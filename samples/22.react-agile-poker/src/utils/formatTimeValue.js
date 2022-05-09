@@ -1,0 +1,22 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
+export const formatTimeValue = (milliseconds) => {
+  if (!milliseconds) {
+    return "0:00";
+  }
+  const rawSeconds = milliseconds / 1000;
+  const minutes = Math.floor(rawSeconds / 60);
+  const seconds = Math.floor(rawSeconds % 60);
+  const secondsFormatted = seconds >= 10 ? seconds : `0${seconds}`;
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const minutesRemainder = Math.floor(minutes % 60);
+    const minutesFormatted =
+      minutesRemainder >= 10 ? minutesRemainder : `0${minutesRemainder}`;
+    return `${hours}:${minutesFormatted}:${secondsFormatted}`;
+  }
+  return `${minutes}:${secondsFormatted}`;
+};

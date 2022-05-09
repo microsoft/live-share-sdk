@@ -1,0 +1,13 @@
+{
+    "entryPoints": [
+        "packages/live-share/",
+        "packages/live-share-media/"
+    ],
+    "entryPointStrategy": "packages",
+    "excludeExternals": true,
+    "excludePrivate": true,
+    "excludeInternal": true,
+    "out": "docs",
+    "name": "Microsoft Live Share SDK",
+    "listInvalidSymbolLinks": true
+}

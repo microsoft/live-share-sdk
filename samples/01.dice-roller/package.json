@@ -1,0 +1,38 @@
+{
+    "name": "dice-roller",
+    "version": "0.2.1",
+    "description": "Sample dice roller app.",
+    "repository": "https://github.com/microsoft/live-share-sdk",
+    "license": "Microsoft",
+    "author": "Microsoft",
+    "scripts": {
+        "clean": "npx shx rm -rf dist",
+        "build": "webpack --env prod --env clean",
+        "build:dev": "webpack --env clean",
+        "start": "start-server-and-test start:server 7070 start:client",
+        "start:client": "webpack serve",
+        "start:server": "npx @fluidframework/azure-local-service@latest"
+    },
+    "dependencies": {
+        "@fluidframework/test-client-utils": "~0.59.0",
+        "@microsoft/live-share": "~0.2.1",
+        "@microsoft/teams-js": "2.0.0-experimental.0",
+        "fluid-framework": "~0.59.0"
+    },
+    "devDependencies": {
+        "clean-webpack-plugin": "^3.0.0",
+        "concurrently": "^5.3.0",
+        "html-webpack-plugin": "^4.3.0",
+        "start-server-and-test": "^1.11.6",
+        "webpack": "4.44.2",
+        "webpack-cli": "^4.8.0",
+        "webpack-dev-server": "3.11.1"
+    },
+    "prettier": {
+        "trailingComma": "es5",
+        "tabWidth": 4,
+        "semi": true,
+        "singleQuote": false,
+        "printWidth": 100
+    }
+}

@@ -1,0 +1,154 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
+import { SharedMap } from "fluid-framework";
+import { TeamsFluidClient } from "@microsoft/live-share";
+import { app } from "@microsoft/teams-js";
+import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
+import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+
+const searchParams = new URL(window.location).searchParams;
+const root = document.getElementById("content");
+
+// Define container schema
+
+const diceValueKey = "dice-value-key";
+
+const containerSchema = {
+  initialObjects: { diceMap: SharedMap }
+};
+
+function onContainerFirstCreated(container) {
+  // Set initial state of the rolled dice to 1.
+  container.initialObjects.diceMap.set(diceValueKey, 1);
+}
+
+
+// STARTUP LOGIC
+
+async function start() {
+  // Check for page to display
+  const view = searchParams.get('view') || 'stage';
+  switch (view) {
+    case 'content':
+      renderSideBar(root);
+      break;
+    case 'config':
+      renderSettings(root);
+      break;
+    case 'stage':
+    default:
+      const { container } = await joinContainer();
+      renderStage(container.initialObjects.diceMap, root);
+      break;
+  }
+}
+
+async function joinContainer() {
+  // Are we running in teams?
+  let client;
+  if (!!searchParams.get('inTeams')) {
+      // Initialize teams app
+      await app.initialize();
+
+      // Create client
+      client = new TeamsFluidClient();
+  } else {
+      // Create client and configure for testing
+      client = new TeamsFluidClient({
+        connection: {
+          tenantId: LOCAL_MODE_TENANT_ID,
+          tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
+          orderer: "http://localhost:7070",
+          storage: "http://localhost:7070",
+        }
+      });
+  }
+
+  // Join container
+  return await client.joinContainer(containerSchema, onContainerFirstCreated);
+}
+
+// STAGE VIEW
+
+const stageTemplate = document.createElement("template");
+
+stageTemplate["innerHTML"] = `
+  <style>
+    .wrapper { text-align: center }
+    .dice { font-size: 200px; }
+    .roll { font-size: 50px; }
+  </style>
+  <div class="wrapper">
+    <div class="dice"></div>
+    <button class="roll"> Roll </button>
+  </div>
+`;
+
+function renderStage(diceMap, elem) {
+    elem.appendChild(stageTemplate.content.cloneNode(true));
+
+    const rollButton = elem.querySelector(".roll");
+    const dice = elem.querySelector(".dice");
+
+    // Set the value at our dataKey with a random number between 1 and 6.
+    rollButton.onclick = () => diceMap.set(diceValueKey, Math.floor(Math.random() * 6) + 1);
+
+    // Get the current value of the shared data to update the view whenever it changes.
+    const updateDice = () => {
+        const diceValue = diceMap.get(diceValueKey);
+        // Unicode 0x2680-0x2685 are the sides of a dice (⚀⚁⚂⚃⚄⚅)
+        dice.textContent = String.fromCodePoint(0x267f + diceValue);
+        dice.style.color = `hsl(${diceValue * 60}, 70%, 30%)`;
+    };
+    updateDice();
+
+    // Use the changed event to trigger the rerender whenever the value changes.
+    diceMap.on("valueChanged", updateDice);
+}
+
+// SIDEBAR VIEW
+
+const sideBarTemplate = document.createElement("template");
+
+sideBarTemplate["innerHTML"] = `
+  <style>
+    .wrapper { text-align: center }
+    .title { font-size: large; font-weight: bolder; }
+    .text { font-size: medium; }
+  </style>
+  <div class="wrapper">
+    <p class="title">Lets get started</p>
+    <p class="text">Press the share to stage button to share Dice Roller to the meeting stage.</p>
+  </div>
+`;
+
+function renderSideBar(elem) {
+    elem.appendChild(sideBarTemplate.content.cloneNode(true));
+}
+
+
+// SETTINGS VIEW
+
+const settingsTemplate = document.createElement("template");
+
+settingsTemplate["innerHTML"] = `
+  <style>
+    .wrapper { text-align: center }
+    .title { font-size: large; font-weight: bolder; }
+    .text { font-size: medium; }
+  </style>
+  <div class="wrapper">
+    <p class="title">Welcome to Dice Roller!</p>
+    <p class="text">Press the save button to continue.</p>
+  </div>
+`;
+
+function renderSettings(elem) {
+    elem.appendChild(settingsTemplate.content.cloneNode(true));
+}
+
+
+start().catch((error) => console.error(error));

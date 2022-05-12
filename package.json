@@ -1,0 +1,16 @@
+{
+  "name": "build",
+  "version": "1.0.0",
+  "description": "build file for Live Share SDK",
+  "main": "index.js",
+  "scripts": {
+    "install": "lerna bootstrap --hoist",
+    "clean": "lerna run clean",
+    "build": "lerna run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lerna": "^4.0.0"
+  }
+}

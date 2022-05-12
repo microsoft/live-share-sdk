@@ -1,0 +1,35 @@
+{
+    "name": "@microsoft/live-share",
+    "version": "0.1.0",
+    "description": "Building colaboritive experiences for Microsoft Teams and M365 using Fluid.",
+    "author": "Microsoft",
+    "license": "MIT",
+    "main": "./bin/index.js",
+    "types": "./bin/index.d.ts",
+    "scripts": {
+        "clean": "npx shx rm -rf bin",
+        "build": "tsc -p tsconfig.build.json",
+        "test": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --timeout 10000",
+        "test:debug": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --inspect-brk",
+        "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
+    },
+    "dependencies": {
+        "@fluidframework/azure-client": "^0.58.2000",
+        "@microsoft/teams-js": "~2.0.0-experimental.0",
+        "fluid-framework": "^0.58.2000",
+        "uuid": "^8.3.2"
+    },
+    "devDependencies": {
+        "@fluidframework/test-runtime-utils": "^0.58.2000",
+        "@fluidframework/test-utils": "^0.58.2000",
+        "@fluidframework/test-version-utils": "^0.58.2000",
+        "@types/assert": "^1.5.6",
+        "@types/mocha": "^9.0.0",
+        "@types/node": "^10.12.24",
+        "@types/uuid": "8.3.4",
+        "mocha": "^9.1.1",
+        "nyc": "^15.1.0",
+        "ts-mocha": "^9.0.2",
+        "typescript": "^4.4.2"
+    }
+}

@@ -1,11 +1,13 @@
 {
-  "name": "@microsoft/react-agile-poker",
-  "version": "0.1.0",
-  "private": true,
-  "license": "MIT",
+  "name": "react-agile-poker",
+  "version": "0.1.1",
+  "description": "Sample live share app.",
+  "repository": "https://github.com/microsoft/live-share-sdk",
+  "license": "Microsoft",
+  "author": "Microsoft",
   "dependencies": {
     "@fluentui/react-components": "^9.0.0-rc.7",
-    "@microsoft/live-share": "~0.1.0",
+    "@microsoft/live-share": "~0.1.1",
     "@fluidframework/telemetry-utils": "^0.58.2000",
     "@microsoft/teams-js": "~2.0.0-experimental.0",
     "@testing-library/jest-dom": "^5.16.2",

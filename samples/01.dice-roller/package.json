@@ -1,9 +1,9 @@
 {
-    "name": "@fluid-example/dice-roller",
-    "version": "0.1.0",
-    "description": "Minimal Fluid Container & Data Object sample to implement a collaborative dice roller as a standalone app.",
-    "repository": "microsoft/FluidHelloWorld",
-    "license": "MIT",
+    "name": "dice-roller",
+    "version": "0.1.1",
+    "description": "Sample dice roller app.",
+    "repository": "https://github.com/microsoft/live-share-sdk",
+    "license": "Microsoft",
     "author": "Microsoft",
     "scripts": {
         "clean": "npx shx rm -rf dist",
@@ -14,7 +14,7 @@
         "start:server": "npx @fluidframework/azure-local-service@latest"
     },
     "dependencies": {
-        "@microsoft/live-share": "~0.1.0",
+        "@microsoft/live-share": "~0.1.1",
         "@microsoft/teams-js": "~2.0.0-experimental.0",
         "fluid-framework": "^0.58.2000",
         "@fluidframework/test-client-utils": "^0.58.2000"

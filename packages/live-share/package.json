@@ -1,9 +1,9 @@
 {
     "name": "@microsoft/live-share",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Building colaboritive experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
-    "license": "MIT",
+    "license": "Microsoft",
     "main": "./bin/index.js",
     "types": "./bin/index.d.ts",
     "scripts": {

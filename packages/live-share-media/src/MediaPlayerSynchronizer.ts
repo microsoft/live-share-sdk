@@ -61,7 +61,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this._onEnd = onEnd;
 
         // Listen for player state requests
-        mediaSession.onRequestPlayerState = () => {
+        mediaSession.setRequestPlayerStateHandler(() => {
             // Find playback state
             let playbackState: ExtendedMediaSessionPlaybackState;
             const src = this._player.currentSrc || this._player.src;
@@ -87,7 +87,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
             };
 
             return state;
-        }
+        });
 
         // Listen for player events
         this._onPlayerEvent = (evt: Event) => {

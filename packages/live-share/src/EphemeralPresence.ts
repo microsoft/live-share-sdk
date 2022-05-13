@@ -66,7 +66,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     );
 
     /**
-     * Presence active status
+     * Returns true if the object has been started.
      */
     public get isStarted(): boolean {
         return !!this._scope;

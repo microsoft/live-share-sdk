@@ -50,7 +50,7 @@ $ cd live-share-sdk
 Install all developer dependencies:
 
 ```bash
-$ npm install --legacy-peer-deps
+$ npm install
 ```
 
 Build packages and samples:

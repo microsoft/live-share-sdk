@@ -4,8 +4,6 @@
  */
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
-import { TypedEventEmitter } from "@fluidframework/common-utils";
-import { IEvent } from "@fluidframework/common-definitions";
 
 /**
  * Callback function used to the get the current state of an ephemeral object that's being

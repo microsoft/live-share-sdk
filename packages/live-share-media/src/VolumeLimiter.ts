@@ -33,7 +33,7 @@ export class VolumeLimiter {
      * Time, in seconds, that the volume should be lowered.
      * 
      * @remarks
-     * Applications should periodically call `lowerVolume()` to keep teh volume lowered. 
+     * Applications should periodically call `lowerVolume()` to keep the volume lowered. 
      */
     public get duration(): number {
         return this._duration.seconds;

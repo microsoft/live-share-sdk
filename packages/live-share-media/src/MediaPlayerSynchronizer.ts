@@ -11,11 +11,23 @@ import { VolumeLimiter } from './VolumeLimiter';
 import { IMediaPlayer } from './IMediaPlayer';
 import { TelemetryEvents } from './internals';
 
+/**
+ * Event data returned by `MediaPlayerSynchronizer` object.
+ */
 export interface IMediaPlayerSynchronizerEvent extends IEvent {
+    /**
+     * Event details.
+     */
     details: ExtendedMediaSessionActionDetails;
 }
 
+/**
+ * Events supported by `MediaPlayerSynchronizer` object.
+ */
 export enum MediaPlayerSynchronizerEvents {
+    /**
+     * 
+     */
     coordinatorstatechange = 'coordinatorstatechange',
     groupaction = 'groupaction',
     useraction = 'useraction'
@@ -40,7 +52,6 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private _volumeLimiter: VolumeLimiter;
     private _onEnd?: () => void;
     private _onPlayerEvent: EventListener;
-    private _catchupFastSeekPeriod: TimeInterval = new TimeInterval(0);
     private _seekSuspension?: MediaSessionCoordinatorSuspension;
     private _viewOnly = false;
     private _expectedPlaybackState: ExtendedMediaSessionPlaybackState = 'none';
@@ -185,22 +196,27 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SynchronizationStarted);
     }
 
-    public get catchupFastSeekPeriod(): number {
-        return this._catchupFastSeekPeriod.seconds;
-    }
-
-    public set catchupFastSeekPeriod(value: number) {
-        this._catchupFastSeekPeriod.seconds = value;
-    }
-
+    /**
+     * Media player being synchronized.
+     */
     public get player(): IMediaPlayer {
         return this._player;
     }
 
+    /**
+     * Synchronizers media session.
+     */
     public get mediaSession(): EphemeralMediaSession {
         return this._mediaSession;
     }
 
+    /**
+     * If true the client is in a view only mode.
+     * 
+     * @remarks
+     * Setting this value to true results in `mediaSession.coordinator.canPlayPause` and
+     * `mediaSession.coordinator.canSeek` being set to false.
+     */
     public get viewOnly(): boolean {
         return this._viewOnly;
     }
@@ -211,20 +227,36 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.mediaSession.coordinator.canSeek = !value;
     }
 
+    /**
+     * Volume limiter used to temporarily reduce the videos volume when someone speaks in a meeting.
+     */
     public get volumeLimiter(): VolumeLimiter {
         return this._volumeLimiter;
     }
 
-    public addEventListener(event: MediaPlayerSynchronizerEvents, listener: () => void): this {
+    /**
+     * Registers a new event listener.
+     * @param event Name of the event to add.
+     * @param listener Function to call when the event is triggered.
+     */
+    public addEventListener(event: MediaPlayerSynchronizerEvents, listener: (evt: IMediaPlayerSynchronizerEvent) => void): this {
         this.on(event, listener);
         return this;
     }
 
-    public removeEventListener(event: MediaPlayerSynchronizerEvents, listener: () => void): this {
+    /**
+     * Un-registers an existing event listener.
+     * @param event Name of the event to remove.
+     * @param listener Function that was registered in call to `addEventListener()`.
+     */
+    public removeEventListener(event: MediaPlayerSynchronizerEvents, listener: (evt: IMediaPlayerSynchronizerEvent) => void): this {
         this.off(event, listener);
         return this;
     }
 
+    /**
+     * Ends synchronization of the current media player.
+     */
     public end(): void {
         if (this._onEnd) {
             try {
@@ -246,6 +278,15 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         }
     }
 
+    /**
+     * Begin a local seek operation.
+     * 
+     * @remarks
+     * UI can call this when a user grabs a timeline scrubber and starts scrubbing the video to a 
+     * new playback position. The synchronizer will being a new suspension which temporarily
+     * disconnects the client for the rest of the group for synchronization purposes. Calling
+     * `endSeek()` will end the suspension and seek the group to the users final seek position.
+     */
     public beginSeek(): void {
         if (this._seekSuspension) {
             throw new Error(`MediaPlayerSynchronizer: cannot begin seek. A seek is already in progress.`);
@@ -255,6 +296,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this._seekSuspension = this._mediaSession.coordinator.beginSuspension();
     }
 
+    /**
+     * Ends a seek operation that was started by calling `beginSeek()`.
+     * @param seekTo Playback position in seconds to seek the group to.
+     */
     public endSeek(seekTo: number): void {
         if (!this._seekSuspension) {
             throw new Error(`MediaPlayerSynchronizer: cannot end seek. No seek is in progress.`);
@@ -274,6 +319,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.dispatchUserAction({action: 'seekto', seekTime: seekTo});
     }
 
+    /**
+     * Tells the group to begin playing the current video.
+     * 
+     * @remarks
+     * For proper operation apps should avoid calling `mediaSession.coordinator.play()` directly 
+     * and instead use the synchronizers `play()` method.  
+     */
     public play(): void {
         this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PlayCalled);
         this._expectedPlaybackState = 'playing';
@@ -282,6 +334,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.dispatchUserAction({action: 'play'});
     }
 
+    /**
+     * Tells the group to pause the current video.
+     * 
+     * @remarks
+     * For proper operation apps should avoid calling `mediaSession.coordinator.pause()` directly 
+     * and instead use the synchronizers `pause()` method.  
+     */
     public pause(): void {
         this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PauseCalled);
         this._expectedPlaybackState = 'paused';
@@ -290,6 +349,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.dispatchUserAction({action: 'pause'});
     }
 
+    /**
+     * Tells the group to seek the current video to a new playback position.
+     * 
+     * @remarks
+     * For proper operation apps should avoid calling `mediaSession.coordinator.seekTo()` directly 
+     * and instead use the synchronizers `seekTo()` method.  
+     */
     public seekTo(time: number): void {
         // Always seek player to new time.
         // - This resolves an issue where the timeline scrubber can temporarily snap back to the original
@@ -302,6 +368,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.dispatchUserAction({action: 'seekto', seekTime: time});
     }
 
+    /**
+     * Tells the group to change to a new track.
+     * 
+     * @remarks
+     * For proper operation apps should avoid calling `mediaSession.coordinator.setTrack()` directly 
+     * and instead use the synchronizers `setTrack()` method.  
+     */
     public setTrack(track: ExtendedMediaMetadata, waitPoints?: CoordinationWaitPoint[]): void {
         this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SetTrackCalled);
         this._mediaSession.coordinator.setTrack(track, waitPoints);
@@ -309,6 +382,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.dispatchUserAction({action: 'settrack', metadata: track});
     }
 
+    /**
+     * Updates the current tracks data object.
+     * 
+     * @remarks
+     * For proper operation apps should avoid calling `mediaSession.coordinator.setTrackData()` directly 
+     * and instead use the synchronizers `setTrackData()` method.  
+     */
     public setTrackData(data: object|null): void {
         this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SetTrackDataCalled);
         this._trackData = data;
@@ -334,23 +414,6 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     }
 
     private async catchupPlayer(time: number): Promise<void> {
-        // Only fast seek if:
-        // - more then 2 seconds behind.
-        // - fast seek hasn't been disabled.
-        // - the current playback rate is 1.0.
-        if (time >= (this._player.currentTime + 2.0) && this.catchupFastSeekPeriod > 0 && this._player.playbackRate == 1.0) {
-            // Fast seek to new position
-            const suspension = await this._mediaSession.coordinator.beginSuspension();
-            const seekPeriod = Math.min(time - this._player.currentTime, this.catchupFastSeekPeriod);
-            const startTime = time - seekPeriod;
-            this._player.currentTime = startTime;
-            this._player.playbackRate = 4.0;
-            setTimeout(async () => {
-                this._player.playbackRate = 1.0;
-                await suspension.end();
-            }, (seekPeriod * 0.25) * 1000)
-        } else {
-            this._player.currentTime = time;
-        }
+        this._player.currentTime = time;
     }
 }

@@ -13,14 +13,34 @@ import EventEmitter from "events";
  * Most recent state of the media session.
  */
 export interface IMediaPlayerState {
+    /**
+     * Metadata for the sessions current track.
+     */
     metadata: ExtendedMediaMetadata|null;
+
+    /**
+     * Optional track data object being synchronized.
+     * 
+     * @remarks
+     * This can be used to sync things like pitch, roll, and yaw when watching 360 videos together.
+     */
     trackData: object|null;
+
+    /**
+     * Sessions current playback state.
+     */
     playbackState: ExtendedMediaSessionPlaybackState;
+
+    /**
+     * Sessions current position state if known.
+     */
     positionState?: MediaPositionState;
 }
 
 /**
- * Implements MediaSessionCoordinator interface
+ * The `EphemeralMediaSessionCoordinator` tracks the playback & position state of all other 
+ * clients being synchronized with. It is responsible for keeping the local media player
+ * in sync with the group.  
  */
 export class EphemeralMediaSessionCoordinator extends EventEmitter  {
     private readonly _runtime: IRuntimeSignaler;
@@ -43,6 +63,10 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
     // Distributed state
     private _groupState?: GroupCoordinatorState;
     
+    /**
+     * @hidden
+     * Applications shouldn't directly create new coordinator instances.
+     */
     constructor(runtime: IRuntimeSignaler, getPlayerState: () => IMediaPlayerState) {
         super();
         this._runtime = runtime;
@@ -50,22 +74,77 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         this._getPlayerState = getPlayerState;
     }
 
-    public get isStarted(): boolean {
-        return this._hasStarted;
-    }
 
+    /**
+     * Controls whether or not the local client is allowed to instruct the group to play or pause.
+     * 
+     * @remarks
+     * This flag largely meant to influence decisions made by the coordinator and can be used by 
+     * the UI to determine what controls should be shown to the user. It does not provide any 
+     * security in itself. 
+     * 
+     * If your app is running in a semi-trusted environment where only some clients are allowed 
+     * to play/pause media, you should use "role based verification" to enforce those policies. 
+     */
     public canPlayPause: boolean = true;
 
+    /**
+     * Controls whether or not the local client is allowed to seek the group to a new playback 
+     * position.
+     * 
+     * @remarks
+     * This flag largely meant to influence decisions made by the coordinator and can be used by 
+     * the UI to determine what controls should be shown to the user. It does not provide any 
+     * security in itself. 
+     * 
+     * If your app is running in a semi-trusted environment where only some clients are allowed 
+     * to change the playback position, you should use "role based verification" to enforce those policies. 
+     */
     public canSeek: boolean = true;
 
+    /**
+     * Controls whether or not the local client is allowed to change tracks.
+     * 
+     * @remarks
+     * This flag largely meant to influence decisions made by the coordinator and can be used by 
+     * the UI to determine what controls should be shown to the user. It does not provide any 
+     * security in itself. 
+     * 
+     * If your app is running in a semi-trusted environment where only some clients are allowed 
+     * to change tracks, you should use "role based verification" to enforce those policies. 
+     */
     public canSetTrack: boolean = true;
 
+    /**
+     * Controls whether or not the local client is allowed to change the tracks custom data object.
+     * 
+     * @remarks
+     * This flag largely meant to influence decisions made by the coordinator and can be used by 
+     * the UI to determine what controls should be shown to the user. It does not provide any 
+     * security in itself. 
+     * 
+     * If your app is running in a semi-trusted environment where only some clients are allowed 
+     * to change the tracks data object, you should use "role based verification" to enforce those 
+     * policies. 
+     */
     public canSetTrackData: boolean = true;
 
+    /**
+     * Returns true if the local client is in a suspended state.
+     */
     public get isSuspended(): boolean {
         return this._groupState ? this._groupState.isSuspended : false;
     }
 
+    /**
+     * Max amount of playback drift allowed in seconds.
+     * 
+     * @remarks
+     * Should the local clients playback position lag by more than the specified value, the 
+     * coordinator will trigger a `catchup` action. 
+     * 
+     * Defaults to a value of `1` second.
+     */
     public get maxPlaybackDrift(): number {
         return this._maxPlaybackDrift.seconds;
     }
@@ -74,6 +153,13 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         this._maxPlaybackDrift.seconds = value;
     }
 
+    /**
+     * Frequency with which position updates are broadcast to the rest of the group in 
+     * seconds.
+     * 
+     * @remarks
+     * Defaults to a value of `2` seconds. 
+     */
     public get positionUpdateInterval(): number {
         return this._positionUpdateInterval.seconds;
     }
@@ -82,10 +168,13 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         this._positionUpdateInterval.seconds = value;
     }
 
-    public findNextWaitPoint(): CoordinationWaitPoint|null {
-        return this._groupState?.playbackTrack.findNextWaitPoint(this._lastWaitPoint) || null;
-    }
-
+    /**
+     * Instructs the group to play the current track.
+     * 
+     * @remarks
+     * Throws an exception if the session/coordinator hasn't been started, no track has been 
+     * loaded, or `canPlayPause` is false.
+     */
     public play(): void {
         if (!this._hasStarted) {
             throw new Error(`EphemeralMediaSessionCoordinator.play() called before start() called.`);
@@ -110,6 +199,13 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         });
     }
     
+    /**
+     * Instructs the group to pause the current track.
+     * 
+     * @remarks
+     * Throws an exception if the session/coordinator hasn't been started, no track has been 
+     * loaded, or `canPlayPause` is false.
+     */
     public pause(): void {
         if (!this._hasStarted) {
             throw new Error(`EphemeralMediaSessionCoordinator.pause() called before start() called.`);
@@ -134,6 +230,14 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         });
     }
 
+    /**
+     * Instructs the group to seek to a new position within the current track.
+     * 
+     * @remarks
+     * Throws an exception if the session/coordinator hasn't been started, no track has been 
+     * loaded, or `canSeek` is false.
+     * @param time Playback position in seconds to seek to.
+     */
     public seekTo(time: number): void {
         if (!this._hasStarted) {
             throw new Error(`EphemeralMediaSessionCoordinator.seekTo() called before start() called.`);
@@ -155,6 +259,15 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         });
     }
 
+    /**
+     * Instructs the group to load a new track.
+     * 
+     * @remarks
+     * Throws an exception if the session/coordinator hasn't been started or `canSetTrack` is 
+     * false.
+     * @param metadata The track to load or `null` to indicate that the end of the track is reached.
+     * @param waitPoints Optional. List of static wait points to configure for the track.  Dynamic wait points can be added via the `beginSuspension()` call.
+     */
     public setTrack(metadata: ExtendedMediaMetadata|null, waitPoints?: CoordinationWaitPoint[]): void {
         if (!this._hasStarted) {
             throw new Error(`EphemeralMediaSessionCoordinator.setTrack() called before start() called.`);
@@ -172,7 +285,18 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         });
     }
 
-    public setTrackData(data: object|null): void {
+    /**
+     * Updates the track data object for the current track.
+     * 
+     * @remarks
+     * The track data object can be used by applications to synchronize things like pitch, roll, 
+     * and yaw of a 360 video. This data object will be reset to null anytime the track changes. 
+     * 
+     * Throws an exception if the session/coordinator hasn't been started or `canSetTrackData` is 
+     * false.
+     * @param data New data object to sync with the group. This value will be synchronized using a last writer wins strategy. 
+     */
+     public setTrackData(data: object|null): void {
         if (!this._hasStarted) {
             throw new Error(`EphemeralMediaSessionCoordinator.setTrackData() called before start() called.`);
         }
@@ -188,6 +312,30 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         });
     }
 
+    /**
+     * Begins a new local suspension.
+     * 
+     * @remarks
+     * Suspension temporarily suspend the clients local synchronization with the group. This can 
+     * be useful for displaying ads to users or temporarily disconnecting from the session while 
+     * the user seeks the video using a timeline scrubber. 
+     * 
+     * Multiple simultaneous suspensions are allowed and when the last suspension ends the local 
+     * client will be immediately re-synchronized with the group.
+     * 
+     * A "Dynamic Wait Point" can be specified when `beginSuspension()` is called and the wait 
+     * point will be broadcast to all other clients in the group.  Those clients will then 
+     * automatically enter a suspension state once they reach the positions specified by the 
+     * wait point. Clients that are passed the wait point will immediately suspend. 
+     * 
+     * Any wait point based suspension (dynamic or static) will result in all clients remaining 
+     * in a suspension state until the list client ends their suspension. This behavior can be
+     * conditionally bypassed by settings the wait points `maxClients` value.
+     *    
+     * Throws an exception if the session/coordinator hasn't been started.
+     * @param waitPoint Optional. Dynamic wait point to broadcast to all of the clients. 
+     * @returns The suspension object. Call `end()` on the returned suspension to end the suspension.
+     */
     public beginSuspension(waitPoint?: CoordinationWaitPoint): MediaSessionCoordinatorSuspension {
         if (!this._hasStarted) {
             throw new Error(`EphemeralMediaSessionCoordinator.beginSuspension() called before start() called.`);
@@ -222,24 +370,18 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         });
     }
 
-    public sendPositionUpdate(state: IMediaPlayerState): void {
-        if (!this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.sendPositionUpdate() called before start() called.`);
-        }
-
-        // Send position update event
-        const evt = this._groupState!.createPositionUpdateEvent(state);
-        this._positionUpdateEvent?.sendEvent(evt);
+    /**
+     * @hidden
+     * Called by MediaSession to verify the coordinator has been started.
+     */
+     public get isStarted(): boolean {
+        return this._hasStarted;
     }
 
-    public syncLocalMediaSession(): void {
-        if (!this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.syncLocalMediaSession() called before start() called.`);
-        }
-
-        this._groupState!.syncLocalMediaSession();
-    }
-
+    /**
+     * @hidden
+     * Called by MediaSession to start coordinator.
+     */
     public async start(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
         if (this._hasStarted) {
             throw new Error(`EphemeralMediaSessionCoordinator.start() already started.`);
@@ -248,6 +390,28 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         // Create children
         await this.createChildren(acceptTransportChangesFrom);
         this._hasStarted = true;
+    }
+
+    /**
+     * @hidden
+     * Called by the MediaSession to detect if a wait point has been hit.
+     */
+    public findNextWaitPoint(): CoordinationWaitPoint|null {
+        return this._groupState?.playbackTrack.findNextWaitPoint(this._lastWaitPoint) || null;
+    }
+
+    /**
+     * @hidden
+     * Called by MediaSession to trigger the sending of a position update.
+     */
+    public sendPositionUpdate(state: IMediaPlayerState): void {
+        if (!this._hasStarted) {
+            throw new Error(`EphemeralMediaSessionCoordinator.sendPositionUpdate() called before start() called.`);
+        }
+
+        // Send position update event
+        const evt = this._groupState!.createPositionUpdateEvent(state);
+        this._positionUpdateEvent?.sendEvent(evt);
     }
     
     protected async createChildren(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {

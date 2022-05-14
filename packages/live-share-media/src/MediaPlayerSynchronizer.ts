@@ -115,7 +115,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     // Handle case for YouTube player where user can pause/play video by clicking on it.
                     // - Videos don't always start at 0.0 seconds.
                     if (this._expectedPlaybackState != 'playing') {
-                        if (!this._viewOnly && this._player.currentTime < 1.0) {
+                        if (this._mediaSession.coordinator.canPlayPause && this._player.currentTime < 1.0) {
                             this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.UserTappedVideoToPlay);
                             this.play();
                         }
@@ -214,8 +214,11 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * If true the client is in a view only mode.
      * 
      * @remarks
-     * Setting this value to true results in `mediaSession.coordinator.canPlayPause` and
-     * `mediaSession.coordinator.canSeek` being set to false.
+     * Toggling this value to true results in `mediaSession.coordinator.canPlayPause`,
+     * `mediaSession.coordinator.canSeek`, `mediaSession.coordinator.canSetTrack`, and
+     * `mediaSession.coordinator.canSetTrackData` all being set to false.  For more fine
+     * grained control over the local clients policies, call the `mediaSession.coordinator`
+     * directly.
      */
     public get viewOnly(): boolean {
         return this._viewOnly;
@@ -225,6 +228,8 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this._viewOnly = value;
         this.mediaSession.coordinator.canPlayPause = !value;
         this.mediaSession.coordinator.canSeek = !value;
+        this.mediaSession.coordinator.canSetTrack = !value;
+        this.mediaSession.coordinator.canSetTrackData = !value;
     }
 
     /**

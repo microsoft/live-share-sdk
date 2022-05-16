@@ -10,6 +10,8 @@ import { EphemeralMediaSession } from "@microsoft/live-share-media";
 import { useState, useEffect, useCallback, useRef } from "react";
 // eslint-disable-next-line
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
+import { inTeams } from "../utils/inTeams";
+import * as microsoftTeams from "@microsoft/teams-js";
 
 /**
  * Hook that synchronizes a media element using MediaSynchronizer and EphemeralMediaSession
@@ -26,12 +28,14 @@ import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
  * @param {boolean} localUserIsPresenting boolean when local user is presenting.
  * @param {UserMeetingRole[]} acceptPlaybackChangesFrom List of acceptable roles for playback transport commands.
  * @param {(text: string) => void} sendNotification Send notificaiton callback from `useNotification` hook.
- * @returns `{mediaSessionStarted, togglePlayPause, seek, setTrack}` where:
+ * @returns `{mediaSessionStarted, suspended, togglePlayPause, seek, setTrack, endSuspension}` where:
  * - `mediaSessionStarted` is a boolean indicating whether mediaSession.start() has been called.
+ * - `suspended` is a flag indicating that the media synchronization is suspended.
  * - `play` is a callback method to play through the synchronizer.
  * - `pause` is a callback method to pause through the synchronizer.
  * - `seekTo` is a callback method to seek a video to a given timestamp (in seconds).
  * - `setTrack` is a callback method to change the selected track src.
+ * - `endSuspension` is a callback method to end the active suspension.
  */
 export const useMediaSession = (
   mediaSession,
@@ -39,15 +43,17 @@ export const useMediaSession = (
   player,
   localUserIsPresenting,
   acceptPlaybackChangesFrom,
-  sendNotification,
+  sendNotification
 ) => {
   const synchronizerRef = useRef(null);
   const [mediaSessionStarted, setStarted] = useState(false);
   const [suspension, setSuspension] = useState(null);
+  // Audio ducking timer
+  const volumeTimer = useRef(undefined);
 
   // callback method to change the selected track src
   const setTrack = useCallback(
-    async (trackId) => {      
+    async (trackId) => {
       if (localUserIsPresenting) {
         const metadata = {
           trackIdentifier: trackId,
@@ -56,7 +62,12 @@ export const useMediaSession = (
         sendNotification(`changed the ${selectedMediaItem.type}`);
       }
     },
-    [synchronizerRef, selectedMediaItem, localUserIsPresenting, sendNotification]
+    [
+      synchronizerRef,
+      selectedMediaItem,
+      localUserIsPresenting,
+      sendNotification,
+    ]
   );
 
   // callback method to play through the synchronizer
@@ -74,7 +85,16 @@ export const useMediaSession = (
       }
       player.play();
     }
-  }, [synchronizerRef, selectedMediaItem, localUserIsPresenting, player, suspension, mediaSession, setSuspension, sendNotification]);
+  }, [
+    synchronizerRef,
+    selectedMediaItem,
+    localUserIsPresenting,
+    player,
+    suspension,
+    mediaSession,
+    setSuspension,
+    sendNotification,
+  ]);
 
   // callback method to play through the synchronizer
   const pause = useCallback(async () => {
@@ -91,7 +111,16 @@ export const useMediaSession = (
       }
       player.pause();
     }
-  }, [synchronizerRef, selectedMediaItem, localUserIsPresenting, player, suspension, mediaSession, setSuspension, sendNotification]);
+  }, [
+    synchronizerRef,
+    selectedMediaItem,
+    localUserIsPresenting,
+    player,
+    suspension,
+    mediaSession,
+    setSuspension,
+    sendNotification,
+  ]);
 
   // callback method to seek a video to a given timestamp (in seconds)
   const seekTo = useCallback(
@@ -109,7 +138,16 @@ export const useMediaSession = (
         player.currentTime = timestamp;
       }
     },
-    [synchronizerRef, selectedMediaItem, localUserIsPresenting, player, suspension, mediaSession, setSuspension, sendNotification]
+    [
+      synchronizerRef,
+      selectedMediaItem,
+      localUserIsPresenting,
+      player,
+      suspension,
+      mediaSession,
+      setSuspension,
+      sendNotification,
+    ]
   );
 
   // If a suspension is active, end it. Called when "Follow presenter" button is clicked.
@@ -135,14 +173,32 @@ export const useMediaSession = (
       // Default to viewOnly mode; this will get set to false for the current presenter below
       synchronizerRef.current.viewOnly = !localUserIsPresenting;
 
-      // Browsers require a click before a video can be played automatically
-      // Either capture a click or mute the audio by default
-      player.muted = true;
-
       // Start synchronizing the media session
       mediaSession.start(acceptPlaybackChangesFrom).then(() => {
         console.log("useSharedSynchronizer: now synchronizing player");
         setStarted(true);
+        if (inTeams()) {
+          // Set up audio ducking
+          console.log(
+            "useMediaSession: registering speaking state change handler"
+          );
+          microsoftTeams.meeting.registerSpeakingStateChangeHandler(
+            (speakingState) => {
+              console.log(
+                "audio state changed:",
+                speakingState.isSpeakingDetected
+              );
+              if (speakingState.isSpeakingDetected && !volumeTimer.current) {
+                volumeTimer.current = setInterval(() => {
+                  synchronizerRef.current?.volumeLimiter?.lowerVolume();
+                }, 250);
+              } else if (volumeTimer.current) {
+                clearInterval(volumeTimer.current);
+                volumeTimer.current = undefined;
+              }
+            }
+          );
+        }
       });
     }
   }, [

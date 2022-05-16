@@ -3,32 +3,21 @@
  * Licensed under the MIT License.
  */
 
-import { useEffect, useState } from "react";
-import * as microsoftTeams from "@microsoft/teams-js";
-import { UserMeetingRole } from "@microsoft/live-share";
-import {
-  useSharedObjects,
-  useMediaSession,
-  useNotifications,
-  usePresence,
-  useTakeControl,
-  usePlaylist,
-} from "../teams-interactive-hooks";
+import { useEffect, useMemo, useState } from "react";
+import * as liveShareHooks from "../live-share-hooks";
 import {
   LiveNotifications,
+  LiveSharePage,
   MediaPlayerContainer,
   PageError,
 } from "../components";
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
-
-// Choose roles that can control playback (e.g., pause/play)
-// If empty or undefined, all users can control playback
-const ACCEPT_PLAYBACK_CHANGES_FROM = [
-  UserMeetingRole.presenter,
-  UserMeetingRole.organizer,
-];
+import { ACCEPT_PLAYBACK_CHANGES_FROM } from "../constants/allowed-roles";
+import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 
 const MeetingStage = () => {
+  // Teams context
+  const context = useTeamsContext();
   // Media player
   const [player, setPlayer] = useState();
 
@@ -39,35 +28,41 @@ const MeetingStage = () => {
     notificationEvent, // EphemeralEvent Fluid object
     takeControlMap, // SharedMap Fluid object for presenter control
     playlistMap, // SharedMap Fluid object for playlist
+    inkEvent, // EphemeralEvent Fluid object
+    container, // Fluid container
     error, // Join container error
-  } = useSharedObjects();
+  } = liveShareHooks.useSharedObjects();
 
-  // EphemeralEvent hook
+  // Notification hook
   const {
     notificationStarted, // boolean that is true once notificationEvent.start() is called
     notificationToDisplay, // most recent notification that was sent through notificationEvent
     sendNotification, // callback method to send a notification through notificationEvent
-  } = useNotifications(notificationEvent);
+  } = liveShareHooks.useNotifications(notificationEvent, context);
 
-  // EphemeralPresence hook
+  // Presence hook
   const {
     presenceStarted, // boolean that is true once presence.start() is called
     localUser, // local user presence object
     localUserIsEligiblePresenter, // boolean that is true if local user is eligible to take control
     users, // user presence array
-  } = usePresence(presence, ACCEPT_PLAYBACK_CHANGES_FROM, sendNotification);
+  } = liveShareHooks.usePresence(
+    presence,
+    ACCEPT_PLAYBACK_CHANGES_FROM,
+    context
+  );
 
   // Take control map
   const {
     takeControlStarted, // boolean that is true once takeControlMap.on() listener is registered
     localUserIsPresenting, // boolean that is true if local user is currently presenting
     takeControl, // callback method to take control of playback
-  } = useTakeControl(
+  } = liveShareHooks.useTakeControl(
     takeControlMap,
-    localUser?.userId,
+    localUser?.data?.teamsUserId,
     localUserIsEligiblePresenter,
     users,
-    sendNotification,
+    sendNotification
   );
 
   // Playlist map
@@ -75,9 +70,9 @@ const MeetingStage = () => {
     playlistStarted, // boolean that is true once playlistMap listener is registered
     selectedMediaItem, // selected media item object, or undefined if unknown
     nextTrack, // callback method to skip to the next track
-  } = usePlaylist(playlistMap, sendNotification);
+  } = liveShareHooks.usePlaylist(playlistMap, sendNotification);
 
-  // EphemeralMediaSession hook
+  // Media session hook
   const {
     mediaSessionStarted, // boolean that is true once mediaSession.start() is called
     suspended, // boolean that is true if synchronizer is suspended
@@ -85,13 +80,19 @@ const MeetingStage = () => {
     pause, // callback method to synchronize a pause action
     seekTo, // callback method to synchronize a seekTo action
     endSuspension, // callback method to end the synchronizer suspension
-  } = useMediaSession(
+  } = liveShareHooks.useMediaSession(
     mediaSession,
     selectedMediaItem,
     player,
     localUserIsPresenting,
     ACCEPT_PLAYBACK_CHANGES_FROM,
-    sendNotification,
+    sendNotification
+  );
+
+  // Ink hook
+  const { inkStarted, strokesToDisplay, sendStrokes } = liveShareHooks.useInk(
+    inkEvent,
+    ACCEPT_PLAYBACK_CHANGES_FROM
   );
 
   // Set up the media player
@@ -109,39 +110,55 @@ const MeetingStage = () => {
     }
   }, [selectedMediaItem, player, setPlayer]);
 
-  // Effect to stop showing Teams loading spinner
-  useEffect(() => {
-    if (notificationStarted && mediaSessionStarted && presenceStarted && takeControlStarted && playlistStarted) {
-      microsoftTeams.appInitialization.notifySuccess();
-    }
-  }, [notificationStarted, mediaSessionStarted, presenceStarted, takeControlStarted, playlistStarted]);
+  const started = useMemo(() => {
+    return [
+      notificationStarted,
+      mediaSessionStarted,
+      presenceStarted,
+      takeControlStarted,
+      playlistStarted,
+      inkStarted,
+    ].every((value) => value === true);
+  }, [
+    notificationStarted,
+    mediaSessionStarted,
+    presenceStarted,
+    takeControlStarted,
+    playlistStarted,
+    inkStarted,
+  ]);
 
   // Render the media player
   return (
     <div style={{ backgroundColor: "black" }}>
       {/* Display error if container failed to load */}
       {error && <PageError error={error} />}
-      {/* Display Notifications */}
-      <LiveNotifications notificationToDisplay={notificationToDisplay} />
-      {/* Media Player */}
-      <MediaPlayerContainer
-        player={player}
-        localUserIsPresenting={localUserIsPresenting}
-        localUserIsEligiblePresenter={localUserIsEligiblePresenter}
-        suspended={suspended}
-        play={play}
-        pause={pause}
-        seekTo={seekTo}
-        takeControl={takeControl}
-        endSuspension={endSuspension}
-        nextTrack={nextTrack}
-      >
-        {/* // Render video */}
-        <video
-          id="video"
-          className="azuremediaplayer amp-default-skin amp-big-play-centered"
-        />
-      </MediaPlayerContainer>
+      {/* Live Share wrapper to show loading indicator before setup */}
+      <LiveSharePage context={context} container={container} started={started}>
+        {/* Display Notifications */}
+        <LiveNotifications notificationToDisplay={notificationToDisplay} />
+        {/* Media Player */}
+        <MediaPlayerContainer
+          player={player}
+          localUserIsPresenting={localUserIsPresenting}
+          localUserIsEligiblePresenter={localUserIsEligiblePresenter}
+          suspended={suspended}
+          strokes={strokesToDisplay}
+          play={play}
+          pause={pause}
+          seekTo={seekTo}
+          takeControl={takeControl}
+          endSuspension={endSuspension}
+          nextTrack={nextTrack}
+          sendStrokes={sendStrokes}
+        >
+          {/* // Render video */}
+          <video
+            id="video"
+            className="azuremediaplayer amp-default-skin amp-big-play-centered"
+          />
+        </MediaPlayerContainer>
+      </LiveSharePage>
     </div>
   );
 };

@@ -95,6 +95,19 @@ export const getPillStyles = makeStyles({
   },
 });
 
+export const getInkCanvasStyles = makeStyles({
+  root: {
+    position: "absolute",
+    zIndex: 0,
+    top: "0",
+    bottom: "0",
+    left: "0",
+    right: "0",
+    textAlign: "center",
+    pointerEvents: "none",
+  },
+});
+
 export const getLiveNotificationStyles = makeStyles({
   root: {
     pointerEvents: "none",

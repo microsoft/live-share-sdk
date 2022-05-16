@@ -8,8 +8,8 @@ import {
   // eslint-disable-next-line
   EphemeralPresence,
 } from "@microsoft/live-share";
+import * as microsoftTeams from "@microsoft/teams-js";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 
 /**
  * Hook for tracking users, roles, and who is in control
@@ -18,18 +18,18 @@ import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
  *
  * @param {EphemeralPresence} presence presence object from Fluid container.
  * @param {UserMeetingRole[]} acceptPlaybackChangesFrom List of acceptable roles for playback transport commands.
+ * @param {microsoftTeams.app.Context} context Teams context object
  * @returns `{started, localUser, users, presentingUser, localUserIsEligiblePresenter, localUserIsPresenting, takeControl}` where:
  * - `presenceStarted` is a boolean indicating whether `presence.start()` has been called.
  * - `localUser` is the local user's presence object.
  * - `users` is an array of user presence objects in the session.
  * - `localUserIsEligiblePresenter` is a boolean indicating whether the local user is an eligible presenter.
  */
-export const usePresence = (presence, acceptPlaybackChangesFrom) => {
+export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
   const usersRef = useRef([]);
   const [users, setUsers] = useState(usersRef.current);
   const [localUser, setLocalUser] = useState(null);
   const [presenceStarted, setStarted] = useState(false);
-  const context = useTeamsContext();
 
   // Local user is an eligible presenter
   const localUserIsEligiblePresenter = useMemo(() => {
@@ -51,29 +51,49 @@ export const usePresence = (presence, acceptPlaybackChangesFrom) => {
       // Register presenceChanged event listener
       presence.on("presenceChanged", (userPresence, local) => {
         if (local) {
+          const localUser = {
+            userId: userPresence.userId,
+            state: userPresence.state,
+            clientId: userPresence.clientId,
+            data: userPresence.data,
+            timestamp: userPresence.timestamp,
+            roles: [],
+          };
           // Get the roles of the local user
-          userPresence.getRoles()
+          userPresence
+            .getRoles()
             .then((roles) => {
+              localUser.roles = roles;
               // Set local user state
-              setLocalUser({
-                userId: userPresence.userId,
-                state: userPresence.state,
-                data: userPresence.data,
-                roles,
-              });
+              setLocalUser(localUser);
             })
-            .catch((err) => console.error(err));
+            .catch((err) => {
+              console.error(err);
+              // Set local user state
+              setLocalUser(localUser);
+            });
         }
         // Set users local state
         const userArray = presence.toArray();
         setUsers(userArray);
       });
+      const userPrincipalName =
+        context?.user.userPrincipalName ?? "someone@contoso.com";
+      const name = `@${userPrincipalName.split("@")[0]}`;
       // Start presence tracking
+      console.log(
+        "usePresence: starting presence for userId",
+        context?.user.id,
+        context?.user.displayName
+      );
       presence
-        .start(context.userObjectId, {
+        .start(undefined, {
+          teamsUserId: context.user?.id,
           joinedTimestamp: EphemeralEvent.getTimestamp(),
+          name,
         })
         .then(() => {
+          console.log("usePresence: started presence");
           setStarted(true);
         })
         .catch((error) => console.error(error));

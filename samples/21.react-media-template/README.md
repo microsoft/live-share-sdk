@@ -1,70 +1,27 @@
-# Getting Started
+# React Media Template Sample
 
-For Teams testing, add a urlParam for `inTeams=true` to the tab settings saved in the `microsoftTeams.setSettings` from your tab configuration page, or the URL shared to the meeting stage. You can also test locally, per the instructions below.
+This repository contains a simple app that enables all connected clients to watch videos together, build a shared playlist, transfer who is in control, and annotate over the video.\
+You can use this sample as a template to build a robust media synchronization feature into your app, or use it as an example.\
+Each `SharedObject` in our schema (as defined in the `/src/live-share-hooks/useSharedObjects.js` file) has a correlating hook in the live-share-hooks folder.\
+We have found this structure to be very useful in composing advanced applications with Live Share using Functional React components, but you can compose this differently for your app.
 
-## Example Manifest
-
-To make a new app manifest, you can visit the [Teams Developer Portal](https://dev.teams.microsoft.com/). You can use ngrok to test locally, as long as you update your manifest and AAD registration to match the ngrok URL each time it changes.
-
-```json
-{
-  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
-  "version": "1.0.0",
-  "manifestVersion": "1.12",
-  "id": "{YOUR_APP_ID}",
-  "packageName": "com.package.name",
-  "name": { "short": "Contoso", "full": "Contoso Video" },
-  "developer": {
-    "name": "{YOUR_COMPANY_NAME}",
-    "mpnId": "",
-    "websiteUrl": "{YOUR_COMPANY_WEBSITE}",
-    "privacyUrl": "{YOUR_COMPANY_PRIVACY_POLICY}",
-    "termsOfUseUrl": "{YOUR_COMPANY_PRIVACY_TERMS}"
-  },
-  "description": {
-    "short": "Contoso Video with friends!",
-    "full": "Video up!"
-  },
-  "icons": { "outline": "outline.png", "color": "color.png" },
-  "accentColor": "#FFFFFF",
-  "showLoadingIndicator": true,
-  "configurableTabs": [
-    {
-      "configurationUrl": "{YOUR_APP_ORIGIN}/config?inTeams=true",
-      "canUpdateConfiguration": false,
-      "scopes": ["groupchat"],
-      "context": ["meetingSidePanel", "meetingStage"]
-    }
-  ],
-  "validDomains": ["{YOUR_APP_ORIGIN}"],
-  "authorization": {
-     "permissions": {
-        "resourceSpecific": [
-          { "name": "ChannelMeetingStage.Write.Group", "type": "Delegated" },
-          { "name": "MeetingStage.Write.Chat", "type": "Delegated" }
-      ]
-    }
-  }
-}
-```
-
-## Available Scripts
+## Testing Locally in Browser
 
 In the project directory, you can run:
 
-### Package installation
+### `npm install`
 
-Follow these [https://github.com/OfficeDev/Teams-Collaboration-SDK/tree/main/javascript](instructions).
+Installs the latest node packages
 
 ### `npm run start`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-If testing locally a browser, this will start both a Azure Fluid Relay test server as well as the app. Once it loads, it will insert a UUID into the URL with a # parameter. To test video synchronization, copy that URL into a new browser tab and they should be in sync.
-
-The page will reload when you make changes, but you will need to manually reload the page as well.
-You may also see any lint errors in the console.
+The page will reload when you make changes.\
+Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.\
+You can copy this URL and paste it into new browser tabs to test Live Share using a local server.\
+To test the side panel & video queue, you can replace your URL with `/sidepanel#{id}`.
 
 ### `npm run build`
 
@@ -73,3 +30,50 @@ It correctly bundles React in production mode and optimizes the build for the be
 
 The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
+
+### Known issues when testing in browser
+
+When not in Teams, we don't have a way to know the user's userId, so we generate a random one.\
+That means you might not always start out in control of playback, and need to press "Take control".\
+Tab configuration page doesn't do anything in browser.
+
+## Testing the app in Teams
+
+### Create a ngrok tunnel to allow Teams to reach your tab app
+1. [Download ngrok](https://ngrok.com/download).
+2. Launch ngrok with port 3000.
+```ngrok http 3000 --host-header=localhost```
+
+### Create the app package to sideload into Teams
+1. Open [/manifest/manifest.json](./manifest/manifest.json) and update values in it.
+2. You must replace `https://<<BASE_URI_DOMAIN>>` with the https path to your ngrok tunnel.
+3. It is recommended that you also update the following fields.
+   * Set `developer.name` to your name.
+   * Update `developer.websiteUrl` with your website.
+   * Update `developer.privacyUrl` with your privacy policy.
+   * Update `developer.termsOfUseUrl` with your terms of use.
+4. Create a zip file with the contents of `.\manifest` directory so that manifest.json, color.png, and outline.png are in the root directory of the zip file.
+   * On Windows, select all files in `.\manifest` directory and compress them to zip.
+   * Give your zip file a descriptive name, e.g. `ContosoMediaTemplate`.
+
+### Test it out 
+1. Schedule a meeting for testing from calendar in Teams.
+2. Join the meeting.
+3. In the meeting window, tap on **+ Apps** and tap on **Manage apps** in the flyout that opens.
+4. In the **Manage apps** pane, tap on **Upload a custom app**.
+   - _Don't see the option to **Upload a custom app?!** Follow [instructions here](https://docs.microsoft.com/en-us/microsoftteams/teams-custom-app-policies-and-settings) to enable custom-apps in your tenant._
+6. Select the zip file you created earlier and upload it.
+7. In the dialog that shows up, tap **Add** to add your sample app into the meeting.
+8. Now, back in the meeting window, tap **+ Apps** again and type the name of your app in the _Find an app_ textbox.
+9. Select the app to activate it in the meeting.
+10. In the configuration dialog, just tap **Save** to add your app into the meeting.
+11. In the side panel, tap the share icon to put your app on the main stage in the meeting.
+
+<img width="216" alt="image" src="https://user-images.githubusercontent.com/7799064/168399675-73e67154-bdde-4d0f-bb8c-bc62aef00e66.png">
+
+11. That's it! You should now see react-media-template on the meeting stage. 
+![image](https://user-images.githubusercontent.com/7799064/168399633-be29ec2b-55db-49ad-a90d-a1011baa8eaa.png)
+12. Your friends/colleagues invited to the meeting should be able to see your app on stage when they join the meeting.
+
+### Make your own manifest
+To make a new app manifest, you can visit the [Teams Developer Portal](https://dev.teams.microsoft.com/). 

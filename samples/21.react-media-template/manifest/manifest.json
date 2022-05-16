@@ -1,0 +1,75 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
+    "version": "1.0.1",
+    "manifestVersion": "1.12",
+    "id": "6f55d89d-bc7b-4514-9fd1-1edc35a3d98d",
+    "packageName": "com.microsoft.contoso",
+    "name": {
+        "short": "Contoso Media",
+        "full": "Contoso Media"
+    },
+    "developer": {
+        "name": "Microsoft Corporation",
+        "mpnId": "",
+        "websiteUrl": "https://www.microsoft.com",
+        "privacyUrl": "https://www.microsoft.com/privacy",
+        "termsOfUseUrl": "https://teams.microsoft.com/termsofuse"
+    },
+    "description": {
+        "short": "Watch amazing stock videos with colleagues",
+        "full": "Have you ever loved stock videos so much that you just had to publish an app to Teams just to watch them with friends? Us to!"
+    },
+    "icons": {
+        "outline": "outline.png",
+        "color": "color.png"
+    },
+    "accentColor": "#38a2ff",
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://<<BASE_URI_DOMAIN>>/config?inTeams=true",
+            "canUpdateConfiguration": false,
+            "scopes": [
+                "groupchat"
+            ],
+            "context": [
+                "meetingSidePanel",
+                "meetingStage"
+            ]
+        }
+    ],
+    "validDomains": [
+        "<<BASE_URI_DOMAIN>>"
+    ],
+    "showLoadingIndicator": true,
+    "authorization": {
+        "permissions": {
+            "orgWide": [],
+            "resourceSpecific": [
+                {
+                    "name": "MeetingStage.Write.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "ChannelMeetingStage.Write.Group",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "OnlineMeetingIncomingAudio.Detect.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "ChannelOnlineMeetingIncomingAudio.Detect.Group",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "LiveShareSession.ReadWrite.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "LiveShareSession.ReadWrite.Group",
+                    "type": "Delegated"
+                }
+            ]
+        }
+    }
+}

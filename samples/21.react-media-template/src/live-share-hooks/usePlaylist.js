@@ -8,6 +8,7 @@ import { debounce } from "lodash";
  * @remarks
  *
  * @param {EphemeralPresence} presence presence object from Fluid container.
+ * @param {(string) => void} sendNotification callback method to send a notification through the useNotifications hook.
  * @returns `{playlistStarted, mediaItems, selectedMediaItem, addMediaItem, selectMediaId, nextTrack}` where:
  * - `playlistStarted` is a boolean indicating whether `playlistMap` event listeners were registered.
  * - `mediaItems` is the list of media items.
@@ -27,15 +28,24 @@ export const usePlaylist = (playlistMap, sendNotification) => {
 
   const addMediaItem = useCallback(
     (id) => {
-      if (!searchList.find((item) => item.id !== id)) {
+      if (!mediaItems.find((item) => item.id === id)) {
         const itemToAdd = searchList.find((item) => item.id === id);
         if (itemToAdd) {
           playlistMap.set(id, itemToAdd);
-          sendNotification("added a video to the playlist");
+          if (!!sendNotification) {
+            sendNotification("added a video to the playlist");
+          }
         }
       }
     },
     [mediaItems, playlistMap, sendNotification]
+  );
+
+  const removeMediaItem = useCallback(
+    (id) => {
+      playlistMap.delete(id);
+    },
+    [playlistMap]
   );
 
   const selectMediaId = useCallback(
@@ -74,6 +84,7 @@ export const usePlaylist = (playlistMap, sendNotification) => {
     if (playlistMap && !playlistStarted) {
       playlistMap.on("valueChanged", debouncedRefresh);
       debouncedRefresh();
+      console.log("usePlaylist: started playlist");
       setStarted(true);
     }
   }, [playlistMap, playlistStarted, setStarted, debouncedRefresh]);
@@ -88,6 +99,7 @@ export const usePlaylist = (playlistMap, sendNotification) => {
     mediaItems,
     selectedMediaItem,
     addMediaItem,
+    removeMediaItem,
     selectMediaId,
     nextTrack,
   };

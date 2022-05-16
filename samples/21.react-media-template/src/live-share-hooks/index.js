@@ -4,5 +4,14 @@ import { useMediaSession } from "./useMediaSession";
 import { useNotifications } from "./useNotifications";
 import { useTakeControl } from "./useTakeControl";
 import { usePlaylist } from "./usePlaylist";
+import { useInk } from "./useInk";
 
-export { useSharedObjects, usePresence, useMediaSession, useNotifications, useTakeControl, usePlaylist };
+export {
+  useSharedObjects,
+  usePresence,
+  useMediaSession,
+  useNotifications,
+  useTakeControl,
+  usePlaylist,
+  useInk,
+};

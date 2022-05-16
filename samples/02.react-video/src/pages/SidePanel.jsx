@@ -18,7 +18,6 @@ const SidePanel = () => {
   const navigate = useNavigate();
   useEffect(() => {
     if (context) {
-      microsoftTeams.appInitialization.notifySuccess();
       if (context.frameContext === "meetingStage") {
         // User shared the app directly to stage, redirect automatically
         navigate({

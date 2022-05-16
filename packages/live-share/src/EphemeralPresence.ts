@@ -53,7 +53,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     /**
      * The objects fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/teams-interactive:EphemeralPresence`;
+    public static readonly TypeName = `@microsoft/live-share:EphemeralPresence`;
 
     /**
      * The objects fluid type factory.

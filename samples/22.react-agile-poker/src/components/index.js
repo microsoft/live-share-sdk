@@ -7,7 +7,7 @@ import { AddUserStory } from "./AddUserStory";
 import { CostingGame } from "./CostingGame";
 import { DiscussionRoom } from "./DiscussionRoom";
 import { ErrorPane } from "./ErrorPane";
-import { FlexColumn, FlexSection } from "./Flex";
+import { FlexRow, FlexColumn, FlexItem } from "./flex";
 import { GameContainer } from "./GameContainer";
 import { GameTimer } from "./GameTimer";
 import { SidePanelAccordion } from "./SidePanelAccordion";
@@ -19,7 +19,8 @@ export {
   DiscussionRoom,
   ErrorPane,
   FlexColumn,
-  FlexSection,
+  FlexRow,
+  FlexItem,
   GameContainer,
   GameTimer,
   SidePanelAccordion,

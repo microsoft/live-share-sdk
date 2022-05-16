@@ -20,7 +20,6 @@ import { UserAnswer } from "./UserAnswer";
 // discuss. Allows for a re-vote after discussion.
 export const DiscussionRoom = ({
   localUserId,
-  onLogIn,
   onStartCosting,
   onStartWaiting,
   users,
@@ -64,9 +63,9 @@ export const DiscussionRoom = ({
           flexItemStyles.grow,
           flexItemStyles.vAlignStart,
           flexRowStyles.wrap,
-          flexRowStyles.vAlignCenter,
+          flexRowStyles.vAlignCenter
         )}
-        style={{maxWidth: "80vw"}}
+        style={{ maxWidth: "80vw" }}
       >
         {users.map((user, index) => (
           <UserAnswer
@@ -74,7 +73,6 @@ export const DiscussionRoom = ({
             user={user}
             localUserId={localUserId}
             index={index}
-            onLogIn={onLogIn}
           />
         ))}
       </div>

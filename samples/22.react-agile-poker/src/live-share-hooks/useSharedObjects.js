@@ -4,18 +4,16 @@
  */
 
 import { useEffect, useState } from "react";
-import { 
-  EphemeralEvent, 
-  EphemeralPresence, 
-  EphemeralState, 
-  TeamsFluidClient 
+import {
+  EphemeralPresence,
+  EphemeralState,
+  TeamsFluidClient,
 } from "@microsoft/live-share";
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
-import { DebugLogger } from "@fluidframework/telemetry-utils";
 import { EphemeralTimer } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework";
-import { v4 as uuid } from "uuid";
+import { getDefaultUserStories } from "../constants/default-user-stories";
 
 /**
  * Hook that creates/loads the apps shared objects.
@@ -32,18 +30,23 @@ export function useSharedObjects() {
 
   useEffect(() => {
     // Check if user is in Teams
-    const searchParams = new URL(window.location).searchParams;
-    const inTeams = !!searchParams.get("inTeams");
+    const url = window.location.href.includes("/#/")
+      ? new URL(`${window.location.href.split("/#/").join("/")}`)
+      : new URL(window.location);
+    const inTeams = !!url.searchParams.get("inTeams");
 
     let connection;
     if (!inTeams) {
       // Configure for local testing (optional).
       connection = {
         tenantId: LOCAL_MODE_TENANT_ID,
-        tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
+        tokenProvider: new InsecureTokenProvider("", {
+          id: "123",
+          name: "Test User",
+        }),
         orderer: "http://localhost:7070",
         storage: "http://localhost:7070",
-      }
+      };
     }
 
     // Define any additional client settings (optional).
@@ -51,7 +54,6 @@ export function useSharedObjects() {
     // - logger: A fluid logger to use.
     const clientProps = {
       connection,
-      logger: DebugLogger.create("fluid:"),
     };
     // Enable debugger
     window.localStorage.debug = "fluid:*";
@@ -60,16 +62,9 @@ export function useSharedObjects() {
     // * This is only called once when the container is first created.
     const onFirstInitialize = (container) => {
       // Setup any initial state here
-      const currentTime = EphemeralEvent.getTimestamp();
-      container.initialObjects.userStoriesMap.set(uuid(), {
-        text: "As a user, I can watch user testing videos together with my team.",
-        addedAt: currentTime,
-        addedBy: null,
-      });
-      container.initialObjects.userStoriesMap.set(uuid(), {
-        text: "As a user, I can play agile poker with my team.",
-        addedAt: currentTime,
-        addedBy: null,
+      const defaultUserStories = getDefaultUserStories();
+      defaultUserStories.forEach((userStory) => {
+        container.initialObjects.userStoriesMap.set(userStory.id, userStory);
       });
     };
 
@@ -85,7 +80,8 @@ export function useSharedObjects() {
 
     // Join Teams container
     const client = new TeamsFluidClient(clientProps);
-    client.joinContainer(schema, onFirstInitialize)
+    client
+      .joinContainer(schema, onFirstInitialize)
       .then((results) => setResults(results))
       .catch((err) => setError(err));
   }, []);

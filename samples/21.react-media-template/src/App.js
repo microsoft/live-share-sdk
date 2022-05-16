@@ -32,7 +32,7 @@ export default function App() {
         setInitialized(true);
       }
     }
-  }, []);
+  });
 
   if (!initialized) {
     return <div />;

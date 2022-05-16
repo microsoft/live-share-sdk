@@ -1,21 +1,24 @@
-/*!
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License.
- */
-
-import { makeStyles } from "@fluentui/react-components";
-import { tokens } from "@fluentui/react-theme";
+import { makeStyles, tokens } from "@fluentui/react-components";
 
 export const getFlexRowStyles = makeStyles({
   root: {
     display: "flex",
-    minHeight: "0px",
+    height: "auto",
+    /** Fix for flex containers:
+     * minHeight/Width ensures padding is respected when
+     * computing height wrt child components */
+    minHeight: 0,
+    minWidth: 0,
   },
   fill: {
     width: "100%",
     height: "100%",
   },
-  smallGap: {
+  gap: {
+    // this is temporary
+    marginRight: "0.5rem",
+  },
+  marginSpacer: {
     "> :not(:last-child)": {
       marginRight: "0.5rem",
     },
@@ -42,7 +45,7 @@ export const getFlexRowStyles = makeStyles({
     alignItems: "end",
   },
   wrap: {
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
 });
 
@@ -50,13 +53,21 @@ export const getFlexColumnStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
-    minHeight: "0px",
+    height: "auto",
+    /** Fix for flex containers:
+     * minHeight/Width ensures padding is respected when
+     * computing height wrt child components */
+    minHeight: 0,
+    minWidth: 0,
   },
   fill: {
     width: "100%",
     height: "100%",
   },
-  smallGap: {
+  gap: {
+    marginBottom: "0.5rem",
+  },
+  marginSpacer: {
     "> :not(:last-child)": {
       marginBottom: "0.5rem",
     },
@@ -108,7 +119,6 @@ export const getFlexColumnStyles = makeStyles({
     },
   },
 });
-
 export const getFlexItemStyles = makeStyles({
   grow: {
     flexGrow: 1,

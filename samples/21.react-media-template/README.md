@@ -68,12 +68,8 @@ Tab configuration page doesn't do anything in browser.
 9. Select the app to activate it in the meeting.
 10. In the configuration dialog, just tap **Save** to add your app into the meeting.
 11. In the side panel, tap the share icon to put your app on the main stage in the meeting.
-
-<img width="216" alt="image" src="https://user-images.githubusercontent.com/7799064/168399675-73e67154-bdde-4d0f-bb8c-bc62aef00e66.png">
-
-11. That's it! You should now see react-media-template on the meeting stage. 
-![image](https://user-images.githubusercontent.com/7799064/168399633-be29ec2b-55db-49ad-a90d-a1011baa8eaa.png)
-12. Your friends/colleagues invited to the meeting should be able to see your app on stage when they join the meeting.
+12. That's it! You should now see react-media-template on the meeting stage. 
+13. Your friends/colleagues invited to the meeting should be able to see your app on stage when they join the meeting.
 
 ### Make your own manifest
 To make a new app manifest, you can visit the [Teams Developer Portal](https://dev.teams.microsoft.com/). 

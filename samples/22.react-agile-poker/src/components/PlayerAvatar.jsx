@@ -7,8 +7,6 @@ import { mergeClasses, Text } from "@fluentui/react-components";
 import { getFlexColumnStyles } from "../styles/layout";
 import nameShape1 from "../assets/name-shape-1.png";
 import nameShape2 from "../assets/name-shape-2.png";
-import { UserAuth } from "./UserAuth";
-import { inTeams } from "../utils/inTeams";
 const avatars = [
   require("../assets/avatar1.png"),
   require("../assets/avatar2.png"),
@@ -24,13 +22,12 @@ const avatars = [
   require("../assets/avatar12.png"),
 ];
 
-export const PlayerAvatar = ({ user, localUserId, index, onLogIn }) => {
+export const PlayerAvatar = ({ user, localUserId, index }) => {
   const flexColumnStyles = getFlexColumnStyles();
   const imageSrc = (index + 1) % 2 ? nameShape2 : nameShape1;
   const avatarIndex =
     user.data && user.data.avatarIndex >= 0 ? user.data.avatarIndex : 0;
   const avatarSrc = avatars[avatarIndex].default;
-  const isLocal = user?.userId === localUserId;
   return (
     <div
       className={mergeClasses(
@@ -79,7 +76,6 @@ export const PlayerAvatar = ({ user, localUserId, index, onLogIn }) => {
           {`${user.data?.name}`}
         </Text>
       </div>
-      {isLocal && inTeams() && <UserAuth onLogIn={onLogIn} />}
     </div>
   );
 };

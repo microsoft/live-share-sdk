@@ -1,29 +1,29 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "manifestVersion": "1.12",
-    "id": "6f55d89d-bc7b-4514-9fd1-1edc35a3d98d",
-    "packageName": "com.microsoft.contoso",
+    "id": "ba45b0c9-8f12-45b0-9b86-179b3352bb19",
+    "packageName": "com.microsoft.agilepoker",
     "name": {
-        "short": "Contoso Media",
-        "full": "Contoso Media"
+        "short": "Agile Poker",
+        "full": "Agile Poker"
     },
     "developer": {
         "name": "Microsoft Corporation",
         "mpnId": "",
-        "websiteUrl": "https://www.microsoft.com",
+        "websiteUrl": "https://microsoft.com",
         "privacyUrl": "https://www.microsoft.com/privacy",
-        "termsOfUseUrl": "https://teams.microsoft.com/termsofuse"
+        "termsOfUseUrl": "https://www.microsoft.com/termsofuse"
     },
     "description": {
-        "short": "Watch amazing stock videos with colleagues",
-        "full": "Have you ever loved stock videos so much that you just had to publish an app to Teams just to watch them with friends? Us to!"
+        "short": "Cost user stories with this fun agile poker planning game!",
+        "full": "Doing real work has never been this fun...or productive!"
     },
     "icons": {
         "outline": "outline.png",
         "color": "color.png"
     },
-    "accentColor": "#38a2ff",
+    "accentColor": "#ffffff",
     "configurableTabs": [
         {
             "configurationUrl": "https://<<BASE_URI_DOMAIN>>/config?inTeams=true",
@@ -51,14 +51,6 @@
                 },
                 {
                     "name": "ChannelMeetingStage.Write.Group",
-                    "type": "Delegated"
-                },
-                {
-                    "name": "OnlineMeetingIncomingAudio.Detect.Chat",
-                    "type": "Delegated"
-                },
-                {
-                    "name": "ChannelOnlineMeetingIncomingAudio.Detect.Group",
                     "type": "Delegated"
                 },
                 {

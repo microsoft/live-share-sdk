@@ -32,8 +32,6 @@ Your app is ready to be deployed!
 
 ### Known issues when testing in browser
 
-When not in Teams, we don't have a way to know the user's userId, so we generate a random one.\
-That means you might not always start out in control of playback, and need to press "Take control".\
 Tab configuration page doesn't do anything in browser.
 
 ## Testing the app in Teams

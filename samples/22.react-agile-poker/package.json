@@ -2,6 +2,7 @@
   "name": "@microsoft/react-agile-poker",
   "version": "0.1.0",
   "private": true,
+  "author": "Microsoft",
   "license": "MIT",
   "dependencies": {
     "@fluentui/react-components": "^9.0.0-rc.9",

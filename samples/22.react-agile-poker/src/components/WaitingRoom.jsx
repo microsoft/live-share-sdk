@@ -20,7 +20,6 @@ import { PlayerAvatar } from "./PlayerAvatar";
 
 export const WaitingRoom = ({
   localUserId,
-  onLogIn,
   onStartCosting,
   users,
   userStory,
@@ -83,12 +82,7 @@ export const WaitingRoom = ({
       >
         {users.map((user, index) => (
           <div key={user.userId} style={{ padding: "24px" }}>
-            <PlayerAvatar
-              user={user}
-              localUserId={localUserId}
-              index={index}
-              onLogIn={onLogIn}
-            />
+            <PlayerAvatar user={user} localUserId={localUserId} index={index} />
           </div>
         ))}
       </div>

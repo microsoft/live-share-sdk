@@ -8,7 +8,7 @@ import { PresenceState } from "@microsoft/live-share";
 import { getRandomAvatar } from "../utils/random-avatar";
 import { useStateRef } from "../utils/useStateRef";
 
-export const usePresence = (presence, localUserId) => {
+export const usePresence = (presence, context) => {
   const [users, setUsers] = useState([]);
   const [localUser, localUserRef, setLocalUser] = useStateRef(undefined);
   const [presenceStarted, setPresenceStarted] = useState(false);
@@ -49,31 +49,30 @@ export const usePresence = (presence, localUserId) => {
     [updatePresence]
   );
 
-  const onChangeName = useCallback(
-    (name) => {
-      updatePresence({ name });
-    },
-    [updatePresence]
-  );
-
   // Effect which registers SharedPresence event listeners before joining space
   useEffect(() => {
-    if (presence && !presence.isStarted && localUserId) {
+    if (presence && !presence.isStarted && context) {
       console.info("usePresence: starting presence");
       presence.on("presenceChanged", (userPresence, local) => {
         if (local) {
+          const localUser = {
+            userId: userPresence.userId,
+            state: userPresence.state,
+            data: userPresence.data,
+            roles: [],
+          };
           // Get the roles of the local user
-          userPresence.getRoles()
+          userPresence
+            .getRoles()
             .then((roles) => {
+              localUser.roles = roles;
               // Set local user state
-              setLocalUser({
-                userId: userPresence.userId,
-                state: userPresence.state,
-                data: userPresence.data,
-                roles,
-              });
+              setLocalUser(localUser);
             })
-            .catch((err) => console.error(err));
+            .catch((err) => {
+              console.error(err);
+              setLocalUser(localUser);
+            });
         }
         // Update our local state
         const updatedUsers = presence
@@ -81,13 +80,18 @@ export const usePresence = (presence, localUserId) => {
           .filter((user) => user.state === PresenceState.online);
         setUsers(updatedUsers);
       });
-      presence.presenceUpdateInterval = 5;
       const defaultAvatarInformation = getRandomAvatar();
+      const userPrincipalName =
+        context?.user.userPrincipalName ??
+        `${defaultAvatarInformation.name}@contoso.com`;
+      const name = userPrincipalName.split("@")[0];
+
+      presence.presenceUpdateInterval = 5;
       presence
         .start(
-          localUserId,
+          context?.user?.id,
           {
-            name: defaultAvatarInformation.name,
+            name,
             avatarIndex: defaultAvatarInformation.avatarIndex,
             ready: false,
           },
@@ -98,7 +102,7 @@ export const usePresence = (presence, localUserId) => {
         })
         .catch((error) => console.error(error));
     }
-  }, [presence, localUserId, setPresenceStarted, setLocalUser]);
+  }, [presence, context, setPresenceStarted, setLocalUser]);
 
   return {
     presenceStarted,
@@ -108,7 +112,6 @@ export const usePresence = (presence, localUserId) => {
     readyUsersCount,
     changeReadyStatus,
     reportAnswer,
-    onChangeName,
     updatePresence,
   };
 };

@@ -8,19 +8,20 @@ import {
   CardPreview,
   CardFooter,
 } from "@fluentui/react-components/unstable";
-import { Image, Text, Button } from "@fluentui/react-components";
+import { Image, Text, Button, mergeClasses } from "@fluentui/react-components";
+import { Delete20Regular } from "@fluentui/react-icons";
 import { getFlexRowStyles, getFlexItemStyles } from "../styles/layouts";
 
 export const MediaCard = ({
   mediaItem,
   nowPlayingId,
   sharingActive,
+  buttonText,
   selectMedia,
+  removeMediaItem,
 }) => {
   const flexRowStyle = getFlexRowStyles();
   const flexItemStyles = getFlexItemStyles();
-  const buttonText =
-    mediaItem.type === "video" ? "Watch together" : "Listen together";
   return (
     <div className={flexItemStyles.noShrink}>
       <Card
@@ -44,9 +45,14 @@ export const MediaCard = ({
             marginBottom: "0.8rem",
           }}
         >
-          <Image height={140} fit="contain" src={mediaItem.thumbnailImage} style={{minHeight: "0px"}} />
+          <Image
+            height={140}
+            fit="contain"
+            src={mediaItem.thumbnailImage}
+            style={{ minHeight: "0px" }}
+          />
         </CardPreview>
-        <div style={{minHeight: "0px"}}>
+        <div style={{ minHeight: "0px" }}>
           <Text size={400} weight="semibold">
             {mediaItem.title}
           </Text>
@@ -54,17 +60,30 @@ export const MediaCard = ({
         <CardFooter
           styles={{ padding: "0px 12px", minHeight: "0px", minWidth: "0px" }}
         >
-          <div className={flexRowStyle.root}>
-            <Button
-              appearance="outline"
-              size="small"
-              disabled={nowPlayingId === mediaItem.id && sharingActive}
-              onClick={() => {
-                selectMedia(mediaItem);
-              }}
-            >
-              {buttonText}
-            </Button>
+          <div className={mergeClasses(flexRowStyle.root, flexRowStyle.vAlignCenter)} style={{width: "100%"}}>
+            <div className={flexItemStyles.grow}>
+              <Button
+                appearance="outline"
+                size="small"
+                disabled={nowPlayingId === mediaItem.id && sharingActive}
+                onClick={() => {
+                  selectMedia(mediaItem);
+                }}
+              >
+                {buttonText}
+              </Button>
+            </div>
+            {!!removeMediaItem && (
+              <Button
+                appearance="subtle"
+                size="small"
+                icon={<Delete20Regular />}
+                title={"Remove from playlist"}
+                onClick={() => {
+                  removeMediaItem(mediaItem.id);
+                }}
+              />
+            )}
           </div>
         </CardFooter>
       </Card>

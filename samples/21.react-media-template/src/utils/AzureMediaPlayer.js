@@ -61,6 +61,10 @@ export class AzureMediaPlayer extends EventTarget {
   _track = emptyTrackState("");
   _blockedState = BlockDetectionState.unknown;
 
+  // If browser blocks initial play event due to autoplay policy
+  // we mute and try again
+  _autoplayPolicyChecked = false;
+
   constructor(videoElementId, src, options = {}) {
     super();
     this._videoElementId = videoElementId;
@@ -206,10 +210,37 @@ export class AzureMediaPlayer extends EventTarget {
 
   play() {
     this._player.play();
+    if (!this._autoplayPolicyChecked) {
+      this._autoplayPolicyChecked = true;
+      if (this.paused) {
+        this.muted = true;
+        this.play();
+      }
+    }
   }
 
   pause() {
     this._player.pause();
+  }
+
+  //---------------------------------------------------------------------------------------------
+  // AMP Variables
+  //---------------------------------------------------------------------------------------------
+
+  get currentPlaybackBitrate() {
+    return this._player.currentPlaybackBitrate();
+  }
+
+  get currentDownloadBitrate() {
+    return this._player.currentDownloadBitrate();
+  }
+
+  get currentHeuristicProfile() {
+    return this._player.currentHeuristicProfile();
+  }
+
+  get resolution() {
+    return `${this._player.videoWidth()}x${this._player.videoHeight()}`;
   }
 
   //---------------------------------------------------------------------------------------------
@@ -227,7 +258,7 @@ export class AzureMediaPlayer extends EventTarget {
       Object.entries(PlayerEvent).forEach(([_, value]) => {
         this._player.addEventListener(
           value,
-          this._onStateChangeEvent.bind(this),
+          this._onStateChangeEvent.bind(this)
         );
       });
     }
@@ -282,7 +313,9 @@ export class AzureMediaPlayer extends EventTarget {
       this._track.skipTo = undefined;
 
       // Seek to adjusted position
-      const adjustment = adjustPosition ? (new Date().getTime() - skipTo.timeAdded) / 1000 : 0;
+      const adjustment = adjustPosition
+        ? (new Date().getTime() - skipTo.timeAdded) / 1000
+        : 0;
       this.currentTime = skipTo.position + adjustment;
     }
   }

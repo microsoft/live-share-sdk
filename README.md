@@ -31,9 +31,9 @@ There are several ways you can [contribute](./CONTRIBUTING.md) to this project:
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.
 
-## Building
+## Preparing the Repository
 
-To build the projects packages and samples, ensure that you have the latest versions of [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/) installed.
+To clone the repository to test samples and/or build the packages, ensure that you have the latest versions of [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/) installed.
 
 Clone a copy of the repo:
 
@@ -46,6 +46,37 @@ Change to the live-share-sdk directory:
 ```bash
 $ cd live-share-sdk
 ```
+
+## Testing the Samples
+
+If you aren't testing local changes to the packages, you can test and build each sample independently. The samples will point to published npm packages.
+
+Navigate to the sample of your choice:
+
+```bash
+$ cd samples/01.dice-roller
+```
+
+Install the dependency packages:
+
+```bash
+$ npm install
+```
+
+Run the sample:
+
+```bash
+$ npm start
+```
+
+For more instructions and information about each sample, reference their respective `README.md` file.
+
+Note: Each sample can be tested either locally in the browser or within Teams using ngrok.
+
+
+## Building Packages & Samples
+
+To build the projects packages and samples (with symlinks to the locally built packages), we use Lerna to prevent dependency errors.
 
 Install all developer dependencies:
 

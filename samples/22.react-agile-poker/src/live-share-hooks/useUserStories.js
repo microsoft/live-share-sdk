@@ -6,6 +6,7 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { EphemeralEvent } from "@microsoft/live-share";
 import { v4 as uuid } from "uuid";
+import { getDefaultUserStories } from "../constants/default-user-stories";
 
 export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
   const [userStories, setUserStories] = useState([]);
@@ -34,7 +35,6 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
       const updatedStory = userStories.find(
         (story) => story.id === userStory.id
       );
-      console.log(updatedStory, userStory.id, points);
       if (userStory) {
         userStoriesMap?.set(userStory.id, {
           text: updatedStory.text,
@@ -83,7 +83,10 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
 };
 
 function getInitialUserStoryId() {
-  const url = new URL(window.location);
+  const url = window.location.href.includes("/#/")
+    ? new URL(`${window.location.href.split("/#/").join("/")}`)
+    : new URL(window.location);
   const params = url.searchParams;
-  return params.get("userStoryId");
+  // If params doesn't have a user story, use the first one in our default list
+  return params.get("userStoryId") ?? getDefaultUserStories()[0].id;
 }

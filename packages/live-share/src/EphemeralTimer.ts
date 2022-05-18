@@ -43,7 +43,7 @@ export class EphemeralTimer extends DataObject<IEphemeralTimerEvents>  {
     /**
      * The objects fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/teams-interactive:EphemeralTimer`;
+    public static readonly TypeName = `@microsoft/live-share:EphemeralTimer`;
 
     /**
      * The objects fluid type factory.

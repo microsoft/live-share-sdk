@@ -267,7 +267,7 @@ export class TeamsFluidClient {
     private async getTeamsClient(): Promise<TeamsClientApi> {
         if (!this._teamsClient) {
             if (window && !this.isTesting) {
-                this._teamsClient = await import('@microsoft/teams-js');
+                this._teamsClient = (await import('@microsoft/teams-js') as any) as TeamsClientApi;
             } else {
                 this._teamsClient = new TestTeamsClientApi(this._props.getLocalTestContainerId, this._props.setLocalTestContainerId);
             }

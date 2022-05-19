@@ -23,8 +23,7 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "@fluidframework/test-client-utils": "^0.54.2",
-    "@fluidframework/tinylicious-client": "^0.58.1000",
+    "@fluidframework/test-client-utils": "^0.58.2000",
     "dotenv-cli": "^5.1.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
@@ -36,7 +35,7 @@
     "clean": "npx shx rm -rf build",
     "start": "start-server-and-test start:server 7070 start:client",
     "start:client": "react-scripts start",
-    "start:server": "npx tinylicious@latest",
+    "start:server": "npx @fluidframework/azure-local-service@latest",
     "build": "react-scripts build",
     "build:dev": "dotenv -e .env.development react-scripts build",
     "test": "react-scripts test",

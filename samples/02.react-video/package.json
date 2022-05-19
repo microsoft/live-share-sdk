@@ -6,7 +6,7 @@
   "license": "Microsoft",
   "author": "Microsoft",
   "dependencies": {
-    "@fluentui/react-components": "^9.0.0-rc.7",
+    "@fluentui/react-components": "^9.0.0-rc.9",
     "@microsoft/live-share": "~0.1.2",
     "@microsoft/live-share-media": "~0.1.2",
     "@microsoft/teams-js": "~2.0.0-experimental.0",
@@ -24,8 +24,7 @@
     "use-resize-observer": "^8.0.0"
   },
   "devDependencies": {
-    "@fluidframework/test-client-utils": "^0.54.2",
-    "@fluidframework/tinylicious-client": "^0.58.1000",
+    "@fluidframework/test-client-utils": "^0.58.2000",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.1",
@@ -36,7 +35,7 @@
     "clean": "npx shx rm -rf build",
     "start": "start-server-and-test start:server 7070 start:client",
     "start:client": "react-scripts start",
-    "start:server": "npx tinylicious@latest",
+    "start:server": "npx @fluidframework/azure-local-service@latest",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

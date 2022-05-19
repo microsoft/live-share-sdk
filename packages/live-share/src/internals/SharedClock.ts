@@ -120,7 +120,7 @@ export class SharedClock implements ITimestampProvider {
     private async getTeamsClient(): Promise<TeamsClientApi> {
         if (!this._teamsClient) {
             if (window) {
-                this._teamsClient = await import('@microsoft/teams-js');
+                this._teamsClient = (await import('@microsoft/teams-js') as any) as TeamsClientApi;
             } else {
                 this._teamsClient = new TestTeamsClientApi();
             }

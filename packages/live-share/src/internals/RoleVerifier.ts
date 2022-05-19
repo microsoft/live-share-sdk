@@ -5,7 +5,7 @@
 
 import { IRoleVerifier, UserMeetingRole } from '../interfaces';
 import { TeamsClientApi, TestTeamsClientApi } from './TestTeamsClientApi';
-import { waitForDelay, waitForResult } from './utils';
+import {  waitForResult } from './utils';
 import { RequestCache } from './RequestCache';
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
@@ -62,7 +62,7 @@ export class RoleVerifier implements IRoleVerifier {
     private async getTeamsClient(): Promise<TeamsClientApi> {
         if (!this._teamsClient) {
             if (window) {
-                this._teamsClient = await import('@microsoft/teams-js');
+                this._teamsClient = (await import('@microsoft/teams-js') as any) as TeamsClientApi;
             } else {
                 this._teamsClient = new TestTeamsClientApi();
             }

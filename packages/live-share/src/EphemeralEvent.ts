@@ -11,19 +11,44 @@ import { EphemeralEventScope } from './EphemeralEventScope';
 import { EphemeralEventTarget } from './EphemeralEventTarget';
 import { LocalRoleVerifier } from './LocalRoleVerifier';
 
+/**
+ * Events supported by `EphemeralEvent` object.
+ */
 export enum EphemeralEventEvents {
     received = 'received'
 }
 
-export interface IEphemeralEventEvents<T extends IEphemeralEvent> extends IEvent {
-    (event: 'received', listener: (evt: T, local: boolean) => void): any;
+/**
+ * `EphemeralEvent` event typings.
+ * @template TEvent Type of event to broadcast.
+ */
+export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends IEvent {
+    /**
+     * A remote event was received or a local event was sent.
+     * @param event Name of event.
+     * @param listener Function called when event is triggered.
+     * @param listener.evt The event that was sent/received.
+     * @param listener.local If true the `evt` is an event that was sent.
+     */
+    (event: 'received', listener: (evt: TEvent, local: boolean) => void): any;
 }
 
-export class EphemeralEvent<T extends IEphemeralEvent = IEphemeralEvent> extends DataObject<{Events: IEphemeralEventEvents<T>}> {
+/**
+ * Ephemeral fluid object that broadcasts an event to other clients and a set of static event 
+ * related helpers.
+ * 
+ * @remarks
+ * Applications should call `on('received', (evt, local) => {})` to listen for local events sent 
+ * and remote events received. Events aren't guaranteed to be delivered so you should limit their 
+ * use to sending events you're ok with potentially being missed. Reactions are a good use case for
+ * `EphemeralEvents`. Use something like the `EphemeralState` class when syncing state. 
+ * @template TEvent Type of event to broadcast.
+ */
+ export class EphemeralEvent<TEvent extends IEphemeralEvent = IEphemeralEvent> extends DataObject<{Events: IEphemeralEventEvents<TEvent>}> {
     private static _timestampProvider: ITimestampProvider = new LocalTimestampProvider();
     private static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
     
-    private _eventTarget?: EphemeralEventTarget<T>; 
+    private _eventTarget?: EphemeralEventTarget<TEvent>; 
 
     /**
      * The objects fluid type/name.
@@ -40,11 +65,18 @@ export class EphemeralEvent<T extends IEphemeralEvent = IEphemeralEvent> extends
         {}
     );
 
+    /**
+     * Returns true if the object has been started.
+     */
     public get isStarted(): boolean {
         return !!this._eventTarget;
     } 
 
-    public start(allowedRoles?: UserMeetingRole[]): Promise<void> {
+    /**
+     * Starts the object.
+     * @param allowedRoles Optional. List of roles allowed to send events.
+     */
+     public start(allowedRoles?: UserMeetingRole[]): Promise<void> {
         if (this._eventTarget) {
             throw new Error(`EphemeralEvent already started.`);
         }
@@ -57,7 +89,18 @@ export class EphemeralEvent<T extends IEphemeralEvent = IEphemeralEvent> extends
         return Promise.resolve();
     }
 
-    public sendEvent(evt?: Partial<T>): T {
+    /**
+     * Broadcasts an event to all other clients.
+     * 
+     * @remarks
+     * The event will be queued for delivery if the client isn't currently connected.
+     * @param evt Optional. Event to send. If omitted, an event will still be sent but it won't 
+     * include any custom event data. 
+     * @returns The full event object that was sent, including the timestamp of when the event 
+     * was sent and the clientId if known. The clientId will be `undefined` if the client is 
+     * disconnected at time of delivery.
+     */
+    public sendEvent(evt?: Partial<TEvent>): TEvent {
         if (!this._eventTarget) {
             throw new Error(`EphemeralEvent not started.`);
         }
@@ -140,10 +183,18 @@ export class EphemeralEvent<T extends IEphemeralEvent = IEphemeralEvent> extends
         return true;
     }
 
+    /**
+     * @hidden
+     * Assigns a new timestamp provider.
+     */
     public static setTimestampProvider(provider: ITimestampProvider): void {
         EphemeralEvent._timestampProvider = provider;
     }
 
+    /**
+     * @hidden
+     * Assigns a new role verifier.
+     */
     public static setRoleVerifier(provider: IRoleVerifier): void {
         EphemeralEvent._roleVerifier = provider;
     }

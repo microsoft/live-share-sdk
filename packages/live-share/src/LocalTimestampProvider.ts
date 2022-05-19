@@ -6,6 +6,7 @@
 import { ITimestampProvider } from "./interfaces";
 
 /**
+ * @hidden
  * Implements a local timestamp provider for testing purposes.
  */
 export class LocalTimestampProvider implements ITimestampProvider {

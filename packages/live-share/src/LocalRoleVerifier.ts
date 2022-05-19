@@ -6,6 +6,7 @@
 import { IRoleVerifier, UserMeetingRole } from "./interfaces";
 
 /**
+ * @hidden
  * Implements a local role verifier for testing purposes.
  */
 export class LocalRoleVerifier implements IRoleVerifier {

@@ -10,7 +10,13 @@ import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { IEphemeralEvent, UserMeetingRole } from "./interfaces";
 import { EphemeralEvent } from "./EphemeralEvent";
 
-export type EphemeralEventListener<T extends IEphemeralEvent> = (evt: T, local: boolean) => void;
+/**
+ * Ephemeral event callback.
+ * @tempate TEvent Type of event being sent/received.
+ * @param evt The event that was sent/received.
+ * @param local If true the `evt` is an event that was sent.
+ */
+export type EphemeralEventListener<TEvent extends IEphemeralEvent> = (evt: TEvent, local: boolean) => void;
 
 /**
  * Duck type of something that provides the expected signalling functionality:
@@ -24,23 +30,31 @@ export interface IRuntimeSignaler {
     submitSignal(type: string, content: any): void;
 }
 
+/**
+ * Object responsible for sending and receiving ephemeral events.
+ * 
+ * @remarks
+ * Ephemeral objects send and receive events using an event scope. Event scopes can be restricted
+ * to only receive events from clients with specific roles. Any events that are received from 
+ * clients without an allowed role type will be ignored.
+ * 
+ * Event scopes are isolated on a per Fluid object basis. That means that two different Fluid 
+ * objects using the same event names don't have to worry about collisions.  Two event scopes 
+ * within the same Fluid object, however, don't have any isolation. You can use multiple event
+ * scopes within the same FLuid object, you just need to be careful that they send different 
+ * events.
+ */
 export class EphemeralEventScope extends TypedEventEmitter<IErrorEvent> {
     private readonly emitter  = new EventEmitter();
     private readonly _runtime: IRuntimeSignaler;
     private _allowedRoles: UserMeetingRole[];
 
-    public get allowedRoles(): UserMeetingRole[] {
-        return this._allowedRoles;
-    }
-
-    public set allowedRoles(values: UserMeetingRole[]) {
-        this._allowedRoles = values;
-    }
-
-    public get clientId(): string | undefined {
-        return this._runtime.clientId;
-    }
-
+    /**
+     * Creates a new `EphemeralEventScope` instance.
+     * @param runtime A Fluid objects runtime instance, typically `this.runtime`.
+     * @param allowedRoles Optional. List of roles allowed to send events using this scope. 
+     * You should use a second scope if you need mixed permission support.
+     */
     constructor(runtime: IRuntimeSignaler, allowedRoles?: UserMeetingRole[]) {
         super();
         this._runtime = runtime;
@@ -74,20 +88,58 @@ export class EphemeralEventScope extends TypedEventEmitter<IErrorEvent> {
         });
     }
 
-    public onEvent<T extends IEphemeralEvent>(eventName: string, listener: EphemeralEventListener<T>): this {
+
+    /**
+     * List of roles allowed to send events through this scope.
+     */
+    public get allowedRoles(): UserMeetingRole[] {
+        return this._allowedRoles;
+    }
+
+    public set allowedRoles(values: UserMeetingRole[]) {
+        this._allowedRoles = values;
+    }
+
+    /**
+     * The runtimes current client ID. This will be `undefined` if the client is disconnected.
+     */
+    public get clientId(): string | undefined {
+        return this._runtime.clientId;
+    }
+
+    /**
+     * Registers a listener for a named event.
+     * @template TEvent Type of event to listen for.
+     * @param eventName Name of event to listen for.
+     * @param listener Function to call when the named event is sent or received. 
+     */
+    public onEvent<TEvent extends IEphemeralEvent>(eventName: string, listener: EphemeralEventListener<TEvent>): this {
         this.emitter.on(eventName, listener);
         return this;
     }
 
-    public offEvent<T extends IEphemeralEvent>(eventName: string, listener: EphemeralEventListener<T>): this {
+    /**
+     * Un-registers a listener for a named event.
+     * @template TEvent Type of event being listened for.
+     * @param eventName Name of event to un-register.
+     * @param listener Function that was originally passed to `onEvent()`.
+     */
+    public offEvent<TEvent extends IEphemeralEvent>(eventName: string, listener: EphemeralEventListener<TEvent>): this {
         this.emitter.off(eventName, listener);
         return this;
     }
 
-    public sendEvent<T extends IEphemeralEvent>(eventName: string, evt: Partial<T> = {}): T {
+    /**
+     * Sends an event to other event scope instances for the Fluid object.
+     * @template TEvent Type of event to send.
+     * @param eventName Name of teh event to send.
+     * @param evt Optional. Partial event object to send. 
+     * @returns The full event 
+     */
+    public sendEvent<TEvent extends IEphemeralEvent>(eventName: string, evt: Partial<TEvent> = {}): TEvent {
         // Clone passed in event and fill out required props.
-        const clone: T = {
-            ...evt as T, 
+        const clone: TEvent = {
+            ...evt as TEvent, 
             clientId: this._runtime.clientId,
             name: eventName,
             timestamp: EphemeralEvent.getTimestamp() 

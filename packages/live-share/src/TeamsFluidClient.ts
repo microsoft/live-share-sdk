@@ -163,7 +163,7 @@ export class TeamsFluidClient {
                 if (this._roleVerifier) {
                     const connections = services.audience.getMyself()?.connections ?? [];
                     for (let i = 0; i < connections.length; i++) {
-                        const clientId = connections[0].id;
+                        const clientId = connections[i].id;
                         await this._roleVerifier?.registerClientId(clientId);
                     }
                 }

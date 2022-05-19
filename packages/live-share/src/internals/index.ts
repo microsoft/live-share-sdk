@@ -5,6 +5,7 @@
 
 export * from './consts';
 export * from './contracts';
+export * from './RequestCache';
 export * from './RoleVerifier';
 export * from './SharedClock';
 export * from './TeamsFluidTokenProvider';

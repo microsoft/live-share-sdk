@@ -5,54 +5,42 @@
 
 import { IRoleVerifier, UserMeetingRole } from '../interfaces';
 import { TeamsClientApi, TestTeamsClientApi } from './TestTeamsClientApi';
-import { waitForDelay } from './utils';
+import { waitForDelay, waitForResult } from './utils';
+import { RequestCache } from './RequestCache';
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
+const CACHE_LIFETIME = 60 * 60 * 1000;
 
 
 export class RoleVerifier implements IRoleVerifier {
     private _teamsClient?: TeamsClientApi;
-    private readonly roleCache: Map<string, UserMeetingRole[]> = new Map();
+    private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> = new RequestCache(CACHE_LIFETIME);
+    private readonly _getRequestCache: RequestCache<UserMeetingRole[]> = new RequestCache(CACHE_LIFETIME);
 
     public async registerClientId(clientId: string): Promise<UserMeetingRole[]> {
-        if (!this.roleCache.has(clientId)) {
-            // Initialize cache with empty entry
-            // - This guards against re-entry while registering client
-            this.roleCache.set(clientId, []);
-            try {
+        return this._registerRequestCache.cacheRequest(clientId, () => {
+            return waitForResult(async () => {
                 const teamsClient = await this.getTeamsClient();
-                const roles = await teamsClient.interactive.registerClientId(clientId);
-                this.roleCache.set(clientId, roles);
-                return roles;
-            } catch (err) {
-                this.roleCache.delete(clientId);
-                throw err;
-            }
-        } else {
-            return this.roleCache.get(clientId)!;
-        }
+                return await teamsClient.interactive.registerClientId(clientId);
+            }, (result) => {
+                return Array.isArray(result);
+            }, () => {
+                return new Error(`RoleVerifier: timed out registering local client ID`);
+            }, EXPONENTIAL_BACKOFF_SCHEDULE);
+        });
     }
 
     public async getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        // Fetch client roles on first access
-        if (!this.roleCache.has(clientId)) {
-            const teamsClient = await this.getTeamsClient();
-
-            let tries = 0;
-            while (true) {
-                const roles = await teamsClient.interactive.getClientRoles(clientId);
-                if (roles) {
-                    this.roleCache.set(clientId, roles);
-                    break;
-                } else if (tries < EXPONENTIAL_BACKOFF_SCHEDULE.length) {
-                    await waitForDelay(EXPONENTIAL_BACKOFF_SCHEDULE[tries++]);
-                } else {
-                    throw new Error(`RoleVerifier: timeout verifying role for a client.`);
-                }
-            }
-        }
-
-        return this.roleCache.get(clientId)!;
+        return this._getRequestCache.cacheRequest(clientId, () => {
+            return waitForResult(async () => {
+                const teamsClient = await this.getTeamsClient();
+                return await teamsClient.interactive.getClientRoles(clientId);
+            }, (result) => {
+                return Array.isArray(result);
+            }, () => {
+                return new Error(`RoleVerifier: timed out getting roles for a remote client ID`);
+            }, EXPONENTIAL_BACKOFF_SCHEDULE);
+        });
     }
     
     public async verifyRolesAllowed(clientId: string, allowedRoles: UserMeetingRole[]): Promise<boolean> {

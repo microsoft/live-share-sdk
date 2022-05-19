@@ -29,3 +29,26 @@ export function waitForDelay(delay: number): Promise<void> {
         setTimeout(() => resolve(), delay);
     });
 }
+
+export function waitForResult<TResult>(
+    fnRequest: () => Promise<TResult|undefined>, 
+    fnSucceeded: (result: TResult|undefined) => boolean,
+    fnTimeout: () => Error,
+    retrySchedule: number[]
+): Promise<TResult> {
+    let retries: number = 0;
+    return new Promise<TResult>(async (resolve, reject) => {
+        while (true) {
+            const result = await fnRequest();
+            if (fnSucceeded(result)) {
+                resolve(result!);
+                break;
+            } else if (retries >= retrySchedule.length) {
+                reject(fnTimeout());
+                break;
+            } else {
+                await waitForDelay(retrySchedule[retries++]);
+            }
+        }
+    });
+}

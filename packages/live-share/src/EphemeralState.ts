@@ -54,7 +54,7 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
     /**
      * The objects fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/teams-interactive:EphemeralState`;
+    public static readonly TypeName = `@microsoft/live-share:EphemeralState`;
 
     /**
      * The objects fluid type factory.

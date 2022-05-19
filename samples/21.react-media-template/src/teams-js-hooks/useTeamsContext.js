@@ -11,22 +11,30 @@ export const useTeamsContext = () => {
   const [ctx, setCtx] = useState(null);
 
   useEffect(() => {
-    if (!ctx?.userObjectId) {
+    if (!ctx?.user?.id) {
       // Add inTeams=true to URL params to get real Teams context
       if (inTeams()) {
-        console.log("Attempting to get Teams context");
+        console.log("useTeamsContext: Attempting to get Teams context");
         // Get Context from the Microsoft Teams SDK
-        microsoftTeams.getContext((context) => {
-          setCtx(context);
-        });
+        microsoftTeams.app
+          .getContext()
+          .then((context) => {
+            console.log(
+              `useTeamsContext: received context: ${JSON.stringify(context)}`
+            );
+            setCtx(context);
+          })
+          .catch((error) => console.error(error));
       } else {
         // Simulate Teams userObjectId for browser testing
         setCtx({
-          userObjectId: `user${Math.abs(Math.random() * 999999999)}`,
+          user: {
+            id: `user${Math.abs(Math.random() * 999999999)}`,
+          },
         });
       }
     }
-  }, [ctx?.userObjectId]);
+  }, [ctx?.user?.id]);
 
   return ctx;
 };

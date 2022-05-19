@@ -8,9 +8,11 @@ import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { EphemeralMediaSession } from "@microsoft/live-share-media";
 import { SharedMap } from "fluid-framework";
-import { DebugLogger } from "@fluidframework/telemetry-utils";
 import { useEffect, useState } from "react";
-import { EphemeralEvent, EphemeralPresence } from "@microsoft/live-share";
+import {
+  EphemeralEvent,
+  EphemeralPresence,
+} from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";
 
 /**
@@ -27,19 +29,25 @@ export function useSharedObjects() {
   const [error, setError] = useState();
 
   useEffect(() => {
+    console.log("useSharedObjects: starting");
     // Check if user is in Teams
-    const searchParams = new URL(window.location).searchParams;
-    const inTeams = !!searchParams.get("inTeams");
+    const url = window.location.href.includes("/#/")
+      ? new URL(`${window.location.href.split("/#/").join("/")}`)
+      : new URL(window.location);
+    const inTeams = !!url.searchParams.get("inTeams");
 
     let connection;
     if (!inTeams) {
       // Configure for local testing (optional).
       connection = {
         tenantId: LOCAL_MODE_TENANT_ID,
-        tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
+        tokenProvider: new InsecureTokenProvider("", {
+          id: "123",
+          name: "Test User",
+        }),
         orderer: "http://localhost:7070",
         storage: "http://localhost:7070",
-      }
+      };
     }
 
     // Define any additional client settings (optional).
@@ -47,14 +55,18 @@ export function useSharedObjects() {
     // - logger: A fluid logger to use.
     const clientProps = {
       connection,
-      logger: DebugLogger.create("fluid:"),
     };
+
+    // To reset the stored container-id, uncomment below:
+    // localStorage.clear();
+
     // Enable debugger
     window.localStorage.debug = "fluid:*";
 
     // Define container callback (optional).
     // * This is only called once when the container is first created.
     const onFirstInitialize = (container) => {
+      console.log("useSharedObjects: onFirstInitialize called");
       // Setup any initial state here
       mediaList.forEach((mediaItem) => {
         container.initialObjects.playlistMap.set(mediaItem.id, {
@@ -62,12 +74,10 @@ export function useSharedObjects() {
           timeAdded: EphemeralEvent.getTimestamp(),
         });
       });
-      if (!inTeams) {
-        container.initialObjects.playlistMap.set(
-          "selected-media-id",
-          mediaList[0].id
-        );
-      }
+      container.initialObjects.playlistMap.set(
+        "selected-media-id",
+        mediaList[0].id
+      );
     };
 
     // Define container schema
@@ -76,15 +86,21 @@ export function useSharedObjects() {
         presence: EphemeralPresence,
         mediaSession: EphemeralMediaSession,
         notificationEvent: EphemeralEvent,
+        inkEvent: EphemeralEvent,
         takeControlMap: SharedMap,
         playlistMap: SharedMap,
       },
     };
 
     // Create the client, join container, and set results
+    console.log("useSharedObjects: joining container");
     const client = new TeamsFluidClient(clientProps);
-    client.joinContainer(schema, onFirstInitialize)
-      .then((results) => setResults(results))
+    client
+      .joinContainer(schema, onFirstInitialize)
+      .then((results) => {
+        console.log("useSharedObjects: joined container");
+        setResults(results);
+      })
       .catch((err) => setError(err));
   }, []);
 
@@ -96,7 +112,9 @@ export function useSharedObjects() {
     notificationEvent: initialObjects?.notificationEvent,
     takeControlMap: initialObjects?.takeControlMap,
     playlistMap: initialObjects?.playlistMap,
+    inkEvent: initialObjects?.inkEvent,
     container,
     error,
+    services: results?.services,
   };
 }

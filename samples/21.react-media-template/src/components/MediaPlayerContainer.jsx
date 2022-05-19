@@ -12,16 +12,26 @@ import {
   SpeakerMute20Filled,
   Speaker220Filled,
   Next20Filled,
-  Live20Filled,
+  Pen24Filled,
+  Pen24Regular,
+  Info24Regular,
 } from "@fluentui/react-icons";
 import { debounce } from "lodash";
-import { mergeClasses, Button, Text } from "@fluentui/react-components";
+import {
+  mergeClasses,
+  Button,
+  Text,
+  Popover,
+  PopoverTrigger,
+  PopoverSurface,
+} from "@fluentui/react-components";
 import {
   getFlexColumnStyles,
   getFlexItemStyles,
   getFlexRowStyles,
 } from "../styles/layouts";
 import { getPlayerControlStyles, getVideoStyle } from "../styles/styles";
+import { InkCanvas } from "./InkCanvas";
 
 const events = [
   "loadstart",
@@ -41,22 +51,28 @@ export const MediaPlayerContainer = ({
   localUserIsPresenting,
   localUserIsEligiblePresenter,
   suspended,
+  strokes,
   play,
   pause,
   seekTo,
   takeControl,
   endSuspension,
   nextTrack,
+  sendStrokes,
   children,
 }) => {
   const [showControls, setShowControls] = useState(true);
+  const [inkActive, setInkActive] = useState(false);
   const [playerState, setPlayerState] = useState({
     isPlaying: false,
     playbackStarted: false,
     duration: 0,
     currentTime: 0,
-    muted: true,
+    muted: false,
     volume: 1,
+    currentPlaybackBitrate: undefined,
+    currentHeuristicProfile: undefined,
+    resolution: undefined,
   });
 
   const hideControls = useCallback(() => {
@@ -67,13 +83,20 @@ export const MediaPlayerContainer = ({
     hideControls,
   ]);
 
-  const togglePlayPause = () => {
+  const togglePlayPause = useCallback(() => {
     if (player.paused) {
       play();
     } else {
       pause();
     }
-  };
+  }, [play, pause]);
+
+  useEffect(() => {
+    if (!localUserIsPresenting) {
+      // Disable ink
+      setInkActive(false);
+    }
+  }, [localUserIsPresenting, setInkActive]);
 
   useEffect(() => {
     const onPlayerStateUpdate = () => {
@@ -84,6 +107,9 @@ export const MediaPlayerContainer = ({
         currentTime: player.currentTime || 0,
         muted: player.muted,
         volume: player.volume,
+        currentPlaybackBitrate: player.currentPlaybackBitrate,
+        currentHeuristicProfile: player.currentHeuristicProfile,
+        resolution: player.resolution,
       });
     };
 
@@ -95,22 +121,23 @@ export const MediaPlayerContainer = ({
       });
     }
 
-    document.body.onkeyup = function(e) {
-      e.preventDefault();
-      if (e.key === " " ||
-          e.code === "Space"   
-      ) {
-        // eslint-disable-next-line
-        togglePlayPause();
-      }
-    }
-
     return () => {
       events.forEach((evt) => {
         player?.removeEventListener(evt, onPlayerStateUpdate);
       });
     };
   }, [player]);
+
+  useEffect(() => {
+    if (player && togglePlayPause) {
+      document.body.onkeyup = function (e) {
+        e.preventDefault();
+        if (e.key === " " || e.code === "Space") {
+          togglePlayPause();
+        }
+      };
+    }
+  }, [player, togglePlayPause]);
 
   const flexRowStyles = getFlexRowStyles();
   const flexColumnStyles = getFlexColumnStyles();
@@ -132,6 +159,11 @@ export const MediaPlayerContainer = ({
       <div className={videoStyle.root} onClick={togglePlayPause}>
         {children}
       </div>
+      <InkCanvas
+        isEnabled={inkActive}
+        strokes={strokes}
+        sendStrokes={sendStrokes}
+      />
       <div
         className={flexColumnStyles.root}
         style={{
@@ -139,7 +171,7 @@ export const MediaPlayerContainer = ({
           left: "0",
           bottom: "0",
           right: "0",
-          zIndex: 1,
+          zIndex: 2,
           visibility:
             showControls || !playerState.isPlaying ? "visible" : "hidden",
           background: "linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.4))",
@@ -158,7 +190,13 @@ export const MediaPlayerContainer = ({
             flexRowStyles.vAlignCenter,
             flexRowStyles.smallGap
           )}
-          style={{ padding: "4px 12px", paddingTop: "0px", minWidth: "0px" }}
+          style={{
+            paddingBottom: "12px",
+            paddingLeft: "12px",
+            paddingRight: "12px",
+            paddingTop: "0px",
+            minWidth: "0px",
+          }}
         >
           {/* Play Button */}
           <Button
@@ -194,31 +232,54 @@ export const MediaPlayerContainer = ({
               flexRowStyles.fill
             )}
           >
-            {/* Formatted Time Value */}
             <div
               className={mergeClasses(
                 flexItemStyles.noShrink,
                 flexItemStyles.grow,
                 flexRowStyles.root,
                 flexRowStyles.vAlignCenter,
-                flexRowStyles.smallGap,
+                flexRowStyles.smallGap
               )}
             >
+              {/* Formatted Time Value */}
               <Text size={300} weight="medium">
                 {formatTimeValue(playerState.currentTime)}
                 {" / "}
                 {formatTimeValue(playerState.duration)}
               </Text>
+              {/* Suspended */}
               {suspended && (
                 <Button
-                  icon={<Live20Filled />}
                   appearance="outline"
-                  size={"small"}
-                  title={"Follow presenter"}
+                  title={"Sync to Presenter"}
                   onClick={endSuspension}
-                  style={{ marginLeft: "0.25rem" }}
+                  style={{ marginLeft: "0.25rem", borderColor: "#6e0811" }}
                 >
-                  Follow presenter
+                  <div
+                    className={mergeClasses(
+                      flexRowStyles.root,
+                      flexRowStyles.vAlignCenter,
+                      flexRowStyles.smallGap
+                    )}
+                  >
+                    <div
+                      className={mergeClasses(
+                        flexRowStyles.root,
+                        flexRowStyles.vAlignCenter
+                      )}
+                      style={{
+                        padding: "0.05rem 0.5rem",
+                        backgroundColor: "#c50f1f",
+                        borderRadius: "8px",
+                        height: "auto",
+                      }}
+                    >
+                      <Text size={100} weight="medium">
+                        {`LIVE`}
+                      </Text>
+                    </div>
+                    <div>{`Sync to Presenter`}</div>
+                  </div>
                 </Button>
               )}
             </div>
@@ -229,27 +290,92 @@ export const MediaPlayerContainer = ({
                 flexRowStyles.hAlignEnd
               )}
             >
-              {!localUserIsPresenting && (
-                <Button
-                  appearance="outline"
-                  size="small"
-                  aria-label={`Take control`}
-                  disabled={!localUserIsEligiblePresenter}
-                  onClick={() => {
-                    takeControl();
-                    if (suspended) {
-                      endSuspension();
-                    }
+              {/* Take Control */}
+              <Button
+                appearance="outline"
+                aria-label={
+                  localUserIsPresenting ? `In control` : `Take control`
+                }
+                disabled={
+                  localUserIsPresenting || !localUserIsEligiblePresenter
+                }
+                onClick={() => {
+                  takeControl();
+                  if (suspended) {
+                    endSuspension();
+                  }
+                }}
+              >
+                <div
+                  style={{
+                    color: "white",
+                    fontWeight: localUserIsPresenting ? 300 : undefined,
+                    opacity: localUserIsPresenting ? "0.7" : "1",
                   }}
                 >
-                  {`Take control`}
-                </Button>
-              )}
+                  {localUserIsPresenting ? `In control` : `Take control`}
+                </div>
+              </Button>
+              {/* Divider */}
+              <div
+                style={{
+                  width: "1px",
+                  height: "20px",
+                  backgroundColor: "white",
+                  opacity: "0.6",
+                  marginLeft: "12px",
+                  marginRight: "4px",
+                }}
+              />
+              {/* Ink Toggle */}
               {localUserIsPresenting && (
-                <Text size={300} weight="medium" align="end">
-                  {"In control"}
-                </Text>
+                <>
+                  <Button
+                    icon={inkActive ? <Pen24Filled /> : <Pen24Regular />}
+                    appearance="transparent"
+                    title={inkActive ? "Disable ink" : "Enable ink"}
+                    onClick={() => {
+                      setInkActive(!inkActive);
+                    }}
+                  />
+                </>
               )}
+              {/* Info Popover */}
+              <Popover>
+                <PopoverTrigger>
+                  <Button
+                    icon={<Info24Regular />}
+                    appearance="transparent"
+                    title={"Info"}
+                  />
+                </PopoverTrigger>
+                <PopoverSurface aria-label="video info">
+                  <div className={mergeClasses(flexColumnStyles.root)}>
+                    {playerState.currentPlaybackBitrate && (
+                      <div>
+                        <Text size={300}>
+                          {`Bitrate: ${
+                            playerState.currentPlaybackBitrate / 1000
+                          }kbps`}
+                        </Text>
+                      </div>
+                    )}
+                    <div>
+                      <Text size={300}>
+                        {`Resolution: ${playerState.resolution}`}
+                      </Text>
+                    </div>
+                    <div>
+                      <Text size={300}>
+                        {`Heuristic Profile: ${playerState.currentHeuristicProfile}`}
+                      </Text>
+                    </div>
+                    <div>
+                      <Text size={300}>{`Volume: ${playerState.volume}`}</Text>
+                    </div>
+                  </div>
+                </PopoverSurface>
+              </Popover>
             </div>
           </div>
         </div>

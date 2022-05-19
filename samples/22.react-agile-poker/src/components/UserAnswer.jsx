@@ -7,7 +7,7 @@ import { mergeClasses, Subheadline } from "@fluentui/react-components";
 import { getFlexColumnStyles, getFlexRowStyles } from "../styles/layout";
 import { PlayerAvatar } from "./PlayerAvatar";
 
-export const UserAnswer = ({ user, localUserId, index, onLogIn }) => {
+export const UserAnswer = ({ user, localUserId, index }) => {
   const flexRowStyles = getFlexRowStyles();
   const flexColumnStyles = getFlexColumnStyles();
   return (
@@ -24,12 +24,7 @@ export const UserAnswer = ({ user, localUserId, index, onLogIn }) => {
           flexColumnStyles.hAlignCenter
         )}
       >
-        <PlayerAvatar
-          user={user}
-          localUserId={localUserId}
-          index={index}
-          onLogIn={onLogIn}
-        />
+        <PlayerAvatar user={user} localUserId={localUserId} index={index} />
       </div>
       <div
         className={mergeClasses(

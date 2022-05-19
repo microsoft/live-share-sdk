@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 
 export const useSharingStatus = (context) => {
   const [sharingActive, setSharingActive] = useState(false);
+
   const intervalIdRef = useRef();
 
   useEffect(() => {
@@ -12,11 +13,11 @@ export const useSharingStatus = (context) => {
       const apiIsSupported = ![
         microsoftTeams.HostClientType.web,
         microsoftTeams.HostClientType.desktop,
-      ].includes(context?.hostClientType);
+      ].includes(context?.app?.host?.clientType);
       if (
         !apiIsSupported &&
         microsoftTeams.meeting &&
-        context.frameContext === microsoftTeams.FrameContexts.sidePanel
+        context.page?.frameContext === microsoftTeams.FrameContexts.sidePanel
       ) {
         const setAppSharingStatus = () => {
           microsoftTeams.meeting.getAppContentStageSharingCapabilities(

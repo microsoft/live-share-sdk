@@ -38,7 +38,7 @@ export const useTakeControl = (
       userId: user.userId,
       state: user.state,
       data: user.data,
-      lastInControlTimestamp: history[user.userId] || 0,
+      lastInControlTimestamp: history[user.data?.teamsUserId] || 0,
     }));
     mappedOnlineUsers.sort((a, b) => {
       // Sort by joined timestamp in descending
@@ -56,16 +56,23 @@ export const useTakeControl = (
     if (!presentingUser || !localUserId) {
       return false;
     }
-    return localUserId === presentingUser.userId;
+    return localUserId === presentingUser?.data?.teamsUserId;
   }, [localUserId, presentingUser]);
 
   // Set the local user ID
   const takeControl = useCallback(() => {
     if (!!localUserId && localUserIsEligiblePresenter) {
       takeControlMap?.set(localUserId, EphemeralEvent.getTimestamp());
-      sendNotification("took control");
+      if (!!sendNotification) {
+        sendNotification("took control");
+      }
     }
-  }, [takeControlMap, localUserId, localUserIsEligiblePresenter, sendNotification]);
+  }, [
+    takeControlMap,
+    localUserId,
+    localUserIsEligiblePresenter,
+    sendNotification,
+  ]);
 
   // Refresh local state with latest values from takeControlMap
   const refreshControlMap = useCallback(() => {
@@ -81,9 +88,16 @@ export const useTakeControl = (
     if (takeControlMap && !takeControlStarted && localUserId) {
       takeControlMap.on("valueChanged", refreshControlMap);
       refreshControlMap();
+      console.log("useTakeControl: started take control");
       setStarted(true);
     }
-  }, [takeControlMap, localUserId, takeControlStarted, refreshControlMap, setStarted]);
+  }, [
+    takeControlMap,
+    localUserId,
+    takeControlStarted,
+    refreshControlMap,
+    setStarted,
+  ]);
 
   return {
     takeControlStarted,

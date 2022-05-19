@@ -5,6 +5,7 @@
 
 import { FluentProvider, teamsDarkTheme } from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
+import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MeetingStage from "./pages/MeetingStage";
 import SidePanel from "./pages/SidePanel";
@@ -12,7 +13,30 @@ import TabConfig from "./pages/TabConfig";
 import { inTeams } from "./utils/inTeams";
 
 export default function App() {
-  microsoftTeams.initialize();
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!initialized) {
+      if (inTeams()) {
+        console.log("App.js: initializing client SDK");
+        microsoftTeams.app
+          .initialize()
+          .then(() => {
+            console.log("App.js: initializing client SDK initialized");
+            microsoftTeams.app.notifyAppLoaded();
+            microsoftTeams.app.notifySuccess();
+            setInitialized(true);
+          })
+          .catch((error) => console.error(error));
+      } else {
+        setInitialized(true);
+      }
+    }
+  }, []);
+
+  if (!initialized) {
+    return <div />;
+  }
 
   return (
     <FluentProvider
@@ -28,7 +52,7 @@ export default function App() {
         backgroundColor: inTeams() ? "transparent" : "#202020",
       }}
     >
-      <Router>
+      <Router window={window} basename="/">
         <Routes>
           <Route exact path={"/"} element={<MeetingStage />} />
           <Route exact path={"/sidepanel"} element={<SidePanel />} />

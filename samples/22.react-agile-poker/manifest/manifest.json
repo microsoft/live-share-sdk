@@ -1,0 +1,67 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
+    "version": "1.0.0",
+    "manifestVersion": "1.12",
+    "id": "ba45b0c9-8f12-45b0-9b86-179b3352bb19",
+    "packageName": "com.microsoft.agilepoker",
+    "name": {
+        "short": "Agile Poker",
+        "full": "Agile Poker"
+    },
+    "developer": {
+        "name": "Microsoft Corporation",
+        "mpnId": "",
+        "websiteUrl": "https://microsoft.com",
+        "privacyUrl": "https://www.microsoft.com/privacy",
+        "termsOfUseUrl": "https://www.microsoft.com/termsofuse"
+    },
+    "description": {
+        "short": "Cost user stories with this fun agile poker planning game!",
+        "full": "Doing real work has never been this fun...or productive!"
+    },
+    "icons": {
+        "outline": "outline.png",
+        "color": "color.png"
+    },
+    "accentColor": "#ffffff",
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://<<BASE_URI_DOMAIN>>/config?inTeams=true",
+            "canUpdateConfiguration": false,
+            "scopes": [
+                "groupchat"
+            ],
+            "context": [
+                "meetingSidePanel",
+                "meetingStage"
+            ]
+        }
+    ],
+    "validDomains": [
+        "*.ngrok.io"
+    ],
+    "showLoadingIndicator": true,
+    "authorization": {
+        "permissions": {
+            "orgWide": [],
+            "resourceSpecific": [
+                {
+                    "name": "MeetingStage.Write.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "ChannelMeetingStage.Write.Group",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "LiveShareSession.ReadWrite.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "LiveShareSession.ReadWrite.Group",
+                    "type": "Delegated"
+                }
+            ]
+        }
+    }
+}

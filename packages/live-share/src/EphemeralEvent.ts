@@ -53,7 +53,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
     /**
      * The objects fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/teams-interactive:EphemeralEvent`;
+    public static readonly TypeName = `@microsoft/live-share:EphemeralEvent`;
 
     /**
      * The objects fluid type factory.

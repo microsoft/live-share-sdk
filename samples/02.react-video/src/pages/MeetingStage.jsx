@@ -3,7 +3,6 @@
  * Licensed under the MIT License.
  */
 
-import * as microsoftTeams from "@microsoft/teams-js";
 import { useEffect, useRef } from "react";
 import { getVideoStyle } from "../styles/styles";
 import { getInitialMediaItem } from "../utils/getInitialMediaItem";
@@ -55,9 +54,6 @@ const MeetingStage = () => {
       const { mediaSession } = container.initialObjects;
       synchronizer.current = mediaSession.synchronize(videoElement.current);
       await mediaSession.start();
-
-      // Notify Teams to stop showing loading spinner
-      microsoftTeams.appInitialization.notifySuccess();
     })();
   }, []);
 

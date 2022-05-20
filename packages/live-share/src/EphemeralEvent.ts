@@ -15,6 +15,9 @@ import { LocalRoleVerifier } from './LocalRoleVerifier';
  * Events supported by `EphemeralEvent` object.
  */
 export enum EphemeralEventEvents {
+    /**
+     * An event has been sent or received.
+     */
     received = 'received'
 }
 

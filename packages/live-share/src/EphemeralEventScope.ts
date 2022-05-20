@@ -12,7 +12,7 @@ import { EphemeralEvent } from "./EphemeralEvent";
 
 /**
  * Ephemeral event callback.
- * @tempate TEvent Type of event being sent/received.
+ * @template TEvent Type of event being sent/received.
  * @param evt The event that was sent/received.
  * @param local If true the `evt` is an event that was sent.
  */
@@ -132,9 +132,10 @@ export class EphemeralEventScope extends TypedEventEmitter<IErrorEvent> {
     /**
      * Sends an event to other event scope instances for the Fluid object.
      * @template TEvent Type of event to send.
-     * @param eventName Name of teh event to send.
-     * @param evt Optional. Partial event object to send. 
-     * @returns The full event 
+     * @param eventName Name of the event to send.
+     * @param evt Optional. Partial event object to send. The `name`, `timestamp`, and `clientId` 
+     * fields will be automatically populated prior to sending.
+     * @returns The full event, including `name`, `timestamp`, and `clientId` fields if known.
      */
     public sendEvent<TEvent extends IEphemeralEvent>(eventName: string, evt: Partial<TEvent> = {}): TEvent {
         // Clone passed in event and fill out required props.

@@ -52,7 +52,7 @@ export interface IContainerRuntimeSignaler {
  * verification purposes. The logic for processing these state updates will vary but implementations
  * will generally want to include a timestamp in their state update so that clients can protect 
  * against out-of-order and delayed updates. Deriving your state update from `IEphemeralEvent` and 
- * using `EphemeralEvent.isNewer()` to compare the received update with teh current update makes this
+ * using `EphemeralEvent.isNewer()` to compare the received update with the current update makes this
  * simple.
  * 
  * Once the initial "connect" event is sent, the synchronizer will periodically broadcast additional 

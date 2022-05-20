@@ -176,6 +176,9 @@ export class TeamsFluidClient {
         }
     }
 
+    /**
+     * @hidden
+     */
     protected initializeRoleVerifier(): Promise<void> {
         if (!this._roleVerifier && !this.isTesting) {
             this._roleVerifier = new RoleVerifier();
@@ -187,6 +190,9 @@ export class TeamsFluidClient {
         return Promise.resolve();
     }
 
+    /**
+     * @hidden
+     */
     protected initializeTimestampProvider(): Promise<void> {
         if (!this._clock && !this.isTesting) {
             this._clock = new SharedClock();

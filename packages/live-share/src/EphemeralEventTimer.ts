@@ -7,6 +7,9 @@ import { TimeInterval } from "./TimeInterval";
 import { EphemeralEventSource } from "./EphemeralEventSource";
 import { IEphemeralEvent } from "./interfaces";
 
+/**
+ * Periodically broadcasts an event to listening `EphemeralEventTarget` instances.
+ */
 export class EphemeralEventTimer<T extends IEphemeralEvent> {
     private _eventSource: EphemeralEventSource<T>;
     private _createEvent: () => Partial<T>;
@@ -55,8 +58,9 @@ export class EphemeralEventTimer<T extends IEphemeralEvent> {
      * Immediately sends an event.
      * 
      * @remarks
-     * The `createEvent` callback to construct the event but does not impact any pending timeouts.
-     * Call `start()` after calling `emit()` if you'd like to skip the next timer interval.
+     * The `createEvent` callback to construct the event is called but does not impact any pending 
+     * timeouts. Call `start()` after calling `sendEvent()` if you'd like to skip the next timer 
+     * interval.
      */
     public sendEvent(): void {
         const evt = this._createEvent();

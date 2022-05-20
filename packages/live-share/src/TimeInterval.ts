@@ -3,6 +3,10 @@
  * Licensed under the MIT License.
  */
 
+/**
+ * @hidden
+ * Manages converting time intervals from seconds-to-milliseconds and vice versa.
+ */
 export class TimeInterval {
     private _value: number;
 

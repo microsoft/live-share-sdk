@@ -23,7 +23,7 @@ export interface IEvent {
  */
 export interface IEphemeralEvent extends IEvent {
     /**
-     * Current client ID, if known. The client ID will be `undefined` if teh client is currently disconnected.
+     * Current client ID, if known. The client ID will be `undefined` if the client is currently disconnected.
      */
     clientId?: string;
 
@@ -43,9 +43,24 @@ export type OutgoingEphemeralEvent<TEvent extends IEphemeralEvent> = Omit<TEvent
  * Allowed roles during a meeting.
  */
 export enum UserMeetingRole {
+    /**
+     * The user is an external guest user.
+     */
     guest = 'Guest',
+
+    /**
+     * The user is a standard meeting attendee.
+     */
     attendee = 'Attendee',
+
+    /**
+     * The user has presenter privileges for the meeting.
+     */
     presenter = 'Presenter',
+
+    /**
+     * The user is a meeting organizer.
+     */
     organizer = 'Organizer',
 }
 

@@ -19,6 +19,9 @@ import { EphemeralEvent } from './EphemeralEvent';
  * Events supported by `EphemeralPresence` object.
  */
 export enum EphemeralPresenceEvents {
+    /**
+     * The presence for the local or a remote user has changed.
+     */
     presenceChanged = 'presenceChanged'
 }
 

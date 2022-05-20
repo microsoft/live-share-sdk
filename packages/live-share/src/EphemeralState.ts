@@ -17,6 +17,9 @@ import { EphemeralObjectSynchronizer } from './EphemeralObjectSynchronizer';
  * Events supported by `EphemeralState` object.
  */
 export enum EphemeralStateEvents {
+    /**
+     * The objects state has changed.
+     */
     stateChanged = 'stateChanged'
 }
 

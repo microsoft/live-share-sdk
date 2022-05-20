@@ -21,20 +21,10 @@ import {
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { EphemeralEvent } from "./EphemeralEvent";
 
-let interactive: typeof import('@microsoft/teams-js');
-
 /**
- * Information from a tabs `microsoftTeams.Context` object, needed to connect to  the fluid 
- * container for a meeting.
+ * Options used to configure the [[TeamsFluidClient]] class.
  */
-export interface IMeetingContext {
-    /**
-     * Meeting Id used by tab when running in meeting context
-     */
-    meetingId?: string;
-}
-
-export interface TeamsFluidClientProps {
+export interface ITeamsFluidClientOptions {
     /**
      * Optional. Configuration to use when connecting to a custom Azure Fluid Relay instance.
      */
@@ -48,19 +38,21 @@ export interface TeamsFluidClientProps {
     /**
      * Optional. Function to lookup the ID of the container to use for local testing. 
      * 
-     * @remarks
+     * #### remarks
      * The default implementation attempts to retrieve the containerId from the `window.location.hash`. 
      * 
      * If the function returns 'undefined' a new container will be created.
+     * @returns ID of the container to connect to or `undefined` if a new container should be created.
      */
     readonly getLocalTestContainerId?: () => string|undefined;
 
     /**
      * Optional. Function to save the ID of a newly created local test container. 
      * 
-     * @remarks
+     * #### remarks
      * The default implementation updates `window.location.hash` with the ID of the newly created 
-     * container. 
+     * container.
+     * @param containerId The ID of the container that was created.
      */
      readonly setLocalTestContainerId?: (containerId: string) => void;
 }
@@ -71,24 +63,24 @@ export interface TeamsFluidClientProps {
  */
 export class TeamsFluidClient {
     private _teamsClient?: TeamsClientApi;
-    private readonly _props: TeamsFluidClientProps;
+    private readonly _options: ITeamsFluidClientOptions;
     private _clock?: SharedClock;
     private _roleVerifier?: RoleVerifier;
 
     /**
      * Creates a new `TeamsFluidClient` instance.
-     * @param props Configuration options for the client. 
+     * @param options Configuration options for the client. 
      */
-    constructor(props?: TeamsFluidClientProps) {
+    constructor(options?: ITeamsFluidClientOptions) {
         // Save props
-        this._props = Object.assign({} as TeamsFluidClientProps, props);
+        this._options = Object.assign({} as ITeamsFluidClientOptions, options);
     }
 
     /**
      * If true the client is configured to use a local test server.
      */
     public get isTesting(): boolean {
-        return this._props.connection?.tenantId == LOCAL_MODE_TENANT_ID;
+        return this._options.connection?.tenantId == LOCAL_MODE_TENANT_ID;
     }
 
     /**
@@ -100,7 +92,7 @@ export class TeamsFluidClient {
     /**
      * Connects to the fluid container for the current teams context.
      * 
-     * @remarks
+     * #### remarks
      * The first client joining the container will create the container resulting in the 
      * `onContainerFirstCreated` callback being called. This callback can be used to set the initial
      * state of of the containers object prior to the container being attached.
@@ -122,7 +114,7 @@ export class TeamsFluidClient {
             const pTimestampProvider = this.initializeTimestampProvider();
 
             // Initialize FRS connection config 
-            let config: AzureConnectionConfig | undefined = this._props.connection;
+            let config: AzureConnectionConfig | undefined = this._options.connection;
             if (!config) {
                 const frsTenantInfo = await teamsClient.interactive.getFluidTenantInfo();
                 console.log(`getFLuidTenantInfo: ${JSON.stringify(frsTenantInfo)}`);
@@ -137,7 +129,7 @@ export class TeamsFluidClient {
             // Create FRS client
             const client = new AzureClient({
                 connection: config,
-                logger: this._props.logger
+                logger: this._options.logger
             });
 
             // Create container on first access
@@ -275,7 +267,7 @@ export class TeamsFluidClient {
             if (window && !this.isTesting) {
                 this._teamsClient = (await import('@microsoft/teams-js') as any) as TeamsClientApi;
             } else {
-                this._teamsClient = new TestTeamsClientApi(this._props.getLocalTestContainerId, this._props.setLocalTestContainerId);
+                this._teamsClient = new TestTeamsClientApi(this._options.getLocalTestContainerId, this._options.setLocalTestContainerId);
             }
         }
 

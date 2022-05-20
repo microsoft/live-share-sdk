@@ -64,8 +64,8 @@ export class EphemeralPresenceUser<TData = object> {
     /**
      * Users current state.
      * 
-     * @remarks
-     * This is automatically set to `PresenceState.offline` if the users client hasn't sent updates 
+     * #### remarks
+     * This is automatically set to [[PresenceState.offline]] if the users client hasn't sent updates 
      * for a period of time.
      */
     public get state(): PresenceState {

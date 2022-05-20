@@ -14,7 +14,7 @@ import { EphemeralEvent } from './EphemeralEvent';
 import { EphemeralObjectSynchronizer } from './EphemeralObjectSynchronizer';
 
 /**
- * Events supported by `EphemeralState` object.
+ * Events supported by [EphemeralState]] object.
  */
 export enum EphemeralStateEvents {
     /**
@@ -24,17 +24,25 @@ export enum EphemeralStateEvents {
 }
 
 /**
- * `EphemeralState` event typings.
+ * Event typings for [[EphemeralState]] class.
  * @template TData Optional data object that's synchronized with the state.
  */
 export interface IEphemeralStateEvents<TData = undefined> extends IEvent {
-    (event: 'stateChanged', listener: (state: string, data: TData|undefined) => void, local: boolean): any;
+    /**
+     * An [[EphemeralState]] objects state has changed.
+     * @param event Name of event.
+     * @param listener Function called when event is triggered.
+     * @param listener.state The new state. Can be the same as the previous state. 
+     * @param listener.data Optional data object for the new state.
+     * @param listener.local If true, a local state change occurred.
+     */
+     (event: 'stateChanged', listener: (state: string, data: TData|undefined, local: boolean) => void): any;
 }
 
 /**
  * Ephemeral fluid object that synchronizes a named state and optional data value across clients.
  * 
- * @remarks
+ * #### remarks
  * The primary benefit of using the `EphemeralState` object in a Teams meeting, versus something 
  * like a `SharedMap`, is that you can restrict the roles of who's allowed to perform state 
  * changes.

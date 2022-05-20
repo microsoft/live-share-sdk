@@ -8,5 +8,6 @@
     "excludePrivate": true,
     "excludeInternal": true,
     "out": "docs",
-    "name": "Microsoft Live Share SDK"
+    "name": "Microsoft Live Share SDK",
+    "listInvalidSymbolLinks": true
 }

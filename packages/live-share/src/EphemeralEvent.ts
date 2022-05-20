@@ -12,7 +12,7 @@ import { EphemeralEventTarget } from './EphemeralEventTarget';
 import { LocalRoleVerifier } from './LocalRoleVerifier';
 
 /**
- * Events supported by `EphemeralEvent` object.
+ * Events supported by [[EphemeralEvent]] object.
  */
 export enum EphemeralEventEvents {
     /**
@@ -22,7 +22,7 @@ export enum EphemeralEventEvents {
 }
 
 /**
- * `EphemeralEvent` event typings.
+ * Event typings for [[EphemeralEvent]] class.
  * @template TEvent Type of event to broadcast.
  */
 export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends IEvent {
@@ -40,11 +40,11 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
  * Ephemeral fluid object that broadcasts an event to other clients and a set of static event 
  * related helpers.
  * 
- * @remarks
+ * #### remarks
  * Applications should call `on('received', (evt, local) => {})` to listen for local events sent 
  * and remote events received. Events aren't guaranteed to be delivered so you should limit their 
  * use to sending events you're ok with potentially being missed. Reactions are a good use case for
- * `EphemeralEvents`. Use something like the `EphemeralState` class when syncing state. 
+ * `EphemeralEvents`. Use something like the [[EphemeralState]] class when syncing state. 
  * @template TEvent Type of event to broadcast.
  */
  export class EphemeralEvent<TEvent extends IEphemeralEvent = IEphemeralEvent> extends DataObject<{Events: IEphemeralEventEvents<TEvent>}> {
@@ -95,7 +95,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
     /**
      * Broadcasts an event to all other clients.
      * 
-     * @remarks
+     * #### remarks
      * The event will be queued for delivery if the client isn't currently connected.
      * @param evt Optional. Event to send. If omitted, an event will still be sent but it won't 
      * include any custom event data. 
@@ -140,7 +140,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
     /**
      * Returns true if a received event is newer then the current event.
      * 
-     * @remarks
+     * #### remarks
      * Used when building new Ephemeral objects to process state change events. The `isNewer()` 
      * method implements an algorithm that deals with conflicting events that have the same timestamp
      * and older events that should have debounced the current event.

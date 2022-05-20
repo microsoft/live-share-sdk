@@ -33,7 +33,7 @@ export interface IRuntimeSignaler {
 /**
  * Object responsible for sending and receiving ephemeral events.
  * 
- * @remarks
+ * #### remarks
  * Ephemeral objects send and receive events using an event scope. Event scopes can be restricted
  * to only receive events from clients with specific roles. Any events that are received from 
  * clients without an allowed role type will be ignored.
@@ -133,9 +133,11 @@ export class EphemeralEventScope extends TypedEventEmitter<IErrorEvent> {
      * Sends an event to other event scope instances for the Fluid object.
      * @template TEvent Type of event to send.
      * @param eventName Name of the event to send.
-     * @param evt Optional. Partial event object to send. The `name`, `timestamp`, and `clientId` 
+     * @param evt Optional. Partial event object to send. The [[IEphemeralEvent.name]], 
+     * [[IEphemeralEvent.timestamp]], and [[IEphemeralEvent.clientId]] 
      * fields will be automatically populated prior to sending.
-     * @returns The full event, including `name`, `timestamp`, and `clientId` fields if known.
+     * @returns The full event, including [[IEphemeralEvent.name]], 
+     * [[IEphemeralEvent.timestamp]], and [[IEphemeralEvent.clientId]] fields if known.
      */
     public sendEvent<TEvent extends IEphemeralEvent>(eventName: string, evt: Partial<TEvent> = {}): TEvent {
         // Clone passed in event and fill out required props.

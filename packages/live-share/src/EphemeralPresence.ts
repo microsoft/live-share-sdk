@@ -16,7 +16,7 @@ import { v4 } from 'uuid';
 import { EphemeralEvent } from './EphemeralEvent';
 
 /**
- * Events supported by `EphemeralPresence` object.
+ * Events supported by [[EphemeralPresence]] object.
  */
 export enum EphemeralPresenceEvents {
     /**
@@ -26,11 +26,18 @@ export enum EphemeralPresenceEvents {
 }
 
 /**
- * `EphemeralPresence` event typings.
+ * Event typings for [[EphemeralPresence]] class.
  * @template TData Type of data object to share with clients.
  */
 export interface IEphemeralPresenceEvents<TData extends object = object> extends IEvent {
-    (event: 'presenceChanged', listener: (user: EphemeralPresenceUser<TData>, local: boolean) => void): any;
+    /**
+     * The presence information for the local or a remote user has changed.
+     * @param event Name of event.
+     * @param listener Function called when event is triggered.
+     * @param listener.user Presence information that changed.
+     * @param listener.local If true the local users presence changed.
+     */
+     (event: 'presenceChanged', listener: (user: EphemeralPresenceUser<TData>, local: boolean) => void): any;
 }
 
 /**
@@ -78,7 +85,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     /**
      * Number of seconds without a presence update before a remote user is considered offline.
      * 
-     * @remarks
+     * #### remarks
      * Defaults to a value of `20` seconds and the minimum value is `1`.
      */
     public get expirationPeriod(): number { 
@@ -114,7 +121,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
      * Starts sharing presence information.
      * @param userId Optional. ID of the local user. Defaults to a GUID if not provided.
      * @param data Optional. Custom data object to share. A deep copy of the data object is saved to avoid any accidental modifications.
-     * @param state Optional. Initial presence state. Defaults to `PresenceState.online`.
+     * @param state Optional. Initial presence state. Defaults to [[PresenceState.online]].
      */
     public async start(userId?: string, data?: TData, state = PresenceState.online): Promise<void> {
         if (this._scope) {
@@ -178,7 +185,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     /**
      * Updates the users presence state and/or shared data object.
      * 
-     * @remarks
+     * #### remarks
      * This will trigger the immediate broadcast of the users presence to all other clients.
      * @param state Optional. Presence state to change.
      * @param data Optional. Data object to change. A deep copy of the data object is saved to avoid any future changes.
@@ -205,6 +212,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     /**
      * Enumerates each user the object is tracking presence for.
      * @param callback Function to call for each user.
+     * @param callback.user Current presence information for a user.
      * @param filter Optional. Presence state to filter enumeration to.
      */
     public forEach(callback: (user: EphemeralPresenceUser<TData>) => void, filter?: PresenceState): void {

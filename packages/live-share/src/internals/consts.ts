@@ -6,7 +6,7 @@
 /**
  * List of telemetry events. 
  * 
- * @remarks
+ * #### remarks
  * Wrap with a call to transmit() if the event should be transmitted to the telemetry service. 
  */
 export const TelemetryEvents = {

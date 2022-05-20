@@ -27,8 +27,8 @@ export type GetSynchronizationState<TState extends object> = (connecting: boolea
 /**
  * Duck type of something that provides the expected signalling functionality at the container level.
  * 
- * @remarks
- * Simplifies the mocks needed to unit test the `EphemeralObjectSynchronizer`. Applications can 
+ * #### remarks
+ * Simplifies the mocks needed to unit test the [[EphemeralObjectSynchronizer]]. Applications can 
  * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
  */
 export interface IContainerRuntimeSignaler {
@@ -41,7 +41,7 @@ export interface IContainerRuntimeSignaler {
  * Synchronizes the underlying state of an ephemeral object with all of the other instances of
  * the object connected to the same container.
  * 
- * @remarks
+ * #### remarks
  * When a synchronizer for a ephemeral object is first created it will broadcast a `"connect"` 
  * message, containing the objects initial state, to all other instances of the object that are 
  * currently running on other clients. Those instances will respond to the sent "connect" message 
@@ -51,8 +51,8 @@ export interface IContainerRuntimeSignaler {
  * in `updateState` callback with the remote objects state and the senders clientId for role 
  * verification purposes. The logic for processing these state updates will vary but implementations
  * will generally want to include a timestamp in their state update so that clients can protect 
- * against out-of-order and delayed updates. Deriving your state update from `IEphemeralEvent` and 
- * using `EphemeralEvent.isNewer()` to compare the received update with the current update makes this
+ * against out-of-order and delayed updates. Deriving your state update from [[IEphemeralEvent]] and 
+ * using [[EphemeralEvent.isNewer]] to compare the received update with the current update makes this
  * simple.
  * 
  * Once the initial "connect" event is sent, the synchronizer will periodically broadcast additional 
@@ -78,7 +78,7 @@ export class EphemeralObjectSynchronizer<TState extends object> {
     /**
      * Creates a new `EphemeralObjectSynchronizer` instance.
      * 
-     * @remarks
+     * #### remarks
      * Consumers should subscribe to the synchronizers `"received"` event to process the remote 
      * state updates being sent by other instances of the ephemeral object.
      * @param id ID of the ephemeral object being synchronized. This should be the value of `this.id` in a class that derives from `DataObject`.
@@ -96,7 +96,7 @@ export class EphemeralObjectSynchronizer<TState extends object> {
     /**
      * Disposes of the synchronizer.
      * 
-     * @remarks
+     * #### remarks
      * All synchronization for the container will stop once the last instance has been disposed of.
      */
     public dispose(): void {
@@ -109,7 +109,7 @@ export class EphemeralObjectSynchronizer<TState extends object> {
     /**
      * Sets the rate at which state updates are broadcast in milliseconds.
      * 
-     * @remarks
+     * #### remarks
      * Defaults to `2000` or once every 2 seconds. 
      */
     static updateInterval = 2000;

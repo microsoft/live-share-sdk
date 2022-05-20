@@ -15,6 +15,9 @@ import { EphemeralEventTarget } from './EphemeralEventTarget';
 import { TimeInterval } from './TimeInterval';
 import { EphemeralEvent } from "./EphemeralEvent";
 
+/**
+ * @hidden
+ */
 export interface ITimerState {
     timeStarted: number;
     position: number;
@@ -22,15 +25,24 @@ export interface ITimerState {
     running: boolean;
 }
 
-export interface IBeginTimerEvent extends IEphemeralEvent {
+/**
+ * @hidden
+ */
+ export interface IBeginTimerEvent extends IEphemeralEvent {
     duration: number;
 }
 
-export interface IPlayPauseEvent extends IEphemeralEvent {
+/**
+ * @hidden
+ */
+ export interface IPlayPauseEvent extends IEphemeralEvent {
     position: number;
 }
 
-export class EphemeralTimer extends DataObject<IEphemeralTimerEvents>  {
+/**
+ * @hidden
+ */
+ export class EphemeralTimer extends DataObject<IEphemeralTimerEvents>  {
     private _hasStarted = false;
     private _state?: ITimerState;
     private _beginEvent?: EphemeralEventTarget<IBeginTimerEvent>;

@@ -1,0 +1,79 @@
+<!DOCTYPE html><html class="default"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Microsoft Live Share SDK</title><meta name="description" content="Documentation for Microsoft Live Share SDK"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script async src="assets/search.js" id="search-script"></script></head><body><script>document.body.classList.add(localStorage.getItem("tsd-theme") || "os")</script><header><div class="tsd-page-toolbar"><div class="container"><div class="table-wrap"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget search no-caption">Search</label><input type="text" id="tsd-search-field"/></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">Microsoft Live Share SDK</a></div><div class="table-cell" id="tsd-widgets"><div id="tsd-filter"><a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a><div class="tsd-filter-group"><div class="tsd-select" id="tsd-filter-visibility"><span class="tsd-select-label">All</span><ul class="tsd-select-list"><li data-value="public">Public</li><li data-value="protected">Public/Protected</li><li data-value="private" class="selected">All</li></ul></div> <input type="checkbox" id="tsd-filter-inherited" checked/><label class="tsd-widget" for="tsd-filter-inherited">Inherited</label></div></div><a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a></div></div></div></div><div class="tsd-page-title"><div class="container"><h1> Microsoft Live Share SDK </h1></div></div></header><div class="container container-main"><div class="row"><div class="col-8 col-content"><div class="tsd-panel tsd-typography">
+<a href="#live-share-sdk" id="live-share-sdk" style="color: inherit; text-decoration: none;">
+  <h1>Live Share SDK</h1>
+</a>
+<p>The Live Share SDK is in preview. You will need to be part of the <a href="https://docs.microsoft.com/en-us/microsoftteams/platform/resources/dev-preview/developer-preview-intro">Developer Preview Program</a> for Microsoft Teams to use this feature.</p>
+<p>The Live Share SDK builds on the <a href="https://fluidframework.com/">Fluid Framework</a> to enable the creation of collaborative experiences for Microsoft Teams and M365. This preview version focuses on building collaborative meeting applications for Microsoft Teams using Fluid. The SDK provides a <code>TeamsFluidClient</code> class for connecting to a special Fluid Container associated with each meeting. A collection of Live Share specific Distributed Data Structure classes are also provided to simplify building applications for common meeting scenarios like shared media playback.</p>
+<p>To get started, we recommend first familiarizing yourself with the <a href="https://fluidframework.com/docs/">Fluid Framework</a> and building <a href="https://docs.microsoft.com/en-us/microsoftteams/platform/apps-in-teams-meetings/teams-apps-in-meetings">Teams Meeting Apps</a>. You can then follow our Quick Start Guide to build your first Teams Meeting App that uses Live Share.</p>
+
+<a href="#installing" id="installing" style="color: inherit; text-decoration: none;">
+  <h2>Installing</h2>
+</a>
+<p>To add the latest version of the SDK to your application using NPM:</p>
+<pre><code class="language-bash"><span class="hl-0">$ npm install @microsoft/live-share --save</span>
+</code></pre>
+<p>or using <a href="https://yarnpkg.com/">Yarn</a>:</p>
+<pre><code class="language-bash"><span class="hl-0">$ yarn add @microsoft/live-share</span>
+</code></pre>
+
+<a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
+  <h2>Contributing</h2>
+</a>
+<p>There are several ways you can <a href="./CONTRIBUTING.md">contribute</a> to this project:</p>
+<ul>
+<li><a href="https://github.com/microsoft/live-share-sdk/issues">Submit bugs</a> and help us verify fixes as they are checked in.</li>
+<li>Review the source code changes.</li>
+<li>Engage with other Live Share developers on <a href="https://stackoverflow.com/questions/tagged/live-share">StackOverflow</a>.</li>
+<li><a href="./CONTRIBUTING.md">Contribute bug fixes</a>.</li>
+</ul>
+<p>This project has adopted the <a href="https://opensource.microsoft.com/codeofconduct/">Microsoft Open Source Code of Conduct</a>. For more information see the <a href="https://opensource.microsoft.com/codeofconduct/faq/">Code of Conduct FAQ</a> or contact <a href="mailto:opencode@microsoft.com">opencode@microsoft.com</a> with any additional questions or comments.</p>
+
+<a href="#preparing-the-repository" id="preparing-the-repository" style="color: inherit; text-decoration: none;">
+  <h2>Preparing the Repository</h2>
+</a>
+<p>To clone the repository to test samples and/or build the packages, ensure that you have the latest versions of <a href="https://git-scm.com/downloads">Git</a> and <a href="https://nodejs.org/">Node.js</a> installed.</p>
+<p>Clone a copy of the repo:</p>
+<pre><code class="language-bash"><span class="hl-0">$ git clone https://github.com/microsoft/live-share-sdk.git</span>
+</code></pre>
+<p>Change to the live-share-sdk directory:</p>
+<pre><code class="language-bash"><span class="hl-0">$ </span><span class="hl-1">cd</span><span class="hl-0"> live-share-sdk</span>
+</code></pre>
+
+<a href="#testing-the-samples" id="testing-the-samples" style="color: inherit; text-decoration: none;">
+  <h2>Testing the Samples</h2>
+</a>
+<p>If you aren&#39;t testing local changes to the packages, you can test and build each sample independently. The samples will point to published npm packages.</p>
+<p>Navigate to the sample of your choice:</p>
+<pre><code class="language-bash"><span class="hl-0">$ </span><span class="hl-1">cd</span><span class="hl-0"> samples/01.dice-roller</span>
+</code></pre>
+<p>Install the dependency packages:</p>
+<pre><code class="language-bash"><span class="hl-0">$ npm install</span>
+</code></pre>
+<p>Run the sample:</p>
+<pre><code class="language-bash"><span class="hl-0">$ npm start</span>
+</code></pre>
+<p>For more instructions and information about each sample, reference their respective <code>README.md</code> file.</p>
+<p>Note: Each sample can be tested either locally in the browser or within Teams using ngrok.</p>
+
+<a href="#building-packages-amp-samples" id="building-packages-amp-samples" style="color: inherit; text-decoration: none;">
+  <h2>Building Packages &amp; Samples</h2>
+</a>
+<p>To build the projects packages and samples (with symlinks to the locally built packages), we use Lerna to prevent dependency errors.</p>
+<p>Install all developer dependencies:</p>
+<pre><code class="language-bash"><span class="hl-0">$ npm install</span>
+</code></pre>
+<p>Build packages and samples:</p>
+<pre><code class="language-bash"><span class="hl-0">$ npm run build</span>
+</code></pre>
+<p>Run the sample of of your choice:</p>
+<pre><code class="language-bash"><span class="hl-0">$ </span><span class="hl-1">cd</span><span class="hl-0"> samples/01.dice-roller</span><br/><span class="hl-0">npm start</span>
+</code></pre>
+<p>Unit tests for all of the packages can be run using <code>npm run test</code> or <code>npm run test:debug</code>. Any previously built files can be deleted prior to building by first running <code>npm run clean</code>.</p>
+
+<a href="#reporting-security-issues" id="reporting-security-issues" style="color: inherit; text-decoration: none;">
+  <h2>Reporting Security Issues</h2>
+</a>
+<p>Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at <a href="mailto:secure@microsoft.com">secure@microsoft.com</a>. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the <a href="https://technet.microsoft.com/en-us/security/dn606155">MSRC PGP</a> key, can be found in the <a href="https://technet.microsoft.com/en-us/security/default">Security TechCenter</a>.</p>
+<p>Copyright (c) Microsoft Corporation. All rights reserved.</p>
+<p>Licensed under a special <a href="./LICENSE">Microsoft</a> License.</p>
+</div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Modules</a></li><li class=" tsd-kind-module"><a href="modules/_microsoft_live_share.html">@microsoft/live-<wbr/>share</a></li><li class=" tsd-kind-module"><a href="modules/_microsoft_live_share_media.html">@microsoft/live-<wbr/>share-<wbr/>media</a></li></ul></nav></div></div></div><footer class="with-border-bottom"><div class="container"><h2>Legend</h2><div class="tsd-legend-group"><ul class="tsd-legend"><li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li><li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li><li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li><li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li></ul></div><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="container tsd-generator"><p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div><div class="overlay"></div><script src="assets/main.js"></script></body></html>

@@ -6,11 +6,15 @@
   "scripts": {
     "install": "lerna bootstrap --hoist",
     "clean": "lerna run clean",
-    "build": "lerna run build"
+    "build": "lerna run build",
+    "build:docs": "typedoc"
   },
   "author": "",
   "license": "Microsoft",
   "dependencies": {
     "lerna": "^4.0.0"
+  },
+  "devDependencies": {
+    "typedoc": "^0.22.15"
   }
 }

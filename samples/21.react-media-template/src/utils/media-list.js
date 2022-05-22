@@ -24,14 +24,14 @@ export const searchList = [
     src: "https://livesharemedia-usw22.streaming.media.azure.net/8bf16f5f-d4b0-437b-8121-d780abe744c9/Onboarding_Video11_Final_H264.ism/manifest(format=mpd-time-cmaf,encryption=cbc)",
     type: "video",
   },
-  {
-    id: "2",
-    thumbnailImage:
-      "https://by3302files.storage.live.com/y4mHWAobY6Eko5RrNOulkHfCymSqTxMZSIoivl3uOeNnteXJU2Gq_WY7TKfubdN0kJr04SThB11E_O4x0_sr-ic0v4yY3KE91R-Vv5gSYre76_xwKT7pc1KBl23yIgf3qgKaU2RFRWLF8WpEjoidwxxpSaqsSjhYXHFM26xqHGwUyxO8jobogFVw8RZ4GcIPYTl?width=660&height=374&cropmode=none",
-    title: "Beach 4K",
-    src: "https://livesharemedia-usw22.streaming.media.azure.net/39bd117d-0f75-40d2-8abe-fb7d49cf1157/pexels-ivan-khmelyuk-7222009.ism/manifest(format=mpd-time-cmaf,encryption=cbc)",
-    type: "video",
-  },
+  // {
+  //   id: "2",
+  //   thumbnailImage:
+  //     "https://by3302files.storage.live.com/y4mHWAobY6Eko5RrNOulkHfCymSqTxMZSIoivl3uOeNnteXJU2Gq_WY7TKfubdN0kJr04SThB11E_O4x0_sr-ic0v4yY3KE91R-Vv5gSYre76_xwKT7pc1KBl23yIgf3qgKaU2RFRWLF8WpEjoidwxxpSaqsSjhYXHFM26xqHGwUyxO8jobogFVw8RZ4GcIPYTl?width=660&height=374&cropmode=none",
+  //   title: "Beach 4K",
+  //   src: "https://livesharemedia-usw22.streaming.media.azure.net/39bd117d-0f75-40d2-8abe-fb7d49cf1157/pexels-ivan-khmelyuk-7222009.ism/manifest(format=mpd-time-cmaf,encryption=cbc)",
+  //   type: "video",
+  // },
   {
     id: "3",
     thumbnailImage:

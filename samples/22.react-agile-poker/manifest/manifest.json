@@ -2,18 +2,18 @@
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
     "version": "1.0.0",
     "manifestVersion": "1.12",
-    "id": "ba45b0c9-8f12-45b0-9b86-179b3352bb19",
-    "packageName": "com.microsoft.agilepoker",
+    "id": "<<YOUR-MICROSOFT-APP-ID>>",
+    "packageName": "com.microsoft.teams.livesharereactagilepoker",
     "name": {
         "short": "Agile Poker",
         "full": "Agile Poker"
     },
     "developer": {
-        "name": "Microsoft Corporation",
+        "name": "Your name here",
         "mpnId": "",
-        "websiteUrl": "https://microsoft.com",
-        "privacyUrl": "https://www.microsoft.com/privacy",
-        "termsOfUseUrl": "https://www.microsoft.com/termsofuse"
+        "websiteUrl": "https://www.example.com",
+        "privacyUrl": "https://www.example.com/PrivacyStatement",
+        "termsOfUseUrl": "https://www.example.com/TermsOfUse"
     },
     "description": {
         "short": "Cost user stories with this fun agile poker planning game!",

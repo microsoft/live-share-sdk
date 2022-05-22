@@ -2,18 +2,18 @@
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
     "version": "1.0.1",
     "manifestVersion": "1.12",
-    "id": "6f55d89d-bc7b-4514-9fd1-1edc35a3d98d",
-    "packageName": "com.microsoft.contoso",
+    "id": "<<YOUR-MICROSOFT-APP-ID>>",
+    "packageName": "com.microsoft.teams.livesharereactmediatemplate",
     "name": {
         "short": "Contoso Media",
         "full": "Contoso Media"
     },
     "developer": {
-        "name": "Microsoft Corporation",
+        "name": "Your name here",
         "mpnId": "",
-        "websiteUrl": "https://www.microsoft.com",
-        "privacyUrl": "https://www.microsoft.com/privacy",
-        "termsOfUseUrl": "https://teams.microsoft.com/termsofuse"
+        "websiteUrl": "https://www.example.com",
+        "privacyUrl": "https://www.example.com/PrivacyStatement",
+        "termsOfUseUrl": "https://www.example.com/TermsOfUse"
     },
     "description": {
         "short": "Watch amazing stock videos with colleagues",

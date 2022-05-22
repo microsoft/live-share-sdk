@@ -8,16 +8,32 @@ To get started, we recommend first familiarizing yourself with the [Fluid Framew
 
 ## Installing
 
+### Live Share
+
 To add the latest version of the SDK to your application using NPM:
 
 ```bash
-$ npm install @microsoft/live-share --save
+npm install @microsoft/live-share --save
 ```
 
 or using [Yarn](https://yarnpkg.com/):
 
 ```bash
-$ yarn add @microsoft/live-share
+yarn add @microsoft/live-share
+```
+
+### Live Share Media
+
+Optionally, to add the latest version of the media package to your application using NPM:
+
+```bash
+npm install @microsoft/live-share-media --save
+```
+
+or using [Yarn](https://yarnpkg.com/):
+
+```bash
+yarn add @microsoft/live-share-media
 ```
 
 ## Contributing
@@ -38,68 +54,46 @@ To clone the repository to test samples and/or build the packages, ensure that y
 Clone a copy of the repo:
 
 ```bash
-$ git clone https://github.com/microsoft/live-share-sdk.git
+git clone https://github.com/microsoft/live-share-sdk.git
 ```
 
 Change to the live-share-sdk directory:
 
 ```bash
-$ cd live-share-sdk
+cd live-share-sdk
 ```
-
-## Testing the Samples
-
-If you aren't testing local changes to the packages, you can test and build each sample independently. The samples will point to published npm packages.
-
-Navigate to the sample of your choice:
-
-```bash
-$ cd samples/01.dice-roller
-```
-
-Install the dependency packages:
-
-```bash
-$ npm install
-```
-
-Run the sample:
-
-```bash
-$ npm start
-```
-
-For more instructions and information about each sample, reference their respective `README.md` file.
-
-Note: Each sample can be tested either locally in the browser or within Teams using ngrok.
-
 
 ## Building Packages & Samples
 
-To build the projects packages and samples (with symlinks to the locally built packages), we use Lerna to prevent dependency errors.
+To build the projects packages (with symlinks to the locally built packages), we use Lerna to prevent dependency errors.
 
 Install all developer dependencies:
 
 ```bash
-$ npm install
+npm install
 ```
 
-Build packages and samples:
+Build packages:
 
 ```bash
-$ npm run build
-```
-
-Run the sample of of your choice:
-
-```bash
-$ cd samples/01.dice-roller
-npm start
+npm run build
 ```
 
 Unit tests for all of the packages can be run using `npm run test` or `npm run test:debug`. Any previously built files can be deleted prior to building by first running `npm run clean`.
 
+## Code samples
+
+There are several code samples that are hosted in a separate GitHub repository.
+
+| Sample name          | Description                                                                                                                               | Javascript                                     |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Dice Roller          | Enable all connected clients to roll a dice and view the result.                                                                          | [View](https://aka.ms/liveshare-diceroller)    |
+| Agile Poker          | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](https://aka.ms/liveshare-agilepoker)    |
+| React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](https://aka.ms/liveshare-reactvideo)    |
+| React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](https://aka.ms/liveshare-mediatemplate) |
+
 ## Reporting Security Issues
+
 Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
 
 Copyright (c) Microsoft Corporation. All rights reserved.

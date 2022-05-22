@@ -1,8 +1,24 @@
-# Teams Fluid Extension
+# Microsoft Live Share
 
 Easily create a collaboration app in Teams with [Fluid Framework](https://fluidframework.com/).
 
+## Installing
+
+To add the latest version of the SDK to your application using NPM:
+
+```bash
+npm install @microsoft/live-share --save
+```
+
+or using [Yarn](https://yarnpkg.com/):
+
+```bash
+yarn add @microsoft/live-share
+```
+
 ## Building the extension
+
+After cloning the [GitHub repository](https://www.github.com/microsoft/live-share-sdk), navigate to the root folder and perform:
 
 ```bash
 npm install --legacy-peer-dep
@@ -10,8 +26,6 @@ npm run build
 ```
 
 This will use lerna to hoist and build all dependencies.
-
-Copy over the binaries (\*.tar.gz) file over to your repo and reference it in you package reference for "@microsoft/live-share".
 
 ## How to use this extension
 
@@ -41,5 +55,30 @@ const { container } = await client.joinContainer(schema);
 ...
 // listen to and send events on container.initialObjects.<DDS>
 ...
-
 ```
+
+## Code samples
+
+| Sample name          | Description                                                                                                                               | Javascript                                     |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Dice Roller          | Enable all connected clients to roll a dice and view the result.                                                                          | [View](https://aka.ms/liveshare-diceroller)    |
+| Agile Poker          | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](https://aka.ms/liveshare-agilepoker)    |
+
+## Contributing
+
+There are several ways you can [contribute](../../CONTRIBUTING.md) to this project:
+
+- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+- Review the source code changes.
+- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+- [Contribute bug fixes](../../CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.
+
+## Reporting Security Issues
+
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+Licensed under a special [Microsoft](../../LICENSE) License.

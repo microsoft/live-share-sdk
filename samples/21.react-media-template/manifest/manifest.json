@@ -54,14 +54,6 @@
                     "type": "Delegated"
                 },
                 {
-                    "name": "OnlineMeetingIncomingAudio.Detect.Chat",
-                    "type": "Delegated"
-                },
-                {
-                    "name": "ChannelOnlineMeetingIncomingAudio.Detect.Group",
-                    "type": "Delegated"
-                },
-                {
                     "name": "LiveShareSession.ReadWrite.Chat",
                     "type": "Delegated"
                 },

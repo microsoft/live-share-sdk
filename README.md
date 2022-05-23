@@ -101,4 +101,6 @@ Security issues and bugs should be reported privately, via email, to the Microso
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-Licensed under a special [Microsoft](./LICENSE) License.
+Live Share packages are licensed under a special [Microsoft Live Share SDK license](./LICENSE).
+
+Code samples are licensed separately under [MIT license](./samples/LICENSE).

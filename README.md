@@ -42,8 +42,8 @@ yarn add @microsoft/live-share-media
 
 There are several ways you can [contribute](./CONTRIBUTING.md) to this project:
 
-- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in. 
-  - ## (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
+- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+  - (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
 - Review the source code changes.
 - Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
 - [Contribute bug fixes](./CONTRIBUTING.md).

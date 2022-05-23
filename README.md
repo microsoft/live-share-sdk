@@ -83,7 +83,7 @@ To build the projects packages (with symlinks to the locally built packages), we
 Install all developer dependencies:
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
 
 Build packages and samples:

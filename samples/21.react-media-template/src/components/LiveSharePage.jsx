@@ -1,5 +1,5 @@
 import { Text } from "@fluentui/react-components";
-import { Spinner } from "@fluentui/react-components/unstable";
+import { Spinner } from "@fluentui/react-components";
 import { useMemo } from "react";
 import { FlexColumn } from "./flex";
 

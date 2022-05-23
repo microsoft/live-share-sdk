@@ -5,7 +5,7 @@
 
 import { mergeClasses } from "@fluentui/react-components";
 import { getFlexItemStyles, getFlexRowStyles } from "../styles/layouts";
-import { TabList, Tab } from "@fluentui/react-components/unstable";
+import { TabList, Tab } from "@fluentui/react-components";
 import { MediaCard } from "./MediaCard";
 import { useMemo, useState } from "react";
 

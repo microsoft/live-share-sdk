@@ -8,6 +8,16 @@ To get started, we recommend first familiarizing yourself with the [Fluid Framew
 
 You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
 
+## Package Compatibility
+
+The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.npmjs.com/package/@microsoft/teams-js) and [fluid-framework](https://www.npmjs.com/package/fluid-framework) packages among others. Both of these packages are sensitive to the package version your app any libraries use. You will likely run into issues if the package version your app uses doesn't match the version otehr libraries you depend on use.
+
+**It is critical that your app use the package dependencies listed in the table below.** Lookup the version of the `@microsoft/live-share-sdk` you're using and set any dependencies for `@microsoft/teams-js` or `fluid-framework` in your package.json file to match:
+
+| @microsoft/live-share | @microsoft/teams-js   | fluid-framework |
+| --------------------- | --------------------- | --------------- |
+| ~0.2.0                | ~2.0.0-experimental.0 | ~0.59.0         |
+
 ## Installing
 
 ### Live Share
@@ -73,7 +83,7 @@ To build the projects packages (with symlinks to the locally built packages), we
 Install all developer dependencies:
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
 
 Build packages and samples:

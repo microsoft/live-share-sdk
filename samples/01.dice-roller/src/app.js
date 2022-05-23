@@ -5,7 +5,7 @@
 
 import { SharedMap } from "fluid-framework";
 import { TeamsFluidClient } from "@microsoft/live-share";
-import { app, pages, Context } from "@microsoft/teams-js";
+import { app, pages } from "@microsoft/teams-js";
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 
@@ -175,7 +175,6 @@ function renderSettings(elem) {
 
     // Enable the Save button in config dialog
     pages.config.setValidityState(true);
-
 }
 
 

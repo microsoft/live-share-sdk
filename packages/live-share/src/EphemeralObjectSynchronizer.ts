@@ -5,8 +5,6 @@
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 
-const UPDATE_INTERVAL = 15000;
-
 /**
  * Callback function used to the get the current state of an ephemeral object that's being
  * synchronized.
@@ -107,6 +105,8 @@ export class EphemeralObjectSynchronizer<TState extends object> {
             EphemeralObjectSynchronizer.unregisterObject(this._containerRuntime, this._id);
         }
     }
+
+    public static updateInterval = 15000;
 
     private static _synchronizers = new Map<any, ContainerSynchronizer>();
 
@@ -211,7 +211,7 @@ class ContainerSynchronizer {
                 } catch (err: any) {
                     console.error(`EphemeralObjectSynchronizer: error sending update - ${err.toString()}`);
                 }
-            }, UPDATE_INTERVAL);
+            }, EphemeralObjectSynchronizer.updateInterval);
         }
     }
 

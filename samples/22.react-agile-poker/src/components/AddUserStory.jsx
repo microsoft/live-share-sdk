@@ -7,7 +7,7 @@ import { useState } from "react";
 
 // UI imports:
 import { mergeClasses, Button } from "@fluentui/react-components";
-import { Label } from "@fluentui/react-components/unstable";
+import { Label } from "@fluentui/react-components";
 import { getFlexColumnStyles } from "../styles/layout";
 
 export const AddUserStory = ({ addUserStory }) => {

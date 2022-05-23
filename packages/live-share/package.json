@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "description": "Building colaboritive experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -14,15 +14,15 @@
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
     },
     "dependencies": {
-        "@fluidframework/azure-client": "^0.58.2000",
+        "@fluidframework/azure-client": "~0.59.0",
         "@microsoft/teams-js": "~2.0.0-experimental.0",
-        "fluid-framework": "^0.58.2000",
+        "fluid-framework": "~0.59.0",
         "uuid": "^8.3.2"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": "^0.58.2000",
-        "@fluidframework/test-utils": "^0.58.2000",
-        "@fluidframework/test-version-utils": "^0.58.2000",
+        "@fluidframework/test-runtime-utils": "~0.59.0",
+        "@fluidframework/test-utils": "~0.59.2000",
+        "@fluidframework/test-version-utils": "~0.59.0",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^9.0.0",
         "@types/node": "^10.12.24",

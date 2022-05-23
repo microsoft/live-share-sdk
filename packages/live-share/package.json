@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "@fluidframework/azure-client": "~0.59.0",
-        "@microsoft/teams-js": "~2.0.0-experimental.0",
+        "@microsoft/teams-js": "2.0.0-experimental.0",
         "fluid-framework": "~0.59.0",
         "uuid": "^8.3.2"
     },

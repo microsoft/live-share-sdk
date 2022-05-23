@@ -4,7 +4,10 @@
   "description": "build file for Live Share SDK",
   "main": "index.js",
   "scripts": {
-    "install": "lerna bootstrap --hoist",
+    "install": "npm run hoist",
+    "prehoist": "shx cp package-lock.json package-lock.bak && shx cp -n package-lock.json lerna-package-lock.json && shx rm package-lock.json && shx cp lerna-package-lock.json package-lock.json",
+    "hoist": "lerna bootstrap --hoist",
+    "posthoist": "npx shx cp package-lock.json lerna-package-lock.json && npx shx cp package-lock.bak package-lock.json && npx shx rm package-lock.bak",
     "clean": "lerna run clean",
     "build": "lerna run build",
     "build:docs": "typedoc"
@@ -15,6 +18,8 @@
     "lerna": "^4.0.0"
   },
   "devDependencies": {
-    "typedoc": "^0.22.15"
+    "shx": "^0.3.4",
+    "typedoc": "^0.22.15",
+    "typescript": "^4.6.4"
   }
 }

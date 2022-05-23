@@ -7,6 +7,7 @@ import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
+import { EphemeralObjectSynchronizer } from "../EphemeralObjectSynchronizer";
 import { EphemeralState } from "../EphemeralState";
 import { Deferred } from './Deferred';
 
@@ -18,6 +19,10 @@ describeNoCompat("EphemeralState", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
     let object1: EphemeralState<TestStateData>;
     let object2: EphemeralState<TestStateData>;
+
+    // Temporarily change update interval
+    before(() => EphemeralObjectSynchronizer.updateInterval = 20);
+    after(() => EphemeralObjectSynchronizer.updateInterval = 15000);
 
     beforeEach(async () => {
         provider = getTestObjectProvider();

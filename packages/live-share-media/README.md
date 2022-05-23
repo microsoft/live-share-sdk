@@ -4,6 +4,8 @@ Easily add media synchronization to your Teams meeting app, powered by [Fluid Fr
 
 This package is an extension of Microsoft Live Share, and requires the `@microsoft/live-share` extension. You can find it on NPM [here](https://www.npmjs.com/package/@microsoft/live-share).
 
+You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
+
 ## Installing
 
 To add the latest version of the SDK to your application using NPM:

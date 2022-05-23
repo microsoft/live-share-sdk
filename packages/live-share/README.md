@@ -2,6 +2,8 @@
 
 Easily create a collaboration app in Teams with [Fluid Framework](https://fluidframework.com/).
 
+You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
+
 ## Installing
 
 To add the latest version of the SDK to your application using NPM:

@@ -6,6 +6,8 @@ The Live Share SDK builds on the [Fluid Framework](https://fluidframework.com/) 
 
 To get started, we recommend first familiarizing yourself with the [Fluid Framework](https://fluidframework.com/docs/) and building [Teams Meeting Apps](https://docs.microsoft.com/en-us/microsoftteams/platform/apps-in-teams-meetings/teams-apps-in-meetings). You can then follow our Quick Start Guide to build your first Teams Meeting App that uses Live Share.
 
+You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
+
 ## Installing
 
 ### Live Share

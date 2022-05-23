@@ -60,6 +60,14 @@
                 {
                     "name": "LiveShareSession.ReadWrite.Group",
                     "type": "Delegated"
+                },
+                {
+                    "name": "OnlineMeetingIncomingAudio.Detect.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "“OnlineMeetingIncomingAudio.Detect.Group",
+                    "type": "Delegated"
                 }
             ]
         }

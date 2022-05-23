@@ -24,3 +24,5 @@ yarn-error.log*
 
 .npmrc
 azcopy.exe
+
+package-lock.json

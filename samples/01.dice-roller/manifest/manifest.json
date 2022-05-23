@@ -2,8 +2,8 @@
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
     "version": "1.0.1",
     "manifestVersion": "1.12",
-    "id": "86dd7ae7-7a3e-4ba1-a68a-7ce9fbbec61b",
-    "packageName": "com.package.name",
+    "id": "<<YOUR-MICROSOFT-APP-ID>>",
+    "packageName": "com.microsoft.teams.livesharediceroller",
     "name": {
         "short": "DiceRollerLiveShre",
         "full": "Dice Roller Live Share"
@@ -50,14 +50,6 @@
                 },
                 {
                     "name": "ChannelMeetingStage.Write.Group",
-                    "type": "Delegated"
-                },
-                {
-                    "name": "OnlineMeetingIncomingAudio.Detect.Chat",
-                    "type": "Delegated"
-                },
-                {
-                    "name": "ChannelOnlineMeetingIncomingAudio.Detect.Group",
                     "type": "Delegated"
                 },
                 {

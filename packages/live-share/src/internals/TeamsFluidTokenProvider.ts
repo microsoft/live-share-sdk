@@ -1,6 +1,6 @@
 /*!
  * Copyright (c) Microsoft Corporation and contributors. All rights reserved.
- * Licensed under the MIT License.
+ * Licensed under the Microsoft Live Share SDK License.
  */
 
 import { ITokenProvider, ITokenResponse } from "@fluidframework/routerlicious-driver";

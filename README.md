@@ -6,18 +6,36 @@ The Live Share SDK builds on the [Fluid Framework](https://fluidframework.com/) 
 
 To get started, we recommend first familiarizing yourself with the [Fluid Framework](https://fluidframework.com/docs/) and building [Teams Meeting Apps](https://docs.microsoft.com/en-us/microsoftteams/platform/apps-in-teams-meetings/teams-apps-in-meetings). You can then follow our Quick Start Guide to build your first Teams Meeting App that uses Live Share.
 
+You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
+
 ## Installing
+
+### Live Share
 
 To add the latest version of the SDK to your application using NPM:
 
 ```bash
-$ npm install @microsoft/live-share --save
+npm install @microsoft/live-share --save
 ```
 
 or using [Yarn](https://yarnpkg.com/):
 
 ```bash
-$ yarn add @microsoft/live-share
+yarn add @microsoft/live-share
+```
+
+### Live Share Media
+
+Optionally, to add the latest version of the media package to your application using NPM:
+
+```bash
+npm install @microsoft/live-share-media --save
+```
+
+or using [Yarn](https://yarnpkg.com/):
+
+```bash
+yarn add @microsoft/live-share-media
 ```
 
 ## Contributing
@@ -25,6 +43,7 @@ $ yarn add @microsoft/live-share
 There are several ways you can [contribute](./CONTRIBUTING.md) to this project:
 
 - [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+  - (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
 - Review the source code changes.
 - Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
 - [Contribute bug fixes](./CONTRIBUTING.md).
@@ -38,70 +57,59 @@ To clone the repository to test samples and/or build the packages, ensure that y
 Clone a copy of the repo:
 
 ```bash
-$ git clone https://github.com/microsoft/live-share-sdk.git
+git clone https://github.com/microsoft/live-share-sdk.git
 ```
 
 Change to the live-share-sdk directory:
 
 ```bash
-$ cd live-share-sdk
+cd live-share-sdk
 ```
-
-## Testing the Samples
-
-If you aren't testing local changes to the packages, you can test and build each sample independently. The samples will point to published npm packages.
-
-Navigate to the sample of your choice:
-
-```bash
-$ cd samples/01.dice-roller
-```
-
-Install the dependency packages:
-
-```bash
-$ npm install
-```
-
-Run the sample:
-
-```bash
-$ npm start
-```
-
-For more instructions and information about each sample, reference their respective `README.md` file.
-
-Note: Each sample can be tested either locally in the browser or within Teams using ngrok.
-
 
 ## Building Packages & Samples
 
-To build the projects packages and samples (with symlinks to the locally built packages), we use Lerna to prevent dependency errors.
+To build the projects packages (with symlinks to the locally built packages), we use Lerna to prevent dependency errors.
 
 Install all developer dependencies:
 
 ```bash
-$ npm install
+npm install
 ```
 
 Build packages and samples:
 
 ```bash
-$ npm run build
+npm run build
 ```
 
 Run the sample of of your choice:
 
 ```bash
-$ cd samples/01.dice-roller
+cd samples/01.dice-roller
 npm start
 ```
 
 Unit tests for all of the packages can be run using `npm run test` or `npm run test:debug`. Any previously built files can be deleted prior to building by first running `npm run clean`.
 
+## Code samples
+
+There are several code samples available to use:
+
+| Sample name          | Description                                                                                                                               | Javascript                                          |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Dice Roller          | Enable all connected clients to roll a dice and view the result.                                                                          | [View](./samples/01.dice-roller/README.md)          |
+| React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](./samples/02.react-video/README.md)          |
+| React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](./samples/21.react-media-template/README.md) |
+| Agile Poker          | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](./samples/22.react-agile-poker/README.md)    |
+
 ## Reporting Security Issues
+
 Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+
+## Licensing & Copyright
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-Licensed under a special [Microsoft](./LICENSE) License.
+Live Share packages are licensed under a special [Microsoft Live Share SDK license](./LICENSE).
+
+Code samples are licensed separately under [MIT license](./samples/LICENSE).

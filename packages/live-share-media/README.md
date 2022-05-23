@@ -1,10 +1,30 @@
-# Typescript Teams Collaboration SDK
+# Microsoft Live Share Media
 
-This will be the future home of the TypeScript SDK. For now, enjoy some contracts for the communication protocol!
+Easily add media synchronization to your Teams meeting app, powered by [Fluid Framework](https://fluidframework.com/).
 
-# Building SDK
+This package is an extension of Microsoft Live Share, and requires the `@microsoft/live-share` extension. You can find it on NPM [here](https://www.npmjs.com/package/@microsoft/live-share).
 
-Navigate to the `/javascript` folder and perform:
+You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
+
+## Installing
+
+To add the latest version of the SDK to your application using NPM:
+
+```bash
+npm install @microsoft/live-share --save
+npm install @microsoft/live-share-media --save
+```
+
+or using [Yarn](https://yarnpkg.com/):
+
+```bash
+yarn add @microsoft/live-share
+yarn add @microsoft/live-share-media
+```
+
+## Building package
+
+After cloning the [GitHub repository](https://www.github.com/microsoft/live-share-sdk), navigate to the root folder and perform:
 
 ```bash
 npm install --legacy-peer-dep
@@ -13,98 +33,94 @@ npm run build
 
 This will use lerna to hoist and build all dependencies.
 
-## Basic implementation example
+## How to use this extension
 
-3PP App gets loaded with:
-
-> https://3ppApp.com/playback#teamsCollab=1&teamsCollabToken=eyasdfasdf&teamsCollabSpaceId=call_asdf-asdf-asdf-asdfasdfasd
-
-```typescript
-let mediaPlayer = <yourCode>.player;
-// Get an SDK instance based on a URI or token provided to you
-let collab = CollaborationSDK.initializeFromUri(window.location.origin);
-// let isAuth = await collab.auth.isAuthenticated();
-// let collab = CollaborationSDK.initializeWithToken(keychain.token);
-
-// // Can potentially be removed if we do this check as part of setupSessionHandler.
-// let userState = await collab.getUserState();
-// // internally we do collab.collabSpaceId = userState.collabSpaceId
-// if (!userState) {
-//     // Stop here, no need to connect
-//     // You can check again later with the same sdk instance
-//     return;
-// }
-
-// Connect to the Collab Session.
-let sessionHandler = await collab.setupSessionHandler();
-
-// set up an event listener for session change to connect if a new session gets initiated
-sessionHandler.on('sessionStart', newSession => appSetupSession(newSession));
-sessionHandler.on('sessionEnd', session => appEndSession(session));
-
-let sessions = sessionHandler.getAllSessionsForApp();
-if (session.length === 0) {
-    // No session active, either wait for sessionStart or create a new session right now
-    let session = sessionHandler.createMediaSession(); // A. send post to cloud api to say session has been created; B. SessionCreated event on PPS socket
-    setupSession(session);
-} else {
-    let mediaSession = sessions.find(session => session.type === 'mediaSession');
-    let dataSession = sessions.find(session => session.type === 'dataSession');
-    setupSession(mediaSession, mediaPlayer);
-}
-
-function setupSession(session, mediaPlayer) {
-    const mediaState = session.getState();
-    mediaPlayer.load(mediaState.url);
-
-    // Handle a Collaboration events
-    session.setActionHandler('play', (data, isSelf) => {
-        if (!isSelf) {
-            mediaPlayer.play();
-        }
-    });
-    session.setActionHandler('seek', data => {
-        mediaPlayer.seekTo(data.timestamp);
-    });
-
-    // Handle mediaPlayer events
-    mediaPlayer.on('pause', () => {
-        session.postEvent('pause');
-    });
-    mediaPlayer.on('play', () => {
-        session.postEvent('play');
-    });
-    mediaPlayer.on('positionUpdate', position => {
-        session.setPositionState({ position });
-    });
-}
+```html
+<body>
+  <video id="player">
+    <source src="YOUR_VIDEO_SRC" type="video/mp4" />
+  </video>
+  <div class="player-controls">
+    <button id="play-button">Play</button>
+    <button id="pause-button">Pause</button>
+    <button id="restart-button">Restart</button>
+    <button id="change-track-button">Change track</button>
+  </div>
+</body>
 ```
 
-## Custom Activity handler example
+```javascript
+import * as microsoftTeams from "@microsoft/teams-js";
+import { TeamsFluidClient } from "@microsoft/live-share";
+import { EphemeralMediaSession } from "@microsoft/live-share-media";
 
-```typescript
-async function someCustomCode() {
-  class JamysActivitySession implements IActivitySession<StateDataType> {
-    // Custom code here
-  }
+// Initialize the Teams Client SDK
+await microsoftTeams.app.initialize();
 
-  let sdk: ICollaborationSDK;
-  sdk.defineSessionType("jamysActivitySession", JamysActivitySession);
-  const sessionHandler = await sdk.connectToSession();
+// Setup the Fluid container
+const client = new TeamsFluidClient();
+const schema = {
+  initialObjects: {
+    mediaSession: EphemeralMediaSession,
+    ...,
+  },
+};
+const { container } = await client.joinContainer(schema);
+const { mediaSession } = container.initialObjects;
 
-  // On client A
-  sessionHandler.createSession<JamysActivitySession>("jamysActivitySession");
+// Get the player from your document and create synchronizer
+const player = document.getElementById("player");
+const synchronizer = mediaSession.synchronize(player);
 
-  // on Client B if out of band from receiving the sessionChange
-  sessionHandler.getCurrentSession<JamysActivitySession>(
-    "jamysActivitySession"
-  );
+// Define roles you want to allow playback control and start sync
+const allowedRoles = ["Organizer", "Presenter"];
+await mediaSession.start(allowedRoles);
 
-  // On client C which handles a sessionChange event
-  sessionHandler.on("sessionChange", (event) => {
-    if (event.type === "jamysActivitySession") {
-      const jSession = event.session as JamysActivitySession;
-    }
+// Intercept user play, pause, seek, and set track actions through synchronizer
+
+document.getElementById("play-button").onclick = () => {
+  synchronizer.play();
+};
+
+document.getElementById("pause-button").onclick = () => {
+  synchronizer.pause();
+};
+
+document.getElementById("restart-button").onclick = () => {
+  synchronizer.seekTo(0);
+};
+
+document.getElementById("change-track-button").onclick = () => {
+  synchronizer.setTrack({
+    trackIdentifier: "SOME_OTHER_VIDEO_SRC",
   });
-}
+};
 ```
+
+## Code samples
+
+There are several code samples that are hosted in a separate GitHub repository.
+
+| Sample name          | Description                                                                                                                               | Javascript                                     |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](https://aka.ms/liveshare-reactvideo)    |
+| React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](https://aka.ms/liveshare-mediatemplate) |
+
+## Contributing
+
+There are several ways you can [contribute](../../CONTRIBUTING.md) to this project:
+
+- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+- Review the source code changes.
+- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+- [Contribute bug fixes](../../CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.
+
+## Reporting Security Issues
+
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+Licensed under a special [Microsoft](../../LICENSE) License.

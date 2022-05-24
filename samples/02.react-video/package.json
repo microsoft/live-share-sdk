@@ -7,8 +7,8 @@
   "author": "Microsoft",
   "dependencies": {
     "@fluentui/react-components": "^9.0.0-rc.10",
-    "@microsoft/live-share": "~0.3.0",
-    "@microsoft/live-share-media": "~0.3.0",
+    "@microsoft/live-share": "0.3.0",
+    "@microsoft/live-share-media": "0.3.0",
     "@microsoft/teams-js": "2.0.0-experimental.0",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",

@@ -5,7 +5,7 @@
 
 import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IEvent } from "@fluidframework/common-definitions";
-import { EphemeralEventScope } from './EphemeralEventScope'; 
+import { EphemeralEventScope } from './EphemeralEventScope';
 import { EphemeralEventTarget } from './EphemeralEventTarget';
 import { EphemeralPresenceUser, PresenceState, IEphemeralPresenceEvent } from './EphemeralPresenceUser';
 import { EphemeralObjectSynchronizer } from './EphemeralObjectSynchronizer';
@@ -49,7 +49,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     private _expirationPeriod = new TimeInterval(20000);
     private _users: EphemeralPresenceUser<TData>[] = [];
     private _currentPresence: IEphemeralPresenceEvent<TData> = {
-        name: 'UpdatePresence', 
+        name: 'UpdatePresence',
         timestamp: 0,
         userId: '',
         state: PresenceState.offline,
@@ -84,11 +84,11 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
 
     /**
      * Number of seconds without a presence update before a remote user is considered offline.
-     * 
-     * #### remarks
+     *
+     * @remarks
      * Defaults to a value of `20` seconds and the minimum value is `1`.
      */
-    public get expirationPeriod(): number { 
+    public get expirationPeriod(): number {
         return this._expirationPeriod.seconds;
     }
 
@@ -97,7 +97,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     }
 
     /**
-     * Optional data object shared by the user. 
+     * Optional data object shared by the user.
      */
      public get data(): TData | undefined {
         return cloneValue(this._currentPresence.data);
@@ -184,8 +184,8 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
 
     /**
      * Updates the users presence state and/or shared data object.
-     * 
-     * #### remarks
+     *
+     * @remarks
      * This will trigger the immediate broadcast of the users presence to all other clients.
      * @param state Optional. Presence state to change.
      * @param data Optional. Data object to change. A deep copy of the data object is saved to avoid any future changes.
@@ -196,10 +196,10 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
         }
 
         // Broadcast state change
-        const evt = this._updatePresenceEvent!.sendEvent({ 
+        const evt = this._updatePresenceEvent!.sendEvent({
             userId: this._currentPresence.userId,
-            state: state ?? this._currentPresence.state, 
-            data: cloneValue(data) ?? this._currentPresence.data 
+            state: state ?? this._currentPresence.state,
+            data: cloneValue(data) ?? this._currentPresence.data
         });
 
         // Update local presence immediately
@@ -261,7 +261,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     }
 
     private updateMembersList(evt: IEphemeralPresenceEvent<TData>, local: boolean): void {
-        
+
         const emitEvent = (user: EphemeralPresenceUser<TData>) => {
             this.emit(EphemeralPresenceEvents.presenceChanged, user, local);
             if (local) {

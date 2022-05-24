@@ -9,6 +9,9 @@ import { TeamsClientApi, TestTeamsClientApi } from "./TestTeamsClientApi";
 const SHARED_CLOCK_IMPROVE_ACCURACY_INTERVAL =  5 * 1000;
 const SHARED_CLOCK_IMPROVE_ACCURACY_ATTEMPTS = 5;
 
+/**
+ * @hidden
+ */
 interface IServerTimeOffset {
   offset: number;
   serverTimeInUtc: number;
@@ -16,7 +19,10 @@ interface IServerTimeOffset {
   requestLatency: number;
 }
 
-export class SharedClock implements ITimestampProvider {
+/**
+ * @hidden
+ */
+ export class SharedClock implements ITimestampProvider {
     private _teamsClient?: TeamsClientApi;
     private _serverTime?: IServerTimeOffset;
     private _syncTimer?: any;
@@ -43,7 +49,7 @@ export class SharedClock implements ITimestampProvider {
         //   This can happen if our accuracy improves and we end up with a smaller offset then before.
         return this._lastTimeSent = Math.max(new Date().getTime() + this._serverTime.offset, this._lastTimeSent);
     }
-    
+
 
     /**
      * Starts the clock
@@ -127,5 +133,5 @@ export class SharedClock implements ITimestampProvider {
         }
 
         return this._teamsClient;
-    } 
+    }
 }

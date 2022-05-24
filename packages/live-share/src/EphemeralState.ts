@@ -7,7 +7,7 @@ import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IEvent } from "@fluidframework/common-definitions";
 import { IEphemeralEvent, UserMeetingRole } from "./interfaces";
 import { cloneValue, TelemetryEvents } from './internals';
-import { EphemeralEventScope } from './EphemeralEventScope'; 
+import { EphemeralEventScope } from './EphemeralEventScope';
 import { EphemeralEventTarget } from './EphemeralEventTarget';
 import { EphemeralTelemetryLogger } from './EphemeralTelemetryLogger';
 import { EphemeralEvent } from './EphemeralEvent';
@@ -32,7 +32,7 @@ export interface IEphemeralStateEvents<TData = undefined> extends IEvent {
      * An [[EphemeralState]] objects state has changed.
      * @param event Name of event.
      * @param listener Function called when event is triggered.
-     * @param listener.state The new state. Can be the same as the previous state. 
+     * @param listener.state The new state. Can be the same as the previous state.
      * @param listener.data Optional data object for the new state.
      * @param listener.local If true, a local state change occurred.
      */
@@ -41,10 +41,10 @@ export interface IEphemeralStateEvents<TData = undefined> extends IEvent {
 
 /**
  * Ephemeral fluid object that synchronizes a named state and optional data value across clients.
- * 
- * #### remarks
- * The primary benefit of using the `EphemeralState` object in a Teams meeting, versus something 
- * like a `SharedMap`, is that you can restrict the roles of who's allowed to perform state 
+ *
+ * @remarks
+ * The primary benefit of using the `EphemeralState` object in a Teams meeting, versus something
+ * like a `SharedMap`, is that you can restrict the roles of who's allowed to perform state
  * changes.
  * @template TData Optional data object that's synchronized with the state.
  */
@@ -85,7 +85,7 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
     }
 
     /**
-     * Optional data object for the current state. 
+     * Optional data object for the current state.
      */
     public get data(): TData | undefined {
         return cloneValue(this._currentState.data);
@@ -154,7 +154,7 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
         }
 
         // Broadcast state change
-        const clone = cloneValue(data); 
+        const clone = cloneValue(data);
         const evt = this._changeStateEvent!.sendEvent({ state: state, data: clone });
 
         // Update local state immediately

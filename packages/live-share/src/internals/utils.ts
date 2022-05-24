@@ -3,10 +3,16 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+/**
+ * @hidden
+ */
 export function cloneValue<T>(value: T|undefined): T|undefined {
     return typeof value == 'object' ? JSON.parse(JSON.stringify(value)) : value;
 }
 
+/**
+ * @hidden
+ */
 export function decodeBase64(data: string): string {
     if (typeof atob == 'function') {
         return atob(data);
@@ -15,7 +21,9 @@ export function decodeBase64(data: string): string {
     }
 }
 
-
+/**
+ * @hidden
+ */
 export const parseJwt = (token: string) => {
     try {
       return JSON.parse(decodeBase64(token.split(".")[1]));
@@ -24,14 +32,20 @@ export const parseJwt = (token: string) => {
     }
 }
 
+/**
+ * @hidden
+ */
 export function waitForDelay(delay: number): Promise<void> {
     return new Promise((resolve) => {
         setTimeout(() => resolve(), delay);
     });
 }
 
+/**
+ * @hidden
+ */
 export function waitForResult<TResult>(
-    fnRequest: () => Promise<TResult|undefined>, 
+    fnRequest: () => Promise<TResult|undefined>,
     fnSucceeded: (result: TResult|undefined) => boolean,
     fnTimeout: () => Error,
     retrySchedule: number[]

@@ -3,6 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+/**
+ * @hidden
+ */
 export class RequestCache<TResult = any> {
     private readonly _cache = new Map<string, RequestCacheEntry<TResult>>();
     private readonly _cacheLifetime: number;
@@ -30,6 +33,9 @@ export class RequestCache<TResult = any> {
     }
 }
 
+/**
+ * @hidden
+ */
 interface RequestCacheEntry<TResult> {
     startTime: number;
     promise: Promise<TResult>;

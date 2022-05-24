@@ -7,6 +7,7 @@ import { ITokenProvider, ITokenResponse } from "@fluidframework/routerlicious-dr
 import { TeamsClientApi, TestTeamsClientApi } from './TestTeamsClientApi';
 
 /**
+ * @hidden
  * Token Provider implementation for connecting to Cowatch Cloud endpoint
  */
 export class TeamsFluidTokenProvider implements ITokenProvider {
@@ -41,7 +42,7 @@ export class TeamsFluidTokenProvider implements ITokenProvider {
         this._tenantId = tenantId;
         if (documentId) {
             this._documentId = documentId;
-        } 
+        }
         return {
             jwt: this._frsToken,
             fromCache,
@@ -58,5 +59,5 @@ export class TeamsFluidTokenProvider implements ITokenProvider {
         }
 
         return this._teamsClient;
-    } 
+    }
 }

@@ -4,10 +4,10 @@
  */
 
 /**
- * List of telemetry events. 
- * 
- * #### remarks
- * Wrap with a call to transmit() if the event should be transmitted to the telemetry service. 
+ * List of telemetry events.
+ * @hidden
+ * @remarks
+ * Wrap with a call to transmit() if the event should be transmitted to the telemetry service.
  */
 export const TelemetryEvents = {
     EphemeralPresence: {
@@ -20,6 +20,9 @@ export const TelemetryEvents = {
     }
 }
 
+/**
+ * @hidden
+ */
 function transmit(eventName: string): string {
     return `${eventName}#transmit`;
 }

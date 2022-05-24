@@ -4,19 +4,19 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { 
-    TeamsFluidTokenProvider, 
-    SharedClock, RoleVerifier, 
-    TestTeamsClientApi, 
-    TeamsClientApi, 
+import {
+    TeamsFluidTokenProvider,
+    SharedClock, RoleVerifier,
+    TestTeamsClientApi,
+    TeamsClientApi,
     ContainerState
 } from './internals';
-import { 
-    AzureClient, 
-    AzureConnectionConfig, 
-    AzureContainerServices, 
-    ITelemetryBaseLogger, 
-    LOCAL_MODE_TENANT_ID 
+import {
+    AzureClient,
+    AzureConnectionConfig,
+    AzureContainerServices,
+    ITelemetryBaseLogger,
+    LOCAL_MODE_TENANT_ID
 } from "@fluidframework/azure-client";
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { EphemeralEvent } from "./EphemeralEvent";
@@ -29,28 +29,28 @@ export interface ITeamsFluidClientOptions {
      * Optional. Configuration to use when connecting to a custom Azure Fluid Relay instance.
      */
     readonly connection?: AzureConnectionConfig,
-     
+
      /**
       * Optional. A logger instance to receive diagnostic messages.
       */
     readonly logger?: ITelemetryBaseLogger,
 
     /**
-     * Optional. Function to lookup the ID of the container to use for local testing. 
-     * 
-     * #### remarks
-     * The default implementation attempts to retrieve the containerId from the `window.location.hash`. 
-     * 
+     * Optional. Function to lookup the ID of the container to use for local testing.
+     *
+     * @remarks
+     * The default implementation attempts to retrieve the containerId from the `window.location.hash`.
+     *
      * If the function returns 'undefined' a new container will be created.
      * @returns ID of the container to connect to or `undefined` if a new container should be created.
      */
     readonly getLocalTestContainerId?: () => string|undefined;
 
     /**
-     * Optional. Function to save the ID of a newly created local test container. 
-     * 
-     * #### remarks
-     * The default implementation updates `window.location.hash` with the ID of the newly created 
+     * Optional. Function to save the ID of a newly created local test container.
+     *
+     * @remarks
+     * The default implementation updates `window.location.hash` with the ID of the newly created
      * container.
      * @param containerId The ID of the container that was created.
      */
@@ -69,7 +69,7 @@ export class TeamsFluidClient {
 
     /**
      * Creates a new `TeamsFluidClient` instance.
-     * @param options Configuration options for the client. 
+     * @param options Configuration options for the client.
      */
     constructor(options?: ITeamsFluidClientOptions) {
         // Save props
@@ -84,16 +84,16 @@ export class TeamsFluidClient {
     }
 
     /**
-     * Number of times the client should attempt to get the ID of the container to join for the 
+     * Number of times the client should attempt to get the ID of the container to join for the
      * current context.
      */
     public maxContainerLookupTries = 3;
 
     /**
      * Connects to the fluid container for the current teams context.
-     * 
-     * #### remarks
-     * The first client joining the container will create the container resulting in the 
+     *
+     * @remarks
+     * The first client joining the container will create the container resulting in the
      * `onContainerFirstCreated` callback being called. This callback can be used to set the initial
      * state of of the containers object prior to the container being attached.
      * @param fluidContainerSchema Fluid objects to create.
@@ -113,7 +113,7 @@ export class TeamsFluidClient {
             const pRoleVerifier = this.initializeRoleVerifier();
             const pTimestampProvider = this.initializeTimestampProvider();
 
-            // Initialize FRS connection config 
+            // Initialize FRS connection config
             let config: AzureConnectionConfig | undefined = this._options.connection;
             if (!config) {
                 const frsTenantInfo = await teamsClient.interactive.getFluidTenantInfo();
@@ -124,7 +124,7 @@ export class TeamsFluidClient {
                     orderer: frsTenantInfo.ordererEndpoint,
                     storage: frsTenantInfo.storageEndpoint,
                 };
-            }  
+            }
 
             // Create FRS client
             const client = new AzureClient({
@@ -174,11 +174,11 @@ export class TeamsFluidClient {
     protected initializeRoleVerifier(): Promise<void> {
         if (!this._roleVerifier && !this.isTesting) {
             this._roleVerifier = new RoleVerifier();
-            
+
             // Register role verifier as current verifier for events
             EphemeralEvent.setRoleVerifier(this._roleVerifier);
-        } 
-        
+        }
+
         return Promise.resolve();
     }
 
@@ -272,5 +272,5 @@ export class TeamsFluidClient {
         }
 
         return this._teamsClient;
-    } 
+    }
 }

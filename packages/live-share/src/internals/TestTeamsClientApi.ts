@@ -5,7 +5,10 @@
 
 import { UserMeetingRole } from '../interfaces';
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
-   
+
+/**
+ * @hidden
+ */
 export enum ContainerState {
     added = 'Added',
     alreadyExists = 'AlreadyExists',
@@ -13,6 +16,9 @@ export enum ContainerState {
     notFound = 'NotFound',
 }
 
+/**
+ * @hidden
+ */
 export interface FluidContainerInfo {
     containerState: ContainerState;
     containerId: string | undefined;
@@ -20,21 +26,33 @@ export interface FluidContainerInfo {
     retryAfter: number;
 }
 
+/**
+ * @hidden
+ */
 export interface NtpTimeInfo {
     ntpTime: string;
     ntpTimeInUTC: number;
 }
 
+/**
+ * @hidden
+ */
 export interface FluidTenantInfo {
     tenantId: string;
     ordererEndpoint: string;
     storageEndpoint: string;
 }
 
+/**
+ * @hidden
+ */
 export interface TeamsClientApi {
     interactive: TeamsClientApiInteractive;
 }
 
+/**
+ * @hidden
+ */
 export interface TeamsClientApiInteractive {
     getFluidTenantInfo(): Promise<FluidTenantInfo>;
     getFluidToken(containerId?: string): Promise<string>;
@@ -45,6 +63,9 @@ export interface TeamsClientApiInteractive {
     getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
 }
 
+/**
+ * @hidden
+ */
 export class TestTeamsClientApi implements TeamsClientApi {
     constructor(getLocalTestContainerId?: () => string|undefined, setLocalTestContainerId?: (containerId: string) => void) {
         this.interactive = new TestTeamsClientApiInteractive(getLocalTestContainerId, setLocalTestContainerId);
@@ -53,11 +74,17 @@ export class TestTeamsClientApi implements TeamsClientApi {
     public readonly interactive: TestTeamsClientApiInteractive;
 }
 
+/**
+ * @hidden
+ */
 export const LOCAL_MODE_TEST_TOKEN = `test-token`;
 
+/**
+ * @hidden
+ */
 class TestTeamsClientApiInteractive implements TeamsClientApiInteractive {
     constructor (
-        private _getLocalTestContainerId?: () => string|undefined, 
+        private _getLocalTestContainerId?: () => string|undefined,
         private _setLocalTestContainerId?: (containerId: string) => void) { }
 
     public clientsMeetingRoles: UserMeetingRole[] = [
@@ -121,15 +148,15 @@ class TestTeamsClientApiInteractive implements TeamsClientApiInteractive {
             return window.location.hash.substring(1);
         } else {
             return undefined;
-        }            
-    } 
+        }
+    }
 
     private setLocalTestContainerId(containerId: string): void {
         if (this._setLocalTestContainerId) {
             this._setLocalTestContainerId(containerId);
         } else {
             window.location.hash = containerId;
-        }            
-    } 
+        }
+    }
 
 }

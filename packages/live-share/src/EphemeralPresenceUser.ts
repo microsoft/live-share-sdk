@@ -23,7 +23,7 @@ export enum PresenceState {
     away = 'away',
 
     /**
-     * The user is offline. Automatically set for users after their client has stopped sending 
+     * The user is offline. Automatically set for users after their client has stopped sending
      * updates for a period of time.
      */
     offline = 'offline'
@@ -46,7 +46,7 @@ export class EphemeralPresenceUser<TData = object> {
      * @hidden
      */
     constructor(private _evt: IEphemeralPresenceEvent<TData>, private _expirationPeriod: TimeInterval, private _isLocalUser: boolean) {}
-    
+
     /**
      * If `true` the user is the local user.
      */
@@ -63,9 +63,9 @@ export class EphemeralPresenceUser<TData = object> {
 
     /**
      * Users current state.
-     * 
-     * #### remarks
-     * This is automatically set to [[PresenceState.offline]] if the users client hasn't sent updates 
+     *
+     * @remarks
+     * This is automatically set to [[PresenceState.offline]] if the users client hasn't sent updates
      * for a period of time.
      */
     public get state(): PresenceState {
@@ -100,7 +100,7 @@ export class EphemeralPresenceUser<TData = object> {
                 return true;
             }
         }
-            
+
         return false;
     }
 

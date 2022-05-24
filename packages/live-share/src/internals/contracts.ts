@@ -5,33 +5,50 @@
 
 import { UserMeetingRole } from "../interfaces";
 
+/**
+ * @hidden
+ */
 export enum ParticipantRole {
   organizer = 'organizer',
-  participant = 'participant' 
+  participant = 'participant'
 }
 
+/**
+ * @hidden
+ */
 export enum UserState {
   InChat = "InChat",
   InCall = "InCall",
   InCollaborationSession = "InCollaborationSession",
 }
 
+/**
+ * @hidden
+ */
 export enum AuthType {
   Unauthenticated = 0,
   SkypeToken = 1 << 0,
   CoWatchToken = 1 << 1,
 }
 
+/**
+ * @hidden
+ */
 export enum ParticipantType {
   Host = "Host",
   Guest = "Guest",
 }
 
+/**
+ * @hidden
+ */
 export interface IAppDefinition {
   appId: string;
   // TODO
 }
-
+/**
+ * @hidden
+ */
 export interface ICollabSpaceInfo {
   // The id of the collabSpace the user is in
   collabSpaceId: string;
@@ -49,13 +66,19 @@ export interface ICollabSpaceInfo {
   sessions: ISessionState[];
 }
 
+/**
+ * @hidden
+ */
 export interface IFRSTenantInfo {
   tenantId: string;
   ordererEndpoint: string;
   storageEndpoint: string;
 }
 
-export interface IUserState {
+/**
+ * @hidden
+ */
+ export interface IUserState {
   // The ID of the app as defined by the app developer
   appId: string;
   // The user id
@@ -70,6 +93,9 @@ export interface IUserState {
   currentContext: UserState;
 }
 
+/**
+ * @hidden
+ */
 export interface ISessionState {
   // The id of the collabSpace the user is in
   collabSpaceId: string;
@@ -83,11 +109,17 @@ export interface ISessionState {
   sessionMetadata: object;
 }
 
+/**
+ * @hidden
+ */
 export interface IUserTokenResponse {
   // The token value
   userAuthToken: string;
 }
 
+/**
+ * @hidden
+ */
 export interface IPPSTokenResponse {
   // The token value
   token: string;
@@ -97,22 +129,33 @@ export interface IPPSTokenResponse {
   expiresAt: number;
 }
 
+/**
+ * @hidden
+ */
 export namespace Requests {
+  /**
+   * @hidden
+   */
   export type IUserStateUpdate = Partial<
-    Pick<
-      IUserState,
-      "appId" | "collabSpaceId" | "participantType" | "currentContext"
-    >
+    Pick<IUserState, "appId" | "collabSpaceId" | "participantType" | "currentContext">
   >;
-  export type ICollabSpaceInfoUpdate = Partial<
-    Omit<ICollabSpaceInfo, "credentials" | "sessions">
-  >;
+  /**
+   * @hidden
+   */
+  export type ICollabSpaceInfoUpdate = Partial<Omit<ICollabSpaceInfo, "credentials" | "sessions">>;
+
+  /**
+   * @hidden
+   */
   export interface ITokenRequest {
     // The appId to generate a token for
     appId: string;
     //  Length of time the token should be valid for in minutes (Default 1 yr)
     validityLength?: number;
   }
+  /**
+   * @hidden
+   */
   export interface IFluidStateRequest {
     // Collaboration space Id
     spaceId: string;
@@ -121,32 +164,50 @@ export namespace Requests {
   }
 }
 
+/**
+ * @hidden
+ */
 export interface ITokenPayload {
   oid: string;
   aud: string;
   tid: string;
 }
 
+/**
+ * @hidden
+ */
 export interface INtpTime {
   ntpTime: string;
   ntpTimeInUTC: number;
 }
 
-export interface IServerTimeOffset {
+/**
+ * @hidden
+ */
+ export interface IServerTimeOffset {
   offset: number;
   serverTimeInUtc: number;
   localTimeInUtc: number;
   requestLatency: number;
 }
 
+/**
+ * @hidden
+ */
 export interface IRegisteredUsersRoles {
   userRoles: UserMeetingRole[];
 }
 
-export interface IVerifiedUserRoles {
+/**
+ * @hidden
+ */
+ export interface IVerifiedUserRoles {
   rolesAccepted: boolean;
 }
 
-export interface ITokenResponse {
+/**
+ * @hidden
+ */
+ export interface ITokenResponse {
   token: string;
 }

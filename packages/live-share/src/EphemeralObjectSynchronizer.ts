@@ -26,9 +26,9 @@ export type GetSynchronizationState<TState extends object> = (connecting: boolea
 
 /**
  * Duck type of something that provides the expected signalling functionality at the container level.
- * 
- * #### remarks
- * Simplifies the mocks needed to unit test the [[EphemeralObjectSynchronizer]]. Applications can 
+ *
+ * @remarks
+ * Simplifies the mocks needed to unit test the [[EphemeralObjectSynchronizer]]. Applications can
  * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
  */
 export interface IContainerRuntimeSignaler {
@@ -40,33 +40,33 @@ export interface IContainerRuntimeSignaler {
 /**
  * Synchronizes the underlying state of an ephemeral object with all of the other instances of
  * the object connected to the same container.
- * 
- * #### remarks
- * When a synchronizer for a ephemeral object is first created it will broadcast a `"connect"` 
- * message, containing the objects initial state, to all other instances of the object that are 
- * currently running on other clients. Those instances will respond to the sent "connect" message 
- * by broadcasting an `"update"` message containing the current state of their object. 
- * 
+ *
+ * @remarks
+ * When a synchronizer for a ephemeral object is first created it will broadcast a `"connect"`
+ * message, containing the objects initial state, to all other instances of the object that are
+ * currently running on other clients. Those instances will respond to the sent "connect" message
+ * by broadcasting an `"update"` message containing the current state of their object.
+ *
  * Anytime a remote "connect" or "update" event is received, the synchronizer will call the passed
- * in `updateState` callback with the remote objects state and the senders clientId for role 
+ * in `updateState` callback with the remote objects state and the senders clientId for role
  * verification purposes. The logic for processing these state updates will vary but implementations
- * will generally want to include a timestamp in their state update so that clients can protect 
- * against out-of-order and delayed updates. Deriving your state update from [[IEphemeralEvent]] and 
+ * will generally want to include a timestamp in their state update so that clients can protect
+ * against out-of-order and delayed updates. Deriving your state update from [[IEphemeralEvent]] and
  * using [[EphemeralEvent.isNewer]] to compare the received update with the current update makes this
  * simple.
- * 
- * Once the initial "connect" event is sent, the synchronizer will periodically broadcast additional 
- * "update" events containing the ephemeral objects current state. This redundancy helps to guard 
- * against missed events and can be used as a ping for scenarios like presence where users can 
- * disconnect from the container without notice.  The rate at which these ping events are sent can be 
+ *
+ * Once the initial "connect" event is sent, the synchronizer will periodically broadcast additional
+ * "update" events containing the ephemeral objects current state. This redundancy helps to guard
+ * against missed events and can be used as a ping for scenarios like presence where users can
+ * disconnect from the container without notice.  The rate at which these ping events are sent can be
  * adjusted globally by setting the static `EphemeralObjectSynchronizer.updateInterval` property.
- *   
- * While each new synchronizer instance will result in a separate "connect" message being sent, the 
+ *
+ * While each new synchronizer instance will result in a separate "connect" message being sent, the
  * periodic updates that are sent get batched together into a single "update" message. This lets apps
- * add as many ephemeral objects to a container as they'd like without increasing the number of 
+ * add as many ephemeral objects to a container as they'd like without increasing the number of
  * messages being broadcast to the container.
- * 
- * Only a single synchronizer is allowed per ephemeral object. Attempting to create more than one 
+ *
+ * Only a single synchronizer is allowed per ephemeral object. Attempting to create more than one
  * synchronizer for the same ephemeral object will result in an exception being raised.
  * @template TState Type of state object being synchronized. This object should be a simple JSON object that uses only serializable primitives.
  */
@@ -77,9 +77,9 @@ export class EphemeralObjectSynchronizer<TState extends object> {
 
     /**
      * Creates a new `EphemeralObjectSynchronizer` instance.
-     * 
-     * #### remarks
-     * Consumers should subscribe to the synchronizers `"received"` event to process the remote 
+     *
+     * @remarks
+     * Consumers should subscribe to the synchronizers `"received"` event to process the remote
      * state updates being sent by other instances of the ephemeral object.
      * @param id ID of the ephemeral object being synchronized. This should be the value of `this.id` in a class that derives from `DataObject`.
      * @param containerRuntime The runtime for the objects container. This should be the value of `this.context.containerRuntime`.
@@ -95,8 +95,8 @@ export class EphemeralObjectSynchronizer<TState extends object> {
 
     /**
      * Disposes of the synchronizer.
-     * 
-     * #### remarks
+     *
+     * @remarks
      * All synchronization for the container will stop once the last instance has been disposed of.
      */
     public dispose(): void {
@@ -138,7 +138,7 @@ const UPDATE_EVENT = 'update';
 
 interface GetAndUpdateStateHandlers<TState extends object> {
     getState: GetSynchronizationState<TState>;
-    updateState: UpdateSynchronizationState<TState> 
+    updateState: UpdateSynchronizationState<TState>
 }
 
 interface StateSyncEventContent {
@@ -171,8 +171,8 @@ class ContainerSynchronizer {
                             } catch (err: any) {
                                 console.error(`EphemeralObjectSynchronizer: error processing received update - ${err.toString()}`);
                             }
-        
-        
+
+
                             // Respond to connect event with an update
                             // - should only be a single ID in content map
                             if (connecting) {
@@ -181,7 +181,7 @@ class ContainerSynchronizer {
                                 } catch (err: any) {
                                     console.error(`EphemeralObjectSynchronizer: error responding to connect with update - ${err.toString()}`);
                                 }
-                            }                
+                            }
                         }
                     }
                 }

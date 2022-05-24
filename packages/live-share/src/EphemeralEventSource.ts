@@ -7,11 +7,11 @@ import { IEphemeralEvent } from "./interfaces";
 import { EphemeralEventScope } from "./EphemeralEventScope";
 
 /**
- * Broadcasts ephemeral events to all clients and can be received by an [[EphemeralEventTarget]]. 
- * 
- * #### remarks
- * Ephemeral objects won't typically create an `EphemeralEventSource` directly. They will, instead, 
- * create an [[EphemeralEventTarget]] class, which can both send & receive events. 
+ * Broadcasts ephemeral events to all clients and can be received by an [[EphemeralEventTarget]].
+ *
+ * @remarks
+ * Ephemeral objects won't typically create an `EphemeralEventSource` directly. They will, instead,
+ * create an [[EphemeralEventTarget]] class, which can both send & receive events.
  * @template TEvent Type of event to broadcast.
  */
 export class EphemeralEventSource<TEvent extends IEphemeralEvent = IEphemeralEvent> {
@@ -30,10 +30,10 @@ export class EphemeralEventSource<TEvent extends IEphemeralEvent = IEphemeralEve
 
     /**
      * Broadcasts an event to any listening [[EphemeralEventTarget]] instances.
-     * @param evt Optional. Partial event object to send. The [[IEphemeralEvent.name]], 
-     * [[IEphemeralEvent.timestamp]], and [[IEphemeralEvent.clientId]] 
+     * @param evt Optional. Partial event object to send. The [[IEphemeralEvent.name]],
+     * [[IEphemeralEvent.timestamp]], and [[IEphemeralEvent.clientId]]
      * fields will be automatically populated prior to sending.
-     * @returns The full event, including [[IEphemeralEvent.name]], 
+     * @returns The full event, including [[IEphemeralEvent.name]],
      * [[IEphemeralEvent.timestamp]], and [[IEphemeralEvent.clientId]] fields if known.
      */
     public sendEvent(evt: Partial<TEvent> = {}): TEvent {

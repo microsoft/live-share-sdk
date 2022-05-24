@@ -12,6 +12,9 @@ const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
 const CACHE_LIFETIME = 60 * 60 * 1000;
 
 
+/**
+ * @hidden
+ */
 export class RoleVerifier implements IRoleVerifier {
     private _teamsClient?: TeamsClientApi;
     private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> = new RequestCache(CACHE_LIFETIME);
@@ -42,7 +45,7 @@ export class RoleVerifier implements IRoleVerifier {
             }, EXPONENTIAL_BACKOFF_SCHEDULE);
         });
     }
-    
+
     public async verifyRolesAllowed(clientId: string, allowedRoles: UserMeetingRole[]): Promise<boolean> {
         if (Array.isArray(allowedRoles) && allowedRoles.length > 0) {
             const roles = await this.getClientRoles(clientId);
@@ -69,5 +72,5 @@ export class RoleVerifier implements IRoleVerifier {
         }
 
         return this._teamsClient;
-    } 
+    }
 }

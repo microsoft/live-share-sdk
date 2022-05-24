@@ -20,7 +20,7 @@ export class EphemeralEventTimer<T extends IEphemeralEvent> {
     /**
      * Creates a new `EphemeralEventTimer instance.
      * @param eventSource Event source that will be used to emit events.
-     * @param createEvent Function used to construct an event to send. This will be called at regular intervals prior to sending an event. 
+     * @param createEvent Function used to construct an event to send. This will be called at regular intervals prior to sending an event.
      * @param delay Period to delay for in milliseconds.
      * @param repeat Optional. If true the timer will repeat once [[start]] is called, otherwise a single event will be sent after the delay. Defaults to false.
      */
@@ -56,10 +56,10 @@ export class EphemeralEventTimer<T extends IEphemeralEvent> {
 
     /**
      * Immediately sends an event.
-     * 
-     * #### remarks
-     * The `createEvent` callback to construct the event is called but does not impact any pending 
-     * timeouts. Call [[start]] after calling `sendEvent` if you'd like to skip the next timer 
+     *
+     * @remarks
+     * The `createEvent` callback to construct the event is called but does not impact any pending
+     * timeouts. Call [[start]] after calling `sendEvent` if you'd like to skip the next timer
      * interval.
      */
     public sendEvent(): void {
@@ -69,8 +69,8 @@ export class EphemeralEventTimer<T extends IEphemeralEvent> {
 
     /**
      * Starts the timer.
-     * 
-     * #### remarks
+     *
+     * @remarks
      * If the timer is running it will be stooped and then re-started with a new [[delay]].
      */
     public start(): void {

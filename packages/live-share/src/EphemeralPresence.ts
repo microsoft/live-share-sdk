@@ -16,7 +16,7 @@ import { v4 } from 'uuid';
 import { EphemeralEvent } from './EphemeralEvent';
 
 /**
- * Events supported by [[EphemeralPresence]] object.
+ * Events supported by `EphemeralPresence` object.
  */
 export enum EphemeralPresenceEvents {
     /**
@@ -26,7 +26,7 @@ export enum EphemeralPresenceEvents {
 }
 
 /**
- * Event typings for [[EphemeralPresence]] class.
+ * Event typings for `EphemeralPresence` class.
  * @template TData Type of data object to share with clients.
  */
 export interface IEphemeralPresenceEvents<TData extends object = object> extends IEvent {
@@ -121,7 +121,7 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
      * Starts sharing presence information.
      * @param userId Optional. ID of the local user. Defaults to a GUID if not provided.
      * @param data Optional. Custom data object to share. A deep copy of the data object is saved to avoid any accidental modifications.
-     * @param state Optional. Initial presence state. Defaults to [[PresenceState.online]].
+     * @param state Optional. Initial presence state. Defaults to `PresenceState.online`.
      */
     public async start(userId?: string, data?: TData, state = PresenceState.online): Promise<void> {
         if (this._scope) {

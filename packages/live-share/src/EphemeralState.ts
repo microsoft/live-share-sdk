@@ -14,7 +14,7 @@ import { EphemeralEvent } from './EphemeralEvent';
 import { EphemeralObjectSynchronizer } from './EphemeralObjectSynchronizer';
 
 /**
- * Events supported by [EphemeralState]] object.
+ * Events supported by [EphemeralState` object.
  */
 export enum EphemeralStateEvents {
     /**
@@ -24,12 +24,12 @@ export enum EphemeralStateEvents {
 }
 
 /**
- * Event typings for [[EphemeralState]] class.
+ * Event typings for `EphemeralState` class.
  * @template TData Optional data object that's synchronized with the state.
  */
 export interface IEphemeralStateEvents<TData = undefined> extends IEvent {
     /**
-     * An [[EphemeralState]] objects state has changed.
+     * An `EphemeralState` objects state has changed.
      * @param event Name of event.
      * @param listener Function called when event is triggered.
      * @param listener.state The new state. Can be the same as the previous state.

@@ -22,7 +22,7 @@ import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { EphemeralEvent } from "./EphemeralEvent";
 
 /**
- * Options used to configure the [[TeamsFluidClient]] class.
+ * Options used to configure the `TeamsFluidClient` class.
  */
 export interface ITeamsFluidClientOptions {
     /**

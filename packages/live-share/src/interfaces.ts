@@ -34,7 +34,7 @@ export interface IEphemeralEvent extends IEvent {
 }
 
 /**
- * Removes the base properties from an event that derives from [[IEphemeralEvent]].
+ * Removes the base properties from an event that derives from `IEphemeralEvent`.
  * @template TEvent Type of event.
  */
 export type OutgoingEphemeralEvent<TEvent extends IEphemeralEvent> = Omit<TEvent, 'name' | 'clientId' | 'timestamp'>; 

@@ -8,7 +8,7 @@ import { EphemeralEventSource } from "./EphemeralEventSource";
 import { IEphemeralEvent } from "./interfaces";
 
 /**
- * Receives events broadcast by an [[EphemeralEventSource]].
+ * Receives events broadcast by an `EphemeralEventSource`.
  *
  * @remarks
  * All ephemeral event targets are also sources. This simplifies the programming model for

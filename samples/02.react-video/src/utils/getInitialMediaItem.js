@@ -3,7 +3,7 @@ import { mediaList } from "./media-list";
 function getInitialMediaId() {
   const url = new URL(window.location);
   const params = url.searchParams;
-  return params.get("mediaId");
+  return `${params.get("mediaId")}`;
 }
 
 export function getInitialMediaItem() {

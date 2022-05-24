@@ -1,6 +1,7 @@
 # React Agile Poker Sample
 
-This repository contains a simple app that enables all connected clients to watch videos together, build a shared playlist, transfer who is in control, and annotate over the video.\
+This repository contains a simple app that simulates the ritual of playing agile poker with user stories. Participants can load user stories, vote on the story point cost, and if they reach consensus before the timer runs out, the app will record the score and move to the next story. If not, the group is given the option to discuss the story again and attempt to reach consensus before another round of voting. 
+
 Each `SharedObject` in our schema (as defined in the `/src/live-share-hooks/useSharedObjects.js` file) has a correlating hook in the live-share-hooks folder.\
 We have found this structure to be very useful in composing advanced applications with Live Share using Functional React components, but you can compose this differently for your app.
 

@@ -28,7 +28,7 @@ export type GetSynchronizationState<TState extends object> = (connecting: boolea
  * Duck type of something that provides the expected signalling functionality at the container level.
  *
  * @remarks
- * Simplifies the mocks needed to unit test the [[EphemeralObjectSynchronizer]]. Applications can
+ * Simplifies the mocks needed to unit test the `EphemeralObjectSynchronizer`. Applications can
  * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
  */
 export interface IContainerRuntimeSignaler {
@@ -51,8 +51,8 @@ export interface IContainerRuntimeSignaler {
  * in `updateState` callback with the remote objects state and the senders clientId for role
  * verification purposes. The logic for processing these state updates will vary but implementations
  * will generally want to include a timestamp in their state update so that clients can protect
- * against out-of-order and delayed updates. Deriving your state update from [[IEphemeralEvent]] and
- * using [[EphemeralEvent.isNewer]] to compare the received update with the current update makes this
+ * against out-of-order and delayed updates. Deriving your state update from `IEphemeralEvent` and
+ * using `EphemeralEvent.isNewer` to compare the received update with the current update makes this
  * simple.
  *
  * Once the initial "connect" event is sent, the synchronizer will periodically broadcast additional

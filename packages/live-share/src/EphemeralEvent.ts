@@ -12,7 +12,7 @@ import { EphemeralEventTarget } from './EphemeralEventTarget';
 import { LocalRoleVerifier } from './LocalRoleVerifier';
 
 /**
- * Events supported by [[EphemeralEvent]] object.
+ * Events supported by `EphemeralEvent` object.
  */
 export enum EphemeralEventEvents {
     /**
@@ -22,7 +22,7 @@ export enum EphemeralEventEvents {
 }
 
 /**
- * Event typings for [[EphemeralEvent]] class.
+ * Event typings for `EphemeralEvent` class.
  * @template TEvent Type of event to broadcast.
  */
 export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends IEvent {
@@ -44,7 +44,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
  * Applications should call `on('received', (evt, local) => {})` to listen for local events sent 
  * and remote events received. Events aren't guaranteed to be delivered so you should limit their 
  * use to sending events you're ok with potentially being missed. Reactions are a good use case for
- * `EphemeralEvents`. Use something like the [[EphemeralState]] class when syncing state. 
+ * `EphemeralEvents`. Use something like the `EphemeralState` class when syncing state. 
  * @template TEvent Type of event to broadcast.
  */
  export class EphemeralEvent<TEvent extends IEphemeralEvent = IEphemeralEvent> extends DataObject<{Events: IEphemeralEventEvents<TEvent>}> {

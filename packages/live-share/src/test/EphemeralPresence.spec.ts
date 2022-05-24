@@ -9,12 +9,18 @@ import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { EphemeralPresence } from "../EphemeralPresence";
 import { PresenceState } from "../EphemeralPresenceUser";
+import { EphemeralObjectSynchronizer } from "../EphemeralObjectSynchronizer";
+import { waitForDelay } from "../internals";
 import { Deferred } from './Deferred';
 
 describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
     let object1: EphemeralPresence<{ foo: string }>;
     let object2: EphemeralPresence<{ foo: string }>;
+
+    // Temporarily change update interval
+    before(() => EphemeralObjectSynchronizer.updateInterval = 20);
+    after(() => EphemeralObjectSynchronizer.updateInterval = 5000);
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
@@ -153,7 +159,6 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                         assert(user.data.foo == 'bar', `user1: Unexpected data object of ${user.data}`);
                         assert(user.state == PresenceState.offline);
                         object1done.resolve();
-
                     } else {
                         triggered = true;
                         assert(!user.data, `user1: data object passed`);
@@ -311,5 +316,32 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
         assert(user1.isLocalUser, `user1: not local user`);
         assert(user2 && user2.userId == 'user2', `user2: missing or wrong user returned`);
         assert(!user2.isLocalUser, `user2: is local user`);
+    });
+
+    it("Should send periodic presence updates", async () => {
+        const ready = new Deferred();
+        object1.on("presenceChanged", (user, local) => {
+            if (!local) {
+                ready.resolve()
+            }
+        });
+        object1.expirationPeriod = 0.2;
+        await object1.start('user1');
+
+        object2.expirationPeriod = 0.2;
+        await object2.start('user2');
+
+        // Wait for ready and then delay
+        await ready.promise;
+        await waitForDelay(600);
+
+        // Delay for a few updates
+        let count = 0;
+        object1.forEach((user) => {
+            count++;
+            assert(user.state == PresenceState.online, `user[${user.userId}] is ${user.state}`);
+        });
+
+        assert(count == 2, `Wrong number of users`);
     });
 });

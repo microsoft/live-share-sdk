@@ -86,14 +86,14 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
      * Number of seconds without a presence update before a remote user is considered offline.
      *
      * @remarks
-     * Defaults to a value of `20` seconds and the minimum value is `1`.
+     * Defaults to a value of `20` seconds. The minimum value is 0.1 seconds for testing purposes.
      */
     public get expirationPeriod(): number {
         return this._expirationPeriod.seconds;
     }
 
     public set expirationPeriod(value: number) {
-        this._expirationPeriod.seconds = value > 1 ? value : 1;
+        this._expirationPeriod.seconds = value > 0.1 ? value : 0.1;
     }
 
     /**

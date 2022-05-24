@@ -42,10 +42,14 @@ export interface IEphemeralPresenceEvent<TData = object> extends IEphemeralEvent
  * A use that presence is being tracked for.
  */
 export class EphemeralPresenceUser<TData = object> {
+    private _lastUpdateTime: number;
+
     /**
      * @hidden
      */
-    constructor(private _evt: IEphemeralPresenceEvent<TData>, private _expirationPeriod: TimeInterval, private _isLocalUser: boolean) {}
+    constructor(private _evt: IEphemeralPresenceEvent<TData>, private _expirationPeriod: TimeInterval, private _isLocalUser: boolean) {
+        this._lastUpdateTime = EphemeralEvent.getTimestamp();
+    }
 
     /**
      * If `true` the user is the local user.
@@ -94,6 +98,7 @@ export class EphemeralPresenceUser<TData = object> {
         if (EphemeralEvent.isNewer(current, evt)) {
             // Save updated event
             this._evt = evt;
+            this._lastUpdateTime = EphemeralEvent.getTimestamp();
 
             // Has anything changed?
             if (evt.state != current.state || JSON.stringify(evt.data) != JSON.stringify(current.data)) {
@@ -106,7 +111,7 @@ export class EphemeralPresenceUser<TData = object> {
 
     private hasExpired(): boolean {
         const now = EphemeralEvent.getTimestamp();
-        const elapsed = now - this._evt.timestamp;
-        return (elapsed > (this._expirationPeriod.milliseconds * 2));
+        const elapsed = now - this._lastUpdateTime;
+        return (!this._isLocalUser && elapsed > this._expirationPeriod.milliseconds);
     }
 }

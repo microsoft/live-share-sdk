@@ -6,7 +6,7 @@ The Live Share SDK builds on the [Fluid Framework](https://fluidframework.com/) 
 
 To get started, we recommend first familiarizing yourself with the [Fluid Framework](https://fluidframework.com/docs/) and building [Teams Meeting Apps](https://docs.microsoft.com/en-us/microsoftteams/platform/apps-in-teams-meetings/teams-apps-in-meetings). You can then follow our Quick Start Guide to build your first Teams Meeting App that uses Live Share.
 
-You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
+You can find our detailed API reference documentation at [Live Share reference docs](https://docs.microsoft.com/javascript/api/@microsoft/live-share/) and [Live Share Media reference docs](https://docs.microsoft.com/javascript/api/@microsoft/live-share-media/).
 
 ## Package Compatibility
 
@@ -109,10 +109,10 @@ There are several code samples available to use:
 
 | Sample name          | Description                                                                                                                               | Javascript                                          |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Dice Roller          | Enable all connected clients to roll a dice and view the result.                                                                          | [View](./samples/01.dice-roller/README.md)          |
-| React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](./samples/02.react-video/README.md)          |
-| React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](./samples/21.react-media-template/README.md) |
-| Agile Poker          | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](./samples/22.react-agile-poker/README.md)    |
+| Dice Roller          | Enable all connected clients to roll a dice and view the result.                                                                          | [View](./samples/01.dice-roller/)          |
+| React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](./samples/02.react-video/)          |
+| React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](./samples/21.react-media-template/) |
+| Agile Poker          | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](./samples/22.react-agile-poker/)    |
 
 ## Reporting Security Issues
 

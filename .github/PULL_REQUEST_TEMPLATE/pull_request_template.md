@@ -25,7 +25,9 @@ Issues: # (issue number)
 - [ ] I have commented my code for clarity
 - [ ] I have made corresponding changes to the documentation (we use [TypeDoc](https://typedoc.org/) to document our code)
 - [ ] My changes generate no new warnings
-- [ ] I have added tests that validates my changes, and provides sufficient test coverage
+- [ ] I have added tests that validates my changes, and provides sufficient test coverage. I have tested with:
+   - [ ] Local testing
+   - [ ] E2E testing in Teams
 - [ ] New and existing unit tests pass locally with my changes
 
 ### Additional information

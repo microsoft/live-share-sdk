@@ -18,7 +18,7 @@ function createConnectedSignalers() {
 describe("EphemeralObjectSynchronizer", () => {
     // Temporarily change update interval
     before(() => EphemeralObjectSynchronizer.updateInterval = 20);
-    after(() => EphemeralObjectSynchronizer.updateInterval = 15000);
+    after(() => EphemeralObjectSynchronizer.updateInterval = 5000);
 
     it("Should send connecting state", async () => {
         const done = new Deferred();

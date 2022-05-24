@@ -57,7 +57,7 @@ There are several ways you can [contribute](./CONTRIBUTING.md) to this project:
 - [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
   - (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
 - Review the source code changes.
-- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share) and [GITTER](https://gitter.im/Live-Share/community).
 - [Contribute bug fixes](./CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.

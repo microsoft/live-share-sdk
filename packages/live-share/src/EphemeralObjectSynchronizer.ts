@@ -106,7 +106,7 @@ export class EphemeralObjectSynchronizer<TState extends object> {
         }
     }
 
-    public static updateInterval = 15000;
+    public static updateInterval = 5000;
 
     private static _synchronizers = new Map<any, ContainerSynchronizer>();
 

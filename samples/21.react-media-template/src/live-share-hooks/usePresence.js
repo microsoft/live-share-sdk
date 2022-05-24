@@ -50,11 +50,11 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
     if (presence && !presence.isStarted && context) {
       // Register presenceChanged event listener
       presence.on("presenceChanged", (userPresence, local) => {
+        console.log("usePresence: presence received", userPresence, local);
         if (local) {
-          const localUser = {
+          const user = {
             userId: userPresence.userId,
             state: userPresence.state,
-            clientId: userPresence.clientId,
             data: userPresence.data,
             timestamp: userPresence.timestamp,
             roles: [],
@@ -63,14 +63,14 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
           userPresence
             .getRoles()
             .then((roles) => {
-              localUser.roles = roles;
+              user.roles = roles;
               // Set local user state
-              setLocalUser(localUser);
+              setLocalUser(user);
             })
             .catch((err) => {
-              console.error(err);
+              console.error("usePresence: getRoles error", err);
               // Set local user state
-              setLocalUser(localUser);
+              setLocalUser(user);
             });
         }
         // Set users local state

@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { Subheadline, mergeClasses } from "@fluentui/react-components";
+import { Subtitle2, mergeClasses } from "@fluentui/react-components";
 import { getFlexColumnStyles } from "../styles/layout";
 
 export const StoryPointCard = ({ value, selectedValue }) => {
@@ -25,7 +25,7 @@ export const StoryPointCard = ({ value, selectedValue }) => {
         cursor: "pointer",
       }}
     >
-      <Subheadline>{value}</Subheadline>
+      <Subtitle2>{value}</Subtitle2>
     </div>
   );
 };

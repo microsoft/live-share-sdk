@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { mergeClasses, Subheadline } from "@fluentui/react-components";
+import { mergeClasses, Subtitle2 } from "@fluentui/react-components";
 import { getFlexColumnStyles, getFlexRowStyles } from "../styles/layout";
 import { PlayerAvatar } from "./PlayerAvatar";
 
@@ -41,7 +41,7 @@ export const UserAnswer = ({ user, localUserId, index }) => {
           marginBottom: "0.8rem",
         }}
       >
-        <Subheadline>{`${user.data?.answer ?? "N/A"}`}</Subheadline>
+        <Subtitle2>{`${user.data?.answer ?? "N/A"}`}</Subtitle2>
       </div>
     </div>
   );

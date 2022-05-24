@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useSharedObjects, useUserStories } from "../live-share-hooks";
 import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 // UI imports
-import { Button, Text, Subheadline } from "@fluentui/react-components";
+import { Button, Text, Subtitle2 } from "@fluentui/react-components";
 import { Card, CardFooter } from "@fluentui/react-components/unstable";
 import { getFlexItemStyles } from "../styles/layout";
 import * as UI from "../components";
@@ -57,7 +57,7 @@ const SidePanel = () => {
               <Card key={userStory.id} className={flexItemStyles.noShrink}>
                 {/** TODO: remove <div> once <Card> issue resolved */}
                 <div>
-                  <Subheadline>{userStory.text}</Subheadline>
+                  <Subtitle2>{userStory.text}</Subtitle2>
                 </div>
                 <CardFooter>
                   {/** Display "Plan Together" button or user story points results */}

@@ -5,7 +5,7 @@
 
 import {
   Button,
-  Subheadline,
+  Subtitle2,
   Image,
   mergeClasses,
 } from "@fluentui/react-components";
@@ -67,7 +67,7 @@ export const WaitingRoom = ({
           >
             Start game!
           </Button>
-          <Subheadline align="center">{"When everyone's ready!"}</Subheadline>
+          <Subtitle2 align="center">{"When everyone's ready!"}</Subtitle2>
         </div>
       </div>
       <div

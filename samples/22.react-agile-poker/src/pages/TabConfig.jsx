@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import * as microsoftTeams from "@microsoft/teams-js";
 // UI imports:
 import { getFlexColumnStyles } from "../styles/layout";
-import { mergeClasses, Title2, Subheadline } from "@fluentui/react-components";
+import { mergeClasses, Title2, Subtitle2 } from "@fluentui/react-components";
 
 const TabConfig = () => {
   useEffect(() => {
@@ -35,9 +35,9 @@ const TabConfig = () => {
       <Title2 block align="center">
         Welcome to Agile Poker!
       </Title2>
-      <Subheadline block align="center">
+      <Subtitle2 block align="center">
         Press the save button to continue.
-      </Subheadline>
+      </Subtitle2>
     </div>
   );
 };

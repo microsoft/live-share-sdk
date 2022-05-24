@@ -6,7 +6,7 @@
 import * as microsoftTeams from "@microsoft/teams-js";
 import { useEffect } from "react";
 import { getFlexColumnStyles } from "../styles/layouts";
-import { mergeClasses, Title2, Subheadline } from "@fluentui/react-components";
+import { mergeClasses, Title2, Subtitle2 } from "@fluentui/react-components";
 
 const TabConfig = () => {
   useEffect(() => {
@@ -35,9 +35,9 @@ const TabConfig = () => {
       <Title2 block align="center">
         Welcome to Contoso Media!
       </Title2>
-      <Subheadline block align="center">
+      <Subtitle2 block align="center">
         Press the save button to continue.
-      </Subheadline>
+      </Subtitle2>
     </div>
   );
 };

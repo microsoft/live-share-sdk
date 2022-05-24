@@ -4,7 +4,7 @@
  */
 
 import {
-  Headline,
+  Title1,
   Accordion,
   AccordionItem,
   AccordionHeader,
@@ -21,7 +21,7 @@ export const SidePanelAccordion = (props) => {
           expandIconPosition="end"
           style={{ backgroundColor: "transparent" }}
         >
-          <Headline>User Stories</Headline>
+          <Title1>User Stories</Title1>
         </AccordionHeader>
         <AccordionPanel>{props.children}</AccordionPanel>
       </AccordionItem>

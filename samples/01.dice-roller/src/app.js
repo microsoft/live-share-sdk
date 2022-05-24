@@ -90,7 +90,7 @@ const stageTemplate = document.createElement("template");
 
 stageTemplate["innerHTML"] = `
   <style>
-    .wrapper { text-align: center }
+    .wrapper { text-align: center; color: white }
     .dice { font-size: 200px; }
     .roll { font-size: 50px; }
   </style>
@@ -128,7 +128,7 @@ const sideBarTemplate = document.createElement("template");
 
 sideBarTemplate["innerHTML"] = `
   <style>
-    .wrapper { text-align: center }
+    .wrapper { text-align: center; color: white }
     .title { font-size: large; font-weight: bolder; }
     .text { font-size: medium; }
   </style>
@@ -149,7 +149,7 @@ const settingsTemplate = document.createElement("template");
 
 settingsTemplate["innerHTML"] = `
   <style>
-    .wrapper { text-align: center }
+    .wrapper { text-align: center; color: white }
     .title { font-size: large; font-weight: bolder; }
     .text { font-size: medium; }
   </style>

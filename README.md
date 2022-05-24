@@ -14,9 +14,9 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 **It is critical that your app use the package dependencies listed in the table below.** Lookup the version of the `@microsoft/live-share` you're using and set any other dependencies in your package.json file to match:
 
-| @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-media | @fluidframework/test-client-utils |
-| --------------------- | -------------------- | --------------- | --------------------------- | --------------------------------- |
-| ~0.3.0                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.0 (optional)           | ~0.59.0 (optional)                |
+| @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-media | @fluidframework/test-client-utils | @microsoft/TeamsFx              |
+| --------------------- | -------------------- | --------------- | --------------------------- | --------------------------------- | ------------------------------- |
+| ~0.3.0                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.0 (optional)           | ~0.59.0 (optional)                | 2.0.0-experimental.0 (optional) |
 
 ### Dev Dependencies
 
@@ -107,8 +107,8 @@ Unit tests for all of the packages can be run using `npm run test` or `npm run t
 
 There are several code samples available to use:
 
-| Sample name          | Description                                                                                                                               | Javascript                                          |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Sample name          | Description                                                                                                                               | Javascript                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | Dice Roller          | Enable all connected clients to roll a dice and view the result.                                                                          | [View](./samples/01.dice-roller/)          |
 | React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](./samples/02.react-video/)          |
 | React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](./samples/21.react-media-template/) |

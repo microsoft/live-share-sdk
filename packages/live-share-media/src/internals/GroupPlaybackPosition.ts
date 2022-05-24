@@ -22,7 +22,7 @@ export interface ICurrentPlaybackPosition {
 }
 
 /**
- * hidden
+ * @hidden
  */
 export class GroupPlaybackPosition {
     private _transportState: GroupTransportState;

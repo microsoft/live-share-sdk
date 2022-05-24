@@ -7,21 +7,34 @@ import { IEvent } from '@microsoft/live-share';
 import EventEmitter from 'events';
 import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
 
-export interface IPlaybackTrackData {
+
+/**
+ * @hidden
+ */
+ export interface IPlaybackTrackData {
     data: object|null;
     timestamp: number;
     clientId: string;
 }
 
-export enum PlaybackTrackDataEvents {
+/**
+ * @hidden
+ */
+ export enum PlaybackTrackDataEvents {
     dataChange = 'dataChange'
 }
 
+/**
+ * @hidden
+ */
 export interface IPlaybackTrackDataChangeEvent extends IEvent {
     data: object|null;
 }
 
-export class GroupPlaybackTrackData extends EventEmitter {
+/**
+ * @hidden
+ */
+ export class GroupPlaybackTrackData extends EventEmitter {
     private _track: GroupPlaybackTrack;
     private _current: IPlaybackTrackData;
 
@@ -50,7 +63,7 @@ export class GroupPlaybackTrackData extends EventEmitter {
     }
 
     public updateData(event: IPlaybackTrackData): boolean {
-        // Ignore state changes that are older 
+        // Ignore state changes that are older
         const current = this.current;
         if (event.timestamp < current.timestamp) {
             return false;
@@ -70,8 +83,8 @@ export class GroupPlaybackTrackData extends EventEmitter {
         this._current = event;
 
         // Notify listeners
-        this.emit(PlaybackTrackDataEvents.dataChange, { type: PlaybackTrackDataEvents.dataChange, data: event.data }); 
-        
+        this.emit(PlaybackTrackDataEvents.dataChange, { type: PlaybackTrackDataEvents.dataChange, data: event.data });
+
         return true;
     }
 }

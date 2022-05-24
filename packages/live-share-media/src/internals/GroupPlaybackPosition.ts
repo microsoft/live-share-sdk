@@ -8,7 +8,10 @@ import { GroupTransportState } from './GroupTransportState';
 import { GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
 import { CoordinationWaitPoint, ExtendedMediaSessionPlaybackState } from '../MediaSessionExtensions';
 
-// Per client position
+/**
+ *Per client position
+ * @hidden
+ */
 export interface ICurrentPlaybackPosition {
     playbackState: ExtendedMediaSessionPlaybackState;
     waitPoint?: CoordinationWaitPoint
@@ -18,13 +21,16 @@ export interface ICurrentPlaybackPosition {
     clientId: string;
 }
 
+/**
+ * hidden
+ */
 export class GroupPlaybackPosition {
     private _transportState: GroupTransportState;
     private _runtime: IRuntimeSignaler;
     private _updateInterval: TimeInterval;
     private _positions: Map<string, ICurrentPlaybackPosition>;
 
-    
+
     constructor(transportState: GroupTransportState, runtime: IRuntimeSignaler, updateInterval: TimeInterval) {
         this._transportState = transportState;
         this._runtime = runtime;
@@ -67,14 +73,14 @@ export class GroupPlaybackPosition {
                 case 'ended':
                     // not playing.
                     break;
-                default: 
+                default:
                     playing++;
                     break;
             }
         });
 
         return playing == 0;
-    } 
+    }
 
     /**
      * Returns the number of clients we're waiting for before we can stop waiting.
@@ -93,13 +99,13 @@ export class GroupPlaybackPosition {
         }
 
         return cnt;
-    } 
+    }
 
     /**
      * Returns the max playback position relative to the start position.
-     * 
+     *
      * @remarks
-     * This is called when calculating the current seekTo position. 
+     * This is called when calculating the current seekTo position.
      */
     public get maxPosition(): number {
         if (this._transportState.playbackState == 'playing') {
@@ -151,7 +157,7 @@ export class GroupPlaybackPosition {
         if (position.duration != undefined) {
             this.mediaDuration = position.duration;
         }
-        
+
         // Save last position
         if (this._positions.has(position.clientId)) {
             // Only update if newer position
@@ -166,7 +172,7 @@ export class GroupPlaybackPosition {
 
     private getMostProgressedPosition(): number {
         // Compute the max possible position for the current transport state.
-        // - This is needed to properly handle seeking backwards in time. Some playback heads may 
+        // - This is needed to properly handle seeking backwards in time. Some playback heads may
         //   not have performed their seek yet and will therefore be ahead of the local player.
         const maxPosition = this.maxPosition;
 

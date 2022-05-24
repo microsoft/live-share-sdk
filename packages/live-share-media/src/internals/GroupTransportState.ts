@@ -9,23 +9,36 @@ import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
 import { ExtendedMediaSessionPlaybackState, ExtendedMediaSessionAction } from '../MediaSessionExtensions';
 import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
 
-export interface ITransportState {
+
+/**
+ * @hidden
+ */
+ export interface ITransportState {
     playbackState: ExtendedMediaSessionPlaybackState;
     startPosition: number;
     timestamp: number;
     clientId: string;
 }
 
+/**
+ * @hidden
+ */
 export enum GroupTransportStateEvents {
     transportStateChange = 'transportStateChange'
 }
 
+/**
+ * @hidden
+ */
 export interface ITransportStateChangeEvent extends IEvent {
     action: ExtendedMediaSessionAction;
     seekTime?: number;
 }
 
-export class GroupTransportState extends EventEmitter {
+/**
+ * @hidden
+ */
+ export class GroupTransportState extends EventEmitter {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _track: GroupPlaybackTrack;
     private _current: ITransportState;
@@ -83,7 +96,7 @@ export class GroupTransportState extends EventEmitter {
             return false;
         }
 
-        // Ignore state changes that are older 
+        // Ignore state changes that are older
         const originalState = this.current;
         if (state.timestamp < originalState.timestamp) {
             return false;
@@ -100,13 +113,13 @@ export class GroupTransportState extends EventEmitter {
         // Trigger transport change
         const playerState = this._getMediaPlayerState().playbackState;
         if (originalState.playbackState == state.playbackState && playerState != 'ended') {
-            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'seekto', seekTime: state.startPosition }); 
+            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'seekto', seekTime: state.startPosition });
         } else if (state.playbackState == 'playing') {
             const now = EphemeralEvent.getTimestamp();
             const projectedPosition = state.startPosition + ((now - state.timestamp) / 1000);
-            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'play', seekTime: projectedPosition}); 
+            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'play', seekTime: projectedPosition});
         } else {
-            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'pause', seekTime: state.startPosition}); 
+            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'pause', seekTime: state.startPosition});
         }
 
         return true;

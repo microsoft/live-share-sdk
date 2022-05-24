@@ -4,8 +4,9 @@
  */
 
 /**
- * List of telemetry events. Wrap with a call to transmit() if the event should be transmitted to 
- * the telemetry service. 
+ * @hidden
+ * List of telemetry events. Wrap with a call to transmit() if the event should be transmitted to
+ * the telemetry service.
  */
 export const TelemetryEvents = {
     MediaPlayerSynchronizer: {
@@ -71,6 +72,9 @@ export const TelemetryEvents = {
     }
 }
 
+/**
+ * @hidden
+ */
 function transmit(eventName: string): string {
     return `${eventName}#transmit`;
 }

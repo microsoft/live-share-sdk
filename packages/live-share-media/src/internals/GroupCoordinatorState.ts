@@ -14,6 +14,9 @@ import { GroupTransportStateEvents } from './GroupTransportState';
 import { GroupPlaybackTrackData, PlaybackTrackDataEvents, IPlaybackTrackData } from './GroupPlaybackTrackData';
 import { TelemetryEvents } from './consts';
 
+/**
+ * @hidden
+ */
 export interface IPositionUpdateEvent extends IEphemeralEvent {
     track: IPlaybackTrack;
     trackData: IPlaybackTrackData;
@@ -23,35 +26,53 @@ export interface IPositionUpdateEvent extends IEphemeralEvent {
     waitPoint?: CoordinationWaitPoint;
 }
 
+/**
+ * @hidden
+ */
 export interface ITransportCommandEvent extends IEphemeralEvent {
     track: IPlaybackTrack;
     position: number;
 }
 
+/**
+ * @hidden
+ */
 export interface ISetTrackEvent extends IEphemeralEvent {
     metadata: ExtendedMediaMetadata|null;
     waitPoints: CoordinationWaitPoint[];
 }
 
+/**
+ * @hidden
+ */
 export interface ISetTrackDataEvent extends IEphemeralEvent {
     data: object|null;
 }
 
-export interface ITriggerActionEvent extends IEvent {
+/**
+ * @hidden
+ */
+ export interface ITriggerActionEvent extends IEvent {
     details: ExtendedMediaSessionActionDetails;
 }
 
+/**
+ * @hidden
+ */
 export enum GroupCoordinatorStateEvents {
     newwaitpoint = 'newwaitpoint',
     triggeraction = 'triggeraction'
 }
 
-export class GroupCoordinatorState extends EventEmitter {
-    private readonly _runtime: IRuntimeSignaler; 
+/**
+ * @hidden
+ */
+ export class GroupCoordinatorState extends EventEmitter {
+    private readonly _runtime: IRuntimeSignaler;
     private readonly _logger: EphemeralTelemetryLogger;
     private readonly _maxPlaybackDrift: TimeInterval;
     private _getMediaPlayerState: () => IMediaPlayerState;
-    
+
     // Shared group state
     private _playbackTrack: GroupPlaybackTrack;
     private _playbackTrackData: GroupPlaybackTrackData;
@@ -65,7 +86,7 @@ export class GroupCoordinatorState extends EventEmitter {
     // "Soft Suspension" tracking
     // - Soft suspensions temporarily disconnect the local media session when transitioning between
     //   paused, playing, and none states. This is to give the local client time to finish any inprogress
-    //   operations like sending a transport command or ending a suspension.  
+    //   operations like sending a transport command or ending a suspension.
     private _lastStateChange: ExtendedMediaSessionPlaybackState = 'none';
     private _lastStateChangeTime: number = 0;
 
@@ -161,13 +182,13 @@ export class GroupCoordinatorState extends EventEmitter {
 
     public beginSuspension(waitPoint?: CoordinationWaitPoint): void {
         this._suspensionCnt++;
-    
+
         if (waitPoint) {
             // Save most recent wait point
             this._waitPoint = waitPoint;
 
             // Add to track state if dynamic wait point
-            this.playbackTrack.addWaitPoint(waitPoint); 
+            this.playbackTrack.addWaitPoint(waitPoint);
         }
     }
 
@@ -204,7 +225,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 playbackState: this._waitPoint ? 'waiting' : playbackState,
                 position: positionState?.position || 0.0,
                 waitPoint: this._waitPoint
-            }; 
+            };
         }
     }
 
@@ -251,7 +272,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 case 'pause':
                     playbackState = 'paused';
                     break;
-            } 
+            }
 
             // Try to update playback state
             const newState: ITransportState = {
@@ -312,7 +333,7 @@ export class GroupCoordinatorState extends EventEmitter {
                     // Begin a "soft suspension" on select state changes
                     // - This is needed because the catchup logic can try to sink the client with
                     //  the rest of the group while the local player is trying to to seek to a
-                    //  new position. 
+                    //  new position.
                     switch (event.playbackState) {
                         case 'none':
                         case 'paused':
@@ -349,7 +370,7 @@ export class GroupCoordinatorState extends EventEmitter {
         if (!this.isWaiting && softSuspensionDelta >= 1000) {
             let { metadata, trackData, positionState, playbackState } = this._getMediaPlayerState();
             this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.CheckingForSyncIssues);
-    
+
             // Check for track change
             if (!this.playbackTrack.compare(metadata)) {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackOutOfSync);
@@ -359,7 +380,7 @@ export class GroupCoordinatorState extends EventEmitter {
 
             // Once local playback has ended there's no need to further sync the client. In fact
             // doing so could cause the player to loop.
-            // - The playbackPosition.trackEnded check is to catch late joiners and prevents syncing if everyone 
+            // - The playbackPosition.trackEnded check is to catch late joiners and prevents syncing if everyone
             //   else has finished the video.
             // - Should another user seek or press play after the video has ended that will cause
             //   a transport action to trigger which will take the player out of the ended state.
@@ -374,18 +395,18 @@ export class GroupCoordinatorState extends EventEmitter {
                 // - Target can return -1 in cases where there is no position tracking data
                 const target = this.playbackPosition.targetPosition;
                 if (target >= 0.0 && Math.abs(target - position) >= this._maxPlaybackDrift.seconds) {
-                    this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.PositionOutOfSync, null, { 
-                        current: position, 
-                        target: target 
+                    this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.PositionOutOfSync, null, {
+                        current: position,
+                        target: target
                     });
                     await this.emitTriggerAction({action: 'catchup', seekTime: target});
                 }
 
                 // Sync transport state
                 if (this.transportState.playbackState != playbackState) {
-                    this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportOutOfSync, null, { 
+                    this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportOutOfSync, null, {
                         current: playbackState,
-                        target: this.transportState.playbackState  
+                        target: this.transportState.playbackState
                     });
                     switch (this.transportState.playbackState) {
                         case 'playing':

@@ -8,22 +8,35 @@ import EventEmitter from 'events';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
 import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExtensions';
 
-export interface IPlaybackTrack {
+/**
+ * @hidden
+ */
+ export interface IPlaybackTrack {
     metadata: ExtendedMediaMetadata|null;
     waitPoints: CoordinationWaitPoint[];
     timestamp: number;
     clientId: string;
 }
 
-export enum GroupPlaybackTrackEvents {
+
+/**
+ * @hidden
+ */
+ export enum GroupPlaybackTrackEvents {
     trackChange = 'trackChange'
 }
 
-export interface IPlaybackTrackChangeEvent extends IEvent {
+/**
+ * @hidden
+ */
+ export interface IPlaybackTrackChangeEvent extends IEvent {
     metadata: ExtendedMediaMetadata|null;
 }
 
-export class GroupPlaybackTrack extends EventEmitter {
+/**
+ * @hidden
+ */
+ export class GroupPlaybackTrack extends EventEmitter {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _current: IPlaybackTrack;
 
@@ -95,9 +108,9 @@ export class GroupPlaybackTrack extends EventEmitter {
             if (track.timestamp == current.timestamp && track.clientId == current.clientId) {
                 return false;
             }
-        }   
+        }
 
-        // Ignore state changes that are older 
+        // Ignore state changes that are older
         if (track.timestamp < current.timestamp) {
             return false;
         }
@@ -112,8 +125,8 @@ export class GroupPlaybackTrack extends EventEmitter {
         this._current = track;
 
         // Notify listeners
-        this.emit(GroupPlaybackTrackEvents.trackChange, { name: GroupPlaybackTrackEvents.trackChange, metadata: track.metadata }); 
-        
+        this.emit(GroupPlaybackTrackEvents.trackChange, { name: GroupPlaybackTrackEvents.trackChange, metadata: track.metadata });
+
         return true;
     }
 

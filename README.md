@@ -16,7 +16,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-media | @fluidframework/test-client-utils | @microsoft/TeamsFx              |
 | --------------------- | -------------------- | --------------- | --------------------------- | --------------------------------- | ------------------------------- |
-| ~0.3.0                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.0 (optional)           | ~0.59.0 (optional)                | 2.0.0-experimental.0 (optional) |
+| ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)           | ~0.59.0 (optional)                | 2.0.0-experimental.0 (optional) |
 
 ### Dev Dependencies
 

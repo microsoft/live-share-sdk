@@ -38,6 +38,13 @@ export class RoleVerifier implements IRoleVerifier {
             throw new Error(`RoleVerifier: called getCLientRoles() without a clientId`);
         }
 
+        // Check for local client ID
+        // - For the local client we want to short circuit any network calls and just use the
+        //   cached value from the registerClientId() call. 
+        if (this._registerRequestCache.has(clientId)) {
+            return await this.registerClientId(clientId);
+        }
+
         return this._getRequestCache.cacheRequest(clientId, () => {
             return waitForResult(async () => {
                 const teamsClient = await this.getTeamsClient();

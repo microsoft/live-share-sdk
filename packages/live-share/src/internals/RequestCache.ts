@@ -31,6 +31,10 @@ export class RequestCache<TResult = any> {
         this._cache.set(key, { startTime, promise });
         return promise;
     }
+
+    public has(key: string): boolean {
+        return this._cache.has(key);
+    }
 }
 
 /**

@@ -38,7 +38,7 @@ describe("EphemeralEventTimer", () => {
             assert(triggered == created * 2, `Messages created is ${created} but received is an unexpected ${triggered}`);
             localTimer.stop();
             done();
-        }, 30);
+        }, 50);
     });
 
     it("Should repeatedly send events after a delay", (done) => {
@@ -62,6 +62,6 @@ describe("EphemeralEventTimer", () => {
             assert(triggered == created * 2, `Messages created is ${created} but received is an unexpected ${triggered}`);
             localTimer.stop();
             done();
-        }, 30);
+        }, 50);
     });
 });

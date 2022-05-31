@@ -306,7 +306,15 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
         return new Promise((resolve) => {
             const onConnected = (clientId: string) => {
                 this.runtime.off('connected', onConnected);
-                resolve(clientId);
+
+                // Yield current thread.
+                // - This addresses a race condition that exists around role verification. We had a 
+                //   situation where registerClientId() and getClientRoles() for the local client 
+                //   were both being called in response to the 'connected' event. getClientRoles() 
+                //   was winning out and we want that call to come after the register call so that 
+                //   it can just wait for the register call to finish and avoid a separate network
+                //   request. Simply yielding the current thread solves the issue.
+                setTimeout(() => resolve(clientId));
             };
 
             if (this.runtime.connected) {

@@ -128,11 +128,11 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
     }
 
      /**
-     * Registers client of the current user.
+     * Registers client id of the current user.
      * @param clientId Client ID to map to current user.
      * @returns The list of roles for the client.
      */
-     public static registerClientRoles(clientId: string): Promise<UserMeetingRole[]> {
+     public static registerClientId(clientId: string): Promise<UserMeetingRole[]> {
         return EphemeralEvent._roleVerifier.registerClientId(clientId);
     }
 

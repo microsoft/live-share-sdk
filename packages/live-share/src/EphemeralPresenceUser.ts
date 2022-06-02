@@ -88,7 +88,7 @@ export class EphemeralPresenceUser<TData = object> {
      */
      public getRoles(): Promise<UserMeetingRole[]> {
         if (this._isLocalUser) {
-            return EphemeralEvent.registerClientRoles(this._evt.clientId!);
+            return EphemeralEvent.registerClientId(this._evt.clientId!);
         } else {
             return EphemeralEvent.getClientRoles(this._evt.clientId!);
         }

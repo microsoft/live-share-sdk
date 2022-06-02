@@ -9,8 +9,8 @@
     "scripts": {
         "clean": "npx shx rm -rf bin",
         "build": "tsc -p tsconfig.build.json",
-        "test": "ts-mocha src/**/*.spec.ts --timeout 10000",
-        "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
+        "test": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --timeout 10000",
+        "test:debug": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
     },
     "dependencies": {
@@ -18,6 +18,9 @@
         "@microsoft/live-share": "0.3.1"
     },
     "devDependencies": {
+        "@fluidframework/test-runtime-utils": "~0.59.0",
+        "@fluidframework/test-utils": "~0.59.0",
+        "@fluidframework/test-version-utils": "~0.59.0",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^9.0.0",
         "@types/node": "^10.12.24",

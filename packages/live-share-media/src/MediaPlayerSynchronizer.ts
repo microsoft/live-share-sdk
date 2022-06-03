@@ -134,9 +134,6 @@ export class MediaPlayerSynchronizer extends EventEmitter {
             }
         };
 
-        // Register for coordinator state changes
-        this._mediaSession.coordinator.on(MediaSessionCoordinatorEvents.coordinatorstatechange, evt => this.emit(evt.type, evt));
-
         // Register media session actions
         for (const action of MediaPlayerSynchronizer.SESSION_ACTIONS) {
             this._mediaSession.setActionHandler(action, (details: ExtendedMediaSessionActionDetails) => {

@@ -11,7 +11,6 @@ export interface MediaSessionCoordinatorSuspension {
 export type MediaSessionCoordinatorState = "closed" | "waiting" | "joined";
 
 export enum MediaSessionCoordinatorEvents {
-    coordinatorstatechange = 'coordinatorstatechange',
     triggeraction = 'triggeraction'
 }
 

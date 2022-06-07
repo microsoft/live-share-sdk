@@ -5,7 +5,7 @@
 
 import { IEvent } from '@microsoft/live-share';
 import EventEmitter from 'events';
-import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
+import { GroupPlaybackTrack } from './GroupPlaybackTrack';
 
 
 /**
@@ -44,7 +44,7 @@ export interface IPlaybackTrackDataChangeEvent extends IEvent {
         this._current = { data: null, timestamp: 0, clientId: '' };
 
         // Listen for track changes
-        this._track.on(GroupPlaybackTrackEvents.trackChange, () => {
+        this._track.on('trackChange', () => {
             // Track changed so reset state to empty object
             this._current = {
                 data: null,

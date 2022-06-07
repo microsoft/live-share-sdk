@@ -6,8 +6,8 @@
 import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { EphemeralTelemetryLogger, UserMeetingRole } from '@microsoft/live-share';
 import { MediaPlayerSynchronizer } from './MediaPlayerSynchronizer';
-import { ITriggerActionEvent, TelemetryEvents } from './internals';
-import { MediaSessionCoordinatorEvents, ExtendedMediaSessionAction, ExtendedMediaSessionActionDetails } from './MediaSessionExtensions';
+import { TelemetryEvents } from './internals';
+import { ExtendedMediaSessionAction, ExtendedMediaSessionActionDetails } from './MediaSessionExtensions';
 import { EphemeralMediaSessionCoordinator, IMediaPlayerState } from './EphemeralMediaSessionCoordinator';
 import { MediaSessionActionThrottler } from './MediaSessionActionThrottler';
 import { RepeatedActionThrottler } from './RepeatedActionThrottler';
@@ -162,9 +162,8 @@ import { IMediaPlayer } from './IMediaPlayer';
 
         // Create coordinator and listen for triggered actions
         this._coordinator = new EphemeralMediaSessionCoordinator(this.runtime, () => this.getCurrentPlayerState());
-        this._coordinator.on(MediaSessionCoordinatorEvents.triggeraction, (event: ITriggerActionEvent) => {
+        this._coordinator.on('triggerAction', (details: ExtendedMediaSessionActionDetails) => {
             // Pre-process actions
-            const details = event.details;
             const seekTime = typeof details.seekTime == 'number' ? details.seekTime : -1;
             switch (details.action) {
                 case 'play':

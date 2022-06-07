@@ -4,10 +4,10 @@
  */
 
 import { EphemeralEventScope, EphemeralTelemetryLogger, EphemeralEventTarget, IEphemeralEvent, IRuntimeSignaler, TimeInterval, UserMeetingRole } from '@microsoft/live-share';
-import { CoordinationWaitPoint, ExtendedMediaSessionActionDetails, ExtendedMediaMetadata, ExtendedMediaSessionPlaybackState, MediaSessionCoordinatorEvents, MediaSessionCoordinatorState, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
-import { TelemetryEvents, ITransportCommandEvent, ISetTrackEvent, IPositionUpdateEvent, GroupCoordinatorState, GroupCoordinatorStateEvents, ITriggerActionEvent, ISetTrackDataEvent } from './internals';
+import { CoordinationWaitPoint, ExtendedMediaMetadata, ExtendedMediaSessionActionDetails, ExtendedMediaSessionPlaybackState, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
+import { TelemetryEvents, ITransportCommandEvent, ISetTrackEvent, IPositionUpdateEvent, GroupCoordinatorState, ISetTrackDataEvent } from './internals';
 import { EphemeralMediaSessionCoordinatorSuspension } from './EphemeralMediaSessionCoordinatorSuspension';
-import EventEmitter from "events";
+import { TypedEventEmitter } from "@fluidframework/common-utils";
 
 /**
  * Most recent state of the media session.
@@ -37,12 +37,33 @@ export interface IMediaPlayerState {
     positionState?: MediaPositionState;
 }
 
+
+/**
+ * Event typings for `EphemeralMediaSessionCoordinator` class.
+ */
+export interface IEphemeralMediaSessionCoordinatorEvents {
+    /**
+     * Base event signature
+     * @param event Name of event.
+     * @param listener Function called when event is triggered.
+     */
+   (event: string, listener: (...args: any[]) => void): any;
+
+    /**
+     * An action is being triggered in an attempt to synchronize the local player with the group.
+     * @param event Name of event.
+     * @param listener Function called when event is triggered.
+     * @param listener.event Details of the action to take.
+     */
+    (event: 'triggerAction', listener: (details: ExtendedMediaSessionActionDetails) => void): any;
+}
+
 /**
  * The `EphemeralMediaSessionCoordinator` tracks the playback & position state of all other 
  * clients being synchronized with. It is responsible for keeping the local media player
  * in sync with the group.  
  */
-export class EphemeralMediaSessionCoordinator extends EventEmitter  {
+export class EphemeralMediaSessionCoordinator extends TypedEventEmitter<IEphemeralMediaSessionCoordinatorEvents>  {
     private readonly _runtime: IRuntimeSignaler;
     private readonly _logger: EphemeralTelemetryLogger;
     private readonly _getPlayerState: () => IMediaPlayerState;
@@ -128,6 +149,35 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      * policies. 
      */
     public canSetTrackData: boolean = true;
+
+    public canSkipFrames = false;
+
+    /*
+    public get playbackLag(): number {
+
+    }
+
+    public get allowedPlaybackLag(): number {
+
+    }
+
+    public get groupClientCount(): number {
+
+    }
+
+    public get groupPlaybackPosition(): number {
+
+    }
+
+    public get maxGroupPlaybackLag(): number {
+
+    }
+
+    public get meanGroupPlaybackLag(): number {
+
+    }
+    */
+
 
     /**
      * Returns true if the local client is in a suspended state.
@@ -421,7 +471,7 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
 
         // Initialize internal coordinator state
         this._groupState = new GroupCoordinatorState(this._runtime, this._maxPlaybackDrift, this._positionUpdateInterval, this._getPlayerState);
-        this._groupState.on(GroupCoordinatorStateEvents.triggeraction, evt => this.emit(evt.name, evt));
+        this._groupState.on('triggerAction', details => this.emit('triggerAction', details));
 
         // Listen for track changes
         this._setTrackEvent = new EphemeralEventTarget<ISetTrackEvent>(scope, 'setTrack', (event, local) => this._groupState!.handleSetTrack(event, local));

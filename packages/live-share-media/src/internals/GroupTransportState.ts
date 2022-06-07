@@ -7,7 +7,7 @@ import { IEvent, EphemeralEvent } from '@microsoft/live-share';
 import EventEmitter from 'events';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
 import { ExtendedMediaSessionPlaybackState, ExtendedMediaSessionAction } from '../MediaSessionExtensions';
-import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
+import { GroupPlaybackTrack } from './GroupPlaybackTrack';
 
 
 /**
@@ -55,7 +55,7 @@ export interface ITransportStateChangeEvent extends IEvent {
         };
 
         // Listen for track changes
-        this._track.on(GroupPlaybackTrackEvents.trackChange, () => {
+        this._track.on('trackChange', () => {
             // Track changed so reset state to stopped ad position 0.0
             this._current = {
                 playbackState: 'none',

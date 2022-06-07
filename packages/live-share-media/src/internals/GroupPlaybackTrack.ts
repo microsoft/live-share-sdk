@@ -4,39 +4,33 @@
  */
 
 import { IEvent } from '@microsoft/live-share';
-import EventEmitter from 'events';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
 import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExtensions';
+import { TypedEventEmitter } from "@fluidframework/common-utils";
 
 /**
  * @hidden
  */
- export interface IPlaybackTrack {
+export interface IPlaybackTrack {
     metadata: ExtendedMediaMetadata|null;
     waitPoints: CoordinationWaitPoint[];
     timestamp: number;
     clientId: string;
 }
 
-
 /**
  * @hidden
  */
- export enum GroupPlaybackTrackEvents {
-    trackChange = 'trackChange'
+ export interface IGroupPlaybackTrackEvents {
+    (event: 'trackChange', listener: (evt: ExtendedMediaMetadata | null) => void): any;
+    (event: 'waitPointAdded', listener: (metadata: ExtendedMediaMetadata | null, waitPoint: CoordinationWaitPoint) => void): any;
+    (event: string, listener: (...args: any[]) => void): any;
 }
 
 /**
  * @hidden
  */
- export interface IPlaybackTrackChangeEvent extends IEvent {
-    metadata: ExtendedMediaMetadata|null;
-}
-
-/**
- * @hidden
- */
- export class GroupPlaybackTrack extends EventEmitter {
+export class GroupPlaybackTrack extends TypedEventEmitter<IGroupPlaybackTrackEvents> {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _current: IPlaybackTrack;
 
@@ -68,16 +62,18 @@ import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExt
             } else if (current.position > waitPoint.position) {
                 // Insert before current position
                 this._current.waitPoints.splice(i, 0, waitPoint);
+                this.emit('waitPointAdded', this.metadata, waitPoint);
                 return true;
             }
         }
 
         // Append to list
         this._current.waitPoints.push(waitPoint);
+        this.emit('waitPointAdded', this.metadata, waitPoint);
         return true;
     }
 
-    public findNextWaitPoint(lastWaitPoint: CoordinationWaitPoint|undefined): CoordinationWaitPoint|undefined {
+    public findNextWaitPoint(lastWaitPoint?: CoordinationWaitPoint): CoordinationWaitPoint|undefined {
         const waitPoints = this._current.waitPoints || [];
         for (const waitPoint of waitPoints) {
             if (lastWaitPoint && waitPoint.position <= lastWaitPoint.position) {
@@ -104,7 +100,7 @@ import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExt
                 this.addWaitPoint(waitPoint);
             });
 
-            // Ignore if same playback state
+            // Ignore if same IPlaybackState instance
             if (track.timestamp == current.timestamp && track.clientId == current.clientId) {
                 return false;
             }
@@ -125,7 +121,7 @@ import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExt
         this._current = track;
 
         // Notify listeners
-        this.emit(GroupPlaybackTrackEvents.trackChange, { name: GroupPlaybackTrackEvents.trackChange, metadata: track.metadata });
+        this.emit('trackChange', track.metadata);
 
         return true;
     }
@@ -138,10 +134,8 @@ import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExt
         // Only compare when we have two metadata instances
         if (current && metadata) {
             return JSON.stringify(current) == JSON.stringify(metadata);
-        } else if (!current && metadata) {
+        } else {
             return false;
         }
-
-        return true;
     }
 }

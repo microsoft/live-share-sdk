@@ -5,32 +5,66 @@
 
 import 'mocha';
 import { strict as assert } from 'assert';
-import { SimulatedBroadcastHub, SimulatedCollaborationSpace, IParticipant, ParticipantRole, Deferred } from '@microsoft/teams-collaboration';
-import { ExtendedMediaMetadata } from './MediaSessionExtensions';
-import { ICurrentPlaybackPosition } from './coordinatorState';
-import { TestMediaSession } from './SharedMediaSession.spec';
+import { Deferred } from './Deferred';
+import { ExtendedMediaMetadata, MediaSessionCoordinatorEvents } from '../MediaSessionExtensions';
+import { EphemeralMediaSessionCoordinator, IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
+import {} from './MockRuntimeSignaler';
+import * as TestUtils from './TestUtils';
 
-describe('SharedMediaSessionCoordinator', () => {
-    const user1: IParticipant = { participantId: 'user1', role: ParticipantRole.organizer };
-    const user2: IParticipant = { participantId: 'user2', role: ParticipantRole.participant };
+function createConnectedCoordinators(localPlayerState: () => IMediaPlayerState, remotePlayerState: () => IMediaPlayerState) {
+    const runtimes = TestUtils.createConnectedRuntimes();
+    const localCoordinator = new EphemeralMediaSessionCoordinator(runtimes.localRuntime, localPlayerState);
+    const remoteCoordinator = new EphemeralMediaSessionCoordinator(runtimes.remoteRuntime, remotePlayerState);
+    return {localCoordinator, remoteCoordinator, ...runtimes};
+}
+
+describe('EphemeralMediaSessionCoordinator', () => {
+
     const testTrack: ExtendedMediaMetadata = {
         trackIdentifier: 'https://example.org/test.mp3',
         title: 'Test Title',
         album: 'Test Album',
         artist: 'The Testers',
-        artwork: []
-    };
-    const leaderPosition: Partial<ICurrentPlaybackPosition> = {
-        playbackState: 'playing',
-        position: 25.0,
-        duration: 600.0
+        artwork: [],
+        liveStream: false
     };
 
-    const laggerPosition: Partial<ICurrentPlaybackPosition> = {
-        playbackState: 'playing',
-        position: 20.0,
-        duration: 600.0
-    };
+    const testTrackPosition: MediaPositionState = {
+        position: 5.25,
+        duration: 64.50,
+        playbackRate: 1.0
+    }
+
+    it('should send sync playing track when started.', async () => {
+        const done = new Deferred();
+        const components = createConnectedCoordinators(() => {
+            return TestUtils.createMediaPlayerState(testTrack, 'playing',testTrackPosition);
+        }, () => {
+            return TestUtils.createMediaPlayerState(null, 'none');
+        });
+
+        components.localCoordinator.on('')
+
+        const hub = new SimulatedBroadcastHub();
+        const space1 = new SimulatedCollaborationSpace(user1, hub);
+        const space2 = new SimulatedCollaborationSpace(user2, hub);
+
+        try {
+            let cnt = 0;
+            const session = new TestMediaSession(space1);
+            await space2.join();
+            space2.socket.addBroadcastListener(session.name, 'joined', async (event) => {
+                cnt++;
+            });
+    
+            await space1.join();
+            assert(cnt == 1, `joined event not sent`);
+        } finally {
+            await space1.leave();
+            await space2.leave();
+        }
+    });
+
 
     it('should send "joined" event when joined.', async () => {
         const hub = new SimulatedBroadcastHub();
@@ -205,10 +239,10 @@ describe('SharedMediaSessionCoordinator', () => {
 
     //     try {
     //         const session1 = new TestMediaSession(testTrack, leaderPosition);
-    //         const session1.coordinator = new SharedMediaSessionCoordinator(space1, session1, session1.name);
+    //         const session1.coordinator = new EphemeralMediaSessionCoordinator(space1, session1, session1.name);
     //         session1.coordinator.positionUpdateInterval = 0.02;
     //         const session2 = new TestMediaSession(testTrack, laggerPosition);
-    //         const coordinator2 = new SharedMediaSessionCoordinator(space2, session2, session2.name);
+    //         const coordinator2 = new EphemeralMediaSessionCoordinator(space2, session2, session2.name);
     //         coordinator2.positionUpdateInterval = 0.02;
             
     //         await session1.coordinator.join();

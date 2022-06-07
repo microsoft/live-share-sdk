@@ -5,7 +5,6 @@
 
 import { EphemeralEvent, IRuntimeSignaler, TimeInterval } from '@microsoft/live-share';
 import { GroupTransportState } from './GroupTransportState';
-import { GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
 import { CoordinationWaitPoint, ExtendedMediaSessionPlaybackState } from '../MediaSessionExtensions';
 
 /**
@@ -38,7 +37,7 @@ export class GroupPlaybackPosition {
         this._positions = new Map();
 
         // Listen for track change
-        this._transportState.track.on(GroupPlaybackTrackEvents.trackChange, _ => {
+        this._transportState.track.on('trackChange', (metadata) => {
             // Reset position tracking and duration
             this._positions = new Map();
             this.mediaDuration = undefined;

@@ -5,7 +5,7 @@
 
 import { EphemeralTelemetryLogger, IEvent, TimeInterval } from '@microsoft/live-share';
 import EventEmitter from 'events';
-import { ExtendedMediaSessionAction, ExtendedMediaSessionPlaybackState, ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionActionDetails, MediaSessionCoordinatorEvents, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
+import { ExtendedMediaSessionAction, ExtendedMediaSessionPlaybackState, ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionActionDetails, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
 import { EphemeralMediaSession } from './EphemeralMediaSession';
 import { VolumeLimiter } from './VolumeLimiter';
 import { IMediaPlayer } from './IMediaPlayer';

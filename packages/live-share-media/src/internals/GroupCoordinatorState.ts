@@ -3,16 +3,16 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent, IEphemeralEvent, EphemeralEvent, TimeInterval, IRuntimeSignaler, EphemeralTelemetryLogger } from '@microsoft/live-share';
-import EventEmitter from 'events';
+import { IEphemeralEvent, EphemeralEvent, TimeInterval, IRuntimeSignaler, EphemeralTelemetryLogger } from '@microsoft/live-share';
 import { ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionPlaybackState, ExtendedMediaSessionActionDetails } from '../MediaSessionExtensions';
-import { GroupPlaybackTrack, GroupPlaybackTrackEvents, IPlaybackTrack } from './GroupPlaybackTrack';
+import { GroupPlaybackTrack, IPlaybackTrack } from './GroupPlaybackTrack';
 import { GroupTransportState, ITransportState } from './GroupTransportState';
 import { GroupPlaybackPosition, ICurrentPlaybackPosition } from './GroupPlaybackPosition';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
 import { GroupTransportStateEvents } from './GroupTransportState';
 import { GroupPlaybackTrackData, PlaybackTrackDataEvents, IPlaybackTrackData } from './GroupPlaybackTrackData';
 import { TelemetryEvents } from './consts';
+import { TypedEventEmitter } from "@fluidframework/common-utils";
 
 /**
  * @hidden
@@ -52,22 +52,16 @@ export interface ISetTrackDataEvent extends IEphemeralEvent {
 /**
  * @hidden
  */
- export interface ITriggerActionEvent extends IEvent {
-    details: ExtendedMediaSessionActionDetails;
+export interface IGroupCoordinatorStateEvents {
+    (event: 'newWaitPoint', listener: (waitPoint: CoordinationWaitPoint) => void): any;
+    (event: 'triggerAction', listener: (details: ExtendedMediaSessionActionDetails) => void): any;
+    (event: string, listener: (...args: any[]) => void): any;
 }
 
 /**
  * @hidden
  */
-export enum GroupCoordinatorStateEvents {
-    newwaitpoint = 'newwaitpoint',
-    triggeraction = 'triggeraction'
-}
-
-/**
- * @hidden
- */
- export class GroupCoordinatorState extends EventEmitter {
+ export class GroupCoordinatorState extends TypedEventEmitter<IGroupCoordinatorStateEvents> {
     private readonly _runtime: IRuntimeSignaler;
     private readonly _logger: EphemeralTelemetryLogger;
     private readonly _maxPlaybackDrift: TimeInterval;
@@ -102,10 +96,10 @@ export enum GroupCoordinatorStateEvents {
         this._getMediaPlayerState = getMediaPlayerState;
 
         // Listen track related events
-        this._playbackTrack.on(GroupPlaybackTrackEvents.trackChange, evt => {
+        this._playbackTrack.on('trackChange', (metadata) => {
             if (!this.isSuspended) {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackChanged);
-                this.emitSetTrack(evt.metadata!);
+                this.emitSetTrack(metadata!);
             } else {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackChangeDelayed);
             }
@@ -437,10 +431,6 @@ export enum GroupCoordinatorStateEvents {
     }
 
     private emitTriggerAction(details: ExtendedMediaSessionActionDetails): void {
-        const evt: ITriggerActionEvent = {
-            name: GroupCoordinatorStateEvents.triggeraction,
-            details: details
-        };
-         this.emit(GroupCoordinatorStateEvents.triggeraction, evt);
+         this.emit('triggerAction', details);
     }
 }

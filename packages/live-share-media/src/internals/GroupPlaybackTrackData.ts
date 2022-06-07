@@ -3,9 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent } from '@microsoft/live-share';
 import EventEmitter from 'events';
 import { GroupPlaybackTrack } from './GroupPlaybackTrack';
+import { TypedEventEmitter } from "@fluidframework/common-utils";
 
 
 /**
@@ -20,21 +20,15 @@ import { GroupPlaybackTrack } from './GroupPlaybackTrack';
 /**
  * @hidden
  */
- export enum PlaybackTrackDataEvents {
-    dataChange = 'dataChange'
+export interface IGroupPlaybackTrackDataEvents {
+    (event: 'dataChange', listener: (data: object | null) => void): any;
+    (event: string, listener: (...args: any[]) => void): any;
 }
 
 /**
  * @hidden
  */
-export interface IPlaybackTrackDataChangeEvent extends IEvent {
-    data: object|null;
-}
-
-/**
- * @hidden
- */
- export class GroupPlaybackTrackData extends EventEmitter {
+ export class GroupPlaybackTrackData extends TypedEventEmitter<IGroupPlaybackTrackDataEvents> {
     private _track: GroupPlaybackTrack;
     private _current: IPlaybackTrackData;
 
@@ -83,7 +77,7 @@ export interface IPlaybackTrackDataChangeEvent extends IEvent {
         this._current = event;
 
         // Notify listeners
-        this.emit(PlaybackTrackDataEvents.dataChange, { type: PlaybackTrackDataEvents.dataChange, data: event.data });
+        this.emit('dataChange', event.data);
 
         return true;
     }

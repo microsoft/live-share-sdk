@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent } from '@microsoft/live-share';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
 import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExtensions';
 import { TypedEventEmitter } from "@fluidframework/common-utils";
@@ -21,8 +20,8 @@ export interface IPlaybackTrack {
 /**
  * @hidden
  */
- export interface IGroupPlaybackTrackEvents {
-    (event: 'trackChange', listener: (evt: ExtendedMediaMetadata | null) => void): any;
+export interface IGroupPlaybackTrackEvents {
+    (event: 'trackChange', listener: (metadata: ExtendedMediaMetadata | null) => void): any;
     (event: 'waitPointAdded', listener: (metadata: ExtendedMediaMetadata | null, waitPoint: CoordinationWaitPoint) => void): any;
     (event: string, listener: (...args: any[]) => void): any;
 }

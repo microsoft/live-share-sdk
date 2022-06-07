@@ -10,7 +10,7 @@ import { GroupTransportState, ITransportState } from './GroupTransportState';
 import { GroupPlaybackPosition, ICurrentPlaybackPosition } from './GroupPlaybackPosition';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
 import { GroupTransportStateEvents } from './GroupTransportState';
-import { GroupPlaybackTrackData, PlaybackTrackDataEvents, IPlaybackTrackData } from './GroupPlaybackTrackData';
+import { GroupPlaybackTrackData, IPlaybackTrackData } from './GroupPlaybackTrackData';
 import { TelemetryEvents } from './consts';
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 
@@ -106,10 +106,10 @@ export interface IGroupCoordinatorStateEvents {
         });
 
         // Listen for track data changes
-        this._playbackTrackData.on(PlaybackTrackDataEvents.dataChange, evt => {
+        this._playbackTrackData.on('dataChange', (data) => {
             if (!this.isSuspended && !this.isWaiting) {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackDataChanged);
-                this.emitTriggerAction({action: 'datachange', data: evt.data});
+                this.emitTriggerAction({action: 'datachange', data: data });
             } else {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackDataChangeDelayed);
             }

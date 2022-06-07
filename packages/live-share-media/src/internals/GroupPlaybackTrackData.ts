@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import EventEmitter from 'events';
 import { GroupPlaybackTrack } from './GroupPlaybackTrack';
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 

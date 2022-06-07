@@ -4,10 +4,10 @@
  */
 
 import { IEvent, EphemeralEvent } from '@microsoft/live-share';
-import EventEmitter from 'events';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
-import { ExtendedMediaSessionPlaybackState, ExtendedMediaSessionAction } from '../MediaSessionExtensions';
+import { ExtendedMediaSessionPlaybackState, ExtendedMediaSessionActionDetails } from '../MediaSessionExtensions';
 import { GroupPlaybackTrack } from './GroupPlaybackTrack';
+import { TypedEventEmitter } from "@fluidframework/common-utils";
 
 
 /**
@@ -23,22 +23,15 @@ import { GroupPlaybackTrack } from './GroupPlaybackTrack';
 /**
  * @hidden
  */
-export enum GroupTransportStateEvents {
-    transportStateChange = 'transportStateChange'
+export interface IGroupTransportStateEvents {
+    (event: 'transportStateChange', listener: (details: ExtendedMediaSessionActionDetails) => void): any;
+    (event: string, listener: (...args: any[]) => void): any;
 }
 
 /**
  * @hidden
  */
-export interface ITransportStateChangeEvent extends IEvent {
-    action: ExtendedMediaSessionAction;
-    seekTime?: number;
-}
-
-/**
- * @hidden
- */
- export class GroupTransportState extends EventEmitter {
+ export class GroupTransportState extends TypedEventEmitter<IGroupTransportStateEvents> {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _track: GroupPlaybackTrack;
     private _current: ITransportState;
@@ -113,13 +106,13 @@ export interface ITransportStateChangeEvent extends IEvent {
         // Trigger transport change
         const playerState = this._getMediaPlayerState().playbackState;
         if (originalState.playbackState == state.playbackState && playerState != 'ended') {
-            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'seekto', seekTime: state.startPosition });
+            this.emit('transportStateChange', { action: 'seekto', seekTime: state.startPosition });
         } else if (state.playbackState == 'playing') {
             const now = EphemeralEvent.getTimestamp();
             const projectedPosition = state.startPosition + ((now - state.timestamp) / 1000);
-            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'play', seekTime: projectedPosition});
+            this.emit('transportStateChange', { action: 'play', seekTime: projectedPosition});
         } else {
-            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'pause', seekTime: state.startPosition});
+            this.emit('transportStateChange', { action: 'pause', seekTime: state.startPosition});
         }
 
         return true;

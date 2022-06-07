@@ -9,7 +9,6 @@ import { GroupPlaybackTrack, IPlaybackTrack } from './GroupPlaybackTrack';
 import { GroupTransportState, ITransportState } from './GroupTransportState';
 import { GroupPlaybackPosition, ICurrentPlaybackPosition } from './GroupPlaybackPosition';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
-import { GroupTransportStateEvents } from './GroupTransportState';
 import { GroupPlaybackTrackData, IPlaybackTrackData } from './GroupPlaybackTrackData';
 import { TelemetryEvents } from './consts';
 import { TypedEventEmitter } from "@fluidframework/common-utils";
@@ -116,31 +115,31 @@ export interface IGroupCoordinatorStateEvents {
         });
 
         // Listen to transport related events
-        this._transportState.on(GroupTransportStateEvents.transportStateChange, evt => {
+        this._transportState.on('transportStateChange', (details) => {
             if (!this.isSuspended && !this.isWaiting) {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportStateChanged, null, {
-                    action: evt.action,
-                    seekTime: evt.seekTime
+                    action: details.action,
+                    seekTime: details.seekTime!
                 });
 
                 // Trigger action
-                switch (evt.action) {
+                switch (details.action) {
                     case 'play':
-                        this.emitTriggerAction({action: 'play', seekTime: evt.seekTime});
+                        this.emitTriggerAction({action: 'play', seekTime: details.seekTime});
                         break;
 
                     case 'pause':
-                        this.emitTriggerAction({action: 'pause', seekTime: evt.seekTime});
+                        this.emitTriggerAction({action: 'pause', seekTime: details.seekTime});
                         break;
 
                     case 'seekto':
-                        this.emitTriggerAction({action: 'seekto', seekTime: evt.seekTime});
+                        this.emitTriggerAction({action: 'seekto', seekTime: details.seekTime});
                         break;
                 }
             } else {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportStateChangeDelayed, null, {
-                    action: evt.action,
-                    seekTime: evt.seekTime
+                    action: details.action,
+                    seekTime: details.seekTime!
                 });
             }
         });

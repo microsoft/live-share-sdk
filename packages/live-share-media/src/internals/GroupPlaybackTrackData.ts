@@ -5,6 +5,7 @@
 
 import { GroupPlaybackTrack } from './GroupPlaybackTrack';
 import { TypedEventEmitter } from "@fluidframework/common-utils";
+import { ExtendedMediaMetadata } from '../MediaSessionExtensions';
 
 
 /**
@@ -20,7 +21,7 @@ import { TypedEventEmitter } from "@fluidframework/common-utils";
  * @hidden
  */
 export interface IGroupPlaybackTrackDataEvents {
-    (event: 'dataChange', listener: (data: object | null) => void): any;
+    (event: 'trackDataChange', listener: (metadata: ExtendedMediaMetadata | null, data: object | null) => void): any;
     (event: string, listener: (...args: any[]) => void): any;
 }
 
@@ -76,7 +77,7 @@ export interface IGroupPlaybackTrackDataEvents {
         this._current = event;
 
         // Notify listeners
-        this.emit('dataChange', event.data);
+        this.emit('trackDataChange', this._track.metadata, event.data);
 
         return true;
     }

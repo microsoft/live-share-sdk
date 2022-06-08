@@ -109,7 +109,7 @@ export class GroupPlaybackPosition {
     public get maxPosition(): number {
         if (this._transportState.playbackState == 'playing') {
             const now = EphemeralEvent.getTimestamp();
-            const projected = this._transportState.startPosition + ((now - this._transportState.timestamp) / 1000);
+            const projected = this._transportState.startPosition + ((now - this._transportState.startTimestamp) / 1000);
             return this.limitProjectedPosition(projected);
         } else {
             return this._transportState.startPosition;

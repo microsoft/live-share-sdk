@@ -3,9 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent, EphemeralEvent } from '@microsoft/live-share';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
-import { ExtendedMediaSessionPlaybackState, ExtendedMediaSessionActionDetails } from '../MediaSessionExtensions';
+import { ExtendedMediaSessionPlaybackState, ExtendedMediaSessionAction, ExtendedMediaMetadata } from '../MediaSessionExtensions';
 import { GroupPlaybackTrack } from './GroupPlaybackTrack';
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 
@@ -13,7 +12,7 @@ import { TypedEventEmitter } from "@fluidframework/common-utils";
 /**
  * @hidden
  */
- export interface ITransportState {
+export interface ITransportState {
     playbackState: ExtendedMediaSessionPlaybackState;
     startPosition: number;
     timestamp: number;
@@ -23,8 +22,17 @@ import { TypedEventEmitter } from "@fluidframework/common-utils";
 /**
  * @hidden
  */
+export interface ITransportStateChange {
+    action: ExtendedMediaSessionAction;
+    startPosition: number;
+    startTimestamp: number;
+}
+
+/**
+ * @hidden
+ */
 export interface IGroupTransportStateEvents {
-    (event: 'transportStateChange', listener: (details: ExtendedMediaSessionActionDetails) => void): any;
+    (event: 'transportStateChange', listener: (metadata: ExtendedMediaMetadata | null, change: ITransportStateChange) => void): any;
     (event: string, listener: (...args: any[]) => void): any;
 }
 
@@ -71,7 +79,7 @@ export interface IGroupTransportStateEvents {
         return this.current.startPosition;
     }
 
-    public get timestamp(): number {
+    public get startTimestamp(): number {
         return this.current.timestamp;
     }
 
@@ -79,13 +87,13 @@ export interface IGroupTransportStateEvents {
         return this._track;
     }
 
-    public compare(state: ITransportState): boolean {
-        return this.current.playbackState == state.playbackState && this.current.startPosition == state.startPosition;
+    public compare(playbackState: ExtendedMediaSessionPlaybackState, startPosition: number): boolean {
+        return this.current.playbackState == playbackState && this.current.startPosition == startPosition;
     }
 
     public updateState(state: ITransportState): boolean {
         // Ignore if same playback state and start position
-        if (this.compare(state)) {
+        if (this.compare(state.playbackState, state.startPosition)) {
             return false;
         }
 
@@ -103,18 +111,19 @@ export interface IGroupTransportStateEvents {
         // Update playback state
         this._current = state;
 
-        // Trigger transport change
+        // Identify triggered action
+        let action: ExtendedMediaSessionAction;
         const playerState = this._getMediaPlayerState().playbackState;
         if (originalState.playbackState == state.playbackState && playerState != 'ended') {
-            this.emit('transportStateChange', { action: 'seekto', seekTime: state.startPosition });
+            action = 'seekto';
         } else if (state.playbackState == 'playing') {
-            const now = EphemeralEvent.getTimestamp();
-            const projectedPosition = state.startPosition + ((now - state.timestamp) / 1000);
-            this.emit('transportStateChange', { action: 'play', seekTime: projectedPosition});
+            action = 'play';
         } else {
-            this.emit('transportStateChange', { action: 'pause', seekTime: state.startPosition});
+            action = 'pause';
         }
 
+        // Trigger transport change
+        this.emit('transportStateChange', this._track.metadata, { action: action, startPosition: state.startPosition, startTimestamp: state.timestamp });
         return true;
     }
 }

@@ -7,8 +7,7 @@ import 'mocha';
 import { strict as assert } from 'assert';
 import { Deferred } from './Deferred';
 import { GroupPlaybackTrack } from '../internals/GroupPlaybackTrack';
-import { CoordinationWaitPoint, ExtendedMediaMetadata, ExtendedMediaSessionPlaybackState } from '../MediaSessionExtensions';
-import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
+import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExtensions';
 import * as TestUtils from './TestUtils';
 
 describe('GroupPlaybackTrack', () => {
@@ -16,7 +15,6 @@ describe('GroupPlaybackTrack', () => {
     const track2 = { trackIdentifier: 'track2', title: 'Test Track 2' } as ExtendedMediaMetadata;
     const waitPoint1 = { position: 1.0, reason: 'first' } as CoordinationWaitPoint;
     const waitPoint2 = { position: 2.0, reason: 'second' } as CoordinationWaitPoint;
-    const waitPoint3 = { position: 3.0, reason: 'third' } as CoordinationWaitPoint;
 
     it('should compareMetadata() of two tracks', async () => {
         let matches = GroupPlaybackTrack.compareMetadata(track1, track1);
@@ -71,7 +69,8 @@ describe('GroupPlaybackTrack', () => {
             }
         });
 
-        playbackTrack.updateTrack({ metadata: track1, waitPoints: [], timestamp: 1, clientId: 'a'});
+        const updated = playbackTrack.updateTrack({ metadata: track1, waitPoints: [], timestamp: 1, clientId: 'a'});
+        assert(updated, `updateTrack() didn't return updated`);
 
         await done.promise;
     });
@@ -89,7 +88,8 @@ describe('GroupPlaybackTrack', () => {
             }
         });
 
-        playbackTrack.updateTrack({ metadata: track1, waitPoints: [], timestamp: 1, clientId: 'a'});
+        const updated = playbackTrack.updateTrack({ metadata: track1, waitPoints: [], timestamp: 1, clientId: 'a'});
+        assert(updated, `updateTrack() didn't return updated`);
 
         await done.promise;
     });
@@ -119,8 +119,39 @@ describe('GroupPlaybackTrack', () => {
         });
 
         playbackTrack.updateTrack({ metadata: track1, waitPoints: [], timestamp: 3, clientId: 'a'});
-        playbackTrack.updateTrack({ metadata: track2, waitPoints: [], timestamp: 2, clientId: 'b'});
+        const updated = playbackTrack.updateTrack({ metadata: track2, waitPoints: [], timestamp: 2, clientId: 'b'});
+        assert(!updated, `updateTrack() returned updated`);
         assert(cnt == 1, `called trackChange event ${cnt} times`);
+    });
+
+    it('should ignore track changes with same timestamps from different clients', async () => {
+        let cnt = 0;
+        let playerState = TestUtils.createMediaPlayerState(null, 'none');
+        const playbackTrack = new GroupPlaybackTrack(() => playerState);
+        playbackTrack.on('trackChange', (metadata) => {
+            cnt++;
+            playerState.metadata = metadata;
+        });
+
+        playbackTrack.updateTrack({ metadata: track1, waitPoints: [], timestamp: 1, clientId: 'a'});
+        const updated = playbackTrack.updateTrack({ metadata: track2, waitPoints: [], timestamp: 1, clientId: 'b'});
+        assert(!updated, `updateTrack() returned updated`);
+        assert(cnt == 1, `called trackChange event ${cnt} times`);
+    });
+
+    it('should allow track changes with same timestamps from the same client', async () => {
+        let cnt = 0;
+        let playerState = TestUtils.createMediaPlayerState(null, 'none');
+        const playbackTrack = new GroupPlaybackTrack(() => playerState);
+        playbackTrack.on('trackChange', (metadata) => {
+            cnt++;
+            playerState.metadata = metadata;
+        });
+
+        playbackTrack.updateTrack({ metadata: track1, waitPoints: [], timestamp: 1, clientId: 'a'});
+        const updated = playbackTrack.updateTrack({ metadata: track2, waitPoints: [], timestamp: 1, clientId: 'a'});
+        assert(updated, `updateTrack() wasn't updated`);
+        assert(cnt == 2, `called trackChange event ${cnt} times`);
     });
 
     it('should fire "waitPointAdded" event when a wait point is added via addWaitPoint()', async () => {
@@ -137,7 +168,8 @@ describe('GroupPlaybackTrack', () => {
             }
         });
 
-        playbackTrack.addWaitPoint(waitPoint1);
+        const added = playbackTrack.addWaitPoint(waitPoint1);
+        assert(added, `addWaitPoint() didn't return added`);
 
         await done.promise;
     });

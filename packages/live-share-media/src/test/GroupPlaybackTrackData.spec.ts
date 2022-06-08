@@ -28,13 +28,14 @@ describe('GroupPlaybackTrackData', () => {
         assert(trackData.current.clientId == '', `invalid current.clientId`);
     });
 
-    it('should fire "dataChange" event when initial data set', async () => {
+    it('should fire "trackDataChange" event when initial data set', async () => {
         const done = new Deferred();
         let playerState = TestUtils.createMediaPlayerState(track1, 'none');
         const playbackTrack = new GroupPlaybackTrack(() => playerState);
         const trackData = new GroupPlaybackTrackData(playbackTrack);
-        trackData.on('dataChange', (data) => {
+        trackData.on('trackDataChange', (metadata, data) => {
             try {
+                assert(TestUtils.compareObjects(metadata, track1), `wrong track`);
                 assert(TestUtils.compareObjects(data, data1), `wrong data`);
                 done.resolve();
             } catch(err) {
@@ -42,23 +43,26 @@ describe('GroupPlaybackTrackData', () => {
             }
         });
 
-        trackData.updateData({ data: data1, timestamp: 1, clientId: 'a'});
+        const updated = trackData.updateData({ data: data1, timestamp: 1, clientId: 'a'});
+        assert(updated, `updateData() didn't return updated`);
 
         await done.promise;
     });
 
-    it('should fire "dataChange" event when data changed', async () => {
+    it('should fire "trackDataChange" event when data changed', async () => {
         let hasData = false;
         const done = new Deferred();
         let playerState = TestUtils.createMediaPlayerState(track1, 'none');
         const playbackTrack = new GroupPlaybackTrack(() => playerState);
         const trackData = new GroupPlaybackTrackData(playbackTrack);
-        trackData.on('dataChange', (data) => {
+        trackData.on('trackDataChange', (metadata, data) => {
             try {
                 if (!hasData) {
+                    assert(TestUtils.compareObjects(metadata, track1), `wrong track`);
                     assert(TestUtils.compareObjects(data, data1), `wrong initial data`);
                     hasData = true;
                 } else {
+                    assert(TestUtils.compareObjects(metadata, track1), `wrong track`);
                     assert(TestUtils.compareObjects(data, data2), `wrong update data`);
                     done.resolve();
                 }
@@ -73,12 +77,25 @@ describe('GroupPlaybackTrackData', () => {
         await done.promise;
     });
 
+    it('should ignore data changes for older timestamps', async () => {
+        let cnt = 0;
+        let playerState = TestUtils.createMediaPlayerState(track1, 'none');
+        const playbackTrack = new GroupPlaybackTrack(() => playerState);
+        const trackData = new GroupPlaybackTrackData(playbackTrack);
+        trackData.on('trackDataChange', (metadata, data) => cnt++);
+
+        trackData.updateData({ data: data1, timestamp: 3, clientId: 'a'});
+        const updated = trackData.updateData({ data: data2, timestamp: 2, clientId: 'b'});
+        assert(!updated, `updateData() returned updated`);
+        assert(cnt == 1, `called trackDataChange event ${cnt} times`);
+    });
+
     it('should reset data when track changes', async () => {
         let cnt = 0;
         let playerState = TestUtils.createMediaPlayerState(track1, 'none');
         const playbackTrack = new GroupPlaybackTrack(() => playerState);
         const trackData = new GroupPlaybackTrackData(playbackTrack);
-        trackData.on('dataChange', (data) => cnt++);
+        trackData.on('trackDataChange', (data) => cnt++);
 
         trackData.updateData({ data: data1, timestamp: 1, clientId: 'a'});
         assert(TestUtils.compareObjects(trackData.data, data1), `wrong initial track data`);
@@ -86,6 +103,6 @@ describe('GroupPlaybackTrackData', () => {
         // Change tracks
         playbackTrack.updateTrack({ metadata: track2, waitPoints: [], timestamp: 2, clientId: 'b'});
         assert(!trackData.data, `track data didn't reset`);
-        assert(cnt == 1, `dataChange event called too many times: ${cnt}`);
+        assert(cnt == 1, `trackDataChange event called too many times: ${cnt}`);
     });
 });

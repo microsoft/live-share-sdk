@@ -69,6 +69,7 @@ export const TelemetryEvents = {
         TrackDataOutOfSync: transmit('GroupCoordinator:TrackDataOutOfSync'),
         TransportOutOfSync: transmit('GroupCoordinator:TransportOutOfSync'),
         PositionOutOfSync: transmit('GroupCoordinator:PositionOutOfSync'),
+        WaitPointAdded: 'GroupCoordinator:WaitPointAdded',
     }
 }
 

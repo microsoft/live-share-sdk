@@ -6,7 +6,7 @@
 import { IEphemeralEvent, EphemeralEvent, TimeInterval, IRuntimeSignaler, EphemeralTelemetryLogger } from '@microsoft/live-share';
 import { ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionPlaybackState, ExtendedMediaSessionActionDetails } from '../MediaSessionExtensions';
 import { GroupPlaybackTrack, IPlaybackTrack } from './GroupPlaybackTrack';
-import { GroupTransportState, ITransportState } from './GroupTransportState';
+import { GroupTransportState, ITransportState, ITransportStateChange } from './GroupTransportState';
 import { GroupPlaybackPosition, ICurrentPlaybackPosition } from './GroupPlaybackPosition';
 import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
 import { GroupPlaybackTrackData, IPlaybackTrackData } from './GroupPlaybackTrackData';
@@ -52,8 +52,10 @@ export interface ISetTrackDataEvent extends IEphemeralEvent {
  * @hidden
  */
 export interface IGroupCoordinatorStateEvents {
-    (event: 'newWaitPoint', listener: (waitPoint: CoordinationWaitPoint) => void): any;
-    (event: 'triggerAction', listener: (details: ExtendedMediaSessionActionDetails) => void): any;
+    (event: 'trackChange', listener: (metadata: ExtendedMediaMetadata | null) => void): any;
+    (event: 'waitPointAdded', listener: (metadata: ExtendedMediaMetadata | null, waitPoint: CoordinationWaitPoint) => void): any;
+    (event: 'trackDataChange', listener: (metadata: ExtendedMediaMetadata | null, data: object | null) => void): any;
+    (event: 'transportStateChange', listener: (metadata: ExtendedMediaMetadata | null, change: ITransportStateChange) => void): any;
     (event: string, listener: (...args: any[]) => void): any;
 }
 
@@ -98,48 +100,44 @@ export interface IGroupCoordinatorStateEvents {
         this._playbackTrack.on('trackChange', (metadata) => {
             if (!this.isSuspended) {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackChanged);
-                this.emitSetTrack(metadata!);
+                this.emit('trackChange', metadata);
             } else {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackChangeDelayed);
             }
         });
 
+        this._playbackTrack.on('waitPointAdded', (metadata, waitPoint) => {
+            this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.WaitPointAdded, null, {
+                position: waitPoint.position,
+                maxClents: waitPoint.maxClients
+            });
+            this.emit('waitPointAdded', metadata, waitPoint);
+        });
+
         // Listen for track data changes
-        this._playbackTrackData.on('dataChange', (data) => {
+        this._playbackTrackData.on('trackDataChange', (metadata, data) => {
             if (!this.isSuspended && !this.isWaiting) {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackDataChanged);
-                this.emitTriggerAction({action: 'datachange', data: data });
+                this.emit('trackDataChange', metadata, data);
             } else {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackDataChangeDelayed);
             }
         });
 
         // Listen to transport related events
-        this._transportState.on('transportStateChange', (details) => {
+        this._transportState.on('transportStateChange', (metadata, change) => {
             if (!this.isSuspended && !this.isWaiting) {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportStateChanged, null, {
-                    action: details.action,
-                    seekTime: details.seekTime!
+                    action: change.action,
+                    startPosition: change.startPosition,
+                    startTimestamp: change.startTimestamp
                 });
-
-                // Trigger action
-                switch (details.action) {
-                    case 'play':
-                        this.emitTriggerAction({action: 'play', seekTime: details.seekTime});
-                        break;
-
-                    case 'pause':
-                        this.emitTriggerAction({action: 'pause', seekTime: details.seekTime});
-                        break;
-
-                    case 'seekto':
-                        this.emitTriggerAction({action: 'seekto', seekTime: details.seekTime});
-                        break;
-                }
+                this.emit('transportStateChange', metadata, change);
             } else {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportStateChangeDelayed, null, {
-                    action: details.action,
-                    seekTime: details.seekTime!
+                    action: change.action,
+                    startPosition: change.startPosition,
+                    startTimestamp: change.startTimestamp
                 });
             }
         });
@@ -310,7 +308,7 @@ export interface IGroupCoordinatorStateEvents {
             }
 
             // Ensure change is for current transport state
-            if (this.transportState.compare(event.transport)) {
+            if (this.transportState.compare(event.transport.playbackState, event.transport.startPosition)) {
                 // Update playback position
                 const position: ICurrentPlaybackPosition = {
                     playbackState: event.playbackState,

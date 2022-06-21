@@ -1,10 +1,7 @@
 const timeout = 3 * 60 * 1000; // adjust this time out as per number of windows you need to test
 const chalk = require("chalk");
-const Events = {
-  UNKNOWN: "unknown",
-  PLAY: "play",
-};
 
+// functions to test for a particular player event
 const isPlay = (log) =>
   log &&
   log.indexOf("MediaPlayerSynchronizer:SeekingPlayerToStartPosition") != -1;
@@ -18,6 +15,7 @@ const isSeekTo = (log, position) => {
   return isSeek(log) && log.indexOf(positionStr) != -1;
 };
 
+// Class to watch log streams from all the open browser pages and count a given player event
 class LogsWatcher {
   constructor(verbose) {
     this.streams = [];
@@ -53,12 +51,6 @@ class LogsWatcher {
       if (this.verbose) {
         console.log(`${prefix} ${msg.text()}`);
       }
-      // for (let i = 0; i < msg.args().length; ++i) {
-      //   if (this.verbose) {
-      //     console.log(`${prefix} ${msg.type()} ${msg.text()}`);
-      //     // console.log(`${prefix} ${i}: ${msg.args()[i]}`);
-      //   }
-      // }
     });
   }
 }
@@ -69,18 +61,9 @@ const delay = (timeout) => {
   });
 };
 
-const logConsole = (page, prefix) => {
-  page.on("console", (msg) => {
-    console.log(`${prefix} ${msg.type()} ${msg.text()}`);
-    // for (let i = 0; i < msg.args().length; ++i)
-    //   console.log(`${prefix} ${i}: ${msg.args()[i]}`);
-  });
-};
-
 const openNewWindow = async (page, url) => {
   page2 = await global.__BROWSER__.newPage();
 
-  // logConsole(page2, "page2");
   await page2.goto(url);
   await page.bringToFront();
   return page2;
@@ -92,7 +75,6 @@ const trackPages = (logsWatcher) => {
     pageNumber++;
     console.log(target);
     const newPage = await target.page();
-    // logConsole(newPage, "page" + pageNumber);
     logsWatcher.addPage(newPage, "page" + pageNumber);
   });
 };

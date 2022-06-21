@@ -12,8 +12,7 @@ import { TeamsFluidClient } from "@microsoft/live-share";
 import { inTeams } from "../utils/inTeams";
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
-import { DebugLogger } from "@fluidframework/telemetry-utils";
-// import { DebugLogger } from "./CustomLogger";
+import { ConsoleLogger } from "./ConsoleLogger";
 
 const MeetingStage = () => {
   // Initial media item selected in SidePanel.jsx
@@ -49,11 +48,9 @@ const MeetingStage = () => {
       window.localStorage.debug = "fluid:*";
 
       // Define Fluid document schema and create container
-      // const id =
-      //   new URLSearchParams(document.location.search).get("id") || "main";
       const client = new TeamsFluidClient({
         connection,
-        logger: DebugLogger.create("*"),
+        logger: new ConsoleLogger(),
       });
       const schema = {
         initialObjects: { mediaSession: EphemeralMediaSession },

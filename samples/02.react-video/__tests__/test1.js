@@ -1,4 +1,4 @@
-const timeout = 3 * 60 * 1000; // adjust this time out as per number of windows you need to test
+const timeout = 4 * 60 * 1000; // adjust this time out as per number of windows you need to test
 const chalk = require("chalk");
 
 // functions to test for a particular player event
@@ -105,24 +105,26 @@ const seekVideo = async (page, seekTo) => {
   await delay(1000);
 };
 
+const closeAllPages = async () => {
+  const pages = await global.__BROWSER__.pages();
+  for (i = 0; i < pages.lengh; i++) {
+    pages[i].close();
+  }
+};
+
 describe("/ (Home Page)", () => {
   let page;
   let logsWatcher;
-  let numberOfWindows = 1;
+  let numberOfWindows = 50;
   beforeAll(async () => {
-    logsWatcher = new LogsWatcher(true);
+    logsWatcher = new LogsWatcher(false);
     trackPages(logsWatcher);
     page = await global.__BROWSER__.newPage();
     await installMouseHelper(page);
     await page.goto("http://localhost:3000");
   });
 
-  afterAll(async () => {
-    const pages = await global.__BROWSER__.pages();
-    for (i = 0; i < pages.lengh; i++) {
-      pages[i].close();
-    }
-  });
+  afterAll(async () => {});
 
   const verifyEvent = async (eventName, eventMatcher, cb) => {
     logsWatcher.resetTracking();
@@ -163,6 +165,7 @@ describe("/ (Home Page)", () => {
         await playVideo(page);
       });
 
+      await closeAllPages();
       await delay(1000);
     },
     timeout

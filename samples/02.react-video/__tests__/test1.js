@@ -115,9 +115,9 @@ const closeAllPages = async () => {
 describe("/ (Home Page)", () => {
   let page;
   let logsWatcher;
-  let numberOfWindows = 50;
+  let numberOfWindows = 5;
   beforeAll(async () => {
-    logsWatcher = new LogsWatcher(false);
+    logsWatcher = new LogsWatcher(true);
     trackPages(logsWatcher);
     page = await global.__BROWSER__.newPage();
     await installMouseHelper(page);

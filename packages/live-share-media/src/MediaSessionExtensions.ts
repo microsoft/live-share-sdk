@@ -18,6 +18,8 @@ export type ExtendedMediaSessionAction = MediaSessionAction |  "settrack" | "wai
 
 export type ExtendedMediaSessionPlaybackState = MediaSessionPlaybackState | "suspended" | "waiting" | "ended";
 
+export type ExtendedMediaSessionWaitState = "suspended" | "waiting" | "none";
+
 export interface ExtendedMediaMetadata extends MediaMetadata {
     trackIdentifier: string;
     liveStream: boolean;

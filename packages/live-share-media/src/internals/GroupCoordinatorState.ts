@@ -128,14 +128,16 @@ export interface IGroupCoordinatorStateEvents {
         this._transportState.on('transportStateChange', (metadata, change) => {
             if (!this.isSuspended && !this.isWaiting) {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportStateChanged, null, {
-                    action: change.action,
+                    didSeek: change.didSeek,
+                    playbackState: change.playbackState,
                     startPosition: change.startPosition,
                     startTimestamp: change.startTimestamp
                 });
                 this.emit('transportStateChange', metadata, change);
             } else {
                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportStateChangeDelayed, null, {
-                    action: change.action,
+                    didSeek: change.didSeek,
+                    playbackState: change.playbackState,
                     startPosition: change.startPosition,
                     startTimestamp: change.startTimestamp
                 });
@@ -316,8 +318,8 @@ export interface IGroupCoordinatorStateEvents {
                     position: event.position,
                     timestamp: event.timestamp,
                     clientId: event.clientId || ''
-                };
-                this.playbackPosition.UpdatePlaybackPosition(position);
+                } as ICurrentPlaybackPosition;
+                this.playbackPosition.updatePlaybackPosition(position);
 
                 // Ensure local media session is in sync with group
                 if (local && !this.isSuspended) {

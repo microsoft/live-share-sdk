@@ -55,9 +55,10 @@ describe('GroupTransportState', () => {
         transportState.on('transportStateChange', (metadata, change) => {
             try {
                 assert(TestUtils.compareObjects(metadata, track1), `wrong track`);
-                assert(change.action == 'play', `wrong action`);
+                assert(change.playbackState == 'playing', `wrong action`);
                 assert(change.startPosition == 0.1, `wrong start position`);
                 assert(change.startTimestamp == 1, `wrong start timestamp`);
+                assert(!change.didSeek, `didSeek wrong value`);
                 done.resolve();
             } catch(err) {
                 done.reject(err);
@@ -66,6 +67,31 @@ describe('GroupTransportState', () => {
 
         const updated = transportState.updateState({ playbackState: 'playing', startPosition: 0.1, timestamp: 1, clientId: 'a'});
         assert(updated, `updateState() didn't return updated`);
+
+        await done.promise;
+    });
+
+    it('should fire "transportStateChange" with didSeek when a seek occurs', async () => {
+        let playing = false;
+        const done = new Deferred();
+        let playerState = TestUtils.createMediaPlayerState(track1, 'none');
+        const playbackTrack = new GroupPlaybackTrack(() => playerState);
+        const transportState = new GroupTransportState(playbackTrack, () => playerState);
+        transportState.on('transportStateChange', (metadata, change) => {
+            try {
+                if (playing) {
+                    assert(change.didSeek, `didSeek wrong value`);
+                    done.resolve();
+                } else {
+                    playing = true;
+                }
+            } catch(err) {
+                done.reject(err);
+            }
+        });
+
+        transportState.updateState({ playbackState: 'playing', startPosition: 0.1, timestamp: 1, clientId: 'a'});
+        transportState.updateState({ playbackState: 'playing', startPosition: 5.0, timestamp: 2, clientId: 'a'});
 
         await done.promise;
     });

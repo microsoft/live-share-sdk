@@ -23,9 +23,10 @@ export interface ITransportState {
  * @hidden
  */
 export interface ITransportStateChange {
-    action: ExtendedMediaSessionAction;
+    playbackState: ExtendedMediaSessionPlaybackState;
     startPosition: number;
     startTimestamp: number;
+    didSeek: boolean;
 }
 
 /**
@@ -112,6 +113,7 @@ export interface IGroupTransportStateEvents {
         this._current = state;
 
         // Identify triggered action
+        /*
         let action: ExtendedMediaSessionAction;
         const playerState = this._getMediaPlayerState().playbackState;
         if (originalState.playbackState == state.playbackState && playerState != 'ended') {
@@ -121,9 +123,19 @@ export interface IGroupTransportStateEvents {
         } else {
             action = 'pause';
         }
+        */
+
+        // Check for seek
+        const playerState = this._getMediaPlayerState().playbackState;
+        const didSeek = (originalState.playbackState == state.playbackState && playerState != 'ended');
 
         // Trigger transport change
-        this.emit('transportStateChange', this._track.metadata, { action: action, startPosition: state.startPosition, startTimestamp: state.timestamp });
+        this.emit('transportStateChange', this._track.metadata, { 
+            playbackState: state.playbackState, 
+            startPosition: state.startPosition, 
+            startTimestamp: state.timestamp,
+            didSeek: didSeek 
+        });
         return true;
     }
 }

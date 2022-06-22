@@ -19,13 +19,13 @@ describe('GroupPlaybackPosition', () => {
     const track1 = { trackIdentifier: 'track1', title: 'Test Track 1' } as ExtendedMediaMetadata;
     const track2 = { trackIdentifier: 'track2', title: 'Test Track 2' } as ExtendedMediaMetadata;
 
-    const updateInterval = new TimeInterval(10);
+    const expirationPeriod = new TimeInterval(10000);
 
     it('should start with 0 clients', async () => {
         const getPlayerState = () => TestUtils.createMediaPlayerState(track1, 'none', {position: 0.0} );
         const playbackTrack = new GroupPlaybackTrack(getPlayerState);
         const transportState = new GroupTransportState(playbackTrack, getPlayerState);
-        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, updateInterval);
+        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, expirationPeriod);
 
         assert(playbackPosition.totalClients == 0, `wrong client count`);
         assert(playbackPosition.localPosition == undefined, `wrong position`);
@@ -35,9 +35,9 @@ describe('GroupPlaybackPosition', () => {
         const getPlayerState = () => TestUtils.createMediaPlayerState(track1, 'none', {position: 0.0} );
         const playbackTrack = new GroupPlaybackTrack(getPlayerState);
         const transportState = new GroupTransportState(playbackTrack, getPlayerState);
-        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, updateInterval);
+        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, expirationPeriod);
 
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'none', 0.0));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'none', 0.0));
 
         assert(playbackPosition.totalClients == 1, `wrong client count`);
         assert(playbackPosition.localPosition != undefined, `local position not found`);
@@ -48,13 +48,13 @@ describe('GroupPlaybackPosition', () => {
         const getPlayerState = () => TestUtils.createMediaPlayerState(track1, 'none', {position: 0.0} );
         const playbackTrack = new GroupPlaybackTrack(getPlayerState);
         const transportState = new GroupTransportState(playbackTrack, getPlayerState);
-        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, updateInterval);
+        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, expirationPeriod);
 
         const position = TestUtils.createPositionUpdate(runtime1, 'none', 0.0);
-        playbackPosition.UpdatePlaybackPosition(position);
+        playbackPosition.updatePlaybackPosition(position);
 
         const newPosition = TestUtils.addSeconds(1.0, TestUtils.createPositionUpdate(runtime1, 'none', 0.0));
-        playbackPosition.UpdatePlaybackPosition(newPosition);
+        playbackPosition.updatePlaybackPosition(newPosition);
 
         assert(playbackPosition.totalClients == 1, `wrong client count`);
         assert(playbackPosition.localPosition != undefined, `local position not found`);
@@ -65,13 +65,13 @@ describe('GroupPlaybackPosition', () => {
         const getPlayerState = () => TestUtils.createMediaPlayerState(track1, 'none', {position: 0.0} );
         const playbackTrack = new GroupPlaybackTrack(getPlayerState);
         const transportState = new GroupTransportState(playbackTrack, getPlayerState);
-        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, updateInterval);
+        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, expirationPeriod);
 
         const position = TestUtils.createPositionUpdate(runtime1, 'none', 0.0);
-        playbackPosition.UpdatePlaybackPosition(position);
+        playbackPosition.updatePlaybackPosition(position);
 
         const newPosition = TestUtils.subtractSeconds(1.0, TestUtils.createPositionUpdate(runtime1, 'none', 0.0));
-        playbackPosition.UpdatePlaybackPosition(newPosition);
+        playbackPosition.updatePlaybackPosition(newPosition);
 
         assert(playbackPosition.totalClients == 1, `wrong client count`);
         assert(playbackPosition.localPosition != undefined, `local position not found`);
@@ -82,14 +82,14 @@ describe('GroupPlaybackPosition', () => {
         const getPlayerState = () => TestUtils.createMediaPlayerState(track1, 'none', {position: 0.0} );
         const playbackTrack = new GroupPlaybackTrack(getPlayerState);
         const transportState = new GroupTransportState(playbackTrack, getPlayerState);
-        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, updateInterval);
+        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, expirationPeriod);
 
 
         const position1 = TestUtils.createPositionUpdate(runtime1, 'none', 0.0);
-        playbackPosition.UpdatePlaybackPosition(position1);
+        playbackPosition.updatePlaybackPosition(position1);
 
         const position2 = TestUtils.addSeconds(1.0, TestUtils.createPositionUpdate(runtime2, 'none', 0.0));
-        playbackPosition.UpdatePlaybackPosition(position2);
+        playbackPosition.updatePlaybackPosition(position2);
 
         assert(playbackPosition.totalClients == 2, `wrong client count`);
         assert(playbackPosition.localPosition != undefined, `local position not found`);
@@ -100,15 +100,14 @@ describe('GroupPlaybackPosition', () => {
         const getPlayerState = () => TestUtils.createMediaPlayerState(track1, 'none', {position: 0.0} );
         const playbackTrack = new GroupPlaybackTrack(getPlayerState);
         const transportState = new GroupTransportState(playbackTrack, getPlayerState);
-        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, updateInterval);
+        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, expirationPeriod);
 
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'none', 0.0));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.subtractSeconds(updateInterval.seconds, TestUtils.createPositionUpdate(runtime2, 'none', 0.0)));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'none', 0.0));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime2, 'none', 0.0));
 
         let cnt = 0;
-        playbackPosition.forEach((position, projectedPosition) => {
+        playbackPosition.forEach((position) => {
             assert(position.position == 0.0, `wrong position ${position.position}`);
-            assert(projectedPosition == 0.0, `wrong projected position ${projectedPosition}`);
             cnt++;
         });
 
@@ -119,33 +118,31 @@ describe('GroupPlaybackPosition', () => {
         const getPlayerState = () => TestUtils.createMediaPlayerState(track1, 'none', {position: 0.0} );
         const playbackTrack = new GroupPlaybackTrack(getPlayerState);
         const transportState = new GroupTransportState(playbackTrack, getPlayerState);
-        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, updateInterval);
+        const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, expirationPeriod);
 
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'none', 0.0));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.subtractSeconds(updateInterval.seconds * 3, TestUtils.createPositionUpdate(runtime2, 'none', 0.0)));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'none', 0.0));
+        playbackPosition.updatePlaybackPosition(TestUtils.subtractSeconds(expirationPeriod.seconds * 3, TestUtils.createPositionUpdate(runtime2, 'none', 0.0)));
 
         let cnt = 0;
-        playbackPosition.forEach((position, projectedPosition) => {
+        playbackPosition.forEach((position) => {
             assert(position.position == 0.0, `wrong position ${position.position}`);
-            assert(projectedPosition == 0.0, `wrong projected position ${projectedPosition}`);
             cnt++;
         });
 
         assert(cnt == 1, `enumerated ${cnt} positions`);
     });
-
+/*
     it('should project position when playing', async () => {
         const getPlayerState = () => TestUtils.createMediaPlayerState(track1, 'none', {position: 0.0} );
         const playbackTrack = new GroupPlaybackTrack(getPlayerState);
         const transportState = new GroupTransportState(playbackTrack, getPlayerState);
         const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, new TimeInterval(1000));
 
-        playbackPosition.UpdatePlaybackPosition(TestUtils.subtractSeconds(1.0, TestUtils.createPositionUpdate(runtime1, 'playing', 0.0)));
+        playbackPosition.updatePlaybackPosition(TestUtils.subtractSeconds(1.0, TestUtils.createPositionUpdate(runtime1, 'playing', 0.0)));
 
         let cnt = 0;
-        playbackPosition.forEach((position, projectedPosition) => {
+        playbackPosition.forEach((position) => {
             assert(position.position == 0.0, `wrong position ${position.position}`);
-            assert(projectedPosition >= 1.0, `wrong projected position ${projectedPosition}`);
             cnt++;
         });
 
@@ -174,8 +171,8 @@ describe('GroupPlaybackPosition', () => {
         assert(playbackPosition.targetPosition == 0.0, `wrong starting position of ${playbackPosition.targetPosition}`);
 
         transportState.updateState(TestUtils.subtractSeconds(2.0, TestUtils.createTransportUpdate(runtime1, 'playing', 0.0)));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'playing', 0.0));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.subtractSeconds(1.0, TestUtils.createPositionUpdate(runtime2, 'playing', 0.0)));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'playing', 0.0));
+        playbackPosition.updatePlaybackPosition(TestUtils.subtractSeconds(1.0, TestUtils.createPositionUpdate(runtime2, 'playing', 0.0)));
 
         // We're sometimes getting back a target position of 0.999 instead of 1.0 (some sort of rounding error)
         assert(playbackPosition.targetPosition > 0.9 && playbackPosition.targetPosition < 2.0, `wrong target position of ${playbackPosition.targetPosition}`);
@@ -188,8 +185,8 @@ describe('GroupPlaybackPosition', () => {
         const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, new TimeInterval(1000));
 
         transportState.updateState(TestUtils.subtractSeconds(2.0, TestUtils.createTransportUpdate(runtime1, 'playing', 0.0)));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'playing', 0.0, undefined, 0.5));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.subtractSeconds(1.0, TestUtils.createPositionUpdate(runtime2, 'playing', 0.0, undefined, 0.5)));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'playing', 0.0, undefined, 0.5));
+        playbackPosition.updatePlaybackPosition(TestUtils.subtractSeconds(1.0, TestUtils.createPositionUpdate(runtime2, 'playing', 0.0, undefined, 0.5)));
 
         assert(playbackPosition.maxPosition == 0.5, `wrong max position ${playbackPosition.maxPosition}`);
         assert(playbackPosition.targetPosition == 0.5, `wrong target position ${playbackPosition.targetPosition}`);
@@ -202,8 +199,8 @@ describe('GroupPlaybackPosition', () => {
         const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, new TimeInterval(1000));
 
         transportState.updateState(TestUtils.subtractSeconds(2.0, TestUtils.createTransportUpdate(runtime1, 'playing', 0.0)));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'suspended', 2.0, { position: 2.0 }));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.subtractSeconds(1.0, TestUtils.createPositionUpdate(runtime2, 'playing', 0.0, undefined)));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'suspended', 2.0, { position: 2.0 }));
+        playbackPosition.updatePlaybackPosition(TestUtils.subtractSeconds(1.0, TestUtils.createPositionUpdate(runtime2, 'playing', 0.0, undefined)));
 
         assert(playbackPosition.clientsWaiting == 2, `wrong count ${playbackPosition.clientsWaiting}`);
     });
@@ -215,8 +212,8 @@ describe('GroupPlaybackPosition', () => {
         const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, new TimeInterval(1000));
 
         transportState.updateState(TestUtils.subtractSeconds(2.0, TestUtils.createTransportUpdate(runtime1, 'playing', 0.0)));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'waiting', 2.0, { position: 2.0 }));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime2, 'suspended', 2.0, { position: 2.0 }));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'waiting', 2.0, { position: 2.0 }));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime2, 'suspended', 2.0, { position: 2.0 }));
 
         assert(playbackPosition.clientsWaiting == 1, `wrong count ${playbackPosition.clientsWaiting}`);
     });
@@ -228,9 +225,10 @@ describe('GroupPlaybackPosition', () => {
         const playbackPosition = new GroupPlaybackPosition(transportState, runtime1, new TimeInterval(1000));
 
         transportState.updateState(TestUtils.subtractSeconds(2.0, TestUtils.createTransportUpdate(runtime1, 'playing', 0.0)));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'waiting', 2.0, { position: 2.0 }));
-        playbackPosition.UpdatePlaybackPosition(TestUtils.createPositionUpdate(runtime2, 'waiting', 2.0, { position: 2.0 }));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime1, 'waiting', 2.0, { position: 2.0 }));
+        playbackPosition.updatePlaybackPosition(TestUtils.createPositionUpdate(runtime2, 'waiting', 2.0, { position: 2.0 }));
 
         assert(playbackPosition.clientsWaiting == 0, `wrong count ${playbackPosition.clientsWaiting}`);
     });
+    */
 });

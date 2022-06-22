@@ -25,13 +25,15 @@ export function createTransportUpdate(runtime: MockRuntimeSignaler, playbackStat
     };
 }
 
-export function createPositionUpdate(runtime: MockRuntimeSignaler, playbackState: ExtendedMediaSessionPlaybackState, position: number, waitPoint?: CoordinationWaitPoint, duration?: number): ICurrentPlaybackPosition {
+export function createPositionUpdate(runtime: MockRuntimeSignaler, playbackState: ExtendedMediaSessionPlaybackState, position: number, waitPoint?: CoordinationWaitPoint, mediaDuration?: number, waitDuration?: number): ICurrentPlaybackPosition {
     return {
         playbackState: playbackState,
         waitPoint: waitPoint,
         position: position,
-        duration: duration,
+        mediaDuration: mediaDuration,
         timestamp: new Date().getTime(),
+        maxTimestampError: 30,
+        waitDuration: waitDuration ?? 0,
         clientId: runtime.clientId
     };
 }

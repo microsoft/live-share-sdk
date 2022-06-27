@@ -61,12 +61,20 @@ const delay = (timeout) => {
   });
 };
 
+// utilities for working with browser tabs
 const openNewWindow = async (page, url) => {
   page2 = await global.__BROWSER__.newPage();
 
   await page2.goto(url);
   await page.bringToFront();
   return page2;
+};
+
+const closeAllPages = async () => {
+  const pages = await global.__BROWSER__.pages();
+  for (i = 0; i < pages.lengh; i++) {
+    pages[i].close();
+  }
 };
 
 let pageNumber = 0;
@@ -79,6 +87,7 @@ const trackPages = (logsWatcher) => {
   });
 };
 
+// utilities to control video play back
 const playVideo = async (page) => {
   await page.click("#player");
   await delay(3000);
@@ -105,13 +114,6 @@ const seekVideo = async (page, seekTo) => {
   await delay(1000);
 };
 
-const closeAllPages = async () => {
-  const pages = await global.__BROWSER__.pages();
-  for (i = 0; i < pages.lengh; i++) {
-    pages[i].close();
-  }
-};
-
 describe("/ (Home Page)", () => {
   let page;
   let logsWatcher;
@@ -126,10 +128,10 @@ describe("/ (Home Page)", () => {
 
   afterAll(async () => {});
 
-  const verifyEvent = async (eventName, eventMatcher, cb) => {
+  const verifyEvent = async (eventName, eventMatcher, performAction) => {
     logsWatcher.resetTracking();
     logsWatcher.startTracking(eventMatcher);
-    await cb();
+    await performAction();
     expect(logsWatcher.getEventCount()).toBe(numberOfWindows);
     console.log(chalk.green(`Successfully verified ${eventName}`));
   };
@@ -172,6 +174,7 @@ describe("/ (Home Page)", () => {
   );
 });
 
+// source : https://gist.github.com/aslushnikov/94108a4094532c7752135c42e12a00eb
 const installMouseHelper = async (page) => {
   await page.evaluateOnNewDocument(() => {
     // Install mouse helper only for top-level frame.

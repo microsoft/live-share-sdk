@@ -29,7 +29,6 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.1",
     "prettier": "^2.5.0",
-    "selenium-webdriver": "^4.2.0",
     "start-server-and-test": "^1.11.6",
     "chalk": "^2.4.2",
     "puppeteer": "^1.17.0",

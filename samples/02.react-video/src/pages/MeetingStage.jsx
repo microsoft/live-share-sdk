@@ -12,6 +12,7 @@ import { TeamsFluidClient } from "@microsoft/live-share";
 import { inTeams } from "../utils/inTeams";
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { ConsoleLogger } from "./ConsoleLogger";
 
 const MeetingStage = () => {
   // Initial media item selected in SidePanel.jsx
@@ -23,7 +24,7 @@ const MeetingStage = () => {
 
   // Initial setup when context is returned
   useEffect(() => {
-    (async function() {
+    (async function () {
       // Set the initial video src for the player element
       videoElement.current.src = initialMediaItem.current.src;
       // Browsers require a click before a video can be played automatically
@@ -35,10 +36,13 @@ const MeetingStage = () => {
         // Configure for local testing (optional).
         connection = {
           tenantId: LOCAL_MODE_TENANT_ID,
-          tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
+          tokenProvider: new InsecureTokenProvider("", {
+            id: "123",
+            name: "Test User",
+          }),
           orderer: "http://localhost:7070",
           storage: "http://localhost:7070",
-        }
+        };
       }
       // Enable debugger
       window.localStorage.debug = "fluid:*";
@@ -46,6 +50,7 @@ const MeetingStage = () => {
       // Define Fluid document schema and create container
       const client = new TeamsFluidClient({
         connection,
+        logger: new ConsoleLogger(),
       });
       const schema = {
         initialObjects: { mediaSession: EphemeralMediaSession },

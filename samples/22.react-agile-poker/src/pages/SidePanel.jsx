@@ -73,7 +73,7 @@ const SidePanel = () => {
                                 console.error(error);
                               }
                             },
-                            `${window.location.origin}/?inTeams=true&userStoryId=${userStory.id}`
+                            `${window.location.origin}/#/?inTeams=true&userStoryId=${userStory.id}`
                           );
                         } else {
                           window.open(

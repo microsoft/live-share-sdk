@@ -65,6 +65,8 @@ const PlayerProgressBar = ({
 
       setToolTipContent(formatTimeValue(hoverTime));
 
+      console.log(xPosition, dimension.top - scrollOffSet)
+
       popperRef.current?.setTarget({
         getBoundingClientRect: getRect(xPosition, dimension.top - scrollOffSet),
         positionFixed: true,
@@ -95,7 +97,7 @@ const PlayerProgressBar = ({
   return (
     <div className={flexItemStyles.noShrink} ref={resizeRef}>
       <div className={styles.pageEl}>
-        <Tooltip withArrow positioning={{ popperRef }} content={toolTipContent} relationship="label">
+        <Tooltip withArrow positioning={{ positioningRef: popperRef }} content={toolTipContent} relationship="label">
           <Slider
             root={{ ref: sliderRef }}
             min={0}

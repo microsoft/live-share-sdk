@@ -109,7 +109,7 @@ const PlayerProgressBar = ({
       <div className={styles.pageEl}>
         <Tooltip
           withArrow
-          positioning={{ popperRef }}
+          positioning={{ positioningRef: popperRef }}
           content={toolTipContent}
           relationship="label"
         >

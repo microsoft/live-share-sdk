@@ -6,7 +6,7 @@
   "license": "Microsoft",
   "author": "Microsoft",
   "dependencies": {
-    "@fluentui/react-components": "^9.0.0-rc.10",
+    "@fluentui/react-components": "^9.0.1",
     "@microsoft/live-share": "~0.3.1",
     "@microsoft/live-share-media": "~0.3.1",
     "@microsoft/teams-js": "2.0.0-experimental.0",
@@ -21,7 +21,8 @@
     "react-scripts": "^4.0.0",
     "uuid": "^8.3.2",
     "web-vitals": "^2.1.4",
-    "use-resize-observer": "^8.0.0"
+    "use-resize-observer": "^8.0.0",
+    "tabster": "1.4.2"
   },
   "devDependencies": {
     "@fluidframework/test-client-utils": "~0.59.0",

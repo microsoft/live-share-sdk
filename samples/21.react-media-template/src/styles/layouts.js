@@ -92,13 +92,13 @@ export const getFlexColumnStyles = makeStyles({
     "::-webkit-scrollbar-thumb": {
       backgroundColor: tokens.colorPaletteCharcoalBackground3,
       borderLeftColor: tokens.colorPaletteCharcoalBackground2,
-      borderLeftWidth: "4px",
+      borderLeftWidth: "6px",
       borderLeftStyle: "solid",
       backgroundClip: "padding-box",
-      borderTopLeftRadius: "5px",
-      borderTopRightRadius: "4px",
+      borderTopLeftRadius: "4px",
+      borderTopRightRadius: "14px",
       borderBottomLeftRadius: "5px",
-      borderBottomRightRadius: "4px",
+      borderBottomRightRadius: "14px",
     },
     "::-webkit-scrollbar-thumb:hover": {
       backgroundColor: tokens.colorPaletteCharcoalForeground3,

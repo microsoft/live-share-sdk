@@ -6,7 +6,8 @@
   "license": "Microsoft",
   "author": "Microsoft",
   "dependencies": {
-    "@fluentui/react-components": "^9.0.0-rc.10",
+    "@fluentui/react-components": "^9.0.1",
+    "@fluidframework/azure-client": "~0.59.0",
     "@microsoft/live-share": "~0.3.1",
     "@microsoft/live-share-media": "~0.3.1",
     "@microsoft/teams-js": "2.0.0-experimental.0",

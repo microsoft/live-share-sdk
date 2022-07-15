@@ -18,7 +18,7 @@ const PlayerProgressBar = ({
   isPlaybackDisabled,
   onSeek
 }) => {
-  const popperRef = useRef();
+  const toolTipPositioningRef = useRef();
   const sliderRef = useRef();
   const [dimension, setDimensions] = useState();
   const [toolTipContent, setToolTipContent] = useState("0:00");
@@ -65,7 +65,7 @@ const PlayerProgressBar = ({
 
       setToolTipContent(formatTimeValue(hoverTime));
 
-      popperRef.current?.setTarget({
+      toolTipPositioningRef.current?.setTarget({
         getBoundingClientRect: getRect(xPosition, dimension.top - scrollOffSet),
         positionFixed: true,
       });
@@ -82,7 +82,7 @@ const PlayerProgressBar = ({
 
       setToolTipContent(formatTimeValue(hoverTime));
 
-      popperRef.current?.setTarget({
+      toolTipPositioningRef.current?.setTarget({
         getBoundingClientRect: getRect(xPosition, dimension.top - scrollOffSet),
         positionFixed: true,
       });
@@ -95,7 +95,7 @@ const PlayerProgressBar = ({
   return (
     <div className={flexItemStyles.noShrink} ref={resizeRef}>
       <div className={styles.pageEl}>
-        <Tooltip withArrow positioning={{ popperRef }} content={toolTipContent} relationship="label">
+        <Tooltip withArrow positioning={{ positioningRef: toolTipPositioningRef }} content={toolTipContent} relationship="label">
           <Slider
             root={{ ref: sliderRef }}
             min={0}

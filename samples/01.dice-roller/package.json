@@ -16,7 +16,7 @@
     "dependencies": {
         "@fluidframework/test-client-utils": "~1.0.1",
         "@microsoft/live-share": "~0.3.1",
-        "@microsoft/teams-js": "2.0.0-experimental.0",
+        "@microsoft/teams-js": "2.0.0-experimental.1",
         "fluid-framework": "~1.0.1"
     },
     "devDependencies": {

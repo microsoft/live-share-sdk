@@ -11,6 +11,7 @@ import { EphemeralMediaSession } from "@microsoft/live-share-media";
 import { TeamsFluidClient } from "@microsoft/live-share";
 import { inTeams } from "../utils/inTeams";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { ConsoleLogger } from "./ConsoleLogger";
 
 const MeetingStage = () => {
   // Initial media item selected in SidePanel.jsx
@@ -22,7 +23,7 @@ const MeetingStage = () => {
 
   // Initial setup when context is returned
   useEffect(() => {
-    (async function() {
+    (async function () {
       // Set the initial video src for the player element
       videoElement.current.src = initialMediaItem.current.src;
       // Browsers require a click before a video can be played automatically
@@ -44,6 +45,7 @@ const MeetingStage = () => {
       // Define Fluid document schema and create container
       const client = new TeamsFluidClient({
         connection,
+        logger: new ConsoleLogger(),
       });
       const schema = {
         initialObjects: { mediaSession: EphemeralMediaSession },

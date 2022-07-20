@@ -6,7 +6,6 @@
 import { SharedMap } from "fluid-framework";
 import { TeamsFluidClient } from "@microsoft/live-share";
 import { app, pages } from "@microsoft/teams-js";
-import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 
 const searchParams = new URL(window.location).searchParams;
@@ -72,10 +71,9 @@ async function joinContainer() {
       // Create client and configure for testing
       client = new TeamsFluidClient({
         connection: {
-          tenantId: LOCAL_MODE_TENANT_ID,
+          type: 'local',
           tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
-          orderer: "http://localhost:7070",
-          storage: "http://localhost:7070",
+          endpoint: "http://localhost:7070"
         }
       });
   }

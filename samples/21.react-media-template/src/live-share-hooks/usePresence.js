@@ -8,6 +8,7 @@ import {
   // eslint-disable-next-line
   EphemeralPresence,
 } from "@microsoft/live-share";
+// eslint-disable-next-line
 import * as microsoftTeams from "@microsoft/teams-js";
 import { useState, useEffect, useRef, useMemo } from "react";
 

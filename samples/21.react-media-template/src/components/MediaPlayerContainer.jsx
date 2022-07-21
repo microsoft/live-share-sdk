@@ -89,7 +89,7 @@ export const MediaPlayerContainer = ({
     } else {
       pause();
     }
-  }, [play, pause, player]);
+  }, [play, pause]);
 
   useEffect(() => {
     if (!localUserIsPresenting) {

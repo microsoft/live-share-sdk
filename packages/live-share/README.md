@@ -22,23 +22,16 @@ yarn add @microsoft/live-share
 
 After cloning the [GitHub repository](https://www.github.com/microsoft/live-share-sdk), navigate to the root folder and perform:
 
-After cloning the repository, install dependencies and start the application
-
-You can install either in the project _root directory **OR** the sample directory_.
-
 ```bash
-npm install
+npm install --legacy-peer-dep
+npm run build
 ```
 
-Then, start the project in the sample directory.
-
-```bash
-npm start
-```
+This will use lerna to hoist and build all dependencies.
 
 ## How to use this extension
 
-- This package depends on [Teams JS SDK](https://docs.microsoft.com/javascript/api/overview/msteams-client?view=msteams-client-js-latest). The version of `@microsoft/teams-js` you use in your app must match the one used in this project.
+- This package depends on [Teams JS SDK](https://docs.microsoft.com/en-us/javascript/api/overview/msteams-client?view=msteams-client-js-latest). The version of `@microsoft/teams-js` you use in your app must match the one used in this project.
 
 ```javascript
 
@@ -96,7 +89,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Reporting Security Issues
 
-Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/security/default).
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 

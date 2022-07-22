@@ -69,7 +69,7 @@ export const InkCanvas = ({ isEnabled, strokes, sendStrokes }) => {
       }
       drawCircle(stroke.x, stroke.y);
     },
-    [canvasRef]
+    [canvasRef, videoSize]
   );
 
   
@@ -107,7 +107,7 @@ export const InkCanvas = ({ isEnabled, strokes, sendStrokes }) => {
       setDrawing(false);
       sendLatestStrokes();
     },
-    [isEnabled, sendLatestStrokes]
+    [canvasRef, videoSize, isEnabled]
   );
 
   const onMouseMove = (e) => {

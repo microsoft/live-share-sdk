@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@fluidframework/test-client-utils": "~1.0.1",
+    "dotenv-cli": "^5.1.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.1",
@@ -37,6 +38,7 @@
     "start:client": "react-scripts start",
     "start:server": "npx @fluidframework/azure-local-service@latest",
     "build": "react-scripts build",
+    "build:dev": "dotenv -e .env.development react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

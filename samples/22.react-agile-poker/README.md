@@ -1,25 +1,21 @@
 # React Agile Poker Sample
 
-This repository contains a simple app that simulates the ritual of playing agile poker with user stories. Participants can load user stories, vote on the story point cost, and if they reach consensus before the timer runs out, the app will record the score and move to the next story. If not, the group is given the option to discuss the story again and attempt to reach consensus before another round of voting.
+This repository contains a simple app that simulates the ritual of playing agile poker with user stories. Participants can load user stories, vote on the story point cost, and if they reach consensus before the timer runs out, the app will record the score and move to the next story. If not, the group is given the option to discuss the story again and attempt to reach consensus before another round of voting. 
 
 Each `SharedObject` in our schema (as defined in the `/src/live-share-hooks/useSharedObjects.js` file) has a correlating hook in the live-share-hooks folder.\
 We have found this structure to be very useful in composing advanced applications with Live Share using Functional React components, but you can compose this differently for your app.
 
-After cloning the repository, install dependencies and start the application
+## Testing Locally in Browser
 
-You can install either in the project _root directory **OR** the sample directory_.
+In the project directory, you can run:
 
-```bash
-npm install
-```
+### `npm install`
 
-Then, start the project in the sample directory.
+Installs the latest node packages
 
-```bash
-npm start
-```
+### `npm run start`
 
-Runs the app in the development mode.
+Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 The page will reload when you make changes.\
@@ -70,7 +66,7 @@ Alternatively, you can use our ready-to-use [demo app package](../demo-manifests
 2. Join the meeting.
 3. In the meeting window, tap on **+ Apps** and tap on **Manage apps** in the flyout that opens.
 4. In the **Manage apps** pane, tap on **Upload a custom app**.
-   - _Don't see the option to **Upload a custom app?!** Follow [instructions here](https://docs.microsoft.com/microsoftteams/teams-custom-app-policies-and-settings) to enable custom-apps in your tenant._
+   - _Don't see the option to **Upload a custom app?!** Follow [instructions here](https://docs.microsoft.com/en-us/microsoftteams/teams-custom-app-policies-and-settings) to enable custom-apps in your tenant._
 5. Select the zip file you created earlier and upload it.
 6. In the dialog that shows up, tap **Add** to add your sample app into the meeting.
 7. Now, back in the meeting window, tap **+ Apps** again and type the name of your app in the _Find an app_ textbox.

@@ -9,6 +9,7 @@ import {
   EphemeralState,
   TeamsFluidClient,
 } from "@microsoft/live-share";
+import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { EphemeralTimer } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework";
@@ -38,9 +39,13 @@ export function useSharedObjects() {
     if (!inTeams) {
       // Configure for local testing (optional).
       connection = {
-        type: 'local',
-        tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
-        endpoint: "http://localhost:7070"
+        tenantId: LOCAL_MODE_TENANT_ID,
+        tokenProvider: new InsecureTokenProvider("", {
+          id: "123",
+          name: "Test User",
+        }),
+        orderer: "http://localhost:7070",
+        storage: "http://localhost:7070",
       };
     }
 

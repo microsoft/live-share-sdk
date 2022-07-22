@@ -4,6 +4,7 @@
  */
 
 import { UserMeetingRole } from '../interfaces';
+import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 
 /**
  * @hidden
@@ -40,7 +41,6 @@ export interface FluidTenantInfo {
     tenantId: string;
     ordererEndpoint: string;
     storageEndpoint: string;
-    serviceEndpoint?: string;
 }
 
 /**
@@ -95,10 +95,9 @@ class TestTeamsClientApiInteractive implements TeamsClientApiInteractive {
 
     public getFluidTenantInfo(): Promise<FluidTenantInfo> {
         return Promise.resolve({
-            tenantId: "local",
+            tenantId: LOCAL_MODE_TENANT_ID,
             ordererEndpoint: "http://localhost:7070",
-            storageEndpoint: "http://localhost:7070",
-            serviceEndpoint:  "http://localhost:7070"
+            storageEndpoint: "http://localhost:7070"
         });
     }
 

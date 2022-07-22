@@ -3,6 +3,8 @@
  * Licensed under the MIT License.
  */
 
+import { TeamsFluidClient } from "@microsoft/live-share";
+import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { EphemeralMediaSession } from "@microsoft/live-share-media";
 import { SharedMap } from "fluid-framework";
@@ -10,7 +12,6 @@ import { useEffect, useState } from "react";
 import {
   EphemeralEvent,
   EphemeralPresence,
-  TeamsFluidClient,
 } from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";
 
@@ -38,11 +39,14 @@ export function useSharedObjects() {
     let connection;
     if (!inTeams) {
       // Configure for local testing (optional).
-      console.warn("useSharedObjects: using a local Azure Fluid Relay test server.");
       connection = {
-        type: 'local',
-        tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
-        endpoint: "http://localhost:7070"
+        tenantId: LOCAL_MODE_TENANT_ID,
+        tokenProvider: new InsecureTokenProvider("", {
+          id: "123",
+          name: "Test User",
+        }),
+        orderer: "http://localhost:7070",
+        storage: "http://localhost:7070",
       };
     }
 
@@ -52,6 +56,9 @@ export function useSharedObjects() {
     const clientProps = {
       connection,
     };
+
+    // To reset the stored container-id, uncomment below:
+    // localStorage.clear();
 
     // Enable debugger
     window.localStorage.debug = "fluid:*";

@@ -14,21 +14,12 @@ import {
 import {
     AzureClient,
     AzureConnectionConfig,
-    AzureRemoteConnectionConfig,
     AzureContainerServices,
-    ITelemetryBaseLogger
+    ITelemetryBaseLogger,
+    LOCAL_MODE_TENANT_ID
 } from "@fluidframework/azure-client";
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { EphemeralEvent } from "./EphemeralEvent";
-
-/**
- * @hidden
- * Map v0.59 orderer endpoints to new v1.0 service endpoints
- */
-const ordererEndpointMap = new Map<string, string>()
-    .set('https://alfred.westus2.fluidrelay.azure.com', 'https://us.fluidrelay.azure.com')
-    .set('https://alfred.westeurope.fluidrelay.azure.com', 'https://eu.fluidrelay.azure.com')
-    .set('https://alfred.southeastasia.fluidrelay.azure.com', 'https://global.fluidrelay.azure.com');
 
 /**
  * Options used to configure the `TeamsFluidClient` class.
@@ -66,6 +57,7 @@ export interface ITeamsFluidClientOptions {
      readonly setLocalTestContainerId?: (containerId: string) => void;
 }
 
+
 /**
  * Client used to connect to fluid containers within a Microsoft Teams context.
  */
@@ -88,7 +80,7 @@ export class TeamsFluidClient {
      * If true the client is configured to use a local test server.
      */
     public get isTesting(): boolean {
-        return this._options.connection?.type == 'local';
+        return this._options.connection?.tenantId == LOCAL_MODE_TENANT_ID;
     }
 
     /**
@@ -125,32 +117,12 @@ export class TeamsFluidClient {
             let config: AzureConnectionConfig | undefined = this._options.connection;
             if (!config) {
                 const frsTenantInfo = await teamsClient.interactive.getFluidTenantInfo();
-                
-                // Compute endpoint
-                let endpoint = frsTenantInfo.serviceEndpoint;
-                if (!endpoint) {
-                    if (ordererEndpointMap.has(frsTenantInfo.ordererEndpoint)) {
-                        endpoint = ordererEndpointMap.get(frsTenantInfo.ordererEndpoint);
-                    } else {
-                        throw new Error(`TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.ordererEndpoint}`)
-                    }
-                }
-
-                // Is this a local config?
-                if (frsTenantInfo.tenantId == 'local') {
-                    config = {
-                        type: 'local',
-                        endpoint: endpoint!,
-                        tokenProvider: new TeamsFluidTokenProvider()
-                    };
-                } else {
-                    config = {
-                        type: 'remote',
-                        tenantId: frsTenantInfo.tenantId,
-                        endpoint: endpoint!,
-                        tokenProvider: new TeamsFluidTokenProvider()
-                    } as AzureRemoteConnectionConfig;
-                }
+                config = {
+                    tenantId: frsTenantInfo.tenantId,
+                    tokenProvider: new TeamsFluidTokenProvider(),
+                    orderer: frsTenantInfo.ordererEndpoint,
+                    storage: frsTenantInfo.storageEndpoint,
+                };
             }
 
             // Create FRS client

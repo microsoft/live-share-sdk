@@ -5,7 +5,6 @@
 
 // eslint-disable-next-line
 import { EphemeralEvent } from "@microsoft/live-share";
-// eslint-disable-next-line
 import * as microsoftTeams from "@microsoft/teams-js";
 import { useState, useEffect, useCallback } from "react";
 

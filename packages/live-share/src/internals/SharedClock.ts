@@ -41,13 +41,21 @@ interface IServerTimeOffset {
      */
     public getTimestamp(): number {
         if (!this._serverTime) {
-            throw new Error(`SharedClock: can't call getTime() before calling start().`);
+            throw new Error(`SharedClock: can't call getTimestamp() before calling start().`);
         }
 
         // Return adjusted timestamp
         // - We're remember the last time we sent and returning that if we ever predict an earlier time.
         //   This can happen if our accuracy improves and we end up with a smaller offset then before.
         return this._lastTimeSent = Math.max(new Date().getTime() + this._serverTime.offset, this._lastTimeSent);
+    }
+
+    public getMaxTimestampError(): number {
+        if (!this._serverTime) {
+            throw new Error(`SharedClock: can't call getTimestamp() before calling start().`);
+        }
+
+        return Math.floor(this._serverTime.requestLatency / 2);
     }
 
 
@@ -110,7 +118,7 @@ interface IServerTimeOffset {
 
         // Compute request latency and session time.
         const requestLatency = endCall - startCall;
-        const serverTimeInUtc = serverTime.ntpTimeInUTC + Math.floor(requestLatency/2);
+        const serverTimeInUtc = serverTime.ntpTimeInUTC + Math.floor(requestLatency / 2);
 
         // Return offset
         return {

@@ -6,7 +6,8 @@
   "license": "Microsoft",
   "author": "Microsoft",
   "dependencies": {
-    "@fluentui/react-components": "^9.0.0-rc.10",
+    "@fluentui/react-components": "^9.0.1",
+    "@fluidframework/azure-client": "~0.59.0",
     "@microsoft/live-share": "~0.3.1",
     "@microsoft/live-share-media": "~0.3.1",
     "@microsoft/teams-js": "2.0.0-experimental.0",
@@ -19,16 +20,21 @@
     "react-dom": "^16.14.0",
     "react-router-dom": "^6.2.2",
     "react-scripts": "^4.0.0",
+    "use-resize-observer": "^8.0.0",
     "uuid": "^8.3.2",
-    "web-vitals": "^2.1.4",
-    "use-resize-observer": "^8.0.0"
+    "web-vitals": "^2.1.4"
   },
   "devDependencies": {
     "@fluidframework/test-client-utils": "~0.59.0",
+    "chalk": "^2.4.2",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.1",
+    "jest": "^26.6.0",
+    "jest-puppeteer": "^6.1.0",
     "prettier": "^2.5.0",
+    "puppeteer": "^1.17.0",
+    "rimraf": "^2.6.3",
     "start-server-and-test": "^1.11.6"
   },
   "scripts": {
@@ -37,7 +43,7 @@
     "start:client": "react-scripts start",
     "start:server": "npx @fluidframework/azure-local-service@latest",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "jest",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

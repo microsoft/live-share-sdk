@@ -46,6 +46,11 @@ export class LocalRoleVerifier implements IRoleVerifier {
         return Promise.resolve(roles);
     }
 
+    public registerClientId(clientId: string): Promise<UserMeetingRole[]> {
+        this.addClient(clientId, this.defaultRoles);
+        return Promise.resolve(this.defaultRoles);
+    }
+
     public async verifyRolesAllowed(clientId: string, allowedRoles: UserMeetingRole[]): Promise<boolean> {
         LocalRoleVerifier.ensureWarned();
 

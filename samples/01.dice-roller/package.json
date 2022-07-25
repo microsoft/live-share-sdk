@@ -1,6 +1,6 @@
 {
     "name": "dice-roller",
-    "version": "0.3.1",
+    "version": "0.4.0",
     "description": "Sample dice roller app.",
     "repository": "https://github.com/microsoft/live-share-sdk",
     "license": "Microsoft",
@@ -14,10 +14,10 @@
         "start:server": "npx @fluidframework/azure-local-service@latest"
     },
     "dependencies": {
-        "@fluidframework/test-client-utils": "~1.0.1",
-        "@microsoft/live-share": "~0.3.1",
+        "@fluidframework/test-client-utils": "~1.2.2",
+        "@microsoft/live-share": "~0.4.0",
         "@microsoft/teams-js": "2.0.0-experimental.1",
-        "fluid-framework": "~1.0.1"
+        "fluid-framework": "~1.2.2"
     },
     "devDependencies": {
         "clean-webpack-plugin": "^3.0.0",

@@ -21,6 +21,7 @@ interface IServerTimeOffset {
 
 /**
  * @hidden
+ * 
  */
  export class SharedClock implements ITimestampProvider {
     private _teamsClient?: TeamsClientApi;
@@ -84,6 +85,12 @@ interface IServerTimeOffset {
         }
     }
 
+    /**
+     * Called in a loop to improve the accuracy of the clients timestamp offset.
+     * 
+     * The function will periodically call itself until we go 5 times without an improvement 
+     * to the calculated timestamp offset. 
+     */
     private async improveAccuracy(): Promise<void> {
         // Check for a more accurate time offset.
         const offset = await this.getSessionTimeOffset();
@@ -107,6 +114,10 @@ interface IServerTimeOffset {
         }
     }
 
+    /**
+     * Fetches the current timestamp from central timestamp service and computes the local offset.
+     * @returns Computed timestamp offset.
+     */
     private async getSessionTimeOffset(): Promise<IServerTimeOffset> {
         const teamsClient = await this.getTeamsClient();
 

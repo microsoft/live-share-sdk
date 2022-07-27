@@ -4,6 +4,7 @@
  */
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
+import { IRuntimeSignaler } from "./EphemeralEventScope";
 
 /**
  * Callback function used to the get the current state of an ephemeral object that's being
@@ -86,11 +87,11 @@ export class EphemeralObjectSynchronizer<TState extends object> {
      * @param getState A function called to retrieve the objects current state. This will be called prior to a "connect" or "update" message being sent.
      * @param updateState A function called to process a state update received from a remote instance. This will be called anytime a "connect" or "update" message is received.
      */
-    constructor(id: string, containerRuntime: IContainerRuntimeSignaler, getState: GetSynchronizationState<TState>, updateState: UpdateSynchronizationState<TState>) {
+    constructor(id: string, runtime: IRuntimeSignaler, containerRuntime: IContainerRuntimeSignaler, getState: GetSynchronizationState<TState>, updateState: UpdateSynchronizationState<TState>) {
         this._id = id;
         this._containerRuntime = containerRuntime;
 
-        EphemeralObjectSynchronizer.registerObject<TState>(containerRuntime, id, { getState, updateState });
+        EphemeralObjectSynchronizer.registerObject<TState>(runtime, containerRuntime, id, { getState, updateState });
     }
 
     /**
@@ -110,11 +111,11 @@ export class EphemeralObjectSynchronizer<TState extends object> {
 
     private static _synchronizers = new Map<any, ContainerSynchronizer>();
 
-    private static registerObject<TState extends object>(containerRuntime: IContainerRuntimeSignaler, id: string, handlers: GetAndUpdateStateHandlers<TState>): void {
+    private static registerObject<TState extends object>(runtime: IRuntimeSignaler, containerRuntime: IContainerRuntimeSignaler, id: string, handlers: GetAndUpdateStateHandlers<TState>): void {
         // Get/create containers synchronizer
         let synchronizer = this._synchronizers.get(containerRuntime);
         if (!synchronizer) {
-            synchronizer = new ContainerSynchronizer(containerRuntime);
+            synchronizer = new ContainerSynchronizer(runtime, containerRuntime);
             this._synchronizers.set(containerRuntime, synchronizer);
         }
 
@@ -146,44 +147,40 @@ interface StateSyncEventContent {
 }
 
 class ContainerSynchronizer {
+    private readonly _runtime: IRuntimeSignaler;
     private readonly _containerRuntime: IContainerRuntimeSignaler;
     private readonly _objects = new Map<string, GetAndUpdateStateHandlers<object>>();
+    private _unconnectedKeys: string[] = [];
+    private _connectedKeys: string[] = [];
     private _refCount = 0;
     private _hTimer: any;
 
-    constructor(runtime: IContainerRuntimeSignaler) {
-        this._containerRuntime = runtime;
+    constructor(runtime: IRuntimeSignaler, containerRuntime: IContainerRuntimeSignaler) {
+        // Listen for runtime to connect/re-connect
+        this._runtime = runtime;
+        this._runtime.on("connected", (clientId) => {
+            if (this._unconnectedKeys.length > 0) {
+                // Send CONNECT_EVENT for all unconnected objects
+                this.sendGroupEvent(this._unconnectedKeys, CONNECT_EVENT);
+
+                // Move keys to connected list
+                this._connectedKeys = this._connectedKeys.concat(this._unconnectedKeys);
+                this._unconnectedKeys = [];
+            }
+        });
+
+        // Listen for a global CONNECT/UPDATE event to be received
+        this._containerRuntime = containerRuntime;
         this._containerRuntime.on("signal", (message, local) => {
             // Ignore local signals
-            if (!local) {
-                const connecting = message.type == CONNECT_EVENT;
-                const content = message.content as StateSyncEventContent;
-                if (typeof content == 'object') {
-                    for (const id in content) {
-                        // Dispatch received state update
-                        const handlers = this._objects.get(id);
-                        if (handlers) {
-                            try {
-                                const state = content[id];
-                                if (typeof state == 'object') {
-                                    handlers.updateState(connecting, state, message.clientId!);
-                                }
-                            } catch (err: any) {
-                                console.error(`EphemeralObjectSynchronizer: error processing received update - ${err.toString()}`);
-                            }
-
-
-                            // Respond to connect event with an update
-                            // - should only be a single ID in content map
-                            if (connecting) {
-                                try {
-                                    this.sendUpdateEvent([id]);
-                                } catch (err: any) {
-                                    console.error(`EphemeralObjectSynchronizer: error responding to connect with update - ${err.toString()}`);
-                                }
-                            }
-                        }
-                    }
+            if (!local && typeof message.content == 'object') {
+                switch (message.type) {
+                    case CONNECT_EVENT:
+                        this.dispatchUpdates(message.clientId!, message.content, true);
+                        break;
+                    case UPDATE_EVENT:
+                        this.dispatchUpdates(message.clientId!, message.content, false);
+                        break;
                 }
             }
         });
@@ -197,17 +194,24 @@ class ContainerSynchronizer {
         // Save object ref
         this._objects.set(id, handlers);
 
-        // Send connect event
-        const connectState: StateSyncEventContent = {
-            [id]: handlers.getState(true)
-        };
-        this._containerRuntime.submitSignal(CONNECT_EVENT, connectState);
+        // Connect object to group
+        if (this._runtime.connected) {
+            // Send single connect event
+            const connectState: StateSyncEventContent = {
+                [id]: handlers.getState(true)
+            };
+            this._containerRuntime.submitSignal(CONNECT_EVENT, connectState);
+            this._connectedKeys.push();
+        } else {
+            // Queue connect event
+            this._unconnectedKeys.push(id);
+        }
 
         // Start update timer on first ref
         if (this._refCount++ == 0) {
             this._hTimer = setInterval(() => {
                 try {
-                    this.sendUpdateEvent(Array.from(this._objects.keys()));
+                    this.sendGroupEvent(this._connectedKeys, UPDATE_EVENT);
                 } catch (err: any) {
                     console.error(`EphemeralObjectSynchronizer: error sending update - ${err.toString()}`);
                 }
@@ -226,24 +230,58 @@ class ContainerSynchronizer {
                 this._hTimer = undefined;
                 return true;
             }
+
+            // Remove id from key lists
+            this._connectedKeys = this._connectedKeys.filter(key => key != id);
+            this._unconnectedKeys = this._unconnectedKeys.filter(key => key != id);
         }
 
         return false;
     }
 
-    private sendUpdateEvent(keys: string[]): void {
+    private sendGroupEvent(keys: string[], evt: string): void {
         // Compose list of updates
+        let send = false;
         const updates: StateSyncEventContent = {};
         keys.forEach((id) => {
             try {
                 const state = this._objects.get(id)?.getState(false);
-                updates[id] = state;
+                if (typeof state == 'object') {
+                    updates[id] = state;
+                    send = true;
+                }
             } catch (err: any) {
                 console.error(`EphemeralObjectSynchronizer: error getting an objects state - ${err.toString()}`);
             }
         });
 
-        // Send update event
-        this._containerRuntime.submitSignal(UPDATE_EVENT, updates);
+        // Send event if we have any updates to broadcast
+        if (send) {
+            this._containerRuntime.submitSignal(evt, updates);
+        }
+    }
+
+    private dispatchUpdates(senderId: string, updates: StateSyncEventContent, connecting: boolean): void {
+        const keys: string[] = [];
+        for (const id in updates) {
+            // Dispatch received state update
+            const handlers = this._objects.get(id);
+            if (handlers) {
+                try {
+                    keys.push(id);
+                    const state = updates[id];
+                    if (typeof state == 'object') {
+                        handlers.updateState(connecting, state, senderId);
+                    }
+                } catch (err: any) {
+                    console.error(`EphemeralObjectSynchronizer: error processing received update - ${err.toString()}`);
+                }
+            }
+        }
+
+        // Send immediate update of current state if connect message
+        if (connecting) {
+            this.sendGroupEvent(keys, UPDATE_EVENT);
+        }
     }
 }

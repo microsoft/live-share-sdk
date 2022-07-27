@@ -148,9 +148,9 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
                 this.updateMembersList(evt, local);
             }
         });
-
+        
         // Create object synchronizer
-        this._synchronizer = new EphemeralObjectSynchronizer<IEphemeralPresenceEvent<TData>>(this.id, this.context.containerRuntime, (connecting) => {
+        this._synchronizer = new EphemeralObjectSynchronizer<IEphemeralPresenceEvent<TData>>(this.id, this.runtime, this.context.containerRuntime, (connecting) => {
                 // Return current presence
                 return this._currentPresence;
             }, (connecting, state, sender) => {

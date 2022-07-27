@@ -26,4 +26,8 @@ export class LocalTimestampProvider implements ITimestampProvider {
 
         return new Date().getTime();
     }
+
+    public getMaxTimestampError(): number {
+        return 0;
+    }
 }

@@ -21,6 +21,7 @@ interface IServerTimeOffset {
 
 /**
  * @hidden
+ * 
  */
  export class SharedClock implements ITimestampProvider {
     private _teamsClient?: TeamsClientApi;
@@ -41,13 +42,21 @@ interface IServerTimeOffset {
      */
     public getTimestamp(): number {
         if (!this._serverTime) {
-            throw new Error(`SharedClock: can't call getTime() before calling start().`);
+            throw new Error(`SharedClock: can't call getTimestamp() before calling start().`);
         }
 
         // Return adjusted timestamp
         // - We're remember the last time we sent and returning that if we ever predict an earlier time.
         //   This can happen if our accuracy improves and we end up with a smaller offset then before.
         return this._lastTimeSent = Math.max(new Date().getTime() + this._serverTime.offset, this._lastTimeSent);
+    }
+
+    public getMaxTimestampError(): number {
+        if (!this._serverTime) {
+            throw new Error(`SharedClock: can't call getTimestamp() before calling start().`);
+        }
+
+        return Math.floor(this._serverTime.requestLatency / 2);
     }
 
 
@@ -76,6 +85,12 @@ interface IServerTimeOffset {
         }
     }
 
+    /**
+     * Called in a loop to improve the accuracy of the clients timestamp offset.
+     * 
+     * The function will periodically call itself until we go 5 times without an improvement 
+     * to the calculated timestamp offset. 
+     */
     private async improveAccuracy(): Promise<void> {
         // Check for a more accurate time offset.
         const offset = await this.getSessionTimeOffset();
@@ -99,6 +114,10 @@ interface IServerTimeOffset {
         }
     }
 
+    /**
+     * Fetches the current timestamp from central timestamp service and computes the local offset.
+     * @returns Computed timestamp offset.
+     */
     private async getSessionTimeOffset(): Promise<IServerTimeOffset> {
         const teamsClient = await this.getTeamsClient();
 
@@ -110,7 +129,7 @@ interface IServerTimeOffset {
 
         // Compute request latency and session time.
         const requestLatency = endCall - startCall;
-        const serverTimeInUtc = serverTime.ntpTimeInUTC + Math.floor(requestLatency/2);
+        const serverTimeInUtc = serverTime.ntpTimeInUTC + Math.floor(requestLatency / 2);
 
         // Return offset
         return {

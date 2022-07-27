@@ -73,6 +73,11 @@ export interface ITimestampProvider {
      * Returns the current timestamp as the number of milliseconds sine the Unix Epoch.
      */
     getTimestamp(): number;
+
+    /**
+     * Returns the maximum number of milliseconds a returned timestamp can be off from the source.
+     */
+    getMaxTimestampError(): number;
 }
 
 /**

@@ -28,19 +28,6 @@ export interface ITimerStateStopped extends ITimerState4 {
 }
 
 export interface IEphemeralTimerEvents extends IEvent {
-//   (
-//     event: "onPlay",
-//     listener: (state: ITimerStateRunning, local: boolean) => void
-//   ): any;
-//   (
-//     event: "onPause",
-//     listener: (state: ITimerStateStopped, local: boolean) => void
-//   ): any;
-//   (
-//     event: "onFinish",
-//     listener: (state: ITimerStateStopped, local: boolean) => void
-//   ): any;
-
   (
     event: "onTimerChanged",
     listener: (state: ITimerState4, local: boolean) => void
@@ -168,6 +155,28 @@ export class EphemeralTimer4 extends DataObject<{
     this.updateState(this.startEventToState(event), true);
   }
 
+  public pause(): void {
+    if (!this._scope) {
+      throw new Error(`EphemeralState not started.`);
+    }
+
+    if (this.isRunning(this._currentState)) {
+        // Broadcast state change
+        const event = this._pauseEvent!.sendEvent({
+            position: EphemeralEvent.getTimestamp() - this._currentState.timeStarted
+        });
+  
+      // Update local state immediately
+      // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
+      //   the client is disconnected this could be several seconds later.
+
+      const newState = this.pauseEventToState(event)
+      if (newState) {
+        this.updateState(newState, true);
+      }
+    }
+  }
+
   private _handleStart(event: IStartEvent, local: boolean) {
     if (!local) {
       this.remoteStateReceived(this.startEventToState(event), event.clientId!);
@@ -261,11 +270,9 @@ export class EphemeralTimer4 extends DataObject<{
     return "durationRemaining" in state;
   }
 
-  // TODO: make sure clientId of local state is always correct
   private _handleTimerInterval() {
-    // this._cancelTimerIfRunning();
+    // TODO: cancel when not needed
     const intervalCallback = () => {
-    
         if (this.isRunning(this._currentState)) {
             const timestamp = EphemeralEvent.getTimestamp()
             if (timestamp >= this._currentState.timeEnd) {
@@ -277,12 +284,9 @@ export class EphemeralTimer4 extends DataObject<{
                   };
                   this.updateState(newState, true)
             } else {
-                // console.log(this._currentState.timeEnd - timestamp)
                 this.emit('onTick', this._currentState);
             }
         }
-
-        // TODO: emit finish if finished?
     };
 
     this._intervalId = setInterval(
@@ -290,5 +294,4 @@ export class EphemeralTimer4 extends DataObject<{
         this._timerInterval.milliseconds
     );
   }
-
 }

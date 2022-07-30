@@ -164,8 +164,8 @@ export class EphemeralTimer4 extends DataObject<{
   private playInternal(duration: number, position: number): void {
     // Broadcast state change
     const event: IPlayEvent = this._playEvent!.sendEvent({
-      duration: cloneValue(duration),
-      position: cloneValue(position),
+      duration: duration,
+      position: position,
     });
 
     // Update local state immediately
@@ -180,9 +180,6 @@ export class EphemeralTimer4 extends DataObject<{
     }
 
     if (this.isRunning(this._currentState)) {
-      const position =
-        EphemeralEvent.getTimestamp() - this._currentState.timeStarted;
-
       // Broadcast state change
       const event = this._pauseEvent!.sendEvent({
         duration: this._currentState.duration,

@@ -39,10 +39,6 @@ export interface IEphemeralTimerEvents extends IEvent {
   ): any;
 }
 
-export interface IStartEvent extends IEphemeralEvent {
-  duration: number;
-}
-
 export interface IPlayEvent extends IEphemeralEvent {
   duration: number,
   position: number;
@@ -66,7 +62,6 @@ export class EphemeralTimer4 extends DataObject<{
   } as ITimerStateStopped;
 
   private _scope?: EphemeralEventScope;
-  private _startEvent?: EphemeralEventTarget<IStartEvent>;
   private _playEvent?: EphemeralEventTarget<IPlayEvent>;
   private _pauseEvent?: EphemeralEventTarget<IPauseEvent>;
   private _synchronizer?: EphemeralObjectSynchronizer<ITimerState4>;
@@ -106,11 +101,6 @@ export class EphemeralTimer4 extends DataObject<{
     this._scope = new EphemeralEventScope(this.runtime, allowedRoles);
 
     // TODO: make enum for event type names
-    this._startEvent = new EphemeralEventTarget(
-      this._scope,
-      "Start",
-      (event, local) => this._handleStart(event, local)
-    );
     this._playEvent = new EphemeralEventTarget(
       this._scope,
       "Play",
@@ -127,10 +117,12 @@ export class EphemeralTimer4 extends DataObject<{
       this.id,
       this.context.containerRuntime,
       (connecting) => {
+        console.log("remote state returned")
         // Return current state
         return this._currentState;
       },
       (connecting, state, sender) => {
+        console.log("remote state received")
         // Check for state change
         this.remoteStateReceived(state!, sender);
       }
@@ -141,20 +133,42 @@ export class EphemeralTimer4 extends DataObject<{
     return Promise.resolve();
   }
 
+  public dispose(): void {
+      super.dispose();
+      if (this._synchronizer) {
+          this._synchronizer.dispose();
+      }
+  }
+
   public start(duration: number): void {
     if (!this._scope) {
       throw new Error(`EphemeralState not started.`);
     }
 
+    this.playInternal(duration, 0)
+  }
+
+  public play(): void {
+    if (!this._scope) {
+      throw new Error(`EphemeralState not started.`);
+    }
+
+    if (this.isStopped(this._currentState) && this._currentState.durationRemaining > 0) {
+      this.playInternal(this._currentState.duration, this._currentState.duration - this._currentState.durationRemaining)
+    }
+  }
+
+  private playInternal(duration: number, position: number): void {
     // Broadcast state change
-    const event = this._startEvent!.sendEvent({
+    const event: IPlayEvent = this._playEvent!.sendEvent({
       duration: cloneValue(duration),
+      position: cloneValue(position)
     });
 
     // Update local state immediately
     // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
     //   the client is disconnected this could be several seconds later.
-    this.updateState(this.startEventToState(event), true);
+    this.updateState(this.playEventToState(event), true);
   }
 
   public pause(): void {
@@ -175,33 +189,6 @@ export class EphemeralTimer4 extends DataObject<{
       // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
       //   the client is disconnected this could be several seconds later.
       this.updateState(this.pauseEventToState(event), true);
-    }
-  }
-
-  public play(): void {
-    if (!this._scope) {
-      throw new Error(`EphemeralState not started.`);
-    }
-
-    if (this.isStopped(this._currentState)) {
-        // Broadcast state change
-        console.log(this._currentState)
-        console.log(this._currentState.duration - this._currentState.durationRemaining)
-        const event = this._playEvent!.sendEvent({
-            duration: this._currentState.duration,
-            position:  this._currentState.duration - this._currentState.durationRemaining
-        });
-  
-      // Update local state immediately
-      // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
-      //   the client is disconnected this could be several seconds later.
-      this.updateState(this.playEventToState(event), true);
-    }
-  }
-
-  private _handleStart(event: IStartEvent, local: boolean) {
-    if (!local) {
-      this.remoteStateReceived(this.startEventToState(event), event.clientId!);
     }
   }
 
@@ -234,20 +221,10 @@ export class EphemeralTimer4 extends DataObject<{
     this.emit('onTimerChanged', cloneValue(clone), local);
   }
 
-  private startEventToState(event: IStartEvent): ITimerStateRunning {
-    return {
-      timestamp: event.timestamp,
-      clientId: event.clientId!, // todo: check connected first
-      duration: event.duration,
-      timeStarted: event.timestamp,
-      timeEnd: event.timestamp + event.duration,
-    };
-  }
-
   private playEventToState(event: IPlayEvent): ITimerStateRunning {
       const newState: ITimerStateRunning = {
         timestamp: event.timestamp,
-        clientId: event.clientId!, // todo: check connected first
+        clientId: event.clientId!, // todo: check connected first?
         duration: event.duration,
         timeStarted: event.timestamp,
         timeEnd: event.timestamp + event.duration - event.position,
@@ -258,7 +235,7 @@ export class EphemeralTimer4 extends DataObject<{
   private pauseEventToState(event: IPauseEvent): ITimerStateStopped {
       const newState: ITimerStateStopped = {
         timestamp: event.timestamp,
-        clientId: event.clientId!, // todo: check connected first
+        clientId: event.clientId!, // todo: check connected first?
         duration: event.duration,
         durationRemaining: event.duration - event.position,
       };

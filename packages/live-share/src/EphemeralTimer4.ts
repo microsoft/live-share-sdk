@@ -48,7 +48,7 @@ export interface IPlayEvent extends IEphemeralEvent {
 }
 
 export interface IPauseEvent extends IEphemeralEvent {
-  position: number;
+  durationRemaining: number;
 }
 
 export class EphemeralTimer4 extends DataObject<{
@@ -161,19 +161,17 @@ export class EphemeralTimer4 extends DataObject<{
     }
 
     if (this.isRunning(this._currentState)) {
+        const position = EphemeralEvent.getTimestamp() - this._currentState.timeStarted
+
         // Broadcast state change
         const event = this._pauseEvent!.sendEvent({
-            position: EphemeralEvent.getTimestamp() - this._currentState.timeStarted
+            durationRemaining: this._currentState.duration - position
         });
   
       // Update local state immediately
       // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
       //   the client is disconnected this could be several seconds later.
-
-      const newState = this.pauseEventToState(event)
-      if (newState) {
-        this.updateState(newState, true);
-      }
+      this.updateState(this.pauseEventToState(event), true);
     }
   }
 
@@ -185,19 +183,15 @@ export class EphemeralTimer4 extends DataObject<{
 
   private _handlePlay(event: IPlayEvent, local: boolean) {
     if (!local) {
-      const newState = this.playEventToState(event);
-      if (newState) {
+        const newState = this.playEventToState(event)
         this.remoteStateReceived(newState, event.clientId!);
-      }
     }
   }
 
   private _handlePause(event: IPauseEvent, local: boolean) {
     if (!local) {
-      const newState = this.pauseEventToState(event);
-      if (newState) {
+        const newState = this.pauseEventToState(event)
         this.remoteStateReceived(newState, event.clientId!);
-      }
     }
   }
 
@@ -226,40 +220,26 @@ export class EphemeralTimer4 extends DataObject<{
     };
   }
 
-  private playEventToState(event: IPlayEvent): ITimerStateRunning | undefined {
-    if (this.isStopped(this._currentState)) {
-      const startTime = EphemeralEvent.getTimestamp();
+  private playEventToState(event: IPlayEvent): ITimerStateRunning {
       const newState: ITimerStateRunning = {
         timestamp: event.timestamp,
         clientId: event.clientId!, // todo: check connected first
         duration: event.duration,
-        timeStarted: startTime,
-        timeEnd: startTime + event.duration - event.position,
+        timeStarted: event.timestamp,
+        timeEnd: event.timestamp + event.duration - event.position,
       };
       return newState;
-    } else {
-      return undefined;
-    }
   }
 
-  private pauseEventToState(
-    event: IPauseEvent
-  ): ITimerStateStopped | undefined {
-    if (this.isRunning(this._currentState)) {
-      const currentTime = EphemeralEvent.getTimestamp();
-      const durationRemaining = this._currentState.timeEnd - currentTime; // TODO: min(0, x)    no negative numbers
-
+  private pauseEventToState(event: IPauseEvent): ITimerStateStopped {
       const newState: ITimerStateStopped = {
         timestamp: event.timestamp,
         clientId: event.clientId!, // todo: check connected first
         duration: event.duration,
-        durationRemaining: durationRemaining,
+        durationRemaining: event.durationRemaining,
       };
 
-      return newState;
-    } else {
-      return undefined;
-    }
+      return newState
   }
 
   private isRunning(state: ITimerState4): state is ITimerStateRunning {

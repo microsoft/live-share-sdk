@@ -6,7 +6,6 @@ import { IEphemeralEvent, UserMeetingRole } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
 import { cloneValue } from "./internals/utils";
 import { EphemeralEvent } from "./EphemeralEvent";
-import { TimeInterval } from "./TimeInterval";
 
 /** for all time values millis from epoch is used */
 export interface ITimerState4 {
@@ -61,8 +60,6 @@ export class EphemeralTimer4 extends DataObject<{
   private _playEvent?: EphemeralEventTarget<IPlayEvent>;
   private _pauseEvent?: EphemeralEventTarget<IPauseEvent>;
   private _synchronizer?: EphemeralObjectSynchronizer<ITimerState4>;
-  private _timerInterval = new TimeInterval(100);
-  private _intervalId: any;
 
   /**
    * The objects fluid type/name.
@@ -123,8 +120,6 @@ export class EphemeralTimer4 extends DataObject<{
         this.remoteStateReceived(state!, sender);
       }
     );
-
-    this._handleTimerInterval();
 
     return Promise.resolve();
   }
@@ -221,12 +216,15 @@ export class EphemeralTimer4 extends DataObject<{
 
     this._currentState = clone;
     this.emit("onTimerChanged", cloneValue(clone), local);
+    if (this.isRunning(clone)) {
+      this.startTicking()
+    }
   }
 
   private playEventToState(event: IPlayEvent): ITimerStateRunning {
     const newState: ITimerStateRunning = {
       timestamp: event.timestamp,
-      clientId: event.clientId!, // todo: check connected first?
+      clientId: event.clientId!,
       duration: event.duration,
       timeStarted: event.timestamp,
     };
@@ -236,7 +234,7 @@ export class EphemeralTimer4 extends DataObject<{
   private pauseEventToState(event: IPauseEvent): ITimerStateStopped {
     const newState: ITimerStateStopped = {
       timestamp: event.timestamp,
-      clientId: event.clientId!, // todo: check connected first?
+      clientId: event.clientId!,
       duration: event.duration,
       position: event.position
     };
@@ -251,9 +249,8 @@ export class EphemeralTimer4 extends DataObject<{
     return "position" in state;
   }
 
-  private _handleTimerInterval() {
-    // TODO: cancel when not needed
-    const intervalCallback = () => {
+  private startTicking () {
+    const tickCallback = () => {
       if (this.isRunning(this._currentState)) {
         const timestamp = EphemeralEvent.getTimestamp();
         if (timestamp >= this._currentState.timeStarted + this._currentState.duration) {
@@ -266,13 +263,18 @@ export class EphemeralTimer4 extends DataObject<{
           this.updateState(newState, true);
         } else {
           this.emit("onTick", this._currentState);
+          this.scheduleAnimationFrame(tickCallback)
         }
       }
-    };
+    }
+    this.scheduleAnimationFrame(tickCallback)
+  }
 
-    this._intervalId = setInterval(
-      intervalCallback.bind(this),
-      this._timerInterval.milliseconds
-    );
+  private scheduleAnimationFrame(callback: FrameRequestCallback): void {
+    if (requestAnimationFrame) {
+        requestAnimationFrame(callback);
+    } else {
+        setTimeout(callback, 20);
+    }
   }
 }

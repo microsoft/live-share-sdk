@@ -87,7 +87,7 @@ export class EphemeralTimer4 extends DataObject<{
     allowedRoles?: UserMeetingRole[]
   ): Promise<void> {
     if (this._scope) {
-      throw new Error(`EphemeralState already started.`);
+      throw new Error(`EphemeralTimer already started.`);
     }
 
     // Save off allowed roles
@@ -138,7 +138,7 @@ export class EphemeralTimer4 extends DataObject<{
 
   public start(duration: number): void {
     if (!this._scope) {
-      throw new Error(`EphemeralState not started.`);
+      throw new Error(`EphemeralTimer not started.`);
     }
 
     this.playInternal(duration, 0);
@@ -147,7 +147,7 @@ export class EphemeralTimer4 extends DataObject<{
   // TODO: should playing a finished timer restart it? Or should we make the user explicitly call start again?
   public play(): void {
     if (!this._scope) {
-      throw new Error(`EphemeralState not started.`);
+      throw new Error(`EphemeralTimer not started.`);
     }
 
     if (
@@ -176,7 +176,7 @@ export class EphemeralTimer4 extends DataObject<{
 
   public pause(): void {
     if (!this._scope) {
-      throw new Error(`EphemeralState not started.`);
+      throw new Error(`EphemeralTimer not started.`);
     }
 
     if (this.isRunning(this._currentState)) {

@@ -1,7 +1,4 @@
-import {
-    DataObject,
-    DataObjectFactory
-  } from "@fluidframework/aqueduct";
+import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { EphemeralEventScope } from "./EphemeralEventScope";
 import { EphemeralEventTarget } from "./EphemeralEventTarget";
 import { EphemeralObjectSynchronizer } from "./EphemeralObjectSynchronizer";
@@ -40,7 +37,7 @@ export interface IEphemeralTimerEvents extends IEvent {
 }
 
 export interface IPlayEvent extends IEphemeralEvent {
-  duration: number,
+  duration: number;
   position: number;
 }
 
@@ -117,27 +114,27 @@ export class EphemeralTimer4 extends DataObject<{
       this.id,
       this.context.containerRuntime,
       (connecting) => {
-        console.log("remote state returned")
+        console.log("remote state returned");
         // Return current state
         return this._currentState;
       },
       (connecting, state, sender) => {
-        console.log("remote state received")
+        console.log("remote state received");
         // Check for state change
         this.remoteStateReceived(state!, sender);
       }
     );
 
-    this._handleTimerInterval()
+    this._handleTimerInterval();
 
     return Promise.resolve();
   }
 
   public dispose(): void {
-      super.dispose();
-      if (this._synchronizer) {
-          this._synchronizer.dispose();
-      }
+    super.dispose();
+    if (this._synchronizer) {
+      this._synchronizer.dispose();
+    }
   }
 
   public start(duration: number): void {
@@ -145,7 +142,7 @@ export class EphemeralTimer4 extends DataObject<{
       throw new Error(`EphemeralState not started.`);
     }
 
-    this.playInternal(duration, 0)
+    this.playInternal(duration, 0);
   }
 
   public play(): void {
@@ -153,8 +150,14 @@ export class EphemeralTimer4 extends DataObject<{
       throw new Error(`EphemeralState not started.`);
     }
 
-    if (this.isStopped(this._currentState) && this._currentState.durationRemaining > 0) {
-      this.playInternal(this._currentState.duration, this._currentState.duration - this._currentState.durationRemaining)
+    if (
+      this.isStopped(this._currentState) &&
+      this._currentState.durationRemaining > 0
+    ) {
+      this.playInternal(
+        this._currentState.duration,
+        this._currentState.duration - this._currentState.durationRemaining
+      );
     }
   }
 
@@ -162,7 +165,7 @@ export class EphemeralTimer4 extends DataObject<{
     // Broadcast state change
     const event: IPlayEvent = this._playEvent!.sendEvent({
       duration: cloneValue(duration),
-      position: cloneValue(position)
+      position: cloneValue(position),
     });
 
     // Update local state immediately
@@ -177,14 +180,16 @@ export class EphemeralTimer4 extends DataObject<{
     }
 
     if (this.isRunning(this._currentState)) {
-        const position = EphemeralEvent.getTimestamp() - this._currentState.timeStarted
+      const position =
+        EphemeralEvent.getTimestamp() - this._currentState.timeStarted;
 
-        // Broadcast state change
-        const event = this._pauseEvent!.sendEvent({
-            duration: this._currentState.duration,
-            position: EphemeralEvent.getTimestamp() - this._currentState.timeStarted
-        });
-  
+      // Broadcast state change
+      const event = this._pauseEvent!.sendEvent({
+        duration: this._currentState.duration,
+        position:
+          EphemeralEvent.getTimestamp() - this._currentState.timeStarted,
+      });
+
       // Update local state immediately
       // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
       //   the client is disconnected this could be several seconds later.
@@ -194,15 +199,15 @@ export class EphemeralTimer4 extends DataObject<{
 
   private _handlePlay(event: IPlayEvent, local: boolean) {
     if (!local) {
-        const newState = this.playEventToState(event)
-        this.remoteStateReceived(newState, event.clientId!);
+      const newState = this.playEventToState(event);
+      this.remoteStateReceived(newState, event.clientId!);
     }
   }
 
   private _handlePause(event: IPauseEvent, local: boolean) {
     if (!local) {
-        const newState = this.pauseEventToState(event)
-        this.remoteStateReceived(newState, event.clientId!);
+      const newState = this.pauseEventToState(event);
+      this.remoteStateReceived(newState, event.clientId!);
     }
   }
 
@@ -212,35 +217,35 @@ export class EphemeralTimer4 extends DataObject<{
   }
 
   private updateState(state: ITimerState4, local: boolean) {
-    const clone = cloneValue(state)!
+    const clone = cloneValue(state)!;
     if (!local) {
-        clone.clientId = this._currentState.clientId
+      clone.clientId = this._currentState.clientId;
     }
 
     this._currentState = clone;
-    this.emit('onTimerChanged', cloneValue(clone), local);
+    this.emit("onTimerChanged", cloneValue(clone), local);
   }
 
   private playEventToState(event: IPlayEvent): ITimerStateRunning {
-      const newState: ITimerStateRunning = {
-        timestamp: event.timestamp,
-        clientId: event.clientId!, // todo: check connected first?
-        duration: event.duration,
-        timeStarted: event.timestamp,
-        timeEnd: event.timestamp + event.duration - event.position,
-      };
-      return newState;
+    const newState: ITimerStateRunning = {
+      timestamp: event.timestamp,
+      clientId: event.clientId!, // todo: check connected first?
+      duration: event.duration,
+      timeStarted: event.timestamp,
+      timeEnd: event.timestamp + event.duration - event.position,
+    };
+    return newState;
   }
 
   private pauseEventToState(event: IPauseEvent): ITimerStateStopped {
-      const newState: ITimerStateStopped = {
-        timestamp: event.timestamp,
-        clientId: event.clientId!, // todo: check connected first?
-        duration: event.duration,
-        durationRemaining: event.duration - event.position,
-      };
+    const newState: ITimerStateStopped = {
+      timestamp: event.timestamp,
+      clientId: event.clientId!, // todo: check connected first?
+      duration: event.duration,
+      durationRemaining: event.duration - event.position,
+    };
 
-      return newState
+    return newState;
   }
 
   private isRunning(state: ITimerState4): state is ITimerStateRunning {
@@ -254,25 +259,25 @@ export class EphemeralTimer4 extends DataObject<{
   private _handleTimerInterval() {
     // TODO: cancel when not needed
     const intervalCallback = () => {
-        if (this.isRunning(this._currentState)) {
-            const timestamp = EphemeralEvent.getTimestamp()
-            if (timestamp >= this._currentState.timeEnd) {
-                const newState: ITimerStateStopped = {
-                    timestamp: timestamp,
-                    clientId: this._currentState.clientId, 
-                    duration: this._currentState.duration,
-                    durationRemaining: 0,
-                  };
-                  this.updateState(newState, true)
-            } else {
-                this.emit('onTick', this._currentState);
-            }
+      if (this.isRunning(this._currentState)) {
+        const timestamp = EphemeralEvent.getTimestamp();
+        if (timestamp >= this._currentState.timeEnd) {
+          const newState: ITimerStateStopped = {
+            timestamp: timestamp,
+            clientId: this._currentState.clientId,
+            duration: this._currentState.duration,
+            durationRemaining: 0,
+          };
+          this.updateState(newState, true);
+        } else {
+          this.emit("onTick", this._currentState);
         }
+      }
     };
 
     this._intervalId = setInterval(
-        intervalCallback.bind(this),
-        this._timerInterval.milliseconds
+      intervalCallback.bind(this),
+      this._timerInterval.milliseconds
     );
   }
 }

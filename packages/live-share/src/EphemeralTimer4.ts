@@ -44,11 +44,13 @@ export interface IStartEvent extends IEphemeralEvent {
 }
 
 export interface IPlayEvent extends IEphemeralEvent {
+  duration: number,
   position: number;
 }
 
 export interface IPauseEvent extends IEphemeralEvent {
-  durationRemaining: number;
+  duration: number;
+  position: number;
 }
 
 export class EphemeralTimer4 extends DataObject<{
@@ -165,13 +167,35 @@ export class EphemeralTimer4 extends DataObject<{
 
         // Broadcast state change
         const event = this._pauseEvent!.sendEvent({
-            durationRemaining: this._currentState.duration - position
+            duration: this._currentState.duration,
+            position: EphemeralEvent.getTimestamp() - this._currentState.timeStarted
         });
   
       // Update local state immediately
       // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
       //   the client is disconnected this could be several seconds later.
       this.updateState(this.pauseEventToState(event), true);
+    }
+  }
+
+  public play(): void {
+    if (!this._scope) {
+      throw new Error(`EphemeralState not started.`);
+    }
+
+    if (this.isStopped(this._currentState)) {
+        // Broadcast state change
+        console.log(this._currentState)
+        console.log(this._currentState.duration - this._currentState.durationRemaining)
+        const event = this._playEvent!.sendEvent({
+            duration: this._currentState.duration,
+            position:  this._currentState.duration - this._currentState.durationRemaining
+        });
+  
+      // Update local state immediately
+      // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
+      //   the client is disconnected this could be several seconds later.
+      this.updateState(this.playEventToState(event), true);
     }
   }
 
@@ -236,7 +260,7 @@ export class EphemeralTimer4 extends DataObject<{
         timestamp: event.timestamp,
         clientId: event.clientId!, // todo: check connected first
         duration: event.duration,
-        durationRemaining: event.durationRemaining,
+        durationRemaining: event.duration - event.position,
       };
 
       return newState

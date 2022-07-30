@@ -17,11 +17,10 @@ export interface ITimerState4 {
 
 export interface ITimerStateRunning extends ITimerState4 {
   timeStarted: number;
-  timeEnd: number;
 }
 
 export interface ITimerStateStopped extends ITimerState4 {
-  durationRemaining: number;
+  position: number;
 }
 
 export interface IEphemeralTimerEvents extends IEvent {
@@ -55,7 +54,7 @@ export class EphemeralTimer4 extends DataObject<{
     timestamp: 0,
     clientId: "",
     duration: 0,
-    durationRemaining: 0,
+    position: 0,
   } as ITimerStateStopped;
 
   private _scope?: EphemeralEventScope;
@@ -145,6 +144,7 @@ export class EphemeralTimer4 extends DataObject<{
     this.playInternal(duration, 0);
   }
 
+  // TODO: should playing a finished timer restart it? Or should we make the user explicitly call start again?
   public play(): void {
     if (!this._scope) {
       throw new Error(`EphemeralState not started.`);
@@ -152,11 +152,11 @@ export class EphemeralTimer4 extends DataObject<{
 
     if (
       this.isStopped(this._currentState) &&
-      this._currentState.durationRemaining > 0
+      this._currentState.position < this._currentState.duration
     ) {
       this.playInternal(
         this._currentState.duration,
-        this._currentState.duration - this._currentState.durationRemaining
+        this._currentState.position
       );
     }
   }
@@ -232,7 +232,6 @@ export class EphemeralTimer4 extends DataObject<{
       clientId: event.clientId!, // todo: check connected first?
       duration: event.duration,
       timeStarted: event.timestamp,
-      timeEnd: event.timestamp + event.duration - event.position,
     };
     return newState;
   }
@@ -242,18 +241,17 @@ export class EphemeralTimer4 extends DataObject<{
       timestamp: event.timestamp,
       clientId: event.clientId!, // todo: check connected first?
       duration: event.duration,
-      durationRemaining: event.duration - event.position,
+      position: event.position
     };
-
     return newState;
   }
 
   private isRunning(state: ITimerState4): state is ITimerStateRunning {
-    return "timeStarted" in state && "timeEnd" in state;
+    return "timeStarted" in state;
   }
 
   private isStopped(state: ITimerState4): state is ITimerStateStopped {
-    return "durationRemaining" in state;
+    return "position" in state;
   }
 
   private _handleTimerInterval() {
@@ -261,12 +259,12 @@ export class EphemeralTimer4 extends DataObject<{
     const intervalCallback = () => {
       if (this.isRunning(this._currentState)) {
         const timestamp = EphemeralEvent.getTimestamp();
-        if (timestamp >= this._currentState.timeEnd) {
+        if (timestamp >= this._currentState.timeStarted + this._currentState.duration) {
           const newState: ITimerStateStopped = {
             timestamp: timestamp,
             clientId: this._currentState.clientId,
             duration: this._currentState.duration,
-            durationRemaining: 0,
+            position: this._currentState.duration,
           };
           this.updateState(newState, true);
         } else {

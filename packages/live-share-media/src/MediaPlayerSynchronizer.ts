@@ -19,6 +19,10 @@ export interface IMediaPlayerSynchronizerEvent extends IEvent {
      * Event details.
      */
     details: ExtendedMediaSessionActionDetails;
+    /**
+     * Player error
+     */
+    playerError?: DOMException;
 }
 
 /**
@@ -139,7 +143,8 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
         // Register media session actions
         for (const action of MediaPlayerSynchronizer.SESSION_ACTIONS) {
-            this._mediaSession.setActionHandler(action, (details: ExtendedMediaSessionActionDetails) => {
+            this._mediaSession.setActionHandler(action, async (details: ExtendedMediaSessionActionDetails) => {
+                let playerError: Error | undefined;
                 switch (details.action) {
                     case 'play':
                         this._expectedPlaybackState = 'playing';
@@ -149,7 +154,11 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                                 this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekingPlayerToStartPosition, null, {position: details.seekTime})
                                 this._player.currentTime = details.seekTime!;
                             }
-                            this._player.play();
+                            await this._player.play()
+                                .catch((error: any) => {
+                                    // Error can occur when user has not sufficiently interacted with browser tab
+                                    playerError = error;
+                                });
                         }
                         break;
                     case 'pause':
@@ -184,7 +193,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                         break;
                 }
 
-                this.dispatchGroupAction(details);
+                this.dispatchGroupAction(details, false, playerError);
             });
         }
 
@@ -402,11 +411,11 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.dispatchUserAction({action: 'datachange', data: data});
     }
 
-    private dispatchGroupAction(details: ExtendedMediaSessionActionDetails, delay = false): void {
+    private dispatchGroupAction(details: ExtendedMediaSessionActionDetails, delay = false, playerError: Error | undefined): void {
         if (delay) {
-            setTimeout(() => this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details}), 50);
+            setTimeout(() => this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details, playerError}), 50);
         } else {
-            this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details});
+            this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details, playerError});
         }
     }
 

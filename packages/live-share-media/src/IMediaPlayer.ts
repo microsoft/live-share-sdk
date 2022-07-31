@@ -15,7 +15,7 @@ export interface IMediaPlayer {
     volume: number;
     load(): void;
     pause(): void;
-    play(): void;
+    play(): Promise<void>;
     addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }

@@ -78,3 +78,37 @@ function timeoutRequest<TResult>(fnRequest: () => Promise<TResult|undefined>, ti
         resolve(result);
     });
 }
+
+export interface IClientTimestamp {
+    timestamp: number;
+    clientId?: string;
+}
+
+// TODO: docs from ephemeralEvent
+export function isNewer(current: IClientTimestamp|undefined, received: IClientTimestamp, debouncePeriod = 0): boolean {
+    if (current) {
+        if (current.timestamp == received.timestamp) {
+            // In a case where both clientId's are blank that's the local client in a disconnected state
+            const cmp = (current.clientId || '').localeCompare(received.clientId || '');
+            if (cmp < 0) {
+                // cmp == 0 is same user and we want to take latest event from a given user.
+                // cmp > 0 is a tie breaker so we'll take that event as well (comparing 'a' with 'c' 
+                // will result in a negative value).
+                return false;
+            }
+        } else if (current.timestamp > received.timestamp) {
+            // Did we receive an older event that should have caused us to debounce the current one?
+            const delta = current.timestamp - received.timestamp;
+            if (delta > debouncePeriod) {
+                return false;
+            }
+        } else {
+            // Is the new event within the debounce period?
+            const delta =  received.timestamp - current.timestamp;
+            if (delta < debouncePeriod) {
+                return false;
+            }
+        }
+    }
+    return true
+}

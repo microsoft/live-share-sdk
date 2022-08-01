@@ -4,7 +4,7 @@ import { EphemeralEventTarget } from "./EphemeralEventTarget";
 import { EphemeralObjectSynchronizer } from "./EphemeralObjectSynchronizer";
 import { IEphemeralEvent, UserMeetingRole } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
-import { cloneValue } from "./internals/utils";
+import { cloneValue, isNewer } from "./internals/utils";
 import { EphemeralEvent } from "./EphemeralEvent";
 
 /** for all time values millis from epoch is used */
@@ -42,7 +42,7 @@ export class EphemeralTimer4 extends DataObject<{
   Events: IEphemeralTimerEvents;
 }> {
   // private _logger = new EphemeralTelemetryLogger(this.runtime);
-  // private _allowedRoles: UserMeetingRole[] = [];
+  private _allowedRoles: UserMeetingRole[] = [];
   private _currentState: ITimerState4 = {
     timestamp: 0,
     clientId: "",
@@ -83,7 +83,7 @@ export class EphemeralTimer4 extends DataObject<{
     }
 
     // Save off allowed roles
-    // this._allowedRoles = allowedRoles || [];
+    this._allowedRoles = allowedRoles || [];
 
     // Create event scope
     this._scope = new EphemeralEventScope(this.runtime, allowedRoles);
@@ -134,7 +134,6 @@ export class EphemeralTimer4 extends DataObject<{
     this.playInternal(duration, 0);
   }
 
-  // TODO: should playing a finished timer restart it? Or should we make the user explicitly call start again?
   public play(): void {
     if (!this._scope) {
       throw new Error(`EphemeralTimer not started.`);
@@ -198,8 +197,14 @@ export class EphemeralTimer4 extends DataObject<{
   }
 
   private remoteStateReceived(state: ITimerState4, sender: string): void {
-    // TODO: role verifications
-    this.updateState(state, false);
+    EphemeralEvent.verifyRolesAllowed(sender, this._allowedRoles).then((allowed) => {
+      // Ensure that state is allowed, newer, and not the initial state.
+      if (allowed && isNewer(this._currentState, state) && state.timestamp !== 0) {
+          this.updateState(state, false);
+      }
+    }).catch((err) => {
+      console.error(err);
+    });
   }
 
   private updateState(state: ITimerState4, local: boolean) {

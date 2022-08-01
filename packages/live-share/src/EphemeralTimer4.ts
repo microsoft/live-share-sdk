@@ -12,14 +12,8 @@ export interface ITimerState4 {
   timestamp: number;
   clientId: string;
   duration: number;
-}
-
-export interface ITimerStateRunning extends ITimerState4 {
-  timeStarted: number;
-}
-
-export interface ITimerStateStopped extends ITimerState4 {
   position: number;
+  timeStarted?: number; // time started or restarted. can i use timestamp?
 }
 
 export interface IEphemeralTimerEvents extends IEvent {
@@ -30,7 +24,7 @@ export interface IEphemeralTimerEvents extends IEvent {
 
   (
     event: "onTick",
-    listener: (state: ITimerStateRunning, local: boolean) => void
+    listener: (state: number, local: boolean) => void
   ): any;
 }
 
@@ -54,7 +48,8 @@ export class EphemeralTimer4 extends DataObject<{
     clientId: "",
     duration: 0,
     position: 0,
-  } as ITimerStateStopped;
+    timeStarted: undefined,
+  } as ITimerState4;
 
   private _scope?: EphemeralEventScope;
   private _playEvent?: EphemeralEventTarget<IPlayEvent>;
@@ -146,7 +141,7 @@ export class EphemeralTimer4 extends DataObject<{
     }
 
     if (
-      this.isStopped(this._currentState) &&
+      !this._currentState.timeStarted &&
       this._currentState.position < this._currentState.duration
     ) {
       this.playInternal(
@@ -173,13 +168,12 @@ export class EphemeralTimer4 extends DataObject<{
     if (!this._scope) {
       throw new Error(`EphemeralTimer not started.`);
     }
-
-    if (this.isRunning(this._currentState)) {
+      
+    if (this._currentState?.timeStarted) {
       // Broadcast state change
       const event = this._pauseEvent!.sendEvent({
         duration: this._currentState.duration,
-        position:
-          EphemeralEvent.getTimestamp() - this._currentState.timeStarted,
+        position: EphemeralEvent.getTimestamp() - this._currentState.timeStarted
       });
 
       // Update local state immediately
@@ -216,23 +210,25 @@ export class EphemeralTimer4 extends DataObject<{
 
     this._currentState = clone;
     this.emit("onTimerChanged", cloneValue(clone), local);
-    if (this.isRunning(clone)) {
+    if (clone.timeStarted) {
       this.startTicking()
     }
   }
 
-  private playEventToState(event: IPlayEvent): ITimerStateRunning {
-    const newState: ITimerStateRunning = {
+  private playEventToState(event: IPlayEvent): ITimerState4 {
+    const newState: ITimerState4 = {
       timestamp: event.timestamp,
       clientId: event.clientId!,
       duration: event.duration,
+      position: event.position,
       timeStarted: event.timestamp,
-    };
+    }; 
+    // does timer restart with full duration?
     return newState;
   }
 
-  private pauseEventToState(event: IPauseEvent): ITimerStateStopped {
-    const newState: ITimerStateStopped = {
+  private pauseEventToState(event: IPauseEvent): ITimerState4 {
+    const newState: ITimerState4 = {
       timestamp: event.timestamp,
       clientId: event.clientId!,
       duration: event.duration,
@@ -241,20 +237,13 @@ export class EphemeralTimer4 extends DataObject<{
     return newState;
   }
 
-  private isRunning(state: ITimerState4): state is ITimerStateRunning {
-    return "timeStarted" in state;
-  }
-
-  private isStopped(state: ITimerState4): state is ITimerStateStopped {
-    return "position" in state;
-  }
-
   private startTicking () {
     const tickCallback = () => {
-      if (this.isRunning(this._currentState)) {
+      if (this._currentState?.timeStarted) {
         const timestamp = EphemeralEvent.getTimestamp();
-        if (timestamp >= this._currentState.timeStarted + this._currentState.duration) {
-          const newState: ITimerStateStopped = {
+        const endTime = this._currentState.timeStarted - this._currentState.position + this._currentState.duration
+        if (timestamp >= endTime) {
+          const newState: ITimerState4 = {
             timestamp: timestamp,
             clientId: this._currentState.clientId,
             duration: this._currentState.duration,
@@ -262,7 +251,7 @@ export class EphemeralTimer4 extends DataObject<{
           };
           this.updateState(newState, true);
         } else {
-          this.emit("onTick", this._currentState);
+          this.emit("onTick", endTime - timestamp);
           this.scheduleAnimationFrame(tickCallback)
         }
       }

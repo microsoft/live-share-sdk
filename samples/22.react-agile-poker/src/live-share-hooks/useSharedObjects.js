@@ -12,6 +12,7 @@ import {
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { EphemeralTimer } from "@microsoft/live-share";
+import { EphemeralTimer4 } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 
@@ -73,7 +74,7 @@ export function useSharedObjects() {
       initialObjects: {
         pokerState: EphemeralState,
         presence: EphemeralPresence,
-        timer: EphemeralTimer,
+        timer: EphemeralTimer4,
         userStoriesMap: SharedMap,
       },
     };

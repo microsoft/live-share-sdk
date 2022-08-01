@@ -52,10 +52,8 @@ const MeetingStage = () => {
   );
 
   // EphemeralTimer hook for tracking round timer
-  const { timerState, timerStarted, beginTimer, pauseTimer } = useTimer(
-    timer,
-    onStartDiscussion
-  );
+  const { timerMilliRemaining, timerStarted, beginTimer, pauseTimer } =
+    useTimer(timer, onStartDiscussion);
 
   // Flag for awaiting container setup
   const started = useMemo(() => {
@@ -82,7 +80,6 @@ const MeetingStage = () => {
         reportAnswer(null);
       } else if (state === "costing") {
         console.log("Starting costing phase");
-        beginTimer();
       } else if (state === "discussion") {
         console.log("Starting discussion phase");
         updatePresence({ ready: false, answer: answerRef.current });
@@ -109,7 +106,7 @@ const MeetingStage = () => {
   // End round if everyone is ready and local user is scrum master
   useEffect(() => {
     if (state === "costing") {
-      if (readyUsersCount === users.length) {
+      if (readyUsersCount === users.length && users.length > 0) {
         if (localUserIsScrumMaster) {
           onStartDiscussion();
         }
@@ -137,7 +134,10 @@ const MeetingStage = () => {
             localUserId={context?.user?.id}
             users={users}
             userStory={userStory}
-            onStartCosting={onStartCosting}
+            onStartCosting={() => {
+              beginTimer();
+              onStartCosting();
+            }}
           />
         )}
 
@@ -146,7 +146,7 @@ const MeetingStage = () => {
             answer={answer}
             readyUsersCount={readyUsersCount}
             setAnswer={setAnswer}
-            timerState={timerState}
+            timerMilliRemaining={timerMilliRemaining}
             users={users}
             userStory={userStory}
             changeReadyStatus={changeReadyStatus}
@@ -158,7 +158,10 @@ const MeetingStage = () => {
             localUserId={context?.user?.id}
             users={users}
             userStory={userStory}
-            onStartCosting={onStartCosting}
+            onStartCosting={() => {
+              beginTimer();
+              onStartCosting();
+            }}
             onStartWaiting={onStartWaiting}
           />
         )}

@@ -10,13 +10,13 @@ import { formatTimeValue } from "../utils/formatTimeValue";
 import { Text, mergeClasses } from "@fluentui/react-components";
 import { getFlexRowStyles } from "../styles/layout";
 
-export const GameTimer = ({ timerState }) => {
+export const GameTimer = ({ timerMilliRemaining }) => {
   const formattedTimestamp = useMemo(() => {
-    if (!timerState) {
+    if (!timerMilliRemaining) {
       return 0;
     }
-    return formatTimeValue(timerState.duration - timerState.position);
-  }, [timerState]);
+    return formatTimeValue(timerMilliRemaining);
+  }, [timerMilliRemaining]);
   const flexRowStyles = getFlexRowStyles();
   return (
     <div

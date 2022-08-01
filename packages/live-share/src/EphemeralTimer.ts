@@ -8,7 +8,7 @@ import { cloneValue, isNewer } from "./internals/utils";
 import { EphemeralEvent } from "./EphemeralEvent";
 
 /** for all time values millis from epoch is used */
-export interface ITimerState4 {
+export interface ITimerState {
   timestamp: number;
   clientId: string;
   duration: number;
@@ -19,7 +19,7 @@ export interface ITimerState4 {
 export interface IEphemeralTimerEvents extends IEvent {
   (
     event: "onTimerChanged",
-    listener: (state: ITimerState4, local: boolean) => void
+    listener: (state: ITimerState, local: boolean) => void
   ): any;
 
   (
@@ -43,18 +43,18 @@ export class EphemeralTimer extends DataObject<{
 }> {
   // private _logger = new EphemeralTelemetryLogger(this.runtime);
   private _allowedRoles: UserMeetingRole[] = [];
-  private _currentState: ITimerState4 = {
+  private _currentState: ITimerState = {
     timestamp: 0,
     clientId: "",
     duration: 0,
     position: 0,
     running: false,
-  } as ITimerState4;
+  } as ITimerState;
 
   private _scope?: EphemeralEventScope;
   private _playEvent?: EphemeralEventTarget<IPlayEvent>;
   private _pauseEvent?: EphemeralEventTarget<IPauseEvent>;
-  private _synchronizer?: EphemeralObjectSynchronizer<ITimerState4>;
+  private _synchronizer?: EphemeralObjectSynchronizer<ITimerState>;
 
   /**
    * The objects fluid type/name.
@@ -101,7 +101,7 @@ export class EphemeralTimer extends DataObject<{
     );
 
     // Create object synchronizer
-    this._synchronizer = new EphemeralObjectSynchronizer<ITimerState4>(
+    this._synchronizer = new EphemeralObjectSynchronizer<ITimerState>(
       this.id,
       this.context.containerRuntime,
       (connecting) => {
@@ -196,7 +196,7 @@ export class EphemeralTimer extends DataObject<{
     }
   }
 
-  private remoteStateReceived(state: ITimerState4, sender: string): void {
+  private remoteStateReceived(state: ITimerState, sender: string): void {
     EphemeralEvent.verifyRolesAllowed(sender, this._allowedRoles).then((allowed) => {
       // Ensure that state is allowed, newer, and not the initial state.
       if (allowed && isNewer(this._currentState, state) && state.timestamp !== 0) {
@@ -207,7 +207,7 @@ export class EphemeralTimer extends DataObject<{
     });
   }
 
-  private updateState(state: ITimerState4, local: boolean) {
+  private updateState(state: ITimerState, local: boolean) {
     const clone = cloneValue(state)!;
     if (!local) {
       clone.clientId = this._currentState.clientId;
@@ -220,8 +220,8 @@ export class EphemeralTimer extends DataObject<{
     }
   }
 
-  private playEventToState(event: IPlayEvent): ITimerState4 {
-    const newState: ITimerState4 = {
+  private playEventToState(event: IPlayEvent): ITimerState {
+    const newState: ITimerState = {
       timestamp: event.timestamp,
       clientId: event.clientId!,
       duration: event.duration,
@@ -231,8 +231,8 @@ export class EphemeralTimer extends DataObject<{
     return newState;
   }
 
-  private pauseEventToState(event: IPauseEvent): ITimerState4 {
-    const newState: ITimerState4 = {
+  private pauseEventToState(event: IPauseEvent): ITimerState {
+    const newState: ITimerState = {
       timestamp: event.timestamp,
       clientId: event.clientId!,
       duration: event.duration,
@@ -248,7 +248,7 @@ export class EphemeralTimer extends DataObject<{
         const timestamp = EphemeralEvent.getTimestamp();
         const endTime = this._currentState.timestamp - this._currentState.position + this._currentState.duration
         if (timestamp >= endTime) {
-          const newState: ITimerState4 = {
+          const newState: ITimerState = {
             timestamp: timestamp,
             clientId: this._currentState.clientId,
             duration: this._currentState.duration,

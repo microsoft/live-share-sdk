@@ -14,7 +14,6 @@ export * from './EphemeralPresence';
 export * from './EphemeralPresenceUser';
 export * from './EphemeralState';
 export * from './EphemeralTimer';
-export * from './EphemeralTimer4';
 export * from './interfaces';
 export * from './LocalRoleVerifier';
 export * from './LocalTimestampProvider';

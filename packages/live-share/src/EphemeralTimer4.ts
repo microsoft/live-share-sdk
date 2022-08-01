@@ -13,7 +13,7 @@ export interface ITimerState4 {
   clientId: string;
   duration: number;
   position: number;
-  timeStarted?: number; // time started or restarted. can i use timestamp?
+  running: boolean;
 }
 
 export interface IEphemeralTimerEvents extends IEvent {
@@ -24,7 +24,7 @@ export interface IEphemeralTimerEvents extends IEvent {
 
   (
     event: "onTick",
-    listener: (state: number, local: boolean) => void
+    listener: (milliRemaining: number, local: boolean) => void
   ): any;
 }
 
@@ -48,7 +48,7 @@ export class EphemeralTimer4 extends DataObject<{
     clientId: "",
     duration: 0,
     position: 0,
-    timeStarted: undefined,
+    running: false,
   } as ITimerState4;
 
   private _scope?: EphemeralEventScope;
@@ -141,7 +141,7 @@ export class EphemeralTimer4 extends DataObject<{
     }
 
     if (
-      !this._currentState.timeStarted &&
+      !this._currentState.running &&
       this._currentState.position < this._currentState.duration
     ) {
       this.playInternal(
@@ -169,11 +169,11 @@ export class EphemeralTimer4 extends DataObject<{
       throw new Error(`EphemeralTimer not started.`);
     }
       
-    if (this._currentState?.timeStarted) {
+    if (this._currentState.running) {
       // Broadcast state change
       const event = this._pauseEvent!.sendEvent({
         duration: this._currentState.duration,
-        position: EphemeralEvent.getTimestamp() - this._currentState.timeStarted
+        position: this._currentState.position + (EphemeralEvent.getTimestamp() - this._currentState.timestamp)
       });
 
       // Update local state immediately
@@ -210,7 +210,7 @@ export class EphemeralTimer4 extends DataObject<{
 
     this._currentState = clone;
     this.emit("onTimerChanged", cloneValue(clone), local);
-    if (clone.timeStarted) {
+    if (clone.running) {
       this.startTicking()
     }
   }
@@ -221,7 +221,8 @@ export class EphemeralTimer4 extends DataObject<{
       clientId: event.clientId!,
       duration: event.duration,
       position: event.position,
-      timeStarted: event.timestamp,
+      running: true,
+      // timeStarted: event.timestamp,
     }; 
     // does timer restart with full duration?
     return newState;
@@ -232,22 +233,24 @@ export class EphemeralTimer4 extends DataObject<{
       timestamp: event.timestamp,
       clientId: event.clientId!,
       duration: event.duration,
-      position: event.position
+      position: event.position,
+      running: false,
     };
     return newState;
   }
 
   private startTicking () {
     const tickCallback = () => {
-      if (this._currentState?.timeStarted) {
+      if (this._currentState.running) {
         const timestamp = EphemeralEvent.getTimestamp();
-        const endTime = this._currentState.timeStarted - this._currentState.position + this._currentState.duration
+        const endTime = this._currentState.timestamp - this._currentState.position + this._currentState.duration
         if (timestamp >= endTime) {
           const newState: ITimerState4 = {
             timestamp: timestamp,
             clientId: this._currentState.clientId,
             duration: this._currentState.duration,
             position: this._currentState.duration,
+            running: false,
           };
           this.updateState(newState, true);
         } else {

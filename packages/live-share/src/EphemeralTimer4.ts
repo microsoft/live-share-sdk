@@ -222,9 +222,7 @@ export class EphemeralTimer4 extends DataObject<{
       duration: event.duration,
       position: event.position,
       running: true,
-      // timeStarted: event.timestamp,
-    }; 
-    // does timer restart with full duration?
+    };
     return newState;
   }
 

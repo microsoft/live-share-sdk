@@ -34,13 +34,8 @@ export const useTimer = (timer, onTimerEnd) => {
 
       const allowedRoles = ["Organizer"];
 
-      timer
-        .finalInitialize(allowedRoles)
-        .then(() => {
-          console.log("starting timer4");
-          setTimerStarted(true);
-        })
-        .catch((error) => console.error(error));
+      timer.initialize(allowedRoles);
+      setTimerStarted(true);
     }
   }, [timer, onTimerEnd, setTimerStarted]);
 

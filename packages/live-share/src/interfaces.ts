@@ -17,11 +17,17 @@ export interface IEvent {
      */
     name: string;
 }
+
+// TODO: should i remove the duplicate properties declared in IEphemeralEvent?
+export interface IClientTimestamp {
+    timestamp: number;
+    clientId?: string;
+}
   
 /**
  * Base interface for all ephemeral events.
  */
-export interface IEphemeralEvent extends IEvent {
+export interface IEphemeralEvent extends IEvent, IClientTimestamp {
     /**
      * Current client ID, if known. The client ID will be `undefined` if the client is currently disconnected.
      */

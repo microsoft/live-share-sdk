@@ -2,11 +2,10 @@ import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { EphemeralEventScope } from "./EphemeralEventScope";
 import { EphemeralEventTarget } from "./EphemeralEventTarget";
 import { EphemeralObjectSynchronizer } from "./EphemeralObjectSynchronizer";
-import { IEphemeralEvent, UserMeetingRole } from "./interfaces";
+import { IClientTimestamp, IEphemeralEvent, UserMeetingRole } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
-import { cloneValue, isNewer } from "./internals/utils";
+import { cloneValue } from "./internals/utils";
 import { EphemeralEvent } from "./EphemeralEvent";
-import { ScopeType } from "@fluidframework/azure-client";
 
 /** for all time values millis from epoch is used */
 export interface ITimerConfig {
@@ -196,17 +195,19 @@ export class EphemeralTimer extends DataObject<{
   private remoteConfigReceived(config: ITimerConfig, sender: string): void {
     EphemeralEvent.verifyRolesAllowed(sender, this._allowedRoles).then((allowed) => {
       // Ensure that state is allowed, newer, and not the initial state.
-      const existingNewerCheck = {
+      const currentClientTimestamp: IClientTimestamp = {
         timestamp: this._currentConfig.configChangedAt,
         clientId: this._currentConfig.clientId,
       }
 
-      const newerCheck = {
+      const newClientTimestamp: IClientTimestamp = {
         timestamp: config.configChangedAt,
         clientId: config.clientId,
       }
 
-      if (allowed && isNewer(existingNewerCheck, newerCheck) && config.clientId) {
+      const isConfigNewer = EphemeralEvent.isNewer(currentClientTimestamp, newClientTimestamp)
+
+      if (allowed && isConfigNewer && config.clientId) {
           this.updateConfig(config, false);
       }
     }).catch((err) => {

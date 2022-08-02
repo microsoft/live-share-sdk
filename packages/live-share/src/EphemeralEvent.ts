@@ -10,7 +10,6 @@ import { IEphemeralEvent, ITimestampProvider, IRoleVerifier, UserMeetingRole, IC
 import { EphemeralEventScope } from './EphemeralEventScope';
 import { EphemeralEventTarget } from './EphemeralEventTarget';
 import { LocalRoleVerifier } from './LocalRoleVerifier';
-import { isNewer } from './internals/utils';
 
 /**
  * Events supported by `EphemeralEvent` object.
@@ -192,7 +191,8 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
                 }
             }
         }
-        return true
+
+        return true;
     }
 
     /**

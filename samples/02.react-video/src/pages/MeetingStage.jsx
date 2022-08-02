@@ -56,13 +56,13 @@ const MeetingStage = () => {
       const { mediaSession } = container.initialObjects;
       synchronizer.current = mediaSession.synchronize(videoElement.current);
       synchronizer.current.addEventListener(MediaPlayerSynchronizerEvents.groupaction, (evt) => {
-        if (evt.details.action === "play" && evt.playerError?.name === "NotAllowedError") {
+        if (evt.details.action === "play" && evt.error?.name === "NotAllowedError") {
           // The user has not interacted with the document so the browser blocked the play action
           // mute the player and try again
           synchronizer.current.player.muted = true;
           synchronizer.current.player.play();
-        } else if (evt.playerError) {
-          console.error(evt.playerError);
+        } else if (evt.error) {
+          console.error(evt.error);
         }
       });
       await mediaSession.start();

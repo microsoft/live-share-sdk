@@ -25,12 +25,12 @@ export interface IClientTimestamp {
     /**
      * Current client ID, if known. The client ID will be `undefined` if the client is currently disconnected.
      */
-     clientId?: string;
+    clientId?: string;
 
-     /**
-      * Global timestamp of when the event was sent.
-      */
-     timestamp: number;
+    /**
+     * Global timestamp of when the event was sent.
+     */
+    timestamp: number;
 }
   
 /**

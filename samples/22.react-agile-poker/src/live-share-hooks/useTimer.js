@@ -21,10 +21,9 @@ export const useTimer = (timer, onTimerEnd) => {
 
   useEffect(() => {
     if (timer && !timer.isStarted) {
-      timer.on("onTimerChanged", (event, local) => {
-        if (event.duration === event.position) {
-          onTimerEnd();
-        }
+      timer.on("onFinish", (event, local) => {
+        console.log("onFinish");
+        onTimerEnd();
       });
 
       timer.on("onTick", (milliRemaining, local) => {

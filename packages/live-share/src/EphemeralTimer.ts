@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { EphemeralEventScope } from "./EphemeralEventScope";
 import { EphemeralEventTarget } from "./EphemeralEventTarget";
@@ -18,9 +23,54 @@ export interface ITimerConfig {
   running: boolean;
 }
 
+/**
+ * Events supported by `EphemeralTimer` object.
+ */
+ export enum EphemeralTimerEvents {
+  /**
+   * Timer has started
+   */
+  onStart = 'onStart',
+  
+  /**
+   * Paused timer has resumed
+   */
+  onPlay = 'onPlay',
+
+  /**
+   * Playing timer has paused
+   */
+  onPause = 'onPause',
+
+  /**
+   * Timer has finished
+   */
+  onFinish = 'onFinish',
+
+  /**
+   * Timer has progressed
+   */
+  onTick = 'onTick'
+}
+
 export interface IEphemeralTimerEvents extends IEvent {
   (
-    event: "onTimerChanged",
+    event: "onStart",
+    listener: (config: ITimerConfig, local: boolean) => void
+  ): any;
+
+  (
+    event: "onPlay",
+    listener: (config: ITimerConfig, local: boolean) => void
+  ): any;
+
+  (
+    event: "onPause",
+    listener: (config: ITimerConfig, local: boolean) => void
+  ): any;
+
+  (
+    event: "onFinish",
     listener: (config: ITimerConfig, local: boolean) => void
   ): any;
 
@@ -61,7 +111,7 @@ export class EphemeralTimer extends DataObject<{
   /**
    * The objects fluid type/name.
    */
-  public static readonly TypeName = `@microsoft/live-share:EphemeralTimer4`;
+  public static readonly TypeName = `@microsoft/live-share:EphemeralTimer`;
 
   /**
    * The objects fluid type factory.
@@ -77,9 +127,7 @@ export class EphemeralTimer extends DataObject<{
    * Starts the object.
    * @param allowedRoles Optional. List of roles allowed to make state changes.
    */
-  public initialize(
-    allowedRoles?: UserMeetingRole[]
-  ): void {
+  public initialize(allowedRoles?: UserMeetingRole[]): void {
     if (this._scope) {
       throw new Error(`EphemeralTimer already started.`);
     }
@@ -218,7 +266,19 @@ export class EphemeralTimer extends DataObject<{
   private updateConfig(config: ITimerConfig, local: boolean) {
     const clone = cloneValue(config)!;
     this._currentConfig = clone;
-    this.emit("onTimerChanged", cloneValue(clone), local);
+
+    // TODO: do we need to clone this one?
+    const userExposedConfig = cloneValue(clone)
+    if (config.position === 0) {
+      this.emit(EphemeralTimerEvents.onStart, userExposedConfig, local);
+    } else if (config.duration === config.position) {
+      this.emit(EphemeralTimerEvents.onFinish, userExposedConfig, local);
+    } else if (config.running) {
+      this.emit(EphemeralTimerEvents.onPlay, userExposedConfig, local);
+    } else {
+      this.emit(EphemeralTimerEvents.onPause, userExposedConfig, local);
+    }
+
     if (clone.running) {
       this.startTicking()
     }
@@ -264,7 +324,7 @@ export class EphemeralTimer extends DataObject<{
           };
           this.updateConfig(newConfig, true);
         } else {
-          this.emit("onTick", endTime - timestamp);
+          this.emit(EphemeralTimerEvents.onTick, endTime - timestamp);
           this.scheduleAnimationFrame(tickCallback)
         }
       }
@@ -273,7 +333,7 @@ export class EphemeralTimer extends DataObject<{
   }
 
   private scheduleAnimationFrame(callback: FrameRequestCallback): void {
-    if (requestAnimationFrame) {
+    if (typeof requestAnimationFrame == "function") {
         requestAnimationFrame(callback);
     } else {
         setTimeout(callback, 20);

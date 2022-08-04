@@ -208,7 +208,7 @@ export class AzureMediaPlayer extends EventTarget {
     this._player.src(this._track.src);
   }
 
-  play() {
+  async play() {
     this._player.play();
     if (!this._autoplayPolicyChecked) {
       this._autoplayPolicyChecked = true;
@@ -217,6 +217,9 @@ export class AzureMediaPlayer extends EventTarget {
         this.play();
       }
     }
+    // HTMLMediaPlayer spec is Promise<void> but AMP does not adhere to this spec for play, so we simply
+    // resolve the promise.
+    return Promise.resolve();
   }
 
   pause() {

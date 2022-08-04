@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 import { getVideoStyle } from "../styles/styles";
 import { getInitialMediaItem } from "../utils/getInitialMediaItem";
 import { MediaPlayerContainer } from "../components";
-import { EphemeralMediaSession } from "@microsoft/live-share-media";
+import { EphemeralMediaSession, MediaPlayerSynchronizerEvents } from "@microsoft/live-share-media";
 import { TeamsFluidClient } from "@microsoft/live-share";
 import { inTeams } from "../utils/inTeams";
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
@@ -27,9 +27,6 @@ const MeetingStage = () => {
     (async function () {
       // Set the initial video src for the player element
       videoElement.current.src = initialMediaItem.current.src;
-      // Browsers require a click before a video can be played automatically
-      // Either capture a click or mute the audio by default
-      videoElement.current.muted = true;
 
       let connection;
       if (!inTeams()) {
@@ -58,6 +55,16 @@ const MeetingStage = () => {
       const { container } = await client.joinContainer(schema);
       const { mediaSession } = container.initialObjects;
       synchronizer.current = mediaSession.synchronize(videoElement.current);
+      synchronizer.current.addEventListener(MediaPlayerSynchronizerEvents.groupaction, (evt) => {
+        if (evt.details.action === "play" && evt.error?.name === "NotAllowedError") {
+          // The user has not interacted with the document so the browser blocked the play action
+          // mute the player and try again
+          synchronizer.current.player.muted = true;
+          synchronizer.current.player.play();
+        } else if (evt.error) {
+          console.error(evt.error);
+        }
+      });
       await mediaSession.start();
     })();
   }, []);

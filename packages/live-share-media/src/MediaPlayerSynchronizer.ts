@@ -19,6 +19,10 @@ export interface IMediaPlayerSynchronizerEvent extends IEvent {
      * Event details.
      */
     details: ExtendedMediaSessionActionDetails;
+    /**
+     * Action errors, including DOMException errors thrown by HTMLMediaElement
+     */
+    error?: Error;
 }
 
 /**
@@ -139,52 +143,62 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
         // Register media session actions
         for (const action of MediaPlayerSynchronizer.SESSION_ACTIONS) {
-            this._mediaSession.setActionHandler(action, (details: ExtendedMediaSessionActionDetails) => {
-                switch (details.action) {
-                    case 'play':
-                        this._expectedPlaybackState = 'playing';
-                        if (this._player.paused) {
-                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PlayAction);
+            this._mediaSession.setActionHandler(action, async (details: ExtendedMediaSessionActionDetails) => {
+                let error: Error | undefined;
+                try {
+                    switch (details.action) {
+                        case 'play':
+                            this._expectedPlaybackState = 'playing';
+                            if (this._player.paused) {
+                                this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PlayAction);
+                                if (typeof details.seekTime == 'number' && this._player.currentTime < 1.0) {
+                                    this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekingPlayerToStartPosition, null, {position: details.seekTime})
+                                    this._player.currentTime = details.seekTime!;
+                                }
+                                // Reference: https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play#exceptions
+                                await this._player.play();
+                            }
+                            break;
+                        case 'pause':
+                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PauseAction);
+                            this._expectedPlaybackState = 'paused';
                             if (typeof details.seekTime == 'number' && this._player.currentTime < 1.0) {
                                 this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekingPlayerToStartPosition, null, {position: details.seekTime})
                                 this._player.currentTime = details.seekTime!;
                             }
-                            this._player.play();
-                        }
-                        break;
-                    case 'pause':
-                        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PauseAction);
-                        this._expectedPlaybackState = 'paused';
-                        if (typeof details.seekTime == 'number' && this._player.currentTime < 1.0) {
-                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekingPlayerToStartPosition, null, {position: details.seekTime})
-                            this._player.currentTime = details.seekTime!;
-                        }
-                        this._player.pause();
-                        break;
-                    case 'seekto':
-                        if (typeof details.seekTime == 'number') {
-                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekToAction, null, {position: details.seekTime});
-                            this._player.currentTime = details.seekTime!;
-                        }
-                        break;
-                    case 'settrack':
-                        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SetTrackAction);
-                        this._expectedPlaybackState = 'none';
-                        this._player.src = details.metadata!.trackIdentifier;
-                        this._player.load();
-                        break;
-                    case 'datachange':
-                        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.DataChangeAction);
-                        break;
-                    case 'catchup':
-                        if (typeof details.seekTime == 'number') {
-                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.CatchupAction, null, {position: details.seekTime});
-                            this.catchupPlayer(details.seekTime!);
-                        }
-                        break;
+                            this._player.pause();
+                            break;
+                        case 'seekto':
+                            if (typeof details.seekTime == 'number') {
+                                this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekToAction, null, {position: details.seekTime});
+                                this._player.currentTime = details.seekTime!;
+                            }
+                            break;
+                        case 'settrack':
+                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SetTrackAction);
+                            this._expectedPlaybackState = 'none';
+                            this._player.src = details.metadata!.trackIdentifier;
+                            this._player.load();
+                            break;
+                        case 'datachange':
+                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.DataChangeAction);
+                            break;
+                        case 'catchup':
+                            if (typeof details.seekTime == 'number') {
+                                this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.CatchupAction, null, {position: details.seekTime});
+                                this.catchupPlayer(details.seekTime!);
+                            }
+                            break;
+                    }
+                } catch (err: any) {
+                    if (err instanceof Error) {
+                        error = err;
+                    } else {
+                        error = new Error(err?.message ?? "An unknown error occurred after processing the group session action.");
+                    }
                 }
 
-                this.dispatchGroupAction(details);
+                this.dispatchGroupAction(details, false, error);
             });
         }
 
@@ -402,11 +416,11 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.dispatchUserAction({action: 'datachange', data: data});
     }
 
-    private dispatchGroupAction(details: ExtendedMediaSessionActionDetails, delay = false): void {
+    private dispatchGroupAction(details: ExtendedMediaSessionActionDetails, delay = false, error: Error | undefined): void {
         if (delay) {
-            setTimeout(() => this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details}), 50);
+            setTimeout(() => this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details, playerError: error}), 50);
         } else {
-            this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details});
+            this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details, error});
         }
     }
 

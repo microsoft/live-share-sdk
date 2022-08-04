@@ -45,10 +45,11 @@ interface IServerTimeOffset {
             throw new Error(`SharedClock: can't call getTimestamp() before calling start().`);
         }
 
-        // Return adjusted timestamp
-        // - We're remember the last time we sent and returning that if we ever predict an earlier time.
-        //   This can happen if our accuracy improves and we end up with a smaller offset then before.
-        return this._lastTimeSent = Math.max(new Date().getTime() + this._serverTime.offset, this._lastTimeSent);
+        // Return adjusted timestamp and save last
+        // - We never want to generate the same timestamp twice and we always want a greater 
+        //   timestamp then what we previously sent. This can happen if our accuracy improves 
+        //   and we end up with a smaller offset then before.
+        return this._lastTimeSent = Math.max(new Date().getTime() + this._serverTime.offset, this._lastTimeSent + 1);
     }
 
     public getMaxTimestampError(): number {

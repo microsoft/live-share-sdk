@@ -21,12 +21,12 @@ export const useTimer = (timer, onTimerEnd) => {
 
   useEffect(() => {
     if (timer && !timer.isStarted) {
-      timer.on("onFinish", (event, local) => {
+      timer.on("onFinish", (config) => {
         console.log("onFinish");
         onTimerEnd();
       });
 
-      timer.on("onTick", (milliRemaining, local) => {
+      timer.on("onTick", (milliRemaining) => {
         console.log("tick");
         setTimerMilliRemaining(milliRemaining);
       });

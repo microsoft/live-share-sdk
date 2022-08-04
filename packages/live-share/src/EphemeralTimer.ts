@@ -71,21 +71,21 @@ export interface IEphemeralTimerEvents extends IEvent {
 
   (
     event: "onFinish",
-    listener: (config: ITimerConfig, local: boolean) => void
+    listener: (config: ITimerConfig) => void
   ): any;
 
   (
     event: "onTick",
-    listener: (milliRemaining: number, local: boolean) => void
+    listener: (milliRemaining: number) => void
   ): any;
 }
 
-export interface IPlayEvent extends IEphemeralEvent {
+interface IPlayEvent extends IEphemeralEvent {
   duration: number;
   position: number;
 }
 
-export interface IPauseEvent extends IEphemeralEvent {
+interface IPauseEvent extends IEphemeralEvent {
   duration: number;
   position: number;
 }
@@ -124,9 +124,17 @@ export class EphemeralTimer extends DataObject<{
   );
 
   /**
-   * Starts the object.
+   * Returns true if the object has been started.
+   */
+  public get isStarted(): boolean {
+    return !!this._scope;
+  }
+
+  /**
+   * initalizes the object.
    * @param allowedRoles Optional. List of roles allowed to make state changes.
    */
+  // TODO: should this be an async method and wait till connected like EphemeralPresence?
   public initialize(allowedRoles?: UserMeetingRole[]): void {
     if (this._scope) {
       throw new Error(`EphemeralTimer already started.`);
@@ -272,7 +280,7 @@ export class EphemeralTimer extends DataObject<{
     if (config.position === 0) {
       this.emit(EphemeralTimerEvents.onStart, userExposedConfig, local);
     } else if (config.duration === config.position) {
-      this.emit(EphemeralTimerEvents.onFinish, userExposedConfig, local);
+      this.emit(EphemeralTimerEvents.onFinish, userExposedConfig);
     } else if (config.running) {
       this.emit(EphemeralTimerEvents.onPlay, userExposedConfig, local);
     } else {

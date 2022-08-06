@@ -108,6 +108,15 @@ export class TeamsFluidClient {
         performance.mark(`TeamsSync: join container`);
         try {
             const teamsClient = await this.getTeamsClient();
+            
+            // If not testing locally, get app context and ensure we are in a supported Teams ring
+            if (!this.isTesting && teamsClient.app) {
+                const context = await teamsClient.app.getContext();
+                const ringId = context.app.host.ringId;
+                if (typeof ringId === "string" && ["general", "general_gcc", "ring3"].includes(ringId)) {
+                    return Promise.reject("Live Share is only supported in Teams Developer Preview. For more information, visit https://aka.ms/teamsdeveloperpreview");
+                }
+            }
 
             // Configure role verifier and timestamp provider
             const pRoleVerifier = this.initializeRoleVerifier();

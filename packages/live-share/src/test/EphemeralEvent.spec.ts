@@ -186,7 +186,7 @@ describeNoCompat("EphemeralEvent", (getTestObjectProvider) => {
         assert(!allowed, `event allowed`);
     });
 
-    it("Should allow events with same timestamp from same client", () => {
+    it("Should block events with same timestamp from same client", () => {
         const current: IEphemeralEvent = {
             name: 'test',
             clientId: 'CA',
@@ -200,7 +200,7 @@ describeNoCompat("EphemeralEvent", (getTestObjectProvider) => {
         };
 
         const allowed = EphemeralEvent.isNewer(current, received);
-        assert(allowed, `event blocked`);
+        assert(!allowed, `event allowed`);
     });
 
     it("Should allow events with same timestamp and a different clientId that sorts lower", () => {

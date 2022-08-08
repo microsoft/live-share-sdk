@@ -102,7 +102,7 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
      * Starts the object.
      * @param allowedRoles Optional. List of roles allowed to make state changes.
      */
-     public async initialize(allowedRoles?: UserMeetingRole[], state = EphemeralState.INITIAL_STATE, data?: TData): Promise<void> {
+    public async initialize(allowedRoles?: UserMeetingRole[], state = EphemeralState.INITIAL_STATE, data?: TData): Promise<void> {
         if (this._scope) {
             throw new Error(`EphemeralState already started.`);
         }

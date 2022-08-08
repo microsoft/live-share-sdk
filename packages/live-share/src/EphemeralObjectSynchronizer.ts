@@ -201,7 +201,7 @@ class ContainerSynchronizer {
                 [id]: handlers.getState(true)
             };
             this._containerRuntime.submitSignal(CONNECT_EVENT, connectState);
-            this._connectedKeys.push();
+            this._connectedKeys.push(id);
         } else {
             // Queue connect event
             this._unconnectedKeys.push(id);

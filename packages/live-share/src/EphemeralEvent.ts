@@ -171,10 +171,13 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
             if (current.timestamp == received.timestamp) {
                 // In a case where both clientId's are blank that's the local client in a disconnected state
                 const cmp = (current.clientId || '').localeCompare(received.clientId || '');
-                if (cmp < 0) {
-                    // cmp == 0 is same user and we want to take latest event from a given user.
-                    // cmp > 0 is a tie breaker so we'll take that event as well (comparing 'a' with 'c' 
-                    // will result in a negative value).
+                if (cmp <= 0) {
+                    // - cmp == 0 is same user. We use to identify events for same user as newer but 
+                    //   that was causing us to fire duplicate state & presence change events. The better
+                    //   approach is to update the timestamp provider to never return the same timestamp 
+                    //   twice.  (Comparison was changed on 8/2/2022)
+                    // - cmp > 0 is a tie breaker so we'll take that event as well (comparing 'a' with 'c' 
+                    //   will result in a negative value).
                     return false;
                 }
             } else if (current.timestamp > received.timestamp) {

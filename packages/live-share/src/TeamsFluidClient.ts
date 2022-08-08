@@ -114,7 +114,7 @@ export class TeamsFluidClient {
                 const context = await teamsClient.app.getContext();
                 const ringId = context.app.host.ringId;
                 if (typeof ringId === "string" && ["general", "general_gcc", "ring3"].includes(ringId)) {
-                    return Promise.reject(new Error("Live Share is only supported in Teams Developer Preview. For more information, visit https://aka.ms/teamsdeveloperpreview"));
+                    throw new Error("Live Share is only supported in Teams Developer Preview. For more information, visit https://aka.ms/teamsdeveloperpreview");
                 }
             }
 

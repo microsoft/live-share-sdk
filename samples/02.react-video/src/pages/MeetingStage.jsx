@@ -65,7 +65,7 @@ const MeetingStage = () => {
           console.error(evt.error);
         }
       });
-      await mediaSession.start();
+      await mediaSession.initialize();
     })();
   }, []);
 

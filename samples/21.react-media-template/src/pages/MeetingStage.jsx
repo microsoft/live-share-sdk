@@ -35,14 +35,14 @@ const MeetingStage = () => {
 
   // Notification hook
   const {
-    notificationStarted, // boolean that is true once notificationEvent.start() is called
+    notificationStarted, // boolean that is true once notificationEvent.initialize() is called
     notificationToDisplay, // most recent notification that was sent through notificationEvent
     sendNotification, // callback method to send a notification through notificationEvent
   } = liveShareHooks.useNotifications(notificationEvent, context);
 
   // Presence hook
   const {
-    presenceStarted, // boolean that is true once presence.start() is called
+    presenceStarted, // boolean that is true once presence.initialize() is called
     localUser, // local user presence object
     localUserIsEligiblePresenter, // boolean that is true if local user is eligible to take control
     users, // user presence array
@@ -74,7 +74,7 @@ const MeetingStage = () => {
 
   // Media session hook
   const {
-    mediaSessionStarted, // boolean that is true once mediaSession.start() is called
+    mediaSessionStarted, // boolean that is true once mediaSession.initialize() is called
     suspended, // boolean that is true if synchronizer is suspended
     play, // callback method to synchronize a play action
     pause, // callback method to synchronize a pause action

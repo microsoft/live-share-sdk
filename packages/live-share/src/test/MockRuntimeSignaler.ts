@@ -11,7 +11,8 @@ import { v4 } from 'uuid';
 
 export class MockRuntimeSignaler implements IRuntimeSignaler {
     private _connected: MockRuntimeSignaler[] = [];
-    private _listeners: ((message: IInboundSignalMessage, local: boolean) => void)[] = [];
+    private _signalListeners: ((message: IInboundSignalMessage, local: boolean) => void)[] = [];
+    private _connectedListeners: ((clientId: string) => void)[] = [];
 
     public constructor(hasClientId = true, isConnected = true) {
         this.clientId = hasClientId ? v4() : undefined;
@@ -22,9 +23,26 @@ export class MockRuntimeSignaler implements IRuntimeSignaler {
     public clientId: string|undefined;
     public connected: boolean;
     public logger: ITelemetryLogger;
+    
+    public connect(): void {
+        if (!this.connected) {
+            this.connected = true;
+            this.clientId = v4();
+            this._connectedListeners.forEach(fn => fn(this.clientId!));
+        }
+    }
 
-    public on(event: 'signal', listener: (message: IInboundSignalMessage, local: boolean) => void): this {
-        this._listeners.push(listener);
+    public on(event: "connected", listener: (clientId: string) => void): this;
+    public on(event: 'signal', listener: (message: IInboundSignalMessage, local: boolean) => void): this;
+    public on(event: string, listener: any) {
+        switch (event) {
+            case 'connected': 
+                this._connectedListeners.push(listener);
+                break;
+            case 'signal':
+                this._signalListeners.push(listener);
+                break;
+        }
         return this;
     }
     
@@ -43,7 +61,7 @@ export class MockRuntimeSignaler implements IRuntimeSignaler {
     }
 
     private emit(message: IInboundSignalMessage, local: boolean): void {
-        this._listeners.forEach(fn => fn(message, local));
+        this._signalListeners.forEach(fn => fn(message, local));
     }
 
     public static connectRuntimes(runtimes: MockRuntimeSignaler[]): void {

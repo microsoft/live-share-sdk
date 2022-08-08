@@ -50,6 +50,42 @@ describe("EphemeralObjectSynchronizer", () => {
         remoteObject.dispose();
     });
 
+    it("Should delay send connecting state until connected", async () => {
+        const done = new Deferred();
+        const localRuntime = new MockRuntimeSignaler(false, false);
+        const signalers = createConnectedSignalers();
+        const localObject = new EphemeralObjectSynchronizer('test', localRuntime, signalers.localContainer, (connecting) => {
+                assert(localRuntime.connected, `local: sending connect before connected`);
+                return { client: 'local' };
+            }, (connecting, state, sender) => {
+                try {
+                    assert(typeof state == 'object', `local: missing state received`);
+                    assert(state.client == 'remote', `local: invalid state received: ${state}`);
+                    assert(sender, `local: sender  ID not received`);
+                    if (connecting) {
+                        done.resolve();
+                    }
+                } catch (err) {
+                    done.reject(err);
+                }
+            });
+
+        const remoteRuntime = new MockRuntimeSignaler(false, false);
+        const remoteObject = new EphemeralObjectSynchronizer('test', remoteRuntime, signalers.remoteContainer, (connecting) => {
+            assert(remoteRuntime.connected, `remote: sending connect before connected`);
+            return { client: 'remote' };
+            }, (connecting, state, sender) => { });
+
+        setTimeout(() => {
+            localRuntime.connect();
+            remoteRuntime.connect();
+        }, 50);
+
+        await done.promise;
+        localObject.dispose();
+        remoteObject.dispose();
+    });
+
     it("Should send periodic updates", async () => {
         let received = 0;
         const done = new Deferred();

@@ -83,6 +83,7 @@ export class EphemeralObjectSynchronizer<TState extends object> {
      * Consumers should subscribe to the synchronizers `"received"` event to process the remote
      * state updates being sent by other instances of the ephemeral object.
      * @param id ID of the ephemeral object being synchronized. This should be the value of `this.id` in a class that derives from `DataObject`.
+     ^ @param runtime The objects local runtime. This should be the value of `this.runtime`.
      * @param containerRuntime The runtime for the objects container. This should be the value of `this.context.containerRuntime`.
      * @param getState A function called to retrieve the objects current state. This will be called prior to a "connect" or "update" message being sent.
      * @param updateState A function called to process a state update received from a remote instance. This will be called anytime a "connect" or "update" message is received.
@@ -241,14 +242,13 @@ class ContainerSynchronizer {
 
     private sendGroupEvent(keys: string[], evt: string): void {
         // Compose list of updates
-        let send = false;
         const updates: StateSyncEventContent = {};
         keys.forEach((id) => {
             try {
+                // Ignore components that return undefined
                 const state = this._objects.get(id)?.getState(false);
                 if (typeof state == 'object') {
                     updates[id] = state;
-                    send = true;
                 }
             } catch (err: any) {
                 console.error(`EphemeralObjectSynchronizer: error getting an objects state - ${err.toString()}`);
@@ -256,7 +256,8 @@ class ContainerSynchronizer {
         });
 
         // Send event if we have any updates to broadcast
-        if (send) {
+        // - `send` is only set if at least one component returns an update. 
+        if (Object.keys(updates).length > 0) {
             this._containerRuntime.submitSignal(evt, updates);
         }
     }

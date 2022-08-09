@@ -4,6 +4,7 @@
     "packages/*",
     "samples/01.dice-roller",
     "samples/02.react-video",
+    "samples/03.live-inking",
     "samples/21.react-media-template",
     "samples/22.react-agile-poker"
   ],

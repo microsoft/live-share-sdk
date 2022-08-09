@@ -1,0 +1,38 @@
+{
+    "name": "@microsoft/live-share-inking",
+    "version": "0.3.1",
+    "description": "Live Share library for collaborative inking.",
+    "author": "Microsoft",
+    "license": "SEE LICENSE IN LICENSE",
+    "main": "./bin/index.js",
+    "types": "./bin/index.d.ts",
+    "scripts": {
+        "clean": "npx shx rm -rf bin",
+        "build": "tsc -p tsconfig.build.json",
+        "test": "ts-mocha src/**/*.spec.ts --timeout 10000",
+        "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
+        "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
+    },
+    "dependencies": {
+        "fluid-framework": "~0.59.0",
+        "@microsoft/live-share": "0.3.1"
+    },
+    "devDependencies": {
+        "@types/assert": "^1.5.6",
+        "@types/mocha": "^9.0.0",
+        "@types/node": "^10.12.24",
+        "mocha": "^9.1.1",
+        "nyc": "^15.1.0",
+        "ts-mocha": "^9.0.2",
+        "typescript": "^4.6.4"
+    },
+    "repository": {
+        "directory": "packages/live-share-inking",
+        "type": "git",
+        "url": "https://github.com/microsoft/live-share-sdk"
+    },
+    "homepage": "https://aka.ms/teamsliveshare",
+    "bugs": {
+        "url": "https://github.com/microsoft/live-share-sdk/issues"
+    }
+}

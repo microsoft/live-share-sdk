@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { InkingCanvas } from "./InkingCanvas";
+import { InkingCanvas } from "./InkingCanvas";
 import { getPressureAdjustedTipSize, computeQuadBetweenTwoCircles, IPointerPoint, IQuad } from "../core/Geometry";
 import { DefaultLaserPointerBrush, IBrush } from "./Brush";
 import { brightenColor, colorToCssColor } from "../core/Utils";
@@ -40,13 +40,6 @@ export class LaserPointerCanvas extends InkingCanvas {
         let radius = brush.tipSize / 2;
 
         const radiusStep = (radius - (radius / 3)) / this._points.length;
-
-        const quad: IQuad = {
-            p1: { x: 0, y: 0 },
-            p2: { x: 0, y: 0 },
-            p3: { x: 0, y: 0 },
-            p4: { x: 0, y: 0 }
-        };
 
         for (let i = this._points.length - 1; i >= 0; i--) {
             const p = this._points[i];

@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { EventEmitter } from "events";
+import { EventEmitter } from "events";
 
 export abstract class InputProvider extends EventEmitter {
     public static readonly PointerDown: symbol = Symbol();

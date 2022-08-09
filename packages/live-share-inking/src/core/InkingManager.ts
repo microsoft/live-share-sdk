@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { EventEmitter } from "events";
+import { EventEmitter } from "events";
 import { CanvasReferencePoint, InkingCanvas } from "../canvas/InkingCanvas";
 import { DryCanvas, WetCanvas } from "../canvas/DryWetCanvas";
 import { LaserPointerCanvas } from "../canvas/LaserPointerCanvas";

@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
+import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IFluidHandle } from '@fluidframework/core-interfaces';
 import { IValueChanged, SharedMap } from '@fluidframework/map';
 import { ISequencedDocumentMessage } from '@fluidframework/protocol-definitions';

@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { v4 as uuid } from "uuid";
+import { v4 as uuid } from "uuid";
 import { IColor } from "../canvas/Brush";
 import { IPointerPoint } from "./Geometry";
 

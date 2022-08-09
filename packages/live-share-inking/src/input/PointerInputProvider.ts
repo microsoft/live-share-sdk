@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { InputProvider } from "./InputProvider";
+import { InputProvider } from "./InputProvider";
 
 export class PointerInputProvider extends InputProvider {
     private onPointerDown = (e: PointerEvent): void => {

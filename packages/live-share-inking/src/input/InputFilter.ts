@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { IPointerPoint } from "../core/Geometry";
+import { IPointerPoint } from "../core/Geometry";
 
 export abstract class InputFilter {
     abstract filterPoint(p: IPointerPoint): IPointerPoint;

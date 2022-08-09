@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { InkingCanvas } from "./InkingCanvas";
-import { getPressureAdjustedTipSize, computeQuadBetweenTwoCircles, IQuad, IPointerPoint, computeQuadBetweenTwoRectangles, IPoint } from "../core/Geometry";
+import { InkingCanvas } from "./InkingCanvas";
+import { getPressureAdjustedTipSize, computeQuadBetweenTwoCircles, IQuad, IPointerPoint, computeQuadBetweenTwoRectangles } from "../core/Geometry";
 import { DefaultPenBrush, IBrush, IColor } from "./Brush";
 import { colorToCssColor } from "../core/Utils";
 
@@ -29,13 +29,6 @@ export abstract class DryWetCanvas extends InkingCanvas {
                 previousPoint = this._points[this._pendingPointsStartIndex - 1];
                 previousPointPressureAdjustedTip = getPressureAdjustedTipSize(tipHalfSize, previousPoint.pressure);
             }
-
-            const quad: IQuad = {
-                p1: { x: 0, y: 0 },
-                p2: { x: 0, y: 0 },
-                p3: { x: 0, y: 0 },
-                p4: { x: 0, y: 0 }
-            };
 
             for (let i = this._pendingPointsStartIndex; i < this._points.length; i++) {
                 const p = this._points[i];
@@ -123,7 +116,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
             const reducedTipSize = this.brush.tipSize - this.brush.tipSize / 2;
 
             const path = this.computeQuadPath(reducedTipSize);
-            this.renderQuadPath(path, reducedTipSize , this.brush.fillColor);
+            this.renderQuadPath(path, reducedTipSize, this.brush.fillColor);
         }
 
         if (this.rendersProgressively()) {

@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { InputFilter } from "./InputFilter";
+import { InputFilter } from "./InputFilter";
 import { IPointerPoint } from "../core/Geometry";
 
 export class JitterFilter extends InputFilter {

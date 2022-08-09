@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { brightenColor } from "../core/Utils";
+import { brightenColor } from "../core/Utils";
 
 export interface IColor {
     readonly r: number; // 0 - 255

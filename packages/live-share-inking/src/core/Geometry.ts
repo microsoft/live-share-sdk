@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
- import { isInRange } from "./Utils";
+import { isInRange } from "./Utils";
 
 export const TWO_PI: number = Math.PI * 2;
 

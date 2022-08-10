@@ -12,6 +12,7 @@ import { generateUniqueId } from "./Utils";
 interface IStrokeData {
     id: string;
     clientId?: string;
+    timeStamp: number;
     brush: IBrush;
     points: IPointerPoint[];
 }
@@ -33,6 +34,7 @@ export interface IStroke {
     deserialize(serializedStroke: string): void;
     readonly id: string;
     readonly clientId?: string;
+    readonly timeStamp: number;
     readonly brush: IBrush;
     readonly length: number;
 }
@@ -40,6 +42,7 @@ export interface IStroke {
 export interface IStrokeCreationOptions {
     id?: string;
     clientId?: string;
+    timeStamp?: number;
     brush?: IBrush;
     points?: IPointerPoint[];
 }
@@ -50,6 +53,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
     private _iteratorCounter = 0;
     private _id: string;
     private _clientId?: string;
+    private _timeStamp: number;
     private _boundingRect?: IRect;
 
     private addPoint(p: IPointerPoint): boolean {
@@ -76,12 +80,14 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         const effectiveOptions: IStrokeCreationOptions = {
             id: options ? options.id : undefined,
             clientId: options ? options.clientId : undefined,
+            timeStamp: options ? options.timeStamp : undefined,
             brush: options ? options.brush : undefined,
             points: options ? options.points : undefined
         }
 
         this._id = effectiveOptions.id ?? generateUniqueId();
         this._clientId = effectiveOptions.clientId;
+        this._timeStamp = effectiveOptions.timeStamp ?? Date.now();
         this._points = effectiveOptions.points ?? [];
 
         this.brush = {...(effectiveOptions.brush ?? DefaultPenBrush)};
@@ -173,10 +179,20 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
             return undefined;
         }
 
+        const createNewStroke: () => Stroke = () => {
+            return new Stroke(
+                {
+                    clientId: this.clientId,
+                    timeStamp: this.timeStamp,
+                    brush: this.brush
+                }
+            );
+        }
+
         let previousPoint: IPointerPoint | undefined = undefined;
 
         const generatedStrokes: IStroke[] = [];
-        let currentStroke = new Stroke({ brush: this.brush });
+        let currentStroke = createNewStroke();
 
         for (const p of this) {
             if (previousPoint) {
@@ -188,7 +204,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
                     if (intersections.length === 1) {
                         // One intersection, we need to cut that segment into two
                         if (isPointInsideRectangle(previousPoint, eraserRect)) {
-                            currentStroke = new Stroke({ brush: this.brush });
+                            currentStroke = createNewStroke();
 
                             currentStroke.addPoint({ ...intersections[0], pressure: previousPoint.pressure });
                             currentStroke.addPoint(p);
@@ -212,7 +228,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
 
                         generatedStrokes.push(currentStroke);
 
-                        currentStroke = new Stroke({ brush: this.brush });
+                        currentStroke = createNewStroke();
                         currentStroke.addPoint({ ...intersections[secondIndex], pressure: previousPoint.pressure });
                         currentStroke.addPoint(p);
                     }
@@ -247,6 +263,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         const data: IStrokeData = {
             id: this.id,
             clientId: this.clientId,
+            timeStamp: this.timeStamp,
             brush: this.brush,
             points: this._points
         };
@@ -259,6 +276,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
 
         this._id = data.id;
         this._clientId = data.clientId;
+        this._timeStamp = data.timeStamp;
         this._brush = data.brush;
         this._points = data.points;
     }
@@ -282,6 +300,10 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
 
     get clientId(): string | undefined {
         return this._clientId;
+    }
+
+    get timeStamp(): number {
+        return this._timeStamp;
     }
 
     get length(): number {

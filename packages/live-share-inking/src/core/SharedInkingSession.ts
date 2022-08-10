@@ -7,7 +7,7 @@ import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IFluidHandle } from '@fluidframework/core-interfaces';
 import { IValueChanged, SharedMap } from '@fluidframework/map';
 import { ISequencedDocumentMessage } from '@fluidframework/protocol-definitions';
-import { AddPointEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IBeginStrokeEventArgs,
+import { AddPointEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
     InkingManager, IWetStroke, StrokesAddedEvent, StrokesRemovedEvent } from './InkingManager';
 import { IPointerPoint, getDistanceBetweenPoints } from './Geometry';
 import { IStroke, Stroke, StrokeType } from "./Stroke";
@@ -185,6 +185,7 @@ export class SharedInkingSession extends DataObject {
                         {
                             id: evt.strokeId,
                             clientId: evt.clientId,
+                            timeStamp: evt.timestamp,
                             brush: evt.brush
                         });
         
@@ -231,15 +232,16 @@ export class SharedInkingSession extends DataObject {
                     try {
                         if (!local) {
                             const strokeJson: string | undefined = this._dryInkMap.get(changed.key);
+                            const addRemoveOptions: IAddRemoveStrokeOptions = { forceReRender: true, addToChangeLog: false };
 
                             if (strokeJson !== undefined) {
                                 const stroke = inkingManager.getStroke(changed.key) ?? new Stroke();
                                 stroke.deserialize(strokeJson);
 
-                                inkingManager.addStroke(stroke);
+                                inkingManager.addStroke(stroke, addRemoveOptions);
                             }
                             else {
-                                inkingManager.removeStroke(changed.key);
+                                inkingManager.removeStroke(changed.key, addRemoveOptions);
                             }
                         }
                     }

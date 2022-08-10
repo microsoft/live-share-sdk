@@ -120,6 +120,11 @@ class EphemeralCanvas extends DryCanvas {
     }
 }
 
+export interface IAddRemoveStrokeOptions {
+    forceReRender?: boolean,
+    addToChangeLog?: boolean
+}
+
 export class InkingManager extends EventEmitter {
     public static readonly localClientId = generateUniqueId();
 
@@ -234,11 +239,15 @@ export class InkingManager extends EventEmitter {
         this._dryCanvas.offset = this._offset;
         this._dryCanvas.scale = this._scale;
 
-        this._strokes.forEach(
-            (stroke: IStroke) => {
-                this._dryCanvas.renderStroke(stroke);
+        const sortedStrokes = [...this._strokes.values()].sort(
+            (stroke1: IStroke, stroke2: IStroke) => {
+                return stroke1.timeStamp - stroke2.timeStamp
             }
         )
+
+        for (const stroke of sortedStrokes) {
+            this._dryCanvas.renderStroke(stroke);
+        }
     }
 
     private scheduleReRender() {
@@ -467,18 +476,25 @@ export class InkingManager extends EventEmitter {
         }
     }
 
-    private internalAddStroke(stroke: IStroke) {
-        if (this._strokes.has(stroke.id)) {
+    private internalAddStroke(stroke: IStroke, options?: IAddRemoveStrokeOptions) {
+        const effectiveOptions: Required<IAddRemoveStrokeOptions> = {
+            forceReRender: options ? (options.forceReRender ?? false) : false,
+            addToChangeLog: options ? (options.addToChangeLog ?? true) : true
+        };
+
+        if (effectiveOptions.forceReRender || this._strokes.has(stroke.id)) {
             this._strokes.set(stroke.id, stroke);
 
-            this.scheduleReRender();
+            effectiveOptions.forceReRender ? this.reRender() : this.scheduleReRender();
         }
         else {
             this._strokes.set(stroke.id, stroke);
             this._dryCanvas.renderStroke(stroke);
         }
 
-        this._changeLog.addStroke(stroke);
+        if (effectiveOptions.addToChangeLog) {
+            this._changeLog.addStroke(stroke);
+        }
     }
 
     private wetStrokeEnded(stroke: IWetStroke) {
@@ -700,19 +716,26 @@ export class InkingManager extends EventEmitter {
         return this._strokes.get(id);
     }
 
-    public addStroke(stroke: IStroke) {
-        this.internalAddStroke(stroke);
+    public addStroke(stroke: IStroke, options?: IAddRemoveStrokeOptions) {
+        this.internalAddStroke(stroke, options);
 
         if (!this._isUpdating) {
             this.flushChangeLog();
         }
     }
 
-    public removeStroke(id: string) {
+    public removeStroke(id: string, options?: IAddRemoveStrokeOptions) {
         if (this._strokes.delete(id)) {
-            this.scheduleReRender();
+            const effectiveOptions: Required<IAddRemoveStrokeOptions> = {
+                forceReRender: options ? (options.forceReRender ?? false) : false,
+                addToChangeLog: options ? (options.addToChangeLog ?? true) : true
+            };
+    
+            effectiveOptions.forceReRender ? this.reRender() : this.scheduleReRender();
 
-            this._changeLog.removeStroke(id);
+            if (effectiveOptions.addToChangeLog) {
+                this._changeLog.removeStroke(id);
+            }
 
             if (!this._isUpdating) {
                 this.flushChangeLog();

@@ -124,7 +124,7 @@ export class InkingManager extends EventEmitter {
     public static readonly localClientId = generateUniqueId();
 
     public static asyncRenderDelay = 30;
-    public static pointEraserProcessingInterval = 60;
+    public static pointEraserProcessingInterval = 30;
     public static ephemeralCanvasRemovalDelay = 1500;
     
     private static WetStroke = class extends Stroke implements IWetStroke {
@@ -274,22 +274,14 @@ export class InkingManager extends EventEmitter {
 
     private schedulePointEraseProcessing() {
         if (this._pointEraseProcessingInterval === undefined) {
-            this._pointEraseProcessingInterval = window.setInterval(
+            this._pointEraseProcessingInterval = window.setTimeout(
                 () => {
                     this.processPendingPointErasePoints();
+
+                    this._pointEraseProcessingInterval = undefined;
                 },
                 InkingManager.pointEraserProcessingInterval);
         }
-    }
-
-    private stopPointEraseProcessing() {
-        if (this._pointEraseProcessingInterval !== undefined) {
-            clearInterval(this._pointEraseProcessingInterval);
-
-            this._pointEraseProcessingInterval = undefined;
-        }
-
-        this.processPendingPointErasePoints();
     }
 
     private getBrushForTool(tool: StrokeBasedTool): IBrush {
@@ -450,12 +442,6 @@ export class InkingManager extends EventEmitter {
                     }
 
                     break;
-                case InkingTool.PointEraser:
-                    this.stopPointEraseProcessing();
-
-                    break;
-                default:
-                    // No pointerUp processing needed for other tools
             }
 
             this.flushChangeLog();

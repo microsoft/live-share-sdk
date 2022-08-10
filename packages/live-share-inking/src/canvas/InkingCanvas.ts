@@ -10,7 +10,6 @@ import { IBrush } from "./Brush";
 export type CanvasReferencePoint = "topLeft" | "center";
 
 export abstract class InkingCanvas {
-    public static asyncRenderInterval = 10;
     public static fadeOutLength = 300;
 
     private _context: CanvasRenderingContext2D;
@@ -25,7 +24,7 @@ export abstract class InkingCanvas {
         this.internalRender();
 
         if (this._strokeStarted) {
-            window.setTimeout(this._internalRenderCallback, InkingCanvas.asyncRenderInterval);
+            window.requestAnimationFrame(this._internalRenderCallback);
         }
     }
 
@@ -161,7 +160,7 @@ export abstract class InkingCanvas {
         this.internalBeginStroke(p);
 
         if (this.rendersAsynchronously()) {
-            window.setTimeout(this._internalRenderCallback, InkingCanvas.asyncRenderInterval);
+            window.requestAnimationFrame(this._internalRenderCallback);
         }
         else {
             this.internalRender();

@@ -30,22 +30,22 @@ export interface ITimerConfig {
   /**
    * Timer has started
    */
-  onStart = 'onStart',
+  started = 'started',
   
   /**
    * Paused timer has resumed
    */
-  onPlay = 'onPlay',
+  played = 'played',
 
   /**
    * Playing timer has paused
    */
-  onPause = 'onPause',
+  paused = 'paused',
 
   /**
    * Timer has finished
    */
-  onFinish = 'onFinish',
+  finished = 'finished',
 
   /**
    * Timer has progressed
@@ -55,22 +55,22 @@ export interface ITimerConfig {
 
 export interface IEphemeralTimerEvents extends IEvent {
   (
-    event: "onStart",
+    event: "started",
     listener: (config: ITimerConfig, local: boolean) => void
   ): any;
 
   (
-    event: "onPlay",
+    event: "played",
     listener: (config: ITimerConfig, local: boolean) => void
   ): any;
 
   (
-    event: "onPause",
+    event: "paused",
     listener: (config: ITimerConfig, local: boolean) => void
   ): any;
 
   (
-    event: "onFinish",
+    event: "finished",
     listener: (config: ITimerConfig) => void
   ): any;
 
@@ -175,6 +175,9 @@ export class EphemeralTimer extends DataObject<{
     );
   }
 
+  /**
+   * Disposes of the object when its container is disposed of.
+   */
   public dispose(): void {
     super.dispose();
     if (this._synchronizer) {
@@ -278,13 +281,13 @@ export class EphemeralTimer extends DataObject<{
     // TODO: do we need to clone this one?
     const userExposedConfig = cloneValue(clone)
     if (config.position === 0) {
-      this.emit(EphemeralTimerEvents.onStart, userExposedConfig, local);
+      this.emit(EphemeralTimerEvents.started, userExposedConfig, local);
     } else if (config.duration === config.position) {
-      this.emit(EphemeralTimerEvents.onFinish, userExposedConfig);
+      this.emit(EphemeralTimerEvents.finished, userExposedConfig);
     } else if (config.running) {
-      this.emit(EphemeralTimerEvents.onPlay, userExposedConfig, local);
+      this.emit(EphemeralTimerEvents.played, userExposedConfig, local);
     } else {
-      this.emit(EphemeralTimerEvents.onPause, userExposedConfig, local);
+      this.emit(EphemeralTimerEvents.paused, userExposedConfig, local);
     }
 
     if (clone.running) {

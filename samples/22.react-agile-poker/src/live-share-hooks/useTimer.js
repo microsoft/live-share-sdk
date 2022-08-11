@@ -10,7 +10,7 @@ export const useTimer = (timer, onTimerEnd) => {
   const [timerStarted, setTimerStarted] = useState(false);
 
   const beginTimer = useCallback(() => {
-    console.log("beginning timer");
+    console.log("starting timer");
     timer.start(60000);
   }, [timer]);
 
@@ -21,8 +21,8 @@ export const useTimer = (timer, onTimerEnd) => {
 
   useEffect(() => {
     if (timer && !timer.isStarted) {
-      timer.on("onFinish", (config) => {
-        console.log("onFinish");
+      timer.on("finished", (config) => {
+        console.log("finished");
         onTimerEnd();
       });
 

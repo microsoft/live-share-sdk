@@ -65,10 +65,10 @@ import { IMediaPlayer } from './IMediaPlayer';
     }
 
     /**
-     * Returns true if the object has been started.
+     * Returns true if the object has been initialized.
      */
-    public get isStarted(): boolean {
-        return this.coordinator.isStarted;
+    public get isInitialized(): boolean {
+        return this.coordinator.isInitialized;
     }
 
     /**
@@ -89,12 +89,22 @@ import { IMediaPlayer } from './IMediaPlayer';
     }
 
     /**
-     * Starts the object.
+     * initialize the object.
      * @param acceptTransportChangesFrom Optional. List of roles allowed to group transport 
      * operations like play/pause/seek/setTrack.
      */
-    public async start(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
-        this.coordinator.start(acceptTransportChangesFrom);
+     public initialize(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
+        return this.coordinator.initialize(acceptTransportChangesFrom);
+    }
+
+    /**
+     * @deprecated initialize should be used instead
+     * initialize the object.
+     * @param acceptTransportChangesFrom Optional. List of roles allowed to group transport 
+     * operations like play/pause/seek/setTrack.
+     */
+    public start(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
+        return this.initialize(acceptTransportChangesFrom)
     }
 
     /**
@@ -145,7 +155,7 @@ import { IMediaPlayer } from './IMediaPlayer';
                 // Send position update if interval hit
                 const now = new Date().getTime();
                 const delta = (now - this._lastUpdateTime) / 1000;
-                if (this.coordinator.isStarted && delta >= this.coordinator.positionUpdateInterval) {
+                if (this.coordinator.isInitialized && delta >= this.coordinator.positionUpdateInterval) {
                     this._lastUpdateTime = now;
                     this.coordinator.sendPositionUpdate(state);
                 }
@@ -198,7 +208,7 @@ import { IMediaPlayer } from './IMediaPlayer';
 
     private checkWaitPointHit(state: IMediaPlayerState): void {
         // Was a wait point hit?
-        if (state.positionState && this.coordinator.isStarted) {
+        if (state.positionState && this.coordinator.isInitialized) {
             const waitPoint = this.coordinator.findNextWaitPoint();
             if (waitPoint && state.positionState.position != undefined && state.positionState.position >= waitPoint.position) {
                 // Ensure handler registered

@@ -88,7 +88,7 @@ export const usePresence = (presence, context) => {
 
       presence.presenceUpdateInterval = 5;
       presence
-        .start(
+        .initialize(
           context?.user?.id,
           {
             name,

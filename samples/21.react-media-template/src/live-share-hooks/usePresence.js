@@ -20,7 +20,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
  * @param {UserMeetingRole[]} acceptPlaybackChangesFrom List of acceptable roles for playback transport commands.
  * @param {microsoftTeams.app.Context} context Teams context object
  * @returns `{started, localUser, users, presentingUser, localUserIsEligiblePresenter, localUserIsPresenting, takeControl}` where:
- * - `presenceStarted` is a boolean indicating whether `presence.start()` has been called.
+ * - `presenceStarted` is a boolean indicating whether `presence.initialize()` has been called.
  * - `localUser` is the local user's presence object.
  * - `users` is an array of user presence objects in the session.
  * - `localUserIsEligiblePresenter` is a boolean indicating whether the local user is an eligible presenter.
@@ -87,7 +87,7 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
         context?.user.displayName
       );
       presence
-        .start(undefined, {
+        .initialize(undefined, {
           teamsUserId: context.user?.id,
           joinedTimestamp: EphemeralEvent.getTimestamp(),
           name,

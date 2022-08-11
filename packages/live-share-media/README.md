@@ -72,9 +72,9 @@ const { mediaSession } = container.initialObjects;
 const player = document.getElementById("player");
 const synchronizer = mediaSession.synchronize(player);
 
-// Define roles you want to allow playback control and start sync
+// Define roles you want to allow playback control and initialize sync
 const allowedRoles = ["Organizer", "Presenter"];
-await mediaSession.start(allowedRoles);
+await mediaSession.initialize(allowedRoles);
 
 // Intercept user play, pause, seek, and set track actions through synchronizer
 

@@ -8,7 +8,7 @@ import { IFluidHandle } from '@fluidframework/core-interfaces';
 import { IValueChanged, SharedMap } from '@fluidframework/map';
 import { ISequencedDocumentMessage } from '@fluidframework/protocol-definitions';
 import { AddPointsEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
-    InkingManager, IWetStroke, StrokesAddedEvent, StrokesRemovedEvent } from './InkingManager';
+    InkingManager, IWetStroke, StrokeEndState, StrokesAddedEvent, StrokesRemovedEvent } from './InkingManager';
 import { IPointerPoint, getDistanceBetweenPoints } from './Geometry';
 import { IStroke, Stroke, StrokeType } from "./Stroke";
 import { EphemeralEventScope, EphemeralEventTarget, IEphemeralEvent, UserMeetingRole } from '@microsoft/live-share';
@@ -49,7 +49,7 @@ class LiveStroke {
         }
     }
 
-    hasEnded: boolean = false;
+    endState?: StrokeEndState;
 
     constructor(
         readonly id: string,
@@ -127,7 +127,7 @@ export class SharedInkingSession extends DataObject {
                 name: StrokeEventNames.AddWetStrokePoints,
                 strokeId: liveStroke.id,
                 points: liveStroke.points,
-                hasEnded: liveStroke.hasEnded
+                endState: liveStroke.endState
             });
 
         liveStroke.clear();
@@ -161,12 +161,13 @@ export class SharedInkingSession extends DataObject {
                     const liveStroke = this._pendingLiveStrokes.get(eventArgs.strokeId);
 
                     if (liveStroke !== undefined) {
-                        if (!eventArgs.hasEnded) {
+                        if (!eventArgs.endState) {
                             liveStroke.points.push(...eventArgs.points);
                         }
-                        liveStroke.hasEnded = eventArgs.hasEnded;
 
-                        if (eventArgs.hasEnded) {
+                        liveStroke.endState = eventArgs.endState;
+
+                        if (eventArgs.endState) {
                             this._pendingLiveStrokes.delete(eventArgs.strokeId);
                         }
 
@@ -207,11 +208,17 @@ export class SharedInkingSession extends DataObject {
                     if (stroke) {
                         stroke.addPoints(...evt.points);
 
-                        // Even as evt.hasEnded is true, leave the wet stroke on the screen
-                        // until the new stroke has been synchronized and we receive a
-                        // valueChanged event. Removing it now would potentially lead to the
+                        // Unless the wet stroke is ephemeral or has been cancelled, leave it
+                        // on the screen until it has been synchronized and we receive
+                        // a valueChanged event. Removing it now would potentially lead to the
                         // stroke fully disappearing for a brief period of time before begin
                         // re-rendered in full fidelity.
+                        if (evt.endState === StrokeEndState.Cancelled) {
+                            stroke.cancel();
+                        }
+                        else if (evt.endState === StrokeEndState.Ended && stroke.type === StrokeType.Ephemeral) {
+                            stroke.end();
+                        }
                     }
                 }        
             });

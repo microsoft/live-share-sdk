@@ -95,6 +95,11 @@ export interface IBeginStrokeEventArgs {
  */
 export const BeginStrokeEvent: symbol = Symbol();
 
+export enum StrokeEndState {
+    Ended,
+    Cancelled
+}
+
 /**
  * Defines the arguments of the AddPointsEvent.
  */
@@ -111,7 +116,7 @@ export interface IAddPointsEventArgs {
      * Indicates whether the stroke has ended (i.e. if the points
      * were the last ones.)
      */
-    hasEnded: boolean;
+    endState?: StrokeEndState;
 }
 
 /**
@@ -281,13 +286,16 @@ export class InkingManager extends EventEmitter {
         end(p?: IPointerPoint) {
             this._canvas.endStroke(p);
 
-            this._owner.wetStrokeEnded(this);
+            this._owner.wetStrokeEnded(this, false);
 
             this._canvas.removeFromDOM();
         }
 
         cancel() {
             this._canvas.cancelStroke();
+
+            this._owner.wetStrokeEnded(this, true);
+
             this._canvas.removeFromDOM();
         }
     }
@@ -613,7 +621,7 @@ export class InkingManager extends EventEmitter {
         }
     }
 
-    private wetStrokeEnded(stroke: IWetStroke) {
+    private wetStrokeEnded(stroke: IWetStroke, isCancelled: boolean) {
         if (stroke.type === StrokeType.Ephemeral) {
             const effectiveClientId = stroke.clientId ?? InkingManager.localClientId;
 
@@ -633,7 +641,8 @@ export class InkingManager extends EventEmitter {
                 }
             );
         }
-        if (stroke.type === StrokeType.Persistent) {
+
+        if (stroke.type === StrokeType.Persistent && !isCancelled) {
             this.internalAddStroke(stroke);
         }
     }
@@ -731,8 +740,7 @@ export class InkingManager extends EventEmitter {
     protected notifyAddPoints(strokeId: string, ...points: IPointerPoint[]) {
         const eventArgs: IAddPointsEventArgs = {
             strokeId,
-            points,
-            hasEnded: false
+            points
         }
 
         this.emit(AddPointsEvent, eventArgs);
@@ -742,7 +750,7 @@ export class InkingManager extends EventEmitter {
         const eventArgs: IAddPointsEventArgs = {
             strokeId,
             points: [ endPoint ],
-            hasEnded: true
+            endState: isCancelled ? StrokeEndState.Cancelled : StrokeEndState.Ended
         }
 
         this.emit(AddPointsEvent, eventArgs);

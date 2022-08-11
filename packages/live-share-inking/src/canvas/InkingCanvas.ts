@@ -7,9 +7,20 @@ import { TWO_PI, IPointerPoint, IQuad, IPoint, viewportToScreen } from "../core/
 import { IStroke } from "../core/Stroke";
 import { IBrush } from "./Brush";
 
+/**
+ * Defines the refernece point of a canvas. The reference point is the origin used for
+ * panning and zooming operations.
+ */
 export type CanvasReferencePoint = "topLeft" | "center";
 
+/**
+ * Represents the base class for all canvases. InkingCanvas provides resizing, coordinate
+ * tramnslation and base drawingprimitives.
+ */
 export abstract class InkingCanvas {
+    /**
+     * Configures the time it takes, in milliseconds, for an InkingCanvas to fade out.
+     */
     public static fadeOutLength = 300;
 
     private _context: CanvasRenderingContext2D;
@@ -59,22 +70,59 @@ export abstract class InkingCanvas {
         };
     }
 
+    /**
+     * Return the brush this canvas should use by default. Must be overridden
+     * by descendant classes.
+     */
     protected abstract getDefaultBrush(): IBrush;
+    /**
+     * Implements the rendering logic. Must be overridden by descendant classes.
+     */
     protected abstract internalRender(): void;
+    /**
+     * Called when a new stroke is started.
+     * @param p The point where the stroke starts.
+     */
     protected abstract internalBeginStroke(p: IPointerPoint): void;
+    /**
+     * Called when a point should be added to the current stroke.
+     * @param p The point to add to the current stroke.
+     */
     protected abstract internalAddPoint(p: IPointerPoint): void;
+    /**
+     * Called when the current stroke ends.
+     * @param p Optional. The point at which the stroke ends. If not provided,
+     * the stroke ends at the last added point.
+     */
     protected abstract internalEndStroke(p?: IPointerPoint): void;
 
+    /**
+     * Determines if this canvas should render asynchronously. When rendering
+     * asynchronously, render operations are scheduled on the next animation frame.
+     * When rendering synchronously, render operations are executed right away.
+     * @returns `true` if the canvas should render asynchronously, `false` otherwise.
+     */
     protected rendersAsynchronously(): boolean {
         return true;
     }
 
+    /**
+     * Provides access to the underlying HTML5 canvas' CanvsRenderingContext2D
+     */
     protected get context(): CanvasRenderingContext2D {
         return this._context;
     }
 
+    /**
+     * The canvas' reference point.
+     */
     referencePoint: CanvasReferencePoint = "center";
 
+    /**
+     * Creates a new InkingCanvas instance, attached to the provided HTMLElement.
+     * @param parentElement The HTML element this canvas is attached to. InkingCanvas
+     * dynamically creates an HTML5 Canvas element and adds it as a child to `parentElement`.
+     */
     constructor(parentElement?: HTMLElement) {
         const canvas = document.createElement("canvas");
         canvas.style.position = "absolute";
@@ -100,6 +148,10 @@ export abstract class InkingCanvas {
         }
     }
 
+    /**
+     * Fades the canvas out by decreasing its opacity, and eventually removes it
+     * from the DOM.
+     */
     fadeOut() {
         let opacity = 0.9;
 
@@ -119,6 +171,9 @@ export abstract class InkingCanvas {
         window.setTimeout(doFadeOut, InkingCanvas.fadeOutLength / 10);
     }
 
+    /**
+     * Removes the canvas from the DOM.
+     */
     removeFromDOM() {
         const parentElement = this.canvas.parentElement;
 
@@ -127,6 +182,11 @@ export abstract class InkingCanvas {
         }
     }
 
+    /**
+     * Resizes this canvas.
+     * @param width The new width of the canvas, in pixels.
+     * @param height The new height of the canvas, in pixels.
+     */
     resize(width: number, height: number) {
         this.canvas.style.width = `${width}px`;
         this.canvas.style.height = `${height}px`;
@@ -140,6 +200,9 @@ export abstract class InkingCanvas {
         this._clientHeight = undefined;
     }
 
+    /**
+     * Clears the canvas.
+     */
     clear() {
         this._context.save();
 
@@ -150,10 +213,10 @@ export abstract class InkingCanvas {
         this._context.restore();
     }
 
-    copy(source: InkingCanvas) {
-        this._context.drawImage(source.canvas, 0, 0);
-    }
-
+    /**
+     * Begins a stroke in the canvas.
+     * @param p The starting point of the stroke.
+     */
     beginStroke(p: IPointerPoint) {
         this._strokeStarted = true;
 
@@ -167,10 +230,23 @@ export abstract class InkingCanvas {
         }
     }
 
+    /**
+     * Adds a points to the current stroke.
+     * @param p The point to add to the current stroke.
+     */
     addPoint(p: IPointerPoint) {
+        if (!this._strokeStarted) {
+            throw new Error("beginStroke must be called before addPoint.");
+        }
+
         this.internalAddPoint(p);
     }
 
+    /**
+     * Ends the current stroke in the canvas.
+     * @param p Optional. The end point of the stroke. If not specified,
+     * the end point is the last one added.
+     */
     endStroke(p?: IPointerPoint) {
         this._strokeStarted = false;
 
@@ -179,10 +255,17 @@ export abstract class InkingCanvas {
         this.internalRender();
     }
 
+    /**
+     * Cancels the current stroke.
+     */
     cancelStroke() {
         this._strokeStarted = false;
     }
 
+    /**
+     * Renders the specified stroke onto the canvas.
+     * @param stroke The stroke to render.
+     */
     renderStroke(stroke: IStroke) {
         this.setBrush(stroke.brush);
 
@@ -199,6 +282,11 @@ export abstract class InkingCanvas {
         }
     }
 
+    /**
+     * Renders a circle onto the canvas.
+     * @param center The center of the circle, in pixels.
+     * @param radius The radius of the circle, in pixels.
+     */
     renderCircle(center: IPoint, radius: number): void {
         const transformedCenter = this.viewportToScreen(center);
 
@@ -210,30 +298,55 @@ export abstract class InkingCanvas {
             TWO_PI);
     }
 
+    /**
+     * Starts a path.
+     */
     beginPath() {
         this._context.beginPath();
     }
 
+    /**
+     * Closes the current path.
+     */
     closePath() {
         this._context.closePath();
     }
 
+    /**
+     * Fills the current path using the canvas' brush.
+     */
     fill() {
         this._context.fill();
     }
 
+    /**
+     * Starts a new sub-path, at the specified coordinates.
+     * @param x The x coordinate, in pixels.
+     * @param y The y coordinate, in pixels.
+     */
     moveTo(x: number, y: number) {
         const transformedPoint = this.viewportToScreen({ x, y });
 
         this._context.moveTo(transformedPoint.x, transformedPoint.y);
     }
 
+    /**
+     * Draws a line from the sub-path's last point to the specified point.
+     * @param x The x coordinate, in pixels.
+     * @param y The y coordinate, in pixels.
+     */
     lineTo(x: number, y: number) {
         const transformedPoint = this.viewportToScreen({ x, y });
 
         this._context.lineTo(transformedPoint.x, transformedPoint.y);
     }
 
+    /**
+     * Renders a rectangle onto the canvas.
+     * @param center The center of the rectangle, in pixels.
+     * @param halfWidth The half-width of the rectangle, in pixels.
+     * @param halfHeight The half-height of the rectangle, in pixels.
+     */
     renderRectangle(center: IPoint, halfWidth: number, halfHeight: number): void {
         const left: number = center.x - halfWidth;
         const right: number = center.x + halfWidth;
@@ -247,6 +360,10 @@ export abstract class InkingCanvas {
         this.lineTo(left, top);
     }
 
+    /**
+     * Renders a "quad", i.e. a shape with four sides, onto the canvas.
+     * @param quad The quad to render.
+     */
     renderQuad(quad: IQuad): void {
         this.moveTo(quad.p1.x, quad.p1.y);
         this.lineTo(quad.p2.x, quad.p2.y);
@@ -255,42 +372,52 @@ export abstract class InkingCanvas {
         this.lineTo(quad.p1.x, quad.p1.y);
     }
 
-    enablePointerEvents(): void {
-        this._context.canvas.style.pointerEvents = 'auto';
-    }
-
-    disablePointerEvents(): void {
-        this._context.canvas.style.pointerEvents = 'none';
-    }
-
+    /**
+     * Sets the current brush for the canvas.
+     * @param value The brush.
+     */
     setBrush(value: IBrush) {
         this._brush = value;
     }
 
+    /**
+     * Gets the underlying HTML5 Canvas element.
+     */
     get canvas(): HTMLCanvasElement {
         return this._context.canvas;
     }
 
-    get hasStrokeEnded(): boolean {
-        return !this._strokeStarted;
-    }
-
+    /**
+     * Gets the canvas' brush.
+     */
     get brush(): IBrush {
         return this._brush ?? this.getDefaultBrush();
     }
 
+    /**
+     * Gets the offset from the canvas' reference point, in pixels.
+     */
     get offset(): Readonly<IPoint> {
         return this._offset;
     }
 
+    /**
+     * Sets the offset from the canvas' reference point, in pixels.
+     */
     set offset(value: IPoint) {
         this._offset = { ...value };
     }
 
+    /**
+     * Gets the canvas' scale. Defaults to 1.
+     */
     get scale(): number {
         return this._scale;
     }
 
+    /**
+     * Sets the canvas' scale. Value must be greater than zero.
+     */
     set scale(value: number) {
         if (value > 0) {
             this._scale = value;

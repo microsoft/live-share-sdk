@@ -7,7 +7,7 @@ import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IFluidHandle } from '@fluidframework/core-interfaces';
 import { IValueChanged, SharedMap } from '@fluidframework/map';
 import { ISequencedDocumentMessage } from '@fluidframework/protocol-definitions';
-import { AddPointEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
+import { AddPointsEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
     InkingManager, IWetStroke, StrokesAddedEvent, StrokesRemovedEvent } from './InkingManager';
 import { IPointerPoint, getDistanceBetweenPoints } from './Geometry';
 import { IStroke, Stroke, StrokeType } from "./Stroke";
@@ -79,11 +79,32 @@ class LiveStroke {
     }
 }
 
+/**
+ * Enables live and collaborative inking.
+ */
 export class SharedInkingSession extends DataObject {
+    /**
+     * Configures the delay before wet stroke events are emitted, to greatly reduce the 
+     * number of events emitted and improve performance.
+     */
     public static wetStrokeEventsStreamDelay = 60;
+    /**
+     * In order to limit the number of points being sent over the wire, wet strokes are
+     * simplified as follows:
+     * - Given 3 points A, B, C
+     * - If distance(A, B) + distance(B, C) - distance(A, C) < wetStrokePointSimplificationThreshold
+     * - Then remove point B because it's almost on the same line as that defined by A and C
+     * This variable allows the fine tuning of that threshold.
+     */
     public static wetStrokePointSimplificationThreshold = 0.08;
 
+    /**
+     * The object's Fluid type/name.
+     */
     public static readonly TypeName = `@microsoft/shared-inking-session`;
+    /**
+     * The object's Fluid type factory.
+     */
     public static readonly factory = new DataObjectFactory(
         SharedInkingSession.TypeName,
         SharedInkingSession,
@@ -97,24 +118,7 @@ export class SharedInkingSession extends DataObject {
     private _wetStrokes: Map<string, IWetStroke> = new Map<string, IWetStroke>();
     private _beginWetStrokeEventTarget!: EphemeralEventTarget<IBeginWetStrokeEvent>;
     private _addWetStrokePointEventTarget!: EphemeralEventTarget<IAddWetStrokePointsEvent>;
-    private _allowedRoles: UserMeetingRole[] = [ UserMeetingRole.guest, UserMeetingRole.attendee, UserMeetingRole.organizer, UserMeetingRole.presenter ];
-    
-    protected async initializingFirstTime(): Promise<void> {
-        this._dryInkMap = SharedMap.create(this.runtime, 'dryInk');
-        this.root.set('dryInk', this._dryInkMap.handle);
-    }
-
-    protected async hasInitialized(): Promise<void> {
-        const handle = this.root.get<IFluidHandle<SharedMap>>("dryInk");
-
-        if (handle) {
-            this._dryInkMap = await handle.get();
-        }
-        else {
-            throw new Error("Unable to get the dryInk SharedMap handle.");
-        }
-    }
-
+    private _allowedRoles: UserMeetingRole[] = [ UserMeetingRole.guest, UserMeetingRole.attendee, UserMeetingRole.organizer, UserMeetingRole.presenter ];    
     private _pendingLiveStrokes: Map<string, LiveStroke> = new Map<string, LiveStroke>();
 
     private liveStrokeProcessed = (liveStroke: LiveStroke) => {
@@ -152,7 +156,7 @@ export class SharedInkingSession extends DataObject {
                         });
                 });
             this._inkingManager.on(
-                AddPointEvent,
+                AddPointsEvent,
                 (eventArgs: IAddPointsEventArgs) => {
                     const liveStroke = this._pendingLiveStrokes.get(eventArgs.strokeId);
 
@@ -296,6 +300,28 @@ export class SharedInkingSession extends DataObject {
         }
     }
 
+    protected async initializingFirstTime(): Promise<void> {
+        this._dryInkMap = SharedMap.create(this.runtime, 'dryInk');
+        this.root.set('dryInk', this._dryInkMap.handle);
+    }
+
+    protected async hasInitialized(): Promise<void> {
+        const handle = this.root.get<IFluidHandle<SharedMap>>("dryInk");
+
+        if (handle) {
+            this._dryInkMap = await handle.get();
+        }
+        else {
+            throw new Error("Unable to get the dryInk SharedMap handle.");
+        }
+    }
+
+    /**
+     * Starts the live inking session.
+     * @param hostElement The element to attach the InkingManager to.
+     * @returns An InkingManager instance that can be used by the applications
+     * to set the tool, brush, add strokes and more.
+     */
     synchronize(hostElement: HTMLElement): InkingManager {
         this._inkingManager = new InkingManager(hostElement);
 
@@ -305,10 +331,16 @@ export class SharedInkingSession extends DataObject {
         return this._inkingManager;
     }
 
+    /**
+     * Gets the list of roles that are allowed to emit wet stroke events.
+     */
     get allowedRoles(): UserMeetingRole[] {
         return this._allowedRoles;
     }
 
+    /**
+     * Sets the list of roles that are allowed to emit wet stroke events.
+     */
     set allowedRoles(value: UserMeetingRole[]) {
         this._allowedRoles = value;
 

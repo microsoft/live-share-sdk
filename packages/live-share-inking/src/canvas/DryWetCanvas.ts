@@ -4,15 +4,13 @@
  */
 
 import { InkingCanvas } from "./InkingCanvas";
-import { getPressureAdjustedTipSize, computeQuadBetweenTwoCircles, IQuad, IPointerPoint, computeQuadBetweenTwoRectangles } from "../core/Geometry";
-import { DefaultPenBrush, IBrush, IColor } from "./Brush";
-import { colorToCssColor } from "../core/Utils";
+import { getPressureAdjustedSize, computeQuadBetweenTwoCircles, IPointerPoint,
+    computeQuadBetweenTwoRectangles, IQuadPathItem } from "../core/Geometry";
+import { toCssColor, DefaultPenBrush, IBrush, IColor } from "./Brush";
 
-interface IQuadPathItem {
-    quad?: IQuad,
-    endPoint: IPointerPoint
-}
-
+/**
+ * Represents the base class from wet and dry canvases, implementing the common rendering logic.
+ */
 export abstract class DryWetCanvas extends InkingCanvas {
     private _pendingPointsStartIndex = 0;
     private _points: IPointerPoint[] = [];
@@ -27,16 +25,17 @@ export abstract class DryWetCanvas extends InkingCanvas {
             
             if (this._pendingPointsStartIndex > 0) {
                 previousPoint = this._points[this._pendingPointsStartIndex - 1];
-                previousPointPressureAdjustedTip = getPressureAdjustedTipSize(tipHalfSize, previousPoint.pressure);
+                previousPointPressureAdjustedTip = getPressureAdjustedSize(tipHalfSize, previousPoint.pressure);
             }
 
             for (let i = this._pendingPointsStartIndex; i < this._points.length; i++) {
                 const p = this._points[i];
 
-                let pressureAdjustedTip = getPressureAdjustedTipSize(tipHalfSize, p.pressure);
+                let pressureAdjustedTip = getPressureAdjustedSize(tipHalfSize, p.pressure);
 
                 const pathItem: IQuadPathItem = {
-                    endPoint: p
+                    endPoint: p,
+                    tipSize: pressureAdjustedTip
                 };
 
                 if (previousPoint !== undefined) {
@@ -65,29 +64,25 @@ export abstract class DryWetCanvas extends InkingCanvas {
         return result;
     }
 
-    private renderQuadPath(path: IQuadPathItem[], tipSize: number, color: IColor) {
-        this.context.strokeStyle = colorToCssColor(color);
-        this.context.fillStyle = colorToCssColor(color);
-
-        const tipHalfSize = tipSize / 2;
+    private renderQuadPath(path: IQuadPathItem[], color: IColor) {
+        this.context.strokeStyle = toCssColor(color);
+        this.context.fillStyle = toCssColor(color);
 
         this.beginPath();
 
         for (let item of path) {
-            const pressureAdjustedTip = getPressureAdjustedTipSize(tipHalfSize, item.endPoint.pressure);
-
             if (item.quad !== undefined) {
                 this.renderQuad(item.quad);
             }
 
             if (this.brush.tip === "ellipse") {
-                this.renderCircle(item.endPoint, pressureAdjustedTip);
+                this.renderCircle(item.endPoint, item.tipSize);
             }
             else {
                 this.renderRectangle(
                     item.endPoint,
-                    pressureAdjustedTip,
-                    pressureAdjustedTip);
+                    item.tipSize,
+                    item.tipSize);
             }
         }
 
@@ -95,14 +90,28 @@ export abstract class DryWetCanvas extends InkingCanvas {
         this.closePath();
     }
 
+    /**
+     * Defines the brush this canvas uses by default.
+     * @returns The brush this canvas should use by default.
+     */
     protected getDefaultBrush(): IBrush {
         return DefaultPenBrush;
     }
 
+    /**
+     * Determines if this canvas renders strokes progressively. When rendering
+     * progressively, the current stroke is rendered incrementally as new points
+     * become available. When progressive rendering is disabled, the current
+     * stroke is fully re-rendered every time.
+     * @returns `true` if this canvas should render progressively, `false` otherwise.
+     */
     protected rendersProgressively(): boolean {
         return true;
     }
 
+    /**
+     * Implements the rendering logic for the current stroke.
+     */
     protected internalRender() {
         if (!this.rendersProgressively()) {
             this.clear();
@@ -110,13 +119,14 @@ export abstract class DryWetCanvas extends InkingCanvas {
 
         const path = this.computeQuadPath(this.brush.tipSize);
 
-        this.renderQuadPath(path, this.brush.tipSize, this.brush.color);
+        this.renderQuadPath(path, this.brush.color);
 
         if (this.brush.fillColor) {
             const reducedTipSize = this.brush.tipSize - this.brush.tipSize / 2;
 
             const path = this.computeQuadPath(reducedTipSize);
-            this.renderQuadPath(path, reducedTipSize, this.brush.fillColor);
+
+            this.renderQuadPath(path, this.brush.fillColor);
         }
 
         if (this.rendersProgressively()) {
@@ -140,6 +150,10 @@ export abstract class DryWetCanvas extends InkingCanvas {
     }
 }
 
+/**
+ * Represents a canvas suitable for "dry ink", i.e. the persistent drawing. DryCanvas renders
+ * synchonously and progressively.
+ */
 export class DryCanvas extends DryWetCanvas {
     protected rendersAsynchronously(): boolean {
         // The dry canvas renders synchronously to favor speed
@@ -154,6 +168,10 @@ export class DryCanvas extends DryWetCanvas {
     } 
 }
 
+/**
+ * Represents a canvas suitable for "wet ink", i.e. an ongoing stroke. WetCanvas renders
+ * asynchonously. It renders progressively as long as its brush doesn't define a `fillColor`.
+ */
 export class WetCanvas extends DryWetCanvas {
     protected rendersProgressively(): boolean {
         return this.brush.fillColor === undefined;

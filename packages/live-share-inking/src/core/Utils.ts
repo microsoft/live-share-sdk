@@ -9,10 +9,21 @@ import { IPointerPoint } from "./Geometry";
 
 const EPSILON = 0.000001;
 
+/**
+ * @hidden
+ * Generates a unique Id.
+ * @returns A unique Id.
+ */
 export function generateUniqueId(): string {
     return uuid();
 }
 
+/**
+ * @hidden
+ * Converts a PointerEvent into an IPointerPoint.
+ * @param e The pointer event to convert.
+ * @returns An IPointerPoint object.
+ */
 export function pointerEventToPoint(e: PointerEvent): IPointerPoint {
     return {
         x: e.offsetX,
@@ -21,37 +32,22 @@ export function pointerEventToPoint(e: PointerEvent): IPointerPoint {
     };
 }
 
-// PointerEvent.getCoalescedEvents() is an experimental feature. TypeScript doesn't yet have the type info.
-interface CoalescedPointerEvent extends PointerEvent {
-    getCoalescedEvents(): PointerEvent[];
-}
-
-export function getCoalescedEvents(event: PointerEvent): PointerEvent[] {
-    if ('getCoalescedEvents' in event) {
-        const events: PointerEvent[] = (event as CoalescedPointerEvent).getCoalescedEvents();
-
-        // Firefox can return an empty list. See https://bugzilla.mozilla.org/show_bug.cgi?id=1511231.
-        if (events.length >= 1) {
-            return events;
-        }
-    }
-
-    return [event];
-}
-
-export function colorToCssColor(color: IColor): string {
-    return `rgba(${color.r},${color.g},${color.b},${color.a})`;
-}
-
-export function brightenColor(color: IColor, percent: number): IColor {
-    if (percent < 0 || percent > 100) {
+/**
+ * @hidden
+ * Brightens the given color by a certain intensity.
+ * @param color The color to brighten.
+ * @param intensity The intensity of the brightening. Must be between 0 and 100.
+ * @returns The brightened color.
+ */
+export function brightenColor(color: IColor, intensity: number): IColor {
+    if (intensity < 0 || intensity > 100) {
         return color;
     }
 
     const brightenChannel = (channel: number) => {
         const delta = 255 - channel;
 
-        return channel + delta / 100 * percent;
+        return channel + delta / 100 * intensity;
     }
 
     return {
@@ -62,6 +58,14 @@ export function brightenColor(color: IColor, percent: number): IColor {
     }
 }
 
+/**
+ * @hidden
+ * Determines if a number is within a randge.
+ * @param n The number to check.
+ * @param r1 The first range boundary.
+ * @param r2 The second range boundary.
+ * @returns `true` if `n` is between `r1` and `r2`, `false` otherwise.
+ */
 export function isInRange(n: number, r1: number, r2: number): boolean {
     const adjustedMin = Math.min(r1, r2) - EPSILON;
     const adjustedMax = Math.max(r1, r2) + EPSILON;

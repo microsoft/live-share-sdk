@@ -5,22 +5,37 @@
 
 import { isInRange } from "./Utils";
 
+/**
+ * @hidden
+ */
 export const TWO_PI: number = Math.PI * 2;
 
+/**
+ * Defines a 2D point.
+ */
 export interface IPoint {
     x: number,
     y: number
 }
 
+/**
+ * Defines a 2D point with pointer pressure.
+ */
 export interface IPointerPoint extends IPoint {
     pressure: number
 }
 
+/**
+ * Defines a segment between two points.
+ */
 export interface ISegment {
     from: IPoint,
     to: IPoint
 }
 
+/**
+ * Defines a rectangle.
+ */
 export interface IRect {
     left: number;
     top: number;
@@ -28,10 +43,21 @@ export interface IRect {
     bottom: number;
 }
 
-export function getPressureAdjustedTipSize(baseRadius: number, pressure: number) {
-    return baseRadius * (pressure * 1.5 + 0.25);
+/**
+ * Adjusts a size given a pointer pressure.
+ * @param baseSize The size to adjust.
+ * @param pressure The pressure.
+ * @returns The adjusted size.
+ */
+export function getPressureAdjustedSize(baseSize: number, pressure: number): number {
+    return baseSize * (pressure * 1.5 + 0.25);
 }
 
+/**
+ * Extends the dimensions of the specified rectangle so it contains the specified point.
+ * @param rect The rectangle to extend.
+ * @param point The point to extend the rectangle to.
+ */
 export function unionRect(rect: IRect, point: IPoint): void {
     rect.left = Math.min(rect.left, point.x);
     rect.right = Math.max(rect.right, point.x);
@@ -39,6 +65,9 @@ export function unionRect(rect: IRect, point: IPoint): void {
     rect.bottom = Math.max(rect.bottom, point.y);
 }
 
+/**
+ * Defines a quad, i.e. a polygon with 4 sides.
+ */
 export interface IQuad {
     p1: IPoint;
     p2: IPoint;
@@ -46,6 +75,24 @@ export interface IQuad {
     p4: IPoint;
 }
 
+/**
+ * @hidden
+ */
+export interface IQuadPathItem {
+    quad?: IQuad,
+    endPoint: IPointerPoint;
+    tipSize: number;
+}
+
+/**
+ * @hidden
+ * Computes a quad between two circles.
+ * @param center1 The center of the first circle.
+ * @param r1 The radius of the first circle.
+ * @param center2 The center of the second circle.
+ * @param r2 The radius of the second circle.
+ * @returns A quad joining the two circles, or undefined if the quad couldn't be computed.
+ */
 export function computeQuadBetweenTwoCircles(
     center1: IPoint,
     r1: number,
@@ -80,6 +127,17 @@ export function computeQuadBetweenTwoCircles(
     }
 }
 
+/**
+ * @hidden
+ * Computes a quad between the specified rectangles.
+ * @param center1 The center of the first rectangle.
+ * @param halfWidth1 The half width of the first rectangle.
+ * @param halfHeight1 The half height of the first rectangle.
+ * @param center2 The center of the second rectangle.
+ * @param halfWidth2 The half width of the second rectangle.
+ * @param halfHeight2 The half height of the second rectangle.
+ * @returns A quad joining the two rectangles, or undefined if the quad couldn't be computed.
+ */
 export function computeQuadBetweenTwoRectangles(
     center1: IPoint,
     halfWidth1: number,
@@ -115,22 +173,44 @@ export function computeQuadBetweenTwoRectangles(
     }
 }
 
-export function makeRectangleFromPoint(p: IPoint, width: number, height: number): IRect {
+/**
+ * @hidden
+ * Makes a rectangle of the specified width and height from the specified center.
+ * @param center The center of the rectangle.
+ * @param width The width of the rectangle.
+ * @param height The height of the rectangle.
+ * @returns The computed rectangle.
+ */
+export function makeRectangle(center: IPoint, width: number, height: number): IRect {
     const halfWidth = width / 2;
     const halfHeight = height / 2;
 
     return {
-        left: p.x - halfWidth,
-        top: p.y - halfHeight,
-        right: p.x + halfWidth,
-        bottom: p.y + halfHeight
+        left: center.x - halfWidth,
+        top: center.y - halfHeight,
+        right: center.x + halfWidth,
+        bottom: center.y + halfHeight
     };
 }
 
+/**
+ * @hidden
+ * Determines if the specified point is inside the specified rectangle.
+ * @param p The point.
+ * @param r The rectangle.
+ * @returns `true` if `p` is inside `r`, `false` otherwise.
+ */
 export function isPointInsideRectangle(p: IPoint, r: IRect): boolean {
     return isInRange(p.x, r.left, r.right) && isInRange(p.y, r.top, r.bottom);
 }
 
+/**
+ * @hidden
+ * Determines if a rectangle is inside another.
+ * @param r The rectangle to check the includion of.
+ * @param containingRectangle The containing rectangle.
+ * @returns `true` is `r` is inside `containingRectangle`, `false` otherwise.
+ */
 export function isRectangleInsideRectangle(r: IRect, containingRectangle: IRect): boolean {
     const topLeft = { x: r.left, y: r.top };
     const topRight = { x: r.right, y: r.top };
@@ -143,6 +223,13 @@ export function isRectangleInsideRectangle(r: IRect, containingRectangle: IRect)
         isPointInsideRectangle(bottomRight, containingRectangle);
 }
 
+/**
+ * @hidden
+ * Determines if two rectangles overlap.
+ * @param r1 The first rectangle.
+ * @param r2 The second rectangle.
+ * @returns `true` if the two rectabgles overlap, `false` otherwise.
+ */
 export function doRectanglesOverlap(r1: IRect, r2: IRect): boolean {
     const test = (r1: IRect, r2: IRect) => {
         const topLeft = { x: r1.left, y: r1.top };
@@ -159,6 +246,15 @@ export function doRectanglesOverlap(r1: IRect, r2: IRect): boolean {
     return test(r1, r2) || test(r2, r1);
 }
 
+/**
+ * @hidden
+ * Determines whether two segments MAY intersect, which doesn't mean they DO intersect.
+ * Computing the intersection of two segments is computationally expensive; this method
+ * provides a way to not have to do it unless it's actually necessary.
+ * @param segment1 The first segment.
+ * @param segment2 The second segment.
+ * @returns `true` is the two segments may intersect, `false` otherwise.
+ */
 export function segmentsMayIntersect(segment1: ISegment, segment2: ISegment): boolean {
     const s1: ISegment = {
         from: {
@@ -185,6 +281,12 @@ export function segmentsMayIntersect(segment1: ISegment, segment2: ISegment): bo
     return !(s1.to.x < s2.from.x || s1.from.x > s2.to.x || s1.to.y < s2.from.y || s1.from.y > s2.to.y);
 }
 
+/**
+ * @hidden
+ * Computes a rectangle's side segments
+ * @param rect The rectangles to get the segments of.
+ * @returns The 4 segments representing the rectangle's 4 sides.
+ */
 export function getRectangleSegments(rect: IRect): ISegment[] {
     return [
         { from: { x: rect.left, y: rect.top}, to: { x: rect.right, y: rect.top} },
@@ -194,6 +296,16 @@ export function getRectangleSegments(rect: IRect): ISegment[] {
     ];
 }
 
+/**
+ * @hidden
+ * Determines if the specified segment MAY intersect with any of the specified rectangle's
+ * sides, which doesn't mean that it DOES intersect. Computing the intersection between
+ * segments is computationally expensive; this method provides a way to not have to do it
+ * unless it's actually necessary.
+ * @param segment The segment.
+ * @param rect The rectangle.
+ * @returns `true` is `segment` may intersect with `rect`, `false` otherwise.
+ */
 export function segmentMayIntersectWithRectangle(segment: ISegment, rect: IRect): boolean {
     const rectSegments = getRectangleSegments(rect);
 
@@ -206,7 +318,14 @@ export function segmentMayIntersectWithRectangle(segment: ISegment, rect: IRect)
     return false;
 }
 
-// From https://gamedev.stackexchange.com/questions/111100/intersection-of-a-line-segment-and-a-rectangle
+/**
+ * @hidden
+ * Computes the intersection point between two segments.
+ * From https://gamedev.stackexchange.com/questions/111100/intersection-of-a-line-segment-and-a-rectangle
+ * @param s1 The first segment.
+ * @param s2 The second segment.
+ * @returns The intersection point, or undefined if the segments do not intersect.
+ */
 export function getSegmentsIntersection(s1: ISegment, s2: ISegment): IPoint | undefined {
     const a1 = s1.to.y - s1.from.y;
     const b1 = s1.from.x - s1.to.x;
@@ -236,6 +355,14 @@ export function getSegmentsIntersection(s1: ISegment, s2: ISegment): IPoint | un
     return undefined;
 }
 
+/**
+ * @hidden
+ * Determines the intersection points between the specified segment and the sides of the
+ * specified rectangle.
+ * @param s The segment.
+ * @param r The rectangle.
+ * @returns An array containing 0, 1 or 2 intersection points.
+ */
 export function getSegmentIntersectionsWithRectangle(s: ISegment, r: IRect): IPoint[] {
     const result: IPoint[] = [];
     const rectSegments = getRectangleSegments(r);
@@ -263,20 +390,46 @@ export function getSegmentIntersectionsWithRectangle(s: ISegment, r: IRect): IPo
     return result;
 }
 
+/**
+ * Computes the distance between two points.
+ * @param p1 The first point.
+ * @param p2 The second point.
+ * @returns The distance between `p1` and `p2`.
+ */
 export function getDistanceBetweenPoints(p1: IPoint, p2: IPoint): number {
     return Math.hypot(p2.x - p1.x, p2.y - p1.y);
 }
 
+/**
+ * Converts screen coordinates to viewport coordinates.
+ * @param p The point to convert.
+ * @param viewportReferencePoint The videwport's reference point.
+ * @param viewportOffset The viewport offset.
+ * @param scale The viewport scale. Defaults to 1 if the provided value is less than or equal to 0.
+ * @returns The converted point.
+ */
 export function screenToViewport(p: IPoint, viewportReferencePoint: IPoint, viewportOffset: IPoint, scale: number): IPoint {
+    const effectiveScale = scale > 0 ? scale : 1;
+
     return {
-        x: (p.x - viewportOffset.x - viewportReferencePoint.x) / scale,
-        y: (p.y - viewportOffset.y - viewportReferencePoint.y) / scale
+        x: (p.x - viewportOffset.x - viewportReferencePoint.x) / effectiveScale,
+        y: (p.y - viewportOffset.y - viewportReferencePoint.y) / effectiveScale
     };
 }
 
+/**
+ * Converts viewport coordinates to screen coordinates.
+ * @param p The point to convert.
+ * @param viewportReferencePoint The videwport's reference point.
+ * @param viewportOffset The viewport offset.
+ * @param scale The viewport scale. Defaults to 1 if the provided value is less than or equal to 0.
+ * @returns The converted point.
+ */
 export function viewportToScreen(p: IPoint, viewportReferencePoint: IPoint, viewportOffset: IPoint, scale: number): IPoint {
+    const effectiveScale = scale > 0 ? scale : 1;
+
     return {
-        x: p.x * scale + viewportReferencePoint.x + viewportOffset.x,
-        y: p.y * scale + viewportReferencePoint.y + viewportOffset.y
+        x: p.x * effectiveScale + viewportReferencePoint.x + viewportOffset.x,
+        y: p.y * effectiveScale + viewportReferencePoint.y + viewportOffset.y
     };
 }

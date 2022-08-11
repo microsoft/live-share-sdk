@@ -6,6 +6,10 @@
 import { InputFilter } from "./InputFilter";
 import { IPointerPoint } from "../core/Geometry";
 
+/**
+ * Implements a jitter reduction filter, which straightens stroke by ignoring
+ * micro movements detected by the input device, mainly pens.
+ */
 export class JitterFilter extends InputFilter {
     // Second-order infinite impulse response filter function.
     // output[n] = (1 - a - b) * input[n] + a * output[n-1] + b * output[n-2]

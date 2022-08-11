@@ -5,6 +5,9 @@
 
 import { InputProvider } from "./InputProvider";
 
+/**
+ * InputProvide implementation that hooks into a DOM element's pointer events.
+ */
 export class PointerInputProvider extends InputProvider {
     private onPointerDown = (e: PointerEvent): void => {
         this.emit(InputProvider.PointerDown, e);

@@ -17,28 +17,98 @@ interface IStrokeData {
     points: IPointerPoint[];
 }
 
+/**
+ * Stroke types.
+ */
 export enum StrokeType {
+    /**
+     * Laser pointer stroke, with a vanishing tail.
+     */
     LaserPointer,
+    /**
+     * Ephemeral stroke, which vanishes all at once after
+     * a set amount of time.
+     */
     Ephemeral,
+    /**
+     * Persistent stroke, that remains on the canvas until
+     * erased.
+     */
     Persistent
 }
 
+/**
+ * Defines a stroke, i.e. a collection of points that can
+ * be rendered on a canvas.
+ */
 export interface IStroke {
+    /**
+     * Adds points to the stroke.
+     * @param points The points to add.
+     */
     addPoints(...points: IPointerPoint[]): boolean;
+    /**
+     * Determines if the stroke intersects with the specified
+     * rectangle.
+     * @param rectangle The rectangle to test against.
+     */
     intersectsWithRectangle(rectangle: IRect): boolean;
+    /**
+     * Computes the intersection points between the stroke
+     * and the specified segment.
+     * @param segment The segment to test against.
+     */
     getIntersectionPoints(segment: ISegment): IPoint[];
+    /**
+     * Gets the point at the given index.
+     * @param index The point index.
+     */
     getPointAt(index: number): IPointerPoint;
+    /**
+     * Computes the stroke's bounding rectangle.
+     */
     getBoundingRect(): IRect;
+    /**
+     * Splits this stroke into several other ones by "erasing"
+     * the portions that are within the eraser rectangle.
+     * @param eraserRect The eraser rectangle.
+     */
     pointErase(eraserRect: IRect): IStroke[] | undefined;
+    /**
+     * Serializes the stroke to a string.
+     */
     serialize(): string;
+    /**
+     * Deserializes the specified stroke string and sets this
+     * stroke's brush, points and other proprties accordingly.
+     * @param serializedStroke The serialized stroke.
+     */
     deserialize(serializedStroke: string): void;
+    /**
+     * The id of the stroke.
+     */
     readonly id: string;
+    /**
+     * Optional. The id of the client the stroke was created on.
+     */
     readonly clientId?: string;
+    /**
+     * The timestamp when the stroke was created.
+     */
     readonly timeStamp: number;
+    /**
+     * The brush used to draw the stroke.
+     */
     readonly brush: IBrush;
+    /**
+     * The number of points in the stroke.
+     */
     readonly length: number;
 }
 
+/**
+ * Defines a set of options when creating new strokes.
+ */
 export interface IStrokeCreationOptions {
     id?: string;
     clientId?: string;
@@ -47,6 +117,9 @@ export interface IStrokeCreationOptions {
     points?: IPointerPoint[];
 }
 
+/**
+ * Represents a concrete stroke object.
+ */
 export class Stroke implements IStroke, Iterable<IPointerPoint> {
     private _brush: IBrush = {...DefaultPenBrush};
     private _points: IPointerPoint[];
@@ -76,6 +149,10 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         return false;
     }
 
+    /**
+     * Creates a new Stroke instance.
+     * @param options Optional creation options such as id, points, etc.
+     */
     constructor(options?: IStrokeCreationOptions) {
         const effectiveOptions: IStrokeCreationOptions = {
             id: options ? options.id : undefined,
@@ -89,10 +166,15 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         this._clientId = effectiveOptions.clientId;
         this._timeStamp = effectiveOptions.timeStamp ?? Date.now();
         this._points = effectiveOptions.points ?? [];
-
-        this.brush = {...(effectiveOptions.brush ?? DefaultPenBrush)};
+        this._brush = {...(effectiveOptions.brush ?? DefaultPenBrush)};
     }
 
+    /**
+     * Adds the specified points to the stroke. Points are added if they are
+     * sufficiently far from each other.
+     * @param points The points to add.
+     * @returns `true` if at least one point was added, `false` otherwise.
+     */
     addPoints(...points: IPointerPoint[]): boolean {
         let pointsAdded = false;
 
@@ -105,12 +187,19 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         return pointsAdded;
     }
 
+    /**
+     * Determines if the stroke intersects with the specified rectangle.
+     * @param rectangle The rectangle to test against.
+     * @returns `true` if the stroke intersects with `rectangle`, `false` otherwise.
+     */
     intersectsWithRectangle(rectangle: IRect): boolean {
         let previousPoint: IPointerPoint | undefined = undefined;
 
         for (const p of this) {
             if (previousPoint) {
-                const intersections = getSegmentIntersectionsWithRectangle({ from: previousPoint, to: p }, rectangle);
+                const intersections = getSegmentIntersectionsWithRectangle(
+                    { from: previousPoint, to: p },
+                    rectangle);
 
                 if (intersections.length > 0) {
                     return true;
@@ -123,6 +212,11 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         return false;
     }
 
+    /**
+     * Computes the intersection points between the stroke and the specified segment.
+     * @param segment The segment to test against.
+     * @returns An array of intersection points.
+     */
     getIntersectionPoints(segment: ISegment): IPoint[] {
         const result: IPoint[] = [];
         let previousPoint: IPointerPoint | undefined = undefined;
@@ -142,6 +236,11 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         return result;
     }
 
+    /**
+     * Computes the stroke's bounding rectangle. Once computed, the bounding rectangle
+     * is cached until new points are added to the stroke.
+     * @returns The stroke's bounding rectangle.
+     */
     getBoundingRect(): IRect {
         if (this._boundingRect === undefined) {
             const result = {
@@ -161,10 +260,22 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         return this._boundingRect;
     }
 
+    /**
+     * Gets the point at the given index.
+     * @param index The point index.
+     * @returns The requested point.
+     */
     getPointAt(index: number): IPointerPoint {
         return this._points[index];
     }
 
+    /**
+     * Splits this stroke into several other ones by "erasing" the portions that
+     * are within the eraser rectangle.
+     * @param eraserRect The eraser rectangle.
+     * @returns A array of new strokes (which might be empty if the whole stroke
+     * was erased), or `undefined` if the stroke was unchanged.
+     */
     pointErase(eraserRect: IRect): IStroke[] | undefined {
         const boundingRect = this.getBoundingRect();
 
@@ -259,6 +370,10 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         return generatedStrokes;
     }
 
+    /**
+     * Serializes the stroke to a string.
+     * @returns The serialized stroke.
+     */
     serialize(): string {
         const data: IStrokeData = {
             id: this.id,
@@ -271,6 +386,11 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         return JSON.stringify(data);
     }
 
+    /**
+     * Deserializes the specified stroke string and sets thisstroke's brush,
+     * points and other proprties accordingly.
+     * @param serializedStroke The serialized stroke.
+     */
     deserialize(serializedStroke: string) {
         const data: IStrokeData = JSON.parse(serializedStroke) as IStrokeData;
 
@@ -294,27 +414,38 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         }
     }
 
+    /**
+     * Gets the id of the stroke.
+     */
     get id(): string {
         return this._id;
     }
 
+    /**
+     * Gets the id of the client the stroke was created on.
+     */
     get clientId(): string | undefined {
         return this._clientId;
     }
 
+    /**
+     * Gets the time when the stroke was created.
+     */
     get timeStamp(): number {
         return this._timeStamp;
     }
 
+    /**
+     * Gets the stroke's number of points.
+     */
     get length(): number {
         return this._points.length;
     }
 
+    /**
+     * Gets the stroke's brush.
+     */
     get brush(): IBrush {
         return this._brush;
-    }
-
-    set brush(value: IBrush) {
-        this._brush = { ...value };
     }
 }

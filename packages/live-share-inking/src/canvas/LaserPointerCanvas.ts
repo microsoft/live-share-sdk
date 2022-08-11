@@ -4,11 +4,13 @@
  */
 
 import { InkingCanvas } from "./InkingCanvas";
-import { getPressureAdjustedTipSize, computeQuadBetweenTwoCircles, IPointerPoint, IQuad } from "../core/Geometry";
-import { DefaultLaserPointerBrush, IBrush } from "./Brush";
-import { brightenColor, colorToCssColor } from "../core/Utils";
+import { getPressureAdjustedSize, computeQuadBetweenTwoCircles, IPointerPoint, IQuad, IQuadPathItem } from "../core/Geometry";
+import { toCssColor, DefaultLaserPointerBrush, IBrush, IColor } from "./Brush";
 
-export class LaserPointerCanvas extends InkingCanvas {
+/**
+ * Represents a canvas that implements the laser pointer behavior.
+ */
+ export class LaserPointerCanvas extends InkingCanvas {
     private static readonly TrailingPointsRemovalInterval = 20;
 
     private _points: IPointerPoint[] = [];
@@ -33,42 +35,57 @@ export class LaserPointerCanvas extends InkingCanvas {
         }
     }
 
-    private internalRenderWithBrush(brush: IBrush) {
-        this.context.fillStyle = colorToCssColor(brush.color);
+    private computeQuadPath(tipSize: number): IQuadPathItem[] {
+        const result: IQuadPathItem[] = [];
 
         let previousPoint: IPointerPoint | undefined = undefined;
-        let radius = brush.tipSize / 2;
+        let radius = tipSize / 2;
 
         const radiusStep = (radius - (radius / 3)) / this._points.length;
 
         for (let i = this._points.length - 1; i >= 0; i--) {
             const p = this._points[i];
 
-            if (i === this._points.length - 1) {
-                this.context.beginPath();
-            }
+            const pathItem: IQuadPathItem = {
+                endPoint: p,
+                tipSize: radius
+            };
 
             if (previousPoint !== undefined) {
-                const quad = computeQuadBetweenTwoCircles(
+                pathItem.quad = computeQuadBetweenTwoCircles(
                     p,
-                    getPressureAdjustedTipSize(radius, p.pressure),
+                    getPressureAdjustedSize(radius, p.pressure),
                     previousPoint,
-                    getPressureAdjustedTipSize(radius - radiusStep, previousPoint.pressure));
-
-                if (quad) {
-                    this.renderQuad(quad);
-                }
+                    getPressureAdjustedSize(radius - radiusStep, previousPoint.pressure));
             }
 
-            this.renderCircle(p, getPressureAdjustedTipSize(radius, p.pressure));
+            result.push(pathItem);
 
             radius -= radiusStep;
 
             previousPoint = p;
         }
 
-        this.context.closePath();
-        this.context.fill();
+        return result;
+    }
+
+    private renderQuadPath(path: IQuadPathItem[], color: IColor) {
+        this.context.fillStyle = toCssColor(color);
+
+        let previousPoint: IPointerPoint | undefined = undefined;
+
+        this.beginPath();
+
+        for (let item of path) {
+            if (item.quad !== undefined) {
+                this.renderQuad(item.quad);
+            }
+
+            this.renderCircle(item.endPoint, item.tipSize);
+        }
+
+        this.closePath();
+        this.fill();
     }
 
     protected getDefaultBrush(): IBrush {
@@ -78,15 +95,17 @@ export class LaserPointerCanvas extends InkingCanvas {
     protected internalRender() {
         this.clear();
 
-        this.internalRenderWithBrush(this.brush);
+        const path = this.computeQuadPath(this.brush.tipSize);
 
-        const innerBrush: IBrush = {
-            ...this.brush,
-            color: brightenColor(this.brush.color, 50),
-            tipSize: this.brush.tipSize - this.brush.tipSize / 2
-        };
+        this.renderQuadPath(path, this.brush.color);
 
-        this.internalRenderWithBrush(innerBrush);
+        if (this.brush.fillColor) {
+            const reducedTipSize = this.brush.tipSize - this.brush.tipSize / 2;
+
+            const path = this.computeQuadPath(reducedTipSize);
+
+            this.renderQuadPath(path, this.brush.fillColor);
+        }
     }
 
     protected internalBeginStroke(p: IPointerPoint) {

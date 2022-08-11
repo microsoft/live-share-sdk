@@ -5,6 +5,9 @@
 
 import { EventEmitter } from "events";
 
+/**
+ * Abstracts pointer event emission.
+ */
 export abstract class InputProvider extends EventEmitter {
     public static readonly PointerDown: symbol = Symbol();
     public static readonly PointerMove: symbol = Symbol();

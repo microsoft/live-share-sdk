@@ -273,7 +273,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
      * Splits this stroke into several other ones by "erasing" the portions that
      * are within the eraser rectangle.
      * @param eraserRect The eraser rectangle.
-     * @returns A array of new strokes (which might be empty if the whole stroke
+     * @returns An array of new strokes (which might be empty if the whole stroke
      * was erased), or `undefined` if the stroke was unchanged.
      */
     pointErase(eraserRect: IRect): IStroke[] | undefined {

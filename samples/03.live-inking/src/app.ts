@@ -77,10 +77,10 @@ window.onload = async () => {
     setupButton("btnEraser", () => { inkingManager.tool = InkingTool.Eraser });
     setupButton("btnPointEraser", () => { inkingManager.tool = InkingTool.PointEraser });
 
-    setupButton("btnYellow", () => { inkingManager.strokeBrush.color = { r: 255, g: 252, b: 0, a: 1 } });
-    setupButton("btnGreen", () => { inkingManager.strokeBrush.color = { r: 0, g: 255, b: 0, a: 1 } });
-    setupButton("btnRed", () => { inkingManager.strokeBrush.color = { r: 255, g: 0, b: 0, a: 1 } });
-    setupButton("btnBlue", () => { inkingManager.strokeBrush.color = { r: 0, g: 105, b: 175, a: 1 } });
+    setupButton("btnYellow", () => { inkingManager.penBrush.color = { r: 255, g: 252, b: 0, a: 1 } });
+    setupButton("btnGreen", () => { inkingManager.penBrush.color = { r: 0, g: 255, b: 0, a: 1 } });
+    setupButton("btnRed", () => { inkingManager.penBrush.color = { r: 255, g: 0, b: 0, a: 1 } });
+    setupButton("btnBlue", () => { inkingManager.penBrush.color = { r: 0, g: 105, b: 175, a: 1 } });
 
     setupButton("btnClear", () => { inkingManager.clear() });
 

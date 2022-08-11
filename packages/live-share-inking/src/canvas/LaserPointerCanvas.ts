@@ -72,8 +72,6 @@ import { toCssColor, DefaultLaserPointerBrush, IBrush, IColor } from "./Brush";
     private renderQuadPath(path: IQuadPathItem[], color: IColor) {
         this.context.fillStyle = toCssColor(color);
 
-        let previousPoint: IPointerPoint | undefined = undefined;
-
         this.beginPath();
 
         for (let item of path) {
@@ -99,12 +97,10 @@ import { toCssColor, DefaultLaserPointerBrush, IBrush, IColor } from "./Brush";
 
         this.renderQuadPath(path, this.brush.color);
 
-        if (this.brush.fillColor) {
-            const reducedTipSize = this.brush.tipSize - this.brush.tipSize / 2;
+        if (this.brush.innerColor && this.brush.innerTipSize) {
+            const path = this.computeQuadPath(this.brush.innerTipSize);
 
-            const path = this.computeQuadPath(reducedTipSize);
-
-            this.renderQuadPath(path, this.brush.fillColor);
+            this.renderQuadPath(path, this.brush.innerColor);
         }
     }
 

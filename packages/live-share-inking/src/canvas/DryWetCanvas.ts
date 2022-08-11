@@ -121,12 +121,10 @@ export abstract class DryWetCanvas extends InkingCanvas {
 
         this.renderQuadPath(path, this.brush.color);
 
-        if (this.brush.fillColor) {
-            const reducedTipSize = this.brush.tipSize - this.brush.tipSize / 2;
+        if (this.brush.innerColor && this.brush.innerTipSize) {
+            const path = this.computeQuadPath(this.brush.innerTipSize);
 
-            const path = this.computeQuadPath(reducedTipSize);
-
-            this.renderQuadPath(path, this.brush.fillColor);
+            this.renderQuadPath(path, this.brush.innerColor);
         }
 
         if (this.rendersProgressively()) {
@@ -174,7 +172,7 @@ export class DryCanvas extends DryWetCanvas {
  */
 export class WetCanvas extends DryWetCanvas {
     protected rendersProgressively(): boolean {
-        return this.brush.fillColor === undefined;
+        return this.brush.innerColor === undefined;
     }
 
     setBrush(value: IBrush) {

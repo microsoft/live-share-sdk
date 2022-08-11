@@ -123,11 +123,11 @@ export interface IBrush {
      */
     color: IColor;
     /**
-     * Optional. The fill color of the brush. When a fill color
-     * is specified, strokes drawn using the brush use `color` as the
-     * outline color and `fillColor` as the fill color.
+     * Optional. When `innerColor` is specified, the brush is
+     * drawn with an outline using `color` and `tipSize` and is
+     * filled using `innerColor` and `innerTipSize`.
      */
-    fillColor?: IColor;
+    innerColor?: IColor;
     /**
      * The shape of the brush's tip.
      */
@@ -136,6 +136,12 @@ export interface IBrush {
      * The size of the brush's tip. Must be greater than 0.
      */
     tipSize: number;
+    /**
+     * The size of the inner brush's tip. Must be greater than 0.
+     * If `innerColor` is specified, `innerTipSize` must be specified
+     * as well.
+     */
+    innerTipSize?: number;
     /**
      * The brush's blen mode.
      */
@@ -166,9 +172,10 @@ export const DefaultHighlighterBrush: IBrush = {
  * The default laser pointer brush.
  */
 export const DefaultLaserPointerBrush: IBrush = {
-    color: basicColors.red,
-    fillColor: brightenColor(basicColors.red, 50),
+    color: fromCssColor("##ff000055"),
+    innerColor: basicColors.red,
     tip: "ellipse",
     tipSize: 10,
+    innerTipSize: 10 / 3,
     blendMode: "normal"
 };

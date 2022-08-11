@@ -77,7 +77,7 @@ const MeetingStage = () => {
             }
           }
         );
-        await mediaSession.start();
+        await mediaSession.initialize();
       } catch (err) {
         setError(error);
       }

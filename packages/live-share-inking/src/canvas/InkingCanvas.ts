@@ -23,6 +23,11 @@ export abstract class InkingCanvas {
      */
     public static fadeOutLength = 300;
 
+    /**
+     * Configures the delay, in milliseconds, after which a render request take effect.
+     */
+    public static asyncRenderDelay = 15;
+
     private _context: CanvasRenderingContext2D;
     private _strokeStarted: boolean = false;
     private _brush!: IBrush;
@@ -30,13 +35,20 @@ export abstract class InkingCanvas {
     private _scale: number = 1;
     private _clientWidth?: number;
     private _clientHeight?: number;
+    private _renderTimeout?: number;
 
-    private _internalRenderCallback = () => {
-        this.internalRender();
-
-        if (this._strokeStarted) {
-            window.requestAnimationFrame(this._internalRenderCallback);
+    private scheduleRender() {
+        if (this._renderTimeout) {
+            window.clearTimeout(this._renderTimeout);
         }
+
+        const doRender = () => {
+            this.internalRender();
+
+            this._renderTimeout = this._strokeStarted ? window.setTimeout(doRender, InkingCanvas.asyncRenderDelay) : undefined;
+        }
+
+        this._renderTimeout = window.setTimeout(doRender, InkingCanvas.asyncRenderDelay);
     }
 
     private getClientWidth(): number {
@@ -223,7 +235,7 @@ export abstract class InkingCanvas {
         this.internalBeginStroke(p);
 
         if (this.rendersAsynchronously()) {
-            window.requestAnimationFrame(this._internalRenderCallback);
+            this.scheduleRender();
         }
         else {
             this.internalRender();

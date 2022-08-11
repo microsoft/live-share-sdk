@@ -207,9 +207,11 @@ export class SharedInkingSession extends DataObject {
                     if (stroke) {
                         stroke.addPoints(...evt.points);
 
-                        if (evt.hasEnded) {
-                            stroke.end();
-                        }
+                        // Even as evt.hasEnded is true, leave the wet stroke on the screen
+                        // until the new stroke has been synchronized and we receive a
+                        // valueChanged event. Removing it now would potentially lead to the
+                        // stroke fully disappearing for a brief period of time before begin
+                        // re-rendered in full fidelity.
                     }
                 }        
             });
@@ -241,6 +243,12 @@ export class SharedInkingSession extends DataObject {
                             if (strokeJson !== undefined) {
                                 const stroke = inkingManager.getStroke(changed.key) ?? new Stroke();
                                 stroke.deserialize(strokeJson);
+
+                                // If we received a stroke that happens to be an ongoing wet stroke,
+                                // cancel the wet stroke so it's removed from the screen and replaced
+                                // woth the full fidelity version we just received.
+                                const wetStroke = this._wetStrokes.get(stroke.id);
+                                wetStroke?.cancel();
 
                                 inkingManager.addStroke(stroke, addRemoveOptions);
                             }

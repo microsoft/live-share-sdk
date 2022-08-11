@@ -452,7 +452,7 @@ export class InkingManager extends EventEmitter {
                     if (this._currentStroke) {
                         this._currentStroke.end(filteredPoint);
 
-                        this.notifyEndStroke(this._currentStroke.id, filteredPoint, false);
+                        this.notifyEndStroke(this._currentStroke.id, filteredPoint, true);
                     }
 
                     this._currentStroke = this.beginWetStroke(

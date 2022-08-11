@@ -49,7 +49,7 @@ export const usePokerState = (pokerState) => {
       });
       const allowedRoles = ["Organizer"];
       pokerState
-        .start(allowedRoles)
+        .initialize(allowedRoles)
         .then(() => {
           setStarted(true);
         })

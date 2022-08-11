@@ -17,7 +17,7 @@ import { useState, useEffect, useCallback } from "react";
  * @param {EphemeralEvent} inkEvent presence object from Fluid container.
  * @param {string[]} acceptPlaybackChangesFrom roles of eligible presenters.
  * @returns `{inkStarted, strokesToDisplay, sendStrokes}` where:
- * - `inkStarted` is a boolean indicating whether `inkEvent.start()` has been called.
+ * - `inkStarted` is a boolean indicating whether `inkEvent.initialize()` has been called.
  * - `strokesToDisplay` are the most recent strokes sent.
  * - `sendStrokes` is a callback method for sending an array of strokes to other users in session.
  */
@@ -39,7 +39,7 @@ export const useInk = (inkEvent, acceptPlaybackChangesFrom) => {
 
   useEffect(() => {
     if (inkEvent && !inkEvent.isStarted) {
-      console.log("useInk: starting ink");
+      console.log("useInk: initializing ink");
       inkEvent.on("received", (event, local) => {
         // Display notification differently for local vs. remote users
         if (!local) {
@@ -48,9 +48,9 @@ export const useInk = (inkEvent, acceptPlaybackChangesFrom) => {
         }
       });
       inkEvent
-        .start(acceptPlaybackChangesFrom)
+        .initialize(acceptPlaybackChangesFrom)
         .then(() => {
-          console.log("useInk: ink started");
+          console.log("useInk: ink initialize");
           setStarted(true);
         })
         .catch((error) => console.error(error));

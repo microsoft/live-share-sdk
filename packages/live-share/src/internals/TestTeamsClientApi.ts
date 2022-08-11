@@ -48,6 +48,8 @@ export interface FluidTenantInfo {
  */
 export interface TeamsClientApi {
     interactive: TeamsClientApiInteractive;
+    // Teams app namespace
+    app?: any;
 }
 
 /**

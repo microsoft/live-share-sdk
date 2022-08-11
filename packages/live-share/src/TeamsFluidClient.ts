@@ -109,6 +109,7 @@ export class TeamsFluidClient {
         try {
             const teamsClient = await this.getTeamsClient();
             
+            // TODO: remove once Live Share is supported in all rings
             // If not testing locally, get app context and ensure we are in a supported Teams ring
             if (!this.isTesting && teamsClient.app) {
                 const context = await teamsClient.app.getContext();

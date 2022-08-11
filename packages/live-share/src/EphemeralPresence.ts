@@ -148,9 +148,16 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
                 this.updateMembersList(evt, local);
             }
         });
-
+        
         // Create object synchronizer
-        this._synchronizer = new EphemeralObjectSynchronizer<IEphemeralPresenceEvent<TData>>(this.id, this.context.containerRuntime, (connecting) => {
+        this._synchronizer = new EphemeralObjectSynchronizer<IEphemeralPresenceEvent<TData>>(this.id, this.runtime, this.context.containerRuntime, (connecting) => {
+                // Update timestamp for current presence
+                // - If we don't do this the user will timeout and show as "offline" for all other
+                //   clients. That's because the EphemeralEvent.isNewer() check will fail.  Updating
+                //   the timestamp of the outgoing update is the best way to show proof that the client
+                //   is still alive.
+                this._currentPresence.timestamp = EphemeralEvent.getTimestamp();
+
                 // Return current presence
                 return this._currentPresence;
             }, (connecting, state, sender) => {

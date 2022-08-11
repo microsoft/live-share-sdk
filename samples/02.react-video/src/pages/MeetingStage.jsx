@@ -77,7 +77,7 @@ const MeetingStage = () => {
             }
           }
         );
-        await mediaSession.start();
+        await mediaSession.initialize();
       } catch (err) {
         setError(error);
       }
@@ -100,7 +100,7 @@ const MeetingStage = () => {
   };
 
   if (error) {
-    return <DisplayError error={error} />
+    return <DisplayError error={error} />;
   }
 
   // Render the media player

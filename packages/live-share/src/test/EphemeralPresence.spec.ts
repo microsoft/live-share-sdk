@@ -56,7 +56,7 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
         });
 
         assert(!object1.isStarted, `presence already started`);
-        await object1.start('user1');
+        await object1.initialize('user1');
         assert(object1.isStarted, `presence not started`);
 
         const object2done = new Deferred();
@@ -73,7 +73,7 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.start('user2');
+        await object2.stainitializert('user2');
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -92,7 +92,7 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.start('user1', undefined, PresenceState.away);
+        await object1.initialize('user1', undefined, PresenceState.away);
 
         const object2done = new Deferred();
         object2.on("presenceChanged", (user, local) => {
@@ -106,7 +106,7 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.start('user2', undefined, PresenceState.offline);
+        await object2.initialize('user2', undefined, PresenceState.offline);
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -125,7 +125,7 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.start('user1', { foo: 'bar' }, PresenceState.away);
+        await object1.initialize('user1', { foo: 'bar' }, PresenceState.away);
         assert(object1.userId == 'user1');
         assert(object1.state == PresenceState.away);
         assert(object1.data?.foo == 'bar');
@@ -142,7 +142,7 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.start('user2', { foo: 'bar'}, PresenceState.offline);
+        await object2.initialize('user2', { foo: 'bar'}, PresenceState.offline);
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -169,7 +169,7 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.start('user1');
+        await object1.initialize('user1');
 
         const object2Ready = new Deferred();
         object2.on("presenceChanged", (user, local) => {
@@ -177,7 +177,7 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 object2Ready.resolve();
             }
         });
-        await object2.start('user2');
+        await object2.initialize('user2');
 
         // Wait for everything to start
         await object2Ready.promise;
@@ -196,8 +196,8 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 ready.resolve()
             }
         });
-        await object1.start('user1');
-        await object2.start('user2', undefined, PresenceState.away);
+        await object1.initialize('user1');
+        await object2.initialize('user2', undefined, PresenceState.away);
 
         // Wait for ready and perform test
         let user1Found = false;
@@ -224,8 +224,8 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 ready.resolve()
             }
         });
-        await object1.start('user1');
-        await object2.start('user2', undefined, PresenceState.away);
+        await object1.initialize('user1');
+        await object2.initialize('user2', undefined, PresenceState.away);
 
         // Wait for ready and perform test
         let user1Found = false;
@@ -252,8 +252,8 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 ready.resolve()
             }
         });
-        await object1.start('user1');
-        await object2.start('user2', undefined, PresenceState.away);
+        await object1.initialize('user1');
+        await object2.initialize('user2', undefined, PresenceState.away);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -270,8 +270,8 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 ready.resolve()
             }
         });
-        await object1.start('user1');
-        await object2.start('user2', undefined, PresenceState.away);
+        await object1.initialize('user1');
+        await object2.initialize('user2', undefined, PresenceState.away);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -287,8 +287,8 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 ready.resolve()
             }
         });
-        await object1.start('user1');
-        await object2.start('user2', undefined, PresenceState.away);
+        await object1.initialize('user1');
+        await object2.initialize('user2', undefined, PresenceState.away);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -304,8 +304,8 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 ready.resolve()
             }
         });
-        await object1.start('user1');
-        await object2.start('user2', undefined, PresenceState.away);
+        await object1.initialize('user1');
+        await object2.initialize('user2', undefined, PresenceState.away);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -326,10 +326,10 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
             }
         });
         object1.expirationPeriod = 0.2;
-        await object1.start('user1');
+        await object1.initialize('user1');
 
         object2.expirationPeriod = 0.2;
-        await object2.start('user2');
+        await object2.initialize('user2');
 
         // Wait for ready and then delay
         await ready.promise;

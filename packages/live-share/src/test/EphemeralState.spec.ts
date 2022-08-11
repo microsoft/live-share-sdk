@@ -55,7 +55,7 @@ describeNoCompat("EphemeralState", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.start();
+        await object1.initialize();
 
         const object2done = new Deferred();
         object2.on("stateChanged", (state, data, local) => {
@@ -70,7 +70,7 @@ describeNoCompat("EphemeralState", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.start();
+        await object2.initialize();
 
         object1.changeState('newState', { value: 'newValue' });
 
@@ -91,7 +91,7 @@ describeNoCompat("EphemeralState", (getTestObjectProvider) => {
                 done.reject(err);
             }
         });
-        await object1.start();
+        await object1.initialize();
 
         object2.on("stateChanged", (state, data, local) => {
             try {
@@ -104,7 +104,7 @@ describeNoCompat("EphemeralState", (getTestObjectProvider) => {
                 done.reject(err);
             }
         });
-        await object2.start();
+        await object2.initialize();
 
         object1.changeState('testState', { value: 'firstValue' });
 

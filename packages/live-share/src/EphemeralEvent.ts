@@ -73,13 +73,13 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      */
     public get isStarted(): boolean {
         return !!this._eventTarget;
-    } 
+    }
 
     /**
-     * Starts the object.
+     * initialize the object.
      * @param allowedRoles Optional. List of roles allowed to send events.
      */
-     public start(allowedRoles?: UserMeetingRole[]): Promise<void> {
+     public initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
         if (this._eventTarget) {
             throw new Error(`EphemeralEvent already started.`);
         }
@@ -91,6 +91,15 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
 
         return Promise.resolve();
     }
+
+    /**
+     * @deprecated initialize should be used instead
+     * Starts the object.
+     * @param allowedRoles Optional. List of roles allowed to send events.
+     */
+     public start(allowedRoles?: UserMeetingRole[]): Promise<void> {
+        return this.initialize(allowedRoles)
+     }
 
     /**
      * Broadcasts an event to all other clients.

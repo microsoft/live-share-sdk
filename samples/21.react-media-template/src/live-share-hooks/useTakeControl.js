@@ -11,7 +11,7 @@ import { SharedMap } from "fluid-framework";
  * @param {string[]} acceptPlaybackChangesFrom accepted roles for playback control
  * @param {(text: string) => void} sendNotification Send notification callback from `useNotification` hook.
  * @returns `{takeControlStarted, presentingUser, localUserIsPresenting, takeControl}` where:
- * - `takeControlStarted` is a boolean indicating whether mediaSession.start() has been called.
+ * - `takeControlStarted` is a boolean indicating whether mediaSession.initialize() has been called.
  * - `presentingUser` is a callback method to play through the synchronizer.
  * - `localUserIsPresenting` is a callback method to pause through the synchronizer.
  * - `takeControl` is a callback method to seek a video to a given timestamp (in seconds).

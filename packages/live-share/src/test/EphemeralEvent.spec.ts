@@ -53,7 +53,7 @@ describeNoCompat("EphemeralEvent", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.start();
+        await object1.initialize();
 
         const object2done = new Deferred();
         object2.on("received", (evt, local) => {
@@ -68,7 +68,7 @@ describeNoCompat("EphemeralEvent", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.start();
+        await object2.initialize();
 
         object1.sendEvent();
 
@@ -77,13 +77,13 @@ describeNoCompat("EphemeralEvent", (getTestObjectProvider) => {
     });
 
     it("Should throw error if already started", async () => {
-        await object1.start();
+        await object1.initialize();
         try {
             // Ensure started
             assert(object1.isStarted, `not started`);
 
-            // Try second call to start.
-            await object1.start();
+            // Try second call to initialize.
+            await object1.initialize();
             assert(false, `exception not thrown`);
         } catch (err) { }
     });

@@ -18,7 +18,7 @@ export const CostingGame = ({
   users,
   readyUsersCount,
   userStory,
-  timerState,
+  timerMilliRemaining,
   answer,
   setAnswer,
   changeReadyStatus,
@@ -36,7 +36,9 @@ export const CostingGame = ({
         flexColumnStyles.smallGap
       )}
     >
-      <GameHeader timer={<GameTimer timerState={timerState} />} />
+      <GameHeader
+        timer={<GameTimer timerMilliRemaining={timerMilliRemaining} />}
+      />
       <div
         className={mergeClasses(
           flexColumnStyles.root,

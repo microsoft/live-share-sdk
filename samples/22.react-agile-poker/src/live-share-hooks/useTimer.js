@@ -6,12 +6,12 @@
 import { useEffect, useState, useCallback } from "react";
 
 export const useTimer = (timer, onTimerEnd) => {
-  const [timerState, setTimerState] = useState();
+  const [timerMilliRemaining, setTimerMilliRemaining] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
 
   const beginTimer = useCallback(() => {
-    console.log("beginning timer");
-    timer.begin(60000);
+    console.log("starting timer");
+    timer.start(60000);
   }, [timer]);
 
   const pauseTimer = useCallback(() => {
@@ -21,24 +21,25 @@ export const useTimer = (timer, onTimerEnd) => {
 
   useEffect(() => {
     if (timer && !timer.isStarted) {
-      timer.on("valueChanged", (event, local) => {
-        if (event.duration === event.position) {
-          onTimerEnd();
-        }
-        setTimerState(event);
+      timer.on("finished", (config) => {
+        console.log("finished");
+        onTimerEnd();
       });
+
+      timer.on("onTick", (milliRemaining) => {
+        console.log("tick");
+        setTimerMilliRemaining(milliRemaining);
+      });
+
       const allowedRoles = ["Organizer"];
-      timer
-        .start(allowedRoles)
-        .then(() => {
-          setTimerStarted(true);
-        })
-        .catch((error) => console.error(error));
+
+      timer.initialize(allowedRoles);
+      setTimerStarted(true);
     }
   }, [timer, onTimerEnd, setTimerStarted]);
 
   return {
-    timerState,
+    timerMilliRemaining,
     timerStarted,
     beginTimer,
     pauseTimer,

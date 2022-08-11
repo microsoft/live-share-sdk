@@ -3,239 +3,351 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    DataObject,
-    DataObjectFactory,
-    DataObjectTypes,
-} from "@fluidframework/aqueduct";
-import { IEventThisPlaceHolder } from "@fluidframework/common-definitions";
-import { IEphemeralEvent, UserMeetingRole } from "./interfaces";
-import { EphemeralEventScope } from './EphemeralEventScope';
-import { EphemeralEventTarget } from './EphemeralEventTarget';
-import { TimeInterval } from './TimeInterval';
+import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { EphemeralEventScope } from "./EphemeralEventScope";
+import { EphemeralEventTarget } from "./EphemeralEventTarget";
+import { EphemeralObjectSynchronizer } from "./EphemeralObjectSynchronizer";
+import { IClientTimestamp, IEphemeralEvent, UserMeetingRole } from "./interfaces";
+import { IEvent } from "@fluidframework/common-definitions";
+import { cloneValue } from "./internals/utils";
 import { EphemeralEvent } from "./EphemeralEvent";
 
-/**
- * @hidden
- */
-export interface ITimerState {
-    timeStarted: number;
-    position: number;
-    duration: number;
-    running: boolean;
+/** for all time values millis from epoch is used */
+export interface ITimerConfig {
+  configChangedAt: number;
+  clientId: string;
+  duration: number;
+  // position when config change occured
+  position: number;
+  // running or not when config change occured
+  running: boolean;
 }
 
 /**
- * @hidden
+ * Events supported by `EphemeralTimer` object.
  */
- export interface IBeginTimerEvent extends IEphemeralEvent {
-    duration: number;
+ export enum EphemeralTimerEvents {
+  /**
+   * Timer has started
+   */
+  started = 'started',
+  
+  /**
+   * Paused timer has resumed
+   */
+  played = 'played',
+
+  /**
+   * Playing timer has paused
+   */
+  paused = 'paused',
+
+  /**
+   * Timer has finished
+   */
+  finished = 'finished',
+
+  /**
+   * Timer has progressed
+   */
+  onTick = 'onTick'
 }
 
-/**
- * @hidden
- */
- export interface IPlayPauseEvent extends IEphemeralEvent {
-    position: number;
+export interface IEphemeralTimerEvents extends IEvent {
+  (
+    event: "started",
+    listener: (config: ITimerConfig, local: boolean) => void
+  ): any;
+
+  (
+    event: "played",
+    listener: (config: ITimerConfig, local: boolean) => void
+  ): any;
+
+  (
+    event: "paused",
+    listener: (config: ITimerConfig, local: boolean) => void
+  ): any;
+
+  (
+    event: "finished",
+    listener: (config: ITimerConfig) => void
+  ): any;
+
+  (
+    event: "onTick",
+    listener: (milliRemaining: number) => void
+  ): any;
 }
 
-/**
- * @hidden
- */
- export class EphemeralTimer extends DataObject<IEphemeralTimerEvents>  {
-    private _hasStarted = false;
-    private _state?: ITimerState;
-    private _beginEvent?: EphemeralEventTarget<IBeginTimerEvent>;
-    private _playEvent?: EphemeralEventTarget<IPlayPauseEvent>;
-    private _pauseEvent?: EphemeralEventTarget<IPlayPauseEvent>;
-    private _resetEvent?: EphemeralEventTarget<IEphemeralEvent>;
-    private _timerInterval = new TimeInterval(100);
-    private _intervalId: any;
+interface IPlayEvent extends IEphemeralEvent {
+  duration: number;
+  position: number;
+}
 
-    /**
-     * The objects fluid type/name.
-     */
-    public static readonly TypeName = `@microsoft/live-share:EphemeralTimer`;
+interface IPauseEvent extends IEphemeralEvent {
+  duration: number;
+  position: number;
+}
 
-    /**
-     * The objects fluid type factory.
-     */
-    public static readonly factory = new DataObjectFactory(
-        EphemeralTimer.TypeName,
-        EphemeralTimer,
-        [],
-        {}
+export class EphemeralTimer extends DataObject<{
+  Events: IEphemeralTimerEvents;
+}> {
+  // private _logger = new EphemeralTelemetryLogger(this.runtime);
+  private _allowedRoles: UserMeetingRole[] = [];
+  private _currentConfig: ITimerConfig = {
+    configChangedAt: 0,
+    clientId: "",
+    duration: 0,
+    position: 0,
+    running: false,
+  } as ITimerConfig;
+
+  private _scope?: EphemeralEventScope;
+  private _playEvent?: EphemeralEventTarget<IPlayEvent>;
+  private _pauseEvent?: EphemeralEventTarget<IPauseEvent>;
+  private _synchronizer?: EphemeralObjectSynchronizer<ITimerConfig>;
+
+  /**
+   * The objects fluid type/name.
+   */
+  public static readonly TypeName = `@microsoft/live-share:EphemeralTimer`;
+
+  /**
+   * The objects fluid type factory.
+   */
+  public static readonly factory = new DataObjectFactory(
+    EphemeralTimer.TypeName,
+    EphemeralTimer,
+    [],
+    {}
+  );
+
+  /**
+   * Returns true if the object has been started.
+   */
+  public get isStarted(): boolean {
+    return !!this._scope;
+  }
+
+  /**
+   * initalizes the object.
+   * @param allowedRoles Optional. List of roles allowed to make state changes.
+   */
+  // TODO: should this be an async method and wait till connected like EphemeralPresence?
+  public initialize(allowedRoles?: UserMeetingRole[]): void {
+    if (this._scope) {
+      throw new Error(`EphemeralTimer already started.`);
+    }
+
+    // Save off allowed roles
+    this._allowedRoles = allowedRoles || [];
+
+    // Create event scope
+    this._scope = new EphemeralEventScope(this.runtime, allowedRoles);
+
+    // TODO: make enum for event type names
+    this._playEvent = new EphemeralEventTarget(
+      this._scope,
+      "Play",
+      (event, local) => this._handlePlay(event, local)
+    );
+    this._pauseEvent = new EphemeralEventTarget(
+      this._scope,
+      "Pause",
+      (event, local) => this._handlePause(event, local)
     );
 
-    public get isStarted(): boolean {
-        return !!this._hasStarted;
+    // Create object synchronizer
+    this._synchronizer = new EphemeralObjectSynchronizer<ITimerConfig>(
+      this.id,
+      this.context.containerRuntime,
+      (connecting) => {
+        console.log("remote state returned");
+        // Return current state
+        return this._currentConfig;
+      },
+      (connecting, state, sender) => {
+        console.log("remote state received");
+        // Check for state change
+        this.remoteConfigReceived(state!, sender);
+      }
+    );
+  }
+
+  /**
+   * Disposes of the object when its container is disposed of.
+   */
+  public dispose(): void {
+    super.dispose();
+    if (this._synchronizer) {
+      this._synchronizer.dispose();
+    }
+  }
+
+  public start(duration: number): void {
+    if (!this._scope) {
+      throw new Error(`EphemeralTimer not started.`);
     }
 
-    public start(allowedRoles?: UserMeetingRole[]): Promise<void> {
-        if (this.isStarted) {
-            throw new Error(`Timer already started.`);
-        }
-        this._hasStarted = true;
-        const scope = new EphemeralEventScope(this.runtime, allowedRoles);
-        this._beginEvent = new EphemeralEventTarget(
-            scope,
-            "begin",
-            (event, local) => this._handleBegin(event, local)
-        );
-        this._playEvent = new EphemeralEventTarget(
-            scope,
-            "play",
-            (event, local) => this._handlePlayEvent(event, local)
-        );
-        this._pauseEvent = new EphemeralEventTarget(
-            scope,
-            "pause",
-            (event, local) => this._handlePauseEvent(event, local)
-        );
-        this._resetEvent = new EphemeralEventTarget(
-            scope,
-            "reset",
-            (event, local) => this._handleReset(local)
-        );
+    this.playInternal(duration, 0);
+  }
 
-        return Promise.resolve();
+  public play(): void {
+    if (!this._scope) {
+      throw new Error(`EphemeralTimer not started.`);
     }
 
-    /**
-     * Starts the shared timer.
-     * @param duration Duration of the timer.
-     */
-    public begin(duration: number): void {
-        this._beginEvent!.sendEvent({
-            duration,
-        });
+    if (
+      !this._currentConfig.running &&
+      this._currentConfig.position < this._currentConfig.duration
+    ) {
+      this.playInternal(
+        this._currentConfig.duration,
+        this._currentConfig.position
+      );
+    }
+  }
+
+  private playInternal(duration: number, position: number): void {
+    // Broadcast state change
+    const event: IPlayEvent = this._playEvent!.sendEvent({
+      duration: duration,
+      position: position,
+    });
+
+    // Update local state immediately
+    this.updateConfig(this.playEventToConfig(event), true);
+  }
+
+  public pause(): void {
+    if (!this._scope) {
+      throw new Error(`EphemeralTimer not started.`);
+    }
+      
+    if (this._currentConfig.running) {
+      // Broadcast state change
+      const event = this._pauseEvent!.sendEvent({
+        duration: this._currentConfig.duration,
+        position: this._currentConfig.position + (EphemeralEvent.getTimestamp() - this._currentConfig.configChangedAt)
+      });
+
+      // Update local state immediately
+      this.updateConfig(this.pauseEventToConfig(event), true);
+    }
+  }
+
+  private _handlePlay(event: IPlayEvent, local: boolean) {
+    if (!local) {
+      const newConfig = this.playEventToConfig(event);
+      this.remoteConfigReceived(newConfig, event.clientId!);
+    }
+  }
+
+  private _handlePause(event: IPauseEvent, local: boolean) {
+    if (!local) {
+      const newConfig = this.pauseEventToConfig(event);
+      this.remoteConfigReceived(newConfig, event.clientId!);
+    }
+  }
+
+  private remoteConfigReceived(config: ITimerConfig, sender: string): void {
+    EphemeralEvent.verifyRolesAllowed(sender, this._allowedRoles).then((allowed) => {
+      // Ensure that state is allowed, newer, and not the initial state.
+      const currentClientTimestamp: IClientTimestamp = {
+        timestamp: this._currentConfig.configChangedAt,
+        clientId: this._currentConfig.clientId,
+      }
+
+      const newClientTimestamp: IClientTimestamp = {
+        timestamp: config.configChangedAt,
+        clientId: config.clientId,
+      }
+
+      const isConfigNewer = EphemeralEvent.isNewer(currentClientTimestamp, newClientTimestamp)
+
+      if (allowed && isConfigNewer && config.clientId) {
+          this.updateConfig(config, false);
+      }
+    }).catch((err) => {
+      console.error(err);
+    });
+  }
+
+  private updateConfig(config: ITimerConfig, local: boolean) {
+    const clone = cloneValue(config)!;
+    this._currentConfig = clone;
+
+    // TODO: do we need to clone this one?
+    const userExposedConfig = cloneValue(clone)
+    if (config.position === 0) {
+      this.emit(EphemeralTimerEvents.started, userExposedConfig, local);
+    } else if (config.duration === config.position) {
+      this.emit(EphemeralTimerEvents.finished, userExposedConfig);
+    } else if (config.running) {
+      this.emit(EphemeralTimerEvents.played, userExposedConfig, local);
+    } else {
+      this.emit(EphemeralTimerEvents.paused, userExposedConfig, local);
     }
 
-    /**
-     * Plays the shared timer.
-     */
-    public play(): void {
-        if (!this._state) {
-            throw Error("Cannot call togglePlayPause before timer is started");
-        }
-        this._playEvent!.sendEvent({
-            position: this._state!.position,
-        });
+    if (clone.running) {
+      this.startTicking()
     }
+  }
 
-    /**
-     * Plays the shared timer.
-     */
-    public pause(): void {
-        if (!this._state) {
-            throw Error("Cannot call togglePlayPause before timer is started");
-        }
-        this._pauseEvent!.sendEvent({
-            position: this._state!.position,
-        });
+  private playEventToConfig(event: IPlayEvent): ITimerConfig {
+    const newConfig: ITimerConfig = {
+      configChangedAt: event.timestamp,
+      clientId: event.clientId!,
+      duration: event.duration,
+      position: event.position,
+      running: true,
+    };
+    return newConfig;
+  }
+
+  private pauseEventToConfig(event: IPauseEvent): ITimerConfig {
+    const newConfig: ITimerConfig = {
+      configChangedAt: event.timestamp,
+      clientId: event.clientId!,
+      duration: event.duration,
+      position: event.position,
+      running: false,
+    };
+    return newConfig;
+  }
+
+  private startTicking () {
+    function endTimeFromConfig (config: ITimerConfig): number {
+      return config.configChangedAt - config.position + config.duration
     }
-
-    /**
-     * Resets the shared timer for current duration.
-     */
-    public reset(): void {
-        if (!this._state) {
-            throw Error("Cannot call reset before timer is started");
-        }
-        this._resetEvent!.sendEvent({});
-    }
-
-    private _handleBegin(event: IBeginTimerEvent, local: boolean) {
-        this._state = {
-            timeStarted: EphemeralEvent.getTimestamp(),
-            position: 0,
-            duration: event.duration,
-            running: true,
-        };
-        this._emitState(local);
-        this._handleTimerInterval();
-    }
-
-    private _handlePlayEvent(event: IPlayPauseEvent, local: boolean) {
-        if (
-            this._state!.duration - this._timerInterval.milliseconds >=
-            this._state!.position
-        ) {
-            this._state = {
-                timeStarted: this._state!.timeStarted,
-                position: event.position,
-                duration: this._state!.duration,
-                running: true,
-            };
-            this._emitState(local);
-            this._handleTimerInterval();
+    const tickCallback = () => {
+      if (this._currentConfig.running) {
+        const timestamp = EphemeralEvent.getTimestamp();
+        const endTime = endTimeFromConfig(this._currentConfig)
+        if (timestamp >= endTime) {
+          const newConfig: ITimerConfig = {
+            configChangedAt: timestamp,
+            clientId: this._scope!.clientId!,
+            duration: this._currentConfig.duration,
+            position: this._currentConfig.duration,
+            running: false,
+          };
+          this.updateConfig(newConfig, true);
         } else {
-            this._handleReset(local);
+          this.emit(EphemeralTimerEvents.onTick, endTime - timestamp);
+          this.scheduleAnimationFrame(tickCallback)
         }
+      }
     }
+    this.scheduleAnimationFrame(tickCallback)
+  }
 
-    private _handlePauseEvent(event: IPlayPauseEvent, local: boolean) {
-        this._state = {
-            timeStarted: this._state!.timeStarted,
-            position: event.position,
-            duration: this._state!.duration,
-            running: true,
-        };
-        this._emitState(local);
-        this._cancelTimerIfRunning();
+  private scheduleAnimationFrame(callback: FrameRequestCallback): void {
+    if (typeof requestAnimationFrame == "function") {
+        requestAnimationFrame(callback);
+    } else {
+        setTimeout(callback, 20);
     }
-
-    private _handleReset(local: boolean) {
-        this._state = {
-            timeStarted: EphemeralEvent.getTimestamp(),
-            position: 0,
-            duration: this._state!.duration,
-            running: this._state!.running,
-        };
-        this._emitState(local);
-        if (this._state.running) {
-            this._handleTimerInterval();
-        }
-    }
-
-    private _emitState(local: boolean) {
-        const newState = Object.assign({}, this._state);
-        this.emit("valueChanged", newState, local);
-    }
-
-    private _handleTimerInterval() {
-        this._cancelTimerIfRunning();
-        const intervalCallback = () => {
-            const position = Math.min(
-                EphemeralEvent.getTimestamp() - this._state!.timeStarted,
-                this._state!.duration
-            );
-            this._state!.position = position;
-            if (position >= this._state!.duration) {
-                this._state!.running = false;
-                this._cancelTimerIfRunning();
-            }
-            this._emitState(true);
-        };
-        this._intervalId = setInterval(
-            intervalCallback.bind(this),
-            this._timerInterval.milliseconds
-        );
-    }
-
-    private _cancelTimerIfRunning() {
-        if (this._intervalId) {
-            clearInterval(this._intervalId);
-            this._intervalId = undefined;
-        }
-    }
-}
-
-interface IEphemeralTimerEvents extends DataObjectTypes {
-    (event: "valueChanged", listener: (
-        changed: ITimerState,
-        local: boolean,
-        target: IEventThisPlaceHolder
-    ) => void
-    ): void;
+  }
 }

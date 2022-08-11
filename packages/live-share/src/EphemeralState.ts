@@ -122,7 +122,7 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
         });
 
         // Create object synchronizer
-        this._synchronizer = new EphemeralObjectSynchronizer(this.id, this.context.containerRuntime, (connecting) => {
+        this._synchronizer = new EphemeralObjectSynchronizer(this.id, this.runtime, this.context.containerRuntime, (connecting) => {
                 // Return current state
                 return this._currentState;
             }, (connecting, state, sender) => {

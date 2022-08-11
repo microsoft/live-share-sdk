@@ -26,6 +26,7 @@ export interface IRuntimeSignaler {
     readonly clientId: string|undefined;
     readonly connected: boolean;
     readonly logger: ITelemetryLogger;
+    on(event: "connected", listener: (clientId: string) => void): this;
     on(event: "signal", listener: (message: IInboundSignalMessage, local: boolean) => void): this;
     submitSignal(type: string, content: any): void;
 }

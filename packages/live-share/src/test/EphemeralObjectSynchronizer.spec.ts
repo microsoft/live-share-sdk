@@ -6,6 +6,7 @@
 import { strict as assert } from "assert";
 import { EphemeralObjectSynchronizer } from "../EphemeralObjectSynchronizer";
 import { MockContainerRuntimeSignaler } from './MockContainerRuntimeSignaler';
+import { MockRuntimeSignaler } from './MockRuntimeSignaler';
 import { Deferred } from './Deferred';
 
 function createConnectedSignalers() {
@@ -22,8 +23,9 @@ describe("EphemeralObjectSynchronizer", () => {
 
     it("Should send connecting state", async () => {
         const done = new Deferred();
+        const localRuntime = new MockRuntimeSignaler();
         const signalers = createConnectedSignalers();
-        const localObject = new EphemeralObjectSynchronizer('test', signalers.localContainer, (connecting) => {
+        const localObject = new EphemeralObjectSynchronizer('test', localRuntime, signalers.localContainer, (connecting) => {
                 return { client: 'local' };
             }, (connecting, state, sender) => {
                 try {
@@ -38,9 +40,46 @@ describe("EphemeralObjectSynchronizer", () => {
                 }
             });
 
-        const remoteObject = new EphemeralObjectSynchronizer('test', signalers.remoteContainer, (connecting) => {
+        const remoteRuntime = new MockRuntimeSignaler();
+        const remoteObject = new EphemeralObjectSynchronizer('test', remoteRuntime, signalers.remoteContainer, (connecting) => {
                 return { client: 'remote' };
             }, (connecting, state, sender) => { });
+
+        await done.promise;
+        localObject.dispose();
+        remoteObject.dispose();
+    });
+
+    it("Should delay send connecting state until connected", async () => {
+        const done = new Deferred();
+        const localRuntime = new MockRuntimeSignaler(false, false);
+        const signalers = createConnectedSignalers();
+        const localObject = new EphemeralObjectSynchronizer('test', localRuntime, signalers.localContainer, (connecting) => {
+                assert(localRuntime.connected, `local: sending connect before connected`);
+                return { client: 'local' };
+            }, (connecting, state, sender) => {
+                try {
+                    assert(typeof state == 'object', `local: missing state received`);
+                    assert(state.client == 'remote', `local: invalid state received: ${state}`);
+                    assert(sender, `local: sender  ID not received`);
+                    if (connecting) {
+                        done.resolve();
+                    }
+                } catch (err) {
+                    done.reject(err);
+                }
+            });
+
+        const remoteRuntime = new MockRuntimeSignaler(false, false);
+        const remoteObject = new EphemeralObjectSynchronizer('test', remoteRuntime, signalers.remoteContainer, (connecting) => {
+            assert(remoteRuntime.connected, `remote: sending connect before connected`);
+            return { client: 'remote' };
+            }, (connecting, state, sender) => { });
+
+        setTimeout(() => {
+            localRuntime.connect();
+            remoteRuntime.connect();
+        }, 50);
 
         await done.promise;
         localObject.dispose();
@@ -51,7 +90,8 @@ describe("EphemeralObjectSynchronizer", () => {
         let received = 0;
         const done = new Deferred();
         const signalers = createConnectedSignalers();
-        const localObject = new EphemeralObjectSynchronizer('test', signalers.localContainer, (connecting) => {
+        const localRuntime = new MockRuntimeSignaler();
+        const localObject = new EphemeralObjectSynchronizer('test', localRuntime, signalers.localContainer, (connecting) => {
                 return { client: 'local' };
             }, (connecting, state, sender) => {
                 try {
@@ -69,7 +109,8 @@ describe("EphemeralObjectSynchronizer", () => {
                 }
             });
 
-        const remoteObject = new EphemeralObjectSynchronizer('test', signalers.remoteContainer, (connecting) => {
+        const remoteRuntime = new MockRuntimeSignaler();
+        const remoteObject = new EphemeralObjectSynchronizer('test', remoteRuntime, signalers.remoteContainer, (connecting) => {
                 return { client: 'remote' };
             }, (connecting, state, sender) => { });
 

@@ -29,6 +29,7 @@ export abstract class InkingCanvas {
     public static asyncRenderDelay = 15;
 
     private _context: CanvasRenderingContext2D;
+    private _additionalLayers: Set<CanvasRenderingContext2D> = new Set<CanvasRenderingContext2D>();
     private _strokeStarted: boolean = false;
     private _brush!: IBrush;
     private _offset: Readonly<IPoint> = { x: 0, y: 0 };
@@ -37,13 +38,19 @@ export abstract class InkingCanvas {
     private _clientHeight?: number;
     private _renderTimeout?: number;
 
+    private render() {
+        if (this._parentElement) {
+            this.internalRender();
+        }
+    }
+
     private scheduleRender() {
         if (this._renderTimeout) {
             window.clearTimeout(this._renderTimeout);
         }
 
         const doRender = () => {
-            this.internalRender();
+            this.render();
 
             this._renderTimeout = this._strokeStarted ? window.setTimeout(doRender, InkingCanvas.asyncRenderDelay) : undefined;
         }
@@ -53,7 +60,7 @@ export abstract class InkingCanvas {
 
     private getClientWidth(): number {
         if (!this._clientWidth) {
-            this._clientWidth = this.canvas.clientWidth;
+            this._clientWidth = this._parentElement ? this._parentElement.clientWidth : 100;
         }
 
         return this._clientWidth;
@@ -61,10 +68,57 @@ export abstract class InkingCanvas {
 
     private getClientHeight(): number {
         if (!this._clientHeight) {
-            this._clientHeight = this.canvas.clientHeight;
+            this._clientHeight = this._parentElement ? this._parentElement.clientHeight : 100;
         }
 
         return this._clientHeight;
+    }
+
+    private createLayer(cssClass: string): CanvasRenderingContext2D {
+        const canvas = document.createElement("canvas");
+        canvas.className = cssClass;
+        canvas.style.position = "absolute";
+        canvas.style.touchAction = "none";
+
+        const default2DOptions: CanvasRenderingContext2DSettings = {
+            alpha: true,
+            desynchronized: false
+        };
+        
+        const context: CanvasRenderingContext2D | null = canvas.getContext('2d', default2DOptions);
+
+        if (context === null) {
+            throw new Error('Could not get 2D context from canvas.');
+        }
+
+        return context;
+    }
+
+    private resizeLayer(context: CanvasRenderingContext2D, width: number, height: number) {
+        context.canvas.style.width = `${width}px`;
+        context.canvas.style.height = `${height}px`;
+    
+        context.canvas.width = width * window.devicePixelRatio;
+        context.canvas.height = height * window.devicePixelRatio;
+
+        context.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+
+    private addLayerToDOM(context: CanvasRenderingContext2D) {
+        if (this._parentElement) {
+            this._parentElement.appendChild(context.canvas);
+
+            this.resizeLayer(
+                context,
+                this.getClientWidth(),
+                this.getClientHeight());
+        }
+    }
+
+    private removeLayerFromDOM(context: CanvasRenderingContext2D) {
+        if (this._parentElement) {
+            this._parentElement.removeChild(context.canvas as HTMLElement);
+        }
     }
 
     protected viewportToScreen(p: IPoint): IPointerPoint
@@ -107,6 +161,10 @@ export abstract class InkingCanvas {
      * the stroke ends at the last added point.
      */
     protected abstract internalEndStroke(p?: IPointerPoint): void;
+    /**
+     * Called when the current stroke is cancelled.
+     */
+    protected abstract internalCancelStroke(): void;
 
     /**
      * Determines if this canvas should render asynchronously. When rendering
@@ -116,6 +174,108 @@ export abstract class InkingCanvas {
      */
     protected rendersAsynchronously(): boolean {
         return true;
+    }
+
+    /**
+     * Starts a new sub-path, at the specified coordinates.
+     * @param context The target canvas context.
+     * @param x The x coordinate, in pixels.
+     * @param y The y coordinate, in pixels.
+     */
+    protected moveTo(context: CanvasRenderingContext2D,x: number, y: number) {
+        const transformedPoint = this.viewportToScreen({ x, y });
+
+        context.moveTo(transformedPoint.x, transformedPoint.y);
+    }
+
+    /**
+     * Draws a line from the sub-path's last point to the specified point.
+     * @param context The target canvas context.
+     * @param x The x coordinate, in pixels.
+     * @param y The y coordinate, in pixels.
+     */
+    protected lineTo(context: CanvasRenderingContext2D,x: number, y: number) {
+        const transformedPoint = this.viewportToScreen({ x, y });
+
+        context.lineTo(transformedPoint.x, transformedPoint.y);
+    }
+
+    /**
+     * Renders a rectangle onto the canvas.
+     * @param context The target canvas context.
+     * @param center The center of the rectangle, in pixels.
+     * @param halfWidth The half-width of the rectangle, in pixels.
+     * @param halfHeight The half-height of the rectangle, in pixels.
+     */
+    protected renderRectangle(
+        context: CanvasRenderingContext2D,
+        center: IPoint,
+        halfWidth: number,
+        halfHeight: number): void {
+        const left: number = center.x - halfWidth;
+        const right: number = center.x + halfWidth;
+        const top: number = center.y - halfHeight;
+        const bottom: number = center.y + halfHeight;
+
+        this.moveTo(context, left, top);
+        this.lineTo(context, right, top);
+        this.lineTo(context, right, bottom);
+        this.lineTo(context, left, bottom);
+        this.lineTo(context, left, top);
+    }
+
+    /**
+     * Renders a "quad", i.e. a shape with four sides, onto the canvas.
+     * @param context The target canvas context.
+     * @param quad The quad to render.
+     */
+    protected renderQuad(context: CanvasRenderingContext2D, quad: IQuad): void {
+        this.moveTo(context, quad.p1.x, quad.p1.y);
+        this.lineTo(context, quad.p2.x, quad.p2.y);
+        this.lineTo(context, quad.p3.x, quad.p3.y);
+        this.lineTo(context, quad.p4.x, quad.p4.y);
+        this.lineTo(context, quad.p1.x, quad.p1.y);
+    }
+
+    /**
+     * Renders a circle onto the canvas.
+     * @param context The target canvas context.
+     * @param center The center of the circle, in pixels.
+     * @param radius The radius of the circle, in pixels.
+     */
+    protected renderCircle(context: CanvasRenderingContext2D, center: IPoint, radius: number): void {
+        const transformedCenter = this.viewportToScreen(center);
+
+        context.arc(
+            transformedCenter.x,
+            transformedCenter.y,
+            radius * this._scale,
+            0,
+            TWO_PI);
+    }
+
+    /**
+     * Adds a new layer to the canvas.
+     * @returns The new layer's context.
+     */
+    protected addLayer(cssClass: string): CanvasRenderingContext2D {
+        const context = this.createLayer(cssClass);
+
+        this._additionalLayers.add(context);
+
+        this.addLayerToDOM(context);
+
+        return context;
+    }
+
+    /**
+     * Removes a layer from the canvas.
+     * @param context The layer to remove.
+     */
+    protected removeLayer(context: CanvasRenderingContext2D) {
+        this.removeLayerFromDOM(context);
+
+        this._additionalLayers.delete(context);
     }
 
     /**
@@ -130,34 +290,15 @@ export abstract class InkingCanvas {
      */
     referencePoint: CanvasReferencePoint = "center";
 
-    /**
+     /**
      * Creates a new InkingCanvas instance, attached to the provided HTMLElement.
-     * @param parentElement The HTML element this canvas is attached to. InkingCanvas
+     * @param _parentElement The HTML element this canvas is attached to. InkingCanvas
      * dynamically creates an HTML5 Canvas element and adds it as a child to `parentElement`.
      */
-    constructor(parentElement?: HTMLElement) {
-        const canvas = document.createElement("canvas");
-        canvas.style.position = "absolute";
-        canvas.style.touchAction = "none";
+    constructor(private _parentElement?: HTMLElement) {
+        this._context = this.createLayer("main-layer");
 
-        const default2DOptions: CanvasRenderingContext2DSettings = {
-            alpha: true,
-            desynchronized: false
-        };
-        
-        const context: CanvasRenderingContext2D | null = canvas.getContext('2d', default2DOptions);
-
-        if (context === null) {
-            throw new Error('Could not get 2D context from canvas.');
-        }
-    
-        this._context = context;
-
-        if (parentElement) {
-            parentElement.appendChild(canvas);
-
-            this.resize(parentElement.clientWidth, parentElement.clientHeight);
-        }
+        this.addLayerToDOM(this._context);
     }
 
     /**
@@ -170,6 +311,12 @@ export abstract class InkingCanvas {
         const doFadeOut = () => {
             if (opacity > 0) {
                 this.canvas.style.opacity = opacity.toString();
+
+                this._additionalLayers.forEach(
+                    (context: CanvasRenderingContext2D) => {
+                        context.canvas.style.opacity = opacity.toString();
+                    }
+                )
 
                 window.setTimeout(doFadeOut, InkingCanvas.fadeOutLength / 10);
 
@@ -187,11 +334,17 @@ export abstract class InkingCanvas {
      * Removes the canvas from the DOM.
      */
     removeFromDOM() {
-        const parentElement = this.canvas.parentElement;
+        this.removeLayerFromDOM(this.context);
 
-        if (parentElement) {
-            parentElement.removeChild(this.canvas as HTMLElement);
-        }
+        this._additionalLayers.forEach(
+            (layer: CanvasRenderingContext2D) => {
+                this.removeLayerFromDOM(layer);
+            }
+        )
+
+        this._additionalLayers.clear();
+
+        this._parentElement = undefined;
     }
 
     /**
@@ -200,29 +353,39 @@ export abstract class InkingCanvas {
      * @param height The new height of the canvas, in pixels.
      */
     resize(width: number, height: number) {
-        this.canvas.style.width = `${width}px`;
-        this.canvas.style.height = `${height}px`;
-    
-        this.canvas.width = width * window.devicePixelRatio;
-        this.canvas.height = height * window.devicePixelRatio;
-
-        this._context.scale(window.devicePixelRatio, window.devicePixelRatio);
-
         this._clientWidth = undefined;
         this._clientHeight = undefined;
+
+        this.resizeLayer(this.context, width, height);
+
+        this._additionalLayers.forEach(
+            (context: CanvasRenderingContext2D) => {
+                this.resizeLayer(context, width, height);
+            }
+        );
     }
 
     /**
      * Clears the canvas.
      */
     clear() {
-        this._context.save();
+        const clearLayer = (context: CanvasRenderingContext2D) => {
+            context.save();
 
-        // Reset transform to identity to clear the whole canvas
-        this._context.setTransform(1, 0, 0, 1, 0, 0);
-        this._context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
-        this._context.restore();
+            // Reset transform to identity to clear the whole canvas
+            context.setTransform(1, 0, 0, 1, 0, 0);
+            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+        
+            context.restore();
+        }
+
+        clearLayer(this.context);
+
+        this._additionalLayers.forEach(
+            (context: CanvasRenderingContext2D) => {
+                clearLayer(context);
+            }
+        )
     }
 
     /**
@@ -236,9 +399,6 @@ export abstract class InkingCanvas {
 
         if (this.rendersAsynchronously()) {
             this.scheduleRender();
-        }
-        else {
-            this.internalRender();
         }
     }
 
@@ -260,17 +420,21 @@ export abstract class InkingCanvas {
      * the end point is the last one added.
      */
     endStroke(p?: IPointerPoint) {
-        this._strokeStarted = false;
-
         this.internalEndStroke(p);
 
-        this.internalRender();
+        if (!this.rendersAsynchronously()) {
+            this.render();
+        }
+
+        this._strokeStarted = false;
     }
 
     /**
      * Cancels the current stroke.
      */
     cancelStroke() {
+        this.internalCancelStroke();
+
         this._strokeStarted = false;
     }
 
@@ -292,96 +456,6 @@ export abstract class InkingCanvas {
                 this.addPoint(stroke.getPointAt(i));
             }
         }
-    }
-
-    /**
-     * Renders a circle onto the canvas.
-     * @param center The center of the circle, in pixels.
-     * @param radius The radius of the circle, in pixels.
-     */
-    renderCircle(center: IPoint, radius: number): void {
-        const transformedCenter = this.viewportToScreen(center);
-
-        this._context.arc(
-            transformedCenter.x,
-            transformedCenter.y,
-            radius * this._scale,
-            0,
-            TWO_PI);
-    }
-
-    /**
-     * Starts a path.
-     */
-    beginPath() {
-        this._context.beginPath();
-    }
-
-    /**
-     * Closes the current path.
-     */
-    closePath() {
-        this._context.closePath();
-    }
-
-    /**
-     * Fills the current path using the canvas' brush.
-     */
-    fill() {
-        this._context.fill();
-    }
-
-    /**
-     * Starts a new sub-path, at the specified coordinates.
-     * @param x The x coordinate, in pixels.
-     * @param y The y coordinate, in pixels.
-     */
-    moveTo(x: number, y: number) {
-        const transformedPoint = this.viewportToScreen({ x, y });
-
-        this._context.moveTo(transformedPoint.x, transformedPoint.y);
-    }
-
-    /**
-     * Draws a line from the sub-path's last point to the specified point.
-     * @param x The x coordinate, in pixels.
-     * @param y The y coordinate, in pixels.
-     */
-    lineTo(x: number, y: number) {
-        const transformedPoint = this.viewportToScreen({ x, y });
-
-        this._context.lineTo(transformedPoint.x, transformedPoint.y);
-    }
-
-    /**
-     * Renders a rectangle onto the canvas.
-     * @param center The center of the rectangle, in pixels.
-     * @param halfWidth The half-width of the rectangle, in pixels.
-     * @param halfHeight The half-height of the rectangle, in pixels.
-     */
-    renderRectangle(center: IPoint, halfWidth: number, halfHeight: number): void {
-        const left: number = center.x - halfWidth;
-        const right: number = center.x + halfWidth;
-        const top: number = center.y - halfHeight;
-        const bottom: number = center.y + halfHeight;
-
-        this.moveTo(left, top);
-        this.lineTo(right, top);
-        this.lineTo(right, bottom);
-        this.lineTo(left, bottom);
-        this.lineTo(left, top);
-    }
-
-    /**
-     * Renders a "quad", i.e. a shape with four sides, onto the canvas.
-     * @param quad The quad to render.
-     */
-    renderQuad(quad: IQuad): void {
-        this.moveTo(quad.p1.x, quad.p1.y);
-        this.lineTo(quad.p2.x, quad.p2.y);
-        this.lineTo(quad.p3.x, quad.p3.y);
-        this.lineTo(quad.p4.x, quad.p4.y);
-        this.lineTo(quad.p1.x, quad.p1.y);
     }
 
     /**

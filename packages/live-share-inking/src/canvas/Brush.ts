@@ -11,7 +11,7 @@ import { brightenColor } from "../core/Utils";
  * @returns A string representing the CSS representation of the color.
  */
 export function toCssColor(color: IColor): string {
-    return `rgba(${color.r},${color.g},${color.b},${color.a})`;
+    return `rgba(${color.r},${color.g},${color.b})`;
 }
 
 /**
@@ -22,7 +22,7 @@ export function toCssColor(color: IColor): string {
  */
 export function fromCssColor(color: string): IColor {
     if (color) {
-        const regEx = /#([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})?/gi;
+        const regEx = /#([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})/gi;
         const matches = regEx.exec(color);
 
         if (matches) {
@@ -30,9 +30,7 @@ export function fromCssColor(color: string): IColor {
             const g = parseInt(matches[2], 16);
             const b = parseInt(matches[3], 16);
 
-            const a = matches[4] ? parseInt(matches[4], 16) / 255 : 1;
-
-            return { r, g, b, a };
+            return { r, g, b };
         }
     }
 
@@ -40,13 +38,12 @@ export function fromCssColor(color: string): IColor {
 }
 
 /**
- * Defines an RGB color with an Alpha channel
+ * Defines an RGB color
  */
 export interface IColor {
     readonly r: number; // 0 - 255
     readonly g: number; // 0 - 255
     readonly b: number; // 0 - 255
-    readonly a: number; // 0.0 - 1.0
 }
 
 /**
@@ -110,24 +107,22 @@ export const highlighterColors = {
 export type BrushTipShape = "ellipse" | "rectangle";
 
 /**
- * Defines how a brush blends into the drawing.
+ * Defines brush types.
  */
-export type BrushBlendMode = "normal" | "darken";
+export type BrushType = "pen" | "highlighter" | "laser";
 
 /**
  * Defines a brush as used to draw strokes.
  */
 export interface IBrush {
     /**
+     * The type of the brush.
+     */
+    type: BrushType,
+    /**
      * The main color of the brush.
      */
     color: IColor;
-    /**
-     * Optional. When `innerColor` is specified, the brush is
-     * drawn with an outline using `color` and `tipSize` and is
-     * filled using `innerColor` and `innerTipSize`.
-     */
-    innerColor?: IColor;
     /**
      * The shape of the brush's tip.
      */
@@ -136,46 +131,34 @@ export interface IBrush {
      * The size of the brush's tip. Must be greater than 0.
      */
     tipSize: number;
-    /**
-     * The size of the inner brush's tip. Must be greater than 0.
-     * If `innerColor` is specified, `innerTipSize` must be specified
-     * as well.
-     */
-    innerTipSize?: number;
-    /**
-     * The brush's blen mode.
-     */
-    blendMode: BrushBlendMode;
 }
 
 /**
  * The default pen brush.
  */
 export const DefaultPenBrush: Readonly<IBrush> = {
+    type: "pen",
     color: penColors.black,
     tip: "ellipse",
-    tipSize: 10,
-    blendMode: "normal"
+    tipSize: 10
 };
 
 /**
  * The default highlighter brush.
  */
 export const DefaultHighlighterBrush: IBrush = {
+    type: "highlighter",
     color: highlighterColors.yellow,
     tip: "rectangle",
-    tipSize: 10,
-    blendMode: "darken"
+    tipSize: 10
 };
 
 /**
  * The default laser pointer brush.
  */
 export const DefaultLaserPointerBrush: IBrush = {
-    color: fromCssColor("##ff000055"),
-    innerColor: basicColors.red,
+    type: "laser",
+    color: basicColors.red,
     tip: "ellipse",
-    tipSize: 10,
-    innerTipSize: 10 / 3,
-    blendMode: "normal"
+    tipSize: 10
 };

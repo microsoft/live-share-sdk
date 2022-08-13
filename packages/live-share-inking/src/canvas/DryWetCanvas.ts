@@ -6,12 +6,13 @@
 import { InkingCanvas } from "./InkingCanvas";
 import { getPressureAdjustedSize, computeQuadBetweenTwoCircles, IPointerPoint,
     computeQuadBetweenTwoRectangles, IQuadPathItem } from "../core/Geometry";
-import { toCssColor, DefaultPenBrush, IBrush, IColor } from "./Brush";
+import { toCssColor, DefaultPenBrush, IBrush, IColor, basicColors } from "./Brush";
 
 /**
  * Represents the base class from wet and dry canvases, implementing the common rendering logic.
  */
 export abstract class DryWetCanvas extends InkingCanvas {
+    private _innerLayer?: CanvasRenderingContext2D;
     private _pendingPointsStartIndex = 0;
     private _points: IPointerPoint[] = [];
 
@@ -64,30 +65,31 @@ export abstract class DryWetCanvas extends InkingCanvas {
         return result;
     }
 
-    private renderQuadPath(path: IQuadPathItem[], color: IColor) {
-        this.context.strokeStyle = toCssColor(color);
-        this.context.fillStyle = toCssColor(color);
+    private renderQuadPath(context: CanvasRenderingContext2D, path: IQuadPathItem[], color: IColor) {
+        context.strokeStyle = toCssColor(color);
+        context.fillStyle = toCssColor(color);
 
-        this.beginPath();
+        context.beginPath();
 
         for (let item of path) {
             if (item.quad !== undefined) {
-                this.renderQuad(item.quad);
+                this.renderQuad(context, item.quad);
             }
 
             if (this.brush.tip === "ellipse") {
-                this.renderCircle(item.endPoint, item.tipSize);
+                this.renderCircle(context, item.endPoint, item.tipSize);
             }
             else {
                 this.renderRectangle(
+                    context,
                     item.endPoint,
                     item.tipSize,
                     item.tipSize);
             }
         }
 
-        this.fill();
-        this.closePath();
+        context.fill();
+        context.closePath();
     }
 
     /**
@@ -110,6 +112,22 @@ export abstract class DryWetCanvas extends InkingCanvas {
     }
 
     /**
+     * Sets the appropriate blend mode on the specified ontext, according
+     * to the current brush. In its base implementation, `setBlendMode` resets
+     * both the opacity and composite operation to their defaults.
+     * @param context 
+     */
+    protected setBlendMode(context: CanvasRenderingContext2D) {
+        context.globalAlpha = 1;
+        context.globalCompositeOperation = "source-over";
+        context.canvas.style.mixBlendMode = "normal";
+    }
+
+    protected getInnerLayerClass(): string {
+        return "DryWetCanvas-inner";
+    }
+
+    /**
      * Implements the rendering logic for the current stroke.
      */
     protected internalRender() {
@@ -119,12 +137,23 @@ export abstract class DryWetCanvas extends InkingCanvas {
 
         const path = this.computeQuadPath(this.brush.tipSize);
 
-        this.renderQuadPath(path, this.brush.color);
+        this.setBlendMode(this.context);
 
-        if (this.brush.innerColor && this.brush.innerTipSize) {
-            const path = this.computeQuadPath(this.brush.innerTipSize);
+        this.renderQuadPath(this.context, path, this.brush.color);
 
-            this.renderQuadPath(path, this.brush.innerColor);
+        if (this.brush.type === "laser") {
+            const path = this.computeQuadPath(this.brush.tipSize / 3);
+
+            if (!this._innerLayer) {
+                this._innerLayer = this.addLayer(this.getInnerLayerClass());
+            }    
+
+            this.renderQuadPath(this._innerLayer, path, this.brush.color);
+        }
+        else if (this._innerLayer) {
+            this.removeLayer(this._innerLayer);
+
+            this._innerLayer = undefined;
         }
 
         if (this.rendersProgressively()) {
@@ -146,42 +175,68 @@ export abstract class DryWetCanvas extends InkingCanvas {
             this._points.push(p);
         }
     }
+
+    protected internalCancelStroke() {
+        // Nothing to do in base implementation
+    }
+
+    protected get points(): IPointerPoint[] {
+        return this._points;
+    }
 }
 
 /**
  * Represents a canvas suitable for "dry ink", i.e. the persistent drawing. DryCanvas renders
- * synchonously and progressively.
+ * synchonously.
  */
 export class DryCanvas extends DryWetCanvas {
     protected rendersAsynchronously(): boolean {
-        // The dry canvas renders synchronously to favor speed
         return false;
     }
 
-    setBrush(value: IBrush) {
-        super.setBrush(value);
-
-        // On a dry canvas, blendMode is applied on the context so whatever is drawn combines with what's already drawn
-        this.context.globalCompositeOperation = this.brush.blendMode === "normal" ? "source-over" : "darken";
-    } 
+    /**
+     * A "dry" canvas renders multiple strokes which might each have a different brush.
+     * The underlying context's global alpha and composite operation must be set before
+     * rendering each stroke.
+     * @param context The context to set the blend mode on, given the current brus.
+     */
+    protected setBlendMode(context: CanvasRenderingContext2D) {
+        switch (this.brush.type) {
+            case "laser":
+                context.globalAlpha = 0.5;
+                break;
+            case "highlighter":
+                context.globalCompositeOperation = "darken";
+                break;
+            default:
+                super.setBlendMode(context);
+                break;
+        }
+    }
 }
 
 /**
- * Represents a canvas suitable for "wet ink", i.e. an ongoing stroke. WetCanvas renders
- * asynchonously. It renders progressively as long as its brush doesn't define a `fillColor`.
+ * Represents a canvas suitable for "wet ink", i.e. an ongoing stroke.
  */
 export class WetCanvas extends DryWetCanvas {
-    protected rendersProgressively(): boolean {
-        return this.brush.innerColor === undefined;
+    /**
+     * A "wet" canvas always renders a single stroke and is discarded when that stroke end.
+     * It needs to be properly composited on whatever other DOM it is overlyed on, basically
+     * the "dry" canvas. It is the HTML5 canvas that needs to be setup for the right blend
+     * mode, by setting its opacity and mixBlendMode styles.
+     * @param context The context to set the blend mode on, given the current brus.
+     */
+     protected setBlendMode(context: CanvasRenderingContext2D) {
+        switch (this.brush.type) {
+            case "laser":
+                context.canvas.style.opacity = "0.5";
+                break;
+            case "highlighter":
+                context.canvas.style.mixBlendMode = "darken";
+                break;
+            default:
+                super.setBlendMode(context);
+                break;
+        }
     }
-
-    setBrush(value: IBrush) {
-        super.setBrush(value);
-
-        // On a wet canvas, blendMode is applied on the <canvas> element so it is blended with whatever DOM element is
-        // under it. The caveat is that mix-blend-mode and globalCompositeOperation do not darken the exact same way.
-        // The end result is that when a stroke is "dried", i.e. moved from the wet canvas to the dry canvas, darkened
-        // portions will look darker than when being drawn on the wet canvas.
-        this.canvas.style.mixBlendMode = this.brush.blendMode === "normal" ? "normal" : "darken";
-    } 
 }

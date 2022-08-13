@@ -3,29 +3,39 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { InkingCanvas } from "./InkingCanvas";
-import { getPressureAdjustedSize, computeQuadBetweenTwoCircles, IPointerPoint, IQuad, IQuadPathItem } from "../core/Geometry";
-import { toCssColor, DefaultLaserPointerBrush, IBrush, IColor } from "./Brush";
+import { IPointerPoint } from "../core/Geometry";
+import { WetCanvas } from "./DryWetCanvas";
 
 /**
  * Represents a canvas that implements the laser pointer behavior.
  */
- export class LaserPointerCanvas extends InkingCanvas {
+export class LaserPointerCanvas extends WetCanvas {
     private static readonly TrailingPointsRemovalInterval = 20;
 
-    private _points: IPointerPoint[] = [];
     private _trailingPointsRemovalInterval?: number;
 
     private scheduleTrailingPointsRemoval() {
         if (this._trailingPointsRemovalInterval === undefined) {
             this._trailingPointsRemovalInterval = window.setInterval(
                 () => {
-                    if (this._points.length > 1) {
-                        const pointsToRemove = Math.max((this._points.length - 1) / 5, 1);
+                    if (this.points.length > 1) {
+                        const pointsToRemove = Math.ceil((this.points.length - 1) / 5);
 
-                        this._points.splice(0, pointsToRemove);
+                        this.points.splice(0, pointsToRemove);
+
+                        if (this.points.length > 0) {
+                            let currentPressure = 0.5;
+                            const pressureStep = (0.9 - currentPressure) / this.points.length;
+
+                            for (let i = this.points.length - 1; i >= 0; i--) {
+                                this.points[i].pressure = currentPressure;
+
+                                currentPressure -= pressureStep;
+                            }
+                        }
                     }
-                    else {
+
+                    if (this.points.length === 1) {
                         window.clearInterval(this._trailingPointsRemovalInterval);
 
                         this._trailingPointsRemovalInterval = undefined;
@@ -35,94 +45,43 @@ import { toCssColor, DefaultLaserPointerBrush, IBrush, IColor } from "./Brush";
         }
     }
 
-    private computeQuadPath(tipSize: number): IQuadPathItem[] {
-        const result: IQuadPathItem[] = [];
-
-        let previousPoint: IPointerPoint | undefined = undefined;
-        let radius = tipSize / 2;
-
-        const radiusStep = (radius - (radius / 3)) / this._points.length;
-
-        for (let i = this._points.length - 1; i >= 0; i--) {
-            const p = this._points[i];
-
-            const pathItem: IQuadPathItem = {
-                endPoint: p,
-                tipSize: radius
-            };
-
-            if (previousPoint !== undefined) {
-                pathItem.quad = computeQuadBetweenTwoCircles(
-                    p,
-                    getPressureAdjustedSize(radius, p.pressure),
-                    previousPoint,
-                    getPressureAdjustedSize(radius - radiusStep, previousPoint.pressure));
-            }
-
-            result.push(pathItem);
-
-            radius -= radiusStep;
-
-            previousPoint = p;
-        }
-
-        return result;
-    }
-
-    private renderQuadPath(path: IQuadPathItem[], color: IColor) {
-        this.context.fillStyle = toCssColor(color);
-
-        this.beginPath();
-
-        for (let item of path) {
-            if (item.quad !== undefined) {
-                this.renderQuad(item.quad);
-            }
-
-            this.renderCircle(item.endPoint, item.tipSize);
-        }
-
-        this.closePath();
-        this.fill();
-    }
-
-    protected getDefaultBrush(): IBrush {
-        return DefaultLaserPointerBrush;
-    }
-
-    protected internalRender() {
-        this.clear();
-
-        const path = this.computeQuadPath(this.brush.tipSize);
-
-        this.renderQuadPath(path, this.brush.color);
-
-        if (this.brush.innerColor && this.brush.innerTipSize) {
-            const path = this.computeQuadPath(this.brush.innerTipSize);
-
-            this.renderQuadPath(path, this.brush.innerColor);
-        }
-    }
-
-    protected internalBeginStroke(p: IPointerPoint) {
-        this._points = [p];
-    }
-
-    protected internalAddPoint(p: IPointerPoint) {
-        this._points.push(p);
-
-        this.scheduleTrailingPointsRemoval();
-    }
-
-    protected internalEndStroke(p?: IPointerPoint) {
+    private cancelTralingPointRemoval() {
         if (this._trailingPointsRemovalInterval !== undefined) {
             window.clearInterval(this._trailingPointsRemovalInterval);
 
             this._trailingPointsRemovalInterval = undefined;
         }
+    }
 
-        if (p) {
-            this.internalAddPoint(p);
-        }
+    protected getInnerLayerClass(): string {
+        return "LaserPointerCanvas-inner";
+    }
+
+    protected internalAddPoint(p: IPointerPoint) {
+        super.internalAddPoint(p);
+
+        this.scheduleTrailingPointsRemoval();
+    }
+
+    protected internalEndStroke(p?: IPointerPoint) {
+        this.cancelTralingPointRemoval();
+
+        super.internalEndStroke(p);
+    }
+
+    protected internalCancelStroke() {
+        this.cancelTralingPointRemoval();
+
+        super.internalCancelStroke();
+    }
+
+    protected rendersProgressively(): boolean {
+        return false;
+    }
+
+    removeFromDOM() {
+        super.removeFromDOM();
+
+        this.cancelTralingPointRemoval();
     }
 }

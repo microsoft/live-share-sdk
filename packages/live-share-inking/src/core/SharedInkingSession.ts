@@ -161,7 +161,7 @@ export class SharedInkingSession extends DataObject {
                     const liveStroke = this._pendingLiveStrokes.get(eventArgs.strokeId);
 
                     if (liveStroke !== undefined) {
-                        if (!eventArgs.endState) {
+                        if (!eventArgs.endState && eventArgs.points.length > 0) {
                             liveStroke.points.push(...eventArgs.points);
                         }
 
@@ -171,7 +171,9 @@ export class SharedInkingSession extends DataObject {
                             this._pendingLiveStrokes.delete(eventArgs.strokeId);
                         }
 
-                        liveStroke.scheduleProcessing(this.liveStrokeProcessed);
+                        if (eventArgs.points.length > 0) {
+                            liveStroke.scheduleProcessing(this.liveStrokeProcessed);
+                        }
                     }
                 });
         }
@@ -252,12 +254,18 @@ export class SharedInkingSession extends DataObject {
                                 stroke.deserialize(strokeJson);
 
                                 // If we received a stroke that happens to be an ongoing wet stroke,
-                                // cancel the wet stroke so it's removed from the screen and replaced
-                                // woth the full fidelity version we just received.
+                                // cancel the wet stroke so it's removed from the screen and replace
+                                // it with the full fidelity version we just received.
                                 const wetStroke = this._wetStrokes.get(stroke.id);
-                                wetStroke?.cancel();
+
+                                if (wetStroke) {
+                                    wetStroke.cancel();
+
+                                    this._wetStrokes.delete(wetStroke.id);
+                                }
 
                                 inkingManager.addStroke(stroke, addRemoveOptions);
+
                             }
                             else {
                                 inkingManager.removeStroke(changed.key, addRemoveOptions);

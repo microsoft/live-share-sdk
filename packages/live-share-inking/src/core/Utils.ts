@@ -53,8 +53,7 @@ export function brightenColor(color: IColor, intensity: number): IColor {
     return {
         r: brightenChannel(color.r),
         g: brightenChannel(color.g),
-        b: brightenChannel(color.b),
-        a: color.a
+        b: brightenChannel(color.b)
     }
 }
 

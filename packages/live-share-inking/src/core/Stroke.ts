@@ -325,7 +325,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
 
                             generatedStrokes.push(currentStroke);
 
-                            currentStroke = new Stroke({ brush: this.brush });
+                            currentStroke = createNewStroke();
                         }
                     }
                     else if (intersections.length === 2) {

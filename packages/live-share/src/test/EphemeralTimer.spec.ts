@@ -36,7 +36,7 @@ describeNoCompat("EphemeralTimer", (getTestObjectProvider) => {
     it("Should raise local and remote start events", async () => {
         const now = new Date().getTime();
         const object1done = new Deferred();
-        object1.on("onStart", (config, local) => {
+        object1.on("started", (config, local) => {
             try {
                 assert(local == true, `Not a local event`);
                 assert(config != null, `Null config arg`);
@@ -51,7 +51,7 @@ describeNoCompat("EphemeralTimer", (getTestObjectProvider) => {
         object1.initialize();
 
         const object2done = new Deferred();
-        object2.on("onStart", (config, local) => {
+        object2.on("started", (config, local) => {
             try {
                 assert(local == false, `Unexpected local event`);
                 assert(config != null, `Null config arg`);
@@ -93,10 +93,10 @@ describeNoCompat("EphemeralTimer", (getTestObjectProvider) => {
     it("pause and play, check resumes at correct position", async () => {
         const object1done = new Deferred();
         let pausePosition = 0;
-        object1.on("onPause", (config, local) => {
+        object1.on("paused", (config, local) => {
             pausePosition = config.position;
         });
-        object1.on("onPlay", (config, local) => {
+        object1.on("played", (config, local) => {
             try {
                 assert(pausePosition !== 0, 'never paused')
                 assert(config.position === pausePosition, `did not resume at pause position`)
@@ -108,7 +108,7 @@ describeNoCompat("EphemeralTimer", (getTestObjectProvider) => {
         object1.initialize();
 
         const object2done = new Deferred();
-        object2.on("onPlay", (config, local) => {
+        object2.on("played", (config, local) => {
             try {
                 assert(pausePosition !== 0, 'never paused')
                 assert(config.position === pausePosition, `did not resume at pause position`)
@@ -137,22 +137,21 @@ describeNoCompat("EphemeralTimer", (getTestObjectProvider) => {
         let startedCounter = 0;
         let finishedCounter = 0;
 
-        object2.on("onStart", (config, local) => { startedCounter += 1; });
-        object2.on("onFinish", (config) => { finishedCounter += 1 });
+        object2.on("started", (config, local) => { startedCounter += 1; });
+        object2.on("finished", (config) => { finishedCounter += 1 });
 
         object1.initialize();
         object2.initialize();
 
+
+        object1.start(20);
         setTimeout(() => {
             object1.start(20);
             setTimeout(() => {
                 object1.start(20);
                 setTimeout(() => {
-                    object1.start(20);
-                    setTimeout(() => {
-                        testDone.resolve();
-                    }, 30)
-                }, 10)
+                    testDone.resolve();
+                }, 30)
             }, 10)
         }, 10)
 
@@ -162,10 +161,10 @@ describeNoCompat("EphemeralTimer", (getTestObjectProvider) => {
         assert(finishedCounter === 1, `${finishedCounter}`)
     });
 
-    it("onFinish callback called within 30ms of ending", async () => {
+    it("finish callback called within 30ms of ending", async () => {
         const now = new Date().getTime();
         const object1done = new Deferred();
-        object1.on("onFinish", (config) => {
+        object1.on("finished", (config) => {
             try {
                 assert(config != null, `Null config arg`);
                 assert(config.clientId != null, `Missing clientId`);
@@ -180,7 +179,7 @@ describeNoCompat("EphemeralTimer", (getTestObjectProvider) => {
         object1.initialize();
 
         const object2done = new Deferred();
-        object2.on("onFinish", (config) => {
+        object2.on("finished", (config) => {
             try {
                 assert(config != null, `Null config arg`);
                 assert(config.clientId != null, `Missing clientId`);

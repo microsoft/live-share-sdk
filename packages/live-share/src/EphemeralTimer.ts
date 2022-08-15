@@ -161,6 +161,7 @@ export class EphemeralTimer extends DataObject<{
     // Create object synchronizer
     this._synchronizer = new EphemeralObjectSynchronizer<ITimerConfig>(
       this.id,
+      this.runtime,
       this.context.containerRuntime,
       (connecting) => {
         console.log("remote state returned");

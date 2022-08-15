@@ -73,7 +73,7 @@ describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.stainitializert('user2');
+        await object2.initialize('user2');
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);

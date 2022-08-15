@@ -13,7 +13,6 @@ import {
 } from "@microsoft/live-share-media";
 import { TeamsFluidClient } from "@microsoft/live-share";
 import { inTeams } from "../utils/inTeams";
-import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { ConsoleLogger } from "./ConsoleLogger";
 
@@ -33,19 +32,14 @@ const MeetingStage = () => {
       try {
         // Set the initial video src for the player element
         videoElement.current.src = initialMediaItem.current.src;
-
         let connection;
         if (!inTeams()) {
           // Configure for local testing (optional).
           connection = {
-            tenantId: LOCAL_MODE_TENANT_ID,
-            tokenProvider: new InsecureTokenProvider("", {
-              id: "123",
-              name: "Test User",
-            }),
-            orderer: "http://localhost:7070",
-            storage: "http://localhost:7070",
-          };
+            type: 'local',
+            tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
+            endpoint: "http://localhost:7070"
+          }
         }
         // Enable debugger
         window.localStorage.debug = "fluid:*";

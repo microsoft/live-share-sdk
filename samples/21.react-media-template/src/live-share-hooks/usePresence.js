@@ -47,7 +47,7 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
 
   // Effect which registers SharedPresence event listeners before joining space
   useEffect(() => {
-    if (presence && !presence.isStarted && context) {
+    if (presence && !presence.isInitialized && context) {
       // Register presenceChanged event listener
       presence.on("presenceChanged", (userPresence, local) => {
         console.log("usePresence: presence received", userPresence, local);

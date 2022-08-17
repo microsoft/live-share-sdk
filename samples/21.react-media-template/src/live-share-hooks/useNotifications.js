@@ -40,7 +40,7 @@ export const useNotifications = (notificationEvent, context) => {
   );
 
   useEffect(() => {
-    if (notificationEvent && !notificationEvent.isStarted) {
+    if (notificationEvent && !notificationEvent.isInitialized) {
       notificationEvent.on("received", (event, local) => {
         // Display notification differently for local vs. remote users
         if (local) {

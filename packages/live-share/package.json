@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "Building colaboritive experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -15,7 +15,6 @@
     },
     "dependencies": {
         "@fluidframework/azure-client": "~1.0.2",
-        "@microsoft/teams-js": "2.0.0-experimental.1",
         "fluid-framework": "~1.2.3",
         "uuid": "^8.3.2"
     },

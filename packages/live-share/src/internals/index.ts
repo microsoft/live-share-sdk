@@ -9,5 +9,4 @@ export * from './RequestCache';
 export * from './RoleVerifier';
 export * from './SharedClock';
 export * from './TeamsFluidTokenProvider';
-export * from './TestTeamsClientApi';
 export * from './utils';

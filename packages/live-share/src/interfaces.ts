@@ -112,3 +112,170 @@ export interface IRoleVerifier {
      */
     verifyRolesAllowed(clientId: string, allowedRoles: UserMeetingRole[]): Promise<boolean>;
 }
+
+/**
+ * State of the current Live Share sessions backing fluid container.
+ */
+export enum ContainerState {
+    /**
+     * The call to `LiveShareHost.setContainerId()` successfully created the container mapping
+     * for the current Live Share session. 
+     */
+    added = 'Added',
+
+    /**
+     * A container mapping for the current Live Share Session already exists and should be used
+     * when joining the sessions Fluid container.
+     */
+    alreadyExists = 'AlreadyExists',
+
+    /**
+     * The call to `LiveShareHost.setContainerId()` failed to create the container mapping due to
+     * another client having already set the container ID for the current Live Share session. 
+     */    
+    conflict = 'Conflict',
+
+    /**
+     * A container mapping for the current Live Share session doesn't exist yet.
+     */
+    notFound = 'NotFound',
+}
+
+/**
+ * Returned from `LiveShareHost.get/setFluidContainerId()` to specify the container mapping for the
+ * current Live Share session.
+ */
+export interface IFluidContainerInfo {
+    /**
+     * State of the containerId mapping.
+     */
+    containerState: ContainerState;
+
+    /**
+     * ID of the container to join for the meeting. Undefined if the container hasn't been
+     * created yet.
+     */
+    containerId: string | undefined;
+
+    /**
+     * If true, the local client should create the container and then save the created containers
+     * ID to the mapping service.
+     */
+    shouldCreate: boolean;
+
+    /**
+     * If `containerId` is undefined and `shouldCreate` is false, the container isn't ready but
+     * another client is creating it. The local client should wait the specified amount of time and
+     * then ask for the container info again.
+     */
+    retryAfter: number;
+}
+
+/**
+ * Returned from `LiveShareHost.getNtpTime()` to specify the global timestamp for the current 
+ * Live Share session.
+ */
+export interface INtpTimeInfo {
+    /**
+     * ISO 8601 formatted server time. For example: '2019-09-07T15:50-04:00'
+     */
+    ntpTime: string;
+
+    /**
+     * Server time expressed as the number of milliseconds since the ECMAScript epoch.
+     */
+    ntpTimeInUTC: number;
+}
+
+/**
+ * Returned from `LiveShareHost.getFluidTenantInfo()` to specify the Fluid service to use for the
+ * current Live Share session.
+ */
+export interface IFluidTenantInfo {
+    /**
+     * The Fluid Tenant ID Live Share should use.
+     */
+    tenantId: string;
+
+    /**
+     * The Fluid service endpoint Live Share should use.
+     */
+    serviceEndpoint?: string;
+
+    /**
+     * @deprecated
+     * As of Fluid 1.0 this configuration information has been deprecated in favor of 
+     * `serviceEndpoint`.
+     */
+    ordererEndpoint: string;
+
+    /**
+     * @deprecated
+     * As of Fluid 1.0 this configuration information has been deprecated in favor of 
+     * `serviceEndpoint`.
+     */
+    storageEndpoint: string;
+}
+
+/**
+ * Interface for hosting a Live Share session within a client like Teams.
+ */
+export interface ILiveShareHost {
+    /**
+     * Returns the Fluid service endpoint and tenant to use for the current session. 
+     */
+    getFluidTenantInfo(): Promise<IFluidTenantInfo>;
+
+    /**
+     * Returns the Fluid access token to use for the current session.
+     * @param containerId Optional. ID of the container being joined. This will be undefined when creating a new container.
+     */
+    getFluidToken(containerId?: string): Promise<string>;
+
+    /**
+     * Returns the container mapping information for the current session.
+     * 
+     * @remarks
+     * Hosts are required to implement a container mapping service that stores the container ID for
+     * the current session. 
+     * 
+     * TODO: add creation protocol details 
+     */
+    getFluidContainerId(): Promise<IFluidContainerInfo>;
+
+    /**
+     * Attempts to save the ID of the Fluid container created to the hosts mapping service.
+     * 
+     * @remarks
+     * Hosts should return a `containerState` of "Added" if the mapping was successfully saved, 
+     * otherwise a state of "Conflict" should be returned to indicate that another client has
+     * already saved a container ID for the current session. 
+     * @param containerId Id of the Fluid container that was created.
+     * @returns Information indicating the success of mapping assignment. 
+     */
+    setFluidContainerId(containerId: string): Promise<IFluidContainerInfo>;
+
+
+    /**
+     * Returns the global timestamp for the current session.
+     */
+    getNtpTime(): Promise<INtpTimeInfo>;
+
+    /**
+     * Registers the local clients Fluid client ID with the hosts role verification service.
+     * 
+     * @remarks
+     * Hosts should expect this to be called anytime the Fluid clients underlying socket connects 
+     * or reconnects.
+     * @param clientId Unique ID assigned to the local Fluid client.
+     * @returns An array of meeting roles assigned to the local user.
+     */
+    registerClientId(clientId: string): Promise<UserMeetingRole[]>;
+
+    /**
+     * Queries the hosts role verification service for the roles associated with a given client ID.
+     * @param clientId ID of teh client to lookup.
+     * @returns An array of roles assigned to the queried client ID.
+     */
+    getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
+}

@@ -18,4 +18,5 @@ export * from './interfaces';
 export * from './LocalRoleVerifier';
 export * from './LocalTimestampProvider';
 export * from './TeamsFluidClient';
+export * from './TestLiveShareHost';
 export * from './TimeInterval';

@@ -187,8 +187,8 @@ export class EphemeralTimer extends DataObject<{
 
   /**
    * Starts the timer with a specified duration. 
-   * Started an already started timer will restart the timer with a new duration.
-   * @param duration. Milliseconds
+   * Starting an already started timer will restart the timer with a new duration.
+   * @param duration in Milliseconds
    */
   public start(duration: number): void {
     if (!this._scope) {
@@ -199,7 +199,7 @@ export class EphemeralTimer extends DataObject<{
   }
 
   /**
-   * Resumes the timer. Playing an already playing timer does nothing
+   * Resumes the timer. Playing an already playing timer does nothing.
    */
   public play(): void {
     if (!this._scope) {
@@ -229,7 +229,7 @@ export class EphemeralTimer extends DataObject<{
   }
 
   /**
-   * Pauses the timer. Pausing an already paused timer does nothing
+   * Pauses the timer. Pausing an already paused timer does nothing.
    */
   public pause(): void {
     if (!this._scope) {

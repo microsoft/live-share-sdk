@@ -20,7 +20,7 @@ export const useTimer = (timer, onTimerEnd) => {
   }, [timer]);
 
   useEffect(() => {
-    if (timer && !timer.isStarted) {
+    if (timer && !timer.isInitialized) {
       timer.on("finished", (config) => {
         console.log("finished");
         onTimerEnd();

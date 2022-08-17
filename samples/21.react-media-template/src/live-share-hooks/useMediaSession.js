@@ -160,7 +160,7 @@ export const useMediaSession = (
   useEffect(() => {
     if (
       mediaSession &&
-      !mediaSession.isStarted &&
+      !mediaSession.isInitialized &&
       !synchronizerRef.current &&
       selectedMediaItem &&
       player

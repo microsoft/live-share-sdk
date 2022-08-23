@@ -10,8 +10,8 @@ import { brightenColor } from "../core/Utils";
  * @param color The color to convert.
  * @returns A string representing the CSS representation of the color.
  */
-export function toCssColor(color: IColor): string {
-    return `rgba(${color.r},${color.g},${color.b})`;
+export function toCssColor(color: IColor, alpha: number = 1): string {
+    return `rgba(${color.r},${color.g},${color.b},${alpha})`;
 }
 
 /**

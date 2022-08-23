@@ -65,9 +65,11 @@ export abstract class DryWetCanvas extends InkingCanvas {
         return result;
     }
 
-    private renderQuadPath(context: CanvasRenderingContext2D, path: IQuadPathItem[], color: IColor) {
-        context.strokeStyle = toCssColor(color);
-        context.fillStyle = toCssColor(color);
+    private renderQuadPath(context: CanvasRenderingContext2D, path: IQuadPathItem[]) {
+        const cssColor = this.getBrushCssColor();
+
+        context.strokeStyle = cssColor;
+        context.fillStyle = cssColor;
 
         context.beginPath();
 
@@ -101,6 +103,15 @@ export abstract class DryWetCanvas extends InkingCanvas {
     }
 
     /**
+     * Converts the current brush's color to a CSS color.
+     * @param color The color to convert.
+     * @returns A CSS color. 
+     */
+    protected getBrushCssColor(): string {
+        return toCssColor(this.brush.color, this.brush.type === "highlighter" ? 0.5 : 1);
+    }
+
+    /**
      * Determines if this canvas renders strokes progressively. When rendering
      * progressively, the current stroke is rendered incrementally as new points
      * become available. When progressive rendering is disabled, the current
@@ -117,14 +128,9 @@ export abstract class DryWetCanvas extends InkingCanvas {
      * both the opacity and composite operation to their defaults.
      * @param context 
      */
-    protected setBlendMode(context: CanvasRenderingContext2D) {
+    protected adjustOpacity(context: CanvasRenderingContext2D) {
         context.globalAlpha = 1;
-        context.globalCompositeOperation = "source-over";
-        context.canvas.style.mixBlendMode = "normal";
-    }
-
-    protected getInnerLayerClass(): string {
-        return "DryWetCanvas-inner";
+        context.canvas.style.opacity = "1";
     }
 
     /**
@@ -137,18 +143,18 @@ export abstract class DryWetCanvas extends InkingCanvas {
 
         const path = this.computeQuadPath(this.brush.tipSize);
 
-        this.setBlendMode(this.context);
+        this.adjustOpacity(this.context);
 
-        this.renderQuadPath(this.context, path, this.brush.color);
+        this.renderQuadPath(this.context, path);
 
         if (this.brush.type === "laser") {
             const path = this.computeQuadPath(this.brush.tipSize / 3);
 
             if (!this._innerLayer) {
-                this._innerLayer = this.addLayer(this.getInnerLayerClass());
+                this._innerLayer = this.addLayer();
             }    
 
-            this.renderQuadPath(this._innerLayer, path, this.brush.color);
+            this.renderQuadPath(this._innerLayer, path);
         }
         else if (this._innerLayer) {
             this.removeLayer(this._innerLayer);
@@ -200,16 +206,14 @@ export class DryCanvas extends DryWetCanvas {
      * rendering each stroke.
      * @param context The context to set the blend mode on, given the current brus.
      */
-    protected setBlendMode(context: CanvasRenderingContext2D) {
+    protected adjustOpacity(context: CanvasRenderingContext2D) {
         switch (this.brush.type) {
             case "laser":
-                context.globalAlpha = 0.5;
+                context.globalAlpha = InkingCanvas.laserShadowOpacity;
                 break;
             case "highlighter":
-                context.globalCompositeOperation = "darken";
-                break;
             default:
-                super.setBlendMode(context);
+                super.adjustOpacity(context);
                 break;
         }
     }
@@ -219,6 +223,17 @@ export class DryCanvas extends DryWetCanvas {
  * Represents a canvas suitable for "wet ink", i.e. an ongoing stroke.
  */
 export class WetCanvas extends DryWetCanvas {
+    protected rendersProgressively(): boolean {
+        return this.brush.type !== "highlighter";
+    }
+
+    protected getBrushCssColor(): string {
+        // In a wet canvas, when using the highlighter, the brush color
+        // used to draw the stroke is always opaque, and it's the canvas
+        // itself that is semi-transparent.
+        return toCssColor(this.brush.color);
+    }
+
     /**
      * A "wet" canvas always renders a single stroke and is discarded when that stroke end.
      * It needs to be properly composited on whatever other DOM it is overlyed on, basically
@@ -226,16 +241,16 @@ export class WetCanvas extends DryWetCanvas {
      * mode, by setting its opacity and mixBlendMode styles.
      * @param context The context to set the blend mode on, given the current brus.
      */
-     protected setBlendMode(context: CanvasRenderingContext2D) {
+     protected adjustOpacity(context: CanvasRenderingContext2D) {
         switch (this.brush.type) {
             case "laser":
-                context.canvas.style.opacity = "0.5";
+                context.canvas.style.opacity = InkingCanvas.laserShadowOpacity.toString();
                 break;
             case "highlighter":
-                context.canvas.style.mixBlendMode = "darken";
+                context.canvas.style.opacity = InkingCanvas.highlighterOpacity.toString();
                 break;
             default:
-                super.setBlendMode(context);
+                super.adjustOpacity(context);
                 break;
         }
     }

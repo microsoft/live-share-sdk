@@ -401,6 +401,17 @@ export function getDistanceBetweenPoints(p1: IPoint, p2: IPoint): number {
 }
 
 /**
+ * Computes the square of the distance between two points. This provides a cheaper
+ * way to compare multiple distances since it doesn't compute any square root.
+ * @param p1 The first point.
+ * @param p2 The second point.
+ * @returns The square of the distance between `p1` and `p2`.
+ */
+export function getSquaredDistanceBetweenPoints(p1: IPoint, p2: IPoint): number {
+    return (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
+}
+
+/**
  * Converts screen coordinates to viewport coordinates.
  * @param p The point to convert.
  * @param viewportReferencePoint The videwport's reference point.

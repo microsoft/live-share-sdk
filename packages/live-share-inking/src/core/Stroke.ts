@@ -4,9 +4,9 @@
  */
 
 import { IBrush, DefaultPenBrush } from "../canvas/Brush";
-import { doRectanglesOverlap, getDistanceBetweenPoints, getSegmentIntersectionsWithRectangle, getSegmentsIntersection,
-    IPoint, IPointerPoint, IRect, ISegment, isPointInsideRectangle, isRectangleInsideRectangle,
-    segmentMayIntersectWithRectangle, unionRect } from "./Geometry";
+import { doRectanglesOverlap, getSegmentIntersectionsWithRectangle, getSegmentsIntersection,
+    getSquaredDistanceBetweenPoints, IPoint, IPointerPoint, IRect, ISegment, isPointInsideRectangle,
+    isRectangleInsideRectangle, segmentMayIntersectWithRectangle, unionRect } from "./Geometry";
 import { generateUniqueId } from "./Utils";
 
 interface IStrokeData {
@@ -330,8 +330,8 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
                     }
                     else if (intersections.length === 2) {
                         // Two intersections, we need to cut the part that's inside the eraser rectangle
-                        const d1 = getDistanceBetweenPoints(previousPoint, intersections[0]);
-                        const d2 = getDistanceBetweenPoints(previousPoint, intersections[1]);
+                        const d1 = getSquaredDistanceBetweenPoints(previousPoint, intersections[0]);
+                        const d2 = getSquaredDistanceBetweenPoints(previousPoint, intersections[1]);
 
                         let [firstIndex, secondIndex] = d1 < d2 ? [0, 1] : [1, 0];
 

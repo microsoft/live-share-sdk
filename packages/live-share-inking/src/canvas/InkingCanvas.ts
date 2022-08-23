@@ -28,6 +28,16 @@ export abstract class InkingCanvas {
      */
     public static asyncRenderDelay = 15;
 
+    /**
+     * Configures the opacity of the laser stroke shadow.
+     */
+    public static laserShadowOpacity = 0.5;
+    
+    /**
+     * Configures the opacity of highlighter strokes.
+     */
+    public static highlighterOpacity = 0.5;
+
     private _context: CanvasRenderingContext2D;
     private _additionalLayers: Set<CanvasRenderingContext2D> = new Set<CanvasRenderingContext2D>();
     private _strokeStarted: boolean = false;
@@ -74,9 +84,8 @@ export abstract class InkingCanvas {
         return this._clientHeight;
     }
 
-    private createLayer(cssClass: string): CanvasRenderingContext2D {
+    private createLayer(): CanvasRenderingContext2D {
         const canvas = document.createElement("canvas");
-        canvas.className = cssClass;
         canvas.style.position = "absolute";
         canvas.style.touchAction = "none";
 
@@ -258,8 +267,8 @@ export abstract class InkingCanvas {
      * Adds a new layer to the canvas.
      * @returns The new layer's context.
      */
-    protected addLayer(cssClass: string): CanvasRenderingContext2D {
-        const context = this.createLayer(cssClass);
+    protected addLayer(): CanvasRenderingContext2D {
+        const context = this.createLayer();
 
         this._additionalLayers.add(context);
 
@@ -296,7 +305,7 @@ export abstract class InkingCanvas {
      * dynamically creates an HTML5 Canvas element and adds it as a child to `parentElement`.
      */
     constructor(private _parentElement?: HTMLElement) {
-        this._context = this.createLayer("main-layer");
+        this._context = this.createLayer();
 
         this.addLayerToDOM(this._context);
     }

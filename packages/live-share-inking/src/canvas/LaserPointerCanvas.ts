@@ -53,10 +53,6 @@ export class LaserPointerCanvas extends WetCanvas {
         }
     }
 
-    protected getInnerLayerClass(): string {
-        return "LaserPointerCanvas-inner";
-    }
-
     protected internalAddPoint(p: IPointerPoint) {
         super.internalAddPoint(p);
 

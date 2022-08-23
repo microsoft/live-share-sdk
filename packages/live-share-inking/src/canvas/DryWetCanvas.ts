@@ -223,10 +223,6 @@ export class DryCanvas extends DryWetCanvas {
  * Represents a canvas suitable for "wet ink", i.e. an ongoing stroke.
  */
 export class WetCanvas extends DryWetCanvas {
-    protected rendersProgressively(): boolean {
-        return this.brush.type !== "highlighter";
-    }
-
     protected getBrushCssColor(): string {
         // In a wet canvas, when using the highlighter, the brush color
         // used to draw the stroke is always opaque, and it's the canvas

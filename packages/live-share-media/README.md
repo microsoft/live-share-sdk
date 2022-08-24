@@ -27,7 +27,7 @@ yarn add @microsoft/live-share-media
 After cloning the [GitHub repository](https://www.github.com/microsoft/live-share-sdk), navigate to the root folder and perform:
 
 ```bash
-npm install --legacy-peer-dep
+npm install
 npm run build
 ```
 
@@ -114,7 +114,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-media | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | --------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| ~0.4.0                | 2.0.0-experimental.1 | ~1.2.3          | ~0.4.0 (optional)           | ~1.0.2 (optional)            | 2.0.0-experimental.1 (optional) | 2.0.0-experimental.1 (optional) |
+| ~0.4.0                | 2.0.0-experimental.1 | ~1.2.3          | ~0.4.0 (optional)           | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)           | ~0.59.0 (optional)           | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 
 ## Contributing

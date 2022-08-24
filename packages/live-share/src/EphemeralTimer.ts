@@ -154,7 +154,6 @@ export class EphemeralTimer extends DataObject<{
     // Create event scope
     this._scope = new EphemeralEventScope(this.runtime, allowedRoles);
 
-    // TODO: make enum for event type names
     this._playEvent = new EphemeralEventTarget(
       this._scope,
       "Play",
@@ -194,6 +193,13 @@ export class EphemeralTimer extends DataObject<{
     }
   }
 
+  /**
+   * Starts the timer with a specified duration. 
+   *
+   * @remarks
+   * Starting an already started timer will restart the timer with a new duration.
+   * @param duration in Milliseconds
+   */
   public start(duration: number): void {
     if (!this._scope) {
       throw new Error(`EphemeralTimer not started.`);
@@ -202,6 +208,12 @@ export class EphemeralTimer extends DataObject<{
     this.playInternal(duration, 0);
   }
 
+  /**
+   * Resumes the timer.
+   *
+   * @remarks
+   * Playing an already playing timer does nothing.
+   */
   public play(): void {
     if (!this._scope) {
       throw new Error(`EphemeralTimer not started.`);
@@ -229,6 +241,12 @@ export class EphemeralTimer extends DataObject<{
     this.updateConfig(this.playEventToConfig(event), true);
   }
 
+  /**
+   * Pauses the timer.
+   *
+   * @remarks
+   * Pausing an already paused timer does nothing.
+   */
   public pause(): void {
     if (!this._scope) {
       throw new Error(`EphemeralTimer not started.`);

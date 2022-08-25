@@ -264,6 +264,12 @@ export class InkingManager extends EventEmitter {
      * strokes) takes to fade out.
      */
     public static ephemeralCanvasRemovalDelay = 1500;
+    /**
+     * Configures the amount of time to wait before sending a pointer moved event. This delay
+     * allows for the elimination of fast, consecutive pointer move events, and only send the
+     * most recent update.
+     */
+    public static pointerMovedNotificationDelay = 15;
 
     private static WetStroke = class extends Stroke implements IWetStroke {
         constructor(
@@ -342,6 +348,7 @@ export class InkingManager extends EventEmitter {
     private _strokes: Map<string, IStroke> = new Map<string, IStroke>();
     private _previousPoint?: IPointerPoint;
     private _reRenderTimeout?: number;
+    private _pointerMovedNotificationTimeout?: number;
     private _pointEraseProcessingInterval?: number;
     private _pendingPointErasePoints: IPoint[] = [];
     private _changeLog: ChangeLog = new ChangeLog();
@@ -552,7 +559,7 @@ export class InkingManager extends EventEmitter {
                     else {
                         const filteredPoint = this._inputFilters.filterPoint(p);
 
-                        this.notifyPointerMoved(filteredPoint);
+                        this.queuePointerMovedNotification(filteredPoint);
                     }
                 }
 
@@ -575,13 +582,13 @@ export class InkingManager extends EventEmitter {
                         case InkingTool.Eraser:
                             this.erase(filteredPoint);
 
-                            this.notifyPointerMoved(filteredPoint);
+                            this.queuePointerMovedNotification(filteredPoint);
 
                             break;
                         case InkingTool.PointEraser:
                             this._pendingPointErasePoints.push(filteredPoint);
 
-                            this.notifyPointerMoved(filteredPoint);
+                            this.queuePointerMovedNotification(filteredPoint);
 
                             this.schedulePointEraseProcessing();
 
@@ -755,6 +762,21 @@ export class InkingManager extends EventEmitter {
         }
 
         return result;
+    }
+
+    private queuePointerMovedNotification(position?: IPoint) {
+        if (this._pointerMovedNotificationTimeout !== undefined) {
+            window.clearTimeout(this._pointerMovedNotificationTimeout);            
+        }
+
+        this._pointerMovedNotificationTimeout = window.setTimeout(
+            () => {
+                this.notifyPointerMoved(position);
+
+                this._pointerMovedNotificationTimeout = undefined;
+            },
+            InkingManager.pointerMovedNotificationDelay
+        );
     }
 
     private notifyPointerMoved(position?: IPoint) {

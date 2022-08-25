@@ -575,12 +575,13 @@ export class InkingManager extends EventEmitter {
                         case InkingTool.Eraser:
                             this.erase(filteredPoint);
 
+                            this.notifyPointerMoved(filteredPoint);
+
                             break;
                         case InkingTool.PointEraser:
-                            // TODO: insert additional eraser points between the previous
-                            // one and the new one to mitigate wide gaps between erased areas
-                            // when the pointer moves fast
                             this._pendingPointErasePoints.push(filteredPoint);
+
+                            this.notifyPointerMoved(filteredPoint);
 
                             this.schedulePointEraseProcessing();
 

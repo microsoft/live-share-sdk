@@ -22,8 +22,13 @@ enum InkingEventNames {
 }
 
 type IPointerMovedEvent = IEphemeralEvent & IPointerMovedEventArgs;
-type IBeginWetStrokeEvent = IEphemeralEvent & IBeginStrokeEventArgs;
-type IAddWetStrokePointsEvent = IEphemeralEvent & IAddPointsEventArgs;
+
+interface ISharedCursor {
+    isCursorShared?: boolean;
+}
+
+type IBeginWetStrokeEvent = IEphemeralEvent & IBeginStrokeEventArgs & ISharedCursor;
+type IAddWetStrokePointsEvent = IEphemeralEvent & IAddPointsEventArgs & ISharedCursor;
 
 class LiveStroke {
     private _points: IPointerPoint[] = [];
@@ -233,7 +238,6 @@ class BuiltInCursorVisual extends CursorVisual {
  */
 export class SharedInkingSession extends DataObject {
     private static readonly dryInkMapKey = "dryInk";
-    private static readonly clientStateMapKey = "clientState";
 
     /**
      * Configures the delay before wet stroke events are emitted, to greatly reduce the 
@@ -267,7 +271,6 @@ export class SharedInkingSession extends DataObject {
     private _inkingManager?: InkingManager;
     private _processingIncomingChanges = false;
     private _dryInkMap!: SharedMap;
-    private _clientStateMap!: SharedMap;
     private _wetStrokes: Map<string, IWetStroke> = new Map<string, IWetStroke>();
     private _pointerMovedEventTarget!: EphemeralEventTarget<IPointerMovedEvent>;
     private _beginWetStrokeEventTarget!: EphemeralEventTarget<IBeginWetStrokeEvent>;
@@ -276,11 +279,13 @@ export class SharedInkingSession extends DataObject {
     private _pendingLiveStrokes: Map<string, LiveStroke> = new Map<string, LiveStroke>();
     private _cursorVisualsMap = new Map<string, CursorVisual>();
     private _cursorVisualsHost!: HTMLElement;
+    private _isCursorShared: boolean = false;
 
     private liveStrokeProcessed = (liveStroke: LiveStroke) => {
         this._addWetStrokePointEventTarget.sendEvent(
             {
                 name: InkingEventNames.AddWetStrokePoints,
+                isCursorShared: this.isCursorShared ? true : undefined,
                 strokeId: liveStroke.id,
                 points: liveStroke.points,
                 endState: liveStroke.endState
@@ -295,10 +300,12 @@ export class SharedInkingSession extends DataObject {
             this._inkingManager.on(
                 PointerMovedEvent,
                 (eventArgs: IPointerMovedEventArgs) => {
-                    this._pointerMovedEventTarget.sendEvent(
-                        {
-                            position: eventArgs.position
-                        });
+                    if (this.isCursorShared) {
+                        this._pointerMovedEventTarget.sendEvent(
+                            {
+                                position: eventArgs.position
+                            });
+                    }
                 });
             this._inkingManager.on(
                 BeginStrokeEvent,
@@ -316,6 +323,7 @@ export class SharedInkingSession extends DataObject {
                     this._beginWetStrokeEventTarget.sendEvent(
                         {
                             name: InkingEventNames.BeginWetStroke,
+                            isCursorShared: this.isCursorShared ? true : undefined,
                             ...eventArgs
                         });
                 });
@@ -372,7 +380,7 @@ export class SharedInkingSession extends DataObject {
                     this._wetStrokes.set(evt.strokeId, stroke);
 
                     if (evt.clientId) {
-                        if (evt.type !== StrokeType.Persistent) {
+                        if (evt.type !== StrokeType.Persistent || !evt.isCursorShared) {
                             this.removeCursor(evt.clientId);
                         }
                         else {
@@ -405,7 +413,7 @@ export class SharedInkingSession extends DataObject {
                         }
 
                         if (evt.clientId) {
-                            if (stroke.type !== StrokeType.Persistent || evt.endState) {
+                            if (stroke.type !== StrokeType.Persistent || evt.endState || !evt.isCursorShared) {
                                 this.removeCursor(evt.clientId);
                             }
                             else {
@@ -420,17 +428,6 @@ export class SharedInkingSession extends DataObject {
     private setupStorageProcessing(): void {
         if (this._inkingManager) {
             const inkingManager = this._inkingManager;
-
-            // Setup incoming client state changes
-            this._clientStateMap.on(
-                "valueChanged",
-                (changed: IValueChanged, local: boolean): void => {
-                    const state = this.getClientState(changed.key);
-
-                    if (!state.isCursorShared) {
-                        this.removeCursor(changed.key);
-                    }
-                });
 
             // Setup incoming dry ink changes
             this._dryInkMap.forEach(
@@ -525,36 +522,6 @@ export class SharedInkingSession extends DataObject {
         }
     }
 
-    private async getSharedMap(key: string): Promise<SharedMap> {
-        const handle = this.root.get<IFluidHandle<SharedMap>>(key);
-
-        if (handle) {
-            return handle.get();
-        }
-        else {
-            throw new Error(`Unable to get SharedMap with key "${key}"`);
-        }
-    }
-
-    private createSharedMap(key: string): SharedMap {
-        const sharedMap = SharedMap.create(this.runtime, key);
-        this.root.set(key, sharedMap.handle);
-
-        return sharedMap;
-    }
-
-    private getClientState(clientId: string): IClientState {
-        const serializedState = this._clientStateMap.get(clientId);
-
-        if (serializedState !== undefined) {
-            return JSON.parse(serializedState) as IClientState;
-        }
-
-        return {
-            isCursorShared: false
-        };
-    }
-
     private getCursor(clientId: string): CursorVisual {
         let cursorVisual = this._cursorVisualsMap.get(clientId);
 
@@ -588,9 +555,7 @@ export class SharedInkingSession extends DataObject {
 
     private updateCursorPosition(clientId: string, position?: IPoint) {
         if (this._inkingManager) {
-            const isCursorShared = this.getClientState(clientId).isCursorShared;
-
-            if (position && isCursorShared) {
+            if (position) {
                 const cursorVisual = this.getCursor(clientId);
                 const screenPosition = this._inkingManager.viewportToScreen(position);
 
@@ -603,13 +568,20 @@ export class SharedInkingSession extends DataObject {
     }
 
     protected async initializingFirstTime(): Promise<void> {
-        this._dryInkMap = this.createSharedMap(SharedInkingSession.dryInkMapKey);
-        this._clientStateMap = this.createSharedMap(SharedInkingSession.clientStateMapKey);
+        this._dryInkMap = SharedMap.create(this.runtime, SharedInkingSession.dryInkMapKey);
+
+        this.root.set(SharedInkingSession.dryInkMapKey, this._dryInkMap.handle);
     }
 
     protected async hasInitialized(): Promise<void> {
-        this._dryInkMap = await this.getSharedMap(SharedInkingSession.dryInkMapKey);
-        this._clientStateMap = await this.getSharedMap(SharedInkingSession.clientStateMapKey);
+        const handle = this.root.get<IFluidHandle<SharedMap>>(SharedInkingSession.dryInkMapKey);
+
+        if (handle) {
+            this._dryInkMap = await handle.get();
+        }
+        else {
+            throw new Error(`Unable to get SharedMap with key "${SharedInkingSession.dryInkMapKey}"`);
+        }
     }
 
     /**
@@ -655,21 +627,21 @@ export class SharedInkingSession extends DataObject {
      * Gets the current cursor sharing status of this client.
      */
     get isCursorShared(): boolean {
-        return this.runtime.clientId
-            ? this.getClientState(this.runtime.clientId).isCursorShared
-            : false;
+        return this._isCursorShared;
     }
 
     /**
      * Sets the current cursor sharing status of this client.
      */
     set isCursorShared(value: boolean) {
-        if (value !== this.isCursorShared && this.runtime.clientId) {
-            let state = this.getClientState(this.runtime.clientId);
+        if (this._isCursorShared !== value) {
+            this._isCursorShared = value;
 
-            state.isCursorShared = value;
-
-            this._clientStateMap.set(this.runtime.clientId,  JSON.stringify(state));
+            if (!this._isCursorShared) {
+                // Send a pointer moved event with an undefined
+                // point to indicated the cursor is not shared anymore
+                this._pointerMovedEventTarget.sendEvent({ });
+            }
         }
     }
 

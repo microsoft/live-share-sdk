@@ -8,17 +8,20 @@ import { IFluidHandle } from '@fluidframework/core-interfaces';
 import { IValueChanged, SharedMap } from '@fluidframework/map';
 import { ISequencedDocumentMessage } from '@fluidframework/protocol-definitions';
 import { AddPointsEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
-    InkingManager, IWetStroke, StrokeEndState, StrokesAddedEvent, StrokesRemovedEvent } from './InkingManager';
-import { IPointerPoint, getDistanceBetweenPoints } from './Geometry';
+    InkingManager, IPointerMovedEventArgs, IWetStroke, PointerMovedEvent, StrokeEndState, StrokesAddedEvent, StrokesRemovedEvent } from './InkingManager';
+import { IPointerPoint, getDistanceBetweenPoints, IPoint } from './Geometry';
 import { IStroke, Stroke, StrokeType } from "./Stroke";
 import { EphemeralEventScope, EphemeralEventTarget, IEphemeralEvent, UserMeetingRole } from '@microsoft/live-share';
-import { IBrush } from '../canvas/Brush';
+import { IBrush } from './Brush';
+import { basicColors, darkenColor, IColor, toCssColor } from './Colors';
 
-enum StrokeEventNames {
+enum InkingEventNames {
+    PointerMove = "PointerMove",
     BeginWetStroke = "BeginWetStroke",
     AddWetStrokePoints = "AddWetStrokePoint",
 }
 
+type IPointerMovedEvent = IEphemeralEvent & IPointerMovedEventArgs;
 type IBeginWetStrokeEvent = IEphemeralEvent & IBeginStrokeEventArgs;
 type IAddWetStrokePointsEvent = IEphemeralEvent & IAddPointsEventArgs;
 
@@ -85,10 +88,153 @@ class LiveStroke {
     }
 }
 
+interface IClientState {
+    isCursorShared: boolean;
+}
+
+/**
+ * Encapsulates information about a shared cursor.
+ */
+export interface ICursorInfo {
+    /**
+     * The client Id associated with the cursor.
+     */
+    clientId: string;
+    /**
+     * Optional. The name associated with the cursor.
+     */
+    name?: string;
+    /**
+     * Optional. The URI of a picture associated with the cursor.
+     */
+    pictureUri?: string;
+}
+
+/**
+ * Represents a cursor's visual representation. Applications that want
+ * to customize the appearance of cursors on the screen should extend
+ * `CursorVisual` and override its `renderedElement` property to return
+ * a custom HTML element.
+ */
+export abstract class CursorVisual {
+    /**
+     * Updates the position of the cursor.
+     * @param position The new position of the cursor.
+     */
+    setPosition(position: IPoint) {
+        if (this.renderedElement) {
+            this.renderedElement.style.left = position.x + "px";
+            this.renderedElement.style.top = position.y + "px";
+        }
+    }
+
+    /**
+     * Initializes a new instance of `CursorVisual`.
+     * @param info The cursor info.
+     */
+    constructor(public info: Readonly<ICursorInfo>) { }
+
+    /**
+     * Returns an HTML element representing the cursor. Applications
+     * that extend `CursorVisual` must override `get renderedElement`
+     * to return a custom built HTML element.
+     */
+    abstract get renderedElement(): HTMLElement;
+}
+
+interface ICursorColor {
+    readonly backgroundColor: IColor,
+    foregroundColor: IColor
+}
+
+class BuiltInCursorVisual extends CursorVisual {
+    private static cursorColors: ICursorColor[] = [
+        { backgroundColor: basicColors.red, foregroundColor: basicColors.white },
+        { backgroundColor: basicColors.green, foregroundColor: basicColors.black },
+        { backgroundColor: basicColors.blue, foregroundColor: basicColors.black },
+        { backgroundColor: basicColors.purple, foregroundColor: basicColors.black },
+        { backgroundColor: basicColors.magenta, foregroundColor: basicColors.black },
+        { backgroundColor: basicColors.violet, foregroundColor: basicColors.black },
+        { backgroundColor: basicColors.gray, foregroundColor: basicColors.black },
+        { backgroundColor: basicColors.silver, foregroundColor: basicColors.black }
+    ];
+    private static currentColorIndex = 0;
+
+    private _color: ICursorColor;
+    private _renderedElement: HTMLElement;
+
+    private render(): HTMLElement {
+        const cursorSize = 20;
+
+        const foregroundColor = toCssColor(this._color.foregroundColor);
+        const backgroundColor = toCssColor(this._color.backgroundColor);
+        const borderColor = toCssColor(darkenColor(this._color.backgroundColor, 50));
+
+        let visualTemplate = `
+            <svg width="${cursorSize}" height="${cursorSize}">
+                <path d="M0 0 L${cursorSize} ${cursorSize / 2.2} L${cursorSize / 2} ${cursorSize / 2} L8 ${cursorSize} Z" stroke-width="1" stroke="${borderColor}" fill="${backgroundColor}"/>
+            </svg>`;
+
+        if (this.info.name && !this.info.pictureUri) {
+            visualTemplate += `
+                <div style="background-color: ${backgroundColor}; color: ${foregroundColor}; border: 1px solid ${borderColor};
+                    border-radius: 10% / 50%; padding: 2px 6px; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px; white-space: nowrap; font-size: 12px; font-family: sans-serif">
+                    ${this.info.name}
+                </div>`;
+        }
+        else if (this.info.pictureUri && !this.info.name) {
+            visualTemplate += `
+                <img src="${this.info.pictureUri}" style="width: ${cursorSize * 1.1}px; height: ${cursorSize * 1.1}px; border-radius: 50%;
+                    border: 1px solid ${borderColor}; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px;">`;
+        }
+        else if (this.info.pictureUri && this.info.name) {
+            visualTemplate += `
+                <div style="display: flex; flex-direction: row; align-items: center; background-color: ${backgroundColor}; color: ${foregroundColor}; border: 1px solid ${borderColor};
+                    border-radius: ${cursorSize * 1.1 / 2}px / 50%; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px; white-space: nowrap; font-size: 12px; font-family: sans-serif">
+                    <img src="${this.info.pictureUri}" style="width: ${cursorSize * 1.1}px; height: ${cursorSize * 1.1}px; border-radius: 50%;">
+                    <div style="padding: 0 8px">${this.info.name}</div>
+                </div>`;
+        }
+
+        const template = document.createElement("template");
+        template.innerHTML = visualTemplate;
+
+        const element = document.createElement("div");
+        element.style.position = "absolute";
+        element.style.display = "flex";
+        element.style.flexDirection = "row";
+
+        element.appendChild(template.content.cloneNode(true));
+
+        return element;
+    }
+
+    constructor(public info: Readonly<ICursorInfo>) {
+        super(info);
+
+        this._color = BuiltInCursorVisual.cursorColors[BuiltInCursorVisual.currentColorIndex];
+
+        BuiltInCursorVisual.currentColorIndex++;
+
+        if (BuiltInCursorVisual.currentColorIndex >= BuiltInCursorVisual.cursorColors.length) {
+            BuiltInCursorVisual.currentColorIndex = 0;
+        }
+
+        this._renderedElement = this.render();
+    }
+
+    get renderedElement(): HTMLElement {
+        return this._renderedElement;
+    }
+}
+
 /**
  * Enables live and collaborative inking.
  */
 export class SharedInkingSession extends DataObject {
+    private static readonly dryInkMapKey = "dryInk";
+    private static readonly clientStateMapKey = "clientState";
+
     /**
      * Configures the delay before wet stroke events are emitted, to greatly reduce the 
      * number of events emitted and improve performance.
@@ -102,7 +248,7 @@ export class SharedInkingSession extends DataObject {
      * - Then remove point B because it's almost on the same line as that defined by A and C
      * This variable allows the fine tuning of that threshold.
      */
-    public static wetStrokePointSimplificationThreshold = 100.2;
+    public static wetStrokePointSimplificationThreshold = 100.1;
 
     /**
      * The object's Fluid type/name.
@@ -121,16 +267,20 @@ export class SharedInkingSession extends DataObject {
     private _inkingManager?: InkingManager;
     private _processingIncomingChanges = false;
     private _dryInkMap!: SharedMap;
+    private _clientStateMap!: SharedMap;
     private _wetStrokes: Map<string, IWetStroke> = new Map<string, IWetStroke>();
+    private _pointerMovedEventTarget!: EphemeralEventTarget<IPointerMovedEvent>;
     private _beginWetStrokeEventTarget!: EphemeralEventTarget<IBeginWetStrokeEvent>;
     private _addWetStrokePointEventTarget!: EphemeralEventTarget<IAddWetStrokePointsEvent>;
     private _allowedRoles: UserMeetingRole[] = [ UserMeetingRole.guest, UserMeetingRole.attendee, UserMeetingRole.organizer, UserMeetingRole.presenter ];    
     private _pendingLiveStrokes: Map<string, LiveStroke> = new Map<string, LiveStroke>();
+    private _cursorVisualsMap = new Map<string, CursorVisual>();
+    private _cursorVisualsHost!: HTMLElement;
 
     private liveStrokeProcessed = (liveStroke: LiveStroke) => {
         this._addWetStrokePointEventTarget.sendEvent(
             {
-                name: StrokeEventNames.AddWetStrokePoints,
+                name: InkingEventNames.AddWetStrokePoints,
                 strokeId: liveStroke.id,
                 points: liveStroke.points,
                 endState: liveStroke.endState
@@ -142,6 +292,14 @@ export class SharedInkingSession extends DataObject {
     private setupWetInkProcessing(): void {
         // Setup outgoing events
         if (this._inkingManager) {
+            this._inkingManager.on(
+                PointerMovedEvent,
+                (eventArgs: IPointerMovedEventArgs) => {
+                    this._pointerMovedEventTarget.sendEvent(
+                        {
+                            position: eventArgs.position
+                        });
+                });
             this._inkingManager.on(
                 BeginStrokeEvent,
                 (eventArgs: IBeginStrokeEventArgs) => {
@@ -157,7 +315,7 @@ export class SharedInkingSession extends DataObject {
 
                     this._beginWetStrokeEventTarget.sendEvent(
                         {
-                            name: StrokeEventNames.BeginWetStroke,
+                            name: InkingEventNames.BeginWetStroke,
                             ...eventArgs
                         });
                 });
@@ -187,9 +345,18 @@ export class SharedInkingSession extends DataObject {
         // Setup incoming events
         const scope = new EphemeralEventScope(this.runtime, [ UserMeetingRole.presenter ]);
 
+        this._pointerMovedEventTarget = new EphemeralEventTarget(
+            scope,
+            InkingEventNames.PointerMove,
+            (evt: IPointerMovedEvent, local: boolean) => {
+                if (!local && evt.clientId) {
+                    this.updateCursorPosition(evt.clientId, evt.position);
+                }
+            });
+
         this._beginWetStrokeEventTarget = new EphemeralEventTarget(
             scope,
-            StrokeEventNames.BeginWetStroke,
+            InkingEventNames.BeginWetStroke,
             (evt: IBeginWetStrokeEvent, local: boolean) => {
                 if (!local && this._inkingManager) {
                     const stroke = this._inkingManager.beginWetStroke(
@@ -203,12 +370,21 @@ export class SharedInkingSession extends DataObject {
                         });
         
                     this._wetStrokes.set(evt.strokeId, stroke);
+
+                    if (evt.clientId) {
+                        if (evt.type !== StrokeType.Persistent) {
+                            this.removeCursor(evt.clientId);
+                        }
+                        else {
+                            this.updateCursorPosition(evt.clientId, evt.startPoint);
+                        }
+                    }
                 }      
             });
 
         this._addWetStrokePointEventTarget = new EphemeralEventTarget(
             scope,
-            StrokeEventNames.AddWetStrokePoints,
+            InkingEventNames.AddWetStrokePoints,
             (evt: IAddWetStrokePointsEvent, local: boolean) => {
                 if (!local) {
                     const stroke = this._wetStrokes.get(evt.strokeId);
@@ -227,16 +403,36 @@ export class SharedInkingSession extends DataObject {
                         else if (evt.endState === StrokeEndState.Ended && stroke.type === StrokeType.Ephemeral) {
                             stroke.end();
                         }
+
+                        if (evt.clientId) {
+                            if (stroke.type !== StrokeType.Persistent || evt.endState) {
+                                this.removeCursor(evt.clientId);
+                            }
+                            else {
+                                this.updateCursorPosition(evt.clientId, evt.points[evt.points.length - 1]);
+                            }
+                        }
                     }
                 }        
             });
     }
 
-    private setupDryInkProcessing(): void {
+    private setupStorageProcessing(): void {
         if (this._inkingManager) {
             const inkingManager = this._inkingManager;
 
-            // Setup incoming changes
+            // Setup incoming client state changes
+            this._clientStateMap.on(
+                "valueChanged",
+                (changed: IValueChanged, local: boolean): void => {
+                    const state = this.getClientState(changed.key);
+
+                    if (!state.isCursorShared) {
+                        this.removeCursor(changed.key);
+                    }
+                });
+
+            // Setup incoming dry ink changes
             this._dryInkMap.forEach(
                 (value: string) => {
                     const stroke = new Stroke();
@@ -252,12 +448,12 @@ export class SharedInkingSession extends DataObject {
 
                     try {
                         if (!local) {
-                            const strokeJson: string | undefined = this._dryInkMap.get(changed.key);
+                            const serializedStroke: string | undefined = this._dryInkMap.get(changed.key);                            
                             const addRemoveOptions: IAddRemoveStrokeOptions = { forceReRender: true, addToChangeLog: false };
 
-                            if (strokeJson !== undefined) {
+                            if (serializedStroke !== undefined) {
                                 const stroke = inkingManager.getStroke(changed.key) ?? new Stroke();
-                                stroke.deserialize(strokeJson);
+                                stroke.deserialize(serializedStroke);
 
                                 // If we received a stroke that happens to be an ongoing wet stroke,
                                 // cancel the wet stroke so it's removed from the screen and replace
@@ -300,7 +496,7 @@ export class SharedInkingSession extends DataObject {
                     }
                 });
 
-            // Setup outgoing changes.
+            // Setup outgoing dry ink changes.
             inkingManager.on(
                 StrokesAddedEvent,
                 (strokes: IStroke[]): void => {
@@ -329,21 +525,107 @@ export class SharedInkingSession extends DataObject {
         }
     }
 
+    private async getSharedMap(key: string): Promise<SharedMap> {
+        const handle = this.root.get<IFluidHandle<SharedMap>>(key);
+
+        if (handle) {
+            return handle.get();
+        }
+        else {
+            throw new Error(`Unable to get SharedMap with key "${key}"`);
+        }
+    }
+
+    private createSharedMap(key: string): SharedMap {
+        const sharedMap = SharedMap.create(this.runtime, key);
+        this.root.set(key, sharedMap.handle);
+
+        return sharedMap;
+    }
+
+    private getClientState(clientId: string): IClientState {
+        const serializedState = this._clientStateMap.get(clientId);
+
+        if (serializedState !== undefined) {
+            return JSON.parse(serializedState) as IClientState;
+        }
+
+        return {
+            isCursorShared: false
+        };
+    }
+
+    private getCursor(clientId: string): CursorVisual {
+        let cursorVisual = this._cursorVisualsMap.get(clientId);
+
+        if (!cursorVisual) {
+            const cursorInfo = this.onGetCursorInfo ? this.onGetCursorInfo(clientId) : { clientId };
+
+            cursorVisual = this.onCreateCursorVisual ? this.onCreateCursorVisual(cursorInfo) : new BuiltInCursorVisual(cursorInfo);
+
+            this._cursorVisualsMap.set(clientId, cursorVisual);
+        }
+
+        if (!this._cursorVisualsHost.contains(cursorVisual.renderedElement)) {
+            this._cursorVisualsHost.appendChild(cursorVisual.renderedElement);
+        }
+
+        return cursorVisual;
+    }
+
+    private removeCursor(clientId: string) {
+        const cursorVisual = this._cursorVisualsMap.get(clientId);
+
+        if (cursorVisual) {
+            if (this._cursorVisualsHost.contains(cursorVisual.renderedElement)) {
+                this._cursorVisualsHost.removeChild(cursorVisual.renderedElement);
+            }
+        }
+
+        // We do not remove the cursor component from the cursor map so that
+        // we don't lose the color it got automatically attributed.
+    }
+
+    private updateCursorPosition(clientId: string, position?: IPoint) {
+        if (this._inkingManager) {
+            const isCursorShared = this.getClientState(clientId).isCursorShared;
+
+            if (position && isCursorShared) {
+                const cursorVisual = this.getCursor(clientId);
+                const screenPosition = this._inkingManager.viewportToScreen(position);
+
+                cursorVisual.setPosition(screenPosition);
+            }
+            else {
+                this.removeCursor(clientId);
+            }
+        }
+    }
+
     protected async initializingFirstTime(): Promise<void> {
-        this._dryInkMap = SharedMap.create(this.runtime, 'dryInk');
-        this.root.set('dryInk', this._dryInkMap.handle);
+        this._dryInkMap = this.createSharedMap(SharedInkingSession.dryInkMapKey);
+        this._clientStateMap = this.createSharedMap(SharedInkingSession.clientStateMapKey);
     }
 
     protected async hasInitialized(): Promise<void> {
-        const handle = this.root.get<IFluidHandle<SharedMap>>("dryInk");
-
-        if (handle) {
-            this._dryInkMap = await handle.get();
-        }
-        else {
-            throw new Error("Unable to get the dryInk SharedMap handle.");
-        }
+        this._dryInkMap = await this.getSharedMap(SharedInkingSession.dryInkMapKey);
+        this._clientStateMap = await this.getSharedMap(SharedInkingSession.clientStateMapKey);
     }
+
+    /**
+     * Optional callback that allows the consuming application to map a client Id
+     * to a name and picture URI, which are then used to display shared cursor
+     * visuals.
+     */
+    onGetCursorInfo?: (clientId: string) => ICursorInfo;
+
+    /**
+     * Optional callback that allows the consuming application to provide its own
+     * cursor visual implementation by extending the abstract `CursorVisual` class.
+     * The callback is passed the cursor info retrieved via the `onGetCursorInfo`
+     * calback, if provided.
+     */
+    onCreateCursorVisual?: (info: ICursorInfo) => CursorVisual;
 
     /**
      * Starts the live inking session.
@@ -354,10 +636,41 @@ export class SharedInkingSession extends DataObject {
     synchronize(hostElement: HTMLElement): InkingManager {
         this._inkingManager = new InkingManager(hostElement);
 
-        this.setupDryInkProcessing();
+        this.setupStorageProcessing();
         this.setupWetInkProcessing();
 
+        this._cursorVisualsHost = document.createElement("div");
+        this._cursorVisualsHost.style.position = "absolute";
+        this._cursorVisualsHost.style.pointerEvents = "none";
+        this._cursorVisualsHost.style.width = "100%";
+        this._cursorVisualsHost.style.height = "100%";
+        this._cursorVisualsHost.style.overflow = "hidden";
+
+        hostElement.appendChild(this._cursorVisualsHost);
+
         return this._inkingManager;
+    }
+
+    /**
+     * Gets the current cursor sharing status of this client.
+     */
+    get isCursorShared(): boolean {
+        return this.runtime.clientId
+            ? this.getClientState(this.runtime.clientId).isCursorShared
+            : false;
+    }
+
+    /**
+     * Sets the current cursor sharing status of this client.
+     */
+    set isCursorShared(value: boolean) {
+        if (value !== this.isCursorShared && this.runtime.clientId) {
+            let state = this.getClientState(this.runtime.clientId);
+
+            state.isCursorShared = value;
+
+            this._clientStateMap.set(this.runtime.clientId,  JSON.stringify(state));
+        }
     }
 
     /**

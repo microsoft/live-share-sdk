@@ -3,14 +3,21 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { brightenColor } from "../core/Utils";
+/**
+ * Defines an RGB color
+ */
+ export interface IColor {
+    readonly r: number; // 0 - 255
+    readonly g: number; // 0 - 255
+    readonly b: number; // 0 - 255
+}
 
 /**
  * Converts an IColor object into its CSS representation.
  * @param color The color to convert.
  * @returns A string representing the CSS representation of the color.
  */
-export function toCssColor(color: IColor, alpha: number = 1): string {
+ export function toCssColor(color: IColor, alpha: number = 1): string {
     return `rgba(${color.r},${color.g},${color.b},${alpha})`;
 }
 
@@ -38,12 +45,51 @@ export function fromCssColor(color: string): IColor {
 }
 
 /**
- * Defines an RGB color
+ * Lightens the given color by a certain intensity.
+ * @param color The color to lighten.
+ * @param intensity The intensity of the lightening. Must be between 0 and 100.
+ * @returns The lightened color.
  */
-export interface IColor {
-    readonly r: number; // 0 - 255
-    readonly g: number; // 0 - 255
-    readonly b: number; // 0 - 255
+export function lightenColor(color: IColor, intensity: number): IColor {
+    if (intensity < 0 || intensity > 100) {
+        return color;
+    }
+
+    const brightenChannel = (channel: number) => {
+        const delta = 255 - channel;
+
+        return channel + delta / 100 * intensity;
+    }
+
+    return {
+        r: brightenChannel(color.r),
+        g: brightenChannel(color.g),
+        b: brightenChannel(color.b)
+    }
+}
+
+/**
+ * Darkens the given color by a certain intensity.
+ * @param color The color to darken.
+ * @param intensity The intensity of the darkening. Must be between 0 and 100.
+ * @returns The darkened color.
+ */
+ export function darkenColor(color: IColor, intensity: number): IColor {
+    if (intensity < 0 || intensity > 100) {
+        return color;
+    }
+
+    const darkenChannel = (channel: number) => {
+        const delta = 255 - channel;
+
+        return channel - channel / 100 * intensity;
+    }
+
+    return {
+        r: darkenChannel(color.r),
+        g: darkenChannel(color.g),
+        b: darkenChannel(color.b)
+    }
 }
 
 /**
@@ -52,9 +98,15 @@ export interface IColor {
 export const basicColors = {
     black: fromCssColor("#000000"),
     white: fromCssColor("#ffffff"),
+    gray: fromCssColor("#808080"),
+    silver: fromCssColor("#c0c0c0"),
     red: fromCssColor("#ff0000"),
     green: fromCssColor("#00ff00"),
-    blue: fromCssColor("#0000ff")
+    blue: fromCssColor("#0000ff"),
+    yellow: fromCssColor("#ffff00"),
+    magenta: fromCssColor("#ea33f6"),
+    violet: fromCssColor("#8719cc"),
+    purple: fromCssColor("#76147d")
 };
 
 /**
@@ -99,66 +151,4 @@ export const highlighterColors = {
     lightGray: fromCssColor("#e6e6e6"),
     gray: fromCssColor("#969696"),
     black: fromCssColor("#000000")
-};
-
-/**
- * Defines the shape of a brush's tip.
- */
-export type BrushTipShape = "ellipse" | "rectangle";
-
-/**
- * Defines brush types.
- */
-export type BrushType = "pen" | "highlighter" | "laser";
-
-/**
- * Defines a brush as used to draw strokes.
- */
-export interface IBrush {
-    /**
-     * The type of the brush.
-     */
-    type: BrushType,
-    /**
-     * The main color of the brush.
-     */
-    color: IColor;
-    /**
-     * The shape of the brush's tip.
-     */
-    tip: BrushTipShape;
-    /**
-     * The size of the brush's tip. Must be greater than 0.
-     */
-    tipSize: number;
-}
-
-/**
- * The default pen brush.
- */
-export const DefaultPenBrush: Readonly<IBrush> = {
-    type: "pen",
-    color: penColors.black,
-    tip: "ellipse",
-    tipSize: 10
-};
-
-/**
- * The default highlighter brush.
- */
-export const DefaultHighlighterBrush: IBrush = {
-    type: "highlighter",
-    color: highlighterColors.yellow,
-    tip: "rectangle",
-    tipSize: 10
-};
-
-/**
- * The default laser pointer brush.
- */
-export const DefaultLaserPointerBrush: IBrush = {
-    type: "laser",
-    color: basicColors.red,
-    tip: "ellipse",
-    tipSize: 10
 };

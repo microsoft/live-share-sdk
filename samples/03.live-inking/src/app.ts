@@ -8,6 +8,7 @@ import { TeamsFluidClient, UserMeetingRole } from "@microsoft/live-share";
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { SharedInkingSession, InkingManager, InkingTool } from "@microsoft/live-share-inking";
+import { IFluidContainer } from "fluid-framework";
 
 function runningInTeams(): boolean {
     const currentUrl = window.location.href;
@@ -27,6 +28,11 @@ const containerSchema = {
 };
 
 var inkingManager: InkingManager;
+var container: IFluidContainer;
+
+function getSharedInkingSession(): SharedInkingSession {
+    return container.initialObjects.inkingSession as SharedInkingSession;
+}
 
 async function start() {
     const client = new TeamsFluidClient({
@@ -38,12 +44,20 @@ async function start() {
         }
     });
 
-    const { container } = await client.joinContainer(containerSchema);
+    container = (await client.joinContainer(containerSchema)).container;
 
     const inkingHost = document.getElementById("inkingHost");
 
     if (inkingHost) {
-        const inkingSession = container.initialObjects.inkingSession as SharedInkingSession;
+        const inkingSession = getSharedInkingSession();
+        inkingSession.onGetCursorInfo = (clientId: string) => {
+            // Map clientId to a name and picture URI
+            return {
+                clientId,
+                name: "Mark Knopfler",
+                pictureUri: "https://assets.mubi.com/images/cast_member/52480/image-original.jpg?1416636889"
+            }
+        }
 
         inkingManager = inkingSession.synchronize(inkingHost);
         inkingManager.activate();
@@ -95,6 +109,21 @@ window.onload = async () => {
         }
     });
     setupButton("btnZoomIn", () => { inkingManager.scale += 0.1; });
+
+    setupButton("btnToggleCursorShare",
+        () => {
+            const sharedInkingSession = getSharedInkingSession();
+            const isCursorShared = sharedInkingSession.isCursorShared;
+
+            sharedInkingSession.isCursorShared = !isCursorShared;
+
+            const button = document.getElementById("btnToggleCursorShare");
+
+            if (button) {
+                button.innerText = sharedInkingSession.isCursorShared ? "Stop sharing cursor" : "Share cursor";
+            }
+        }
+    )
 
     if (runningInTeams()) {
         try {

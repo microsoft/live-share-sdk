@@ -6,7 +6,8 @@
 import { InkingCanvas } from "./InkingCanvas";
 import { getPressureAdjustedSize, computeQuadBetweenTwoCircles, IPointerPoint,
     computeQuadBetweenTwoRectangles, IQuadPathItem } from "../core/Geometry";
-import { toCssColor, DefaultPenBrush, IBrush, IColor, basicColors } from "./Brush";
+import { DefaultPenBrush, IBrush } from "../core/Brush";
+import { toCssColor } from "../core/Colors";
 
 /**
  * Represents the base class from wet and dry canvases, implementing the common rendering logic.

@@ -5,7 +5,7 @@
 
 import { TWO_PI, IPointerPoint, IQuad, IPoint, viewportToScreen } from "../core/Geometry";
 import { IStroke } from "../core/Stroke";
-import { IBrush } from "./Brush";
+import { IBrush } from "../core/Brush";
 
 /**
  * Defines the refernece point of a canvas. The reference point is the origin used for

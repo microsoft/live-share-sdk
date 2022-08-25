@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IBrush, DefaultPenBrush } from "../canvas/Brush";
+import { IBrush, DefaultPenBrush } from "./Brush";
 import { doRectanglesOverlap, getSegmentIntersectionsWithRectangle, getSegmentsIntersection,
     getSquaredDistanceBetweenPoints, IPoint, IPointerPoint, IRect, ISegment, isPointInsideRectangle,
     isRectangleInsideRectangle, segmentMayIntersectWithRectangle, unionRect } from "./Geometry";

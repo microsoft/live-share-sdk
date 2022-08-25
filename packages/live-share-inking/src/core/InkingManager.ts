@@ -14,7 +14,7 @@ import { JitterFilter } from "../input/JitterFilter";
 import { generateUniqueId, pointerEventToPoint } from "./Utils";
 import { InputProvider } from "../input/InputProvider";
 import { PointerInputProvider } from "../input/PointerInputProvider";
-import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultPenBrush, IBrush } from "../canvas/Brush";
+import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultPenBrush, IBrush } from "./Brush";
 
 interface CoalescedPointerEvent extends PointerEvent {
     getCoalescedEvents(): PointerEvent[];
@@ -67,6 +67,18 @@ export const StrokesAddedEvent: symbol = Symbol();
  * The event emitted by InkingManager when a stroked is removed.
  */
 export const StrokesRemovedEvent: symbol = Symbol();
+
+/**
+ * Defines the arguments of the PointerMovedEvent.
+ */
+export interface IPointerMovedEventArgs {
+    position?: IPoint;
+}
+
+/**
+ * The event emitted by InkingManager when the pointer moves over the canvas.
+ */
+export const PointerMovedEvent: symbol = Symbol();
 
 /**
  * Defines the arguments of the BeginStrokeEvent.
@@ -513,27 +525,34 @@ export class InkingManager extends EventEmitter {
 
                 // The laser pointer is displayed while hovering over the inking surface. We activate
                 // it if there's not pointer captured
-                if (this._tool === InkingTool.LaserPointer && this._activePointerId === undefined) {
-                    if (this._currentStroke === undefined) {
-                        this._inputFilters.reset(p);
+                if (this._activePointerId === undefined) {
+                    if (this._tool === InkingTool.LaserPointer) {
+                        if (this._currentStroke === undefined) {
+                            this._inputFilters.reset(p);
 
-                        const filteredPoint = this._inputFilters.filterPoint(p);
+                            const filteredPoint = this._inputFilters.filterPoint(p);
 
-                        this._currentStroke = this.beginWetStroke(
-                            StrokeType.LaserPointer,
-                            filteredPoint,
-                            {
-                                brush: this.getBrushForTool(this._tool)
-                            });
+                            this._currentStroke = this.beginWetStroke(
+                                StrokeType.LaserPointer,
+                                filteredPoint,
+                                {
+                                    brush: this.getBrushForTool(this._tool)
+                                });
 
-                        this.notifyBeginStroke(this._currentStroke);
+                            this.notifyBeginStroke(this._currentStroke);
+                        }
+                        else {
+                            const filteredPoint = this._inputFilters.filterPoint(p);
+
+                            this._currentStroke.addPoints(filteredPoint);
+
+                            this.notifyAddPoints(this._currentStroke.id, filteredPoint);
+                        }
                     }
                     else {
                         const filteredPoint = this._inputFilters.filterPoint(p);
 
-                        this._currentStroke.addPoints(filteredPoint);
-
-                        this.notifyAddPoints(this._currentStroke.id, filteredPoint);
+                        this.notifyPointerMoved(filteredPoint);
                     }
                 }
 
@@ -608,10 +627,15 @@ export class InkingManager extends EventEmitter {
     };
 
     private onPointerLeave = (e: PointerEvent): void => {
-        if (this._tool === InkingTool.LaserPointer && this._activePointerId === undefined) {
-            const filteredPoint = this._inputFilters.filterPoint(pointerEventToPoint(e));
+        if (this._activePointerId === undefined) {
+            if (this._tool === InkingTool.LaserPointer) {
+                const filteredPoint = this._inputFilters.filterPoint(pointerEventToPoint(e));
 
-            this.cancelCurrentStroke(filteredPoint);
+                this.cancelCurrentStroke(filteredPoint);
+            }
+            else {
+                this.notifyPointerMoved();
+            }
         }
 
         e.preventDefault();
@@ -732,6 +756,14 @@ export class InkingManager extends EventEmitter {
         return result;
     }
 
+    private notifyPointerMoved(position?: IPoint) {
+        const eventArgs: IPointerMovedEventArgs = {
+            position
+        };
+
+        this.emit(PointerMovedEvent, eventArgs);
+    }
+
     private notifyStrokesAdded(...strokes: IStroke[]) {
         if (strokes.length > 0) {
             this.emit(StrokesAddedEvent, strokes);
@@ -797,6 +829,7 @@ export class InkingManager extends EventEmitter {
             new InkingManager.ScreenToViewportCoordinateTransform(this));
 
         this._host = host;
+        this._host.style.position = "relative";
 
         this._dryCanvas = new DryCanvas(this._host);
 

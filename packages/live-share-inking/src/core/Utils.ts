@@ -4,7 +4,7 @@
  */
 
 import { v4 as uuid } from "uuid";
-import { IColor } from "../canvas/Brush";
+import { IColor } from "./Colors";
 import { IPointerPoint } from "./Geometry";
 
 const EPSILON = 0.000001;
@@ -30,31 +30,6 @@ export function pointerEventToPoint(e: PointerEvent): IPointerPoint {
         y: e.offsetY,
         pressure: e.pressure > 0 ? e.pressure : 0.5
     };
-}
-
-/**
- * @hidden
- * Brightens the given color by a certain intensity.
- * @param color The color to brighten.
- * @param intensity The intensity of the brightening. Must be between 0 and 100.
- * @returns The brightened color.
- */
-export function brightenColor(color: IColor, intensity: number): IColor {
-    if (intensity < 0 || intensity > 100) {
-        return color;
-    }
-
-    const brightenChannel = (channel: number) => {
-        const delta = 255 - channel;
-
-        return channel + delta / 100 * intensity;
-    }
-
-    return {
-        r: brightenChannel(color.r),
-        g: brightenChannel(color.g),
-        b: brightenChannel(color.b)
-    }
 }
 
 /**

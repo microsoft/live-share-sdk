@@ -246,37 +246,39 @@ export interface IAddRemoveStrokeOptions {
  */
 export class InkingManager extends EventEmitter {
     /**
+     * Configures the amount of time to wait before sending a pointer moved event. This delay
+     * allows for the elimination of fast, consecutive pointer move events, and only send the
+     * most recent update.
+     */
+    private static readonly pointerMovedNotificationDelay = 15;
+
+    /**
+     * Configures the delay between a request to render the canvas and the actual rendering.
+     */
+    private static readonly asyncRenderDelay = 30;
+
+    /**
+     * Configures the amount of time to wait before processing eraser strokes. This delay allows
+     * the collection of changes that can be handled as a batch.
+     */
+    private static readonly pointEraserProcessingInterval = 30;
+    
+    /**
      * The default client Id of the device running the application.
      */
     public static readonly localClientId = generateUniqueId();
 
     /**
-     * Configures the delay between a request to render the canvas and the actual rendering.
-     */
-    public static asyncRenderDelay = 30;
-    /**
-     * Configures the amount of time to wait before processing eraser strokes. This delay allows
-     * the collection of changes that can be handled as a batch.
-     */
-    public static pointEraserProcessingInterval = 30;
-    /**
      * Configures the amount of time an ephemeral canvas (i.e. a canvas that renders ephemeral
-     * strokes) takes to fade out.
+     * strokes) remains ready for new strokes before being faded out and removed.
      */
     public static ephemeralCanvasRemovalDelay = 1500;
-    /**
-     * Configures the amount of time to wait before sending a pointer moved event. This delay
-     * allows for the elimination of fast, consecutive pointer move events, and only send the
-     * most recent update.
-     */
-    public static pointerMovedNotificationDelay = 15;
 
     private static WetStroke = class extends Stroke implements IWetStroke {
         constructor(
             private _owner: InkingManager,
             private _canvas: InkingCanvas,
             readonly type: StrokeType,
-            startPoint: IPointerPoint,
             options?: IStrokeCreationOptions) {
             super(options);
 
@@ -942,7 +944,6 @@ export class InkingManager extends EventEmitter {
             this,
             canvas,
             strokeType,
-            startPoint,
             options);
 
         stroke.addPoints(startPoint);

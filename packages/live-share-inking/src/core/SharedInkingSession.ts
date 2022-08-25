@@ -31,6 +31,22 @@ type IBeginWetStrokeEvent = IEphemeralEvent & IBeginStrokeEventArgs & ISharedCur
 type IAddWetStrokePointsEvent = IEphemeralEvent & IAddPointsEventArgs & ISharedCursor;
 
 class LiveStroke {
+    /**
+     * In order to limit the number of points being sent over the wire, wet strokes are
+     * simplified as follows:
+     * - Given 3 points A, B, C
+     * - If distance(A, B) + distance(B, C) < wetStrokePointSimplificationThreshold % of distance(A, C)
+     * - Then remove point B because it's almost on the same line as that defined by A and C
+     * This variable allows the fine tuning of that threshold.
+     */
+    private static readonly wetStrokePointSimplificationThreshold = 100.1;
+
+    /**
+     * Configures the delay before wet stroke events are emitted, to greatly reduce the 
+     * number of events emitted and improve performance.
+     */
+    private static readonly wetStrokeEventsStreamDelay = 60;
+
     private _points: IPointerPoint[] = [];
     private _processTimeout?: number;
 
@@ -54,7 +70,7 @@ class LiveStroke {
 
             const threshold = (p1p2 + p2p3) * (100 / p1p3);
 
-            if (threshold < SharedInkingSession.wetStrokePointSimplificationThreshold) {
+            if (threshold < LiveStroke.wetStrokePointSimplificationThreshold) {
                 this._points.splice(index + 1, 1);
             }
             else {
@@ -88,7 +104,7 @@ class LiveStroke {
 
                     onProcessedCallback(this);
                 },
-                SharedInkingSession.wetStrokeEventsStreamDelay);
+                LiveStroke.wetStrokeEventsStreamDelay);
         }
     }
 }
@@ -240,24 +256,10 @@ export class SharedInkingSession extends DataObject {
     private static readonly dryInkMapKey = "dryInk";
 
     /**
-     * Configures the delay before wet stroke events are emitted, to greatly reduce the 
-     * number of events emitted and improve performance.
-     */
-    public static wetStrokeEventsStreamDelay = 60;
-    /**
-     * In order to limit the number of points being sent over the wire, wet strokes are
-     * simplified as follows:
-     * - Given 3 points A, B, C
-     * - If distance(A, B) + distance(B, C) < wetStrokePointSimplificationThreshold % of distance(A, C)
-     * - Then remove point B because it's almost on the same line as that defined by A and C
-     * This variable allows the fine tuning of that threshold.
-     */
-    public static wetStrokePointSimplificationThreshold = 100.1;
-
-    /**
      * The object's Fluid type/name.
      */
     public static readonly TypeName = `@microsoft/shared-inking-session`;
+
     /**
      * The object's Fluid type factory.
      */

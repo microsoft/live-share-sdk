@@ -19,14 +19,14 @@ export type CanvasReferencePoint = "topLeft" | "center";
  */
 export abstract class InkingCanvas {
     /**
-     * Configures the time it takes, in milliseconds, for an InkingCanvas to fade out.
+     * Configures the delay, in milliseconds, after which a render request takes effect.
      */
-    public static fadeOutLength = 300;
+    private static readonly asyncRenderDelay = 15;
 
     /**
-     * Configures the delay, in milliseconds, after which a render request take effect.
+     * Configures the time it takes, in milliseconds, for an InkingCanvas to fade out.
      */
-    public static asyncRenderDelay = 15;
+    public static fadeOutDuration = 300;
 
     /**
      * Configures the opacity of the laser stroke shadow.
@@ -327,7 +327,7 @@ export abstract class InkingCanvas {
                     }
                 )
 
-                window.setTimeout(doFadeOut, InkingCanvas.fadeOutLength / 10);
+                window.setTimeout(doFadeOut, InkingCanvas.fadeOutDuration / 10);
 
                 opacity -= 0.1;
             }
@@ -336,7 +336,7 @@ export abstract class InkingCanvas {
             }
         }
 
-        window.setTimeout(doFadeOut, InkingCanvas.fadeOutLength / 10);
+        window.setTimeout(doFadeOut, InkingCanvas.fadeOutDuration / 10);
     }
 
     /**

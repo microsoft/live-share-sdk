@@ -13,6 +13,13 @@ import { IBrush } from "../core/Brush";
  */
 export type CanvasReferencePoint = "topLeft" | "center";
 
+interface IDimensions {
+    width: number;
+    height: number;
+    halfWidth: number;
+    halfHeight: number;
+}
+
 /**
  * Represents the base class for all canvases. InkingCanvas provides resizing, coordinate
  * tramnslation and base drawingprimitives.
@@ -39,8 +46,7 @@ export abstract class InkingCanvas {
     private _brush!: IBrush;
     private _offset: Readonly<IPoint> = { x: 0, y: 0 };
     private _scale: number = 1;
-    private _clientWidth?: number;
-    private _clientHeight?: number;
+    private _clientDimensions?: IDimensions;
     private _renderTimeout?: number;
 
     private render() {
@@ -61,22 +67,6 @@ export abstract class InkingCanvas {
         }
 
         this._renderTimeout = window.requestAnimationFrame(doRender);
-    }
-
-    private getClientWidth(): number {
-        if (!this._clientWidth) {
-            this._clientWidth = this._parentElement ? this._parentElement.clientWidth : 100;
-        }
-
-        return this._clientWidth;
-    }
-
-    private getClientHeight(): number {
-        if (!this._clientHeight) {
-            this._clientHeight = this._parentElement ? this._parentElement.clientHeight : 100;
-        }
-
-        return this._clientHeight;
     }
 
     private createLayer(): CanvasRenderingContext2D {
@@ -114,8 +104,8 @@ export abstract class InkingCanvas {
 
             this.resizeLayer(
                 context,
-                this.getClientWidth(),
-                this.getClientHeight());
+                this.clientDimensions.width,
+                this.clientDimensions.height);
         }
     }
 
@@ -125,13 +115,29 @@ export abstract class InkingCanvas {
         }
     }
 
+    private get clientDimensions(): IDimensions {
+        if (!this._clientDimensions) {
+            const clientWidth = this._parentElement ? this._parentElement.clientWidth : 100;
+            const clientHeight = this._parentElement ? this._parentElement.clientHeight : 100;
+
+            this._clientDimensions = {
+                width: clientWidth,
+                height: clientHeight,
+                halfWidth: clientWidth * 0.5,
+                halfHeight: clientHeight * 0.5
+            };
+        }
+
+        return this._clientDimensions;
+    }
+
     protected viewportToScreen(p: IPoint): IPointerPoint
     protected viewportToScreen(p: IPointerPoint): IPointerPoint {
         return {
             ...viewportToScreen(
                 p,
                 this.referencePoint === "center"
-                    ? { x: this.getClientWidth() / 2, y: this.getClientHeight() / 2 }
+                    ? { x: this.clientDimensions.halfWidth, y: this.clientDimensions.halfHeight }
                     : { x: 0, y: 0 },
                 this.offset,
                 this.scale
@@ -357,8 +363,7 @@ export abstract class InkingCanvas {
      * @param height The new height of the canvas, in pixels.
      */
     resize(width: number, height: number) {
-        this._clientWidth = undefined;
-        this._clientHeight = undefined;
+        this._clientDimensions = undefined;
 
         this.resizeLayer(this.context, width, height);
 

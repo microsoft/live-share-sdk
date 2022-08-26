@@ -19,11 +19,6 @@ export type CanvasReferencePoint = "topLeft" | "center";
  */
 export abstract class InkingCanvas {
     /**
-     * Configures the delay, in milliseconds, after which a render request takes effect.
-     */
-    private static readonly asyncRenderDelay = 15;
-
-    /**
      * Configures the time it takes, in milliseconds, for an InkingCanvas to fade out.
      */
     public static fadeOutDuration = 300;
@@ -56,16 +51,16 @@ export abstract class InkingCanvas {
 
     private scheduleRender() {
         if (this._renderTimeout) {
-            window.clearTimeout(this._renderTimeout);
+            window.cancelAnimationFrame(this._renderTimeout);
         }
 
         const doRender = () => {
             this.render();
 
-            this._renderTimeout = this._strokeStarted ? window.setTimeout(doRender, InkingCanvas.asyncRenderDelay) : undefined;
+            this._renderTimeout = undefined;
         }
 
-        this._renderTimeout = window.setTimeout(doRender, InkingCanvas.asyncRenderDelay);
+        this._renderTimeout = window.requestAnimationFrame(doRender);
     }
 
     private getClientWidth(): number {
@@ -421,6 +416,10 @@ export abstract class InkingCanvas {
         }
 
         this.internalAddPoint(p);
+
+        if (this.rendersAsynchronously()) {
+            this.scheduleRender();
+        }
     }
 
     /**
@@ -433,6 +432,9 @@ export abstract class InkingCanvas {
 
         if (!this.rendersAsynchronously()) {
             this.render();
+        }
+        else {
+            this.scheduleRender();
         }
 
         this._strokeStarted = false;

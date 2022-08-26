@@ -109,10 +109,6 @@ class LiveStroke {
     }
 }
 
-interface IClientState {
-    isCursorShared: boolean;
-}
-
 /**
  * Encapsulates information about a shared cursor.
  */

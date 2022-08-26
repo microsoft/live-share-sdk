@@ -4,11 +4,12 @@
  */
 
 import * as microsoftTeams from "@microsoft/teams-js";
-import { TeamsFluidClient, UserMeetingRole } from "@microsoft/live-share";
+import { EphemeralEvent, TeamsFluidClient, UserMeetingRole } from "@microsoft/live-share";
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { SharedInkingSession, InkingManager, InkingTool } from "@microsoft/live-share-inking";
 import { IFluidContainer } from "fluid-framework";
+import { DrawingSimulation } from "./simulation";
 
 function runningInTeams(): boolean {
     const currentUrl = window.location.href;
@@ -23,15 +24,22 @@ function runningInTeams(): boolean {
 
 const containerSchema = {
     initialObjects: {
-        inkingSession: SharedInkingSession
+        inkingSession: SharedInkingSession,
+        startStopDrawingSimulation: EphemeralEvent
     }
 };
 
 var inkingManager: InkingManager;
 var container: IFluidContainer;
+var simulation: DrawingSimulation;
+var simulationStarted = false;
 
 function getSharedInkingSession(): SharedInkingSession {
     return container.initialObjects.inkingSession as SharedInkingSession;
+}
+
+function startOrStopDrawingSimulation(start: boolean) {
+    (container.initialObjects.startStopDrawingSimulation as EphemeralEvent).sendEvent({ isStarted: start });
 }
 
 async function start() {
@@ -45,6 +53,44 @@ async function start() {
     });
 
     container = (await client.joinContainer(containerSchema)).container;
+
+    const startStopDrawingSimulationEvent = container.initialObjects.startStopDrawingSimulation as EphemeralEvent;
+    startStopDrawingSimulationEvent.on(
+        "received",
+        (event, local) => {
+            const button = document.getElementById("btnSimulation");
+
+            if (local) {
+                simulationStarted = event.isStarted;
+
+                if (button) {
+                    button.innerText = simulationStarted ? "Stop simulation" : "Start simulation";
+                }
+            }
+            else {
+                if (event.isStarted) {
+                    // Ait a maximum of 1 second so not all clients starts drawing at the same time
+                    window.setTimeout(
+                        () => { simulation.start(); },
+                        Math.random() * 5000);
+                }
+                else {
+                    simulation.stop();
+                }
+
+                if (button) {
+                    if (event.isStarted) {
+                        button.setAttribute("disabled", "");
+                    }
+                    else {
+                        button.removeAttribute("disabled");
+                    }
+                }    
+            }
+        }
+    );
+
+    startStopDrawingSimulationEvent.start();
 
     const inkingHost = document.getElementById("inkingHost");
 
@@ -61,6 +107,8 @@ async function start() {
 
         inkingManager = inkingSession.synchronize(inkingHost);
         inkingManager.activate();
+
+        simulation = new DrawingSimulation(inkingManager);
 
         /*
         // Set which roles can draw on the canvas. By default, all roles are allowed
@@ -96,7 +144,7 @@ window.onload = async () => {
     setupButton("btnRed", () => { inkingManager.penBrush.color = { r: 255, g: 0, b: 0 } });
     setupButton("btnBlue", () => { inkingManager.penBrush.color = { r: 0, g: 105, b: 175 } });
 
-    setupButton("btnClear", () => { inkingManager.clear() });
+    setupButton("btnClear", () => { inkingManager.clear(); });
 
     setupButton("btnOffsetLeft", () => { offsetBy(-10, 0); });
     setupButton("btnOffsetUp", () => { offsetBy(0, -10); });
@@ -110,7 +158,8 @@ window.onload = async () => {
     });
     setupButton("btnZoomIn", () => { inkingManager.scale += 0.1; });
 
-    setupButton("btnToggleCursorShare",
+    setupButton(
+        "btnToggleCursorShare",
         () => {
             const sharedInkingSession = getSharedInkingSession();
             const isCursorShared = sharedInkingSession.isCursorShared;
@@ -124,6 +173,17 @@ window.onload = async () => {
             }
         }
     )
+
+    setupButton("btnSimulation", () => { startOrStopDrawingSimulation(!simulationStarted); });
+
+    var offset = 0;
+
+    setupButton("btnOpenNewWindow",
+        () => {
+            window.open(document.URL, "_blank", `left=${offset},top=${offset},width=1000,height=1000`);
+
+            offset += 80;
+        });
 
     if (runningInTeams()) {
         try {

@@ -50,23 +50,7 @@ export abstract class InkingCanvas {
     private _renderTimeout?: number;
 
     private render() {
-        if (this._parentElement) {
-            this.internalRender();
-        }
-    }
-
-    private scheduleRender() {
-        if (this._renderTimeout) {
-            window.cancelAnimationFrame(this._renderTimeout);
-        }
-
-        const doRender = () => {
-            this.render();
-
-            this._renderTimeout = undefined;
-        }
-
-        this._renderTimeout = window.requestAnimationFrame(doRender);
+        this.internalRender();
     }
 
     private createLayer(): CanvasRenderingContext2D {
@@ -129,6 +113,20 @@ export abstract class InkingCanvas {
         }
 
         return this._clientDimensions;
+    }
+
+    protected scheduleRender() {
+        if (this._renderTimeout) {
+            window.cancelAnimationFrame(this._renderTimeout);
+        }
+
+        const doRender = () => {
+            this.render();
+
+            this._renderTimeout = undefined;
+        }
+
+        this._renderTimeout = window.requestAnimationFrame(doRender);
     }
 
     protected viewportToScreen(p: IPoint): IPointerPoint

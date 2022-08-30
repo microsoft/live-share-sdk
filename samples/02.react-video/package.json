@@ -6,7 +6,9 @@
   "license": "Microsoft",
   "author": "Microsoft",
   "dependencies": {
-    "@fluentui/react-components": "^9.0.1",
+    "@fluentui/react-components": "^9.2.0",
+    "@fluentui/react-icons": "^2.0.179",
+    "@fluentui/react-theme": "^9.0.0",
     "@fluidframework/azure-client": "~1.0.2",
     "@microsoft/live-share": "~0.4.1",
     "@microsoft/live-share-media": "~0.4.1",
@@ -30,7 +32,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.1",
-    "jest": "^26.6.0",
     "jest-puppeteer": "^6.1.0",
     "prettier": "^2.5.0",
     "puppeteer": "^1.17.0",

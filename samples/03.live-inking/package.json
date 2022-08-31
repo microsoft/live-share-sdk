@@ -27,7 +27,8 @@
         "ts-loader": "^8.3.0",
         "webpack": "4.44.2",
         "webpack-cli": "^4.8.0",
-        "webpack-dev-server": "3.11.1"
+        "webpack-dev-server": "3.11.1",
+        "copy-webpack-plugin": "6.4.1"
     },
     "prettier": {
         "trailingComma": "es5",

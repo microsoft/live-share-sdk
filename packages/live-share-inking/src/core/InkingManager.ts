@@ -867,7 +867,6 @@ export class InkingManager extends EventEmitter {
             new InkingManager.ScreenToViewportCoordinateTransform(this));
 
         this._host = host;
-        this._host.style.position = "relative";
 
         this._dryCanvas = new DryCanvas(this._host);
 

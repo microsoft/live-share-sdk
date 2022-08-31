@@ -1,0 +1,67 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
+    "version": "1.0.1",
+    "manifestVersion": "1.12",
+    "id": "4df81952-a7db-4b2b-9693-40e28d19f0ab",
+    "packageName": "com.microsoft.teams.liveshareinking",
+    "name": {
+        "short": "LiveShareInking",
+        "full": "Inking with Live Share"
+    },
+    "developer": {
+        "name": "Your name here",
+        "mpnId": "",
+        "websiteUrl": "https://liveshareinking-crcpe0bpfybnd0h9.z01.azurefd.net/",
+        "privacyUrl": "https://www.example.com/PrivacyStatement",
+        "termsOfUseUrl": "https://www.example.com/TermsOfUse"
+    },
+    "description": {
+        "short": "Live Share inking demo",
+        "full": "Collaborative inking demo powered by Live Share"
+    },
+    "icons": {
+        "outline": "outline.png",
+        "color": "color.png"
+    },
+    "accentColor": "#FFFFFF",
+    "configurableTabs": [
+        {            
+            "configurationUrl": "https://liveshareinking-crcpe0bpfybnd0h9.z01.azurefd.net/?config=true",
+            "canUpdateConfiguration": false,
+            "scopes": [
+                "groupchat"
+            ],
+            "context": [
+                "meetingSidePanel",
+                "meetingStage"
+            ]
+        }
+    ],
+    "validDomains": [
+        "liveshareinking.azurewebsites.net",
+        "liveshareinking-crcpe0bpfybnd0h9.z01.azurefd.net"
+    ],
+    "authorization": {
+        "permissions": {
+            "orgWide": [],
+            "resourceSpecific": [
+                {
+                    "name": "MeetingStage.Write.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "ChannelMeetingStage.Write.Group",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "LiveShareSession.ReadWrite.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "LiveShareSession.ReadWrite.Group",
+                    "type": "Delegated"
+                }
+            ]
+        }
+    }
+}

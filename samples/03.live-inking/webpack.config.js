@@ -5,13 +5,21 @@
 
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = env => {
 	const htmlTemplate = "./src/index.html";
 
-	const plugins = env && env.clean
-		? [ new CleanWebpackPlugin(), new HtmlWebpackPlugin({ template: htmlTemplate }) ]
-		: [ new HtmlWebpackPlugin({ template: htmlTemplate }) ];
+	const plugins = env && env.clean ? [ new CleanWebpackPlugin() ] : [];
+
+	plugins.push(
+		new HtmlWebpackPlugin({ template: htmlTemplate }),
+		new CopyWebpackPlugin(
+			{
+				patterns: [
+					{ from: "./src/app.css", to: "app.css" }
+				]
+			}));
 
 	const mode = env && env.prod
 		? "production"

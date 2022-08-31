@@ -494,7 +494,15 @@ export class InkingManager extends EventEmitter {
     private onPointerMove = (e: PointerEvent): void => {
         getCoalescedEvents(e).forEach(
             (evt: PointerEvent) => {
-                this.pointerMove(pointerEventToPoint(evt), this._activePointerId !== undefined);
+                let invokePointerMove = true;
+                
+                if (this._activePointerId) {
+                    invokePointerMove = evt.pointerId === this._activePointerId;
+                }
+
+                if (invokePointerMove) {
+                    this.pointerMove(pointerEventToPoint(evt), this._activePointerId !== undefined);
+                }
             });
 
         e.preventDefault();

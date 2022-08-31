@@ -833,7 +833,7 @@ export class InkingManager extends EventEmitter {
             this.cancelCurrentStroke(filteredPoint);
         }
         else {
-            this.notifyPointerMoved();
+            this.queuePointerMovedNotification();
         }
     }
 

@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
 import * as Teams from "@microsoft/teams-js";
 import * as Utils from "./utils";
 import { View } from "./view";

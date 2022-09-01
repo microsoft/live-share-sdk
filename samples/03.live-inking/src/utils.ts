@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
 export function loadTemplate(template: string, targetElement: HTMLElement) {
     const templateElement = document.createElement("template");
     templateElement.innerHTML = template;

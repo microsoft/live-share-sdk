@@ -21,14 +21,28 @@ enum InkingEventNames {
     AddWetStrokePoints = "AddWetStrokePoint",
 }
 
-type IPointerMovedEvent = IEphemeralEvent & IPointerMovedEventArgs;
+/**
+ * Encapsulates information about a user.
+ */
+export interface IUserInfo {
+    /**
+     * Optional. The user's display name.
+     */
+    displayName?: string;
+    /**
+     * Optional. The URI to the user's picture.
+     */
+    pictureUri?: string;
+}
+
+type IPointerMovedEvent = IEphemeralEvent & IPointerMovedEventArgs & IUserInfo;
 
 interface ISharedCursor {
     isCursorShared?: boolean;
 }
 
-type IBeginWetStrokeEvent = IEphemeralEvent & IBeginStrokeEventArgs & ISharedCursor;
-type IAddWetStrokePointsEvent = IEphemeralEvent & IAddPointsEventArgs & ISharedCursor;
+type IBeginWetStrokeEvent = IEphemeralEvent & IBeginStrokeEventArgs & ISharedCursor & IUserInfo;
+type IAddWetStrokePointsEvent = IEphemeralEvent & IAddPointsEventArgs & ISharedCursor & IUserInfo;
 
 class LiveStroke {
     /**
@@ -110,30 +124,22 @@ class LiveStroke {
 }
 
 /**
- * Encapsulates information about a shared cursor.
- */
-export interface ICursorInfo {
-    /**
-     * The client Id associated with the cursor.
-     */
-    clientId: string;
-    /**
-     * Optional. The name associated with the cursor.
-     */
-    name?: string;
-    /**
-     * Optional. The URI of a picture associated with the cursor.
-     */
-    pictureUri?: string;
-}
-
-/**
  * Represents a cursor's visual representation. Applications that want
  * to customize the appearance of cursors on the screen should extend
  * `CursorVisual` and override its `renderedElement` property to return
  * a custom HTML element.
  */
 export abstract class CursorVisual {
+    private _renderedElement?: HTMLElement;
+
+    protected abstract internalRender(): HTMLElement;
+
+    /**
+     * Initializes a new instance of `CursorVisual`.
+     * @param info The cursor info.
+     */
+    constructor(public readonly clientId: string, public readonly userInfo?: IUserInfo) { }
+
     /**
      * Updates the position of the cursor.
      * @param position The new position of the cursor.
@@ -146,17 +152,17 @@ export abstract class CursorVisual {
     }
 
     /**
-     * Initializes a new instance of `CursorVisual`.
-     * @param info The cursor info.
-     */
-    constructor(public info: Readonly<ICursorInfo>) { }
-
-    /**
      * Returns an HTML element representing the cursor. Applications
      * that extend `CursorVisual` must override `get renderedElement`
      * to return a custom built HTML element.
      */
-    abstract get renderedElement(): HTMLElement;
+    get renderedElement(): HTMLElement {
+        if (!this._renderedElement) {
+            this._renderedElement = this.internalRender();
+        }
+
+        return this._renderedElement;
+    }
 }
 
 interface ICursorColor {
@@ -178,9 +184,8 @@ class BuiltInCursorVisual extends CursorVisual {
     private static currentColorIndex = 0;
 
     private _color: ICursorColor;
-    private _renderedElement: HTMLElement;
 
-    private render(): HTMLElement {
+    protected internalRender(): HTMLElement {
         const cursorSize = 20;
 
         const foregroundColor = toCssColor(this._color.foregroundColor);
@@ -192,25 +197,27 @@ class BuiltInCursorVisual extends CursorVisual {
                 <path d="M0 0 L${cursorSize} ${cursorSize / 2.2} L${cursorSize / 2} ${cursorSize / 2} L8 ${cursorSize} Z" stroke-width="1" stroke="${borderColor}" fill="${backgroundColor}"/>
             </svg>`;
 
-        if (this.info.name && !this.info.pictureUri) {
-            visualTemplate += `
-                <div style="background-color: ${backgroundColor}; color: ${foregroundColor}; border: 1px solid ${borderColor};
-                    border-radius: 10% / 50%; padding: 2px 6px; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px; white-space: nowrap; font-size: 12px; font-family: sans-serif">
-                    ${this.info.name}
-                </div>`;
-        }
-        else if (this.info.pictureUri && !this.info.name) {
-            visualTemplate += `
-                <img src="${this.info.pictureUri}" style="width: ${cursorSize * 1.1}px; height: ${cursorSize * 1.1}px; border-radius: 50%;
-                    border: 1px solid ${borderColor}; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px;">`;
-        }
-        else if (this.info.pictureUri && this.info.name) {
-            visualTemplate += `
-                <div style="display: flex; flex-direction: row; align-items: center; background-color: ${backgroundColor}; color: ${foregroundColor}; border: 1px solid ${borderColor};
-                    border-radius: ${cursorSize * 1.1 / 2}px / 50%; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px; white-space: nowrap; font-size: 12px; font-family: sans-serif">
-                    <img src="${this.info.pictureUri}" style="width: ${cursorSize * 1.1}px; height: ${cursorSize * 1.1}px; border-radius: 50%;">
-                    <div style="padding: 0 8px">${this.info.name}</div>
-                </div>`;
+        if (this.userInfo) {
+            if (this.userInfo.displayName) {
+                visualTemplate += `
+                    <div style="background-color: ${backgroundColor}; color: ${foregroundColor}; border: 1px solid ${borderColor};
+                    border-radius: ${cursorSize * 1.1 / 2}px / 50%; padding: 2px 6px; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px; white-space: nowrap; font-size: 12px; font-family: sans-serif">
+                        ${this.userInfo.displayName}
+                    </div>`;
+            }
+            else if (this.userInfo.pictureUri && !this.userInfo.displayName) {
+                visualTemplate += `
+                    <img src="${this.userInfo.pictureUri}" style="width: ${cursorSize * 1.1}px; height: ${cursorSize * 1.1}px; border-radius: 50%;
+                        border: 1px solid ${borderColor}; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px;">`;
+            }
+            else if (this.userInfo.pictureUri && this.userInfo.displayName) {
+                visualTemplate += `
+                    <div style="display: flex; flex-direction: row; align-items: center; background-color: ${backgroundColor}; color: ${foregroundColor}; border: 1px solid ${borderColor};
+                        border-radius: ${cursorSize * 1.1 / 2}px / 50%; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px; white-space: nowrap; font-size: 12px; font-family: sans-serif">
+                        <img src="${this.userInfo.pictureUri}" style="width: ${cursorSize * 1.1}px; height: ${cursorSize * 1.1}px; border-radius: 50%;">
+                        <div style="padding: 0 8px">${this.userInfo.displayName}</div>
+                    </div>`;
+            }
         }
 
         const template = document.createElement("template");
@@ -226,8 +233,8 @@ class BuiltInCursorVisual extends CursorVisual {
         return element;
     }
 
-    constructor(public info: Readonly<ICursorInfo>) {
-        super(info);
+    constructor(public clientId: string, public readonly userInfo?: IUserInfo) {
+        super(clientId, userInfo);
 
         this._color = BuiltInCursorVisual.cursorColors[BuiltInCursorVisual.currentColorIndex];
 
@@ -236,12 +243,6 @@ class BuiltInCursorVisual extends CursorVisual {
         if (BuiltInCursorVisual.currentColorIndex >= BuiltInCursorVisual.cursorColors.length) {
             BuiltInCursorVisual.currentColorIndex = 0;
         }
-
-        this._renderedElement = this.render();
-    }
-
-    get renderedElement(): HTMLElement {
-        return this._renderedElement;
     }
 }
 
@@ -280,16 +281,23 @@ export class SharedInkingSession extends DataObject {
     private _isCursorShared: boolean = false;
 
     private liveStrokeProcessed = (liveStroke: LiveStroke) => {
+        const userInfo = this.getLocalUserInfo();
+
         this._addWetStrokePointEventTarget.sendEvent(
             {
                 name: InkingEventNames.AddWetStrokePoints,
                 isCursorShared: this.isCursorShared ? true : undefined,
+                displayName: userInfo?.displayName,
                 strokeId: liveStroke.id,
                 points: liveStroke.points,
                 endState: liveStroke.endState
             });
 
         liveStroke.clear();
+    }
+
+    private getLocalUserInfo(): IUserInfo | undefined {
+        return this.onGetLocalUserInfo ? this.onGetLocalUserInfo() : undefined;
     }
 
     private setupWetInkProcessing(): void {
@@ -299,9 +307,13 @@ export class SharedInkingSession extends DataObject {
                 PointerMovedEvent,
                 (eventArgs: IPointerMovedEventArgs) => {
                     if (this.isCursorShared) {
+                        const userInfo = this.getLocalUserInfo();
+
                         this._pointerMovedEventTarget.sendEvent(
                             {
-                                position: eventArgs.position
+                                position: eventArgs.position,
+                                displayName: userInfo?.displayName,
+                                pictureUri: userInfo?.pictureUri
                             });
                     }
                 });
@@ -318,10 +330,14 @@ export class SharedInkingSession extends DataObject {
 
                     this._pendingLiveStrokes.set(liveStroke.id, liveStroke);
 
+                    const userInfo = this.getLocalUserInfo();
+
                     this._beginWetStrokeEventTarget.sendEvent(
                         {
                             name: InkingEventNames.BeginWetStroke,
                             isCursorShared: this.isCursorShared ? true : undefined,
+                            displayName: userInfo?.displayName,
+                            pictureUri: userInfo?.pictureUri,
                             ...eventArgs
                         });
                 });
@@ -356,7 +372,13 @@ export class SharedInkingSession extends DataObject {
             InkingEventNames.PointerMove,
             (evt: IPointerMovedEvent, local: boolean) => {
                 if (!local && evt.clientId) {
-                    this.updateCursorPosition(evt.clientId, evt.position);
+                    this.updateCursorPosition(
+                        evt.clientId,
+                        {
+                            displayName: evt.displayName,
+                            pictureUri: evt.pictureUri
+                        },
+                        evt.position);
                 }
             });
 
@@ -382,7 +404,13 @@ export class SharedInkingSession extends DataObject {
                             this.removeCursor(evt.clientId);
                         }
                         else {
-                            this.updateCursorPosition(evt.clientId, evt.startPoint);
+                            this.updateCursorPosition(
+                                evt.clientId,
+                                {
+                                    displayName: evt.displayName,
+                                    pictureUri: evt.pictureUri
+                                },
+                                evt.startPoint);
                         }
                     }
                 }      
@@ -415,7 +443,13 @@ export class SharedInkingSession extends DataObject {
                                 this.removeCursor(evt.clientId);
                             }
                             else {
-                                this.updateCursorPosition(evt.clientId, evt.points[evt.points.length - 1]);
+                                this.updateCursorPosition(
+                                    evt.clientId,
+                                    {
+                                        displayName: evt.displayName,
+                                        pictureUri: evt.pictureUri
+                                    },
+                                    evt.points[evt.points.length - 1]);
                             }
                         }
                     }
@@ -520,13 +554,13 @@ export class SharedInkingSession extends DataObject {
         }
     }
 
-    private getCursor(clientId: string): CursorVisual {
+    private getCursor(clientId: string, userInfo?: IUserInfo): CursorVisual {
         let cursorVisual = this._cursorVisualsMap.get(clientId);
 
         if (!cursorVisual) {
-            const cursorInfo = this.onGetCursorInfo ? this.onGetCursorInfo(clientId) : { clientId };
-
-            cursorVisual = this.onCreateCursorVisual ? this.onCreateCursorVisual(cursorInfo) : new BuiltInCursorVisual(cursorInfo);
+            cursorVisual = this.onCreateCursorVisual
+                ? this.onCreateCursorVisual(clientId, userInfo)
+                : new BuiltInCursorVisual(clientId, userInfo);
 
             this._cursorVisualsMap.set(clientId, cursorVisual);
         }
@@ -551,10 +585,11 @@ export class SharedInkingSession extends DataObject {
         // we don't lose the color it got automatically attributed.
     }
 
-    private updateCursorPosition(clientId: string, position?: IPoint) {
+    private updateCursorPosition(clientId: string, userInfo?: IUserInfo, position?: IPoint) {
         if (this._inkingManager) {
             if (position) {
-                const cursorVisual = this.getCursor(clientId);
+                const cursorVisual = this.getCursor(clientId, userInfo);
+
                 const screenPosition = this._inkingManager.viewportToScreen(position);
 
                 cursorVisual.setPosition(screenPosition);
@@ -583,11 +618,11 @@ export class SharedInkingSession extends DataObject {
     }
 
     /**
-     * Optional callback that allows the consuming application to map a client Id
-     * to a name and picture URI, which are then used to display shared cursor
-     * visuals.
+     * Optional callback that allows the consuming application to provide a
+     * friendly display name and/or a picture that will be used on remote devices
+     * to render shared cursors.
      */
-    onGetCursorInfo?: (clientId: string) => ICursorInfo;
+    onGetLocalUserInfo?: () => IUserInfo | undefined;
 
     /**
      * Optional callback that allows the consuming application to provide its own
@@ -595,7 +630,7 @@ export class SharedInkingSession extends DataObject {
      * The callback is passed the cursor info retrieved via the `onGetCursorInfo`
      * calback, if provided.
      */
-    onCreateCursorVisual?: (info: ICursorInfo) => CursorVisual;
+    onCreateCursorVisual?: (clientId: string, userInfo?: IUserInfo) => CursorVisual;
 
     /**
      * Starts the live inking session.

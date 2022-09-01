@@ -9,12 +9,35 @@ import { doRectanglesOverlap, getSegmentIntersectionsWithRectangle, getSegmentsI
     isRectangleInsideRectangle, segmentMayIntersectWithRectangle, unionRect } from "./Geometry";
 import { generateUniqueId } from "./Utils";
 
-interface IStrokeData {
+/**
+ * Field names on this interface are intentionally short to minimize
+ * the mount of data in a serialized stroke.
+ */
+interface ISerializedStrokeData {
+    /**
+     * Version
+     */
+    v: number;
+    /**
+     * Id
+     */
     id: string;
-    clientId?: string;
-    timeStamp: number;
-    brush: IBrush;
-    points: IPointerPoint[];
+    /**
+     * Client Id
+     */
+    cId?: string;
+    /**
+     * Timestamp
+     */
+    t: number;
+    /**
+     * Brush
+     */
+    br: IBrush;
+    /**
+     * Data, i.e. serialized point array
+     */
+    d: string;
 }
 
 /**
@@ -121,6 +144,14 @@ export interface IStrokeCreationOptions {
  * Represents a concrete stroke object.
  */
 export class Stroke implements IStroke, Iterable<IPointerPoint> {
+    private static readonly coordinateSerializationPrecision = 1;
+    private static readonly pressureSerializationPrecision = 2;
+
+    // Version is fixed at 1 for now. If/when we evolve the structure
+    // of a stroke, we'll update the version number and the
+    // serialization/deserialization logic
+    private _version: number = 1;
+
     private _brush: IBrush = {...DefaultPenBrush};
     private _points: IPointerPoint[];
     private _iteratorCounter = 0;
@@ -147,6 +178,74 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         }
 
         return false;
+    }
+
+    /**
+     * In order to reduce the amount of data a serialized stroke uses, points
+     * are serialized in a minimal way:
+     * - Each point is represented in the X,Y,Pressure format
+     * - Coordinates are rounded to the number of decimals configured via
+     * `Stroke.coordinateSerializationPrecision`
+     * - Pressures are rounded to the number of decimals configured via
+     * `Stroke.pressureSerializationPrecision`
+     * - All X, Y and P are expressed as integers. This allows to not use a
+     * decimal point which saves three characters per point
+     * 
+     * @returns The serialized points.
+     */
+    private serializePoints(): string {
+        let result = "";
+
+        const coordinateMultiplier = Math.pow(10, Stroke.coordinateSerializationPrecision);
+        const pressureMultiplier = Math.pow(10, Stroke.pressureSerializationPrecision);
+
+        for (let i = 0; i < this._points.length; i++) {
+            const p = this._points[i];
+
+            result += `${(p.x * coordinateMultiplier).toFixed(0)},${(p.y * coordinateMultiplier).toFixed(0)},${(p.pressure * pressureMultiplier).toFixed(0)}`;
+
+            if (i < this._points.length - 1) {
+                result += ",";
+            }
+        }
+
+        return result;
+    }
+
+    private deserializePoints(serializedPoints: string): IPointerPoint[] {
+        const result: IPointerPoint[] = [];
+
+        const coordinateMultiplier = Math.pow(10, Stroke.coordinateSerializationPrecision);
+        const pressureMultiplier = Math.pow(10, Stroke.pressureSerializationPrecision);
+
+        let currentPosition = 0;
+        let currentValues: number[] = [];
+
+        while (currentPosition < serializedPoints.length) {
+            const p = serializedPoints.indexOf(",", currentPosition);
+
+            if (p === -1) {
+                break;
+            }
+
+            currentValues.push(parseFloat(serializedPoints.substring(currentPosition, p)));
+
+            if (currentValues.length === 3) {
+                const point: IPointerPoint = {
+                    x: currentValues[0] / coordinateMultiplier,
+                    y: currentValues[1] / coordinateMultiplier,
+                    pressure: currentValues[2] / pressureMultiplier
+                }
+
+                result.push(point);
+
+                currentValues = [];
+            }
+
+            currentPosition = p + 1;
+        }
+
+        return result;
     }
 
     /**
@@ -375,15 +474,16 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
      * @returns The serialized stroke.
      */
     serialize(): string {
-        const data: IStrokeData = {
+        const strokeData: ISerializedStrokeData = {
+            v: this._version,
             id: this.id,
-            clientId: this.clientId,
-            timeStamp: this.timeStamp,
-            brush: this.brush,
-            points: this._points
+            cId: this.clientId,
+            t: this.timeStamp,
+            br: this.brush,
+            d: this.serializePoints()
         };
 
-        return JSON.stringify(data);
+        return JSON.stringify(strokeData);;
     }
 
     /**
@@ -392,13 +492,14 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
      * @param serializedStroke The serialized stroke.
      */
     deserialize(serializedStroke: string) {
-        const data: IStrokeData = JSON.parse(serializedStroke) as IStrokeData;
+        const strokeData: ISerializedStrokeData = JSON.parse(serializedStroke) as ISerializedStrokeData;
 
-        this._id = data.id;
-        this._clientId = data.clientId;
-        this._timeStamp = data.timeStamp;
-        this._brush = data.brush;
-        this._points = data.points;
+        this._version = strokeData.v;
+        this._id = strokeData.id;
+        this._clientId = strokeData.cId;
+        this._timeStamp = strokeData.t;
+        this._brush = strokeData.br;
+        this._points = this.deserializePoints(strokeData.d);
     }
 
     [Symbol.iterator]() {

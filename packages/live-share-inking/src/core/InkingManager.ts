@@ -259,6 +259,12 @@ export class InkingManager extends EventEmitter {
     private static readonly pointEraserProcessingInterval = 30;
     
     /**
+     * Configures the amount of time to wait before flushing the change log, giving it time to
+     * accumulate changes that can then be handled as a batch.
+     */
+    private static readonly changeLogFlushInterval = 60;
+
+    /**
      * The default client Id of the device running the application.
      */
     public static readonly localClientId = generateUniqueId();
@@ -343,10 +349,10 @@ export class InkingManager extends EventEmitter {
     private _inputProvider!: InputProvider;
     private _currentStroke?: IWetStroke;
     private _strokes: Map<string, IStroke> = new Map<string, IStroke>();
-    private _previousPoint?: IPointerPoint;
     private _reRenderTimeout?: number;
     private _pointerMovedNotificationTimeout?: number;
     private _pointEraseProcessingInterval?: number;
+    private _changeLogFlushTimeout?: number;
     private _pendingPointErasePoints: IPoint[] = [];
     private _changeLog: ChangeLog = new ChangeLog();
     private _isUpdating: boolean = false;
@@ -410,11 +416,30 @@ export class InkingManager extends EventEmitter {
     }
 
     private flushChangeLog() {
+        if (this._changeLogFlushTimeout) {
+            window.clearTimeout(this._changeLogFlushTimeout);
+
+            this._changeLogFlushTimeout = undefined;
+        }
+
         if (this._changeLog.hasChanges) {
             this.notifyStrokesRemoved(...this._changeLog.getRemovedStrokes());
             this.notifyStrokesAdded(...this._changeLog.getAddedStrokes());
 
             this._changeLog.clear();
+        }
+    }
+
+    private scheduleChangeLogFlush() {
+        if (this._changeLogFlushTimeout === undefined) {
+            this._changeLogFlushTimeout = window.setTimeout(
+                () => {
+                    this._changeLogFlushTimeout = undefined;
+
+                    this.flushChangeLog();
+                },
+                InkingManager.changeLogFlushInterval
+            )
         }
     }
 
@@ -433,6 +458,8 @@ export class InkingManager extends EventEmitter {
                     this.processPendingPointErasePoints();
 
                     this._pointEraseProcessingInterval = undefined;
+
+                    this.scheduleChangeLogFlush();
                 },
                 InkingManager.pointEraserProcessingInterval);
         }
@@ -728,8 +755,6 @@ export class InkingManager extends EventEmitter {
 
                 break;
         }
-
-        this._previousPoint = filteredPoint;
     }
 
     protected pointerMove(p: IPointerPoint, isPointerDown: boolean) {
@@ -797,8 +822,6 @@ export class InkingManager extends EventEmitter {
 
                     break;
             }
-
-            this._previousPoint = filteredPoint;
         }        
     }
 
@@ -822,7 +845,6 @@ export class InkingManager extends EventEmitter {
 
         this.flushChangeLog();
 
-        this._previousPoint = undefined;
         this._activePointerId = undefined;
     }
 

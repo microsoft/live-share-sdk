@@ -1,12 +1,13 @@
+import * as Teams from "@microsoft/teams-js";
 import * as Utils from "./utils";
 import { View } from "./view";
 import { EphemeralEvent, TeamsFluidClient } from "@microsoft/live-share";
-import { InkingManager, InkingTool, SharedInkingSession } from "@microsoft/live-share-inking";
+import { InkingManager, InkingTool, IUserInfo, SharedInkingSession } from "@microsoft/live-share-inking";
 import { IFluidContainer } from "fluid-framework";
 import { DrawingSimulation } from "./simulation";
 import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
-import { app } from "@microsoft/teams-js";
+import { getRandomUserInfo } from "./random-userInfo";
 
 const appTemplate = `
     <div id="appRoot">
@@ -73,7 +74,7 @@ export class MainView extends View {
     private getSharedInkingSession(): SharedInkingSession {
         return this._container.initialObjects.inkingSession as SharedInkingSession;
     }
-    
+
     private startOrStopDrawingSimulation(start: boolean) {
         (this._container.initialObjects.startStopDrawingSimulation as EphemeralEvent).sendEvent({ isStarted: start });
     }
@@ -86,6 +87,7 @@ export class MainView extends View {
     }
 
     private _hostResizeObserver!: ResizeObserver;
+    private _userInfo: IUserInfo;
 
     private async internalStart() {
         const clientOptions = this.runningInTeams()
@@ -140,18 +142,13 @@ export class MainView extends View {
         );
     
         startStopDrawingSimulationEvent.start();
-    
+
         const inkingHost = document.getElementById("inkingHost");
     
         if (inkingHost) {
             const inkingSession = this.getSharedInkingSession();
-            inkingSession.onGetCursorInfo = (clientId: string) => {
-                // Map clientId to a name and picture URI
-                return {
-                    clientId,
-                    name: "Mark Knopfler",
-                    pictureUri: "https://assets.mubi.com/images/cast_member/52480/image-original.jpg?1416636889"
-                }
+            inkingSession.onGetLocalUserInfo = () => {
+                return this._userInfo;
             }
     
             this._inkingManager = inkingSession.synchronize(inkingHost);
@@ -192,6 +189,8 @@ export class MainView extends View {
 
     constructor() {
         super();
+
+        this._userInfo = getRandomUserInfo();
 
         Utils.loadTemplate(appTemplate, document.body);
 
@@ -314,8 +313,8 @@ export class MainView extends View {
 
     start() {
         if (this.runningInTeams()) {
-            app.initialize();
-            app.notifySuccess();
+            Teams.app.initialize();
+            Teams.app.notifySuccess();
         }
 
         this.internalStart().catch(

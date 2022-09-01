@@ -42,7 +42,7 @@ interface IServerTimeOffset {
      */
     public getTimestamp(): number {
         if (!this._serverTime) {
-            throw new Error(`SharedClock: can't call getTimestamp() before calling start().`);
+            throw new Error(`SharedClock: can't call getTimestamp() before calling initialize().`);
         }
 
         // Return adjusted timestamp and save last
@@ -54,7 +54,7 @@ interface IServerTimeOffset {
 
     public getMaxTimestampError(): number {
         if (!this._serverTime) {
-            throw new Error(`SharedClock: can't call getTimestamp() before calling start().`);
+            throw new Error(`SharedClock: can't call getTimestamp() before calling initialize().`);
         }
 
         return Math.floor(this._serverTime.requestLatency / 2);

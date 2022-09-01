@@ -29,7 +29,7 @@ import * as microsoftTeams from "@microsoft/teams-js";
  * @param {UserMeetingRole[]} acceptPlaybackChangesFrom List of acceptable roles for playback transport commands.
  * @param {(text: string) => void} sendNotification Send notificaiton callback from `useNotification` hook.
  * @returns `{mediaSessionStarted, suspended, togglePlayPause, seek, setTrack, endSuspension}` where:
- * - `mediaSessionStarted` is a boolean indicating whether mediaSession.start() has been called.
+ * - `mediaSessionStarted` is a boolean indicating whether mediaSession.initialize() has been called.
  * - `suspended` is a flag indicating that the media synchronization is suspended.
  * - `play` is a callback method to play through the synchronizer.
  * - `pause` is a callback method to pause through the synchronizer.
@@ -160,7 +160,7 @@ export const useMediaSession = (
   useEffect(() => {
     if (
       mediaSession &&
-      !mediaSession.isStarted &&
+      !mediaSession.isInitialized &&
       !synchronizerRef.current &&
       selectedMediaItem &&
       player
@@ -174,7 +174,7 @@ export const useMediaSession = (
       synchronizerRef.current.viewOnly = !localUserIsPresenting;
 
       // Start synchronizing the media session
-      mediaSession.start(acceptPlaybackChangesFrom).then(() => {
+      mediaSession.initialize(acceptPlaybackChangesFrom).then(() => {
         console.log("useSharedSynchronizer: now synchronizing player");
         setStarted(true);
         if (inTeams()) {

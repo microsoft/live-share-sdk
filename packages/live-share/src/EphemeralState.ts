@@ -78,10 +78,18 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
     );
 
     /**
-     * Returns true if the object has been started.
+     * Returns true if the object has been initialized.
+     */
+    public get isInitialized(): boolean {
+        return !!this._scope;
+    }
+
+    /**
+     * @deprecated isInitialized should be used instead
+     * Returns true if the object has been initialized.
      */
     public get isStarted(): boolean {
-        return !!this._scope;
+        return this.isInitialized
     }
 
     /**
@@ -102,7 +110,7 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
      * Starts the object.
      * @param allowedRoles Optional. List of roles allowed to make state changes.
      */
-    public async start(allowedRoles?: UserMeetingRole[], state = EphemeralState.INITIAL_STATE, data?: TData): Promise<void> {
+    public async initialize(allowedRoles?: UserMeetingRole[], state = EphemeralState.INITIAL_STATE, data?: TData): Promise<void> {
         if (this._scope) {
             throw new Error(`EphemeralState already started.`);
         }
@@ -131,6 +139,15 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
             });
 
         return Promise.resolve();
+    }
+
+    /**
+     * @deprecated initialize should be used instead
+     * Starts the object.
+     * @param allowedRoles Optional. List of roles allowed to make state changes.
+     */
+    public async start(allowedRoles?: UserMeetingRole[], state = EphemeralState.INITIAL_STATE, data?: TData): Promise<void> {
+        return this.initialize(allowedRoles, state, data)
     }
 
     /**

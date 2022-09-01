@@ -51,7 +51,7 @@ export const usePresence = (presence, context) => {
 
   // Effect which registers SharedPresence event listeners before joining space
   useEffect(() => {
-    if (presence && !presence.isStarted && context) {
+    if (presence && !presence.isInitialized && context) {
       console.info("usePresence: starting presence");
       presence.on("presenceChanged", (userPresence, local) => {
         if (local) {
@@ -88,7 +88,7 @@ export const usePresence = (presence, context) => {
 
       presence.presenceUpdateInterval = 5;
       presence
-        .start(
+        .initialize(
           context?.user?.id,
           {
             name,

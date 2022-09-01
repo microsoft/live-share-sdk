@@ -16,7 +16,7 @@ import { useState, useEffect, useCallback } from "react";
  * @param {EphemeralEvent} notificationEvent presence object from Fluid container.
  * @param {microsoftTeams.app.Context} context Teams context object
  * @returns `{notificationStarted, notificationToDisplay, sendNotification}` where:
- * - `notificationStarted` is a boolean indicating whether `notificationEvent.start()` has been called.
+ * - `notificationStarted` is a boolean indicating whether `notificationEvent.initialize()` has been called.
  * - `notificationToDisplay` is the most recent notification to display.
  * - `sendNotification` is a callback method for sending a notification to other users in session.
  */
@@ -40,7 +40,7 @@ export const useNotifications = (notificationEvent, context) => {
   );
 
   useEffect(() => {
-    if (notificationEvent && !notificationEvent.isStarted) {
+    if (notificationEvent && !notificationEvent.isInitialized) {
       notificationEvent.on("received", (event, local) => {
         // Display notification differently for local vs. remote users
         if (local) {
@@ -51,7 +51,7 @@ export const useNotifications = (notificationEvent, context) => {
       });
       console.log("useNotifications: starting notifications");
       notificationEvent
-        .start()
+        .initialize()
         .then(() => {
           console.log("useNotifications: notifications started");
           setStarted(true);

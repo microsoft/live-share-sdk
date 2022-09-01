@@ -49,7 +49,7 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
     private _positionUpdateInterval = new TimeInterval(2000);
     private _maxPlaybackDrift = new TimeInterval(1000);
     private _lastWaitPoint?: CoordinationWaitPoint;
-    private _hasStarted = false;
+    private _hasInitialized = false;
 
     // Broadcast events
     private _playEvent?: EphemeralEventTarget<ITransportCommandEvent>;
@@ -172,12 +172,12 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      * Instructs the group to play the current track.
      * 
      * @remarks
-     * Throws an exception if the session/coordinator hasn't been started, no track has been 
+     * Throws an exception if the session/coordinator hasn't been initialized, no track has been 
      * loaded, or `canPlayPause` is false.
      */
     public play(): void {
-        if (!this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.play() called before start() called.`);
+        if (!this._hasInitialized) {
+            throw new Error(`EphemeralMediaSessionCoordinator.play() called before initialize() called.`);
         }
 
         if (!this._groupState?.playbackTrack.current.metadata) {
@@ -203,12 +203,12 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      * Instructs the group to pause the current track.
      * 
      * @remarks
-     * Throws an exception if the session/coordinator hasn't been started, no track has been 
+     * Throws an exception if the session/coordinator hasn't been initialized, no track has been 
      * loaded, or `canPlayPause` is false.
      */
     public pause(): void {
-        if (!this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.pause() called before start() called.`);
+        if (!this._hasInitialized) {
+            throw new Error(`EphemeralMediaSessionCoordinator.pause() called before initialize() called.`);
         }
 
         if (!this._groupState?.playbackTrack.current.metadata) {
@@ -234,13 +234,13 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      * Instructs the group to seek to a new position within the current track.
      * 
      * @remarks
-     * Throws an exception if the session/coordinator hasn't been started, no track has been 
+     * Throws an exception if the session/coordinator hasn't been initialized, no track has been 
      * loaded, or `canSeek` is false.
      * @param time Playback position in seconds to seek to.
      */
     public seekTo(time: number): void {
-        if (!this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.seekTo() called before start() called.`);
+        if (!this._hasInitialized) {
+            throw new Error(`EphemeralMediaSessionCoordinator.seekTo() called before initialize() called.`);
         }
 
         if (!this._groupState?.playbackTrack.current.metadata) {
@@ -263,14 +263,14 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      * Instructs the group to load a new track.
      * 
      * @remarks
-     * Throws an exception if the session/coordinator hasn't been started or `canSetTrack` is 
+     * Throws an exception if the session/coordinator hasn't been initialized or `canSetTrack` is 
      * false.
      * @param metadata The track to load or `null` to indicate that the end of the track is reached.
      * @param waitPoints Optional. List of static wait points to configure for the track.  Dynamic wait points can be added via the `beginSuspension()` call.
      */
     public setTrack(metadata: ExtendedMediaMetadata|null, waitPoints?: CoordinationWaitPoint[]): void {
-        if (!this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.setTrack() called before start() called.`);
+        if (!this._hasInitialized) {
+            throw new Error(`EphemeralMediaSessionCoordinator.setTrack() called before initialize() called.`);
         }
 
         if (!this.canSetTrack) {
@@ -292,13 +292,13 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      * The track data object can be used by applications to synchronize things like pitch, roll, 
      * and yaw of a 360 video. This data object will be reset to null anytime the track changes. 
      * 
-     * Throws an exception if the session/coordinator hasn't been started or `canSetTrackData` is 
+     * Throws an exception if the session/coordinator hasn't been initialized or `canSetTrackData` is 
      * false.
      * @param data New data object to sync with the group. This value will be synchronized using a last writer wins strategy. 
      */
      public setTrackData(data: object|null): void {
-        if (!this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.setTrackData() called before start() called.`);
+        if (!this._hasInitialized) {
+            throw new Error(`EphemeralMediaSessionCoordinator.setTrackData() called before initialize() called.`);
         }
 
         if (!this.canSetTrackData) {
@@ -332,13 +332,13 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      * in a suspension state until the list client ends their suspension. This behavior can be
      * conditionally bypassed by settings the wait points `maxClients` value.
      *    
-     * Throws an exception if the session/coordinator hasn't been started.
+     * Throws an exception if the session/coordinator hasn't been initialized.
      * @param waitPoint Optional. Dynamic wait point to broadcast to all of the clients. 
      * @returns The suspension object. Call `end()` on the returned suspension to end the suspension.
      */
     public beginSuspension(waitPoint?: CoordinationWaitPoint): MediaSessionCoordinatorSuspension {
-        if (!this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.beginSuspension() called before start() called.`);
+        if (!this._hasInitialized) {
+            throw new Error(`EphemeralMediaSessionCoordinator.beginSuspension() called before initialize() called.`);
         }
 
         if (!this._groupState?.playbackTrack.current.metadata) {
@@ -372,24 +372,24 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
 
     /**
      * @hidden
-     * Called by MediaSession to verify the coordinator has been started.
+     * Called by MediaSession to verify the coordinator has been initialized.
      */
-     public get isStarted(): boolean {
-        return this._hasStarted;
+     public get isInitialized(): boolean {
+        return this._hasInitialized;
     }
 
     /**
      * @hidden
      * Called by MediaSession to start coordinator.
      */
-    public async start(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
-        if (this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.start() already started.`);
+    public async initialize(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
+        if (this._hasInitialized) {
+            throw new Error(`EphemeralMediaSessionCoordinator.initialize() already initialized.`);
         }
 
         // Create children
         await this.createChildren(acceptTransportChangesFrom);
-        this._hasStarted = true;
+        this._hasInitialized = true;
     }
 
     /**
@@ -405,8 +405,8 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      * Called by MediaSession to trigger the sending of a position update.
      */
     public sendPositionUpdate(state: IMediaPlayerState): void {
-        if (!this._hasStarted) {
-            throw new Error(`EphemeralMediaSessionCoordinator.sendPositionUpdate() called before start() called.`);
+        if (!this._hasInitialized) {
+            throw new Error(`EphemeralMediaSessionCoordinator.sendPositionUpdate() called before initialize() called.`);
         }
 
         // Send position update event

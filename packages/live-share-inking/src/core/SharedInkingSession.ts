@@ -53,7 +53,7 @@ class LiveStroke {
      * - Then remove point B because it's almost on the same line as that defined by A and C
      * This variable allows the fine tuning of that threshold.
      */
-    private static readonly wetStrokePointSimplificationThreshold = 100.1;
+    private static readonly wetStrokePointSimplificationThreshold = 100.05;
 
     /**
      * Configures the delay before wet stroke events are emitted, to greatly reduce the 

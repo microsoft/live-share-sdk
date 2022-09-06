@@ -4,14 +4,13 @@
  */
 
 import * as Teams from "@microsoft/teams-js";
+import { EphemeralEvent, ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
+import { InkingManager, InkingTool, IUserInfo, SharedInkingSession } from "@microsoft/live-share-inking";
+import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { IFluidContainer } from "fluid-framework";
 import * as Utils from "./utils";
 import { View } from "./view";
-import { EphemeralEvent, TeamsFluidClient } from "@microsoft/live-share";
-import { InkingManager, InkingTool, IUserInfo, SharedInkingSession } from "@microsoft/live-share-inking";
-import { IFluidContainer } from "fluid-framework";
 import { DrawingSimulation } from "./simulation";
-import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { getRandomUserInfo } from "./random-userInfo";
 
 const appTemplate = `
@@ -95,14 +94,13 @@ export class MainView extends View {
     private _userInfo: IUserInfo;
 
     private async internalStart() {
-        const clientOptions = this.runningInTeams()
+        const clientOptions: ITeamsFluidClientOptions | undefined = this.runningInTeams()
             ? undefined
             : {
                 connection: {
-                    tenantId: LOCAL_MODE_TENANT_ID,
+                    type: "local",
                     tokenProvider: new InsecureTokenProvider("", { id: "123" }),
-                    orderer: "http://localhost:7070",
-                    storage: "http://localhost:7070",
+                    endpoint: "http://localhost:7070"
                 }
             };
 

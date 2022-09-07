@@ -3,6 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-export * from "./InkingCanvas";
 export * from "./DryWetCanvas";
+export * from "./InkingCanvas";
 export * from "./LaserPointerCanvas";

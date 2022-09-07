@@ -5,11 +5,14 @@
 
 import { IBrush, DefaultPenBrush } from "./Brush";
 import {
-    doRectanglesOverlap, getSegmentIntersectionsWithRectangle, getSegmentsIntersection,
-    getSquaredDistanceBetweenPoints, IPoint, IPointerPoint, IRect, ISegment, isPointInsideRectangle,
-    isRectangleInsideRectangle, segmentMayIntersectWithRectangle, unionRect
+    getSquaredDistanceBetweenPoints, IPoint, IPointerPoint, IRect, ISegment,
+    unionRect
 } from "./Geometry";
-import { generateUniqueId } from "./Utils";
+import {
+    doRectanglesOverlap, getSegmentIntersectionsWithRectangle, getSegmentsIntersection,
+    isPointInsideRectangle, isRectangleInsideRectangle, segmentMayIntersectWithRectangle,
+    generateUniqueId
+} from "./Internals";
 
 /**
  * Field names on this interface are intentionally short to minimize
@@ -163,7 +166,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
     private _boundingRect?: IRect;
 
     private addPoint(p: IPointerPoint): boolean {
-        let lastPoint = this._points.length > 0 ?  this._points[this._points.length - 1] : undefined;
+        let lastPoint = this._points.length > 0 ? this._points[this._points.length - 1] : undefined;
 
         if (lastPoint === undefined || lastPoint.x !== p.x || lastPoint.y !== p.y) {
             this._points.push(p);

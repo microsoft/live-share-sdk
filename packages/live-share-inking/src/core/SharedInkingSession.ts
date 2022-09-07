@@ -7,13 +7,15 @@ import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IFluidHandle } from '@fluidframework/core-interfaces';
 import { IValueChanged, SharedMap } from '@fluidframework/map';
 import { ISequencedDocumentMessage } from '@fluidframework/protocol-definitions';
-import { AddPointsEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
-    InkingManager, IPointerMovedEventArgs, IWetStroke, PointerMovedEvent, StrokeEndState, StrokesAddedEvent, StrokesRemovedEvent } from './InkingManager';
+import {
+    AddPointsEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
+    InkingManager, IPointerMovedEventArgs, IWetStroke, PointerMovedEvent, StrokeEndState, StrokesAddedEvent, StrokesRemovedEvent
+} from './InkingManager';
 import { IPointerPoint, getDistanceBetweenPoints, IPoint } from './Geometry';
 import { IStroke, Stroke, StrokeType } from "./Stroke";
 import { EphemeralEventScope, EphemeralEventTarget, IEphemeralEvent, UserMeetingRole } from '@microsoft/live-share';
 import { IBrush } from './Brush';
-import { basicColors, darkenColor, IColor, toCssColor } from './Colors';
+import { BasicColors, darkenColor, IColor, toCssColor } from './Colors';
 
 enum InkingEventNames {
     PointerMove = "PointerMove",
@@ -46,16 +48,6 @@ type IAddWetStrokePointsEvent = IEphemeralEvent & IAddPointsEventArgs & ISharedC
 
 class LiveStroke {
     /**
-     * In order to limit the number of points being sent over the wire, wet strokes are
-     * simplified as follows:
-     * - Given 3 points A, B, C
-     * - If distance(A, B) + distance(B, C) < wetStrokePointSimplificationThreshold % of distance(A, C)
-     * - Then remove point B because it's almost on the same line as that defined by A and C
-     * This variable allows the fine tuning of that threshold.
-     */
-    private static readonly wetStrokePointSimplificationThreshold = 100.05;
-
-    /**
      * Configures the delay before wet stroke events are emitted, to greatly reduce the 
      * number of events emitted and improve performance.
      */
@@ -84,11 +76,11 @@ class LiveStroke {
 
             const threshold = (p1p2 + p2p3) * (100 / p1p3);
 
-            if (threshold < LiveStroke.wetStrokePointSimplificationThreshold) {
+            if (threshold < this.simplificationThreshold) {
                 this._points.splice(index + 1, 1);
             }
             else {
-                index++; 
+                index++;
             }
         }
     }
@@ -98,7 +90,8 @@ class LiveStroke {
     constructor(
         readonly id: string,
         readonly type: StrokeType,
-        readonly brush: IBrush) { }
+        readonly brush: IBrush,
+        readonly simplificationThreshold: number) { }
 
     get points(): IPointerPoint[] {
         return this._points;
@@ -172,14 +165,14 @@ interface ICursorColor {
 
 class BuiltInCursorVisual extends CursorVisual {
     private static cursorColors: ICursorColor[] = [
-        { backgroundColor: basicColors.red, foregroundColor: basicColors.white },
-        { backgroundColor: basicColors.green, foregroundColor: basicColors.black },
-        { backgroundColor: basicColors.blue, foregroundColor: basicColors.black },
-        { backgroundColor: basicColors.purple, foregroundColor: basicColors.black },
-        { backgroundColor: basicColors.magenta, foregroundColor: basicColors.black },
-        { backgroundColor: basicColors.violet, foregroundColor: basicColors.black },
-        { backgroundColor: basicColors.gray, foregroundColor: basicColors.black },
-        { backgroundColor: basicColors.silver, foregroundColor: basicColors.black }
+        { backgroundColor: BasicColors.red, foregroundColor: BasicColors.white },
+        { backgroundColor: BasicColors.green, foregroundColor: BasicColors.black },
+        { backgroundColor: BasicColors.blue, foregroundColor: BasicColors.black },
+        { backgroundColor: BasicColors.purple, foregroundColor: BasicColors.black },
+        { backgroundColor: BasicColors.magenta, foregroundColor: BasicColors.black },
+        { backgroundColor: BasicColors.violet, foregroundColor: BasicColors.black },
+        { backgroundColor: BasicColors.gray, foregroundColor: BasicColors.black },
+        { backgroundColor: BasicColors.silver, foregroundColor: BasicColors.black }
     ];
     private static currentColorIndex = 0;
 
@@ -253,8 +246,18 @@ export class SharedInkingSession extends DataObject {
     private static readonly dryInkMapKey = "dryInk";
 
     /**
-     * The object's Fluid type/name.
+     * In order to limit the number of points being sent over the wire, wet strokes are
+     * simplified as follows:
+     * - Given 3 points A, B, C
+     * - If distance(A, B) + distance(B, C) < wetStrokePointSimplificationThreshold % of distance(A, C)
+     * - Then remove point B because it's almost on the same line as that defined by A and C
+     * This variable allows the fine tuning of that threshold.
      */
+    private static readonly wetStrokePointSimplificationThreshold = 100.05;
+
+    /**
+    * The object's Fluid type/name.
+    */
     public static readonly TypeName = `@microsoft/shared-inking-session`;
 
     /**
@@ -274,7 +277,7 @@ export class SharedInkingSession extends DataObject {
     private _pointerMovedEventTarget!: EphemeralEventTarget<IPointerMovedEvent>;
     private _beginWetStrokeEventTarget!: EphemeralEventTarget<IBeginWetStrokeEvent>;
     private _addWetStrokePointEventTarget!: EphemeralEventTarget<IAddWetStrokePointsEvent>;
-    private _allowedRoles: UserMeetingRole[] = [ UserMeetingRole.guest, UserMeetingRole.attendee, UserMeetingRole.organizer, UserMeetingRole.presenter ];    
+    private _allowedRoles: UserMeetingRole[] = [UserMeetingRole.guest, UserMeetingRole.attendee, UserMeetingRole.organizer, UserMeetingRole.presenter];
     private _pendingLiveStrokes: Map<string, LiveStroke> = new Map<string, LiveStroke>();
     private _cursorVisualsMap = new Map<string, CursorVisual>();
     private _cursorVisualsHost!: HTMLElement;
@@ -323,7 +326,8 @@ export class SharedInkingSession extends DataObject {
                     const liveStroke = new LiveStroke(
                         eventArgs.strokeId,
                         eventArgs.type,
-                        eventArgs.brush
+                        eventArgs.brush,
+                        SharedInkingSession.wetStrokePointSimplificationThreshold
                     );
 
                     liveStroke.points.push(eventArgs.startPoint);
@@ -365,7 +369,7 @@ export class SharedInkingSession extends DataObject {
         }
 
         // Setup incoming events
-        const scope = new EphemeralEventScope(this.runtime, [ UserMeetingRole.presenter ]);
+        const scope = new EphemeralEventScope(this.runtime, [UserMeetingRole.presenter]);
 
         this._pointerMovedEventTarget = new EphemeralEventTarget(
             scope,
@@ -396,7 +400,7 @@ export class SharedInkingSession extends DataObject {
                             timeStamp: evt.timestamp,
                             brush: evt.brush
                         });
-        
+
                     this._wetStrokes.set(evt.strokeId, stroke);
 
                     if (evt.clientId) {
@@ -413,7 +417,7 @@ export class SharedInkingSession extends DataObject {
                                 evt.startPoint);
                         }
                     }
-                }      
+                }
             });
 
         this._addWetStrokePointEventTarget = new EphemeralEventTarget(
@@ -422,7 +426,7 @@ export class SharedInkingSession extends DataObject {
             (evt: IAddWetStrokePointsEvent, local: boolean) => {
                 if (!local) {
                     const stroke = this._wetStrokes.get(evt.strokeId);
-        
+
                     if (stroke) {
                         stroke.addPoints(...evt.points);
 
@@ -453,7 +457,7 @@ export class SharedInkingSession extends DataObject {
                             }
                         }
                     }
-                }        
+                }
             });
     }
 
@@ -477,7 +481,7 @@ export class SharedInkingSession extends DataObject {
 
                     try {
                         if (!local) {
-                            const serializedStroke: string | undefined = this._dryInkMap.get(changed.key);                            
+                            const serializedStroke: string | undefined = this._dryInkMap.get(changed.key);
                             const addRemoveOptions: IAddRemoveStrokeOptions = { forceReRender: true, addToChangeLog: false };
 
                             if (serializedStroke !== undefined) {
@@ -672,7 +676,7 @@ export class SharedInkingSession extends DataObject {
             if (!this._isCursorShared) {
                 // Send a pointer moved event with an undefined
                 // point to indicated the cursor is not shared anymore
-                this._pointerMovedEventTarget.sendEvent({ });
+                this._pointerMovedEventTarget.sendEvent({});
             }
         }
     }

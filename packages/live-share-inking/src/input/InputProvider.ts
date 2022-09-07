@@ -9,11 +9,11 @@ import { EventEmitter } from "events";
  * Abstracts pointer event emission.
  */
 export abstract class InputProvider extends EventEmitter {
-    public static readonly PointerDown: symbol = Symbol();
-    public static readonly PointerMove: symbol = Symbol();
-    public static readonly PointerUp: symbol = Symbol();
-    public static readonly PointerEnter: symbol = Symbol();
-    public static readonly PointerLeave: symbol = Symbol();
+    public static readonly PointerDown = "PointerDown"; 
+    public static readonly PointerMove = "PointerMove";
+    public static readonly PointerUp = "PointerUp";
+    public static readonly PointerEnter = "PointerEnter";
+    public static readonly PointerLeave = "PointerLeave";
 
     constructor(readonly element: HTMLElement) {
         super();

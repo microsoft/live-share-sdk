@@ -4,7 +4,7 @@
  */
 
 import { InputFilter } from "./InputFilter";
-import { IPointerPoint } from "../core/Geometry";
+import { IPointerPoint } from "../core";
 
 /**
  * Implements a jitter reduction filter, which straightens stroke by ignoring

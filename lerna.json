@@ -5,9 +5,9 @@
     "samples/01.dice-roller",
     "samples/02.react-video",
     "samples/03.live-inking",
-    "samples/31.inking-tests",
     "samples/21.react-media-template",
-    "samples/22.react-agile-poker"
+    "samples/22.react-agile-poker",
+    "samples/31.inking-tests"
   ],
   "version": "0.0.0"
 }

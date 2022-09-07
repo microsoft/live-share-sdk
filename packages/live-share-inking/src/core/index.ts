@@ -4,9 +4,8 @@
  */
 
 export * from "./Brush";
-export * from "./Utils";
 export * from "./Colors";
 export * from "./Geometry";
-export * from "./Stroke";
 export * from "./InkingManager";
 export * from "./SharedInkingSession";
+export * from "./Stroke";

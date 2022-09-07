@@ -4,10 +4,8 @@
  */
 
 import { InkingCanvas } from "./InkingCanvas";
-import { getPressureAdjustedSize, computeQuadBetweenTwoCircles, IPointerPoint,
-    computeQuadBetweenTwoRectangles, IQuadPathItem } from "../core/Geometry";
-import { DefaultPenBrush, IBrush } from "../core/Brush";
-import { toCssColor } from "../core/Colors";
+import { getPressureAdjustedSize, IPointerPoint, DefaultPenBrush, IBrush, toCssColor } from "../core";
+import { computeQuadBetweenTwoCircles, computeQuadBetweenTwoRectangles, IQuadPathItem } from "../core/Internals";
 
 /**
  * Represents the base class from wet and dry canvases, implementing the common rendering logic.
@@ -24,7 +22,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
         if (this._pendingPointsStartIndex < this._points.length) {
             let previousPoint: IPointerPoint | undefined = undefined;
             let previousPointPressureAdjustedTip = 0;
-            
+
             if (this._pendingPointsStartIndex > 0) {
                 previousPoint = this._points[this._pendingPointsStartIndex - 1];
                 previousPointPressureAdjustedTip = getPressureAdjustedSize(tipHalfSize, previousPoint.pressure);
@@ -153,7 +151,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
 
             if (!this._innerLayer) {
                 this._innerLayer = this.addLayer();
-            }    
+            }
 
             this.renderQuadPath(this._innerLayer, path);
         }
@@ -224,6 +222,19 @@ export class DryCanvas extends DryWetCanvas {
  * Represents a canvas suitable for "wet ink", i.e. an ongoing stroke.
  */
 export class WetCanvas extends DryWetCanvas {
+    /**
+     * This setting exists for testing purposes only. Do not set to `false`
+     * in production code as it will drastically impair performance.
+     * Asynchronous rendering, combined with progressive rendering,
+     * causes two canvases rendering the same stroke (with the exact same
+     * points) to not render the exact same pixels.
+     */
+    private static readonly forceSynchronousRendering = false;
+
+    protected rendersAsynchronously(): boolean {
+        return WetCanvas.forceSynchronousRendering ? false : super.rendersAsynchronously();
+    }
+
     protected getBrushCssColor(): string {
         // In a wet canvas, when using the highlighter, the brush color
         // used to draw the stroke is always opaque, and it's the canvas
@@ -238,7 +249,7 @@ export class WetCanvas extends DryWetCanvas {
      * mode, by setting its opacity and mixBlendMode styles.
      * @param context The context to set the blend mode on, given the current brus.
      */
-     protected adjustOpacity(context: CanvasRenderingContext2D) {
+    protected adjustOpacity(context: CanvasRenderingContext2D) {
         switch (this.brush.type) {
             case "laser":
                 context.canvas.style.opacity = InkingCanvas.laserShadowOpacity.toString();

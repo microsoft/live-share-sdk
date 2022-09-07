@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { basicColors, IColor, InkingManager, IPoint, IPointerPoint } from "@microsoft/live-share-inking";
+import { BasicColors, IColor, InkingManager, IPoint, IPointerPoint } from "@microsoft/live-share-inking";
 
 interface ITestInkingManager {
     pointerDown(p: IPointerPoint): void;
@@ -13,19 +13,19 @@ interface ITestInkingManager {
 }
 
 const strokeColors: IColor[] = [
-    basicColors.black,
-    basicColors.red,
-    basicColors.green,
-    basicColors.blue,
-    basicColors.purple,
-    basicColors.magenta,
-    basicColors.violet,
-    basicColors.gray
+    BasicColors.black,
+    BasicColors.red,
+    BasicColors.green,
+    BasicColors.blue,
+    BasicColors.purple,
+    BasicColors.magenta,
+    BasicColors.violet,
+    BasicColors.gray
 ];
 
 export class DrawingSimulation {
-    private static pointsPerStroke = 100;
-    private static strokeCount = 20;
+    private static pointsPerStroke = 3;
+    private static strokeCount = 1;
 
     private simulatePointerDown(p: IPointerPoint) {
         ((<unknown>this.inkingManager) as ITestInkingManager).pointerDown(p);
@@ -71,9 +71,10 @@ export class DrawingSimulation {
         return strokeColors[Math.floor(Math.random() * (strokeColors.length - 1))];
     }
 
-    public draw() {
+    public async draw(midDrawCallback: () => Promise<void>) {
         for (let i = 0; i < DrawingSimulation.strokeCount; i++) {
             const points = this.computeSine();
+            const halfWayIndex = Math.floor(points.length / 2);
 
             this.inkingManager.penBrush.color = this.getRandomColor();
 
@@ -91,6 +92,10 @@ export class DrawingSimulation {
                 }
                 else {
                     this.simulatePointerMove(p, true);
+                }
+
+                if (pointIndex === halfWayIndex) {
+                    await midDrawCallback();
                 }
             }
         }

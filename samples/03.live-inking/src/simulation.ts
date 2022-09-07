@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { basicColors, IColor, InkingManager, IPoint, IPointerPoint } from "@microsoft/live-share-inking";
+import { BasicColors, IColor, InkingManager, IPoint, IPointerPoint } from "@microsoft/live-share-inking";
 
 interface ITestInkingManager {
     pointerDown(p: IPointerPoint): void;
@@ -13,14 +13,14 @@ interface ITestInkingManager {
 }
 
 const strokeColors: IColor[] = [
-    basicColors.black,
-    basicColors.red,
-    basicColors.green,
-    basicColors.blue,
-    basicColors.purple,
-    basicColors.magenta,
-    basicColors.violet,
-    basicColors.gray
+    BasicColors.black,
+    BasicColors.red,
+    BasicColors.green,
+    BasicColors.blue,
+    BasicColors.purple,
+    BasicColors.magenta,
+    BasicColors.violet,
+    BasicColors.gray
 ];
 
 export class DrawingSimulation {

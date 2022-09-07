@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { basicColors, highlighterColors, IColor, penColors } from "./Colors";
+import { BasicColors, HighlighterColors, IColor, PenColors } from "./Colors";
 
 /**
  * Defines the shape of a brush's tip.
@@ -42,7 +42,7 @@ export interface IBrush {
  */
 export const DefaultPenBrush: Readonly<IBrush> = {
     type: "pen",
-    color: penColors.black,
+    color: PenColors.black,
     tip: "ellipse",
     tipSize: 10
 };
@@ -52,7 +52,7 @@ export const DefaultPenBrush: Readonly<IBrush> = {
  */
 export const DefaultHighlighterBrush: IBrush = {
     type: "highlighter",
-    color: highlighterColors.yellow,
+    color: HighlighterColors.yellow,
     tip: "rectangle",
     tipSize: 10
 };
@@ -62,7 +62,7 @@ export const DefaultHighlighterBrush: IBrush = {
  */
 export const DefaultLaserPointerBrush: IBrush = {
     type: "laser",
-    color: basicColors.red,
+    color: BasicColors.red,
     tip: "ellipse",
     tipSize: 10
 };

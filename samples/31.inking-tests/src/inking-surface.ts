@@ -4,7 +4,7 @@
  */
 
 import { ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
-import { InkingManager, SharedInkingSession } from "@microsoft/live-share-inking";
+import { InkingManager, InputFilter, SharedInkingSession } from "@microsoft/live-share-inking";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 
@@ -18,10 +18,6 @@ export class InkingSurface {
     private _hostElement: HTMLElement;
     private _inkingManager!: InkingManager;
     private _container!: IFluidContainer;
-
-    private getSharedInkingSession(): SharedInkingSession {
-        return this._container.initialObjects.inkingSession as SharedInkingSession;
-    }
 
     private async internalStart() {
         const clientOptions: ITeamsFluidClientOptions = {
@@ -39,21 +35,35 @@ export class InkingSurface {
         const inkingSession = this.getSharedInkingSession();
 
         this._inkingManager = inkingSession.synchronize(this._hostElement);
-        this._inkingManager.setInputFilters([]);
+        this._inkingManager.setInputFilters(this._inputFilters);
         this._inkingManager.activate();
     }
 
-    constructor(hostElement: HTMLElement) {
+    constructor(hostElement: HTMLElement, private _inputFilters?: InputFilter[]) {
         this._hostElement = hostElement;
     }
 
-    start() {
-        this.internalStart().catch(
-            (error) => {
-                console.error(error)
+    getSharedInkingSession(): SharedInkingSession {
+        return this._container.initialObjects.inkingSession as SharedInkingSession;
+    }
 
-                document.body.innerText = `Error: ${JSON.stringify(error)}`;
-            });
+    async start() {
+        try {
+            await this.internalStart();
+        }
+        catch(error) {
+            console.error(error)
+
+            document.body.innerText = `Error: ${JSON.stringify(error)}`;
+        };
+    }
+
+    getContext(): CanvasRenderingContext2D {
+        return (this.inkingManager as any)._dryCanvas._context;
+    }
+
+    reRender() {
+        (this.inkingManager as any).reRender();
     }
 
     get inkingManager(): InkingManager {

@@ -41,7 +41,7 @@ export function fromCssColor(color: string): IColor {
         }
     }
 
-    return penColors.black;
+    return PenColors.black;
 }
 
 /**
@@ -95,7 +95,7 @@ export function lightenColor(color: IColor, intensity: number): IColor {
 /**
  * Pre-defined basic colors
  */
-export const basicColors = {
+export const BasicColors = {
     black: fromCssColor("#000000"),
     white: fromCssColor("#ffffff"),
     gray: fromCssColor("#808080"),
@@ -112,7 +112,7 @@ export const basicColors = {
 /**
  * Pre-defined pen colors
  */
-export const penColors = {
+export const PenColors = {
     yellow: fromCssColor("#ffc114"),
     orange: fromCssColor("#f6630d"),
     pink: fromCssColor("#ff0066"),
@@ -134,7 +134,7 @@ export const penColors = {
 /**
  * Pre-defined highlighter colors
  */
-export const highlighterColors = {
+export const HighlighterColors = {
     yellow: fromCssColor("#fffc00"),
     lime: fromCssColor("#00f900"),
     aqua: fromCssColor("#00fdff"),

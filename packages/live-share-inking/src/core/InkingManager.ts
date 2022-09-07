@@ -7,14 +7,14 @@ import { EventEmitter } from "events";
 import { CanvasReferencePoint, InkingCanvas } from "../canvas/InkingCanvas";
 import { DryCanvas, WetCanvas } from "../canvas/DryWetCanvas";
 import { LaserPointerCanvas } from "../canvas/LaserPointerCanvas";
-import { IPoint, IPointerPoint, IRect, makeRectangle, screenToViewport, viewportToScreen } from "./Geometry";
+import { IPoint, IPointerPoint, IRect, screenToViewport, viewportToScreen } from "./Geometry";
 import { Stroke, IStroke, IStrokeCreationOptions, StrokeType } from "./Stroke";
 import { InputFilter, InputFilterCollection } from "../input/InputFilter";
 import { JitterFilter } from "../input/JitterFilter";
-import { generateUniqueId, pointerEventToPoint } from "./Utils";
 import { InputProvider } from "../input/InputProvider";
 import { PointerInputProvider } from "../input/PointerInputProvider";
 import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultPenBrush, IBrush } from "./Brush";
+import { makeRectangle, generateUniqueId, pointerEventToPoint } from "./Internals";
 
 interface CoalescedPointerEvent extends PointerEvent {
     getCoalescedEvents(): PointerEvent[];
@@ -58,15 +58,15 @@ type StrokeBasedTool = InkingTool.Pen | InkingTool.LaserPointer | InkingTool.Hig
 /**
  * The event emitted by InkingManager when the canvas is cleared.
  */
-export const ClearEvent: symbol = Symbol();
+export const ClearEvent = "Clear";
 /**
  * The event emitted by InkingManager when a stroked is added.
  */
-export const StrokesAddedEvent: symbol = Symbol();
+export const StrokesAddedEvent = "StrokesAdded";
 /**
  * The event emitted by InkingManager when a stroked is removed.
  */
-export const StrokesRemovedEvent: symbol = Symbol();
+export const StrokesRemovedEvent = "StrokesRemoved";
 
 /**
  * Defines the arguments of the PointerMovedEvent.
@@ -78,7 +78,7 @@ export interface IPointerMovedEventArgs {
 /**
  * The event emitted by InkingManager when the pointer moves over the canvas.
  */
-export const PointerMovedEvent: symbol = Symbol();
+export const PointerMovedEvent = "PointerMoved";
 
 /**
  * Defines the arguments of the BeginStrokeEvent.
@@ -105,7 +105,7 @@ export interface IBeginStrokeEventArgs {
 /**
  * The event emitted by InkingManager when a stroke begins.
  */
-export const BeginStrokeEvent: symbol = Symbol();
+export const BeginStrokeEvent = "BeginStroke";
 
 export enum StrokeEndState {
     Ended,
@@ -135,7 +135,7 @@ export interface IAddPointsEventArgs {
  * The event emitted by InkingManager when points are added to
  * the current stroke.
  */
-export const AddPointsEvent: symbol = Symbol();
+export const AddPointsEvent = "AddPoints";
 
 /**
  * Defines a "wet" stroke, i.e. a stroke as it's being drawn.

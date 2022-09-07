@@ -3,6 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-export * from "./core/index";
-export * from "./canvas/index";
-export * from "./input/index";
+export * from "./core";
+export * from "./canvas";
+export * from "./input";

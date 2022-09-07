@@ -3,9 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TWO_PI, IPointerPoint, IQuad, IPoint, viewportToScreen } from "../core/Geometry";
-import { IStroke } from "../core/Stroke";
-import { IBrush } from "../core/Brush";
+import { IPointerPoint, IPoint, viewportToScreen, IStroke, IBrush } from "../core";
+import { IQuad, TWO_PI } from "../core/Internals";
 
 /**
  * Defines the refernece point of a canvas. The reference point is the origin used for
@@ -34,7 +33,7 @@ export abstract class InkingCanvas {
      * Configures the opacity of the laser stroke shadow.
      */
     public static laserShadowOpacity = 0.5;
-    
+
     /**
      * Configures the opacity of highlighter strokes.
      */
@@ -62,7 +61,7 @@ export abstract class InkingCanvas {
             alpha: true,
             desynchronized: false
         };
-        
+
         const context: CanvasRenderingContext2D | null = canvas.getContext('2d', default2DOptions);
 
         if (context === null) {
@@ -75,7 +74,7 @@ export abstract class InkingCanvas {
     private resizeLayer(context: CanvasRenderingContext2D, width: number, height: number) {
         context.canvas.style.width = `${width}px`;
         context.canvas.style.height = `${height}px`;
-    
+
         context.canvas.width = width * window.devicePixelRatio;
         context.canvas.height = height * window.devicePixelRatio;
 
@@ -190,7 +189,7 @@ export abstract class InkingCanvas {
      * @param x The x coordinate, in pixels.
      * @param y The y coordinate, in pixels.
      */
-    protected moveTo(context: CanvasRenderingContext2D,x: number, y: number) {
+    protected moveTo(context: CanvasRenderingContext2D, x: number, y: number) {
         const transformedPoint = this.viewportToScreen({ x, y });
 
         context.moveTo(transformedPoint.x, transformedPoint.y);
@@ -202,7 +201,7 @@ export abstract class InkingCanvas {
      * @param x The x coordinate, in pixels.
      * @param y The y coordinate, in pixels.
      */
-    protected lineTo(context: CanvasRenderingContext2D,x: number, y: number) {
+    protected lineTo(context: CanvasRenderingContext2D, x: number, y: number) {
         const transformedPoint = this.viewportToScreen({ x, y });
 
         context.lineTo(transformedPoint.x, transformedPoint.y);
@@ -298,11 +297,11 @@ export abstract class InkingCanvas {
      */
     referencePoint: CanvasReferencePoint = "center";
 
-     /**
-     * Creates a new InkingCanvas instance, attached to the provided HTMLElement.
-     * @param _parentElement The HTML element this canvas is attached to. InkingCanvas
-     * dynamically creates an HTML5 Canvas element and adds it as a child to `parentElement`.
-     */
+    /**
+    * Creates a new InkingCanvas instance, attached to the provided HTMLElement.
+    * @param _parentElement The HTML element this canvas is attached to. InkingCanvas
+    * dynamically creates an HTML5 Canvas element and adds it as a child to `parentElement`.
+    */
     constructor(private _parentElement?: HTMLElement) {
         this._context = this.createLayer();
 
@@ -382,7 +381,7 @@ export abstract class InkingCanvas {
             // Reset transform to identity to clear the whole canvas
             context.setTransform(1, 0, 0, 1, 0, 0);
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-        
+
             context.restore();
         }
 

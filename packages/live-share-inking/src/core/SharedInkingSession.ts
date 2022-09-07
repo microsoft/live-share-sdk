@@ -496,7 +496,6 @@ export class SharedInkingSession extends DataObject {
                                 }
 
                                 inkingManager.addStroke(stroke, addRemoveOptions);
-
                             }
                             else {
                                 inkingManager.removeStroke(changed.key, addRemoveOptions);

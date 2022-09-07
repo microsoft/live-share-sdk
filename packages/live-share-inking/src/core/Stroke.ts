@@ -4,9 +4,11 @@
  */
 
 import { IBrush, DefaultPenBrush } from "./Brush";
-import { doRectanglesOverlap, getSegmentIntersectionsWithRectangle, getSegmentsIntersection,
+import {
+    doRectanglesOverlap, getSegmentIntersectionsWithRectangle, getSegmentsIntersection,
     getSquaredDistanceBetweenPoints, IPoint, IPointerPoint, IRect, ISegment, isPointInsideRectangle,
-    isRectangleInsideRectangle, segmentMayIntersectWithRectangle, unionRect } from "./Geometry";
+    isRectangleInsideRectangle, segmentMayIntersectWithRectangle, unionRect
+} from "./Geometry";
 import { generateUniqueId } from "./Utils";
 
 /**
@@ -152,7 +154,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
     // serialization/deserialization logic
     private _version: number = 1;
 
-    private _brush: IBrush = {...DefaultPenBrush};
+    private _brush: IBrush = { ...DefaultPenBrush };
     private _points: IPointerPoint[];
     private _iteratorCounter = 0;
     private _id: string;
@@ -161,20 +163,16 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
     private _boundingRect?: IRect;
 
     private addPoint(p: IPointerPoint): boolean {
-        let lastPoint: IPointerPoint | undefined = undefined;
-
-        if (this._points.length !== 0) {
-            lastPoint = this._points[this._points.length - 1];
-        }
+        let lastPoint = this._points.length > 0 ?  this._points[this._points.length - 1] : undefined;
 
         if (lastPoint === undefined || lastPoint.x !== p.x || lastPoint.y !== p.y) {
             this._points.push(p);
 
-            return true;
-        }
+            if (this._boundingRect && !isPointInsideRectangle(p, this._boundingRect)) {
+                this._boundingRect = undefined;
+            }
 
-        if (this._boundingRect && !isPointInsideRectangle(p, this._boundingRect)) {
-            this._boundingRect = undefined;
+            return true;
         }
 
         return false;
@@ -222,10 +220,10 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         let currentValues: number[] = [];
 
         while (currentPosition < serializedPoints.length) {
-            const p = serializedPoints.indexOf(",", currentPosition);
+            let p = serializedPoints.indexOf(",", currentPosition);
 
             if (p === -1) {
-                break;
+                p = serializedPoints.length;
             }
 
             currentValues.push(parseFloat(serializedPoints.substring(currentPosition, p)));
@@ -265,7 +263,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         this._clientId = effectiveOptions.clientId;
         this._timeStamp = effectiveOptions.timeStamp ?? Date.now();
         this._points = effectiveOptions.points ?? [];
-        this._brush = {...(effectiveOptions.brush ?? DefaultPenBrush)};
+        this._brush = { ...(effectiveOptions.brush ?? DefaultPenBrush) };
     }
 
     /**
@@ -407,7 +405,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         for (const p of this) {
             if (previousPoint) {
                 const segment: ISegment = { from: previousPoint, to: p };
-                
+
                 if (segmentMayIntersectWithRectangle(segment, eraserRect)) {
                     const intersections = getSegmentIntersectionsWithRectangle(segment, eraserRect);
 

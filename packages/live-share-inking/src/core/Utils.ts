@@ -4,7 +4,6 @@
  */
 
 import { v4 as uuid } from "uuid";
-import { IColor } from "./Colors";
 import { IPointerPoint } from "./Geometry";
 
 const EPSILON = 0.000001;
@@ -28,7 +27,7 @@ export function pointerEventToPoint(e: PointerEvent): IPointerPoint {
     return {
         x: e.offsetX,
         y: e.offsetY,
-        pressure: e.pressure > 0 ? e.pressure : 0.5
+        pressure: e.pressure
     };
 }
 

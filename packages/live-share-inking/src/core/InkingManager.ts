@@ -150,7 +150,7 @@ export interface IWetStroke extends IStroke {
      * @param p Optional. The points at which the stroke ends. If not specified,
      * the stroke ends at the last added point.
      */
-    end(p?: IPointerPoint): void;
+    end(): void;
     /**
      * Cancels the wet stroke.
      */
@@ -257,7 +257,7 @@ export class InkingManager extends EventEmitter {
      * the collection of changes that can be handled as a batch.
      */
     private static readonly pointEraserProcessingInterval = 30;
-    
+
     /**
      * Configures the amount of time to wait before flushing the change log, giving it time to
      * accumulate changes that can then be handled as a batch.
@@ -307,9 +307,9 @@ export class InkingManager extends EventEmitter {
             return result;
         }
 
-        end(p?: IPointerPoint) {
+        end() {
             this._canvas.removeFromDOM();
-            this._canvas.endStroke(p);
+            this._canvas.endStroke();
 
             this._owner.wetStrokeEnded(this, false);
 
@@ -339,8 +339,8 @@ export class InkingManager extends EventEmitter {
     private readonly _host: HTMLElement;
     private readonly _canvasPoolHost: HTMLElement;
     private readonly _dryCanvas: InkingCanvas;
-    private readonly _inputFilters: InputFilterCollection;
 
+    private _inputFilters: InputFilterCollection;
     private _penBrush: IBrush = { ...DefaultPenBrush };
     private _highlighterBrush: IBrush = { ...DefaultHighlighterBrush };
     private _laserPointerBrush: IBrush = { ...DefaultLaserPointerBrush }
@@ -522,7 +522,7 @@ export class InkingManager extends EventEmitter {
         getCoalescedEvents(e).forEach(
             (evt: PointerEvent) => {
                 let invokePointerMove = true;
-                
+
                 if (this._activePointerId) {
                     invokePointerMove = evt.pointerId === this._activePointerId;
                 }
@@ -591,7 +591,7 @@ export class InkingManager extends EventEmitter {
                     ephemeralCanvas = new EphemeralCanvas(effectiveClientId, this._canvasPoolHost);
                     ephemeralCanvas.offset = this.offset;
                     ephemeralCanvas.scale = this.scale;
-            
+
                     this._ephemeralCanvases.set(effectiveClientId, ephemeralCanvas);
                 }
 
@@ -603,8 +603,7 @@ export class InkingManager extends EventEmitter {
                     }
                 );
             }
-
-            if (stroke.type === StrokeType.Persistent && !isCancelled) {
+            else if (stroke.type === StrokeType.Persistent) {
                 this.internalAddStroke(stroke);
             }
         }
@@ -675,7 +674,7 @@ export class InkingManager extends EventEmitter {
 
     private queuePointerMovedNotification(position?: IPoint) {
         if (this._pointerMovedNotificationTimeout !== undefined) {
-            window.clearTimeout(this._pointerMovedNotificationTimeout);            
+            window.clearTimeout(this._pointerMovedNotificationTimeout);
         }
 
         this._pointerMovedNotificationTimeout = window.setTimeout(
@@ -822,7 +821,7 @@ export class InkingManager extends EventEmitter {
 
                     break;
             }
-        }        
+        }
     }
 
     protected pointerUp(p: IPointerPoint) {
@@ -833,7 +832,8 @@ export class InkingManager extends EventEmitter {
             case InkingTool.Highlighter:
             case InkingTool.LaserPointer:
                 if (this._currentStroke) {
-                    this._currentStroke.end(filteredPoint);
+                    this._currentStroke.addPoints(filteredPoint);
+                    this._currentStroke.end();
 
                     this.notifyEndStroke(this._currentStroke.id, filteredPoint);
 
@@ -844,8 +844,6 @@ export class InkingManager extends EventEmitter {
         }
 
         this.flushChangeLog();
-
-        this._activePointerId = undefined;
     }
 
     protected pointerLeave(p: IPointerPoint) {
@@ -871,11 +869,21 @@ export class InkingManager extends EventEmitter {
     private notifyEndStroke(strokeId: string, endPoint?: IPointerPoint, isCancelled: boolean = false) {
         const eventArgs: IAddPointsEventArgs = {
             strokeId,
-            points: endPoint ? [ endPoint ] : [],
+            points: endPoint ? [endPoint] : [],
             endState: isCancelled ? StrokeEndState.Cancelled : StrokeEndState.Ended
         }
 
         this.emit(AddPointsEvent, eventArgs);
+    }
+
+    private createInputFilterCollection(inputFilters?: InputFilter[]): InputFilterCollection {
+        const result = new InputFilterCollection();
+
+        inputFilters ? result.addFilters(...inputFilters) : result.addFilters(new JitterFilter());
+
+        result.addFilters(new InkingManager.ScreenToViewportCoordinateTransform(this));
+
+        return result;
     }
 
     /**
@@ -892,9 +900,7 @@ export class InkingManager extends EventEmitter {
     constructor(host: HTMLElement) {
         super();
 
-        this._inputFilters = new InputFilterCollection(
-            new JitterFilter(),
-            new InkingManager.ScreenToViewportCoordinateTransform(this));
+        this._inputFilters = this.createInputFilterCollection();
 
         this._host = host;
 
@@ -910,6 +916,16 @@ export class InkingManager extends EventEmitter {
 
         this._hostResizeObserver = new ResizeObserver(this.onHostResized);
         this._hostResizeObserver.observe(this._host);
+    }
+
+    /**
+     * Sets the input filters to use with this InkingManager instance. By default, a jitter
+     * reduction filter is used.
+     * @param inputFilters The input filters to use, in the order provided. If `undefined` is
+     * passed, the default input filters are used.
+     */
+    public setInputFilters(inputFilters?: InputFilter[]) {
+        this._inputFilters = this.createInputFilterCollection(inputFilters);
     }
 
     /**
@@ -1264,7 +1280,7 @@ export class InkingManager extends EventEmitter {
      * reference point, scale and offset.
      */
     get viewPort(): IRect {
-        const topLeft = this.screenToViewport({ x: 0, y: 0});
+        const topLeft = this.screenToViewport({ x: 0, y: 0 });
         const bottomRight = this.screenToViewport({ x: this.clientWidth, y: this.clientHeight });
 
         return {

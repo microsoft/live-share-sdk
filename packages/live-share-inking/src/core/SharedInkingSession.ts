@@ -18,9 +18,9 @@ import { IBrush } from './Brush';
 import { BasicColors, darkenColor, IColor, toCssColor } from './Colors';
 
 enum InkingEventNames {
-    PointerMove = "PointerMove",
-    BeginWetStroke = "BeginWetStroke",
-    AddWetStrokePoints = "AddWetStrokePoint",
+    pointerMove = "PointerMove",
+    beginWetStroke = "BeginWetStroke",
+    addWetStrokePoints = "AddWetStrokePoint",
 }
 
 /**
@@ -57,7 +57,7 @@ class LiveStroke {
     private _processTimeout?: number;
 
     private process() {
-        if (this.type !== StrokeType.Persistent) {
+        if (this.type !== StrokeType.persistent) {
             return;
         }
 
@@ -288,7 +288,7 @@ export class SharedInkingSession extends DataObject {
 
         this._addWetStrokePointEventTarget.sendEvent(
             {
-                name: InkingEventNames.AddWetStrokePoints,
+                name: InkingEventNames.addWetStrokePoints,
                 isCursorShared: this.isCursorShared ? true : undefined,
                 displayName: userInfo?.displayName,
                 strokeId: liveStroke.id,
@@ -338,7 +338,7 @@ export class SharedInkingSession extends DataObject {
 
                     this._beginWetStrokeEventTarget.sendEvent(
                         {
-                            name: InkingEventNames.BeginWetStroke,
+                            name: InkingEventNames.beginWetStroke,
                             isCursorShared: this.isCursorShared ? true : undefined,
                             displayName: userInfo?.displayName,
                             pictureUri: userInfo?.pictureUri,
@@ -373,7 +373,7 @@ export class SharedInkingSession extends DataObject {
 
         this._pointerMovedEventTarget = new EphemeralEventTarget(
             scope,
-            InkingEventNames.PointerMove,
+            InkingEventNames.pointerMove,
             (evt: IPointerMovedEvent, local: boolean) => {
                 if (!local && evt.clientId) {
                     this.updateCursorPosition(
@@ -388,7 +388,7 @@ export class SharedInkingSession extends DataObject {
 
         this._beginWetStrokeEventTarget = new EphemeralEventTarget(
             scope,
-            InkingEventNames.BeginWetStroke,
+            InkingEventNames.beginWetStroke,
             (evt: IBeginWetStrokeEvent, local: boolean) => {
                 if (!local && this._inkingManager) {
                     const stroke = this._inkingManager.beginWetStroke(
@@ -404,7 +404,7 @@ export class SharedInkingSession extends DataObject {
                     this._wetStrokes.set(evt.strokeId, stroke);
 
                     if (evt.clientId) {
-                        if (evt.type !== StrokeType.Persistent || !evt.isCursorShared) {
+                        if (evt.type !== StrokeType.persistent || !evt.isCursorShared) {
                             this.removeCursor(evt.clientId);
                         }
                         else {
@@ -422,7 +422,7 @@ export class SharedInkingSession extends DataObject {
 
         this._addWetStrokePointEventTarget = new EphemeralEventTarget(
             scope,
-            InkingEventNames.AddWetStrokePoints,
+            InkingEventNames.addWetStrokePoints,
             (evt: IAddWetStrokePointsEvent, local: boolean) => {
                 if (!local) {
                     const stroke = this._wetStrokes.get(evt.strokeId);
@@ -435,15 +435,15 @@ export class SharedInkingSession extends DataObject {
                         // a valueChanged event. Removing it now would potentially lead to the
                         // stroke fully disappearing for a brief period of time before begin
                         // re-rendered in full fidelity.
-                        if (evt.endState === StrokeEndState.Cancelled) {
+                        if (evt.endState === StrokeEndState.cancelled) {
                             stroke.cancel();
                         }
-                        else if (evt.endState === StrokeEndState.Ended && stroke.type === StrokeType.Ephemeral) {
+                        else if (evt.endState === StrokeEndState.ended && stroke.type === StrokeType.ephemeral) {
                             stroke.end();
                         }
 
                         if (evt.clientId) {
-                            if (stroke.type !== StrokeType.Persistent || evt.endState || !evt.isCursorShared) {
+                            if (stroke.type !== StrokeType.persistent || evt.endState || !evt.isCursorShared) {
                                 this.removeCursor(evt.clientId);
                             }
                             else {

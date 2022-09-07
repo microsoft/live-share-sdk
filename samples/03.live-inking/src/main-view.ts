@@ -227,11 +227,11 @@ export class MainView extends View {
             }
         }
     
-        setupButton("btnStroke", () => { this._inkingManager.tool = InkingTool.Pen });
-        setupButton("btnLaserPointer", () => { this._inkingManager.tool = InkingTool.LaserPointer });
-        setupButton("btnHighlighter", () => { this._inkingManager.tool = InkingTool.Highlighter });
-        setupButton("btnEraser", () => { this._inkingManager.tool = InkingTool.Eraser });
-        setupButton("btnPointEraser", () => { this._inkingManager.tool = InkingTool.PointEraser });
+        setupButton("btnStroke", () => { this._inkingManager.tool = InkingTool.pen });
+        setupButton("btnLaserPointer", () => { this._inkingManager.tool = InkingTool.laserPointer });
+        setupButton("btnHighlighter", () => { this._inkingManager.tool = InkingTool.highlighter });
+        setupButton("btnEraser", () => { this._inkingManager.tool = InkingTool.eraser });
+        setupButton("btnPointEraser", () => { this._inkingManager.tool = InkingTool.pointEraser });
     
         setupButton("btnBlack", () => { this._inkingManager.penBrush.color = { r: 0, g: 0, b: 0 } });
         setupButton("btnYellow", () => { this._inkingManager.penBrush.color = { r: 255, g: 252, b: 0 } });

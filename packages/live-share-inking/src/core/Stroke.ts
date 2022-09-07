@@ -52,17 +52,17 @@ export enum StrokeType {
     /**
      * Laser pointer stroke, with a vanishing tail.
      */
-    LaserPointer,
+    laserPointer,
     /**
      * Ephemeral stroke, which vanishes all at once after
      * a set amount of time.
      */
-    Ephemeral,
+    ephemeral,
     /**
      * Persistent stroke, that remains on the canvas until
      * erased.
      */
-    Persistent
+    persistent
 }
 
 /**

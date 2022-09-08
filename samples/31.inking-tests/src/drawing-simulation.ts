@@ -24,8 +24,8 @@ const strokeColors: IColor[] = [
 ];
 
 export class DrawingSimulation {
-    private static pointsPerStroke = 3;
-    private static strokeCount = 1;
+    private static pointsPerStroke = 100;
+    private static strokeCount = 20;
 
     private simulatePointerDown(p: IPointerPoint) {
         ((<unknown>this.inkingManager) as ITestInkingManager).pointerDown(p);

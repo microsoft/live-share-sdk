@@ -235,6 +235,10 @@ export class WetCanvas extends DryWetCanvas {
         return WetCanvas.forceSynchronousRendering ? false : super.rendersAsynchronously();
     }
 
+    protected rendersProgressively(): boolean {
+        return WetCanvas.forceSynchronousRendering ? false : super.rendersProgressively();
+    }
+
     protected getBrushCssColor(): string {
         // In a wet canvas, when using the highlighter, the brush color
         // used to draw the stroke is always opaque, and it's the canvas

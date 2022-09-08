@@ -49,6 +49,9 @@ async function testWetStroke() {
                 }
             }
 
+            (localWetStroke as any)._canvas.render();
+            (remoteWetStroke as any)._canvas.render();
+
             const remoteWetStrokeContext: CanvasRenderingContext2D = (remoteWetStroke as any)._canvas._context;
 
             const localDataURL = localWetStrokeContext.canvas.toDataURL();

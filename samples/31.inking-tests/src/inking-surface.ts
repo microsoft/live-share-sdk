@@ -34,8 +34,11 @@ export class InkingSurface {
 
         const inkingSession = this.getSharedInkingSession();
 
-        this._inkingManager = inkingSession.synchronize(this._hostElement);
+        this._inkingManager = new InkingManager(this._hostElement);
         this._inkingManager.setInputFilters(this._inputFilters);
+
+        await inkingSession.initialize(this._inkingManager);
+
         this._inkingManager.activate();
     }
 
@@ -51,7 +54,7 @@ export class InkingSurface {
         try {
             await this.internalStart();
         }
-        catch(error) {
+        catch (error) {
             console.error(error)
 
             document.body.innerText = `Error: ${JSON.stringify(error)}`;

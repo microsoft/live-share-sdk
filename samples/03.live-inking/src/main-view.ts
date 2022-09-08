@@ -86,7 +86,7 @@ export class MainView extends View {
     private runningInTeams(): boolean {
         const params = new URLSearchParams(window.location.search);
         const config = params.get("inTeams");
-    
+
         return config !== null && config.toLowerCase() === "1";
     }
 
@@ -105,18 +105,18 @@ export class MainView extends View {
             };
 
         const client = new TeamsFluidClient(clientOptions);
-    
+
         this._container = (await client.joinContainer(containerSchema)).container;
-    
+
         const startStopDrawingSimulationEvent = this._container.initialObjects.startStopDrawingSimulation as EphemeralEvent;
         startStopDrawingSimulationEvent.on(
             "received",
             (event, local) => {
                 const button = document.getElementById("btnSimulation");
-    
+
                 if (local) {
                     this._simulationStarted = event.isStarted;
-    
+
                     if (button) {
                         button.innerText = this._simulationStarted ? "Stop simulation" : "Start simulation";
                     }
@@ -131,7 +131,7 @@ export class MainView extends View {
                     else {
                         this._drawingSimulation.stop();
                     }
-    
+
                     if (button) {
                         if (event.isStarted) {
                             button.setAttribute("disabled", "");
@@ -139,26 +139,29 @@ export class MainView extends View {
                         else {
                             button.removeAttribute("disabled");
                         }
-                    }    
+                    }
                 }
             }
         );
-    
+
         startStopDrawingSimulationEvent.start();
 
         const inkingHost = document.getElementById("inkingHost");
-    
+
         if (inkingHost) {
             const inkingSession = this.getSharedInkingSession();
             inkingSession.onGetLocalUserInfo = () => {
                 return this._userInfo;
             }
-    
-            this._inkingManager = inkingSession.synchronize(inkingHost);
+
+            this._inkingManager = new InkingManager(inkingHost);
+
+            await inkingSession.initialize(this._inkingManager);
+
             this._inkingManager.activate();
-    
+
             this._drawingSimulation = new DrawingSimulation(this._inkingManager);
-    
+
             this._hostResizeObserver = new ResizeObserver(() => { this.updateBackgroundImagePosition(); });
             this._hostResizeObserver.observe(inkingHost);
 
@@ -221,31 +224,31 @@ export class MainView extends View {
 
         const setupButton = (buttonId: string, onClick: () => void) => {
             const button = document.getElementById(buttonId);
-    
+
             if (button) {
                 button.onclick = onClick;
             }
         }
-    
+
         setupButton("btnStroke", () => { this._inkingManager.tool = InkingTool.pen });
         setupButton("btnLaserPointer", () => { this._inkingManager.tool = InkingTool.laserPointer });
         setupButton("btnHighlighter", () => { this._inkingManager.tool = InkingTool.highlighter });
         setupButton("btnEraser", () => { this._inkingManager.tool = InkingTool.eraser });
         setupButton("btnPointEraser", () => { this._inkingManager.tool = InkingTool.pointEraser });
-    
+
         setupButton("btnBlack", () => { this._inkingManager.penBrush.color = { r: 0, g: 0, b: 0 } });
         setupButton("btnYellow", () => { this._inkingManager.penBrush.color = { r: 255, g: 252, b: 0 } });
         setupButton("btnGreen", () => { this._inkingManager.penBrush.color = { r: 0, g: 255, b: 0 } });
         setupButton("btnRed", () => { this._inkingManager.penBrush.color = { r: 255, g: 0, b: 0 } });
         setupButton("btnBlue", () => { this._inkingManager.penBrush.color = { r: 0, g: 105, b: 175 } });
-    
+
         setupButton("btnClear", () => { this._inkingManager.clear(); });
-    
+
         setupButton("btnOffsetLeft", () => { this.offsetBy(-10, 0); });
         setupButton("btnOffsetUp", () => { this.offsetBy(0, -10); });
         setupButton("btnOffsetRight", () => { this.offsetBy(10, 0); });
         setupButton("btnOffsetDown", () => { this.offsetBy(0, 10); });
-    
+
         setupButton(
             "btnResetView",
             () => {
@@ -278,17 +281,17 @@ export class MainView extends View {
                 this.updateBackgroundImagePosition();
             }
         );
-    
+
         setupButton(
             "btnToggleCursorShare",
             () => {
                 const sharedInkingSession = this.getSharedInkingSession();
                 const isCursorShared = sharedInkingSession.isCursorShared;
-    
+
                 sharedInkingSession.isCursorShared = !isCursorShared;
-    
+
                 const button = document.getElementById("btnToggleCursorShare");
-    
+
                 if (button) {
                     button.innerText = sharedInkingSession.isCursorShared ? "Stop sharing cursor" : "Share cursor";
                 }
@@ -301,23 +304,23 @@ export class MainView extends View {
         }
         else {
             setupButton("btnSimulation", () => { this.startOrStopDrawingSimulation(!this._simulationStarted); });
-        
+
             var offset = 0;
-        
+
             setupButton(
                 "btnOpenNewWindow",
                 () => {
                     window.open(document.URL, "_blank", `left=${offset},top=${offset},width=1000,height=1000`);
-        
+
                     offset += 80;
                 });
-            }
+        }
     }
 
     async start() {
         if (this.runningInTeams()) {
             await Teams.app.initialize();
-            
+
             Teams.app.notifySuccess();
         }
 

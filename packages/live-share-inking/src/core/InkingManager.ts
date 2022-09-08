@@ -336,7 +336,7 @@ export class InkingManager extends EventEmitter {
         }
     }
 
-    private readonly _host: HTMLElement;
+    private readonly _hostElement: HTMLElement;
     private readonly _canvasPoolHost: HTMLElement;
     private readonly _dryCanvas: InkingCanvas;
 
@@ -893,29 +893,29 @@ export class InkingManager extends EventEmitter {
 
     /**
      * Creates a new InkingManager instance.
-     * @param host The HTML element to host the canvases and other DOM elements handled by
-     * the InkingManager instance. The `host` element shouldn't have any children. The
+     * @param hostElement The HTML element to host the canvases and other DOM elements handled by
+     * the InkingManager instance. `hostElement` shouldn't have any children. The
      * InkingManager instance might change its attributes, including its style.
      */
-    constructor(host: HTMLElement) {
+    constructor(hostElement: HTMLElement) {
         super();
 
         this._inputFilters = this.createInputFilterCollection();
 
-        this._host = host;
+        this._hostElement = hostElement;
 
-        this._dryCanvas = new DryCanvas(this._host);
+        this._dryCanvas = new DryCanvas(this._hostElement);
 
         this._canvasPoolHost = document.createElement("div");
         this._canvasPoolHost.style.position = "absolute";
         this._canvasPoolHost.style.pointerEvents = "none";
 
-        this._host.appendChild(this._canvasPoolHost);
+        this._hostElement.appendChild(this._canvasPoolHost);
 
         this._inputProvider = new PointerInputProvider(this._dryCanvas.canvas);
 
         this._hostResizeObserver = new ResizeObserver(this.onHostResized);
-        this._hostResizeObserver.observe(this._host);
+        this._hostResizeObserver.observe(this._hostElement);
     }
 
     /**
@@ -1116,6 +1116,13 @@ export class InkingManager extends EventEmitter {
     }
 
     /**
+     * Gets the DOM element that hosts the inking surface.
+     */
+    get hostElement(): HTMLElement {
+        return this._hostElement;
+    }
+
+    /**
      * Gets the pen brush.
      */
     get penBrush(): IBrush {
@@ -1162,7 +1169,7 @@ export class InkingManager extends EventEmitter {
      */
     get clientWidth(): number {
         if (!this._clientWidth) {
-            this._clientWidth = this._host.clientWidth;
+            this._clientWidth = this._hostElement.clientWidth;
         }
 
         return this._clientWidth;
@@ -1173,7 +1180,7 @@ export class InkingManager extends EventEmitter {
      */
     get clientHeight(): number {
         if (!this._clientHeight) {
-            this._clientHeight = this._host.clientHeight;
+            this._clientHeight = this._hostElement.clientHeight;
         }
 
         return this._clientHeight;

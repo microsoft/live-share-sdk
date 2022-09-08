@@ -636,13 +636,12 @@ export class SharedInkingSession extends DataObject {
     onCreateCursorVisual?: (clientId: string, userInfo?: IUserInfo) => CursorVisual;
 
     /**
-     * Starts the live inking session.
-     * @param hostElement The element to attach the InkingManager to.
-     * @returns An InkingManager instance that can be used by the applications
-     * to set the tool, brush, add strokes and more.
+     * Initializes the live inking session.
+     * @param inkingManager The InkingManager instance providing the drawing and events
+     * that will be synchronized across clients.
      */
-    synchronize(hostElement: HTMLElement): InkingManager {
-        this._inkingManager = new InkingManager(hostElement);
+    async initialize(inkingManager: InkingManager) {
+        this._inkingManager = inkingManager;
 
         this.setupStorageProcessing();
         this.setupWetInkProcessing();
@@ -654,9 +653,7 @@ export class SharedInkingSession extends DataObject {
         this._cursorVisualsHost.style.height = "100%";
         this._cursorVisualsHost.style.overflow = "hidden";
 
-        hostElement.appendChild(this._cursorVisualsHost);
-
-        return this._inkingManager;
+        inkingManager.hostElement.appendChild(this._cursorVisualsHost);
     }
 
     /**

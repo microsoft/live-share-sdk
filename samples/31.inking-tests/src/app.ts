@@ -24,6 +24,10 @@ function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const allTestsCompletedPrefix = "AllTestsCompleted: ";
+const wetStrokeTestFailedPrefix = "WetStrokeTestFailed: ";
+const dryCanvasTestFailedPrefix = "DryCanvasTestFailed: ";
+
 async function testWetStroke() {
     await delay(100);
 
@@ -36,7 +40,7 @@ async function testWetStroke() {
 
         if (remoteWetStroke) {
             if (localWetStroke.length !== remoteWetStroke.length) {
-                console.warn("Local and remote strokes are not the same length");
+                console.warn(`${wetStrokeTestFailedPrefix}Local stroke has ${localWetStroke.length} points, remote stroke has ${remoteWetStroke.length} points.`);
             }
             else {
                 for (let i = 0; i < localWetStroke.length; i++) {
@@ -44,7 +48,7 @@ async function testWetStroke() {
                     const p2 = remoteWetStroke.getPointAt(i);
 
                     if (p1.x !== p2.x || p1.y !== p2.y || p1.pressure !== p2.pressure) {
-                        console.warn(`Points at index ${i} are different: ${JSON.stringify(p1)} !== ${JSON.stringify(p2)}`);
+                        console.warn(`${wetStrokeTestFailedPrefix}Points at index ${i} are different: ${JSON.stringify(p1)} !== ${JSON.stringify(p2)}`);
                     }
                 }
             }
@@ -94,6 +98,12 @@ async function performTest() {
 
     const dryCanvasTestPassed = testDryCanvas();
 
+    if (!dryCanvasTestPassed) {
+        console.warn(dryCanvasTestFailedPrefix + "Rendering was different on local and remote.");
+    }
+
+    console.log(`${allTestsCompletedPrefix}${dryCanvasTestPassed && wetStrokeTestFailures === 0 ? "Passes" : "Failed"}`);
+
     displayTestResults(`Wet stroke failures: ${wetStrokeTestFailures} - Dry canvas test: ${dryCanvasTestPassed ? "Passed" : "Failed"}`);
 }
 
@@ -135,6 +145,15 @@ window.onload = async () => {
 
         setupButton("btnClear", () => { localInkingSurface.inkingManager.clear(); });
         setupButton("btnStartTest", () => { performTest(); });
+
+        const params = new URLSearchParams(window.location.search);
+        const config = params.get("startTest");
+    
+        if (config && config.toLowerCase() === "true") {
+            // await delay(1000);
+    
+            performTest();
+        }
     }
 }
 

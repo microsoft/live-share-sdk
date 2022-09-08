@@ -314,9 +314,10 @@ export class MainView extends View {
             }
     }
 
-    start() {
+    async start() {
         if (this.runningInTeams()) {
-            Teams.app.initialize();
+            await Teams.app.initialize();
+            
             Teams.app.notifySuccess();
         }
 

@@ -5,7 +5,7 @@
 
 import { InkingSurface } from "./inking-surface";
 import { DrawingSimulation } from "./drawing-simulation";
-import { InputFilter, IPointerPoint, IWetStroke, SharedInkingSession, Stroke, WetCanvas } from "@microsoft/live-share-inking";
+import { InputFilter, IPointerPoint, IWetStroke, LiveCanvas, Stroke, WetCanvas } from "@microsoft/live-share-inking";
 
 var localInkingSurface: InkingSurface;
 var simulatedInkingSurface: InkingSurface;
@@ -36,7 +36,7 @@ async function testWetStroke() {
     if (localWetStroke) {
         const localWetStrokeContext: CanvasRenderingContext2D = (localWetStroke as any)._canvas._context;
 
-        const remoteWetStroke: IWetStroke = (simulatedInkingSurface.getSharedInkingSession() as any)._wetStrokes.get(localWetStroke.id);
+        const remoteWetStroke: IWetStroke = (simulatedInkingSurface.getLiveCanvas() as any)._wetStrokes.get(localWetStroke.id);
 
         if (remoteWetStroke) {
             if (localWetStroke.length !== remoteWetStroke.length) {
@@ -125,7 +125,7 @@ class PrecisionReducerFilter extends InputFilter {
 window.onload = async () => {
     // Disable wet stroke point simplification in order to produce the same pixels
     // locally and remotely.
-    (SharedInkingSession as any).wetStrokePointSimplificationThreshold = 50;
+    (LiveCanvas as any).wetStrokePointSimplificationThreshold = 50;
 
     // Disable asynchronous rendering on wet canvases. Asynchronous rendering causes
     // two wet canvases rendering the same exact stroke to not produce the exact same

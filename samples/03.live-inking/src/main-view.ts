@@ -5,7 +5,7 @@
 
 import * as Teams from "@microsoft/teams-js";
 import { EphemeralEvent, ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
-import { InkingManager, InkingTool, IUserInfo, SharedInkingSession } from "@microsoft/live-share-inking";
+import { InkingManager, InkingTool, IUserInfo, LiveCanvas } from "@microsoft/live-share-inking";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 import * as Utils from "./utils";
@@ -55,7 +55,7 @@ const appTemplate = `
 
 const containerSchema = {
     initialObjects: {
-        inkingSession: SharedInkingSession,
+        liveCanvas: LiveCanvas,
         startStopDrawingSimulation: EphemeralEvent
     }
 };
@@ -75,8 +75,8 @@ export class MainView extends View {
         this.updateBackgroundImagePosition();
     }
 
-    private getSharedInkingSession(): SharedInkingSession {
-        return this._container.initialObjects.inkingSession as SharedInkingSession;
+    private getLiveCanvas(): LiveCanvas {
+        return this._container.initialObjects.liveCanvas as LiveCanvas;
     }
 
     private startOrStopDrawingSimulation(start: boolean) {
@@ -149,14 +149,14 @@ export class MainView extends View {
         const inkingHost = document.getElementById("inkingHost");
 
         if (inkingHost) {
-            const inkingSession = this.getSharedInkingSession();
-            inkingSession.onGetLocalUserInfo = () => {
+            const liveCanvas = this.getLiveCanvas();
+            liveCanvas.onGetLocalUserInfo = () => {
                 return this._userInfo;
             }
 
             this._inkingManager = new InkingManager(inkingHost);
 
-            await inkingSession.initialize(this._inkingManager);
+            await liveCanvas.initialize(this._inkingManager);
 
             this._inkingManager.activate();
 
@@ -167,7 +167,7 @@ export class MainView extends View {
 
             /*
             // Set which roles can draw on the canvas. By default, all roles are allowed
-            inkingSession.allowedRoles = [ UserMeetingRole.presenter ];
+            liveCanvas.allowedRoles = [ UserMeetingRole.presenter ];
             */
         }
 
@@ -285,15 +285,15 @@ export class MainView extends View {
         setupButton(
             "btnToggleCursorShare",
             () => {
-                const sharedInkingSession = this.getSharedInkingSession();
-                const isCursorShared = sharedInkingSession.isCursorShared;
+                const liveCanvas = this.getLiveCanvas();
+                const isCursorShared = liveCanvas.isCursorShared;
 
-                sharedInkingSession.isCursorShared = !isCursorShared;
+                liveCanvas.isCursorShared = !isCursorShared;
 
                 const button = document.getElementById("btnToggleCursorShare");
 
                 if (button) {
-                    button.innerText = sharedInkingSession.isCursorShared ? "Stop sharing cursor" : "Share cursor";
+                    button.innerText = liveCanvas.isCursorShared ? "Stop sharing cursor" : "Share cursor";
                 }
             }
         );

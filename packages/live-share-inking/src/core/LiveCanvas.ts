@@ -242,7 +242,7 @@ class BuiltInCursorVisual extends CursorVisual {
 /**
  * Enables live and collaborative inking.
  */
-export class SharedInkingSession extends DataObject {
+export class LiveCanvas extends DataObject {
     private static readonly dryInkMapKey = "dryInk";
 
     /**
@@ -264,8 +264,8 @@ export class SharedInkingSession extends DataObject {
      * The object's Fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        SharedInkingSession.TypeName,
-        SharedInkingSession,
+        LiveCanvas.TypeName,
+        LiveCanvas,
         [],
         {}
     );
@@ -327,7 +327,7 @@ export class SharedInkingSession extends DataObject {
                         eventArgs.strokeId,
                         eventArgs.type,
                         eventArgs.brush,
-                        SharedInkingSession.wetStrokePointSimplificationThreshold
+                        LiveCanvas.wetStrokePointSimplificationThreshold
                     );
 
                     liveStroke.points.push(eventArgs.startPoint);
@@ -604,19 +604,19 @@ export class SharedInkingSession extends DataObject {
     }
 
     protected async initializingFirstTime(): Promise<void> {
-        this._dryInkMap = SharedMap.create(this.runtime, SharedInkingSession.dryInkMapKey);
+        this._dryInkMap = SharedMap.create(this.runtime, LiveCanvas.dryInkMapKey);
 
-        this.root.set(SharedInkingSession.dryInkMapKey, this._dryInkMap.handle);
+        this.root.set(LiveCanvas.dryInkMapKey, this._dryInkMap.handle);
     }
 
     protected async hasInitialized(): Promise<void> {
-        const handle = this.root.get<IFluidHandle<SharedMap>>(SharedInkingSession.dryInkMapKey);
+        const handle = this.root.get<IFluidHandle<SharedMap>>(LiveCanvas.dryInkMapKey);
 
         if (handle) {
             this._dryInkMap = await handle.get();
         }
         else {
-            throw new Error(`Unable to get SharedMap with key "${SharedInkingSession.dryInkMapKey}"`);
+            throw new Error(`Unable to get SharedMap with key "${LiveCanvas.dryInkMapKey}"`);
         }
     }
 

@@ -7,5 +7,5 @@ export * from "./Brush";
 export * from "./Colors";
 export * from "./Geometry";
 export * from "./InkingManager";
-export * from "./SharedInkingSession";
+export * from "./LiveCanvas";
 export * from "./Stroke";

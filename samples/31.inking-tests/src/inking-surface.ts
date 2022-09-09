@@ -4,13 +4,13 @@
  */
 
 import { ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
-import { InkingManager, InputFilter, SharedInkingSession } from "@microsoft/live-share-inking";
+import { InkingManager, InputFilter, LiveCanvas } from "@microsoft/live-share-inking";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 
 const containerSchema = {
     initialObjects: {
-        inkingSession: SharedInkingSession
+        liveCanvas: LiveCanvas
     }
 };
 
@@ -32,12 +32,12 @@ export class InkingSurface {
 
         this._container = (await client.joinContainer(containerSchema)).container;
 
-        const inkingSession = this.getSharedInkingSession();
+        const liveCanvas = this.getLiveCanvas();
 
         this._inkingManager = new InkingManager(this._hostElement);
         this._inkingManager.setInputFilters(this._inputFilters);
 
-        await inkingSession.initialize(this._inkingManager);
+        await liveCanvas.initialize(this._inkingManager);
 
         this._inkingManager.activate();
     }
@@ -46,8 +46,8 @@ export class InkingSurface {
         this._hostElement = hostElement;
     }
 
-    getSharedInkingSession(): SharedInkingSession {
-        return this._container.initialObjects.inkingSession as SharedInkingSession;
+    getLiveCanvas(): LiveCanvas {
+        return this._container.initialObjects.liveCanvas as LiveCanvas;
     }
 
     async start() {

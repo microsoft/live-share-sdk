@@ -3,14 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { BasicColors, IColor, InkingManager, IPoint, IPointerPoint } from "@microsoft/live-share-inking";
-
-interface ITestInkingManager {
-    pointerDown(p: IPointerPoint): void;
-    pointerMove(p: IPointerPoint, isPointerDown: boolean): void;
-    pointerUp(p: IPointerPoint): void;
-    pointerLeave(p: IPointerPoint): void;
-}
+import { BasicColors, IColor, InkingManager, InputProvider, IPoint, IPointerEvent, IPointerMoveEvent, IPointerPoint } from "@microsoft/live-share-inking";
 
 const strokeColors: IColor[] = [
     BasicColors.black,
@@ -23,21 +16,25 @@ const strokeColors: IColor[] = [
     BasicColors.gray
 ];
 
+class DummyInputProvider extends InputProvider {
+    emitPointerDownEvent(e: IPointerEvent) {
+        this.pointerDownEvent.emit(e);
+    }
+
+    emitPointerMoveEvent(e: IPointerMoveEvent) {
+        this.pointerMoveEvent.emit(e);
+    }
+
+    emitPointerUpEvent(e: IPointerEvent) {
+        this.pointerUpEvent.emit(e);
+    }
+}
+
 export class DrawingSimulation {
     private static pointsPerStroke = 100;
     private static strokeCount = 20;
 
-    private simulatePointerDown(p: IPointerPoint) {
-        ((<unknown>this.inkingManager) as ITestInkingManager).pointerDown(p);
-    }
-
-    private simulatePointerMove(p: IPointerPoint, isPointerDown: boolean) {
-        ((<unknown>this.inkingManager) as ITestInkingManager).pointerMove(p, isPointerDown);
-    }
-
-    private simulatePointerUp(p: IPointerPoint) {
-        ((<unknown>this.inkingManager) as ITestInkingManager).pointerUp(p);
-    }
+    private _dummyInputProvider = new DummyInputProvider();
 
     private computeSine(): IPoint[] {
         const sineWidth = this.inkingManager.clientWidth * 0.66;
@@ -79,19 +76,22 @@ export class DrawingSimulation {
             this.inkingManager.penBrush.color = this.getRandomColor();
 
             for (let pointIndex = 0; pointIndex < points.length; pointIndex++) {
-                const p: IPointerPoint = {
+                const p: IPointerEvent = {
+                    altKey: false,
+                    ctrlKey: false,
+                    shiftKey: false,
                     ...points[pointIndex],
                     pressure: 0.5
-                }
+                };
 
                 if (pointIndex === 0) {
-                    this.simulatePointerDown(p);
+                    this._dummyInputProvider.emitPointerDownEvent(p);
                 }
                 else if (pointIndex === points.length - 1) {
-                    this.simulatePointerUp(p);
+                    this._dummyInputProvider.emitPointerUpEvent(p);
                 }
                 else {
-                    this.simulatePointerMove(p, true);
+                    this._dummyInputProvider.emitPointerMoveEvent( { ...p, isPointerDown: true });
                 }
 
                 if (pointIndex === halfWayIndex) {
@@ -101,5 +101,7 @@ export class DrawingSimulation {
         }
     }
 
-    constructor(private inkingManager: InkingManager) { }
+    constructor(private inkingManager: InkingManager) {
+        inkingManager.inputProvider = this._dummyInputProvider;
+    }
 }

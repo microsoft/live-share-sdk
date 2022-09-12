@@ -6,7 +6,6 @@
 import { SharedMap } from "fluid-framework";
 import { TeamsFluidClient } from "@microsoft/live-share";
 import { app, pages, meeting } from "@microsoft/teams-js";
-import { LOCAL_MODE_TENANT_ID } from "@fluidframework/azure-client";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 
 const searchParams = new URL(window.location).searchParams;

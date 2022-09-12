@@ -5,7 +5,7 @@
 
 import { InkingCanvas } from "./InkingCanvas";
 import { getPressureAdjustedSize, IPointerPoint, DefaultPenBrush, IBrush, toCssColor } from "../core";
-import { computeQuadBetweenTwoCircles, computeQuadBetweenTwoRectangles, IQuadPathItem } from "../core/Internals";
+import { computeQuadBetweenTwoCircles, computeQuadBetweenTwoRectangles, IQuadPathSegment } from "../core/Internals";
 
 /**
  * Represents the base class from wet and dry canvases, implementing the common rendering logic.
@@ -15,8 +15,8 @@ export abstract class DryWetCanvas extends InkingCanvas {
     private _pendingPointsStartIndex = 0;
     private _points: IPointerPoint[] = [];
 
-    private computeQuadPath(tipSize: number): IQuadPathItem[] {
-        const result: IQuadPathItem[] = [];
+    private computeQuadPath(tipSize: number): IQuadPathSegment[] {
+        const result: IQuadPathSegment[] = [];
         const tipHalfSize = tipSize / 2;
 
         if (this._pendingPointsStartIndex < this._points.length) {
@@ -33,13 +33,13 @@ export abstract class DryWetCanvas extends InkingCanvas {
 
                 let pressureAdjustedTip = getPressureAdjustedSize(tipHalfSize, p.pressure);
 
-                const pathItem: IQuadPathItem = {
+                const segment: IQuadPathSegment = {
                     endPoint: p,
                     tipSize: pressureAdjustedTip
                 };
 
                 if (previousPoint !== undefined) {
-                    pathItem.quad = this.brush.tip === "ellipse"
+                    segment.quad = this.brush.tip === "ellipse"
                         ? computeQuadBetweenTwoCircles(
                             p,
                             pressureAdjustedTip,
@@ -54,7 +54,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
                             previousPointPressureAdjustedTip);
                 }
 
-                result.push(pathItem);
+                result.push(segment);
 
                 previousPoint = p;
                 previousPointPressureAdjustedTip = pressureAdjustedTip;
@@ -64,7 +64,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
         return result;
     }
 
-    private renderQuadPath(context: CanvasRenderingContext2D, path: IQuadPathItem[]) {
+    private renderQuadPath(context: CanvasRenderingContext2D, path: IQuadPathSegment[]) {
         const cssColor = this.getBrushCssColor();
 
         context.strokeStyle = cssColor;
@@ -122,7 +122,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
     }
 
     /**
-     * Sets the appropriate blend mode on the specified ontext, according
+     * Sets the appropriate blend mode on the specified context, according
      * to the current brush. In its base implementation, `setBlendMode` resets
      * both the opacity and composite operation to their defaults.
      * @param context 
@@ -247,11 +247,11 @@ export class WetCanvas extends DryWetCanvas {
     }
 
     /**
-     * A "wet" canvas always renders a single stroke and is discarded when that stroke end.
-     * It needs to be properly composited on whatever other DOM it is overlyed on, basically
+     * A "wet" canvas always renders a single stroke and is discarded when that stroke ends.
+     * It needs to be properly composited on whatever other DOM it is overlayed on, basically
      * the "dry" canvas. It is the HTML5 canvas that needs to be setup for the right blend
      * mode, by setting its opacity and mixBlendMode styles.
-     * @param context The context to set the blend mode on, given the current brus.
+     * @param context The context to set the blend mode on, given the current brush.
      */
     protected adjustOpacity(context: CanvasRenderingContext2D) {
         switch (this.brush.type) {

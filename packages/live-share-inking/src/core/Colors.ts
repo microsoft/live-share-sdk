@@ -55,16 +55,16 @@ export function lightenColor(color: IColor, intensity: number): IColor {
         return color;
     }
 
-    const brightenChannel = (channel: number) => {
+    const lightenChannel = (channel: number) => {
         const delta = 255 - channel;
 
-        return channel + delta / 100 * intensity;
+        return channel + Math.round(delta / 100 * intensity);
     }
 
     return {
-        r: brightenChannel(color.r),
-        g: brightenChannel(color.g),
-        b: brightenChannel(color.b)
+        r: lightenChannel(color.r),
+        g: lightenChannel(color.g),
+        b: lightenChannel(color.b)
     }
 }
 
@@ -82,7 +82,7 @@ export function lightenColor(color: IColor, intensity: number): IColor {
     const darkenChannel = (channel: number) => {
         const delta = 255 - channel;
 
-        return channel - channel / 100 * intensity;
+        return channel - Math.round(channel / 100 * intensity);
     }
 
     return {
@@ -101,7 +101,7 @@ export const BasicColors = {
     gray: fromCssColor("#808080"),
     silver: fromCssColor("#c0c0c0"),
     red: fromCssColor("#ff0000"),
-    green: fromCssColor("#00ff00"),
+    green: fromCssColor("#008000"),
     blue: fromCssColor("#0000ff"),
     yellow: fromCssColor("#ffff00"),
     magenta: fromCssColor("#ea33f6"),

@@ -907,7 +907,7 @@ export class InkingManager extends EventEmitter {
      * can be created at the same time and will not interfere with each other.
      * @param strokeType The type of the stroke to start.
      * @param startPoint The starting point of the stroke.
-     * @param options Creation options, such as is, points, brush...
+     * @param options Creation options, such as id, points, brush...
      * @returns An IWetStroke object representing the ongoing stroke.
      */
     public beginWetStroke(strokeType: StrokeType, startPoint: IPointerPoint, options?: IStrokeCreationOptions): IWetStroke {
@@ -940,7 +940,7 @@ export class InkingManager extends EventEmitter {
      * Adds a stroke to the drawing.
      * @param stroke The stroke to add. If a stroke with the same id already exists
      * in the drawing, is it replaced.
-     * @param options Options allowing the caller to force a re-render and/or bock the
+     * @param options Options allowing the caller to force a re-render and/or block the
      * emission of `StrokesAddedEvent`.
      */
     public addStroke(stroke: IStroke, options?: IAddRemoveStrokeOptions) {
@@ -955,7 +955,7 @@ export class InkingManager extends EventEmitter {
      * Removes a stroke from the drawing.
      * @param id The id of the stroke to remove. If the stroke doesn't exist, nothing
      * happens.
-     * @param options Options allowing the caller to force a re-render and/or bock the
+     * @param options Options allowing the caller to force a re-render and/or block the
      * emission of `StrokesRemovedEvent`.
      */
     public removeStroke(id: string, options?: IAddRemoveStrokeOptions) {
@@ -991,7 +991,7 @@ export class InkingManager extends EventEmitter {
     }
 
     /**
-     * Erases portions os strokes that intersect with the eraser rectangle.
+     * Erases portions of strokes that intersect with the eraser rectangle.
      * @param p The center of the eraser rectangle. The size of the rectangle is
      * determined by the `eraserSize` property.
      */

@@ -11,11 +11,11 @@ import {
     AddPointsEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
     InkingManager, IPointerMovedEventArgs, IWetStroke, PointerMovedEvent, StrokeEndState, StrokesAddedEvent, StrokesRemovedEvent
 } from './InkingManager';
-import { IPointerPoint, getDistanceBetweenPoints, IPoint } from './Geometry';
+import { IPointerPoint, getDistanceBetweenPoints, IPoint, IRect, unionRect } from './Geometry';
 import { IStroke, Stroke, StrokeType } from "./Stroke";
 import { EphemeralEventScope, EphemeralEventTarget, IEphemeralEvent, UserMeetingRole } from '@microsoft/live-share';
 import { IBrush } from './Brush';
-import { BasicColors, darkenColor, IColor, toCssColor } from './Colors';
+import { BasicColors, darkenColor, IColor, lightenColor, toCssColor } from './Colors';
 
 enum InkingEventNames {
     pointerMove = "PointerMove",
@@ -60,8 +60,6 @@ class LiveStroke {
         if (this.type !== StrokeType.persistent) {
             return;
         }
-
-        const startLength = this._points.length;
 
         let index = 0;
 
@@ -117,18 +115,18 @@ class LiveStroke {
 }
 
 /**
- * Represents a cursor's visual representation. Applications that want
- * to customize the appearance of cursors on the screen should extend
- * `CursorVisual` and override its `renderedElement` property to return
- * a custom HTML element.
+ * Represents a live (shared) cursor. Applications that want to customize
+ * the appearance of cursors on the screen should extend `LiveCursor` and
+ * override its `renderedElement` property to return a custom HTML element.
  */
-export abstract class CursorVisual {
+export abstract class LiveCursor {
     private _renderedElement?: HTMLElement;
+    private _lastUpdated = Date.now();
 
     protected abstract internalRender(): HTMLElement;
 
     /**
-     * Initializes a new instance of `CursorVisual`.
+     * Initializes a new instance of `LiveCursor`.
      * @param info The cursor info.
      */
     constructor(public readonly clientId: string, public readonly userInfo?: IUserInfo) { }
@@ -138,6 +136,8 @@ export abstract class CursorVisual {
      * @param position The new position of the cursor.
      */
     setPosition(position: IPoint) {
+        this._lastUpdated = Date.now();
+
         if (this.renderedElement) {
             this.renderedElement.style.left = position.x + "px";
             this.renderedElement.style.top = position.y + "px";
@@ -145,8 +145,15 @@ export abstract class CursorVisual {
     }
 
     /**
+     * Gets the amount of time the cursor has been idle.
+     */
+    get idleTime() {
+        return Date.now() - this._lastUpdated;
+    }
+
+    /**
      * Returns an HTML element representing the cursor. Applications
-     * that extend `CursorVisual` must override `get renderedElement`
+     * that extend `LiveCursor` must override `get renderedElement`
      * to return a custom built HTML element.
      */
     get renderedElement(): HTMLElement {
@@ -160,54 +167,92 @@ export abstract class CursorVisual {
 
 interface ICursorColor {
     readonly backgroundColor: IColor,
-    foregroundColor: IColor
+    readonly textColor: IColor
 }
 
-class BuiltInCursorVisual extends CursorVisual {
+class BuiltInLiveCursor extends LiveCursor {
     private static cursorColors: ICursorColor[] = [
-        { backgroundColor: BasicColors.red, foregroundColor: BasicColors.white },
-        { backgroundColor: BasicColors.green, foregroundColor: BasicColors.black },
-        { backgroundColor: BasicColors.blue, foregroundColor: BasicColors.black },
-        { backgroundColor: BasicColors.purple, foregroundColor: BasicColors.black },
-        { backgroundColor: BasicColors.magenta, foregroundColor: BasicColors.black },
-        { backgroundColor: BasicColors.violet, foregroundColor: BasicColors.black },
-        { backgroundColor: BasicColors.gray, foregroundColor: BasicColors.black },
-        { backgroundColor: BasicColors.silver, foregroundColor: BasicColors.black }
+        { backgroundColor: BasicColors.red, textColor: BasicColors.white },
+        { backgroundColor: BasicColors.green, textColor: BasicColors.white },
+        { backgroundColor: BasicColors.blue, textColor: BasicColors.white },
+        { backgroundColor: BasicColors.purple, textColor: BasicColors.white },
+        { backgroundColor: BasicColors.magenta, textColor: BasicColors.white },
+        { backgroundColor: BasicColors.violet, textColor: BasicColors.white },
+        { backgroundColor: BasicColors.gray, textColor: BasicColors.white },
+        { backgroundColor: BasicColors.silver, textColor: BasicColors.black }
     ];
     private static currentColorIndex = 0;
 
     private _color: ICursorColor;
+    private _arrowPathData?: string;
+    private _arrawBounds?: IRect;
 
     protected internalRender(): HTMLElement {
-        const cursorSize = 20;
+        const arrowPath: IPoint[] = [
+            { x: 0, y: 0},
+            { x: 10, y: 30},
+            { x: 17, y: 17},
+            { x: 30, y: 10}
+        ];
 
-        const foregroundColor = toCssColor(this._color.foregroundColor);
+        if (!this._arrowPathData || !this._arrawBounds) {
+            this._arrowPathData = "";
+
+            this._arrawBounds = {
+                left: Number.MAX_VALUE,
+                top: Number.MAX_VALUE,
+                right: Number.MIN_VALUE,
+                bottom: Number.MIN_VALUE
+            }
+
+            for (let i = 0; i < arrowPath.length; i++) {
+                const p = arrowPath[i];
+
+                unionRect(this._arrawBounds, p);
+
+                this._arrowPathData += `${i === 0 ? "M" : "L"} ${p.x} ${p.y} `;
+            }
+
+            this._arrowPathData += "Z";
+        }
+
+        const arrowWidth = this._arrawBounds.right - this._arrawBounds.left;
+        const arrowHeight = this._arrawBounds.bottom - this._arrawBounds.top;
+        const arrowStrokeWidth = 10;
+
+        const textColor = toCssColor(this._color.textColor);
+        const arrowBorderColor = toCssColor(lightenColor(this._color.backgroundColor, 80));
         const backgroundColor = toCssColor(this._color.backgroundColor);
-        const borderColor = toCssColor(darkenColor(this._color.backgroundColor, 50));
 
         let visualTemplate = `
-            <svg width="${cursorSize}" height="${cursorSize}">
-                <path d="M0 0 L${cursorSize} ${cursorSize / 2.2} L${cursorSize / 2} ${cursorSize / 2} L8 ${cursorSize} Z" stroke-width="1" stroke="${borderColor}" fill="${backgroundColor}"/>
+            <svg viewbox="-${arrowStrokeWidth} -${arrowStrokeWidth} ${2 * arrowStrokeWidth + arrowWidth} ${2 * arrowStrokeWidth + arrowHeight}"
+                width="${arrowWidth}" height="${arrowHeight}" style="filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, .7)">
+                <path d="${this._arrowPathData}" stroke="${arrowBorderColor}" stroke-width="10" stroke-linejoin="round" stroke-opacity="0.90"/>
+                <path d="${this._arrowPathData}" fill="${backgroundColor}" stroke="${backgroundColor}" stroke-width="2" stroke-linejoin="round"/>
             </svg>`;
 
         if (this.userInfo) {
-            if (this.userInfo.displayName) {
+            if (this.userInfo.displayName && !this.userInfo.pictureUri) {
                 visualTemplate += `
-                    <div style="background-color: ${backgroundColor}; color: ${foregroundColor}; border: 1px solid ${borderColor};
-                    border-radius: ${cursorSize * 1.1 / 2}px / 50%; padding: 2px 6px; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px; white-space: nowrap; font-size: 12px; font-family: sans-serif">
+                    <div style="display: flex; align-items: center; box-shadow: 0 0 2px black; background-color: ${backgroundColor};
+                        height: ${arrowHeight}px; color: ${textColor}; border-radius: ${arrowHeight / 2}px / 50%;
+                        border-top-left-radius: 4px; padding: 2px 8px; margin: ${arrowHeight * 0.75}px 0 0 -${arrowWidth * 0.25}px;
+                        white-space: nowrap; font-size: 12px; font-family: sans-serif">
                         ${this.userInfo.displayName}
                     </div>`;
             }
             else if (this.userInfo.pictureUri && !this.userInfo.displayName) {
                 visualTemplate += `
-                    <img src="${this.userInfo.pictureUri}" style="width: ${cursorSize * 1.1}px; height: ${cursorSize * 1.1}px; border-radius: 50%;
-                        border: 1px solid ${borderColor}; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px;">`;
+                    <img src="${this.userInfo.pictureUri}" style="width: ${arrowHeight * 1.1}px; height: ${arrowHeight * 1.1}px;
+                        border-radius: 50%; box-shadow: 0 0 2px black;
+                        margin: ${arrowHeight * 0.75}px 0 0 -${arrowWidth * 0.25}px;">`;
             }
             else if (this.userInfo.pictureUri && this.userInfo.displayName) {
                 visualTemplate += `
-                    <div style="display: flex; flex-direction: row; align-items: center; background-color: ${backgroundColor}; color: ${foregroundColor}; border: 1px solid ${borderColor};
-                        border-radius: ${cursorSize * 1.1 / 2}px / 50%; margin: ${cursorSize * 0.75}px 0 0 -${cursorSize * 0.25}px; white-space: nowrap; font-size: 12px; font-family: sans-serif">
-                        <img src="${this.userInfo.pictureUri}" style="width: ${cursorSize * 1.1}px; height: ${cursorSize * 1.1}px; border-radius: 50%;">
+                    <div style="display: flex; flex-direction: row; align-items: center; background-color: ${backgroundColor}; color: ${textColor};
+                        border-radius: ${arrowHeight / 2}px / 50%; margin: ${arrowHeight * 0.75}px 0 0 -${arrowWidth * 0.25}px;
+                        padding: 2px; white-space: nowrap; font-size: 12px; font-family: sans-serif; box-shadow: 0 0 2px black">
+                        <img src="${this.userInfo.pictureUri}" style="width: ${arrowHeight * 1.1}px; height: ${arrowHeight * 1.1}px; border-radius: 50%;">
                         <div style="padding: 0 8px">${this.userInfo.displayName}</div>
                     </div>`;
             }
@@ -229,12 +274,12 @@ class BuiltInCursorVisual extends CursorVisual {
     constructor(public clientId: string, public readonly userInfo?: IUserInfo) {
         super(clientId, userInfo);
 
-        this._color = BuiltInCursorVisual.cursorColors[BuiltInCursorVisual.currentColorIndex];
+        this._color = BuiltInLiveCursor.cursorColors[BuiltInLiveCursor.currentColorIndex];
 
-        BuiltInCursorVisual.currentColorIndex++;
+        BuiltInLiveCursor.currentColorIndex++;
 
-        if (BuiltInCursorVisual.currentColorIndex >= BuiltInCursorVisual.cursorColors.length) {
-            BuiltInCursorVisual.currentColorIndex = 0;
+        if (BuiltInLiveCursor.currentColorIndex >= BuiltInLiveCursor.cursorColors.length) {
+            BuiltInLiveCursor.currentColorIndex = 0;
         }
     }
 }
@@ -256,8 +301,18 @@ export class LiveCanvas extends DataObject {
     private static readonly wetStrokePointSimplificationThreshold = 100.05;
 
     /**
-    * The object's Fluid type/name.
-    */
+     * Configures the frequency at which inactive live cursors are removed from the screen.
+     */
+    private static readonly liveCursorSweepFrequency = 1000;
+
+    /**
+     * Configures how long an inactive live cursor will remain on the screen before being hidden.
+     */
+    private static readonly liveCursorIdleLifetime = 5000;
+
+    /**
+     * The object's Fluid type/name.
+     */
     public static readonly TypeName = `@microsoft/shared-inking-session`;
 
     /**
@@ -279,9 +334,10 @@ export class LiveCanvas extends DataObject {
     private _addWetStrokePointEventTarget!: EphemeralEventTarget<IAddWetStrokePointsEvent>;
     private _allowedRoles: UserMeetingRole[] = [UserMeetingRole.guest, UserMeetingRole.attendee, UserMeetingRole.organizer, UserMeetingRole.presenter];
     private _pendingLiveStrokes: Map<string, LiveStroke> = new Map<string, LiveStroke>();
-    private _cursorVisualsMap = new Map<string, CursorVisual>();
-    private _cursorVisualsHost!: HTMLElement;
+    private _liveCursorsMap = new Map<string, LiveCursor>();
+    private _liveCursorsHost!: HTMLElement;
     private _isCursorShared: boolean = false;
+    private _liveCursorSweepTimeout?: number;
 
     private liveStrokeProcessed = (liveStroke: LiveStroke) => {
         const userInfo = this.getLocalUserInfo();
@@ -557,30 +613,65 @@ export class LiveCanvas extends DataObject {
         }
     }
 
-    private getCursor(clientId: string, userInfo?: IUserInfo): CursorVisual {
-        let cursorVisual = this._cursorVisualsMap.get(clientId);
+    private sweepLiveCursors() {
+        const cursorsToSweep: string[] = [];
 
-        if (!cursorVisual) {
-            cursorVisual = this.onCreateCursorVisual
-                ? this.onCreateCursorVisual(clientId, userInfo)
-                : new BuiltInCursorVisual(clientId, userInfo);
+        this._liveCursorsMap.forEach(
+            (liveCursor: LiveCursor) => {
+                if (liveCursor.idleTime > LiveCanvas.liveCursorIdleLifetime) {
+                    cursorsToSweep.push(liveCursor.clientId);
+                }
+            }
+        );
 
-            this._cursorVisualsMap.set(clientId, cursorVisual);
+        for (let cursorId of cursorsToSweep) {
+            this.removeCursor(cursorId);
+        }
+    }
+
+    private scheduleLiveCursorSweep() {
+        if (this._liveCursorSweepTimeout === undefined) {
+            this._liveCursorSweepTimeout = window.setTimeout(
+                () => {
+                    this._liveCursorSweepTimeout = undefined;
+
+                    this.sweepLiveCursors();
+
+                    if (this._liveCursorsMap.size > 0) {
+                        this.scheduleLiveCursorSweep();
+                    }
+                },
+                LiveCanvas.liveCursorSweepFrequency
+            )
+        }
+    }
+
+    private getCursor(clientId: string, userInfo?: IUserInfo): LiveCursor {
+        let liveCursor = this._liveCursorsMap.get(clientId);
+
+        if (!liveCursor) {
+            liveCursor = this.onCreateLiveCursor
+                ? this.onCreateLiveCursor(clientId, userInfo)
+                : new BuiltInLiveCursor(clientId, userInfo);
+
+            this._liveCursorsMap.set(clientId, liveCursor);
         }
 
-        if (!this._cursorVisualsHost.contains(cursorVisual.renderedElement)) {
-            this._cursorVisualsHost.appendChild(cursorVisual.renderedElement);
+        if (!this._liveCursorsHost.contains(liveCursor.renderedElement)) {
+            this._liveCursorsHost.appendChild(liveCursor.renderedElement);
         }
 
-        return cursorVisual;
+        this.scheduleLiveCursorSweep();
+
+        return liveCursor;
     }
 
     private removeCursor(clientId: string) {
-        const cursorVisual = this._cursorVisualsMap.get(clientId);
+        const liveCursor = this._liveCursorsMap.get(clientId);
 
-        if (cursorVisual) {
-            if (this._cursorVisualsHost.contains(cursorVisual.renderedElement)) {
-                this._cursorVisualsHost.removeChild(cursorVisual.renderedElement);
+        if (liveCursor) {
+            if (this._liveCursorsHost.contains(liveCursor.renderedElement)) {
+                this._liveCursorsHost.removeChild(liveCursor.renderedElement);
             }
         }
 
@@ -591,11 +682,11 @@ export class LiveCanvas extends DataObject {
     private updateCursorPosition(clientId: string, userInfo?: IUserInfo, position?: IPoint) {
         if (this._inkingManager) {
             if (position) {
-                const cursorVisual = this.getCursor(clientId, userInfo);
+                const liveCursor = this.getCursor(clientId, userInfo);
 
                 const screenPosition = this._inkingManager.viewportToScreen(position);
 
-                cursorVisual.setPosition(screenPosition);
+                liveCursor.setPosition(screenPosition);
             }
             else {
                 this.removeCursor(clientId);
@@ -629,11 +720,11 @@ export class LiveCanvas extends DataObject {
 
     /**
      * Optional callback that allows the consuming application to provide its own
-     * cursor visual implementation by extending the abstract `CursorVisual` class.
-     * The callback is passed the cursor info retrieved via the `onGetCursorInfo`
-     * calback, if provided.
+     * live cursor visual representation by extending the abstract `LiveCursor`
+     * class. The callback is passed the user information retrieved via the
+     * `onGetLocalUserInfo` calback, if provided.
      */
-    onCreateCursorVisual?: (clientId: string, userInfo?: IUserInfo) => CursorVisual;
+    onCreateLiveCursor?: (clientId: string, userInfo?: IUserInfo) => LiveCursor;
 
     /**
      * Initializes the live inking session.
@@ -646,14 +737,14 @@ export class LiveCanvas extends DataObject {
         this.setupStorageProcessing();
         this.setupWetInkProcessing();
 
-        this._cursorVisualsHost = document.createElement("div");
-        this._cursorVisualsHost.style.position = "absolute";
-        this._cursorVisualsHost.style.pointerEvents = "none";
-        this._cursorVisualsHost.style.width = "100%";
-        this._cursorVisualsHost.style.height = "100%";
-        this._cursorVisualsHost.style.overflow = "hidden";
+        this._liveCursorsHost = document.createElement("div");
+        this._liveCursorsHost.style.position = "absolute";
+        this._liveCursorsHost.style.pointerEvents = "none";
+        this._liveCursorsHost.style.width = "100%";
+        this._liveCursorsHost.style.height = "100%";
+        this._liveCursorsHost.style.overflow = "hidden";
 
-        inkingManager.hostElement.appendChild(this._cursorVisualsHost);
+        inkingManager.hostElement.appendChild(this._liveCursorsHost);
     }
 
     /**

@@ -34,7 +34,7 @@ export function pointerEventToPoint(e: PointerEvent): IPointerPoint {
 }
 
 /**
- * Determines if a number is within a randge.
+ * Determines if a number is within a range.
  * @param n The number to check.
  * @param r1 The first range boundary.
  * @param r2 The second range boundary.
@@ -63,7 +63,7 @@ export interface IQuad {
  * Defines a segment in a path that joins circles
  * or rectangles.
  */
-export interface IQuadPathItem {
+export interface IQuadPathSegment {
     quad?: IQuad,
     endPoint: IPointerPoint;
     tipSize: number;
@@ -187,7 +187,7 @@ export function isPointInsideRectangle(p: IPoint, r: IRect): boolean {
 
 /**
  * Determines if a rectangle is inside another.
- * @param r The rectangle to check the includion of.
+ * @param r The rectangle to check the inclusion of.
  * @param containingRectangle The containing rectangle.
  * @returns `true` is `r` is inside `containingRectangle`, `false` otherwise.
  */

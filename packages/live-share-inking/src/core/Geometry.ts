@@ -99,7 +99,7 @@ export function screenToViewport(p: IPoint, viewportReferencePoint: IPoint, view
 /**
  * Converts viewport coordinates to screen coordinates.
  * @param p The point to convert.
- * @param viewportReferencePoint The videwport's reference point.
+ * @param viewportReferencePoint The viewport's reference point.
  * @param viewportOffset The viewport offset.
  * @param scale The viewport scale. Defaults to 1 if the provided value is less than or equal to 0.
  * @returns The converted point.

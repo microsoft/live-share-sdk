@@ -488,7 +488,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
     }
 
     /**
-     * Deserializes the specified stroke string and sets thisstroke's brush,
+     * Deserializes the specified stroke string and sets this stroke's brush,
      * points and other proprties accordingly.
      * @param serializedStroke The serialized stroke.
      */

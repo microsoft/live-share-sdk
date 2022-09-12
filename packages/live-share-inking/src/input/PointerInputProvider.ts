@@ -17,7 +17,7 @@ function pointerEventToIPointerEvent(e: PointerEvent): IPointerEvent {
 }
 
 /**
- * InputProvide implementation that hooks into a DOM element's pointer events.
+ * InputProvider implementation that hooks into a DOM element's pointer events.
  */
 export class PointerInputProvider extends InputProvider {
     private _activePointerId?: number;
@@ -29,7 +29,7 @@ export class PointerInputProvider extends InputProvider {
             this._activePointerId = pointerId;
         }
         catch (e) {
-            console.error(`Coult not capture pointer with id ${pointerId}: ${e}`);
+            console.error(`Could not capture pointer with id ${pointerId}: ${e}`);
         }
     }
 
@@ -39,7 +39,7 @@ export class PointerInputProvider extends InputProvider {
                 this.element.releasePointerCapture(this._activePointerId);
             }
             catch (e) {
-                console.error(`Coult not release pointer with id ${this._activePointerId}: ${e}`);
+                console.error(`Could not release pointer with id ${this._activePointerId}: ${e}`);
             }
 
             this._activePointerId = undefined;

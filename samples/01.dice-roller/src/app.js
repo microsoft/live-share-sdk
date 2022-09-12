@@ -56,8 +56,12 @@ async function start() {
       break;
     case 'stage':
     default:
-      const { container } = await joinContainer();
-      renderStage(container.initialObjects.diceMap, root);
+      try {
+        const { container } = await joinContainer();
+        renderStage(container.initialObjects.diceMap, root);
+      } catch (error) {
+        renderError(root, error);
+      }
       break;
   }
 }
@@ -72,10 +76,9 @@ async function joinContainer() {
       // Create client and configure for testing
       client = new TeamsFluidClient({
         connection: {
-          tenantId: LOCAL_MODE_TENANT_ID,
+          type: 'local',
           tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
-          orderer: "http://localhost:7070",
-          storage: "http://localhost:7070",
+          endpoint: "http://localhost:7070"
         }
       });
   }
@@ -190,5 +193,35 @@ function renderSettings(elem) {
     pages.config.setValidityState(true);
 }
 
+// Error view
+
+const errorTemplate = document.createElement("template");
+
+errorTemplate["innerHTML"] = `
+  <style>
+    .wrapper { text-align: center; color: red }
+    .error-title { font-size: large; font-weight: bolder; }
+    .error-text { font-size: medium; }
+  </style>
+  <div class="wrapper">
+    <p class="error-title">Something went wrong</p>
+    <p class="error-text"></p>
+    <button class="refresh"> Try again </button>
+  </div>
+`;
+
+function renderError(elem, error) {
+    elem.appendChild(errorTemplate.content.cloneNode(true));
+    const refreshButton = elem.querySelector(".refresh");
+    const errorText = elem.querySelector(".error-text");
+
+    // Refresh the page on click
+    refreshButton.onclick = () => {
+      window.location.reload();
+    };
+    console.error(error);
+    const errorTextContent = error.toString();
+    errorText.textContent = errorTextContent;
+}
 
 start().catch((error) => console.error(error));

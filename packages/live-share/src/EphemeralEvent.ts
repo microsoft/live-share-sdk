@@ -6,7 +6,7 @@
 import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IEvent } from "@fluidframework/common-definitions";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
-import { IEphemeralEvent, ITimestampProvider, IRoleVerifier, UserMeetingRole } from "./interfaces";
+import { IEphemeralEvent, ITimestampProvider, IRoleVerifier, UserMeetingRole, IClientTimestamp } from "./interfaces";
 import { EphemeralEventScope } from './EphemeralEventScope';
 import { EphemeralEventTarget } from './EphemeralEventTarget';
 import { LocalRoleVerifier } from './LocalRoleVerifier';
@@ -69,17 +69,25 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
     );
 
     /**
-     * Returns true if the object has been started.
+     * Returns true if the object has been initialized.
      */
-    public get isStarted(): boolean {
+    public get isInitialized(): boolean {
         return !!this._eventTarget;
-    } 
+    }
 
     /**
-     * Starts the object.
+     * @deprecated isInitialized should be used instead
+     * Returns true if the object has been initialized.
+     */
+    public get isStarted(): boolean {
+        return this.isInitialized
+    }
+
+    /**
+     * initialize the object.
      * @param allowedRoles Optional. List of roles allowed to send events.
      */
-     public start(allowedRoles?: UserMeetingRole[]): Promise<void> {
+     public initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
         if (this._eventTarget) {
             throw new Error(`EphemeralEvent already started.`);
         }
@@ -91,6 +99,15 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
 
         return Promise.resolve();
     }
+
+    /**
+     * @deprecated initialize should be used instead
+     * Starts the object.
+     * @param allowedRoles Optional. List of roles allowed to send events.
+     */
+     public start(allowedRoles?: UserMeetingRole[]): Promise<void> {
+        return this.initialize(allowedRoles)
+     }
 
     /**
      * Broadcasts an event to all other clients.
@@ -166,15 +183,18 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      * @param debouncePeriod Optional. Time in milliseconds to ignore any new events for. Defaults to 0 ms.
      * @returns True if the received event is newer then the current event and should replace the current one. 
      */
-    public static isNewer(current: IEphemeralEvent|undefined, received: IEphemeralEvent, debouncePeriod = 0): boolean {
+    public static isNewer(current: IClientTimestamp|undefined, received: IClientTimestamp, debouncePeriod = 0): boolean {
         if (current) {
             if (current.timestamp == received.timestamp) {
                 // In a case where both clientId's are blank that's the local client in a disconnected state
                 const cmp = (current.clientId || '').localeCompare(received.clientId || '');
-                if (cmp < 0) {
-                    // cmp == 0 is same user and we want to take latest event from a given user.
-                    // cmp > 0 is a tie breaker so we'll take that event as well (comparing 'a' with 'c' 
-                    // will result in a negative value).
+                if (cmp <= 0) {
+                    // - cmp == 0 is same user. We use to identify events for same user as newer but 
+                    //   that was causing us to fire duplicate state & presence change events. The better
+                    //   approach is to update the timestamp provider to never return the same timestamp 
+                    //   twice.  (Comparison was changed on 8/2/2022)
+                    // - cmp > 0 is a tie breaker so we'll take that event as well (comparing 'a' with 'c' 
+                    //   will result in a negative value).
                     return false;
                 }
             } else if (current.timestamp > received.timestamp) {
@@ -190,7 +210,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
                     return false;
                 }
             }
-        } 
+        }
 
         return true;
     }

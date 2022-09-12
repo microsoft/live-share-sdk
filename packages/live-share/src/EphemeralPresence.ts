@@ -76,10 +76,18 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     );
 
     /**
-     * Returns true if the object has been started.
+     * Returns true if the object has been initialized.
+     */
+    public get isInitialized(): boolean {
+        return !!this._scope;
+    }
+
+    /**
+     * @deprecated isInitialized should be used instead
+     * Returns true if the object has been initialized.
      */
     public get isStarted(): boolean {
-        return !!this._scope;
+        return this.isInitialized
     }
 
     /**
@@ -120,10 +128,10 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
     /**
      * Starts sharing presence information.
      * @param userId Optional. ID of the local user. Defaults to a GUID if not provided.
-     * @param data Optional. Custom data object to share. A deep copy of the data object is saved to avoid any accidental modifications.
+     * @param data Optional. Custom data object to sshare. A deep copy of the data object is saved to avoid any accidental modifications.
      * @param state Optional. Initial presence state. Defaults to `PresenceState.online`.
      */
-    public async start(userId?: string, data?: TData, state = PresenceState.online): Promise<void> {
+    public async initialize(userId?: string, data?: TData, state = PresenceState.online): Promise<void> {
         if (this._scope) {
             throw new Error(`EphemeralPresence: already started.`);
         }
@@ -148,9 +156,16 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
                 this.updateMembersList(evt, local);
             }
         });
-
+        
         // Create object synchronizer
-        this._synchronizer = new EphemeralObjectSynchronizer<IEphemeralPresenceEvent<TData>>(this.id, this.context.containerRuntime, (connecting) => {
+        this._synchronizer = new EphemeralObjectSynchronizer<IEphemeralPresenceEvent<TData>>(this.id, this.runtime, this.context.containerRuntime, (connecting) => {
+                // Update timestamp for current presence
+                // - If we don't do this the user will timeout and show as "offline" for all other
+                //   clients. That's because the EphemeralEvent.isNewer() check will fail.  Updating
+                //   the timestamp of the outgoing update is the best way to show proof that the client
+                //   is still alive.
+                this._currentPresence.timestamp = EphemeralEvent.getTimestamp();
+
                 // Return current presence
                 return this._currentPresence;
             }, (connecting, state, sender) => {
@@ -161,6 +176,17 @@ export class EphemeralPresence<TData extends object = object> extends DataObject
         // Add local user to list
         this.updateMembersList(this._currentPresence, true);
     }
+
+    /**
+     * @deprecated initialize should be used instead
+     * Starts sharing presence information.
+     * @param userId Optional. ID of the local user. Defaults to a GUID if not provided.
+     * @param data Optional. Custom data object to share. A deep copy of the data object is saved to avoid any accidental modifications.
+     * @param state Optional. Initial presence state. Defaults to `PresenceState.online`.
+     */
+     public start(userId?: string, data?: TData, state = PresenceState.online): Promise<void> {
+        return this.initialize(userId, data, state)
+     }
 
     /**
      * Disposes of the object when its container is disposed of.

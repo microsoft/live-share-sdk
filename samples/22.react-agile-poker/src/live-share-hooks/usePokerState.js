@@ -37,7 +37,7 @@ export const usePokerState = (pokerState) => {
   }, [changePokerState, stateRef]);
 
   useEffect(() => {
-    if (pokerState && !pokerState.isStarted) {
+    if (pokerState && !pokerState.isInitialized) {
       console.log("usePokerState: starting poker state");
       pokerState.on("stateChanged", (state, value, local) => {
         if (availableStates.includes(state)) {
@@ -49,7 +49,7 @@ export const usePokerState = (pokerState) => {
       });
       const allowedRoles = ["Organizer"];
       pokerState
-        .start(allowedRoles)
+        .initialize(allowedRoles)
         .then(() => {
           setStarted(true);
         })

@@ -11,6 +11,7 @@ import { ITimestampProvider } from "./interfaces";
  */
 export class LocalTimestampProvider implements ITimestampProvider {
     private static _warned: boolean = false;
+    private _lastTimeSent = 0;
 
     constructor(noWarn = false) {
         if (noWarn) {
@@ -24,6 +25,13 @@ export class LocalTimestampProvider implements ITimestampProvider {
             LocalTimestampProvider._warned = true;
         }
 
-        return new Date().getTime();
+        // Return timestamp and save last
+        // - We never want to generate the same timestamp twice and we always want a greater 
+        //   timestamp then what we previously sent.
+        return this._lastTimeSent = Math.max(new Date().getTime(), this._lastTimeSent + 1);
+    }
+
+    public getMaxTimestampError(): number {
+        return 0;
     }
 }

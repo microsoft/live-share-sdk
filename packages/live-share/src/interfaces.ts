@@ -17,11 +17,11 @@ export interface IEvent {
      */
     name: string;
 }
-  
+
 /**
- * Base interface for all ephemeral events.
+ * Base interface for all client timestamp comparisons.
  */
-export interface IEphemeralEvent extends IEvent {
+export interface IClientTimestamp {
     /**
      * Current client ID, if known. The client ID will be `undefined` if the client is currently disconnected.
      */
@@ -32,6 +32,11 @@ export interface IEphemeralEvent extends IEvent {
      */
     timestamp: number;
 }
+  
+/**
+ * Base interface for all ephemeral events.
+ */
+export interface IEphemeralEvent extends IEvent, IClientTimestamp {}
 
 /**
  * Removes the base properties from an event that derives from `IEphemeralEvent`.
@@ -73,6 +78,11 @@ export interface ITimestampProvider {
      * Returns the current timestamp as the number of milliseconds sine the Unix Epoch.
      */
     getTimestamp(): number;
+
+    /**
+     * Returns the maximum number of milliseconds a returned timestamp can be off from the source.
+     */
+    getMaxTimestampError(): number;
 }
 
 /**

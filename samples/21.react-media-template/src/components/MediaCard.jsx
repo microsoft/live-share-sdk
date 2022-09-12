@@ -42,7 +42,7 @@ export const MediaCard = ({
             minHeight: "0px",
             maxHeight: "140px",
             overflow: "hidden",
-            marginBottom: "0.8rem",
+            marginBottom: "0.4rem",
           }}
         >
           <Image
@@ -52,15 +52,31 @@ export const MediaCard = ({
             style={{ minHeight: "0px" }}
           />
         </CardPreview>
-        <div style={{ minHeight: "0px" }}>
+        <div
+          style={{
+            minHeight: "0px",
+            paddingLeft: "0.8rem",
+            paddingRight: "0.8rem",
+          }}
+        >
           <Text size={400} weight="semibold">
             {mediaItem.title}
           </Text>
         </div>
-        <CardFooter
-          styles={{ padding: "0px 12px", minHeight: "0px", minWidth: "0px" }}
-        >
-          <div className={mergeClasses(flexRowStyle.root, flexRowStyle.vAlignCenter)} style={{width: "100%"}}>
+        <CardFooter styles={{ padding: "0rem", minHeight: "0px", minWidth: "0px" }}>
+          <div
+            className={mergeClasses(
+              flexRowStyle.root,
+              flexRowStyle.vAlignCenter
+            )}
+            style={{
+              width: "100%",
+              paddingLeft: "0.8rem",
+              paddingRight: "0.8rem",
+              paddingBottom: "1.2rem",
+              paddingTop: "0rem",
+            }}
+          >
             <div className={flexItemStyles.grow}>
               <Button
                 appearance="outline"

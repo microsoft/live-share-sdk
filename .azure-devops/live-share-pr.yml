@@ -45,6 +45,8 @@ extends:
         pool:
           name: 1ES-Teams-MMSWindows2019
         condition: succeeded()
+        variables:
+          Build.SDL.Roslyn.Enabled: false
         timeoutInMinutes: 10
         cancelTimeoutInMinutes: 1
 

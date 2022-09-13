@@ -1,0 +1,15 @@
+variables:
+- name: ServiceTreeID
+  value: '4b310c23-4420-4e37-bdee-ce6d119fd03d'
+- name: sdk_packages_directory
+  value: "packages"
+- name: teams_interactive_sdk_working_directory
+  value: "packages/live-share"
+- name: teams_interactive_media_sdk_working_directory
+  value: "packages/live-share-media"
+- name: feed_id
+  value: "1a2b5430-eb75-40cf-8420-9e056e0cbb8a"
+- name: enableGdnV2
+  value: true
+- name: Build.SDL.Roslyn.Enabled # Disabling Roslyn as no C# code being built in this pipeline
+  value: false

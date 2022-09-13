@@ -1,0 +1,61 @@
+# https://domoreexp.visualstudio.com/Teamspace/_build?definitionId=6457
+
+resources:
+  repositories:
+  - repository: SkypeSpaces-Infra
+    type: git
+    name: SkypeSpaces-Infra
+  - repository: MsTeamsServices-Tools
+    type: git
+    name: MsTeamsServices-Tools
+
+variables:
+- template: variables/variables.yml
+- name: esLintExclusionFilePath
+  value: "$(Build.SourcesDirectory)/.eslintignore"
+- name: esLintTargets
+  value: ''
+
+trigger: none
+
+extends:
+  template: azure-devops-templates/steps/coral/general_build_template.yml@SkypeSpaces-Infra
+  parameters:    
+    name: 'build'
+    pool:
+      name: 1ES-Teams-MMSWindows2019
+    jobParams:
+      displayName: 'CI SDK Build'
+      condition: succeeded()
+      timeoutInMinutes: 30
+      cancelTimeoutInMinutes: 5
+    service_tree:
+      service_id: ${{ variables.ServiceTreeID }}
+      isProduction: false    
+    sdl:
+      esLint:
+        esLintExclusionFilePath: ${{ variables.esLintExclusionFilePath }}
+
+    stages:
+    - stage: BuildLiveShareSDK
+      jobs:
+      - job: Phase1
+        displayName: Bluild Live Share SDK
+        pool:
+          name: 1ES-Teams-MMSWindows2019
+        condition: succeeded()
+        timeoutInMinutes: 10
+        cancelTimeoutInMinutes: 1
+
+        steps:
+        - script: "npm install --no-audit --legacy-peer-deps"
+          workingDirectory: ""
+          displayName: "npm install"
+
+        - script: "npm run build"
+          workingDirectory: ""
+          displayName: "npm run build"
+
+        - script: "npm run test"
+          workingDirectory: "${{ variables.sdk_packages_directory }}/live-share"
+          displayName: "npm run test"

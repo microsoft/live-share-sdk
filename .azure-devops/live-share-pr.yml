@@ -16,7 +16,8 @@ variables:
 - name: esLintTargets
   value: ''
 
-trigger: none
+trigger:
+- main
 
 extends:
   template: azure-devops-templates/steps/coral/general_build_template.yml@SkypeSpaces-Infra

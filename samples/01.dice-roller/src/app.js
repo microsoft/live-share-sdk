@@ -5,7 +5,7 @@
 
 import { SharedMap } from "fluid-framework";
 import { TeamsFluidClient } from "@microsoft/live-share";
-import { app, pages } from "@microsoft/teams-js";
+import { app, pages, meeting } from "@microsoft/teams-js";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 
 const searchParams = new URL(window.location).searchParams;
@@ -142,8 +142,21 @@ sideBarTemplate["innerHTML"] = `
 
 function renderSideBar(elem) {
     elem.appendChild(sideBarTemplate.content.cloneNode(true));
+    const shareToStageButton = document.createElement("button");
+    shareToStageButton["innerHTML"] = "Share to Stage";
+    shareToStageButton.onclick = shareToStage;
+    elem.appendChild(shareToStageButton)
 }
 
+function shareToStage() {
+  meeting.shareAppContentToStage((error, result) => {
+    if (!error) {
+      console.log("Started sharing, sharedToStage result")
+    } else {
+      console.warn("SharingToStageError", error);
+    }
+  }, window.location.origin + '?inTeams=1&view=stage');
+}
 
 // SETTINGS VIEW
 

@@ -15,7 +15,7 @@
   "author": "",
   "license": "Microsoft",
   "dependencies": {
-    "lerna": "^4.0.0"
+    "lerna": "^5.5.1"
   },
   "devDependencies": {
     "shx": "^0.3.4",

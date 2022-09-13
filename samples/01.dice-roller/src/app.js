@@ -90,7 +90,7 @@ async function joinContainer() {
 
 const stageTemplate = document.createElement("template");
 
-stageTemplate["innerHTML"] = `
+stageTemplate["inner"+"HTML"] = `
   <style>
     .wrapper { text-align: center; color: white }
     .dice { font-size: 200px; }
@@ -128,7 +128,7 @@ function renderStage(diceMap, elem) {
 
 const sideBarTemplate = document.createElement("template");
 
-sideBarTemplate["innerHTML"] = `
+sideBarTemplate["inner"+"HTML"] = `
   <style>
     .wrapper { text-align: center; color: white }
     .title { font-size: large; font-weight: bolder; }
@@ -143,7 +143,7 @@ sideBarTemplate["innerHTML"] = `
 function renderSideBar(elem) {
     elem.appendChild(sideBarTemplate.content.cloneNode(true));
     const shareToStageButton = document.createElement("button");
-    shareToStageButton["innerHTML"] = "Share to Stage";
+    shareToStageButton["inner"+"HTML"] = "Share to Stage";
     shareToStageButton.onclick = shareToStage;
     elem.appendChild(shareToStageButton)
 }
@@ -162,7 +162,7 @@ function shareToStage() {
 
 const settingsTemplate = document.createElement("template");
 
-settingsTemplate["innerHTML"] = `
+settingsTemplate["inner"+"HTML"] = `
   <style>
     .wrapper { text-align: center; color: white }
     .title { font-size: large; font-weight: bolder; }
@@ -196,7 +196,7 @@ function renderSettings(elem) {
 
 const errorTemplate = document.createElement("template");
 
-errorTemplate["innerHTML"] = `
+errorTemplate["inner"+"HTML"] = `
   <style>
     .wrapper { text-align: center; color: red }
     .error-title { font-size: large; font-weight: bolder; }

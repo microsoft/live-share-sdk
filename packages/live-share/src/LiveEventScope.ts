@@ -7,16 +7,16 @@ import EventEmitter from "events";
 import { IErrorEvent, ITelemetryLogger } from "@fluidframework/common-definitions";
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
-import { IEphemeralEvent, UserMeetingRole } from "./interfaces";
-import { EphemeralEvent } from "./EphemeralEvent";
+import { ILiveShareEvent, UserMeetingRole } from "./interfaces";
+import { LiveEvent } from "./LiveEvent";
 
 /**
- * Ephemeral event callback.
+ * Live event callback.
  * @template TEvent Type of event being sent/received.
  * @param evt The event that was sent/received.
  * @param local If true the `evt` is an event that was sent.
  */
-export type EphemeralEventListener<TEvent extends IEphemeralEvent> = (evt: TEvent, local: boolean) => void;
+export type LiveEventListener<TEvent extends ILiveShareEvent> = (evt: TEvent, local: boolean) => void;
 
 /**
  * Duck type of something that provides the expected signalling functionality:
@@ -32,10 +32,10 @@ export interface IRuntimeSignaler {
 }
 
 /**
- * Object responsible for sending and receiving ephemeral events.
+ * Object responsible for sending and receiving live share events.
  *
  * @remarks
- * Ephemeral objects send and receive events using an event scope. Event scopes can be restricted
+ * Live objects send and receive events using an event scope. Event scopes can be restricted
  * to only receive events from clients with specific roles. Any events that are received from
  * clients without an allowed role type will be ignored.
  *
@@ -45,13 +45,13 @@ export interface IRuntimeSignaler {
  * scopes within the same FLuid object, you just need to be careful that they send different
  * events.
  */
-export class EphemeralEventScope extends TypedEventEmitter<IErrorEvent> {
+export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
     private readonly emitter  = new EventEmitter();
     private readonly _runtime: IRuntimeSignaler;
     private _allowedRoles: UserMeetingRole[];
 
     /**
-     * Creates a new `EphemeralEventScope` instance.
+     * Creates a new `LiveEventScope` instance.
      * @param runtime A Fluid objects runtime instance, typically `this.runtime`.
      * @param allowedRoles Optional. List of roles allowed to send events using this scope.
      * You should use a second scope if you need mixed permission support.
@@ -69,14 +69,14 @@ export class EphemeralEventScope extends TypedEventEmitter<IErrorEvent> {
             // We'll overwrite the contents clientId with the messages clientId which can't be
             // spoofed.
             const clientId = message.clientId;
-            (message.content as IEphemeralEvent).clientId = clientId as string;
+            (message.content as ILiveShareEvent).clientId = clientId as string;
 
             // Only call listeners when the runtime is connected and if the signal has an
             // identifiable sender clientId.  The listener is responsible for deciding how
             // it wants to handle local/remote signals
             // eslint-disable-next-line no-null/no-null
             if (this._runtime.connected && clientId !== null) {
-                EphemeralEvent.verifyRolesAllowed(clientId, this._allowedRoles).then((value) => {
+                LiveEvent.verifyRolesAllowed(clientId, this._allowedRoles).then((value) => {
                     if (value) {
                         this.emitter.emit(message.type, message.content, local);
                     } else {
@@ -114,7 +114,7 @@ export class EphemeralEventScope extends TypedEventEmitter<IErrorEvent> {
      * @param eventName Name of event to listen for.
      * @param listener Function to call when the named event is sent or received.
      */
-    public onEvent<TEvent extends IEphemeralEvent>(eventName: string, listener: EphemeralEventListener<TEvent>): this {
+    public onEvent<TEvent extends ILiveShareEvent>(eventName: string, listener: LiveEventListener<TEvent>): this {
         this.emitter.on(eventName, listener);
         return this;
     }
@@ -125,7 +125,7 @@ export class EphemeralEventScope extends TypedEventEmitter<IErrorEvent> {
      * @param eventName Name of event to un-register.
      * @param listener Function that was originally passed to `onEvent()`.
      */
-    public offEvent<TEvent extends IEphemeralEvent>(eventName: string, listener: EphemeralEventListener<TEvent>): this {
+    public offEvent<TEvent extends ILiveShareEvent>(eventName: string, listener: LiveEventListener<TEvent>): this {
         this.emitter.off(eventName, listener);
         return this;
     }
@@ -134,19 +134,19 @@ export class EphemeralEventScope extends TypedEventEmitter<IErrorEvent> {
      * Sends an event to other event scope instances for the Fluid object.
      * @template TEvent Type of event to send.
      * @param eventName Name of the event to send.
-     * @param evt Optional. Partial event object to send. The `IEphemeralEvent.name`,
-     * `IEphemeralEvent.timestamp`, and `IEphemeralEvent.clientId`
+     * @param evt Optional. Partial event object to send. The `ILiveEvent.name`,
+     * `ILiveEvent.timestamp`, and `ILiveEvent.clientId`
      * fields will be automatically populated prior to sending.
-     * @returns The full event, including `IEphemeralEvent.name`,
-     * `IEphemeralEvent.timestamp`, and `IEphemeralEvent.clientId` fields if known.
+     * @returns The full event, including `ILiveEvent.name`,
+     * `ILiveEvent.timestamp`, and `ILiveEvent.clientId` fields if known.
      */
-    public sendEvent<TEvent extends IEphemeralEvent>(eventName: string, evt: Partial<TEvent> = {}): TEvent {
+    public sendEvent<TEvent extends ILiveShareEvent>(eventName: string, evt: Partial<TEvent> = {}): TEvent {
         // Clone passed in event and fill out required props.
         const clone: TEvent = {
             ...evt as TEvent,
             clientId: this._runtime.clientId,
             name: eventName,
-            timestamp: EphemeralEvent.getTimestamp()
+            timestamp: LiveEvent.getTimestamp()
         };
 
         // Send event

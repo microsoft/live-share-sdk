@@ -4,13 +4,13 @@
  */
 
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
-import { EphemeralEventScope } from "./EphemeralEventScope";
-import { EphemeralEventTarget } from "./EphemeralEventTarget";
-import { EphemeralObjectSynchronizer } from "./EphemeralObjectSynchronizer";
-import { IClientTimestamp, IEphemeralEvent, UserMeetingRole } from "./interfaces";
+import { LiveEventScope } from "./LiveEventScope";
+import { LiveEventTarget } from "./LiveEventTarget";
+import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import { IClientTimestamp, ILiveShareEvent, UserMeetingRole } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
 import { cloneValue } from "./internals/utils";
-import { EphemeralEvent } from "./EphemeralEvent";
+import { LiveEvent } from "./LiveEvent";
 
 /** for all time values millis from epoch is used */
 export interface ITimerConfig {
@@ -24,9 +24,9 @@ export interface ITimerConfig {
 }
 
 /**
- * Events supported by `EphemeralTimer` object.
+ * Events supported by `LiveTimer` object.
  */
- export enum EphemeralTimerEvents {
+ export enum LiveTimerEvents {
   /**
    * Timer has started
    */
@@ -53,7 +53,7 @@ export interface ITimerConfig {
   onTick = 'onTick'
 }
 
-export interface IEphemeralTimerEvents extends IEvent {
+export interface ILiveTimerEvents extends IEvent {
   (
     event: "started",
     listener: (config: ITimerConfig, local: boolean) => void
@@ -80,20 +80,20 @@ export interface IEphemeralTimerEvents extends IEvent {
   ): any;
 }
 
-interface IPlayEvent extends IEphemeralEvent {
+interface IPlayEvent extends ILiveShareEvent {
   duration: number;
   position: number;
 }
 
-interface IPauseEvent extends IEphemeralEvent {
+interface IPauseEvent extends ILiveShareEvent {
   duration: number;
   position: number;
 }
 
-export class EphemeralTimer extends DataObject<{
-  Events: IEphemeralTimerEvents;
+export class LiveTimer extends DataObject<{
+  Events: ILiveTimerEvents;
 }> {
-  // private _logger = new EphemeralTelemetryLogger(this.runtime);
+  // private _logger = new LiveTelemetryLogger(this.runtime);
   private _allowedRoles: UserMeetingRole[] = [];
   private _currentConfig: ITimerConfig = {
     configChangedAt: 0,
@@ -103,22 +103,22 @@ export class EphemeralTimer extends DataObject<{
     running: false,
   } as ITimerConfig;
 
-  private _scope?: EphemeralEventScope;
-  private _playEvent?: EphemeralEventTarget<IPlayEvent>;
-  private _pauseEvent?: EphemeralEventTarget<IPauseEvent>;
-  private _synchronizer?: EphemeralObjectSynchronizer<ITimerConfig>;
+  private _scope?: LiveEventScope;
+  private _playEvent?: LiveEventTarget<IPlayEvent>;
+  private _pauseEvent?: LiveEventTarget<IPauseEvent>;
+  private _synchronizer?: LiveObjectSynchronizer<ITimerConfig>;
 
   /**
    * The objects fluid type/name.
    */
-  public static readonly TypeName = `@microsoft/live-share:EphemeralTimer`;
+  public static readonly TypeName = `@microsoft/live-share:LiveTimer`;
 
   /**
    * The objects fluid type factory.
    */
   public static readonly factory = new DataObjectFactory(
-    EphemeralTimer.TypeName,
-    EphemeralTimer,
+    LiveTimer.TypeName,
+    LiveTimer,
     [],
     {}
   );
@@ -134,32 +134,32 @@ export class EphemeralTimer extends DataObject<{
    * initalizes the object.
    * @param allowedRoles Optional. List of roles allowed to make state changes.
    */
-  // TODO: should this be an async method and wait till connected like EphemeralPresence?
+  // TODO: should this be an async method and wait till connected like LivePresence?
   public initialize(allowedRoles?: UserMeetingRole[]): void {
     if (this._scope) {
-      throw new Error(`EphemeralTimer already started.`);
+      throw new Error(`LiveTimer already started.`);
     }
 
     // Save off allowed roles
     this._allowedRoles = allowedRoles || [];
 
     // Create event scope
-    this._scope = new EphemeralEventScope(this.runtime, allowedRoles);
+    this._scope = new LiveEventScope(this.runtime, allowedRoles);
 
     // TODO: make enum for event type names
-    this._playEvent = new EphemeralEventTarget(
+    this._playEvent = new LiveEventTarget(
       this._scope,
       "Play",
       (event, local) => this._handlePlay(event, local)
     );
-    this._pauseEvent = new EphemeralEventTarget(
+    this._pauseEvent = new LiveEventTarget(
       this._scope,
       "Pause",
       (event, local) => this._handlePause(event, local)
     );
 
     // Create object synchronizer
-    this._synchronizer = new EphemeralObjectSynchronizer<ITimerConfig>(
+    this._synchronizer = new LiveObjectSynchronizer<ITimerConfig>(
       this.id,
       this.runtime,
       this.context.containerRuntime,
@@ -188,7 +188,7 @@ export class EphemeralTimer extends DataObject<{
 
   public start(duration: number): void {
     if (!this._scope) {
-      throw new Error(`EphemeralTimer not started.`);
+      throw new Error(`LiveTimer not started.`);
     }
 
     this.playInternal(duration, 0);
@@ -196,7 +196,7 @@ export class EphemeralTimer extends DataObject<{
 
   public play(): void {
     if (!this._scope) {
-      throw new Error(`EphemeralTimer not started.`);
+      throw new Error(`LiveTimer not started.`);
     }
 
     if (
@@ -223,14 +223,14 @@ export class EphemeralTimer extends DataObject<{
 
   public pause(): void {
     if (!this._scope) {
-      throw new Error(`EphemeralTimer not started.`);
+      throw new Error(`LiveTimer not started.`);
     }
       
     if (this._currentConfig.running) {
       // Broadcast state change
       const event = this._pauseEvent!.sendEvent({
         duration: this._currentConfig.duration,
-        position: this._currentConfig.position + (EphemeralEvent.getTimestamp() - this._currentConfig.configChangedAt)
+        position: this._currentConfig.position + (LiveEvent.getTimestamp() - this._currentConfig.configChangedAt)
       });
 
       // Update local state immediately
@@ -253,7 +253,7 @@ export class EphemeralTimer extends DataObject<{
   }
 
   private remoteConfigReceived(config: ITimerConfig, sender: string): void {
-    EphemeralEvent.verifyRolesAllowed(sender, this._allowedRoles).then((allowed) => {
+    LiveEvent.verifyRolesAllowed(sender, this._allowedRoles).then((allowed) => {
       // Ensure that state is allowed, newer, and not the initial state.
       const currentClientTimestamp: IClientTimestamp = {
         timestamp: this._currentConfig.configChangedAt,
@@ -265,7 +265,7 @@ export class EphemeralTimer extends DataObject<{
         clientId: config.clientId,
       }
 
-      const isConfigNewer = EphemeralEvent.isNewer(currentClientTimestamp, newClientTimestamp)
+      const isConfigNewer = LiveEvent.isNewer(currentClientTimestamp, newClientTimestamp)
 
       if (allowed && isConfigNewer && config.clientId) {
           this.updateConfig(config, false);
@@ -282,13 +282,13 @@ export class EphemeralTimer extends DataObject<{
     // TODO: do we need to clone this one?
     const userExposedConfig = cloneValue(clone)
     if (config.position === 0) {
-      this.emit(EphemeralTimerEvents.started, userExposedConfig, local);
+      this.emit(LiveTimerEvents.started, userExposedConfig, local);
     } else if (config.duration === config.position) {
-      this.emit(EphemeralTimerEvents.finished, userExposedConfig);
+      this.emit(LiveTimerEvents.finished, userExposedConfig);
     } else if (config.running) {
-      this.emit(EphemeralTimerEvents.played, userExposedConfig, local);
+      this.emit(LiveTimerEvents.played, userExposedConfig, local);
     } else {
-      this.emit(EphemeralTimerEvents.paused, userExposedConfig, local);
+      this.emit(LiveTimerEvents.paused, userExposedConfig, local);
     }
 
     if (clone.running) {
@@ -324,7 +324,7 @@ export class EphemeralTimer extends DataObject<{
     }
     const tickCallback = () => {
       if (this._currentConfig.running) {
-        const timestamp = EphemeralEvent.getTimestamp();
+        const timestamp = LiveEvent.getTimestamp();
         const endTime = endTimeFromConfig(this._currentConfig)
         if (timestamp >= endTime) {
           const newConfig: ITimerConfig = {
@@ -336,7 +336,7 @@ export class EphemeralTimer extends DataObject<{
           };
           this.updateConfig(newConfig, true);
         } else {
-          this.emit(EphemeralTimerEvents.onTick, endTime - timestamp);
+          this.emit(LiveTimerEvents.onTick, endTime - timestamp);
           this.scheduleAnimationFrame(tickCallback)
         }
       }

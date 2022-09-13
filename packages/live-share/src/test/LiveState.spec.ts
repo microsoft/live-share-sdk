@@ -7,30 +7,30 @@ import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
-import { EphemeralObjectSynchronizer } from "../EphemeralObjectSynchronizer";
-import { EphemeralState } from "../EphemeralState";
+import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
+import { LiveState } from "../LiveState";
 import { Deferred } from './Deferred';
 
 interface TestStateData {
     value: string;
 }
 
-describeNoCompat("EphemeralState", (getTestObjectProvider) => {
+describeNoCompat("LiveState", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
-    let object1: EphemeralState<TestStateData>;
-    let object2: EphemeralState<TestStateData>;
+    let object1: LiveState<TestStateData>;
+    let object2: LiveState<TestStateData>;
 
     // Temporarily change update interval
-    before(() => EphemeralObjectSynchronizer.updateInterval = 20);
-    after(() => EphemeralObjectSynchronizer.updateInterval = 15000);
+    before(() => LiveObjectSynchronizer.updateInterval = 20);
+    after(() => LiveObjectSynchronizer.updateInterval = 15000);
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(EphemeralState.factory);
-        object1 = await requestFluidObject<EphemeralState<TestStateData>>(container1, "default");
+        const container1 = await provider.createContainer(LiveState.factory);
+        object1 = await requestFluidObject<LiveState<TestStateData>>(container1, "default");
 
-        const container2 = await provider.loadContainer(EphemeralState.factory);
-        object2 = await requestFluidObject<EphemeralState<TestStateData>>(container2, "default");
+        const container2 = await provider.loadContainer(LiveState.factory);
+        object2 = await requestFluidObject<LiveState<TestStateData>>(container2, "default");
 
         // need to be connected to send signals
         if (!container1.connected) {

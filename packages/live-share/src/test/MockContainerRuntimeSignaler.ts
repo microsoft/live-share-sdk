@@ -4,7 +4,7 @@
  */
 
 import { IInboundSignalMessage } from '@fluidframework/runtime-definitions';
-import { IContainerRuntimeSignaler } from '../EphemeralObjectSynchronizer';
+import { IContainerRuntimeSignaler } from '../LiveObjectSynchronizer';
 import { v4 } from 'uuid';
 
 export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {

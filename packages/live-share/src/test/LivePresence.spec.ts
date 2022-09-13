@@ -7,28 +7,28 @@ import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
-import { EphemeralPresence } from "../EphemeralPresence";
-import { PresenceState } from "../EphemeralPresenceUser";
-import { EphemeralObjectSynchronizer } from "../EphemeralObjectSynchronizer";
+import { LivePresence } from "../LivePresence";
+import { PresenceState } from "../LivePresenceUser";
+import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { waitForDelay } from "../internals";
 import { Deferred } from './Deferred';
 
-describeNoCompat("EphemeralPresence", (getTestObjectProvider) => {
+describeNoCompat("LivePresence", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
-    let object1: EphemeralPresence<{ foo: string }>;
-    let object2: EphemeralPresence<{ foo: string }>;
+    let object1: LivePresence<{ foo: string }>;
+    let object2: LivePresence<{ foo: string }>;
 
     // Temporarily change update interval
-    before(() => EphemeralObjectSynchronizer.updateInterval = 20);
-    after(() => EphemeralObjectSynchronizer.updateInterval = 5000);
+    before(() => LiveObjectSynchronizer.updateInterval = 20);
+    after(() => LiveObjectSynchronizer.updateInterval = 5000);
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(EphemeralPresence.factory);
-        object1 = await requestFluidObject<EphemeralPresence<{ foo: string }>>(container1, "default");
+        const container1 = await provider.createContainer(LivePresence.factory);
+        object1 = await requestFluidObject<LivePresence<{ foo: string }>>(container1, "default");
 
-        const container2 = await provider.loadContainer(EphemeralPresence.factory);
-        object2 = await requestFluidObject<EphemeralPresence<{ foo: string }>>(container2, "default");
+        const container2 = await provider.loadContainer(LivePresence.factory);
+        object2 = await requestFluidObject<LivePresence<{ foo: string }>>(container2, "default");
 
         // need to be connected to send signals
         if (!container1.connected) {

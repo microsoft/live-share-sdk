@@ -6,7 +6,7 @@
 import { ITelemetryLogger } from '@fluidframework/common-definitions';
 import { IInboundSignalMessage } from '@fluidframework/runtime-definitions';
 import { MockLogger } from "@fluidframework/telemetry-utils";
-import { IRuntimeSignaler } from '../EphemeralEventScope';
+import { IRuntimeSignaler } from '../LiveEventScope';
 import { v4 } from 'uuid';
 
 export class MockRuntimeSignaler implements IRuntimeSignaler {

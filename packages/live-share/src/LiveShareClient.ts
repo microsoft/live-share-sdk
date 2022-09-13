@@ -16,7 +16,7 @@ import {
     ITelemetryBaseLogger
 } from "@fluidframework/azure-client";
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
-import { EphemeralEvent } from "./EphemeralEvent";
+import { LiveEvent } from "./LiveEvent";
 import { ILiveShareHost, ContainerState } from './interfaces';
 import { TestLiveShareHost } from './TestLiveShareHost';
 
@@ -32,7 +32,7 @@ const ordererEndpointMap = new Map<string, string>()
 /**
  * Options used to configure the `TeamsFluidClient` class.
  */
-export interface ITeamsFluidClientOptions {
+export interface ILiveShareClientOptions {
     /**
      * Optional. Configuration to use when connecting to a custom Azure Fluid Relay instance.
      */
@@ -68,9 +68,9 @@ export interface ITeamsFluidClientOptions {
 /**
  * Client used to connect to fluid containers within a Microsoft Teams context.
  */
-export class TeamsFluidClient {
+export class LiveShareClient {
     private _host?: ILiveShareHost;
-    private readonly _options: ITeamsFluidClientOptions;
+    private readonly _options: ILiveShareClientOptions;
     private _clock?: SharedClock;
     private _roleVerifier?: RoleVerifier;
 
@@ -80,9 +80,9 @@ export class TeamsFluidClient {
      * @param host Optional. Host for the current Live Share session. If not specified the host 
      * will attempt to be automatically determined.
      */
-    constructor(options?: ITeamsFluidClientOptions, host?: ILiveShareHost) {
+    constructor(options?: ILiveShareClientOptions, host?: ILiveShareHost) {
         // Save props
-        this._options = Object.assign({} as ITeamsFluidClientOptions, options);
+        this._options = Object.assign({} as ILiveShareClientOptions, options);
         this._host = host;
     }
 
@@ -210,7 +210,7 @@ export class TeamsFluidClient {
             this._roleVerifier = new RoleVerifier(host);
 
             // Register role verifier as current verifier for events
-            EphemeralEvent.setRoleVerifier(this._roleVerifier);
+            LiveEvent.setRoleVerifier(this._roleVerifier);
         }
 
         return Promise.resolve();
@@ -225,7 +225,7 @@ export class TeamsFluidClient {
             this._clock = new SharedClock(host);
 
             // Register clock as current timestamp provider for events
-            EphemeralEvent.setTimestampProvider(this._clock);
+            LiveEvent.setTimestampProvider(this._clock);
 
             // Start the clock
             return this._clock.start();

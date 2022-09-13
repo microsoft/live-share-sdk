@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { BasicColors, IColor, InkingManager, IPoint, IPointerPoint } from "@microsoft/live-share-inking";
+import { BasicColors, IColor, InkingManager, IPoint, IPointerPoint } from "@microsoft/live-share-canvas";
 
 interface ITestInkingManager {
     pointerDown(p: IPointerPoint): void;

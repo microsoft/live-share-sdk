@@ -1,7 +1,7 @@
 {
-    "name": "@microsoft/live-share-inking",
-    "version": "0.3.1",
-    "description": "Live Share library for collaborative inking.",
+    "name": "@microsoft/live-share-canvas",
+    "version": "0.4.1",
+    "description": "Live Share extension library for collaborative inking.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
     "main": "./bin/index.js",
@@ -14,8 +14,8 @@
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
     },
     "dependencies": {
-        "fluid-framework": "~0.59.0",
-        "@microsoft/live-share": "0.3.1"
+        "fluid-framework": "~1.2.3",
+        "@microsoft/live-share": "0.4.1"
     },
     "devDependencies": {
         "@types/assert": "^1.5.6",
@@ -27,7 +27,7 @@
         "typescript": "^4.6.4"
     },
     "repository": {
-        "directory": "packages/live-share-inking",
+        "directory": "packages/live-share-canvas",
         "type": "git",
         "url": "https://github.com/microsoft/live-share-sdk"
     },

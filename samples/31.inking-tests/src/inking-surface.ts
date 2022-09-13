@@ -4,7 +4,7 @@
  */
 
 import { ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
-import { InkingManager, InputFilter, LiveCanvas } from "@microsoft/live-share-inking";
+import { InkingManager, InputFilter, LiveCanvas } from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 

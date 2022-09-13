@@ -5,7 +5,7 @@
 
 import * as Teams from "@microsoft/teams-js";
 import { EphemeralEvent, ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
-import { InkingManager, InkingTool, IUserInfo, LiveCanvas } from "@microsoft/live-share-inking";
+import { InkingManager, InkingTool, IUserInfo, LiveCanvas } from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 import * as Utils from "./utils";

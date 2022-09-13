@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IUserInfo } from "@microsoft/live-share-inking";
+import { IUserInfo } from "@microsoft/live-share-canvas";
 
 const firstNames = [
     "Dog",

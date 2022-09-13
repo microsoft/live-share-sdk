@@ -5,7 +5,7 @@
 
 import { InkingSurface } from "./inking-surface";
 import { DrawingSimulation } from "./drawing-simulation";
-import { InputFilter, IPointerPoint, IWetStroke, LiveCanvas, Stroke, WetCanvas } from "@microsoft/live-share-inking";
+import { InputFilter, IPointerPoint, IWetStroke, LiveCanvas, Stroke, WetCanvas } from "@microsoft/live-share-canvas";
 
 var localInkingSurface: InkingSurface;
 var simulatedInkingSurface: InkingSurface;
@@ -150,7 +150,9 @@ window.onload = async () => {
         const config = params.get("startTest");
     
         if (config && config.toLowerCase() === "true") {
-            // await delay(1000);
+            // Give everything time to settle. Without this, the first wet stroke test
+            // tends to fail.
+            await delay(1000);
     
             performTest();
         }

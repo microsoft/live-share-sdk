@@ -1,4 +1,4 @@
-# Microsoft Live Share Inking
+# Microsoft Live Share Canvas
 
 Easily add collaborative inking to your Teams meeting app, powered by [Fluid Framework](https://fluidframework.com/).
 
@@ -12,14 +12,14 @@ To add the latest version of the SDK to your application using NPM:
 
 ```bash
 npm install @microsoft/live-share --save
-npm install @microsoft/live-share-inking --save
+npm install @microsoft/live-share-canvas --save
 ```
 
 or using [Yarn](https://yarnpkg.com/):
 
 ```bash
 yarn add @microsoft/live-share
-yarn add @microsoft/live-share-inking
+yarn add @microsoft/live-share-canvas
 ```
 
 ## Building the packages
@@ -45,7 +45,7 @@ This will use lerna to hoist and build all dependencies.
 ```javascript
 import * as microsoftTeams from "@microsoft/teams-js";
 import { TeamsFluidClient } from "@microsoft/live-share";
-import { LiveCanvas, InkingManager, InkingTool } from "@microsoft/live-share-inking";
+import { LiveCanvas, InkingManager, InkingTool } from "@microsoft/live-share-canvas";
 
 // Initialize the Teams Client SDK
 await microsoftTeams.app.initialize();

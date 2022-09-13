@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { BasicColors, IColor, InkingManager, InputProvider, IPoint, IPointerEvent, IPointerMoveEvent, IPointerPoint } from "@microsoft/live-share-inking";
+import { BasicColors, IColor, InkingManager, InputProvider, IPoint, IPointerEvent, IPointerMoveEvent } from "@microsoft/live-share-canvas";
 
 const strokeColors: IColor[] = [
     BasicColors.black,

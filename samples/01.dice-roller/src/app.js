@@ -151,7 +151,7 @@ function renderSideBar(elem) {
 function shareToStage() {
   meeting.shareAppContentToStage((error, result) => {
     if (!error) {
-      console.log("Started sharing for YouTube, sharedToStage result")
+      console.log("Started sharing, sharedToStage result")
     } else {
       console.warn("SharingToStageError", error);
     }

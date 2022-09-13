@@ -16,21 +16,22 @@ export default function App() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    if (!initialized) {
-      if (inTeams()) {
-        console.log("App.js: initializing client SDK");
-        microsoftTeams.app
-          .initialize()
-          .then(() => {
-            console.log("App.js: initializing client SDK initialized");
-            microsoftTeams.app.notifyAppLoaded();
-            microsoftTeams.app.notifySuccess();
-            setInitialized(true);
-          })
-          .catch((error) => console.error(error));
-      } else {
+    const initialize = async () => 
+    {
+      try {
+        console.log("App.js: initializing client SDK initialized");
+        await microsoftTeams.app.initialize();
+        microsoftTeams.app.notifyAppLoaded();
+        microsoftTeams.app.notifySuccess();
         setInitialized(true);
-      }
+      } catch (error) {
+        console.error(error);
+      }    
+    };
+
+    if (inTeams()) {
+      console.log("App.js: initializing client SDK");
+      initialize();
     }
   }, []);
 
@@ -39,7 +40,7 @@ export default function App() {
   }
 
   return (
-    <FluentProvider
+    initialized && <FluentProvider
       theme={teamsDarkTheme}
       style={{
         minHeight: "0px",

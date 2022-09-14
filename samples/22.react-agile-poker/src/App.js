@@ -5,7 +5,6 @@
 
 import { FluentProvider, webDarkTheme } from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
-import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MeetingStage from "./pages/MeetingStage";
 import SidePanel from "./pages/SidePanel";
@@ -14,9 +13,6 @@ import { inTeams } from "./utils/inTeams";
 
 export default function App() {
 
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
     const initialize = async () => 
     {
       try {
@@ -24,20 +20,19 @@ export default function App() {
         await microsoftTeams.app.initialize();
         microsoftTeams.app.notifyAppLoaded();
         microsoftTeams.app.notifySuccess();
-        setInitialized(true);
       } catch (error) {
         console.error(error);
       }    
     };
 
+    // initialize Teams SDK before any render.
     if (inTeams()) {
       console.log("App.js: initializing client SDK");
       initialize();
     }
-  }, []);
 
   return (
-    initialized && <FluentProvider
+    <FluentProvider
       theme={webDarkTheme}
       style={{
         minHeight: "0px",

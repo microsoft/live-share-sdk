@@ -134,15 +134,6 @@ export class LiveState<TData = undefined> extends DataObject<{Events: ILiveState
     }
 
     /**
-     * @deprecated initialize should be used instead
-     * Starts the object.
-     * @param allowedRoles Optional. List of roles allowed to make state changes.
-     */
-    public async start(allowedRoles?: UserMeetingRole[], state = LiveState.INITIAL_STATE, data?: TData): Promise<void> {
-        return this.initialize(allowedRoles, state, data)
-    }
-
-    /**
      * Disposes of the object when its container is disposed of.
      */
     public dispose(): void {

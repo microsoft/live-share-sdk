@@ -93,15 +93,6 @@ export interface ILiveEventEvents<TEvent extends ILiveShareEvent> extends IEvent
     }
 
     /**
-     * @deprecated initialize should be used instead
-     * Starts the object.
-     * @param allowedRoles Optional. List of roles allowed to send events.
-     */
-     public start(allowedRoles?: UserMeetingRole[]): Promise<void> {
-        return this.initialize(allowedRoles)
-     }
-
-    /**
      * Broadcasts an event to all other clients.
      * 
      * #### remarks

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<meta name="viewport" content="width=device-width">
+<meta charset="utf-8">
+<!--
+<meta http-equiv="Content-Security-Policy" content="frame-ancestors teams.microsoft.com *.teams.microsoft.com *.skype.com">
+-->
+
+<html lang="en">
+
+<head>
+    <title>Live Share Inking test/validation app</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+
+<body>
+    <div class="inkingHostsRoot">
+        <div id="localInkHost" class="inkingHost"></div>
+        <div id="simulatedRemoteInkHost" class="inkingHost"></div>
+    </div>
+    <div id="buttonStrip">
+        <div class="toolbar">
+            <button type="button" id="btnClear">Clear</button>
+            <button type="button" id="btnStartTest">Start test</button>
+        </div>
+    </div>
+    <div id="testResultsHost"></div>
+</body>
+
+</html>

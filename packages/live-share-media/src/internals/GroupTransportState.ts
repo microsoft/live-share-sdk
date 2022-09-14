@@ -3,9 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent, EphemeralEvent } from '@microsoft/live-share';
+import { IEvent, LiveEvent } from '@microsoft/live-share';
 import EventEmitter from 'events';
-import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
+import { IMediaPlayerState } from '../LiveMediaSessionCoordinator';
 import { ExtendedMediaSessionPlaybackState, ExtendedMediaSessionAction } from '../MediaSessionExtensions';
 import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
 
@@ -115,7 +115,7 @@ export interface ITransportStateChangeEvent extends IEvent {
         if (originalState.playbackState == state.playbackState && playerState != 'ended') {
             this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'seekto', seekTime: state.startPosition });
         } else if (state.playbackState == 'playing') {
-            const now = EphemeralEvent.getTimestamp();
+            const now = LiveEvent.getTimestamp();
             const projectedPosition = state.startPosition + ((now - state.timestamp) / 1000);
             this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'play', seekTime: projectedPosition});
         } else {

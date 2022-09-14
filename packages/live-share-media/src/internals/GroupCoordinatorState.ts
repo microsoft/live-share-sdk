@@ -3,13 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent, IEphemeralEvent, EphemeralEvent, TimeInterval, IRuntimeSignaler, EphemeralTelemetryLogger } from '@microsoft/live-share';
+import { IEvent, ILiveShareEvent, LiveEvent, TimeInterval, IRuntimeSignaler, LiveTelemetryLogger } from '@microsoft/live-share';
 import EventEmitter from 'events';
 import { ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionPlaybackState, ExtendedMediaSessionActionDetails } from '../MediaSessionExtensions';
 import { GroupPlaybackTrack, GroupPlaybackTrackEvents, IPlaybackTrack } from './GroupPlaybackTrack';
 import { GroupTransportState, ITransportState } from './GroupTransportState';
 import { GroupPlaybackPosition, ICurrentPlaybackPosition } from './GroupPlaybackPosition';
-import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
+import { IMediaPlayerState } from '../LiveMediaSessionCoordinator';
 import { GroupTransportStateEvents } from './GroupTransportState';
 import { GroupPlaybackTrackData, PlaybackTrackDataEvents, IPlaybackTrackData } from './GroupPlaybackTrackData';
 import { TelemetryEvents } from './consts';
@@ -17,7 +17,7 @@ import { TelemetryEvents } from './consts';
 /**
  * @hidden
  */
-export interface IPositionUpdateEvent extends IEphemeralEvent {
+export interface IPositionUpdateEvent extends ILiveShareEvent {
     track: IPlaybackTrack;
     trackData: IPlaybackTrackData;
     transport: ITransportState;
@@ -29,7 +29,7 @@ export interface IPositionUpdateEvent extends IEphemeralEvent {
 /**
  * @hidden
  */
-export interface ITransportCommandEvent extends IEphemeralEvent {
+export interface ITransportCommandEvent extends ILiveShareEvent {
     track: IPlaybackTrack;
     position: number;
 }
@@ -37,7 +37,7 @@ export interface ITransportCommandEvent extends IEphemeralEvent {
 /**
  * @hidden
  */
-export interface ISetTrackEvent extends IEphemeralEvent {
+export interface ISetTrackEvent extends ILiveShareEvent {
     metadata: ExtendedMediaMetadata|null;
     waitPoints: CoordinationWaitPoint[];
 }
@@ -45,7 +45,7 @@ export interface ISetTrackEvent extends IEphemeralEvent {
 /**
  * @hidden
  */
-export interface ISetTrackDataEvent extends IEphemeralEvent {
+export interface ISetTrackDataEvent extends ILiveShareEvent {
     data: object|null;
 }
 
@@ -69,7 +69,7 @@ export enum GroupCoordinatorStateEvents {
  */
  export class GroupCoordinatorState extends EventEmitter {
     private readonly _runtime: IRuntimeSignaler;
-    private readonly _logger: EphemeralTelemetryLogger;
+    private readonly _logger: LiveTelemetryLogger;
     private readonly _maxPlaybackDrift: TimeInterval;
     private _getMediaPlayerState: () => IMediaPlayerState;
 
@@ -93,7 +93,7 @@ export enum GroupCoordinatorStateEvents {
     constructor (runtime: IRuntimeSignaler, maxPlaybackDrift: TimeInterval, positionUpdateInterval: TimeInterval, getMediaPlayerState: () => IMediaPlayerState) {
         super();
         this._runtime = runtime;
-        this._logger = new EphemeralTelemetryLogger(runtime);
+        this._logger = new LiveTelemetryLogger(runtime);
         this._maxPlaybackDrift = maxPlaybackDrift;
         this._playbackTrack = new GroupPlaybackTrack(getMediaPlayerState);
         this._playbackTrackData = new GroupPlaybackTrackData(this._playbackTrack);
@@ -240,7 +240,7 @@ export enum GroupCoordinatorStateEvents {
         });
 
         if (updated) {
-            this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemoteSetTrackReceived, null, {correlationId: EphemeralTelemetryLogger.formatCorrelationId(event.clientId, event.timestamp)});
+            this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemoteSetTrackReceived, null, {correlationId: LiveTelemetryLogger.formatCorrelationId(event.clientId, event.timestamp)});
         }
     }
 
@@ -254,7 +254,7 @@ export enum GroupCoordinatorStateEvents {
         });
 
         if (updated) {
-            this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemoteSetTrackReceived, null, {correlationId: EphemeralTelemetryLogger.formatCorrelationId(event.clientId, event.timestamp)});
+            this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemoteSetTrackReceived, null, {correlationId: LiveTelemetryLogger.formatCorrelationId(event.clientId, event.timestamp)});
         }
     }
 
@@ -284,7 +284,7 @@ export enum GroupCoordinatorStateEvents {
             const updated = this.transportState.updateState(newState);
 
             if (updated) {
-                const correlationId = EphemeralTelemetryLogger.formatCorrelationId(event.clientId, event.timestamp);
+                const correlationId = LiveTelemetryLogger.formatCorrelationId(event.clientId, event.timestamp);
                 switch (event.name) {
                     case 'play':
                         this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemotePlayReceived, null, {correlationId: correlationId});
@@ -341,7 +341,7 @@ export enum GroupCoordinatorStateEvents {
                             if (event.playbackState != this._lastStateChange) {
                                 this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.BeginSoftSuspension, null, {playbackState: event.playbackState});
                                 this._lastStateChange = event.playbackState;
-                                this._lastStateChangeTime = EphemeralEvent.getTimestamp();
+                                this._lastStateChangeTime = LiveEvent.getTimestamp();
                             }
                             break;
                     }
@@ -366,7 +366,7 @@ export enum GroupCoordinatorStateEvents {
 
     public async syncLocalMediaSession(): Promise<void> {
         // Skip further syncs if we're waiting or in a "soft suspension".
-        const softSuspensionDelta = EphemeralEvent.getTimestamp() - this._lastStateChangeTime;
+        const softSuspensionDelta = LiveEvent.getTimestamp() - this._lastStateChangeTime;
         if (!this.isWaiting && softSuspensionDelta >= 1000) {
             let { metadata, trackData, positionState, playbackState } = this._getMediaPlayerState();
             this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.CheckingForSyncIssues);

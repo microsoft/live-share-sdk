@@ -5,7 +5,7 @@
 
 import { MediaSessionCoordinatorSuspension, CoordinationWaitPoint } from './MediaSessionExtensions';
 
-export class EphemeralMediaSessionCoordinatorSuspension implements MediaSessionCoordinatorSuspension {
+export class LiveMediaSessionCoordinatorSuspension implements MediaSessionCoordinatorSuspension {
     private _waitPoint?: CoordinationWaitPoint;
     private _onEnd: (seekTo?: number) => void;
 

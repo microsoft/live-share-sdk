@@ -4,23 +4,23 @@
  */
 
 import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
-import { EphemeralTelemetryLogger, UserMeetingRole } from '@microsoft/live-share';
+import { LiveTelemetryLogger, UserMeetingRole } from '@microsoft/live-share';
 import { MediaPlayerSynchronizer } from './MediaPlayerSynchronizer';
 import { ITriggerActionEvent, TelemetryEvents } from './internals';
 import { MediaSessionCoordinatorEvents, ExtendedMediaSessionAction, ExtendedMediaSessionActionDetails } from './MediaSessionExtensions';
-import { EphemeralMediaSessionCoordinator, IMediaPlayerState } from './EphemeralMediaSessionCoordinator';
+import { LiveMediaSessionCoordinator, IMediaPlayerState } from './LiveMediaSessionCoordinator';
 import { MediaSessionActionThrottler } from './MediaSessionActionThrottler';
 import { RepeatedActionThrottler } from './RepeatedActionThrottler';
 import { IMediaPlayer } from './IMediaPlayer';
 
 /**
- * Ephemeral fluid object that synchronizes media playback across multiple clients.
+ * Live fluid object that synchronizes media playback across multiple clients.
  */
- export class EphemeralMediaSession extends DataObject {
+ export class LiveMediaSession extends DataObject {
     private _actionThrottler: MediaSessionActionThrottler = new RepeatedActionThrottler();
-    private _logger?: EphemeralTelemetryLogger;
+    private _logger?: LiveTelemetryLogger;
     private _requestPlayerStateHandler?: () => IMediaPlayerState;
-    private _coordinator?: EphemeralMediaSessionCoordinator;
+    private _coordinator?: LiveMediaSessionCoordinator;
     private readonly _actionHandlers: Map<string, MediaSessionActionHandler> = new Map();
     private _synchronizing?: MediaPlayerSynchronizer;
 
@@ -37,8 +37,8 @@ import { IMediaPlayer } from './IMediaPlayer';
      * The objects fluid type factory.
      */
      public static readonly factory = new DataObjectFactory(
-        EphemeralMediaSession.TypeName,
-        EphemeralMediaSession,
+        LiveMediaSession.TypeName,
+        LiveMediaSession,
         [],
         {}
     );
@@ -48,7 +48,7 @@ import { IMediaPlayer } from './IMediaPlayer';
      * local sync behavior.
      * 
      * @remarks
-     * The `EphemeralMediaCoordinator` is fairly aggressive at wanting to keep the local media player 
+     * The `LiveMediaCoordinator` is fairly aggressive at wanting to keep the local media player 
      * in sync with the rest of the group. This aggressiveness can result in the coordinator sending 
      * new sync actions before the local player has finished responding to the previous sync action. 
      * The `ActionThrottler` gives apps fine grain control over how aggressive they want sync to be.
@@ -74,7 +74,7 @@ import { IMediaPlayer } from './IMediaPlayer';
     /**
      * The group coordinator for the session.
      */
-    public get coordinator(): EphemeralMediaSessionCoordinator {
+    public get coordinator(): LiveMediaSessionCoordinator {
         return this._coordinator!;
     }
 
@@ -84,7 +84,7 @@ import { IMediaPlayer } from './IMediaPlayer';
      * @remarks
      * This is used by the `MediaPlayerSynchronizer` to log events.
      */
-    public get logger(): EphemeralTelemetryLogger {
+    public get logger(): LiveTelemetryLogger {
         return this._logger!;
     }
 
@@ -168,10 +168,10 @@ import { IMediaPlayer } from './IMediaPlayer';
     }
 
     protected async hasInitialized(): Promise<void> {
-        this. _logger = new EphemeralTelemetryLogger(this.runtime);
+        this. _logger = new LiveTelemetryLogger(this.runtime);
 
         // Create coordinator and listen for triggered actions
-        this._coordinator = new EphemeralMediaSessionCoordinator(this.runtime, () => this.getCurrentPlayerState());
+        this._coordinator = new LiveMediaSessionCoordinator(this.runtime, () => this.getCurrentPlayerState());
         this._coordinator.on(MediaSessionCoordinatorEvents.triggeraction, (event: ITriggerActionEvent) => {
             // Pre-process actions
             const details = event.details;

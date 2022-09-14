@@ -98,16 +98,6 @@ import { IMediaPlayer } from './IMediaPlayer';
     }
 
     /**
-     * @deprecated initialize should be used instead
-     * initialize the object.
-     * @param acceptTransportChangesFrom Optional. List of roles allowed to group transport 
-     * operations like play/pause/seek/setTrack.
-     */
-    public start(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
-        return this.initialize(acceptTransportChangesFrom)
-    }
-
-    /**
      * Registers an action handler with the session.
      * @param action Name of the action to register a handler for.
      * @param handler Function called when the action is triggered.

@@ -5,9 +5,9 @@
 
 export function loadTemplate(template: string, targetElement: HTMLElement) {
     const templateElement = document.createElement("template");
-    templateElement.innerHTML = template;
+    templateElement["innerHTML"] = template;
 
-    targetElement.innerHTML = "";
+    targetElement["innerHTML"] = "";
     targetElement.appendChild(templateElement.content.cloneNode(true));
 }
 

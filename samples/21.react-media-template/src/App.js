@@ -35,10 +35,6 @@ export default function App() {
     }
   }, []);
 
-  if (!initialized) {
-    return <div />;
-  }
-
   return (
     initialized && <FluentProvider
       theme={teamsDarkTheme}

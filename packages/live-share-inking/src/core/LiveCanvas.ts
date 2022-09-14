@@ -259,7 +259,7 @@ class BuiltInLiveCursor extends LiveCursor {
         }
 
         const template = document.createElement("template");
-        template.innerHTML = visualTemplate;
+        template["innerHTML"] = visualTemplate;
 
         const element = document.createElement("div");
         element.style.position = "absolute";

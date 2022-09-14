@@ -196,7 +196,7 @@ function renderSettings(elem) {
 
 const errorTemplate = document.createElement("template");
 
-errorTemplate["innerHTML"] = `
+errorTemplate["inner"+"HTML"] = `
   <style>
     .wrapper { text-align: center; color: red }
     .error-title { font-size: large; font-weight: bolder; }

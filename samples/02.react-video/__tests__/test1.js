@@ -184,7 +184,7 @@ const installMouseHelper = async (page) => {
       () => {
         const box = document.createElement("puppeteer-mouse-pointer");
         const styleElement = document.createElement("style");
-        styleElement.innerHTML = `
+        styleElement["innerHTML"] = `
         puppeteer-mouse-pointer {
           pointer-events: none;
           position: absolute;

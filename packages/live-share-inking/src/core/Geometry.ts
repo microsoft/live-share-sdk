@@ -47,15 +47,18 @@ export function getPressureAdjustedSize(baseSize: number, pressure: number): num
 }
 
 /**
- * Extends the dimensions of the specified rectangle so it contains the specified point.
+ * Expands the specified rectangle so it contains the specified point.
  * @param rect The rectangle to extend.
  * @param point The point to extend the rectangle to.
+ * @returns The expanded rectangle.
  */
-export function unionRect(rect: IRect, point: IPoint): void {
-    rect.left = Math.min(rect.left, point.x);
-    rect.right = Math.max(rect.right, point.x);
-    rect.top = Math.min(rect.top, point.y);
-    rect.bottom = Math.max(rect.bottom, point.y);
+export function expandRect(rect: IRect, point: IPoint): IRect {
+    return {
+        left: Math.min(rect.left, point.x),
+        right: Math.max(rect.right, point.x),
+        top: Math.min(rect.top, point.y),
+        bottom: Math.max(rect.bottom, point.y)
+    }
 }
 
 /**

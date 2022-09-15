@@ -6,7 +6,7 @@
 import { IBrush, DefaultPenBrush } from "./Brush";
 import {
     getSquaredDistanceBetweenPoints, IPoint, IPointerPoint, IRect, ISegment,
-    unionRect
+    expandRect
 } from "./Geometry";
 import {
     doRectanglesOverlap, getSegmentIntersectionsWithRectangle, getSegmentsIntersection,
@@ -343,7 +343,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
      */
     getBoundingRect(): IRect {
         if (this._boundingRect === undefined) {
-            const result = {
+            let result = {
                 left: Number.MAX_VALUE,
                 top: Number.MAX_VALUE,
                 right: -Number.MAX_VALUE,
@@ -351,7 +351,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
             };
 
             for (const p of this) {
-                unionRect(result, p);
+                result = expandRect(result, p);
             }
 
             this._boundingRect = result;

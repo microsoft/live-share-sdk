@@ -11,11 +11,11 @@ import {
     AddPointsEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
     InkingManager, IPointerMovedEventArgs, IWetStroke, PointerMovedEvent, StrokeEndState, StrokesAddedEvent, StrokesRemovedEvent
 } from './InkingManager';
-import { IPointerPoint, getDistanceBetweenPoints, IPoint, IRect, unionRect } from './Geometry';
+import { IPointerPoint, getDistanceBetweenPoints, IPoint, IRect, expandRect } from './Geometry';
 import { IStroke, Stroke, StrokeType } from "./Stroke";
 import { EphemeralEventScope, EphemeralEventTarget, IEphemeralEvent, UserMeetingRole } from '@microsoft/live-share';
 import { IBrush } from './Brush';
-import { BasicColors, darkenColor, IColor, lightenColor, toCssColor } from './Colors';
+import { BasicColors, darkenColor, IColor, lightenColor, toCssRgbaColor } from './Colors';
 
 enum InkingEventNames {
     pointerMove = "PointerMove",
@@ -185,7 +185,7 @@ class BuiltInLiveCursor extends LiveCursor {
 
     private _color: ICursorColor;
     private _arrowPathData?: string;
-    private _arrawBounds?: IRect;
+    private _arrowBounds?: IRect;
 
     protected internalRender(): HTMLElement {
         const arrowPath: IPoint[] = [
@@ -195,10 +195,10 @@ class BuiltInLiveCursor extends LiveCursor {
             { x: 30, y: 10}
         ];
 
-        if (!this._arrowPathData || !this._arrawBounds) {
+        if (!this._arrowPathData || !this._arrowBounds) {
             this._arrowPathData = "";
 
-            this._arrawBounds = {
+            this._arrowBounds = {
                 left: Number.MAX_VALUE,
                 top: Number.MAX_VALUE,
                 right: Number.MIN_VALUE,
@@ -208,7 +208,7 @@ class BuiltInLiveCursor extends LiveCursor {
             for (let i = 0; i < arrowPath.length; i++) {
                 const p = arrowPath[i];
 
-                unionRect(this._arrawBounds, p);
+                this._arrowBounds = expandRect(this._arrowBounds, p);
 
                 this._arrowPathData += `${i === 0 ? "M" : "L"} ${p.x} ${p.y} `;
             }
@@ -216,13 +216,13 @@ class BuiltInLiveCursor extends LiveCursor {
             this._arrowPathData += "Z";
         }
 
-        const arrowWidth = this._arrawBounds.right - this._arrawBounds.left;
-        const arrowHeight = this._arrawBounds.bottom - this._arrawBounds.top;
+        const arrowWidth = this._arrowBounds.right - this._arrowBounds.left;
+        const arrowHeight = this._arrowBounds.bottom - this._arrowBounds.top;
         const arrowStrokeWidth = 10;
 
-        const textColor = toCssColor(this._color.textColor);
-        const arrowBorderColor = toCssColor(lightenColor(this._color.backgroundColor, 80));
-        const backgroundColor = toCssColor(this._color.backgroundColor);
+        const textColor = toCssRgbaColor(this._color.textColor);
+        const arrowBorderColor = toCssRgbaColor(lightenColor(this._color.backgroundColor, 80));
+        const backgroundColor = toCssRgbaColor(this._color.backgroundColor);
 
         let visualTemplate = `
             <svg viewbox="-${arrowStrokeWidth} -${arrowStrokeWidth} ${2 * arrowStrokeWidth + arrowWidth} ${2 * arrowStrokeWidth + arrowHeight}"

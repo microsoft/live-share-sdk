@@ -3,6 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { forceIntoRange } from "./Internals";
+
 /**
  * Defines an RGB color
  */
@@ -13,16 +15,21 @@
 }
 
 /**
- * Converts an IColor object into its CSS representation.
+ * Converts an IColor object into its CSS rgba() representation.
  * @param color The color to convert.
- * @returns A string representing the CSS representation of the color.
+ * @returns A string representing the CSS rgba() representation of the color.
  */
- export function toCssColor(color: IColor, alpha: number = 1): string {
-    return `rgba(${color.r},${color.g},${color.b},${alpha})`;
+ export function toCssRgbaColor(color: IColor, alpha: number = 1): string {
+    const r = forceIntoRange(color.r, 0, 255);
+    const g = forceIntoRange(color.g, 0, 255);
+    const b = forceIntoRange(color.b, 0, 255);
+    const a = forceIntoRange(alpha, 0, 1);
+
+    return `rgba(${r},${g},${b},${a})`;
 }
 
 /**
- * Converts a CSS color expressed in the #RRGGBB[AA] format into an IColor object
+ * Converts a CSS color expressed in the #RRGGBB format into an IColor object
  * @param color The CSS color to convert.
  * @returns The converted color as an IColor object, or a default color if the provided
  * color string isn't valid.

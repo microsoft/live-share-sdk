@@ -6,6 +6,7 @@
 import { FluentProvider, teamsDarkTheme } from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
 import MeetingStage from "./pages/MeetingStage";
 import SidePanel from "./pages/SidePanel";
 import TabConfig from "./pages/TabConfig";
@@ -13,26 +14,32 @@ import { inTeams } from "./utils/inTeams";
 
 export default function App() {
   
-  const initialize = async () => 
-    {
-      try {
-        console.log("App.js: initializing client SDK initialized");
-        await microsoftTeams.app.initialize();
-        microsoftTeams.app.notifyAppLoaded();
-        microsoftTeams.app.notifySuccess();
-      } catch (error) {
-        console.error(error);
-      }    
-    };
+  const [initialized, setInitialized] = useState(false);
 
-    // initialize Teams SDK before any render.
-    if (inTeams()) {
-      console.log("App.js: initializing client SDK");
-      initialize();
-    }
+  useEffect(() => {
+    const initialize = async () => 
+      {
+        try {
+          console.log("App.js: initializing client SDK initialized");
+          await microsoftTeams.app.initialize();
+          microsoftTeams.app.notifyAppLoaded();
+          microsoftTeams.app.notifySuccess();
+          setInitialized(true);
+        } catch (error) {
+          console.error(error);
+        }    
+      };
+
+      if (inTeams()) {
+        console.log("App.js: initializing client SDK");
+        initialize();
+      }
+  });
+
+  const appReady = (inTeams() && initialized) || !inTeams();
 
   return (
-    <FluentProvider
+    appReady && <FluentProvider
       theme={teamsDarkTheme}
       style={{
         minHeight: "0px",

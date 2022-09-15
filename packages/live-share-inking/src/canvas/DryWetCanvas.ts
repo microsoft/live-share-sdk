@@ -4,7 +4,7 @@
  */
 
 import { InkingCanvas } from "./InkingCanvas";
-import { getPressureAdjustedSize, IPointerPoint, DefaultPenBrush, IBrush, toCssColor } from "../core";
+import { getPressureAdjustedSize, IPointerPoint, DefaultPenBrush, IBrush, toCssRgbaColor } from "../core";
 import { computeQuadBetweenTwoCircles, computeQuadBetweenTwoRectangles, IQuadPathSegment } from "../core/Internals";
 
 /**
@@ -107,7 +107,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
      * @returns A CSS color. 
      */
     protected getBrushCssColor(): string {
-        return toCssColor(this.brush.color, this.brush.type === "highlighter" ? 0.5 : 1);
+        return toCssRgbaColor(this.brush.color, this.brush.type === "highlighter" ? 0.5 : 1);
     }
 
     /**
@@ -243,7 +243,7 @@ export class WetCanvas extends DryWetCanvas {
         // In a wet canvas, when using the highlighter, the brush color
         // used to draw the stroke is always opaque, and it's the canvas
         // itself that is semi-transparent.
-        return toCssColor(this.brush.color);
+        return toCssRgbaColor(this.brush.color);
     }
 
     /**

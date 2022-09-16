@@ -48,6 +48,25 @@ export function isInRange(n: number, r1: number, r2: number): boolean {
 }
 
 /**
+ * Forces a number into a range.
+ * @param n The number to process.
+ * @param min The minimum value.
+ * @param max The maximum value.
+ * @returns `min` if `n < min`, `max` if `n > max`, `n` otherwise.
+ */
+export function forceIntoRange(n: number, min: number, max: number): number {
+    if (n < min) {
+        return min;
+    }
+
+    if (n > max) {
+        return max;
+    }
+
+    return n;
+}
+
+/**
  * @hidden
  * Defines a quad, i.e. a polygon with 4 sides.
  */

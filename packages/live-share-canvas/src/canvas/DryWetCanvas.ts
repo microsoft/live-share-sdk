@@ -4,7 +4,7 @@
  */
 
 import { InkingCanvas } from "./InkingCanvas";
-import { getPressureAdjustedSize, IPointerPoint, DefaultPenBrush, IBrush, toCssColor } from "../core";
+import { getPressureAdjustedSize, IPointerPoint, DefaultPenBrush, IBrush, toCssRgbaColor } from "../core";
 import { computeQuadBetweenTwoCircles, computeQuadBetweenTwoRectangles, IQuadPathSegment } from "../core/Internals";
 
 /**
@@ -107,7 +107,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
      * @returns A CSS color. 
      */
     protected getBrushCssColor(): string {
-        return toCssColor(this.brush.color, this.brush.type === "highlighter" ? 0.5 : 1);
+        return toCssRgbaColor(this.brush.color, this.brush.type === "highlighter" ? 0.5 : 1);
     }
 
     /**
@@ -125,7 +125,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
      * Sets the appropriate blend mode on the specified context, according
      * to the current brush. In its base implementation, `setBlendMode` resets
      * both the opacity and composite operation to their defaults.
-     * @param context 
+     * @param context The context to set the blend mode on, given the current brush.
      */
     protected adjustOpacity(context: CanvasRenderingContext2D) {
         context.globalAlpha = 1;
@@ -201,16 +201,14 @@ export class DryCanvas extends DryWetCanvas {
 
     /**
      * A "dry" canvas renders multiple strokes which might each have a different brush.
-     * The underlying context's global alpha and composite operation must be set before
-     * rendering each stroke.
-     * @param context The context to set the blend mode on, given the current brus.
+     * The underlying context's global alpha must be set before rendering each stroke.
+     * @param context The context to set the blend mode on, given the current brush.
      */
     protected adjustOpacity(context: CanvasRenderingContext2D) {
         switch (this.brush.type) {
             case "laser":
                 context.globalAlpha = InkingCanvas.laserShadowOpacity;
                 break;
-            case "highlighter":
             default:
                 super.adjustOpacity(context);
                 break;
@@ -243,14 +241,13 @@ export class WetCanvas extends DryWetCanvas {
         // In a wet canvas, when using the highlighter, the brush color
         // used to draw the stroke is always opaque, and it's the canvas
         // itself that is semi-transparent.
-        return toCssColor(this.brush.color);
+        return toCssRgbaColor(this.brush.color);
     }
 
     /**
      * A "wet" canvas always renders a single stroke and is discarded when that stroke ends.
-     * It needs to be properly composited on whatever other DOM it is overlayed on, basically
-     * the "dry" canvas. It is the HTML5 canvas that needs to be setup for the right blend
-     * mode, by setting its opacity and mixBlendMode styles.
+     * It needs to be properly composited on whatever other DOM element it is overlayed on,
+     * which means the HTML5 canvas itself must have its opacity set up appropriately.
      * @param context The context to set the blend mode on, given the current brush.
      */
     protected adjustOpacity(context: CanvasRenderingContext2D) {

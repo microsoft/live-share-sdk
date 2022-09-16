@@ -3,6 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+export function runningInTeams(): boolean {
+    const params = new URLSearchParams(window.location.search);
+    const config = params.get("inTeams");
+
+    return config !== null && config.toLowerCase() === "1";
+}
+
 export function loadTemplate(template: string, targetElement: HTMLElement) {
     const templateElement = document.createElement("template");
     templateElement["innerHTML"] = template;

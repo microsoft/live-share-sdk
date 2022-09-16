@@ -5,15 +5,29 @@
 
 import { View } from "./view";
 import { ConfigView } from "./config-view";
-import { MainView } from "./main-view";
+import { StageView } from "./stage-view";
+import { SidebarView } from "./sidebar-view";
 
 var view: View;
 
 window.onload = () => {
     const params = new URLSearchParams(window.location.search);
-    const config = params.get("config");
+    const viewParam = params.get("view") || "sideBar";
 
-    view = config && config.toLowerCase() === "true" ? new ConfigView() : new MainView();
+    let view: View;
+
+    switch (viewParam.toLowerCase()) {
+        case "config":
+            view = new ConfigView();
+            break;
+        case "stage":
+            view = new StageView();
+            break;
+        default:
+            view = new SidebarView();
+            break;
+    }
+
     view.start();
 }
 

@@ -12,13 +12,28 @@ function pointerEventToIPointerEvent(e: PointerEvent): IPointerEvent {
         shiftKey: e.shiftKey,
         x: e.offsetX,
         y: e.offsetY,
-        pressure: e.pressure
+        pressure: e.pressure > 0 ? e.pressure : 0.5
     }
 }
 
+function getCoalescedEvents(event: PointerEvent): PointerEvent[] {
+    // getCoalescedEvents isn't supported in Safari
+    if ('getCoalescedEvents' in event) {
+        const events: PointerEvent[] = event.getCoalescedEvents();
+
+        // Older versions of Firefox can return an empty list.
+        // See https://bugzilla.mozilla.org/show_bug.cgi?id=1511231.
+        if (events.length >= 1) {
+            return events;
+        }
+    }
+
+    return [event];
+}
+
 /**
- * InputProvider implementation that hooks into a DOM element's pointer events.
- */
+* InputProvider implementation that hooks into a DOM element's pointer events.
+*/
 export class PointerInputProvider extends InputProvider {
     private _activePointerId?: number;
 
@@ -70,8 +85,8 @@ export class PointerInputProvider extends InputProvider {
             if (invokePointerMove) {
                 const isPointerDown = this._activePointerId !== undefined;
 
-                const coalescedEvents = e.getCoalescedEvents();
-                
+                const coalescedEvents = getCoalescedEvents(e);
+
                 coalescedEvents.forEach(
                     (evt: PointerEvent) => {
                         this.pointerMoveEvent.emit(
@@ -134,7 +149,7 @@ export class PointerInputProvider extends InputProvider {
 
     deactivate() {
         super.deactivate();
-        
+
         this.element.removeEventListener('pointerdown', this.onPointerDown);
         this.element.removeEventListener('pointermove', this.onPointerMove);
         this.element.removeEventListener('pointerup', this.onPointerUp);

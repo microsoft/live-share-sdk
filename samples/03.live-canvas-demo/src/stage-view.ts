@@ -13,6 +13,12 @@ import { View } from "./view";
 import { DrawingSimulation } from "./simulation";
 import { getRandomUserInfo } from "./random-userInfo";
 
+/**
+ * Other images
+ * https://guitar.com/wp-content/uploads/2020/09/Mark-Knopfler-Dire-Straits-Credit-Mick-Hutson-Redferns@2160x1459.jpg
+ * https://guitar.com/wp-content/uploads/2020/09/Mark-Knopfler-Dier-Straits-Suhr-Schecter-Credit-Ebet-Roberts-Redferns@2560x1707.jpg
+ */
+
 const appTemplate = `
     <div id="appRoot">
         <div id="inkingRoot">
@@ -60,7 +66,7 @@ const containerSchema = {
     }
 };
 
-export class MainView extends View {
+export class StageView extends View {
     private _inkingManager!: InkingManager;
     private _container!: IFluidContainer;
     private _drawingSimulation!: DrawingSimulation;
@@ -83,18 +89,11 @@ export class MainView extends View {
         (this._container.initialObjects.startStopDrawingSimulation as EphemeralEvent).sendEvent({ isStarted: start });
     }
 
-    private runningInTeams(): boolean {
-        const params = new URLSearchParams(window.location.search);
-        const config = params.get("inTeams");
-
-        return config !== null && config.toLowerCase() === "1";
-    }
-
     private _hostResizeObserver!: ResizeObserver;
     private _userInfo: IUserInfo;
 
     private async internalStart() {
-        const clientOptions: ITeamsFluidClientOptions | undefined = this.runningInTeams()
+        const clientOptions: ITeamsFluidClientOptions | undefined = Utils.runningInTeams()
             ? undefined
             : {
                 connection: {
@@ -298,7 +297,7 @@ export class MainView extends View {
             }
         );
 
-        if (this.runningInTeams()) {
+        if (Utils.runningInTeams()) {
             Utils.toggleElementVisibility("btnSimulation", false);
             Utils.toggleElementVisibility("btnOpenNewWindow", false);
         }
@@ -318,7 +317,7 @@ export class MainView extends View {
     }
 
     async start() {
-        if (this.runningInTeams()) {
+        if (Utils.runningInTeams()) {
             await Teams.app.initialize();
 
             Teams.app.notifySuccess();

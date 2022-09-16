@@ -17,8 +17,8 @@ export class ConfigView extends View {
                 websiteUrl: window.location.origin,
                 suggestedDisplayName: "Live Share Canvas demo"
             });
-            
-        saveEvent.notifySuccess();    
+
+        saveEvent.notifySuccess();
     };
 
     constructor() {
@@ -30,9 +30,11 @@ export class ConfigView extends View {
     }
 
     start() {
-        app.initialize();
-        pages.config.registerOnSaveHandler(this.onSavePagesConfig);
-        pages.config.setValidityState(true);
-        app.notifySuccess();
+        if (Utils.runningInTeams()) {
+            app.initialize();
+            pages.config.registerOnSaveHandler(this.onSavePagesConfig);
+            pages.config.setValidityState(true);
+            app.notifySuccess();
+        }
     }
 }

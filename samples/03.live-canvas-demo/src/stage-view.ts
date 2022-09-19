@@ -220,7 +220,6 @@ export class StageView extends View {
                 overlay.style.position = "absolute";
                 overlay.style.width = "100%";
                 overlay.style.height = "100%";
-                // overlay.style.backgroundColor = "red";
                 overlay.style.color = "red";
                 overlay.style.fontWeight = "bold";
                 overlay.style.fontFamily = "'Courier New', Courier, monospace";
@@ -228,16 +227,8 @@ export class StageView extends View {
 
                 inkingRoot.appendChild(overlay);
 
-                overlay.innerText = "Loaded";
-
-                try {
-                    this._inkingManager.tool = InkingTool.laserPointer;
-
-                    this._inkingManager.inputProvider = new MotionInputProvider(overlay);
-                }
-                catch (err) {
-                    overlay.innerText = "Error: " + JSON.stringify(err);
-                }
+                this._inkingManager.tool = InkingTool.laserPointer;
+                this._inkingManager.inputProvider = new MotionInputProvider(overlay);
             }
         }
         else {

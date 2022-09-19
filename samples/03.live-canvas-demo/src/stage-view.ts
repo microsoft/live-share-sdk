@@ -231,122 +231,120 @@ export class StageView extends View {
                 this._inkingManager.inputProvider = new MotionInputProvider(overlay);
             }
         }
-        else {
-            const backgroundImage = document.getElementById("backgroundImage") as HTMLImageElement;
+        const backgroundImage = document.getElementById("backgroundImage") as HTMLImageElement;
 
-            if (backgroundImage) {
-                const showBackgroundImage = () => {
-                    this._backgroundImageWidth = backgroundImage.naturalWidth;
-                    this._backgroundImageHeight = backgroundImage.naturalHeight;
+        if (backgroundImage) {
+            const showBackgroundImage = () => {
+                this._backgroundImageWidth = backgroundImage.naturalWidth;
+                this._backgroundImageHeight = backgroundImage.naturalHeight;
 
-                    this.updateBackgroundImagePosition();
-                }
-
-                if (backgroundImage.complete) {
-                    showBackgroundImage();
-                }
-                else {
-                    backgroundImage.addEventListener(
-                        "load",
-                        () => {
-                            showBackgroundImage();
-                        });
-                }
+                this.updateBackgroundImagePosition();
             }
 
-            const setupButton = (buttonId: string, onClick: () => void) => {
-                const button = document.getElementById(buttonId);
-
-                if (button) {
-                    button.onclick = onClick;
-                }
-            }
-
-            setupButton("btnStroke", () => { this._inkingManager.tool = InkingTool.pen });
-            setupButton("btnLaserPointer", () => { this._inkingManager.tool = InkingTool.laserPointer });
-            setupButton("btnHighlighter", () => { this._inkingManager.tool = InkingTool.highlighter });
-            setupButton("btnEraser", () => { this._inkingManager.tool = InkingTool.eraser });
-            setupButton("btnPointEraser", () => { this._inkingManager.tool = InkingTool.pointEraser });
-
-            setupButton("btnBlack", () => { this._inkingManager.penBrush.color = { r: 0, g: 0, b: 0 } });
-            setupButton("btnYellow", () => { this._inkingManager.penBrush.color = { r: 255, g: 252, b: 0 } });
-            setupButton("btnGreen", () => { this._inkingManager.penBrush.color = { r: 0, g: 255, b: 0 } });
-            setupButton("btnRed", () => { this._inkingManager.penBrush.color = { r: 255, g: 0, b: 0 } });
-            setupButton("btnBlue", () => { this._inkingManager.penBrush.color = { r: 0, g: 105, b: 175 } });
-
-            setupButton("btnClear", () => { this._inkingManager.clear(); });
-
-            setupButton("btnOffsetLeft", () => { this.offsetBy(-10, 0); });
-            setupButton("btnOffsetUp", () => { this.offsetBy(0, -10); });
-            setupButton("btnOffsetRight", () => { this.offsetBy(10, 0); });
-            setupButton("btnOffsetDown", () => { this.offsetBy(0, 10); });
-
-            setupButton(
-                "btnResetView",
-                () => {
-                    this._inkingManager.offset = {
-                        x: 0,
-                        y: 0
-                    }
-
-                    this._inkingManager.scale = 1;
-
-                    this.updateBackgroundImagePosition();
-                }
-            );
-
-            setupButton(
-                "btnZoomOut",
-                () => {
-                    if (this._inkingManager.scale > 0.1) {
-                        this._inkingManager.scale -= 0.1;
-
-                        this.updateBackgroundImagePosition();
-                    }
-                }
-            );
-            setupButton(
-                "btnZoomIn",
-                () => {
-                    this._inkingManager.scale += 0.1;
-
-                    this.updateBackgroundImagePosition();
-                }
-            );
-
-            setupButton(
-                "btnToggleCursorShare",
-                () => {
-                    const liveCanvas = this.getLiveCanvas();
-                    const isCursorShared = liveCanvas.isCursorShared;
-
-                    liveCanvas.isCursorShared = !isCursorShared;
-
-                    const button = document.getElementById("btnToggleCursorShare");
-
-                    if (button) {
-                        button.innerText = liveCanvas.isCursorShared ? "Stop sharing cursor" : "Share cursor";
-                    }
-                }
-            );
-
-            if (Utils.runningInTeams()) {
-                Utils.toggleElementVisibility("btnSimulation", false);
-                Utils.toggleElementVisibility("btnOpenNewWindow", false);
+            if (backgroundImage.complete) {
+                showBackgroundImage();
             }
             else {
-                setupButton("btnSimulation", () => { this.startOrStopDrawingSimulation(!this._simulationStarted); });
-
-                var offset = 0;
-
-                setupButton(
-                    "btnOpenNewWindow",
+                backgroundImage.addEventListener(
+                    "load",
                     () => {
-                        window.open(document.URL, "_blank", `left=${offset},top=${offset},width=1000,height=1000`);
-
-                        offset += 80;
+                        showBackgroundImage();
                     });
             }
+        }
+
+        const setupButton = (buttonId: string, onClick: () => void) => {
+            const button = document.getElementById(buttonId);
+
+            if (button) {
+                button.onclick = onClick;
+            }
+        }
+
+        setupButton("btnStroke", () => { this._inkingManager.tool = InkingTool.pen });
+        setupButton("btnLaserPointer", () => { this._inkingManager.tool = InkingTool.laserPointer });
+        setupButton("btnHighlighter", () => { this._inkingManager.tool = InkingTool.highlighter });
+        setupButton("btnEraser", () => { this._inkingManager.tool = InkingTool.eraser });
+        setupButton("btnPointEraser", () => { this._inkingManager.tool = InkingTool.pointEraser });
+
+        setupButton("btnBlack", () => { this._inkingManager.penBrush.color = { r: 0, g: 0, b: 0 } });
+        setupButton("btnYellow", () => { this._inkingManager.penBrush.color = { r: 255, g: 252, b: 0 } });
+        setupButton("btnGreen", () => { this._inkingManager.penBrush.color = { r: 0, g: 255, b: 0 } });
+        setupButton("btnRed", () => { this._inkingManager.penBrush.color = { r: 255, g: 0, b: 0 } });
+        setupButton("btnBlue", () => { this._inkingManager.penBrush.color = { r: 0, g: 105, b: 175 } });
+
+        setupButton("btnClear", () => { this._inkingManager.clear(); });
+
+        setupButton("btnOffsetLeft", () => { this.offsetBy(-10, 0); });
+        setupButton("btnOffsetUp", () => { this.offsetBy(0, -10); });
+        setupButton("btnOffsetRight", () => { this.offsetBy(10, 0); });
+        setupButton("btnOffsetDown", () => { this.offsetBy(0, 10); });
+
+        setupButton(
+            "btnResetView",
+            () => {
+                this._inkingManager.offset = {
+                    x: 0,
+                    y: 0
+                }
+
+                this._inkingManager.scale = 1;
+
+                this.updateBackgroundImagePosition();
+            }
+        );
+
+        setupButton(
+            "btnZoomOut",
+            () => {
+                if (this._inkingManager.scale > 0.1) {
+                    this._inkingManager.scale -= 0.1;
+
+                    this.updateBackgroundImagePosition();
+                }
+            }
+        );
+        setupButton(
+            "btnZoomIn",
+            () => {
+                this._inkingManager.scale += 0.1;
+
+                this.updateBackgroundImagePosition();
+            }
+        );
+
+        setupButton(
+            "btnToggleCursorShare",
+            () => {
+                const liveCanvas = this.getLiveCanvas();
+                const isCursorShared = liveCanvas.isCursorShared;
+
+                liveCanvas.isCursorShared = !isCursorShared;
+
+                const button = document.getElementById("btnToggleCursorShare");
+
+                if (button) {
+                    button.innerText = liveCanvas.isCursorShared ? "Stop sharing cursor" : "Share cursor";
+                }
+            }
+        );
+
+        if (Utils.runningInTeams()) {
+            Utils.toggleElementVisibility("btnSimulation", false);
+            Utils.toggleElementVisibility("btnOpenNewWindow", false);
+        }
+        else {
+            setupButton("btnSimulation", () => { this.startOrStopDrawingSimulation(!this._simulationStarted); });
+
+            var offset = 0;
+
+            setupButton(
+                "btnOpenNewWindow",
+                () => {
+                    window.open(document.URL, "_blank", `left=${offset},top=${offset},width=1000,height=1000`);
+
+                    offset += 80;
+                });
         }
     }
 

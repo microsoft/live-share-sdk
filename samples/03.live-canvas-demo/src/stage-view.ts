@@ -104,7 +104,7 @@ export class StageView extends View {
                 connection: {
                     type: "local",
                     tokenProvider: new InsecureTokenProvider("", { id: "123" }),
-                    endpoint: window.location.protocol + "//" + window.location.hostname + ":7070"
+                    endpoint: "http://localhost:7070"
                 }
             };
 
@@ -127,7 +127,7 @@ export class StageView extends View {
                 }
                 else {
                     if (event.isStarted) {
-                        // Ait a maximum of 1 second so not all clients starts drawing at the same time
+                        // Wait a maximum of 1 second so not all clients starts drawing at the same time
                         window.setTimeout(
                             () => { this._drawingSimulation.start(); },
                             Math.random() * 5000);
@@ -157,8 +157,6 @@ export class StageView extends View {
             liveCanvas.onGetLocalUserInfo = () => {
                 return this._userInfo;
             }
-
-            this._inkingManager = new InkingManager(inkingHost);
 
             await liveCanvas.initialize(this._inkingManager);
 
@@ -231,6 +229,7 @@ export class StageView extends View {
                 this._inkingManager.inputProvider = new MotionInputProvider(overlay);
             }
         }
+       
         const backgroundImage = document.getElementById("backgroundImage") as HTMLImageElement;
 
         if (backgroundImage) {

@@ -24,14 +24,14 @@ export class ConfigView extends View {
     constructor() {
         super();
 
-        const template = `<div>This is the config page.</div>`;
+        const template = `<div>Welcome to the Live Share Canvas demo. Click the button below to start collaborative inking.</div>`;
 
         Utils.loadTemplate(template, document.body);
     }
 
-    start() {
+    async start() {
         if (Utils.runningInTeams()) {
-            app.initialize();
+            await app.initialize();
             pages.config.registerOnSaveHandler(this.onSavePagesConfig);
             pages.config.setValidityState(true);
             app.notifySuccess();

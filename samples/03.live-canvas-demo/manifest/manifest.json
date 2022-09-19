@@ -11,7 +11,7 @@
     "developer": {
         "name": "Your name here",
         "mpnId": "",
-        "websiteUrl": "https://liveshareinking-crcpe0bpfybnd0h9.z01.azurefd.net/",
+        "websiteUrl": "https://liveshareinking-crcpe0bpfybnd0h9.z01.azurefd.net",
         "privacyUrl": "https://www.example.com/PrivacyStatement",
         "termsOfUseUrl": "https://www.example.com/TermsOfUse"
     },
@@ -26,7 +26,7 @@
     "accentColor": "#FFFFFF",
     "configurableTabs": [
         {            
-            "configurationUrl": "https://liveshareinking-crcpe0bpfybnd0h9.z01.azurefd.net/?config=true",
+            "configurationUrl": "https://liveshareinking-crcpe0bpfybnd0h9.z01.azurefd.net/?view=config&inTeams=1",
             "canUpdateConfiguration": false,
             "scopes": [
                 "groupchat"

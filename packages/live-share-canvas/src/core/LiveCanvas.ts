@@ -425,7 +425,7 @@ export class LiveCanvas extends DataObject {
         }
 
         // Setup incoming events
-        const scope = new EphemeralEventScope(this.runtime, [UserMeetingRole.presenter]);
+        const scope = new EphemeralEventScope(this.runtime); //, [UserMeetingRole.presenter]);
 
         this._pointerMovedEventTarget = new EphemeralEventTarget(
             scope,

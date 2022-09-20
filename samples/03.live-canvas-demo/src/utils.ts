@@ -25,3 +25,19 @@ export function toggleElementVisibility(elementId: string, isVisible: boolean) {
         element.style.visibility = isVisible ? "visible" : "hidden";
     }
 }
+
+export function forceIntoRange(n: number, min: number, max: number): { result: number, wasForced: boolean } {
+    if (n < min) {
+        return { result: min, wasForced: true };
+    }
+
+    if (n > max) {
+        return { result: max, wasForced: true };
+    }
+
+    return { result: n, wasForced: false };
+}
+
+export function valueOrDefault(n: number | undefined | null, defaultValue: number = 0): number {
+    return typeof n === "number" ? n : defaultValue;
+}

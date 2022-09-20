@@ -5,13 +5,15 @@
 
 import * as Teams from "@microsoft/teams-js";
 import { EphemeralEvent, ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
-import { InkingManager, InkingTool, IUserInfo, LiveCanvas } from "@microsoft/live-share-canvas";
+import { InkingManager, InkingTool, IRect, IUserInfo, LiveCanvas } from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 import * as Utils from "./utils";
 import { View } from "./view";
 import { DrawingSimulation } from "./simulation";
 import { getRandomUserInfo } from "./random-userInfo";
+import { AccelerationBasedMotionInputProvider } from "./AccelerationBasedMotionInputProvider";
+import { OrientationBasedMotionInputProvider } from "./OrientationBasedMotionInputProvider";
 import { MotionInputProvider } from "./MotionInputProvider";
 
 /**
@@ -178,6 +180,7 @@ export class StageView extends View {
 
     private _backgroundImageWidth?: number;
     private _backgroundImageHeight?: number;
+    private _motionInputProvider?: MotionInputProvider;
 
     private updateBackgroundImagePosition() {
         const backgroundImage = document.getElementById("backgroundImage");
@@ -193,6 +196,22 @@ export class StageView extends View {
             backgroundImage.style.left = (this._inkingManager.centerX + this._inkingManager.offset.x - this._backgroundImageWidth / 2 * this._inkingManager.scale) + "px";
             backgroundImage.style.top = (this._inkingManager.centerY + this._inkingManager.offset.y - this._backgroundImageHeight / 2 * this._inkingManager.scale) + "px";
         }
+    }
+
+    private getBackgroundImageBounds(): IRect | undefined {
+        if (this._backgroundImageWidth && this._backgroundImageHeight) {
+            const left = (this._inkingManager.centerX + this._inkingManager.offset.x - this._backgroundImageWidth / 2 * this._inkingManager.scale);
+            const top = (this._inkingManager.centerY + this._inkingManager.offset.y - this._backgroundImageHeight / 2 * this._inkingManager.scale);
+
+            return {
+                left,
+                top,
+                right: left + this._backgroundImageWidth,
+                bottom: top + this._backgroundImageHeight
+            }
+        }
+
+        return undefined;
     }
 
     constructor() {
@@ -226,7 +245,17 @@ export class StageView extends View {
                 inkingRoot.appendChild(overlay);
 
                 this._inkingManager.tool = InkingTool.laserPointer;
-                this._inkingManager.inputProvider = new MotionInputProvider(overlay);
+
+                // this._motionInputProvider = new AccelerationBasedMotionInputProvider(overlay);
+                this._motionInputProvider = new OrientationBasedMotionInputProvider(overlay);
+
+                this._inkingManager.inputProvider = this._motionInputProvider;
+
+                const bounds = this.getBackgroundImageBounds();
+
+                if (bounds) {
+                    this._motionInputProvider.bounds = bounds;
+                }
             }
         }
        
@@ -236,6 +265,14 @@ export class StageView extends View {
             const showBackgroundImage = () => {
                 this._backgroundImageWidth = backgroundImage.naturalWidth;
                 this._backgroundImageHeight = backgroundImage.naturalHeight;
+
+                if (this._motionInputProvider) {
+                    const bounds = this.getBackgroundImageBounds();
+
+                    if (bounds) {
+                        this._motionInputProvider.bounds = bounds;
+                    }
+                }
 
                 this.updateBackgroundImagePosition();
             }

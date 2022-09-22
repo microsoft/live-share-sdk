@@ -319,16 +319,19 @@ class WetLineStroke extends WetStroke {
 
         this.canvas.cancelStroke();
         this.canvas.beginStroke(this.getPointAt(0));
-        this.canvas.addPoint(this.getPointAt(1));
 
-        if (this.length > 1 && this.brush.endArrow === "open") {
-            const arrowPath = computeEndArrow(this.getPointAt(0), this.getPointAt(1));
+        if (this.length > 1) {
+            this.canvas.addPoint(this.getPointAt(1));
 
-            for (let i = 0; i < arrowPath.length; i++) {
-                const p = { ...arrowPath[i], pressure: this.getPointAt(1).pressure };
+            if (this.brush.endArrow === "open") {
+                const arrowPath = computeEndArrow(this.getPointAt(0), this.getPointAt(1));
 
-                this.addPoint(p);
-                this.canvas.addPoint(p);
+                for (let i = 0; i < arrowPath.length; i++) {
+                    const p = { ...arrowPath[i], pressure: this.getPointAt(1).pressure };
+
+                    this.addPoint(p);
+                    this.canvas.addPoint(p);
+                }
             }
         }
 

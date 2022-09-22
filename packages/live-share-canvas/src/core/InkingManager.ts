@@ -126,6 +126,12 @@ export interface IWetStroke extends IStroke {
      */
     readonly mode: StrokeMode;
     /**
+     * Straightens a point so that the line it forms with the previous
+     * point is straight (either horizontal or vertical).
+     * @param p The point to update
+     */
+    straighten(p: IPointerPoint): IPointerPoint;
+    /**
     * Ends the wet stroke.
     * @param p Optional. The points at which the stroke ends. If not specified,
     * the stroke ends at the last added point.
@@ -240,6 +246,10 @@ abstract class WetStroke extends Stroke implements IWetStroke {
         this._canvas.setBrush(this.brush);
     }
 
+    straighten(p: IPointerPoint): IPointerPoint {
+        return p;
+    }
+
     end() {
         this._canvas.removeFromDOM();
         this._canvas.endStroke();
@@ -300,6 +310,23 @@ class WetFreehandStroke extends WetStroke {
 }
 
 class WetLineStroke extends WetStroke {
+    straighten(p: IPointerPoint): IPointerPoint {
+        const result = { ...p };
+
+        if (this.length > 0) {
+            const firstPoint = this.getPointAt(0);
+
+            if (Math.abs(result.x - firstPoint.x) > Math.abs(result.y - firstPoint.y)) {
+                result.y = firstPoint.y;
+            }
+            else {
+                result.x = firstPoint.x;
+            }
+        }
+
+        return result;
+    }
+    
     addPoints(...points: IPointerPoint[]): boolean {
         if (this.length === 0) {
             this.addPoint(points[0]);
@@ -616,18 +643,11 @@ export class InkingManager extends EventEmitter {
         // Otherwise, we handle the pointer move event only if the pointer it comes
         // from is the one we have captured
         else {
-            const filteredPoint = this._inputFilters.filterPoint(e);
+            let filteredPoint = this._inputFilters.filterPoint(e);
 
             if (this._currentStroke) {
-                if (this._currentStroke.mode === StrokeMode.line && e.shiftKey) {
-                    const firstPoint = this._currentStroke.getPointAt(0);
-
-                    if (Math.abs(filteredPoint.x - firstPoint.x) > Math.abs(filteredPoint.y - firstPoint.y)) {
-                        filteredPoint.y = firstPoint.y;
-                    }
-                    else {
-                        filteredPoint.x = firstPoint.x;
-                    }
+                if (e.shiftKey) {
+                    filteredPoint = this._currentStroke.straighten(filteredPoint);
                 }
 
                 this._currentStroke.addPoints(filteredPoint);
@@ -656,9 +676,13 @@ export class InkingManager extends EventEmitter {
     };
 
     private onPointerUp = (e: IPointerEvent): void => {
-        const filteredPoint = this._inputFilters.filterPoint(e);
+        let filteredPoint = this._inputFilters.filterPoint(e);
 
         if (this._currentStroke) {
+            if (e.shiftKey) {
+                filteredPoint = this._currentStroke.straighten(filteredPoint);
+            }
+
             this._currentStroke.addPoints(filteredPoint);
             this._currentStroke.end();
 

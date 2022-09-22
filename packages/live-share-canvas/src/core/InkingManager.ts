@@ -646,8 +646,6 @@ export class InkingManager extends EventEmitter {
             let filteredPoint = this._inputFilters.filterPoint(e);
 
             if (this._currentStroke) {
-                this._currentStroke.brush.endArrow = e.altKey ? "open" : undefined;
-
                 if (e.shiftKey) {
                     filteredPoint = this._currentStroke.straighten(filteredPoint);
                 }
@@ -681,8 +679,6 @@ export class InkingManager extends EventEmitter {
         let filteredPoint = this._inputFilters.filterPoint(e);
 
         if (this._currentStroke) {
-            this._currentStroke.brush.endArrow = e.altKey ? "open" : undefined;
-            
             if (e.shiftKey) {
                 filteredPoint = this._currentStroke.straighten(filteredPoint);
             }

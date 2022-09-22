@@ -4,16 +4,14 @@
  */
 
 import { EventEmitter } from "events";
-import { CanvasReferencePoint, InkingCanvas } from "../canvas/InkingCanvas";
-import { DryCanvas, WetCanvas } from "../canvas/DryWetCanvas";
-import { LaserPointerCanvas } from "../canvas/LaserPointerCanvas";
+import { CanvasReferencePoint, InkingCanvas, DryCanvas, WetCanvas, LaserPointerCanvas } from "../canvas";
 import { IPoint, IPointerPoint, IRect, screenToViewport, viewportToScreen } from "./Geometry";
 import { Stroke, IStroke, IStrokeCreationOptions, StrokeType, StrokeMode } from "./Stroke";
-import { InputFilter, InputFilterCollection } from "../input/InputFilter";
-import { JitterFilter } from "../input/JitterFilter";
-import { IPointerEvent, InputProvider, PointerInputProvider, IPointerMoveEvent } from "../input";
-import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultLineBrush, DefaultPenBrush, IBrush } from "./Brush";
-import { makeRectangle, generateUniqueId, pointerEventToPoint } from "./Internals";
+import { InputFilter, InputFilterCollection, JitterFilter, IPointerEvent, InputProvider,
+    PointerInputProvider, IPointerMoveEvent } from "../input";
+import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultLineBrush, DefaultPenBrush,
+    IBrush, ArrowType } from "./Brush";
+import { makeRectangle, generateUniqueId, computeEndArrow } from "./Internals";
 
 /**
  * Defines available inking tools.
@@ -282,6 +280,23 @@ class WetFreehandStroke extends WetStroke {
 
         return result;
     }
+
+    end() {
+        if (this.length > 1 && this.brush.endArrow === "open") {
+            const penultimatePoint = this.getPointAt(this.length - 2);
+            const lastPoint = this.getPointAt(this.length - 1);
+
+            const arrowPath = computeEndArrow(penultimatePoint, lastPoint);
+
+            for (let i = 0; i < arrowPath.length; i++) {
+                const p = { ...arrowPath[i], pressure: lastPoint.pressure };
+
+                this.addPoint(p);
+            }
+        }
+
+        super.end();
+    }
 }
 
 class WetLineStroke extends WetStroke {
@@ -305,6 +320,17 @@ class WetLineStroke extends WetStroke {
         this.canvas.cancelStroke();
         this.canvas.beginStroke(this.getPointAt(0));
         this.canvas.addPoint(this.getPointAt(1));
+
+        if (this.length > 1 && this.brush.endArrow === "open") {
+            const arrowPath = computeEndArrow(this.getPointAt(0), this.getPointAt(1));
+
+            for (let i = 0; i < arrowPath.length; i++) {
+                const p = { ...arrowPath[i], pressure: this.getPointAt(1).pressure };
+
+                this.addPoint(p);
+                this.canvas.addPoint(p);
+            }
+        }
 
         return true;
     }
@@ -521,15 +547,18 @@ export class InkingManager extends EventEmitter {
             case InkingTool.line:
             case InkingTool.highlighter:
             case InkingTool.laserPointer:
-                const mode = this.tool === InkingTool.line ? StrokeMode.line : (e.shiftKey ? StrokeMode.line : StrokeMode.freeHand);
+                const mode = this.tool === InkingTool.line ? StrokeMode.line : (e.ctrlKey ? StrokeMode.line : StrokeMode.freeHand);
+                const brush = { ...this.getBrushForTool(this.tool) };
+
+                if (e.altKey) {
+                    brush.endArrow = "open";
+                }
 
                 this._currentStroke = this.beginWetStroke(
                     this.tool === InkingTool.laserPointer ? StrokeType.ephemeral : StrokeType.persistent,
                     mode,
                     filteredPoint,
-                    {
-                        brush: this.getBrushForTool(this.tool)
-                    });
+                    { brush });
 
                 this.notifyBeginStroke(this._currentStroke);
 
@@ -587,7 +616,7 @@ export class InkingManager extends EventEmitter {
             const filteredPoint = this._inputFilters.filterPoint(e);
 
             if (this._currentStroke) {
-                if (this._currentStroke.mode === StrokeMode.line && e.ctrlKey) {
+                if (this._currentStroke.mode === StrokeMode.line && e.shiftKey) {
                     const firstPoint = this._currentStroke.getPointAt(0);
 
                     if (Math.abs(filteredPoint.x - firstPoint.x) > Math.abs(filteredPoint.y - firstPoint.y)) {

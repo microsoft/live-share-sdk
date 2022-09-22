@@ -16,6 +16,11 @@ export type BrushTipShape = "ellipse" | "rectangle";
 export type BrushType = "pen" | "highlighter" | "laser";
 
 /**
+ * 
+ */
+export type ArrowType = "none" | "open";
+
+/**
  * Defines a brush as used to draw strokes.
  */
 export interface IBrush {
@@ -35,6 +40,11 @@ export interface IBrush {
      * The size of the brush's tip. Must be greater than 0.
      */
     tipSize: number;
+    /**
+     * Optional. The type of arrow at the end of a line drawn with
+     * the brush. Defaults to `none`.
+     */
+    endArrow?: ArrowType;
 }
 
 /**

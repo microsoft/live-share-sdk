@@ -4,7 +4,7 @@ import { useMediaSession } from "./useMediaSession";
 import { useNotifications } from "./useNotifications";
 import { useTakeControl } from "./useTakeControl";
 import { usePlaylist } from "./usePlaylist";
-import { useInk } from "./useInk";
+import { useLiveCanvas } from "./useLiveCanvas";
 
 export {
   useSharedObjects,
@@ -13,5 +13,5 @@ export {
   useNotifications,
   useTakeControl,
   usePlaylist,
-  useInk,
+  useLiveCanvas,
 };

@@ -354,3 +354,5 @@ MigrationBackup/
 
 package-lock.bak
 package.json.lerna_backup
+
+build

@@ -1,10 +1,13 @@
 
 
 #inkingRoot {
-  flex: 1 1 100%;
+  flex: 1 1 200%;
 }
 
 #inkingHost {
+  margin: 2%;
+  border-style: solid;
+  border-radius: 5px;
   height: 100%;
 }
 

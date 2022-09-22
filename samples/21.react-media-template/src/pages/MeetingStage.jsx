@@ -28,7 +28,7 @@ const MeetingStage = () => {
     notificationEvent, // EphemeralEvent Fluid object
     takeControlMap, // SharedMap Fluid object for presenter control
     playlistMap, // SharedMap Fluid object for playlist
-    inkEvent, // EphemeralEvent Fluid object
+    liveCanvas, // EphemeralEvent Fluid object
     container, // Fluid container
     error, // Join container error
   } = liveShareHooks.useSharedObjects();
@@ -89,12 +89,6 @@ const MeetingStage = () => {
     sendNotification
   );
 
-  // Ink hook
-  const { inkStarted, strokesToDisplay, sendStrokes } = liveShareHooks.useInk(
-    inkEvent,
-    ACCEPT_PLAYBACK_CHANGES_FROM
-  );
-
   // Set up the media player
   useEffect(() => {
     if (!player && selectedMediaItem) {
@@ -117,15 +111,13 @@ const MeetingStage = () => {
       presenceStarted,
       takeControlStarted,
       playlistStarted,
-      inkStarted,
     ].every((value) => value === true);
   }, [
     notificationStarted,
     mediaSessionStarted,
     presenceStarted,
     takeControlStarted,
-    playlistStarted,
-    inkStarted,
+    playlistStarted,    
   ]);
 
   // Render the media player
@@ -143,14 +135,13 @@ const MeetingStage = () => {
           localUserIsPresenting={localUserIsPresenting}
           localUserIsEligiblePresenter={localUserIsEligiblePresenter}
           suspended={suspended}
-          strokes={strokesToDisplay}
           play={play}
           pause={pause}
           seekTo={seekTo}
           takeControl={takeControl}
           endSuspension={endSuspension}
           nextTrack={nextTrack}
-          sendStrokes={sendStrokes}
+          liveCanvas={liveCanvas}
         >
           {/* // Render video */}
           <video

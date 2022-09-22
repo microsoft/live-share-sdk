@@ -1,6 +1,11 @@
 import './App.css';
-import { LiveCanvasPage } from './LiveCanvasPage';
+import * as microsoftTeams from "@microsoft/teams-js";
+import { LiveCanvasPage } from './Pages/LiveCanvasPage';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import SidePanel from "./Pages/SidePanel";
+import TabConfig from "./Pages/TabConfig";
 import { useEffect, useState } from "react";
+import { inTeams } from './utils/inTeams';
 
 export default function App() {
 
@@ -30,6 +35,13 @@ export default function App() {
 
   
   return (
-        <LiveCanvasPage />
+    appReady && 
+    <Router>
+        <Routes>
+          <Route exact path={"/"} element={<LiveCanvasPage />} />
+          <Route exact path={"/sidepanel"} element={<SidePanel />} />
+          <Route exact path={"/config"} element={<TabConfig />} />
+        </Routes>
+    </Router>
   );
 }

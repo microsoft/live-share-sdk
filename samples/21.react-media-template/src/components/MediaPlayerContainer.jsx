@@ -51,15 +51,14 @@ export const MediaPlayerContainer = ({
   localUserIsPresenting,
   localUserIsEligiblePresenter,
   suspended,
-  strokes,
   play,
   pause,
   seekTo,
   takeControl,
   endSuspension,
   nextTrack,
-  sendStrokes,
   children,
+  liveCanvas,
 }) => {
   const [showControls, setShowControls] = useState(true);
   const [inkActive, setInkActive] = useState(false);
@@ -161,8 +160,7 @@ export const MediaPlayerContainer = ({
       </div>
       <InkCanvas
         isEnabled={inkActive}
-        strokes={strokes}
-        sendStrokes={sendStrokes}
+        liveCanvas={liveCanvas}
       />
       <div
         className={flexColumnStyles.root}

@@ -2,7 +2,7 @@ import { TeamsFluidClient } from "@microsoft/live-share";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { useEffect, useState, useRef } from "react";
-import { useLiveCanvas } from "./useLiveCanvas";
+import { useLiveCanvas } from "../utils/useLiveCanvas";
 
 
 const containerSchema = {
@@ -20,14 +20,23 @@ const clientOptions = {
 };
 
 export const LiveCanvasPage = () => {
-  const [container, setContainer] = useState(undefined);
+  const [liveCanvas, setliveCanvas] = useState(undefined);
   const divRef = useRef();
-  const { handleBlackPenClick, handleBluePenClick, handleClearClick } = useLiveCanvas(container, divRef.current)
+  const {
+    setToPen,
+    setToEraser,
+    setToHighlighter,
+    setToLaserPointer,
+    setToBlackBrush,
+    setToBlueBrush,
+    setToRedBrush,
+    clearCanvas,
+  } = useLiveCanvas(liveCanvas, divRef.current);
 
   const initialize = async () => {
     const client = new TeamsFluidClient(clientOptions);
     const { container } = await client.joinContainer(containerSchema);
-    setContainer(container);
+    setliveCanvas(container.initialObjects.liveCanvas);
   };
 
   useEffect(() => {
@@ -40,9 +49,14 @@ export const LiveCanvasPage = () => {
         <div id="inkingHost" ref={divRef}></div>
       </div>
       <div>
-        <button onClick={handleBlackPenClick}>Black brush</button>
-        <button onClick={handleBluePenClick}>Blue brush</button>
-        <button onClick={handleClearClick}>Clear</button>
+        <button onClick={clearCanvas}>Clear</button>
+        <button onClick={setToEraser}>Eraser</button>
+        <button onClick={setToPen}>Pen</button>
+        <button onClick={setToHighlighter}>Highlighter</button>
+        <button onClick={setToLaserPointer}>Laser Pointer</button>
+        <button onClick={setToBlueBrush}>Blue brush</button>
+        <button onClick={setToBlackBrush}>Black brush</button>
+        <button onClick={setToRedBrush}>Red brush</button>
       </div>
     </>
   );

@@ -581,13 +581,23 @@ export class InkingManager extends EventEmitter {
                 this.queuePointerMovedNotification(filteredPoint);
             }
         }
-
         // Otherwise, we handle the pointer move event only if the pointer it comes
         // from is the one we have captured
-        if (e.isPointerDown) {
+        else {
             const filteredPoint = this._inputFilters.filterPoint(e);
 
             if (this._currentStroke) {
+                if (this._currentStroke.mode === StrokeMode.line && e.ctrlKey) {
+                    const firstPoint = this._currentStroke.getPointAt(0);
+
+                    if (Math.abs(filteredPoint.x - firstPoint.x) > Math.abs(filteredPoint.y - firstPoint.y)) {
+                        filteredPoint.y = firstPoint.y;
+                    }
+                    else {
+                        filteredPoint.x = firstPoint.x;
+                    }
+                }
+
                 this._currentStroke.addPoints(filteredPoint);
 
                 this.notifyAddPoints(this._currentStroke.id, filteredPoint);

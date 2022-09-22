@@ -7,6 +7,9 @@ import { useEventListener } from "../utils/useEventListener";
 
 export const InkCanvas = ({ isEnabled, liveCanvas }) => {
   const canvasRef = useRef(null);
+  // useLiveCanvas hook will insert the canvas as a child of hosting element
+  // and starts the Live Inking session.It returns set of callbacks for clearing 
+  // the canvas, changing Ink tool type, and brush colors.
   const { canvasReady, setToHighlighter, clearCanvas } = useLiveCanvas(liveCanvas, canvasRef.current)
   const { ref: resizeRef, width = 1, height = 1 } = useResizeObserver();
   const videoSize = useVisibleVideoSize(width, height);

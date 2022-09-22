@@ -6,6 +6,12 @@
 import { InkingManager, InkingTool } from "@microsoft/live-share-canvas";
 import { useCallback, useEffect, useState } from "react";
 
+/**
+ * 
+ * @param {LiveCanvas} liveCanvas Fluid LiveCanvas Data object
+ * @param {HTMLElement} hostingElement Hosting Element where LiveCanvas needs to be attached.
+ * @returns LiveCanvas callback helpers and inking manager.
+ */
 export const useLiveCanvas = (liveCanvas, hostingElement) => {
   const [inkingManager, setInkingManager] = useState(undefined);
   const [error, setError] = useState(undefined);

@@ -10,7 +10,7 @@ import { Stroke, IStroke, IStrokeCreationOptions, StrokeType, StrokeMode } from 
 import { InputFilter, InputFilterCollection, JitterFilter, IPointerEvent, InputProvider,
     PointerInputProvider, IPointerMoveEvent } from "../input";
 import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultLineBrush, DefaultPenBrush,
-    IBrush, ArrowType } from "./Brush";
+    IBrush } from "./Brush";
 import { makeRectangle, generateUniqueId, computeEndArrow } from "./Internals";
 
 /**
@@ -400,6 +400,12 @@ export class InkingManager extends EventEmitter {
      */
     public static ephemeralCanvasRemovalDelay = 1500;
 
+    /**
+     * Configures whether the Ctrl, Shift and Alt keys can be used to alter the way strokes
+     * are drawn using various tools.
+     */
+    public static enableStrokeModifierHotKeys = true;
+
     private static ScreenToViewportCoordinateTransform = class extends InputFilter {
         constructor(private _owner: InkingManager) {
             super();
@@ -577,10 +583,10 @@ export class InkingManager extends EventEmitter {
             case InkingTool.line:
             case InkingTool.highlighter:
             case InkingTool.laserPointer:
-                const mode = this.tool === InkingTool.line ? StrokeMode.line : (e.ctrlKey ? StrokeMode.line : StrokeMode.freeHand);
+                const mode = this.tool === InkingTool.line ? StrokeMode.line : (e.ctrlKey && InkingManager.enableStrokeModifierHotKeys ? StrokeMode.line : StrokeMode.freeHand);
                 const brush = { ...this.getBrushForTool(this.tool) };
 
-                if (e.altKey) {
+                if (e.altKey && InkingManager.enableStrokeModifierHotKeys) {
                     brush.endArrow = "open";
                 }
 
@@ -646,7 +652,7 @@ export class InkingManager extends EventEmitter {
             let filteredPoint = this._inputFilters.filterPoint(e);
 
             if (this._currentStroke) {
-                if (e.shiftKey) {
+                if (e.shiftKey && InkingManager.enableStrokeModifierHotKeys) {
                     filteredPoint = this._currentStroke.straighten(filteredPoint);
                 }
 
@@ -679,7 +685,7 @@ export class InkingManager extends EventEmitter {
         let filteredPoint = this._inputFilters.filterPoint(e);
 
         if (this._currentStroke) {
-            if (e.shiftKey) {
+            if (e.shiftKey && InkingManager.enableStrokeModifierHotKeys) {
                 filteredPoint = this._currentStroke.straighten(filteredPoint);
             }
 

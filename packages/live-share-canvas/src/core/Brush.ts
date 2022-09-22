@@ -48,6 +48,16 @@ export const DefaultPenBrush: Readonly<IBrush> = {
 };
 
 /**
+ * The default line brush.
+ */
+export const DefaultLineBrush: Readonly<IBrush> = {
+    type: "pen",
+    color: PenColors.black,
+    tip: "ellipse",
+    tipSize: 10
+};
+
+/**
  * The default highlighter brush.
  */
 export const DefaultHighlighterBrush: IBrush = {

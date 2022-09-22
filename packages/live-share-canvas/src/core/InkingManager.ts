@@ -8,51 +8,26 @@ import { CanvasReferencePoint, InkingCanvas } from "../canvas/InkingCanvas";
 import { DryCanvas, WetCanvas } from "../canvas/DryWetCanvas";
 import { LaserPointerCanvas } from "../canvas/LaserPointerCanvas";
 import { IPoint, IPointerPoint, IRect, screenToViewport, viewportToScreen } from "./Geometry";
-import { Stroke, IStroke, IStrokeCreationOptions, StrokeType } from "./Stroke";
+import { Stroke, IStroke, IStrokeCreationOptions, StrokeType, StrokeMode } from "./Stroke";
 import { InputFilter, InputFilterCollection } from "../input/InputFilter";
 import { JitterFilter } from "../input/JitterFilter";
 import { IPointerEvent, InputProvider, PointerInputProvider, IPointerMoveEvent } from "../input";
-import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultPenBrush, IBrush } from "./Brush";
+import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultLineBrush, DefaultPenBrush, IBrush } from "./Brush";
 import { makeRectangle, generateUniqueId, pointerEventToPoint } from "./Internals";
-
-interface CoalescedPointerEvent extends PointerEvent {
-    getCoalescedEvents(): PointerEvent[];
-}
-
-/**
- * @hidden
- * Retrieves a list of coalesced PointerEvent objects from a single PointerEvent.
- * PointerEvent.getCoalescedEvents() is an experimental feature and TypeScript doesn't
- * yet declare it.
- * For more info: https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/getCoalescedEvents
- * @param event The PointerEvent to get coalesced events from.
- * @returns An array of coalesced PointerEvent objects.
- */
-function getCoalescedEvents(event: PointerEvent): PointerEvent[] {
-    if ('getCoalescedEvents' in event) {
-        const events: PointerEvent[] = (event as CoalescedPointerEvent).getCoalescedEvents();
-
-        // Firefox can return an empty list. See https://bugzilla.mozilla.org/show_bug.cgi?id=1511231.
-        if (events.length >= 1) {
-            return events;
-        }
-    }
-
-    return [event];
-}
 
 /**
  * Defines available inking tools.
  */
 export enum InkingTool {
-    pen,
-    laserPointer,
-    highlighter,
-    eraser,
-    pointEraser
+    pen = 0,
+    laserPointer = 1,
+    highlighter = 2,
+    eraser = 3,
+    pointEraser = 4,
+    line = 5
 }
 
-type StrokeBasedTool = InkingTool.pen | InkingTool.laserPointer | InkingTool.highlighter;
+type StrokeBasedTool = InkingTool.pen | InkingTool.line | InkingTool.laserPointer | InkingTool.highlighter;
 
 /**
  * The event emitted by InkingManager when the canvas is cleared.
@@ -91,6 +66,10 @@ export interface IBeginStrokeEventArgs {
      * The type of the new stroke.
      */
     type: StrokeType;
+    /**
+     * The stroke's mode.
+     */
+    mode: StrokeMode;
     /**
      * The brush of the new stroke.
      */
@@ -141,14 +120,18 @@ export const AddPointsEvent = "AddPoints";
  */
 export interface IWetStroke extends IStroke {
     /**
-     * The type of the wet stroke.
-     */
+    * The type of the wet stroke.
+    */
     readonly type: StrokeType;
     /**
-     * Ends the wet stroke.
-     * @param p Optional. The points at which the stroke ends. If not specified,
-     * the stroke ends at the last added point.
+     * The wet stroke's mode.
      */
+    readonly mode: StrokeMode;
+    /**
+    * Ends the wet stroke.
+    * @param p Optional. The points at which the stroke ends. If not specified,
+    * the stroke ends at the last added point.
+    */
     end(): void;
     /**
      * Cancels the wet stroke.
@@ -240,6 +223,93 @@ export interface IAddRemoveStrokeOptions {
     addToChangeLog?: boolean
 }
 
+abstract class WetStroke extends Stroke implements IWetStroke {
+    protected notifyStrokeEnded(isCancelled: boolean) {
+        if (this.onStrokeEnded) {
+            this.onStrokeEnded(this, isCancelled);
+        }
+    }
+
+    onStrokeEnded?: (sender: WetStroke, isCancelled: boolean) => void;
+
+    constructor(
+        private _canvas: InkingCanvas,
+        readonly type: StrokeType,
+        readonly mode: StrokeMode,
+        options?: IStrokeCreationOptions) {
+        super(options);
+
+        this._canvas.setBrush(this.brush);
+    }
+
+    end() {
+        this._canvas.removeFromDOM();
+        this._canvas.endStroke();
+
+        this.notifyStrokeEnded(false);
+    }
+
+    cancel() {
+        this._canvas.removeFromDOM();
+        this._canvas.cancelStroke();
+
+        this.notifyStrokeEnded(true);
+    }
+
+    get canvas(): InkingCanvas {
+        return this._canvas;
+    }
+}
+
+class WetFreehandStroke extends WetStroke {
+    addPoints(...points: IPointerPoint[]): boolean {
+        const currentLength = this.length;
+        const result = super.addPoints(...points);
+
+        if (result) {
+            let startIndex = currentLength;
+
+            if (startIndex === 0) {
+                this.canvas.beginStroke(this.getPointAt(0));
+
+                startIndex = 1;
+            }
+
+            for (let i = startIndex; i < this.length; i++) {
+                this.canvas.addPoint(this.getPointAt(i));
+            }
+        }
+
+        return result;
+    }
+}
+
+class WetLineStroke extends WetStroke {
+    addPoints(...points: IPointerPoint[]): boolean {
+        if (this.length === 0) {
+            this.addPoint(points[0]);
+
+            if (points.length > 1) {
+                this.addPoint(points[points.length - 1]);
+            }
+        }
+        else {
+            const firstPoint = this.getPointAt(0);
+
+            this.clear();
+
+            this.addPoint(firstPoint);
+            this.addPoint(points[points.length - 1]);
+        }
+
+        this.canvas.cancelStroke();
+        this.canvas.beginStroke(this.getPointAt(0));
+        this.canvas.addPoint(this.getPointAt(1));
+
+        return true;
+    }
+}
+
 /**
  * Handles user interaction with a canvas, and manages the rendering of wet and dry strokes.
  */
@@ -274,54 +344,6 @@ export class InkingManager extends EventEmitter {
      */
     public static ephemeralCanvasRemovalDelay = 1500;
 
-    private static WetStroke = class extends Stroke implements IWetStroke {
-        constructor(
-            private _owner: InkingManager,
-            private _canvas: InkingCanvas,
-            readonly type: StrokeType,
-            options?: IStrokeCreationOptions) {
-            super(options);
-
-            this._canvas.setBrush(this.brush);
-        }
-
-        addPoints(...points: IPointerPoint[]): boolean {
-            const currentLength = this.length;
-            const result = super.addPoints(...points);
-
-            if (result) {
-                let startIndex = currentLength;
-
-                if (startIndex === 0) {
-                    this._canvas.beginStroke(this.getPointAt(0));
-
-                    startIndex = 1;
-                }
-
-                for (let i = startIndex; i < this.length; i++) {
-                    this._canvas.addPoint(this.getPointAt(i));
-                }
-            }
-
-            return result;
-        }
-
-        end() {
-            this._canvas.removeFromDOM();
-            this._canvas.endStroke();
-
-            this._owner.wetStrokeEnded(this, false);
-
-        }
-
-        cancel() {
-            this._canvas.removeFromDOM();
-            this._canvas.cancelStroke();
-
-            this._owner.wetStrokeEnded(this, true);
-        }
-    }
-
     private static ScreenToViewportCoordinateTransform = class extends InputFilter {
         constructor(private _owner: InkingManager) {
             super();
@@ -341,6 +363,7 @@ export class InkingManager extends EventEmitter {
 
     private _inputFilters: InputFilterCollection;
     private _penBrush: IBrush = { ...DefaultPenBrush };
+    private _lineBrush: IBrush = { ...DefaultLineBrush };
     private _highlighterBrush: IBrush = { ...DefaultHighlighterBrush };
     private _laserPointerBrush: IBrush = { ...DefaultLaserPointerBrush }
     private _tool: InkingTool = InkingTool.pen;
@@ -469,6 +492,8 @@ export class InkingManager extends EventEmitter {
                 return this.laserPointerBrush;
             case InkingTool.highlighter:
                 return this.highlighterBrush;
+            case InkingTool.line:
+                return this.lineBrush;
             default:
                 return this.penBrush;
         }
@@ -491,15 +516,19 @@ export class InkingManager extends EventEmitter {
 
         this.cancelCurrentStroke(filteredPoint);
 
-        switch (this._tool) {
+        switch (this.tool) {
             case InkingTool.pen:
+            case InkingTool.line:
             case InkingTool.highlighter:
             case InkingTool.laserPointer:
+                const mode = this.tool === InkingTool.line ? StrokeMode.line : (e.shiftKey ? StrokeMode.line : StrokeMode.freeHand);
+
                 this._currentStroke = this.beginWetStroke(
-                    this._tool === InkingTool.laserPointer ? StrokeType.ephemeral : StrokeType.persistent,
+                    this.tool === InkingTool.laserPointer ? StrokeType.ephemeral : StrokeType.persistent,
+                    mode,
                     filteredPoint,
                     {
-                        brush: this.getBrushForTool(this._tool)
+                        brush: this.getBrushForTool(this.tool)
                     });
 
                 this.notifyBeginStroke(this._currentStroke);
@@ -522,7 +551,7 @@ export class InkingManager extends EventEmitter {
         // The laser pointer is displayed while hovering over the inking surface. We activate
         // it if there's not pointer captured
         if (!e.isPointerDown) {
-            if (this._tool === InkingTool.laserPointer) {
+            if (this.tool === InkingTool.laserPointer) {
                 if (this._currentStroke === undefined) {
                     this._inputFilters.reset(e);
 
@@ -530,9 +559,10 @@ export class InkingManager extends EventEmitter {
 
                     this._currentStroke = this.beginWetStroke(
                         StrokeType.laserPointer,
+                        StrokeMode.freeHand,
                         filteredPoint,
                         {
-                            brush: this.getBrushForTool(this._tool)
+                            brush: this.getBrushForTool(this.tool)
                         });
 
                     this.notifyBeginStroke(this._currentStroke);
@@ -557,31 +587,28 @@ export class InkingManager extends EventEmitter {
         if (e.isPointerDown) {
             const filteredPoint = this._inputFilters.filterPoint(e);
 
-            switch (this._tool) {
-                case InkingTool.pen:
-                case InkingTool.highlighter:
-                case InkingTool.laserPointer:
-                    if (this._currentStroke) {
-                        this._currentStroke.addPoints(filteredPoint);
+            if (this._currentStroke) {
+                this._currentStroke.addPoints(filteredPoint);
 
-                        this.notifyAddPoints(this._currentStroke.id, filteredPoint);
-                    }
+                this.notifyAddPoints(this._currentStroke.id, filteredPoint);
+            }
+            else {
+                switch (this.tool) {
+                    case InkingTool.eraser:
+                        this.erase(filteredPoint);
 
-                    break;
-                case InkingTool.eraser:
-                    this.erase(filteredPoint);
+                        this.queuePointerMovedNotification(filteredPoint);
 
-                    this.queuePointerMovedNotification(filteredPoint);
+                        break;
+                    case InkingTool.pointEraser:
+                        this._pendingPointErasePoints.push(filteredPoint);
 
-                    break;
-                case InkingTool.pointEraser:
-                    this._pendingPointErasePoints.push(filteredPoint);
+                        this.queuePointerMovedNotification(filteredPoint);
 
-                    this.queuePointerMovedNotification(filteredPoint);
+                        this.schedulePointEraseProcessing();
 
-                    this.schedulePointEraseProcessing();
-
-                    break;
+                        break;
+                }
             }
         }
     };
@@ -589,27 +616,22 @@ export class InkingManager extends EventEmitter {
     private onPointerUp = (e: IPointerEvent): void => {
         const filteredPoint = this._inputFilters.filterPoint(e);
 
-        switch (this._tool) {
-            case InkingTool.pen:
-            case InkingTool.highlighter:
-            case InkingTool.laserPointer:
-                if (this._currentStroke) {
-                    this._currentStroke.addPoints(filteredPoint);
-                    this._currentStroke.end();
+        if (this._currentStroke) {
+            this._currentStroke.addPoints(filteredPoint);
+            this._currentStroke.end();
 
-                    this.notifyEndStroke(this._currentStroke.id, filteredPoint);
+            this.notifyEndStroke(this._currentStroke.id, filteredPoint);
 
-                    this._currentStroke = undefined;
-                }
-
-                break;
+            this._currentStroke = undefined;
         }
+
+        // No necessary logic for other tools on pointer up
 
         this.flushChangeLog();
     };
 
     private onPointerLeave = (e: IPointerEvent): void => {
-        if (this._tool === InkingTool.laserPointer) {
+        if (this.tool === InkingTool.laserPointer) {
             const filteredPoint = this._inputFilters.filterPoint(e);
 
             this.cancelCurrentStroke(filteredPoint);
@@ -643,7 +665,7 @@ export class InkingManager extends EventEmitter {
         }
     }
 
-    private wetStrokeEnded(stroke: IWetStroke, isCancelled: boolean) {
+    private wetStrokeEnded = (stroke: IWetStroke, isCancelled: boolean) => {
         if (!isCancelled) {
             if (stroke.type === StrokeType.ephemeral) {
                 const effectiveClientId = stroke.clientId ?? InkingManager.localClientId;
@@ -779,7 +801,8 @@ export class InkingManager extends EventEmitter {
             strokeId: stroke.id,
             brush: stroke.brush,
             startPoint: stroke.getPointAt(0),
-            type: stroke.type
+            type: stroke.type,
+            mode: stroke.mode
         }
 
         this.emit(BeginStrokeEvent, eventArgs);
@@ -906,22 +929,31 @@ export class InkingManager extends EventEmitter {
      * Starts a new wet stroke which will be drawn progressively on the canvas. Multiple wet strokes
      * can be created at the same time and will not interfere with each other.
      * @param strokeType The type of the stroke to start.
+     * @param strokeKind The kind of stroke to start.
      * @param startPoint The starting point of the stroke.
      * @param options Creation options, such as id, points, brush...
      * @returns An IWetStroke object representing the ongoing stroke.
      */
-    public beginWetStroke(strokeType: StrokeType, startPoint: IPointerPoint, options?: IStrokeCreationOptions): IWetStroke {
+    public beginWetStroke(
+        strokeType: StrokeType,
+        strokeKind: StrokeMode,
+        startPoint: IPointerPoint,
+        options?: IStrokeCreationOptions): IWetStroke {
         const canvas = strokeType === StrokeType.laserPointer ? new LaserPointerCanvas(this._canvasPoolHost) : new WetCanvas(this._canvasPoolHost);
         canvas.resize(this.clientWidth, this.clientHeight);
         canvas.offset = this.offset;
         canvas.scale = this.scale;
 
-        const stroke = new InkingManager.WetStroke(
-            this,
-            canvas,
-            strokeType,
-            options);
+        let stroke: WetStroke;
 
+        if (strokeKind === StrokeMode.line) {
+            stroke = new WetLineStroke(canvas, strokeType, strokeKind, options);
+        }
+        else {
+            stroke = new WetFreehandStroke(canvas, strokeType, strokeKind, options);
+        }
+
+        stroke.onStrokeEnded = this.wetStrokeEnded;
         stroke.addPoints(startPoint);
 
         return stroke;
@@ -1052,6 +1084,20 @@ export class InkingManager extends EventEmitter {
      */
     set penBrush(value: IBrush) {
         this._penBrush = { ...value };
+    }
+
+    /**
+     * Gets the line brush.
+     */
+    get lineBrush(): IBrush {
+        return this._lineBrush;
+    }
+
+    /**
+     * Sets the line brush.
+     */
+    set lineBrush(value: IBrush) {
+        this._lineBrush = { ...value };
     }
 
     /**

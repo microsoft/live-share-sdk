@@ -32,6 +32,7 @@ const appTemplate = `
         <div id="buttonStrip">
             <div class="toolbar">
                 <button id="btnStroke">Stroke</button>
+                <button id="btnArrow">Arrow</button>
                 <button id="btnLaserPointer">Laser pointer</button>
                 <button id="btnHighlighter">Highlighter</button>
                 <button id="btnEraser">Eraser</button>
@@ -298,6 +299,11 @@ export class StageView extends View {
         }
 
         setupButton("btnStroke", () => { this._inkingManager.tool = InkingTool.pen });
+        setupButton(
+            "btnArrow", () => {
+                this._inkingManager.tool = InkingTool.line;
+                this._inkingManager.lineBrush.endArrow = "open";
+            });
         setupButton("btnLaserPointer", () => { this._inkingManager.tool = InkingTool.laserPointer });
         setupButton("btnHighlighter", () => { this._inkingManager.tool = InkingTool.highlighter });
         setupButton("btnEraser", () => { this._inkingManager.tool = InkingTool.eraser });

@@ -449,6 +449,7 @@ export class LiveCanvas extends DataObject {
                 if (!local && this._inkingManager) {
                     const stroke = this._inkingManager.beginWetStroke(
                         evt.type,
+                        evt.mode,
                         evt.startPoint,
                         {
                             id: evt.strokeId,

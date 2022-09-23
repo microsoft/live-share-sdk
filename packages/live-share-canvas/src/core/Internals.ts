@@ -21,19 +21,6 @@ export function generateUniqueId(): string {
 }
 
 /**
- * Converts a PointerEvent into an IPointerPoint.
- * @param e The pointer event to convert.
- * @returns An IPointerPoint object.
- */
-export function pointerEventToPoint(e: PointerEvent): IPointerPoint {
-    return {
-        x: e.offsetX,
-        y: e.offsetY,
-        pressure: e.pressure
-    };
-}
-
-/**
  * Determines if a number is within a range.
  * @param n The number to check.
  * @param r1 The first range boundary.
@@ -381,4 +368,36 @@ export function getSegmentIntersectionsWithRectangle(s: ISegment, r: IRect): IPo
     }
 
     return result;
+}
+
+/**
+ * Calculates the points defining the path of an arrow at the end of
+ * a segment.
+ * @param from The start point of the arrow segment.
+ * @param to The end point of the arrow segment.
+ * @returns The points making up the arrow.
+ */
+export function computeEndArrow(from: IPoint, to: IPoint, arrowSize: number = 20): IPoint[] {
+    // dx,dy = arrow line vector
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+
+    // Normalize the vector
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const unitDx = dx / length;
+    const unitDy = dy / length;
+
+    // The two additional points are on either side of the perpendicular to
+    // vector.
+    return [
+        {
+            x: to.x - arrowSize * (unitDx - unitDy),
+            y: to.y - arrowSize * (unitDy + unitDx)
+        },
+        to,
+        {
+            x: to.x - arrowSize * (unitDx + unitDy),
+            y: to.y - arrowSize * (unitDy - unitDx)
+        }    
+    ]
 }

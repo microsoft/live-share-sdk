@@ -447,6 +447,7 @@ export abstract class InkingCanvas {
      */
     cancelStroke() {
         this.internalCancelStroke();
+        this.clear();
 
         this._strokeStarted = false;
     }

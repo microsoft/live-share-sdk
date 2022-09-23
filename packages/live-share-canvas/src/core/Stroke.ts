@@ -46,23 +46,37 @@ interface ISerializedStrokeData {
 }
 
 /**
+ * Stroke modes.
+ */
+export enum StrokeMode {
+    /**
+     * A freehand stroke that follows a path.
+     */
+    freeHand = 0,
+    /**
+     * A straight line stroke between two points.
+     */
+    line = 1
+}
+
+/**
  * Stroke types.
  */
 export enum StrokeType {
     /**
      * Laser pointer stroke, with a vanishing tail.
      */
-    laserPointer,
+    laserPointer = 0,
     /**
      * Ephemeral stroke, which vanishes all at once after
      * a set amount of time.
      */
-    ephemeral,
+    ephemeral = 1,
     /**
      * Persistent stroke, that remains on the canvas until
      * erased.
      */
-    persistent
+    persistent = 2
 }
 
 /**
@@ -165,22 +179,6 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
     private _timeStamp: number;
     private _boundingRect?: IRect;
 
-    private addPoint(p: IPointerPoint): boolean {
-        let lastPoint = this._points.length > 0 ? this._points[this._points.length - 1] : undefined;
-
-        if (lastPoint === undefined || lastPoint.x !== p.x || lastPoint.y !== p.y) {
-            this._points.push(p);
-
-            if (this._boundingRect && !isPointInsideRectangle(p, this._boundingRect)) {
-                this._boundingRect = undefined;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
     /**
      * In order to reduce the amount of data a serialized stroke uses, points
      * are serialized in a minimal way:
@@ -249,6 +247,22 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         return result;
     }
 
+    protected addPoint(p: IPointerPoint): boolean {
+        let lastPoint = this._points.length > 0 ? this._points[this._points.length - 1] : undefined;
+
+        if (lastPoint === undefined || lastPoint.x !== p.x || lastPoint.y !== p.y) {
+            this._points.push(p);
+
+            if (this._boundingRect && !isPointInsideRectangle(p, this._boundingRect)) {
+                this._boundingRect = undefined;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Creates a new Stroke instance.
      * @param options Optional creation options such as id, points, etc.
@@ -285,6 +299,14 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         }
 
         return pointsAdded;
+    }
+
+    /**
+     * CLears the stroke, i.e. removes all of its points.
+     */
+    clear() {
+        this._points = [];
+        this._boundingRect = undefined;
     }
 
     /**

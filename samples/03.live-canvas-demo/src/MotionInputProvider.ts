@@ -39,16 +39,6 @@ export abstract class MotionInputProvider extends InputProvider {
         }
     }
 
-    private vectorToPointerEvent(v: IVector): IPointerEvent {
-        return {
-            altKey: false,
-            ctrlKey: false,
-            shiftKey: false,
-            ...v,
-            pressure: 0.5
-        };
-    }
-
     private onPointerDown = (e: PointerEvent): void => {
         if (this.isActive) {
             if (this._activePointerId === undefined) {
@@ -74,6 +64,16 @@ export abstract class MotionInputProvider extends InputProvider {
             e.stopPropagation();
         }
     };
+
+    protected vectorToPointerEvent(v: IVector): IPointerEvent {
+        return {
+            altKey: false,
+            ctrlKey: false,
+            shiftKey: false,
+            ...v,
+            pressure: 0.5
+        };
+    }
 
     protected displayData(data: any) {
         this.element.innerText = JSON.stringify(

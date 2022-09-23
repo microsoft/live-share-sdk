@@ -22,10 +22,12 @@ import { MotionInputProvider } from "./MotionInputProvider";
  * https://guitar.com/wp-content/uploads/2020/09/Mark-Knopfler-Dier-Straits-Suhr-Schecter-Credit-Ebet-Roberts-Redferns@2560x1707.jpg
  */
 
+const backgroundImageUrl = "https://discovertemplate.com/wp-content/uploads/2020/06/DT_T03_SmartBusinessDashboardKPIsTemplate-13-scaled.jpg";
+
 const appTemplate = `
     <div id="appRoot">
         <div id="inkingRoot">
-            <img id="backgroundImage" src="https://guitar.com/wp-content/uploads/2020/09/Mark-Knopfler-Dire-Straits-Credit-Mick-Hutson-Redferns@2160x1459.jpg"
+            <img id="backgroundImage" src="${backgroundImageUrl}"
                  alt="Mark Knopfler playing guitar" style="visibility: hidden;">
             <div id="inkingHost"></div>
         </div>
@@ -246,6 +248,7 @@ export class StageView extends View {
                 inkingRoot.appendChild(overlay);
 
                 this._inkingManager.tool = InkingTool.laserPointer;
+                this._inkingManager.laserPointerBrush.endArrow = "open";
 
                 // this._motionInputProvider = new AccelerationBasedMotionInputProvider(overlay);
                 this._motionInputProvider = new OrientationBasedMotionInputProvider(overlay);

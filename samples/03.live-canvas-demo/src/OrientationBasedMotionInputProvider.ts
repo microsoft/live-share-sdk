@@ -1,3 +1,4 @@
+import { IPointerEvent } from "@microsoft/live-share-canvas";
 import { isInRange } from "@microsoft/live-share-canvas/bin/core/Internals";
 import { MotionInputProvider, IVector } from "./MotionInputProvider";
 import * as Utils from "./utils";
@@ -50,6 +51,15 @@ class Range {
 export class OrientationBasedMotionInputProvider extends MotionInputProvider {
     private _alphaRange = new Range(45, -22.5);
     private _betaRange = new Range(45);
+
+    protected vectorToPointerEvent(v: IVector): IPointerEvent {
+        return {
+            ...super.vectorToPointerEvent(v),
+            // Force a straigh arrow
+            ctrlKey: true,
+            altKey: true
+        }
+    }
 
     protected start() {
         const deviceOrientationEvent = (DeviceOrientationEvent as any) as IOSDeviceOrientationEvent;

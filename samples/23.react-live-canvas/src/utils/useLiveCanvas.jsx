@@ -40,7 +40,6 @@ export const useLiveCanvas = (liveCanvas, hostingElement) => {
   }, [startInkingManager]);
 
   return {
-    canvasReady: !!inkingManager,
     inkingManager,
     error,    
   }

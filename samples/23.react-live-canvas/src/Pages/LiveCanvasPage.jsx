@@ -1,7 +1,7 @@
 import { TeamsFluidClient } from "@microsoft/live-share";
-import { LiveCanvas } from "@microsoft/live-share-canvas";
+import { LiveCanvas, InkingTool } from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useLiveCanvas } from "../utils/useLiveCanvas";
 
 
@@ -22,16 +22,55 @@ const clientOptions = {
 export const LiveCanvasPage = () => {
   const [liveCanvas, setliveCanvas] = useState(undefined);
   const divRef = useRef();
-  const {
-    setToPen,
-    setToEraser,
-    setToHighlighter,
-    setToLaserPointer,
-    setToBlackBrush,
-    setToBlueBrush,
-    setToRedBrush,
-    clearCanvas,
-  } = useLiveCanvas(liveCanvas, divRef.current);
+  const { inkingManager } = useLiveCanvas(liveCanvas, divRef.current);
+
+  const setToPen = useCallback(() => {
+    if (inkingManager) {
+      inkingManager.tool = InkingTool.pen;
+    }
+  }, [inkingManager]);
+
+  const setToLaserPointer = useCallback(() => {
+    if (inkingManager) {
+      inkingManager.tool = InkingTool.laserPointer;
+    }
+  }, [inkingManager]);
+
+  const setToHighlighter = useCallback(() => {
+    if (inkingManager) {
+      inkingManager.tool = InkingTool.highlighter;
+    }
+  }, [inkingManager]);
+
+  const setToEraser = useCallback(() => {
+    if (inkingManager) {
+      inkingManager.tool = InkingTool.pointEraser;
+    }
+  }, [inkingManager]);
+
+  const setToBlackBrush = useCallback(() => {
+    if (inkingManager) {
+      inkingManager.penBrush.color = { r: 0, g: 0, b: 0 };
+    }
+  }, [inkingManager]);
+
+  const setToBlueBrush = useCallback(() => {
+    if (inkingManager) {
+      inkingManager.penBrush.color = { r: 0, g: 0, b: 255, a: 1 };
+    }
+  }, [inkingManager]);
+
+  const setToRedBrush = useCallback(() => {
+    if (inkingManager) {
+      inkingManager.penBrush.color = { r: 255, g: 0, b: 0 };
+    }
+  }, [inkingManager]);
+
+  const clearCanvas = useCallback(() => {
+    if (inkingManager) {
+      inkingManager.clear();
+    }
+  }, [inkingManager]);
 
   const initialize = async () => {
     const client = new TeamsFluidClient(clientOptions);

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect } from "react";
 import useResizeObserver from "use-resize-observer";
 import { InkingTool } from "@microsoft/live-share-canvas";
 import { getInkCanvasStyles } from "../styles/styles";
@@ -21,29 +21,17 @@ export const InkCanvas = ({ isEnabled, liveCanvas }) => {
     }
   };
 
-  const setToHighlighter = useCallback(() => {
-    if (inkingManager) {
-      inkingManager.tool = InkingTool.highlighter;
-    }
-  }, [inkingManager]);
-
-  const clearCanvas = useCallback(() => {
-    if (inkingManager) {
-      inkingManager.clear();
-    }
-  }, [inkingManager]);
-
   useEffect(() => {
     if (!inkingManager) {
       return;
     }
 
     if (isEnabled) {
-      setToHighlighter();
+      inkingManager.tool = InkingTool.highlighter;
     } else {
-      clearCanvas();
+      inkingManager.clear();
     }    
-  }, [inkingManager, setToHighlighter, clearCanvas, isEnabled]);
+  }, [inkingManager, isEnabled]);
 
   useEffect(() => {
     if (videoSize) {

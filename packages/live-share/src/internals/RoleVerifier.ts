@@ -37,8 +37,10 @@ export class RoleVerifier implements IRoleVerifier {
                     return true;
                 }
 
-                const mobileRolesDefined = (result as any).userRoles && (Array.isArray((result as any).userRoles));
-                return !!mobileRolesDefined;
+                if (!result.userRoles) {
+                    return false;
+                }
+                return Array.isArray(result.userRoles);
             }, () => {
                 return new Error(`RoleVerifier: timed out registering local client ID`);
             }, EXPONENTIAL_BACKOFF_SCHEDULE);
@@ -73,8 +75,10 @@ export class RoleVerifier implements IRoleVerifier {
                     return true;
                 }
 
-                const mobileRolesDefined = (result as any).userRoles && (Array.isArray((result as any).userRoles));
-                return !!mobileRolesDefined;
+                if (!result.userRoles) {
+                    return false;
+                }
+                return Array.isArray(result.userRoles);
             }, () => {
                 return new Error(`RoleVerifier: timed out getting roles for a remote client ID`);
             }, EXPONENTIAL_BACKOFF_SCHEDULE);

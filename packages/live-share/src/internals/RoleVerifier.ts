@@ -25,22 +25,30 @@ export class RoleVerifier implements IRoleVerifier {
             return waitForResult(async () => {
                 const teamsClient = await this.getTeamsClient();
                 const rolesResult = await teamsClient.interactive.registerClientId(clientId);
-                if (Array.isArray(rolesResult)) {
+                if (!rolesResult) {
+                    return undefined;
+                } else if (Array.isArray(rolesResult)) {
                     return rolesResult;
                 } else {
                   //TODO: Mobile client return type is object.
                   // clean up after mobile fixes return type.
-                  return (rolesResult as any).userRoles;
+                  const rolesArray = (rolesResult as any).userRoles;
+                  if (!rolesArray) {
+                    return rolesResult;
+                  } else {
+                    return rolesArray;
+                  }
                 }
             }, (result) => {
-                if (Array.isArray(result)) {
-                    return true;
-                }
-
-                if (!result.userRoles) {
+                if (!result) {
                     return false;
-                }
-                return Array.isArray(result.userRoles);
+                } else if (Array.isArray(result)) {
+                    return true;
+                } else if (!result.userRoles) {
+                    return false;
+                } else {
+                    return Array.isArray(result.userRoles);
+                }                
             }, () => {
                 return new Error(`RoleVerifier: timed out registering local client ID`);
             }, EXPONENTIAL_BACKOFF_SCHEDULE);
@@ -63,22 +71,30 @@ export class RoleVerifier implements IRoleVerifier {
             return waitForResult(async () => {
                 const teamsClient = await this.getTeamsClient();
                 const rolesResult = await teamsClient.interactive.getClientRoles(clientId);
-                if (Array.isArray(rolesResult)) {
+                if (!rolesResult) {
+                    return undefined;
+                } else if (Array.isArray(rolesResult)) {
                     return rolesResult;
                 } else {
                   //TODO: Mobile client return type is object.
                   // clean up after mobile fixes return type.
-                  return (rolesResult as any).userRoles;
+                  const rolesArray = (rolesResult as any).userRoles;
+                  if (!rolesArray) {
+                    return rolesResult;
+                  } else {
+                    return rolesArray;
+                  }
                 }
             }, (result) => {
-                if (Array.isArray(result)) {
-                    return true;
-                }
-
-                if (!result.userRoles) {
+                if (!result) {
                     return false;
+                } else if (Array.isArray(result)) {
+                    return true;
+                } else if (!result.userRoles) {
+                    return false;
+                } else {
+                    return Array.isArray(result.userRoles);
                 }
-                return Array.isArray(result.userRoles);
             }, () => {
                 return new Error(`RoleVerifier: timed out getting roles for a remote client ID`);
             }, EXPONENTIAL_BACKOFF_SCHEDULE);

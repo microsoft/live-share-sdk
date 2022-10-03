@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share",
-    "version": "0.4.1",
+    "version": "0.5.0",
     "description": "Building colaboritive experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",

@@ -4,8 +4,10 @@
     "packages/*",
     "samples/01.dice-roller",
     "samples/02.react-video",
+    "samples/03.live-canvas-demo",
     "samples/21.react-media-template",
-    "samples/22.react-agile-poker"
+    "samples/22.react-agile-poker",
+    "samples/31.live-canvas-tests"
   ],
   "version": "0.0.0"
 }

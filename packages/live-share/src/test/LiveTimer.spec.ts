@@ -74,10 +74,10 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
     it("Should throw error if already initialized", async () => {
         await object1.initialize();
         try {
-            // Ensure started
-            assert(object1.isStarted, `not started`);
+            // Ensure initialized
+            assert(object1.isInitialized, `not initialized`);
 
-            // Try second call to start.
+            // Try second call to initialize.
             await object1.initialize();
             assert(false, `exception not thrown`);
         } catch (err) { }

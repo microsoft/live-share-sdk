@@ -55,9 +55,9 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
 
-        assert(!object1.isStarted, `presence already started`);
+        assert(!object1.isInitialized, `presence already initialized`);
         await object1.initialize('user1');
-        assert(object1.isStarted, `presence not started`);
+        assert(object1.isInitialized, `presence not initialized`);
 
         const object2done = new Deferred();
         object2.on("presenceChanged", (user, local) => {

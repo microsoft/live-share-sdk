@@ -69,10 +69,18 @@ export interface ILiveEventEvents<TEvent extends ILiveShareEvent> extends IEvent
     );
 
     /**
-     * Returns true if the object has been started.
+     * Returns true if the object has been initialized.
+     */
+    public get isInitialized(): boolean {
+        return !!this._eventTarget;
+    }
+
+    /**
+     * @deprecated isInitialized should be used instead
+     * Returns true if the object has been initialized.
      */
     public get isStarted(): boolean {
-        return !!this._eventTarget;
+        return this.isInitialized
     }
 
     /**

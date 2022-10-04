@@ -9,7 +9,7 @@ We have found this structure to be very useful in composing advanced application
 
 In the project directory, you can run:
 
-### `npm install --legacy-peer-deps`
+### `npm install`
 
 Installs the latest node packages
 

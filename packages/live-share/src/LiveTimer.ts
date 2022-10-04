@@ -124,10 +124,18 @@ export class LiveTimer extends DataObject<{
   );
 
   /**
-   * Returns true if the object has been started.
+   * Returns true if the object has been initialized.
    */
-  public get isStarted(): boolean {
+  public get isInitialized(): boolean {
     return !!this._scope;
+  }
+
+  /**
+   * @deprecated isInitialized should be used instead
+   * Returns true if the object has been initialized.
+   */
+   public get isStarted(): boolean {
+    return this.isInitialized
   }
 
   /**
@@ -186,6 +194,13 @@ export class LiveTimer extends DataObject<{
     }
   }
 
+  /**
+   * Starts the timer with a specified duration. 
+   *
+   * @remarks
+   * Starting an already started timer will restart the timer with a new duration.
+   * @param duration in Milliseconds
+   */
   public start(duration: number): void {
     if (!this._scope) {
       throw new Error(`LiveTimer not started.`);
@@ -194,6 +209,12 @@ export class LiveTimer extends DataObject<{
     this.playInternal(duration, 0);
   }
 
+  /**
+   * Resumes the timer.
+   *
+   * @remarks
+   * Playing an already playing timer does nothing.
+   */
   public play(): void {
     if (!this._scope) {
       throw new Error(`LiveTimer not started.`);
@@ -221,6 +242,12 @@ export class LiveTimer extends DataObject<{
     this.updateConfig(this.playEventToConfig(event), true);
   }
 
+  /**
+   * Pauses the timer.
+   *
+   * @remarks
+   * Pausing an already paused timer does nothing.
+   */
   public pause(): void {
     if (!this._scope) {
       throw new Error(`LiveTimer not started.`);

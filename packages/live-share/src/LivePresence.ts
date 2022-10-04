@@ -76,10 +76,18 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
     );
 
     /**
-     * Returns true if the object has been started.
+     * Returns true if the object has been initialized.
+     */
+    public get isInitialized(): boolean {
+        return !!this._scope;
+    }
+
+    /**
+     * @deprecated isInitialized should be used instead
+     * Returns true if the object has been initialized.
      */
     public get isStarted(): boolean {
-        return !!this._scope;
+        return this.isInitialized
     }
 
     /**

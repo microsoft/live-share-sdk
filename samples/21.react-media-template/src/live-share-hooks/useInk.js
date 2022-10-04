@@ -38,7 +38,7 @@ export const useInk = (inkEvent, acceptPlaybackChangesFrom) => {
   );
 
   useEffect(() => {
-    if (inkEvent && !inkEvent.isStarted) {
+    if (inkEvent && !inkEvent.isInitialized) {
       console.log("useInk: initializing ink");
       inkEvent.on("received", (event, local) => {
         // Display notification differently for local vs. remote users

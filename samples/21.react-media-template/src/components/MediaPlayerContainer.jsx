@@ -12,8 +12,6 @@ import {
   SpeakerMute20Filled,
   Speaker220Filled,
   Next20Filled,
-  Pen24Filled,
-  Pen24Regular,
   Info24Regular,
 } from "@fluentui/react-icons";
 import { debounce } from "lodash";
@@ -32,6 +30,7 @@ import {
 } from "../styles/layouts";
 import { getPlayerControlStyles, getVideoStyle } from "../styles/styles";
 import { InkCanvas } from "./InkCanvas";
+import { InkingControls } from "./InkingControls";
 
 const events = [
   "loadstart",
@@ -51,14 +50,14 @@ export const MediaPlayerContainer = ({
   localUserIsPresenting,
   localUserIsEligiblePresenter,
   suspended,
-  strokes,
   play,
   pause,
   seekTo,
   takeControl,
   endSuspension,
   nextTrack,
-  sendStrokes,
+  canvasRef,
+  inkingManager,
   children,
 }) => {
   const [showControls, setShowControls] = useState(true);
@@ -160,9 +159,9 @@ export const MediaPlayerContainer = ({
         {children}
       </div>
       <InkCanvas
+        canvasRef={canvasRef}
         isEnabled={inkActive}
-        strokes={strokes}
-        sendStrokes={sendStrokes}
+        inkingManager={inkingManager}
       />
       <div
         className={flexColumnStyles.root}
@@ -329,16 +328,11 @@ export const MediaPlayerContainer = ({
               />
               {/* Ink Toggle */}
               {localUserIsPresenting && (
-                <>
-                  <Button
-                    icon={inkActive ? <Pen24Filled /> : <Pen24Regular />}
-                    appearance="transparent"
-                    title={inkActive ? "Disable ink" : "Enable ink"}
-                    onClick={() => {
-                      setInkActive(!inkActive);
-                    }}
-                  />
-                </>
+                <InkingControls
+                  inkingManager={inkingManager}
+                  isEnabled={inkActive}
+                  setIsEnabled={setInkActive}
+                />
               )}
               {/* Info Popover */}
               <Popover>

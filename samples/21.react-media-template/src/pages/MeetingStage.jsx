@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import * as liveShareHooks from "../live-share-hooks";
 import {
   LiveNotifications,
@@ -20,6 +20,8 @@ const MeetingStage = () => {
   const context = useTeamsContext();
   // Media player
   const [player, setPlayer] = useState();
+  // Element ref for inking canvas
+  const canvasRef = useRef(null);
 
   // Fluid objects hook which uses TeamsFluidClient to create container
   const {
@@ -28,7 +30,7 @@ const MeetingStage = () => {
     notificationEvent, // EphemeralEvent Fluid object
     takeControlMap, // SharedMap Fluid object for presenter control
     playlistMap, // SharedMap Fluid object for playlist
-    inkEvent, // EphemeralEvent Fluid object
+    liveCanvas, // EphemeralEvent Fluid object
     container, // Fluid container
     error, // Join container error
   } = liveShareHooks.useSharedObjects();
@@ -89,10 +91,14 @@ const MeetingStage = () => {
     sendNotification
   );
 
-  // Ink hook
-  const { inkStarted, strokesToDisplay, sendStrokes } = liveShareHooks.useInk(
-    inkEvent,
-    ACCEPT_PLAYBACK_CHANGES_FROM
+  // useLiveCanvas hook will insert the canvas as a child of hosting element
+  // and starts the Live Inking session.It returns set of callbacks for clearing 
+  // the canvas, changing Ink tool type, and brush colors.
+  const {
+    inkingManager, // Manager class
+  } = liveShareHooks.useLiveCanvas(
+    liveCanvas,
+    canvasRef.current,
   );
 
   // Set up the media player
@@ -117,15 +123,13 @@ const MeetingStage = () => {
       presenceStarted,
       takeControlStarted,
       playlistStarted,
-      inkStarted,
     ].every((value) => value === true);
   }, [
     notificationStarted,
     mediaSessionStarted,
     presenceStarted,
     takeControlStarted,
-    playlistStarted,
-    inkStarted,
+    playlistStarted,    
   ]);
 
   // Render the media player
@@ -143,14 +147,14 @@ const MeetingStage = () => {
           localUserIsPresenting={localUserIsPresenting}
           localUserIsEligiblePresenter={localUserIsEligiblePresenter}
           suspended={suspended}
-          strokes={strokesToDisplay}
+          canvasRef={canvasRef}
+          inkingManager={inkingManager}
           play={play}
           pause={pause}
           seekTo={seekTo}
           takeControl={takeControl}
           endSuspension={endSuspension}
           nextTrack={nextTrack}
-          sendStrokes={sendStrokes}
         >
           {/* // Render video */}
           <video

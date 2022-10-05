@@ -3,7 +3,7 @@ import { TimeInterval } from '@microsoft/live-share';
 
 export class VolumeLimiter {
     private readonly _player: IMediaPlayer;
-    private readonly _rampDuration = new TimeInterval(4500);
+    private readonly _rampDuration = new TimeInterval(500);
 
     private _selectedVolume = 1.0;
     private _limitVolume = 0.1;
@@ -17,25 +17,28 @@ export class VolumeLimiter {
     }
 
     public limit(): void {
-        console.log("limiting volume")
         this._limited = true
         this._startTime = new Date().getTime();
         this._startVolume = this._player.volume
+        this.startAdjusting()
     }
 
     public noLimit(): void {
-        console.log("removing volume limit");
         this._limited = false
         this._startTime = new Date().getTime();
         this._startVolume = this._player.volume
+        this.startAdjusting()
     }
 
     private startAdjusting() {
         const adjustVolume = () => {
-            const newVolume = this.computeVolume()
-            console.log("adjusting volume", newVolume)
-            this._player.volume = newVolume;
-            this.scheduleAnimationFrame(adjustVolume);
+            if (this.milliIntoRamp() <= this._rampDuration.milliseconds) {
+                const newVolume = this.computeRampVolume()
+                this._player.volume = newVolume;
+                this.scheduleAnimationFrame(adjustVolume);
+            } else {
+                this._player.volume = this.computeTargetVolume();
+            }
         }
         this.scheduleAnimationFrame(adjustVolume);
     }
@@ -49,14 +52,8 @@ export class VolumeLimiter {
     }
 
     // returns the volume it should be, adjusted for how long its been ramping
-    private computeVolume(): number {
-        const now = new Date().getTime()
-        const timeIntoRamp = now - this._startTime;
-
-        if (timeIntoRamp > this._rampDuration.milliseconds) {
-            return this.computeTargetVolume();
-        }
-
+    private computeRampVolume(): number {
+        const timeIntoRamp = this.milliIntoRamp();
         const targetVolume = this.computeTargetVolume()
         const adjustmentFromStart = (targetVolume - this._startVolume) / this._rampDuration.milliseconds * timeIntoRamp
         return this._startVolume + adjustmentFromStart;
@@ -68,5 +65,10 @@ export class VolumeLimiter {
         } else {
             return this._selectedVolume
         }
+    }
+
+    private milliIntoRamp(): number {
+        const now = new Date().getTime()
+        return now - this._startTime;
     }
 }

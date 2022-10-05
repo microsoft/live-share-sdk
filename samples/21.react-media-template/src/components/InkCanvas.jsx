@@ -6,6 +6,8 @@ import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
 import { useLiveCanvas } from "../live-share-hooks";
 import { useEventListener } from "../utils/useEventListener";
 
+const REFERENCE_HEIGHT = 1080;
+
 export const InkCanvas = ({ isEnabled, liveCanvas }) => {
   const canvasRef = useRef(null);
   // useLiveCanvas hook will insert the canvas as a child of hosting element
@@ -30,15 +32,21 @@ export const InkCanvas = ({ isEnabled, liveCanvas }) => {
       inkingManager.tool = InkingTool.highlighter;
     } else {
       inkingManager.clear();
-    }    
+    }
   }, [inkingManager, isEnabled]);
 
   useEffect(() => {
     if (videoSize) {
       canvasRef.current.width = videoSize.width;
       canvasRef.current.height = videoSize.height;
+      if (inkingManager) {
+        // Update the scale of inkingManager so that the annotations appear
+        // in the same positions for all users
+        const scale = videoSize.height / REFERENCE_HEIGHT;
+        inkingManager.scale = scale;
+      }
     }
-  }, [videoSize]);
+  }, [videoSize, inkingManager]);
 
   useEventListener("mousedown", onMouseEvent, canvasRef.current);
   useEventListener("mouseup", onMouseEvent, canvasRef.current);

@@ -10,7 +10,6 @@ import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 import * as Utils from "./utils";
 import { View } from "./view";
-import { DrawingSimulation } from "./simulation";
 import { getRandomUserInfo } from "./random-userInfo";
 
 /**
@@ -53,25 +52,18 @@ const appTemplate = `
                 <button id="btnOffsetDown">Offset down</button>
                 <button id="btnResetView" style="margin-left: 20px;">Reset view</button>
             </div>
-            <div class="toolbar">
-                <button id="btnSimulation">Start simulation</button>
-                <button id="btnOpenNewWindow">Open new window</button>
-            </div>
         </div>
     </div>`;
 
 const containerSchema = {
     initialObjects: {
-        liveCanvas: LiveCanvas,
-        startStopDrawingSimulation: EphemeralEvent
+        liveCanvas: LiveCanvas
     }
 };
 
 export class StageView extends View {
     private _inkingManager!: InkingManager;
     private _container!: IFluidContainer;
-    private _drawingSimulation!: DrawingSimulation;
-    private _simulationStarted = false;
 
     private offsetBy(x: number, y: number) {
         this._inkingManager.offset = {
@@ -84,10 +76,6 @@ export class StageView extends View {
 
     private getLiveCanvas(): LiveCanvas {
         return this._container.initialObjects.liveCanvas as LiveCanvas;
-    }
-
-    private startOrStopDrawingSimulation(start: boolean) {
-        (this._container.initialObjects.startStopDrawingSimulation as EphemeralEvent).sendEvent({ isStarted: start });
     }
 
     private _hostResizeObserver!: ResizeObserver;
@@ -108,44 +96,6 @@ export class StageView extends View {
 
         this._container = (await client.joinContainer(containerSchema)).container;
 
-        const startStopDrawingSimulationEvent = this._container.initialObjects.startStopDrawingSimulation as EphemeralEvent;
-        startStopDrawingSimulationEvent.on(
-            "received",
-            (event, local) => {
-                const button = document.getElementById("btnSimulation");
-
-                if (local) {
-                    this._simulationStarted = event.isStarted;
-
-                    if (button) {
-                        button.innerText = this._simulationStarted ? "Stop simulation" : "Start simulation";
-                    }
-                }
-                else {
-                    if (event.isStarted) {
-                        // Ait a maximum of 1 second so not all clients starts drawing at the same time
-                        window.setTimeout(
-                            () => { this._drawingSimulation.start(); },
-                            Math.random() * 5000);
-                    }
-                    else {
-                        this._drawingSimulation.stop();
-                    }
-
-                    if (button) {
-                        if (event.isStarted) {
-                            button.setAttribute("disabled", "");
-                        }
-                        else {
-                            button.removeAttribute("disabled");
-                        }
-                    }
-                }
-            }
-        );
-
-        startStopDrawingSimulationEvent.start();
-
         const inkingHost = document.getElementById("inkingHost");
 
         if (inkingHost) {
@@ -159,8 +109,6 @@ export class StageView extends View {
             await liveCanvas.initialize(this._inkingManager);
 
             this._inkingManager.activate();
-
-            this._drawingSimulation = new DrawingSimulation(this._inkingManager);
 
             this._hostResizeObserver = new ResizeObserver(() => { this.updateBackgroundImagePosition(); });
             this._hostResizeObserver.observe(inkingHost);
@@ -302,24 +250,6 @@ export class StageView extends View {
                 }
             }
         );
-
-        if (Utils.runningInTeams()) {
-            Utils.toggleElementVisibility("btnSimulation", false);
-            Utils.toggleElementVisibility("btnOpenNewWindow", false);
-        }
-        else {
-            setupButton("btnSimulation", () => { this.startOrStopDrawingSimulation(!this._simulationStarted); });
-
-            var offset = 0;
-
-            setupButton(
-                "btnOpenNewWindow",
-                () => {
-                    window.open(document.URL, "_blank", `left=${offset},top=${offset},width=1000,height=1000`);
-
-                    offset += 80;
-                });
-        }
     }
 
     async start() {

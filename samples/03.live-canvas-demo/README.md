@@ -13,7 +13,7 @@ Installs the latest node packages
 ### `npm run start`
 
 Runs the app in the development mode.\
-Open [http://localhost:8080?view=stage](http://localhost:8080?view=stage) to view it in your browser.
+Open [http://localhost:8080](http://localhost:8080) to view it in your browser.
 
 The page will reload when you make changes.\
 Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.\

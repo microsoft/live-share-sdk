@@ -13,7 +13,7 @@ export class ConfigView extends View {
 
         await pages.config.setConfig(
             {
-                contentUrl: window.location.origin + '?inTeams=1',
+                contentUrl: window.location.origin + '?inTeams=1&view=sideBar',
                 websiteUrl: window.location.origin,
                 suggestedDisplayName: "Live Share Canvas demo"
             });

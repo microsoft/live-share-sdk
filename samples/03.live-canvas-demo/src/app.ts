@@ -12,7 +12,7 @@ var view: View;
 
 window.onload = () => {
     const params = new URLSearchParams(window.location.search);
-    const viewParam = params.get("view") || "sideBar";
+    const viewParam = params.get("view") || "stage";
 
     let view: View;
 

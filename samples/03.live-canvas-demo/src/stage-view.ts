@@ -4,7 +4,7 @@
  */
 
 import * as Teams from "@microsoft/teams-js";
-import { EphemeralEvent, ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
+import { LiveEvent, ILiveShareClientOptions, LiveShareClient } from "@microsoft/live-share";
 import { InkingManager, InkingTool, IUserInfo, LiveCanvas } from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
@@ -63,7 +63,7 @@ const appTemplate = `
 const containerSchema = {
     initialObjects: {
         liveCanvas: LiveCanvas,
-        startStopDrawingSimulation: EphemeralEvent
+        startStopDrawingSimulation: LiveEvent
     }
 };
 
@@ -87,14 +87,14 @@ export class StageView extends View {
     }
 
     private startOrStopDrawingSimulation(start: boolean) {
-        (this._container.initialObjects.startStopDrawingSimulation as EphemeralEvent).sendEvent({ isStarted: start });
+        (this._container.initialObjects.startStopDrawingSimulation as LiveEvent).sendEvent({ isStarted: start });
     }
 
     private _hostResizeObserver!: ResizeObserver;
     private _userInfo: IUserInfo;
 
     private async internalStart() {
-        const clientOptions: ITeamsFluidClientOptions | undefined = Utils.runningInTeams()
+        const clientOptions: ILiveShareClientOptions | undefined = Utils.runningInTeams()
             ? undefined
             : {
                 connection: {
@@ -104,11 +104,11 @@ export class StageView extends View {
                 }
             };
 
-        const client = new TeamsFluidClient(clientOptions);
+        const client = new LiveShareClient(clientOptions);
 
         this._container = (await client.joinContainer(containerSchema)).container;
 
-        const startStopDrawingSimulationEvent = this._container.initialObjects.startStopDrawingSimulation as EphemeralEvent;
+        const startStopDrawingSimulationEvent = this._container.initialObjects.startStopDrawingSimulation as LiveEvent;
         startStopDrawingSimulationEvent.on(
             "received",
             (event, local) => {
@@ -144,7 +144,7 @@ export class StageView extends View {
             }
         );
 
-        startStopDrawingSimulationEvent.start();
+        startStopDrawingSimulationEvent.initialize();
 
         const inkingHost = document.getElementById("inkingHost");
 

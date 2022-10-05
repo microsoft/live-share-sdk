@@ -13,7 +13,7 @@ import {
 } from './InkingManager';
 import { IPointerPoint, getDistanceBetweenPoints, IPoint, IRect, expandRect } from './Geometry';
 import { IStroke, Stroke, StrokeType } from "./Stroke";
-import { EphemeralEventScope, EphemeralEventTarget, IEphemeralEvent, UserMeetingRole } from '@microsoft/live-share';
+import { LiveEventScope, LiveEventTarget, ILiveShareEvent, UserMeetingRole } from '@microsoft/live-share';
 import { IBrush } from './Brush';
 import { BasicColors, darkenColor, IColor, lightenColor, toCssRgbaColor } from './Colors';
 
@@ -37,14 +37,14 @@ export interface IUserInfo {
     pictureUri?: string;
 }
 
-type IPointerMovedEvent = IEphemeralEvent & IPointerMovedEventArgs & IUserInfo;
+type IPointerMovedEvent = ILiveShareEvent & IPointerMovedEventArgs & IUserInfo;
 
 interface ISharedCursor {
     isCursorShared?: boolean;
 }
 
-type IBeginWetStrokeEvent = IEphemeralEvent & IBeginStrokeEventArgs & ISharedCursor & IUserInfo;
-type IAddWetStrokePointsEvent = IEphemeralEvent & IAddPointsEventArgs & ISharedCursor & IUserInfo;
+type IBeginWetStrokeEvent = ILiveShareEvent & IBeginStrokeEventArgs & ISharedCursor & IUserInfo;
+type IAddWetStrokePointsEvent = ILiveShareEvent & IAddPointsEventArgs & ISharedCursor & IUserInfo;
 
 class LiveStroke {
     /**
@@ -329,9 +329,9 @@ export class LiveCanvas extends DataObject {
     private _processingIncomingChanges = false;
     private _dryInkMap!: SharedMap;
     private _wetStrokes: Map<string, IWetStroke> = new Map<string, IWetStroke>();
-    private _pointerMovedEventTarget!: EphemeralEventTarget<IPointerMovedEvent>;
-    private _beginWetStrokeEventTarget!: EphemeralEventTarget<IBeginWetStrokeEvent>;
-    private _addWetStrokePointEventTarget!: EphemeralEventTarget<IAddWetStrokePointsEvent>;
+    private _pointerMovedEventTarget!: LiveEventTarget<IPointerMovedEvent>;
+    private _beginWetStrokeEventTarget!: LiveEventTarget<IBeginWetStrokeEvent>;
+    private _addWetStrokePointEventTarget!: LiveEventTarget<IAddWetStrokePointsEvent>;
     private _allowedRoles: UserMeetingRole[] = [UserMeetingRole.guest, UserMeetingRole.attendee, UserMeetingRole.organizer, UserMeetingRole.presenter];
     private _pendingLiveStrokes: Map<string, LiveStroke> = new Map<string, LiveStroke>();
     private _liveCursorsMap = new Map<string, LiveCursor>();
@@ -425,9 +425,9 @@ export class LiveCanvas extends DataObject {
         }
 
         // Setup incoming events
-        const scope = new EphemeralEventScope(this.runtime, [UserMeetingRole.presenter]);
+        const scope = new LiveEventScope(this.runtime, [UserMeetingRole.presenter]);
 
-        this._pointerMovedEventTarget = new EphemeralEventTarget(
+        this._pointerMovedEventTarget = new LiveEventTarget(
             scope,
             InkingEventNames.pointerMove,
             (evt: IPointerMovedEvent, local: boolean) => {
@@ -442,7 +442,7 @@ export class LiveCanvas extends DataObject {
                 }
             });
 
-        this._beginWetStrokeEventTarget = new EphemeralEventTarget(
+        this._beginWetStrokeEventTarget = new LiveEventTarget(
             scope,
             InkingEventNames.beginWetStroke,
             (evt: IBeginWetStrokeEvent, local: boolean) => {
@@ -477,7 +477,7 @@ export class LiveCanvas extends DataObject {
                 }
             });
 
-        this._addWetStrokePointEventTarget = new EphemeralEventTarget(
+        this._addWetStrokePointEventTarget = new LiveEventTarget(
             scope,
             InkingEventNames.addWetStrokePoints,
             (evt: IAddWetStrokePointsEvent, local: boolean) => {

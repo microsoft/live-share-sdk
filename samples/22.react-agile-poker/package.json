@@ -9,7 +9,7 @@
     "@fluentui/react-icons": "^2.0.179",
     "@fluentui/react-theme": "^9.0.0",
     "@fluidframework/azure-client": "~1.0.2",
-    "@microsoft/live-share": "~0.4.0",
+    "@microsoft/live-share": "1.0.0-preview.1",
     "@microsoft/teams-js": "2.4.0",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",

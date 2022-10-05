@@ -19,6 +19,7 @@
         "uuid": "^8.3.2"
     },
     "devDependencies": {
+        "@microsoft/teams-js": "2.4.0",
         "@fluidframework/test-runtime-utils": "~1.2.3",
         "@fluidframework/test-utils": "~1.2.3",
         "@fluidframework/test-version-utils": "~1.2.3",

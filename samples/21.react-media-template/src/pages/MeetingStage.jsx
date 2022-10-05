@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import * as liveShareHooks from "../live-share-hooks";
 import {
   LiveNotifications,
@@ -20,6 +20,8 @@ const MeetingStage = () => {
   const context = useTeamsContext();
   // Media player
   const [player, setPlayer] = useState();
+  // Element ref for inking canvas
+  const canvasRef = useRef(null);
 
   // Fluid objects hook which uses TeamsFluidClient to create container
   const {
@@ -89,6 +91,16 @@ const MeetingStage = () => {
     sendNotification
   );
 
+  // useLiveCanvas hook will insert the canvas as a child of hosting element
+  // and starts the Live Inking session.It returns set of callbacks for clearing 
+  // the canvas, changing Ink tool type, and brush colors.
+  const {
+    inkingManager, // Manager class
+  } = liveShareHooks.useLiveCanvas(
+    liveCanvas,
+    canvasRef.current,
+  );
+
   // Set up the media player
   useEffect(() => {
     if (!player && selectedMediaItem) {
@@ -135,13 +147,14 @@ const MeetingStage = () => {
           localUserIsPresenting={localUserIsPresenting}
           localUserIsEligiblePresenter={localUserIsEligiblePresenter}
           suspended={suspended}
+          canvasRef={canvasRef}
+          inkingManager={inkingManager}
           play={play}
           pause={pause}
           seekTo={seekTo}
           takeControl={takeControl}
           endSuspension={endSuspension}
           nextTrack={nextTrack}
-          liveCanvas={liveCanvas}
         >
           {/* // Render video */}
           <video

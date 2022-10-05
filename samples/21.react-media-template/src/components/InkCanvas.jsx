@@ -1,19 +1,13 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import useResizeObserver from "use-resize-observer";
-import { InkingTool } from "@microsoft/live-share-canvas";
 import { getInkCanvasStyles } from "../styles/styles";
 import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
-import { useLiveCanvas } from "../live-share-hooks";
 import { useEventListener } from "../utils/useEventListener";
 
 const REFERENCE_HEIGHT = 1080;
 
-export const InkCanvas = ({ isEnabled, liveCanvas }) => {
-  const canvasRef = useRef(null);
-  // useLiveCanvas hook will insert the canvas as a child of hosting element
-  // and starts the Live Inking session.It returns set of callbacks for clearing 
-  // the canvas, changing Ink tool type, and brush colors.
-  const { inkingManager } = useLiveCanvas(liveCanvas, canvasRef.current)
+export const InkCanvas = ({ isEnabled, inkingManager, canvasRef }) => {
+  
   const { ref: resizeRef, width = 1, height = 1 } = useResizeObserver();
   const videoSize = useVisibleVideoSize(width, height);
 
@@ -22,18 +16,6 @@ export const InkCanvas = ({ isEnabled, liveCanvas }) => {
       event.preventDefault();
     }
   };
-
-  useEffect(() => {
-    if (!inkingManager) {
-      return;
-    }
-
-    if (isEnabled) {
-      inkingManager.tool = InkingTool.highlighter;
-    } else {
-      inkingManager.clear();
-    }
-  }, [inkingManager, isEnabled]);
 
   useEffect(() => {
     if (videoSize) {

@@ -4,9 +4,8 @@
  */
 
 import { SharedMap } from "fluid-framework";
-import { TeamsFluidClient } from "@microsoft/live-share";
-import { app, pages, meeting } from "@microsoft/teams-js";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { app, pages, meeting, liveShare } from "@microsoft/teams-js";
+import { testLiveShare } from "@microsoft/live-share";
 
 const searchParams = new URL(window.location).searchParams;
 const root = document.getElementById("content");
@@ -67,23 +66,15 @@ async function start() {
 
 async function joinContainer() {
   // Are we running in teams?
-  let client;
   if (!!searchParams.get('inTeams')) {
-      // Create client
-      client = new TeamsFluidClient();
+    // Use teams client version of live share
+    await liveShare.initialize();
+    return await liveShare.joinContainer(containerSchema, onContainerFirstCreated);
   } else {
-      // Create client and configure for testing
-      client = new TeamsFluidClient({
-        connection: {
-          type: 'local',
-          tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
-          endpoint: "http://localhost:7070"
-        }
-      });
+    // Use local test version of live share
+    await testLiveShare.initialize();
+    return await testLiveShare.joinContainer(containerSchema, onContainerFirstCreated);
   }
-
-  // Join container
-  return await client.joinContainer(containerSchema, onContainerFirstCreated);
 }
 
 // STAGE VIEW

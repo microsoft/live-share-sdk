@@ -65,6 +65,11 @@ async function start() {
 }
 
 async function joinContainer() {
+  const LiveShareClient = window['53de46f8-db62-4b8d-ae81-330f828ac86c'];
+  if (!LiveShareClient) {
+    throw new Error(`not found`);
+  }
+
   // Are we running in teams?
   if (!!searchParams.get('inTeams')) {
     // Use teams client version of live share

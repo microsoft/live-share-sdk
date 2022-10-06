@@ -5,13 +5,14 @@ export enum LevelType { fixed, percentage }
 export class VolumeLimiter {
     private readonly _player: IMediaPlayer;
     private readonly _rampDuration = new TimeInterval(500);
-    private _level = 0.1
-    private _levelType: LevelType = LevelType.fixed;
 
     private _selectedVolume = 1.0;
     private _limited = false;
+    private _level = 0.1
+    private _levelType: LevelType = LevelType.fixed;
     private _startTime = 0;
     private _startVolume = 0;
+    private _running = false;
 
     constructor(player: IMediaPlayer) {
         this._player = player;
@@ -103,8 +104,9 @@ export class VolumeLimiter {
     }
 
     private startAdjusting() {
-        this._startTime = new Date().getTime();
-        this._startVolume = this._player.volume;
+        if (this._running) {
+            return;
+        }
 
         const adjustVolume = () => {
             if (this.milliIntoRamp() <= this._rampDuration.milliseconds) {
@@ -116,8 +118,13 @@ export class VolumeLimiter {
                 const newVolume = this.computeTargetVolume();
                 console.log("adjusting", newVolume);
                 this._player.volume = newVolume;
+                this._running = false
             }
         }
+
+        this._running = true
+        this._startTime = new Date().getTime();
+        this._startVolume = this._player.volume;
         this.scheduleAnimationFrame(adjustVolume);
     }
 

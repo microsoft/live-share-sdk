@@ -15,6 +15,27 @@ export class VolumeLimiter {
 
     constructor(player: IMediaPlayer) {
         this._player = player;
+        this._player.volume = this._selectedVolume;
+    }
+
+    /**
+     * The selected volume.
+     *
+     * @remarks
+     * Expressed as a value between 0.0 and 1.0. The default value is 1.0.
+     * Can be used for things like volume sliders.
+     */
+    public get selectedVolume(): number {
+        return this._selectedVolume;
+    }
+
+    public set selectedVolume(value: number) {
+        if (value < 0 || value > 1.0) {
+            throw new Error(`VolumeLimiter: cannot set selectedVolume to ${value}. Level must be between 0.0 and 1.0.`);
+        }
+
+        this._selectedVolume = value;
+        this.startAdjusting();
     }
 
     /**
@@ -55,42 +76,46 @@ export class VolumeLimiter {
     }
 
     /**
-     * The selected volume.
-     *
-     * @remarks
-     * Expressed as a value between 0.0 and 1.0. The default value is 1.0.
-     * Can be used for things like volume sliders.
+     * Amount of time, in seconds, it should take to ramp the volume down to the desired level.
      */
-    public get selectedVolume(): number {
-        return this._selectedVolume;
+    public get rampDuration(): number {
+        return this._rampDuration.seconds;
     }
 
-    public set selectedVolume(value: number) {
-        this._selectedVolume = value;
+    public set rampDuration(value: number) {
+        this._rampDuration.seconds = Math.abs(value);
     }
 
+    /**
+     * Limits volume based on `level` and `levelType` properties.
+     */
     public enableLimit(): void {
         this._limited = true
-        this._startTime = new Date().getTime();
-        this._startVolume = this._player.volume
-        this.startAdjusting()
+        this.startAdjusting();
     }
 
+    /**
+     * disables volume limit.
+     */
     public disableLimit(): void {
         this._limited = false
-        this._startTime = new Date().getTime();
-        this._startVolume = this._player.volume
-        this.startAdjusting()
+        this.startAdjusting();
     }
 
     private startAdjusting() {
+        this._startTime = new Date().getTime();
+        this._startVolume = this._player.volume;
+
         const adjustVolume = () => {
             if (this.milliIntoRamp() <= this._rampDuration.milliseconds) {
-                const newVolume = this.computeRampVolume()
+                const newVolume = this.computeRampVolume();
+                console.log("adjusting", newVolume);
                 this._player.volume = newVolume;
                 this.scheduleAnimationFrame(adjustVolume);
             } else {
-                this._player.volume = this.computeTargetVolume();
+                const newVolume = this.computeTargetVolume();
+                console.log("adjusting", newVolume);
+                this._player.volume = newVolume;
             }
         }
         this.scheduleAnimationFrame(adjustVolume);
@@ -104,17 +129,19 @@ export class VolumeLimiter {
         }
     }
 
-    // returns the volume it should be, adjusted for how long its been ramping
     private computeRampVolume(): number {
-        const timeIntoRamp = this.milliIntoRamp();
-        const targetVolume = this.computeTargetVolume()
-        const adjustmentFromStart = (targetVolume - this._startVolume) / this._rampDuration.milliseconds * timeIntoRamp
+        const volumeDifference = this.computeTargetVolume() - this._startVolume
+        const adjustmentFromStart = volumeDifference / this._rampDuration.milliseconds * this.milliIntoRamp()
         return this._startVolume + adjustmentFromStart;
     }
 
     private computeTargetVolume(): number {
         if (this._levelType == LevelType.percentage) {
-           return this._selectedVolume * this._level;
+            if (this._limited) {
+                return this._selectedVolume * this._level;
+            } else {
+                return this._selectedVolume
+            }
         } else {
             if (this._limited && this._selectedVolume > this._level) {
                 return this._level

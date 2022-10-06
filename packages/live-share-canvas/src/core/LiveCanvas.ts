@@ -425,7 +425,7 @@ export class LiveCanvas extends DataObject {
         }
 
         // Setup incoming events
-        const scope = new LiveEventScope(this.runtime, [UserMeetingRole.presenter]);
+        const scope = new LiveEventScope(this.runtime, this.allowedRoles);
 
         this._pointerMovedEventTarget = new LiveEventTarget(
             scope,

@@ -5,6 +5,7 @@
 
 import { TeamsFluidClient } from "@microsoft/live-share";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { EphemeralMediaSession } from "@microsoft/live-share-media";
 import { SharedMap } from "fluid-framework";
 import { useEffect, useState } from "react";
@@ -81,7 +82,7 @@ export function useSharedObjects() {
         presence: EphemeralPresence,
         mediaSession: EphemeralMediaSession,
         notificationEvent: EphemeralEvent,
-        inkEvent: EphemeralEvent,
+        liveCanvas: LiveCanvas,
         takeControlMap: SharedMap,
         playlistMap: SharedMap,
       },
@@ -108,6 +109,7 @@ export function useSharedObjects() {
     takeControlMap: initialObjects?.takeControlMap,
     playlistMap: initialObjects?.playlistMap,
     inkEvent: initialObjects?.inkEvent,
+    liveCanvas: initialObjects?.liveCanvas,
     container,
     error,
     services: results?.services,

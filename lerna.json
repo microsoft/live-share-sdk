@@ -7,6 +7,7 @@
     "samples/03.live-canvas-demo",
     "samples/21.react-media-template",
     "samples/22.react-agile-poker",
+    "samples/23.react-live-canvas",
     "samples/31.live-canvas-tests"
   ],
   "version": "0.0.0"

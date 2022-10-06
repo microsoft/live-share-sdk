@@ -91,7 +91,7 @@ export class VolumeLimiter {
      * Limits volume based on `level` and `levelType` properties.
      */
     public enableLimit(): void {
-        this._limited = true
+        this._limited = true;
         this.startAdjusting();
     }
 
@@ -99,7 +99,7 @@ export class VolumeLimiter {
      * disables volume limit.
      */
     public disableLimit(): void {
-        this._limited = false
+        this._limited = false;
         this.startAdjusting();
     }
 
@@ -118,7 +118,7 @@ export class VolumeLimiter {
                 const newVolume = this.computeTargetVolume();
                 console.log("adjusting", newVolume);
                 this._player.volume = newVolume;
-                this._running = false
+                this._running = false;
             }
         }
 
@@ -147,19 +147,19 @@ export class VolumeLimiter {
             if (this._limited) {
                 return this._selectedVolume * this._level;
             } else {
-                return this._selectedVolume
+                return this._selectedVolume;
             }
         } else {
             if (this._limited && this._selectedVolume > this._level) {
-                return this._level
+                return this._level;
             } else {
-                return this._selectedVolume
+                return this._selectedVolume;
             }
         }
     }
 
     private milliIntoRamp(): number {
-        const now = new Date().getTime()
+        const now = new Date().getTime();
         return now - this._startTime;
     }
 }

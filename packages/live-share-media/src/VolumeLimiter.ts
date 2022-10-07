@@ -109,10 +109,6 @@ export class VolumeLimiter {
     }
 
     private startAdjusting() {
-        if (this._running) {
-            return;
-        }
-
         const adjustVolume = () => {
             if (this.milliIntoRamp() <= this._rampDuration.milliseconds) {
                 const newVolume = this.computeRampVolume();
@@ -127,14 +123,16 @@ export class VolumeLimiter {
             }
         }
 
-        this._running = true
         this._startTime = new Date().getTime();
         this._startVolume = this._player.volume;
-        this.scheduleAnimationFrame(adjustVolume);
+        if (!this._running) {
+            this._running = true
+            this.scheduleAnimationFrame(adjustVolume);
+        }
     }
 
     private scheduleAnimationFrame(callback: FrameRequestCallback): void {
-        if (requestAnimationFrame) {
+        if (typeof requestAnimationFrame == "function") {
             requestAnimationFrame(callback);
         } else {
             setTimeout(callback, 20);

@@ -10,7 +10,7 @@ describe('VolumeLimiter', () => {
         const limiter = new VolumeLimiter(player);
 
         assert(player.volume == 1.0);
-        limiter.enableLimit();
+        limiter.start();
         setTimeout(() => {
             // check volume at halfway point
             assert(player.volume > 0.4);
@@ -32,12 +32,12 @@ describe('VolumeLimiter', () => {
         const limiter = new VolumeLimiter(player);
 
         // limit at start
-        limiter.enableLimit();
+        limiter.start();
 
         // when limited all the way, test ramp up
         setTimeout(() => {
             assert(player.volume == limiter.level);
-            limiter.disableLimit();
+            limiter.stop();
 
             setTimeout(() => {
                 // check volume at halfway point
@@ -62,12 +62,12 @@ describe('VolumeLimiter', () => {
         const limiter = new VolumeLimiter(player);
 
         assert(player.volume == 1.0);
-        limiter.enableLimit();
+        limiter.start();
         setTimeout(() => {
             // check volume at halfway point, begin ramping other direction
             assert(player.volume > 0.4);
             assert(player.volume < 0.6);
-            limiter.disableLimit();
+            limiter.stop();
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
@@ -108,14 +108,14 @@ describe('VolumeLimiter', () => {
         const limiter = new VolumeLimiter(player);
 
         assert(player.volume == 1.0);
-        limiter.enableLimit();
+        limiter.start();
         setTimeout(() => {
             // check volume at halfway point, begin ramping other direction with lower selected volume
             assert(player.volume > 0.4);
             assert(player.volume < 0.6);
 
             limiter.selectedVolume = 0.7;
-            limiter.disableLimit();
+            limiter.stop();
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
@@ -159,7 +159,7 @@ describe('VolumeLimiter', () => {
         limiter.level = 0.5;
 
         assert(player.volume == 1.0);
-        limiter.enableLimit();
+        limiter.start();
 
         setTimeout(() => {
             // check volume at halfway point

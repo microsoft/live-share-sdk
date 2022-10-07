@@ -7,6 +7,10 @@ import { TimeInterval } from '@microsoft/live-share';
 import { IMediaPlayer } from './IMediaPlayer';
 
 export enum LevelType { fixed, percentage }
+
+/**
+ * Smooth audio level changes when selectedVolume is modified, or if volume limiting has started/ended.
+ */
 export class VolumeLimiter {
     private readonly _player: IMediaPlayer;
     private readonly _rampDuration = new TimeInterval(500);
@@ -95,15 +99,15 @@ export class VolumeLimiter {
     /**
      * Limits volume based on `level` and `levelType` properties.
      */
-    public enableLimit(): void {
+    public start(): void {
         this._limited = true;
         this.startAdjusting();
     }
 
     /**
-     * disables volume limit.
+     * Disables volume limit.
      */
-    public disableLimit(): void {
+    public stop(): void {
         this._limited = false;
         this.startAdjusting();
     }

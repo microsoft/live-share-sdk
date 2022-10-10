@@ -8,9 +8,9 @@ import { ILiveShareHost } from "../interfaces";
 
 /**
  * @hidden
- * Token Provider implementation for connecting to Cowatch Cloud endpoint
+ * Token Provider implementation for connecting to a Live Share Host
  */
-export class TeamsFluidTokenProvider implements ITokenProvider {
+export class LiveShareTokenProvider implements ITokenProvider {
     private _frsToken?: string;
     private _documentId?: string;
     private _tenantId?: string;

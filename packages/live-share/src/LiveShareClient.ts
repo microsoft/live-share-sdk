@@ -5,8 +5,8 @@
  */
 
 import {
-    TeamsFluidTokenProvider,
-    SharedClock, RoleVerifier
+    LiveShareTokenProvider,
+    SharedClock, RoleVerifier, DefaultTeamsHost
 } from './internals';
 import {
     AzureClient,
@@ -143,14 +143,14 @@ export class LiveShareClient {
                     config = {
                         type: 'local',
                         endpoint: endpoint!,
-                        tokenProvider: new TeamsFluidTokenProvider(host)
+                        tokenProvider: new LiveShareTokenProvider(host)
                     };
                 } else {
                     config = {
                         type: 'remote',
                         tenantId: frsTenantInfo.tenantId,
                         endpoint: endpoint!,
-                        tokenProvider: new TeamsFluidTokenProvider(host)
+                        tokenProvider: new LiveShareTokenProvider(host)
                     } as AzureRemoteConnectionConfig;
                 }
             }
@@ -295,12 +295,7 @@ export class LiveShareClient {
     private async getHost(): Promise<ILiveShareHost> {
         if (!this._host) {
             if (window && !this.isTesting) {
-                const teamsClient = (await import('@microsoft/teams-js') as any) as ITeamsClientApi;
-                if (teamsClient && teamsClient.liveShare) {
-                    this._host = teamsClient.liveShare.getHost();
-                } else {
-                    throw new Error(`TeamsFluidClient: The Live Share Host could not be automatically identified.`);
-                }
+                this._host = await DefaultTeamsHost.getTeamsHost();
             } else {
                 this._host = new TestLiveShareHost(this._options.getLocalTestContainerId, this._options.setLocalTestContainerId);
             }

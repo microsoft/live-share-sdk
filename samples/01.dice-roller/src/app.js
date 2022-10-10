@@ -4,8 +4,9 @@
  */
 
 import { SharedMap } from "fluid-framework";
-import { app, pages, meeting, liveShare } from "@microsoft/teams-js";
-import { testLiveShare } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
+import { app, pages, meeting } from "@microsoft/teams-js";
+import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 
 const searchParams = new URL(window.location).searchParams;
 const root = document.getElementById("content");
@@ -65,21 +66,24 @@ async function start() {
 }
 
 async function joinContainer() {
-  const LiveShareClient = window['53de46f8-db62-4b8d-ae81-330f828ac86c'];
-  if (!LiveShareClient) {
-    throw new Error(`not found`);
+  // Are we running in teams?
+  let client;
+  if (!!searchParams.get('inTeams')) {
+      // Create client
+      client = new LiveShareClient();
+  } else {
+      // Create client and configure for testing
+      client = new LiveShareClient({
+        connection: {
+          type: 'local',
+          tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
+          endpoint: "http://localhost:7070"
+        }
+      });
   }
 
-  // Are we running in teams?
-  if (!!searchParams.get('inTeams')) {
-    // Use teams client version of live share
-    await liveShare.initialize();
-    return await liveShare.joinContainer(containerSchema, onContainerFirstCreated);
-  } else {
-    // Use local test version of live share
-    await testLiveShare.initialize();
-    return await testLiveShare.joinContainer(containerSchema, onContainerFirstCreated);
-  }
+  // Join container
+  return await client.joinContainer(containerSchema, onContainerFirstCreated);
 }
 
 // STAGE VIEW

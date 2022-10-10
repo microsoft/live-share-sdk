@@ -4,8 +4,10 @@
  */
 
 export * from './consts';
+export * from './DefaultTeamsHost';
+export * from './LiveShareTokenProvider';
 export * from './RequestCache';
 export * from './RoleVerifier';
 export * from './SharedClock';
-export * from './TeamsFluidTokenProvider';
+export * from './TeamsClientApi';
 export * from './utils';

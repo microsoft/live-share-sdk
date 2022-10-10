@@ -13,7 +13,7 @@ export enum LevelType { fixed, percentage }
  */
 export class VolumeLimiter {
     private readonly _player: IMediaPlayer;
-    private readonly _rampDuration = new TimeInterval(500);
+    private readonly _volumeChangeDuration = new TimeInterval(500);
 
     private _selectedVolume = 1.0;
     private _limited = false;
@@ -89,14 +89,14 @@ export class VolumeLimiter {
      * Amount of time, in seconds, it should take to change the volume up or down to the desired level.
      *
      * @remarks
-     * Default `rampDuration` is 0.5 seconds.
+     * Default `volumeChangeDuration` is 0.5 seconds.
      */
-    public get rampDuration(): number {
-        return this._rampDuration.seconds;
+    public get volumeChangeDuration(): number {
+        return this._volumeChangeDuration.seconds;
     }
 
-    public set rampDuration(value: number) {
-        this._rampDuration.seconds = Math.abs(value);
+    public set volumeChangeDuration(value: number) {
+        this._volumeChangeDuration.seconds = Math.abs(value);
     }
 
     /**
@@ -119,9 +119,9 @@ export class VolumeLimiter {
 
     private startAdjusting() {
         const adjustVolume = () => {
-            // Schedule next animation frame if volume ramp not finished
-            if (this.milliAfterRampStart() <= this._rampDuration.milliseconds) {
-                this._player.volume = this.computeRampVolume();
+            // Schedule next animation frame if volume change not finished
+            if (this.millisSinceVolumeChangeStart() <= this._volumeChangeDuration.milliseconds) {
+                this._player.volume = this.computeInteroplatedVolume();
                 this.scheduleAnimationFrame(adjustVolume);
             } else {
                 this._player.volume = this.computeTargetVolume();
@@ -145,9 +145,10 @@ export class VolumeLimiter {
         }
     }
 
-    private computeRampVolume(): number {
+    private computeInteroplatedVolume(): number {
+        const volumeChangeMillis = this._volumeChangeDuration.milliseconds
         const volumeDifference = this.computeTargetVolume() - this._startVolume
-        const adjustmentFromStart = volumeDifference / this._rampDuration.milliseconds * this.milliAfterRampStart()
+        const adjustmentFromStart = volumeDifference / volumeChangeMillis * this.millisSinceVolumeChangeStart()
         return this._startVolume + adjustmentFromStart;
     }
 
@@ -167,7 +168,7 @@ export class VolumeLimiter {
         }
     }
 
-    private milliAfterRampStart(): number {
+    private millisSinceVolumeChangeStart(): number {
         const now = new Date().getTime();
         return now - this._startTime;
     }

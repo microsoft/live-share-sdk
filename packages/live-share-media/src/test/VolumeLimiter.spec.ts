@@ -15,13 +15,13 @@ describe('VolumeLimiter', () => {
             // check volume at halfway point
             assert(player.volume > 0.4);
             assert(player.volume < 0.6);
-        }, limiter.rampDuration * 1000 / 2);
+        }, limiter.volumeChangeDuration * 1000 / 2);
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
             assert(player.volume == limiter.level);
             testAwait.resolve();
-        }, limiter.rampDuration * 1000 + 20);
+        }, limiter.volumeChangeDuration * 1000 + 20);
 
         await testAwait.promise;
     });
@@ -43,15 +43,15 @@ describe('VolumeLimiter', () => {
                 // check volume at halfway point
                 assert(player.volume > 0.4);
                 assert(player.volume < 0.6);
-            }, limiter.rampDuration * 1000 / 2);
+            }, limiter.volumeChangeDuration * 1000 / 2);
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
                 assert(player.volume == limiter.selectedVolume);
                 testAwait.resolve();
-            }, limiter.rampDuration * 1000 + 20);
+            }, limiter.volumeChangeDuration * 1000 + 20);
 
-        }, limiter.rampDuration * 1000 + 20);
+        }, limiter.volumeChangeDuration * 1000 + 20);
 
         await testAwait.promise;
     });
@@ -73,9 +73,9 @@ describe('VolumeLimiter', () => {
                 // check volume at end with 20ms of leeway
                 assert(player.volume == limiter.selectedVolume);
                 testAwait.resolve();
-            }, limiter.rampDuration * 1000 + 20);
+            }, limiter.volumeChangeDuration * 1000 + 20);
 
-        }, limiter.rampDuration * 1000 / 2);
+        }, limiter.volumeChangeDuration * 1000 / 2);
 
         await testAwait.promise;
     });
@@ -91,13 +91,13 @@ describe('VolumeLimiter', () => {
             // check volume at halfway point
             assert(player.volume > 0.6);
             assert(player.volume < 0.7);
-        }, limiter.rampDuration * 1000 / 2);
+        }, limiter.volumeChangeDuration * 1000 / 2);
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
             assert(player.volume == limiter.selectedVolume);
             testAwait.resolve();
-        }, limiter.rampDuration * 1000 + 20);
+        }, limiter.volumeChangeDuration * 1000 + 20);
 
         await testAwait.promise;
     });
@@ -121,9 +121,9 @@ describe('VolumeLimiter', () => {
                 // check volume at end with 20ms of leeway
                 assert(player.volume === limiter.selectedVolume);
                 testAwait.resolve();
-            }, limiter.rampDuration * 1000 + 20);
+            }, limiter.volumeChangeDuration * 1000 + 20);
 
-        }, limiter.rampDuration * 1000 / 2);
+        }, limiter.volumeChangeDuration * 1000 / 2);
 
         await testAwait.promise;
     });
@@ -145,8 +145,8 @@ describe('VolumeLimiter', () => {
                 // check volume at end with 20ms of leeway
                 assert(player.volume == limiter.selectedVolume);
                 testAwait.resolve();
-            }, limiter.rampDuration * 1000 + 20);
-        }, limiter.rampDuration * 1000 / 2);
+            }, limiter.volumeChangeDuration * 1000 + 20);
+        }, limiter.volumeChangeDuration * 1000 / 2);
 
         await testAwait.promise;
     });
@@ -165,13 +165,13 @@ describe('VolumeLimiter', () => {
             // check volume at halfway point
             assert(player.volume > 0.7);
             assert(player.volume < 0.8);
-        }, limiter.rampDuration * 1000 / 2);
+        }, limiter.volumeChangeDuration * 1000 / 2);
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
             assert(player.volume == limiter.level * limiter.selectedVolume);
             testAwait.resolve();
-        }, limiter.rampDuration * 1000 + 20);
+        }, limiter.volumeChangeDuration * 1000 + 20);
 
         await testAwait.promise;
     });

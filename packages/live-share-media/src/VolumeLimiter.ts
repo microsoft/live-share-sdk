@@ -87,6 +87,9 @@ export class VolumeLimiter {
 
     /**
      * Amount of time, in seconds, it should take to change the volume up or down to the desired level.
+     *
+     * @remarks
+     * Default `rampDuration` is 0.5 seconds
      */
     public get rampDuration(): number {
         return this._rampDuration.seconds;
@@ -114,15 +117,12 @@ export class VolumeLimiter {
 
     private startAdjusting() {
         const adjustVolume = () => {
-            if (this.milliIntoRamp() <= this._rampDuration.milliseconds) {
-                const newVolume = this.computeRampVolume();
-                console.log("adjusting", newVolume);
-                this._player.volume = newVolume;
+            // Schedule next animation frame if volume ramp not finished
+            if (this.milliAfterRampStart() <= this._rampDuration.milliseconds) {
+                this._player.volume = this.computeRampVolume();
                 this.scheduleAnimationFrame(adjustVolume);
             } else {
-                const newVolume = this.computeTargetVolume();
-                console.log("adjusting", newVolume);
-                this._player.volume = newVolume;
+                this._player.volume = this.computeTargetVolume();
                 this._running = false;
             }
         }
@@ -145,7 +145,7 @@ export class VolumeLimiter {
 
     private computeRampVolume(): number {
         const volumeDifference = this.computeTargetVolume() - this._startVolume
-        const adjustmentFromStart = volumeDifference / this._rampDuration.milliseconds * this.milliIntoRamp()
+        const adjustmentFromStart = volumeDifference / this._rampDuration.milliseconds * this.milliAfterRampStart()
         return this._startVolume + adjustmentFromStart;
     }
 
@@ -165,7 +165,7 @@ export class VolumeLimiter {
         }
     }
 
-    private milliIntoRamp(): number {
+    private milliAfterRampStart(): number {
         const now = new Date().getTime();
         return now - this._startTime;
     }

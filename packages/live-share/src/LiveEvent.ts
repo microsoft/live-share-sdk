@@ -6,7 +6,7 @@
 import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IEvent } from "@fluidframework/common-definitions";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
-import { ILiveShareEvent, ITimestampProvider, IRoleVerifier, UserMeetingRole, IClientTimestamp } from "./interfaces";
+import { ILiveEvent, ITimestampProvider, IRoleVerifier, UserMeetingRole, IClientTimestamp } from "./interfaces";
 import { LiveEventScope } from './LiveEventScope';
 import { LiveEventTarget } from './LiveEventTarget';
 import { LocalRoleVerifier } from './LocalRoleVerifier';
@@ -25,7 +25,7 @@ export enum LiveEventEvents {
  * Event typings for `LiveEvent` class.
  * @template TEvent Type of event to broadcast.
  */
-export interface ILiveEventEvents<TEvent extends ILiveShareEvent> extends IEvent {
+export interface ILiveEventEvents<TEvent extends ILiveEvent> extends IEvent {
     /**
      * A remote event was received or a local event was sent.
      * @param event Name of event.
@@ -47,7 +47,7 @@ export interface ILiveEventEvents<TEvent extends ILiveShareEvent> extends IEvent
  * `LiveEvents`. Use something like the `LiveState` class when syncing state. 
  * @template TEvent Type of event to broadcast.
  */
- export class LiveEvent<TEvent extends ILiveShareEvent = ILiveShareEvent> extends DataObject<{Events: ILiveEventEvents<TEvent>}> {
+ export class LiveEvent<TEvent extends ILiveEvent = ILiveEvent> extends DataObject<{Events: ILiveEventEvents<TEvent>}> {
     private static _timestampProvider: ITimestampProvider = new LocalTimestampProvider();
     private static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
     

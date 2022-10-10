@@ -4,7 +4,7 @@
  */
 
 import { LiveEvent } from './LiveEvent';
-import { ILiveShareEvent , UserMeetingRole} from './interfaces';
+import { ILiveEvent , UserMeetingRole} from './interfaces';
 import { TimeInterval } from './TimeInterval';
 import { cloneValue } from './internals';
 
@@ -32,7 +32,7 @@ export enum PresenceState {
 /**
  * @hidden
  */
-export interface ILivePresenceEvent<TData = object> extends ILiveShareEvent {
+export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
     userId: string;
     state: PresenceState;
     data?: TData;

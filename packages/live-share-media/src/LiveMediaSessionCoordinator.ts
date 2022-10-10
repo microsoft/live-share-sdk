@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveEventScope, LiveTelemetryLogger, LiveEventTarget, ILiveShareEvent, IRuntimeSignaler, TimeInterval, UserMeetingRole } from '@microsoft/live-share';
+import { LiveEventScope, LiveTelemetryLogger, LiveEventTarget, ILiveEvent, IRuntimeSignaler, TimeInterval, UserMeetingRole } from '@microsoft/live-share';
 import { CoordinationWaitPoint, ExtendedMediaSessionActionDetails, ExtendedMediaMetadata, ExtendedMediaSessionPlaybackState, MediaSessionCoordinatorEvents, MediaSessionCoordinatorState, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
 import { TelemetryEvents, ITransportCommandEvent, ISetTrackEvent, IPositionUpdateEvent, GroupCoordinatorState, GroupCoordinatorStateEvents, ITriggerActionEvent, ISetTrackDataEvent } from './internals';
 import { LiveMediaSessionCoordinatorSuspension } from './LiveMediaSessionCoordinatorSuspension';
@@ -58,7 +58,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter  {
     private _setTrackEvent?: LiveEventTarget<ISetTrackEvent>;
     private _setTrackDataEvent?: LiveEventTarget<ISetTrackDataEvent>;
     private _positionUpdateEvent?: LiveEventTarget<IPositionUpdateEvent>;
-    private _joinedEvent?: LiveEventTarget<ILiveShareEvent>;
+    private _joinedEvent?: LiveEventTarget<ILiveEvent>;
 
     // Distributed state
     private _groupState?: GroupCoordinatorState;

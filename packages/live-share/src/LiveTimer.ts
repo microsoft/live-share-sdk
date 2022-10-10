@@ -7,7 +7,7 @@ import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
-import { IClientTimestamp, ILiveShareEvent, UserMeetingRole } from "./interfaces";
+import { IClientTimestamp, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
 import { cloneValue } from "./internals/utils";
 import { LiveEvent } from "./LiveEvent";
@@ -80,12 +80,12 @@ export interface ILiveTimerEvents extends IEvent {
   ): any;
 }
 
-interface IPlayEvent extends ILiveShareEvent {
+interface IPlayEvent extends ILiveEvent {
   duration: number;
   position: number;
 }
 
-interface IPauseEvent extends ILiveShareEvent {
+interface IPauseEvent extends ILiveEvent {
   duration: number;
   position: number;
 }

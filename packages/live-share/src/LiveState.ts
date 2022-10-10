@@ -5,7 +5,7 @@
 
 import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IEvent } from "@fluidframework/common-definitions";
-import { ILiveShareEvent, UserMeetingRole } from "./interfaces";
+import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { cloneValue, TelemetryEvents } from './internals';
 import { LiveEventScope } from './LiveEventScope';
 import { LiveEventTarget } from './LiveEventTarget';
@@ -191,7 +191,7 @@ export class LiveState<TData = undefined> extends DataObject<{Events: ILiveState
     }
 }
 
-interface IStateChangeEvent<T> extends ILiveShareEvent {
+interface IStateChangeEvent<T> extends ILiveEvent {
     state: string;
     data?: T;
 }

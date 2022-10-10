@@ -36,13 +36,13 @@ export interface IClientTimestamp {
 /**
  * Base interface for all live share events.
  */
-export interface ILiveShareEvent extends IEvent, IClientTimestamp {}
+export interface ILiveEvent extends IEvent, IClientTimestamp {}
 
 /**
  * Removes the base properties from an event that derives from `ILiveEvent`.
  * @template TEvent Type of event.
  */
-export type OutgoingLiveShareEvent<TEvent extends ILiveShareEvent> = Omit<TEvent, 'name' | 'clientId' | 'timestamp'>; 
+export type OutgoingLiveEvent<TEvent extends ILiveEvent> = Omit<TEvent, 'name' | 'clientId' | 'timestamp'>; 
 
 /**
  * Allowed roles during a meeting.

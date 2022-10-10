@@ -13,7 +13,7 @@ import {
 } from './InkingManager';
 import { IPointerPoint, getDistanceBetweenPoints, IPoint, IRect, expandRect } from './Geometry';
 import { IStroke, Stroke, StrokeType } from "./Stroke";
-import { LiveEventScope, LiveEventTarget, ILiveShareEvent, UserMeetingRole } from '@microsoft/live-share';
+import { LiveEventScope, LiveEventTarget, ILiveEvent, UserMeetingRole } from '@microsoft/live-share';
 import { IBrush } from './Brush';
 import { BasicColors, darkenColor, IColor, lightenColor, toCssRgbaColor } from './Colors';
 
@@ -37,14 +37,14 @@ export interface IUserInfo {
     pictureUri?: string;
 }
 
-type IPointerMovedEvent = ILiveShareEvent & IPointerMovedEventArgs & IUserInfo;
+type IPointerMovedEvent = ILiveEvent & IPointerMovedEventArgs & IUserInfo;
 
 interface ISharedCursor {
     isCursorShared?: boolean;
 }
 
-type IBeginWetStrokeEvent = ILiveShareEvent & IBeginStrokeEventArgs & ISharedCursor & IUserInfo;
-type IAddWetStrokePointsEvent = ILiveShareEvent & IAddPointsEventArgs & ISharedCursor & IUserInfo;
+type IBeginWetStrokeEvent = ILiveEvent & IBeginStrokeEventArgs & ISharedCursor & IUserInfo;
+type IAddWetStrokePointsEvent = ILiveEvent & IAddPointsEventArgs & ISharedCursor & IUserInfo;
 
 class LiveStroke {
     /**

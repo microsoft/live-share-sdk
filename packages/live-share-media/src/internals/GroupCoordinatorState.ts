@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent, ILiveShareEvent, LiveEvent, TimeInterval, IRuntimeSignaler, LiveTelemetryLogger } from '@microsoft/live-share';
+import { IEvent, ILiveEvent, LiveEvent, TimeInterval, IRuntimeSignaler, LiveTelemetryLogger } from '@microsoft/live-share';
 import EventEmitter from 'events';
 import { ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionPlaybackState, ExtendedMediaSessionActionDetails } from '../MediaSessionExtensions';
 import { GroupPlaybackTrack, GroupPlaybackTrackEvents, IPlaybackTrack } from './GroupPlaybackTrack';
@@ -17,7 +17,7 @@ import { TelemetryEvents } from './consts';
 /**
  * @hidden
  */
-export interface IPositionUpdateEvent extends ILiveShareEvent {
+export interface IPositionUpdateEvent extends ILiveEvent {
     track: IPlaybackTrack;
     trackData: IPlaybackTrackData;
     transport: ITransportState;
@@ -29,7 +29,7 @@ export interface IPositionUpdateEvent extends ILiveShareEvent {
 /**
  * @hidden
  */
-export interface ITransportCommandEvent extends ILiveShareEvent {
+export interface ITransportCommandEvent extends ILiveEvent {
     track: IPlaybackTrack;
     position: number;
 }
@@ -37,7 +37,7 @@ export interface ITransportCommandEvent extends ILiveShareEvent {
 /**
  * @hidden
  */
-export interface ISetTrackEvent extends ILiveShareEvent {
+export interface ISetTrackEvent extends ILiveEvent {
     metadata: ExtendedMediaMetadata|null;
     waitPoints: CoordinationWaitPoint[];
 }
@@ -45,7 +45,7 @@ export interface ISetTrackEvent extends ILiveShareEvent {
 /**
  * @hidden
  */
-export interface ISetTrackDataEvent extends ILiveShareEvent {
+export interface ISetTrackDataEvent extends ILiveEvent {
     data: object|null;
 }
 

@@ -5,12 +5,12 @@
 
 import { TimeInterval } from "./TimeInterval";
 import { LiveEventSource } from "./LiveEventSource";
-import { ILiveShareEvent } from "./interfaces";
+import { ILiveEvent } from "./interfaces";
 
 /**
  * Periodically broadcasts an event to listening `LiveEventTarget` instances.
  */
-export class LiveEventTimer<T extends ILiveShareEvent> {
+export class LiveEventTimer<T extends ILiveEvent> {
     private _eventSource: LiveEventSource<T>;
     private _createEvent: () => Partial<T>;
     private _delay: TimeInterval;

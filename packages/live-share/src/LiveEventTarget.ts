@@ -5,7 +5,7 @@
 
 import { LiveEventScope, LiveEventListener } from "./LiveEventScope";
 import { LiveEventSource } from "./LiveEventSource";
-import { ILiveShareEvent } from "./interfaces";
+import { ILiveEvent } from "./interfaces";
 
 /**
  * Receives events broadcast by an `LiveEventSource`.
@@ -16,7 +16,7 @@ import { ILiveShareEvent } from "./interfaces";
  * events to other instances of itself.
  * @template TEvent Type of event to broadcast.
  */
-export class LiveEventTarget<TEvent extends ILiveShareEvent = ILiveShareEvent> extends LiveEventSource<TEvent> {
+export class LiveEventTarget<TEvent extends ILiveEvent = ILiveEvent> extends LiveEventSource<TEvent> {
     /**
      * Creates a new `LiveEventTarget` instance.
      * @param scope Scope to use for sending events.

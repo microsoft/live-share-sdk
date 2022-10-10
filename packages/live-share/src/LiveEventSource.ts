@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveShareEvent } from "./interfaces";
+import { ILiveEvent } from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 
 /**
@@ -14,7 +14,7 @@ import { LiveEventScope } from "./LiveEventScope";
  * create an `LiveEventTarget` class, which can both send & receive events.
  * @template TEvent Type of event to broadcast.
  */
-export class LiveEventSource<TEvent extends ILiveShareEvent = ILiveShareEvent> {
+export class LiveEventSource<TEvent extends ILiveEvent = ILiveEvent> {
     private _scope: LiveEventScope;
     private _eventName: string;
 

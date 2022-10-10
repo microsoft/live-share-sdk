@@ -124,15 +124,15 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                             this.play();
                         }
                     }
-                    // block play if player state is playing when expected synced state is paused
-                    // needed for YouTube because cannot tell if its a user initiated event, so disallow play (except when starting)
-                    if (this._expectedPlaybackState === 'paused') {
+                    // block play if player state is playing when expected synced state is paused or none.
+                    // needed because cannot tell if its a user initiated event, so disallow play (except when starting)
+                    if (this._expectedPlaybackState === 'paused' || this._expectedPlaybackState === 'none') {
                         this._player.pause();
                     }
                     break;
                 case 'pause':
                     // block pause if player state is paused when expected synced state is playing
-                    // needed for YouTube because cannot tell if its a user initiated event, so disallow pause
+                    // needed because cannot tell if its a user initiated event, so disallow pause
                     if (this._expectedPlaybackState === 'playing') {
                         this._player.play();
                     }

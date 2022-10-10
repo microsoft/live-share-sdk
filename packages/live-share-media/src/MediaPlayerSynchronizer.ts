@@ -7,7 +7,7 @@ import { EphemeralTelemetryLogger, IEvent, TimeInterval } from '@microsoft/live-
 import EventEmitter from 'events';
 import { ExtendedMediaSessionAction, ExtendedMediaSessionPlaybackState, ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionActionDetails, MediaSessionCoordinatorEvents, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
 import { EphemeralMediaSession } from './EphemeralMediaSession';
-import { VolumeLimiter } from './VolumeLimiter';
+import { VolumeManager } from './VolumeManager';
 import { IMediaPlayer } from './IMediaPlayer';
 import { TelemetryEvents } from './internals';
 
@@ -53,7 +53,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private _logger: EphemeralTelemetryLogger;
     private _player: IMediaPlayer;
     private _mediaSession: EphemeralMediaSession;
-    private _volumeLimiter: VolumeLimiter;
+    private _volumeManager: VolumeManager;
     private _onEnd?: () => void;
     private _onPlayerEvent: EventListener;
     private _seekSuspension?: MediaSessionCoordinatorSuspension;
@@ -72,7 +72,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this._player = player;
         this._mediaSession = mediaSession;
         this._logger = mediaSession.logger;
-        this._volumeLimiter = new VolumeLimiter(player);
+        this._volumeManager = new VolumeManager(player);
         this._onEnd = onEnd;
 
         // Listen for player state requests
@@ -261,8 +261,8 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     /**
      * Volume limiter used to temporarily reduce the videos volume when someone speaks in a meeting.
      */
-    public get volumeLimiter(): VolumeLimiter {
-        return this._volumeLimiter;
+    public get volumeManager(): VolumeManager {
+        return this._volumeManager;
     }
 
     /**

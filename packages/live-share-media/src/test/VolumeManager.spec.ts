@@ -1,27 +1,28 @@
 import { strict as assert } from "assert";
 import { IMediaPlayer } from "../IMediaPlayer"
-import { LevelType, VolumeLimiter } from "../VolumeLimiter"
+import { LevelType, VolumeManager } from "../VolumeManager"
 import { Deferred } from '@microsoft/live-share/src/test/Deferred';
 
-describe('VolumeLimiter', () => {
+describe('VolumeManager', () => {
     it('should ramp down volume', async () => {
         const testAwait = new Deferred();
         const player = new TestMediaPlayer();
-        const limiter = new VolumeLimiter(player);
+        player.volume = 1.0
+        const volumeManager = new VolumeManager(player);
 
         assert(player.volume == 1.0);
-        limiter.start();
+        volumeManager.start();
         setTimeout(() => {
             // check volume at halfway point
             assert(player.volume > 0.4);
             assert(player.volume < 0.6);
-        }, limiter.volumeChangeDuration * 1000 / 2);
+        }, volumeManager.volumeChangeDuration * 1000 / 2);
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
-            assert(player.volume == limiter.level);
+            assert(player.volume == volumeManager.level);
             testAwait.resolve();
-        }, limiter.volumeChangeDuration * 1000 + 20);
+        }, volumeManager.volumeChangeDuration * 1000 + 20);
 
         await testAwait.promise;
     });
@@ -29,29 +30,30 @@ describe('VolumeLimiter', () => {
     it('should ramp up volume', async () => {
         const testAwait = new Deferred();
         const player = new TestMediaPlayer();
-        const limiter = new VolumeLimiter(player);
+        player.volume = 1.0
+        const volumeManager = new VolumeManager(player);
 
         // limit at start
-        limiter.start();
+        volumeManager.start();
 
         // when limited all the way, test ramp up
         setTimeout(() => {
-            assert(player.volume == limiter.level);
-            limiter.stop();
+            assert(player.volume == volumeManager.level);
+            volumeManager.stop();
 
             setTimeout(() => {
                 // check volume at halfway point
                 assert(player.volume > 0.4);
                 assert(player.volume < 0.6);
-            }, limiter.volumeChangeDuration * 1000 / 2);
+            }, volumeManager.volumeChangeDuration * 1000 / 2);
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
-                assert(player.volume == limiter.selectedVolume);
+                assert(player.volume == volumeManager.selectedVolume);
                 testAwait.resolve();
-            }, limiter.volumeChangeDuration * 1000 + 20);
+            }, volumeManager.volumeChangeDuration * 1000 + 20);
 
-        }, limiter.volumeChangeDuration * 1000 + 20);
+        }, volumeManager.volumeChangeDuration * 1000 + 20);
 
         await testAwait.promise;
     });
@@ -59,23 +61,24 @@ describe('VolumeLimiter', () => {
     it('should ramp down halfway, then ramp up', async () => {
         const testAwait = new Deferred();
         const player = new TestMediaPlayer();
-        const limiter = new VolumeLimiter(player);
+        player.volume = 1.0
 
-        assert(player.volume == 1.0);
-        limiter.start();
+        const volumeManager = new VolumeManager(player);
+
+        volumeManager.start();
         setTimeout(() => {
             // check volume at halfway point, begin ramping other direction
             assert(player.volume > 0.4);
             assert(player.volume < 0.6);
-            limiter.stop();
+            volumeManager.stop();
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
-                assert(player.volume == limiter.selectedVolume);
+                assert(player.volume == volumeManager.selectedVolume);
                 testAwait.resolve();
-            }, limiter.volumeChangeDuration * 1000 + 20);
+            }, volumeManager.volumeChangeDuration * 1000 + 20);
 
-        }, limiter.volumeChangeDuration * 1000 / 2);
+        }, volumeManager.volumeChangeDuration * 1000 / 2);
 
         await testAwait.promise;
     });
@@ -83,21 +86,22 @@ describe('VolumeLimiter', () => {
     it('ramp using selected volume', async () => {
         const testAwait = new Deferred();
         const player = new TestMediaPlayer();
-        const limiter = new VolumeLimiter(player);
+        player.volume = 1.0
 
-        assert(player.volume == 1.0);
-        limiter.selectedVolume = 0.3;
+        const volumeManager = new VolumeManager(player);
+
+        volumeManager.selectedVolume = 0.3;
         setTimeout(() => {
             // check volume at halfway point
             assert(player.volume > 0.6);
             assert(player.volume < 0.7);
-        }, limiter.volumeChangeDuration * 1000 / 2);
+        }, volumeManager.volumeChangeDuration * 1000 / 2);
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
-            assert(player.volume == limiter.selectedVolume);
+            assert(player.volume == volumeManager.selectedVolume);
             testAwait.resolve();
-        }, limiter.volumeChangeDuration * 1000 + 20);
+        }, volumeManager.volumeChangeDuration * 1000 + 20);
 
         await testAwait.promise;
     });
@@ -105,25 +109,25 @@ describe('VolumeLimiter', () => {
     it('enable limit, change selected volume, then disable limit', async () => {
         const testAwait = new Deferred();
         const player = new TestMediaPlayer();
-        const limiter = new VolumeLimiter(player);
+        player.volume = 1.0
+        const volumeManager = new VolumeManager(player);
 
-        assert(player.volume == 1.0);
-        limiter.start();
+        volumeManager.start();
         setTimeout(() => {
             // check volume at halfway point, begin ramping other direction with lower selected volume
             assert(player.volume > 0.4);
             assert(player.volume < 0.6);
 
-            limiter.selectedVolume = 0.7;
-            limiter.stop();
+            volumeManager.selectedVolume = 0.7;
+            volumeManager.stop();
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
-                assert(player.volume === limiter.selectedVolume);
+                assert(player.volume === volumeManager.selectedVolume);
                 testAwait.resolve();
-            }, limiter.volumeChangeDuration * 1000 + 20);
+            }, volumeManager.volumeChangeDuration * 1000 + 20);
 
-        }, limiter.volumeChangeDuration * 1000 / 2);
+        }, volumeManager.volumeChangeDuration * 1000 / 2);
 
         await testAwait.promise;
     });
@@ -131,22 +135,23 @@ describe('VolumeLimiter', () => {
     it('ramp down with selected volume to 0.3, then up to 0.8', async () => {
         const testAwait = new Deferred();
         const player = new TestMediaPlayer();
-        const limiter = new VolumeLimiter(player);
+        player.volume = 1.0
 
-        assert(player.volume == 1.0);
-        limiter.selectedVolume = 0.3;
+        const volumeManager = new VolumeManager(player);
+        volumeManager.selectedVolume = 0.3;
+
         setTimeout(() => {
             // check volume at halfway point
             assert(player.volume > 0.6);
             assert(player.volume < 0.7);
-            limiter.selectedVolume = 0.8;
+            volumeManager.selectedVolume = 0.8;
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
-                assert(player.volume == limiter.selectedVolume);
+                assert(player.volume == volumeManager.selectedVolume);
                 testAwait.resolve();
-            }, limiter.volumeChangeDuration * 1000 + 20);
-        }, limiter.volumeChangeDuration * 1000 / 2);
+            }, volumeManager.volumeChangeDuration * 1000 + 20);
+        }, volumeManager.volumeChangeDuration * 1000 / 2);
 
         await testAwait.promise;
     });
@@ -154,24 +159,25 @@ describe('VolumeLimiter', () => {
     it('test 50% limiting', async () => {
         const testAwait = new Deferred();
         const player = new TestMediaPlayer();
-        const limiter = new VolumeLimiter(player);
-        limiter.levelType = LevelType.percentage;
-        limiter.level = 0.5;
+        player.volume = 1.0
 
-        assert(player.volume == 1.0);
-        limiter.start();
+        const volumeManager = new VolumeManager(player);
+        volumeManager.levelType = LevelType.percentage;
+        volumeManager.level = 0.5;
+
+        volumeManager.start();
 
         setTimeout(() => {
             // check volume at halfway point
             assert(player.volume > 0.7);
             assert(player.volume < 0.8);
-        }, limiter.volumeChangeDuration * 1000 / 2);
+        }, volumeManager.volumeChangeDuration * 1000 / 2);
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
-            assert(player.volume == limiter.level * limiter.selectedVolume);
+            assert(player.volume == volumeManager.level * volumeManager.selectedVolume);
             testAwait.resolve();
-        }, limiter.volumeChangeDuration * 1000 + 20);
+        }, volumeManager.volumeChangeDuration * 1000 + 20);
 
         await testAwait.promise;
     });

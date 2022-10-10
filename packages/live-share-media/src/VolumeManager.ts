@@ -11,11 +11,12 @@ export enum LevelType { fixed, percentage }
 /**
  * Smooth audio level changes when selectedVolume is modified, or if volume limiting has started/ended.
  */
-export class VolumeLimiter {
+export class VolumeManager {
     private readonly _player: IMediaPlayer;
     private readonly _volumeChangeDuration = new TimeInterval(500);
 
-    private _selectedVolume = 1.0;
+    // defaults to player volume
+    private _selectedVolume = 0.0;
     private _limited = false;
     private _level = 0.1
     private _levelType: LevelType = LevelType.fixed;
@@ -25,7 +26,7 @@ export class VolumeLimiter {
 
     constructor(player: IMediaPlayer) {
         this._player = player;
-        this._player.volume = this._selectedVolume;
+        this._selectedVolume = this._player.volume;
     }
 
     /**
@@ -41,7 +42,7 @@ export class VolumeLimiter {
 
     public set selectedVolume(value: number) {
         if (value < 0 || value > 1.0) {
-            throw new Error(`VolumeLimiter: cannot set selectedVolume to ${value}. Level must be between 0.0 and 1.0.`);
+            throw new Error(`VolumeManager: cannot set selectedVolume to ${value}. Level must be between 0.0 and 1.0.`);
         }
 
         this._selectedVolume = value;
@@ -68,7 +69,7 @@ export class VolumeLimiter {
 
     public set level(value: number) {
         if (value < 0 || value > 1.0) {
-            throw new Error(`VolumeLimiter: cannot set level to ${value}. Level must be between 0.0 and 1.0.`);
+            throw new Error(`VolumeManager: cannot set level to ${value}. Level must be between 0.0 and 1.0.`);
         }
 
         this._level = value;

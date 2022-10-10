@@ -144,9 +144,9 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         object2.initialize();
 
 
-        object1.start(20);
+        object1.start(40);
         setTimeout(() => {
-            object1.start(20);
+            object1.start(40);
             setTimeout(() => {
                 object1.start(20);
                 setTimeout(() => {

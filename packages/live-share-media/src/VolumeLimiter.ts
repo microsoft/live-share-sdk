@@ -121,7 +121,7 @@ export class VolumeLimiter {
         const adjustVolume = () => {
             // Schedule next animation frame if volume change not finished
             if (this.millisSinceVolumeChangeStart() <= this._volumeChangeDuration.milliseconds) {
-                this._player.volume = this.computeInteroplatedVolume();
+                this._player.volume = this.computeInterpolatedVolume();
                 this.scheduleAnimationFrame(adjustVolume);
             } else {
                 this._player.volume = this.computeTargetVolume();
@@ -145,7 +145,7 @@ export class VolumeLimiter {
         }
     }
 
-    private computeInteroplatedVolume(): number {
+    private computeInterpolatedVolume(): number {
         const volumeChangeMillis = this._volumeChangeDuration.milliseconds
         const volumeDifference = this.computeTargetVolume() - this._startVolume
         const adjustmentFromStart = volumeDifference / volumeChangeMillis * this.millisSinceVolumeChangeStart()

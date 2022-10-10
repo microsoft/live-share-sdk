@@ -89,7 +89,7 @@ export class VolumeLimiter {
      * Amount of time, in seconds, it should take to change the volume up or down to the desired level.
      *
      * @remarks
-     * Default `rampDuration` is 0.5 seconds
+     * Default `rampDuration` is 0.5 seconds.
      */
     public get rampDuration(): number {
         return this._rampDuration.seconds;
@@ -101,6 +101,8 @@ export class VolumeLimiter {
 
     /**
      * Limits volume based on `level` and `levelType` properties.
+     * @see `level`
+     * @see `levelType`
      */
     public start(): void {
         this._limited = true;

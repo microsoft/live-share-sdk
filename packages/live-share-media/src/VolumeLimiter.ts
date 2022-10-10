@@ -86,7 +86,7 @@ export class VolumeLimiter {
     }
 
     /**
-     * Amount of time, in seconds, it should take to ramp the volume down to the desired level.
+     * Amount of time, in seconds, it should take to change the volume up or down to the desired level.
      */
     public get rampDuration(): number {
         return this._rampDuration.seconds;

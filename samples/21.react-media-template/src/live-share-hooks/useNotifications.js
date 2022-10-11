@@ -4,8 +4,7 @@
  */
 
 // eslint-disable-next-line
-import { EphemeralEvent } from "@microsoft/live-share";
-import * as microsoftTeams from "@microsoft/teams-js";
+import { LiveEvent } from "@microsoft/live-share";
 import { useState, useEffect, useCallback } from "react";
 
 /**
@@ -13,7 +12,7 @@ import { useState, useEffect, useCallback } from "react";
  *
  * @remarks
  *
- * @param {EphemeralEvent} notificationEvent presence object from Fluid container.
+ * @param {LiveEvent} notificationEvent presence object from Fluid container.
  * @param {microsoftTeams.app.Context} context Teams context object
  * @returns `{notificationStarted, notificationToDisplay, sendNotification}` where:
  * - `notificationStarted` is a boolean indicating whether `notificationEvent.initialize()` has been called.

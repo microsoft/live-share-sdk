@@ -3,12 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import {
-  EphemeralEvent,
-  // eslint-disable-next-line
-  EphemeralPresence,
-} from "@microsoft/live-share";
-import * as microsoftTeams from "@microsoft/teams-js";
+import { LiveEvent } from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
 
 /**
@@ -16,7 +11,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
  *
  * @remarks
  *
- * @param {EphemeralPresence} presence presence object from Fluid container.
+ * @param {LivePresence} presence presence object from Fluid container.
  * @param {UserMeetingRole[]} acceptPlaybackChangesFrom List of acceptable roles for playback transport commands.
  * @param {microsoftTeams.app.Context} context Teams context object
  * @returns `{started, localUser, users, presentingUser, localUserIsEligiblePresenter, localUserIsPresenting, takeControl}` where:
@@ -89,7 +84,7 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
       presence
         .initialize(undefined, {
           teamsUserId: context.user?.id,
-          joinedTimestamp: EphemeralEvent.getTimestamp(),
+          joinedTimestamp: LiveEvent.getTimestamp(),
           name,
         })
         .then(() => {

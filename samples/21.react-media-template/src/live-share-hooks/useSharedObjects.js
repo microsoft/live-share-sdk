@@ -6,12 +6,12 @@
 import { LiveShareClient } from "@microsoft/live-share";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
-import { EphemeralMediaSession } from "@microsoft/live-share-media";
+import { LiveMediaSession } from "@microsoft/live-share-media";
 import { SharedMap } from "fluid-framework";
 import { useEffect, useState } from "react";
 import {
-  EphemeralEvent,
-  EphemeralPresence,
+  LiveEvent,
+  LivePresence,
 } from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";
 
@@ -67,7 +67,7 @@ export function useSharedObjects() {
       mediaList.forEach((mediaItem) => {
         container.initialObjects.playlistMap.set(mediaItem.id, {
           ...mediaItem,
-          timeAdded: EphemeralEvent.getTimestamp(),
+          timeAdded: LiveEvent.getTimestamp(),
         });
       });
       container.initialObjects.playlistMap.set(
@@ -79,9 +79,9 @@ export function useSharedObjects() {
     // Define container schema
     const schema = {
       initialObjects: {
-        presence: EphemeralPresence,
-        mediaSession: EphemeralMediaSession,
-        notificationEvent: EphemeralEvent,
+        presence: LivePresence,
+        mediaSession: LiveMediaSession,
+        notificationEvent: LiveEvent,
         liveCanvas: LiveCanvas,
         takeControlMap: SharedMap,
         playlistMap: SharedMap,

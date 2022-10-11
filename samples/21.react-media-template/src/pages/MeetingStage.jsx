@@ -25,12 +25,12 @@ const MeetingStage = () => {
 
   // Fluid objects hook which uses LiveShareClient to create container
   const {
-    presence, // EphemeralPresence Fluid object
-    mediaSession, // EphemeralMediaSession Fluid object
-    notificationEvent, // EphemeralEvent Fluid object
+    presence, // LivePresence Fluid object
+    mediaSession, // LiveMediaSession Fluid object
+    notificationEvent, // LiveEvent Fluid object
     takeControlMap, // SharedMap Fluid object for presenter control
     playlistMap, // SharedMap Fluid object for playlist
-    liveCanvas, // EphemeralEvent Fluid object
+    liveCanvas, // LiveEvent Fluid object
     container, // Fluid container
     error, // Join container error
   } = liveShareHooks.useSharedObjects();
@@ -92,7 +92,7 @@ const MeetingStage = () => {
   );
 
   // useLiveCanvas hook will insert the canvas as a child of hosting element
-  // and starts the Live Inking session.It returns set of callbacks for clearing 
+  // and starts the Live Inking session.It returns set of callbacks for clearing
   // the canvas, changing Ink tool type, and brush colors.
   const {
     inkingManager, // Manager class
@@ -129,7 +129,7 @@ const MeetingStage = () => {
     mediaSessionStarted,
     presenceStarted,
     takeControlStarted,
-    playlistStarted,    
+    playlistStarted,
   ]);
 
   // Render the media player

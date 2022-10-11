@@ -23,7 +23,7 @@ const MeetingStage = () => {
   const [answer, answerRef, setAnswer] = useStateRef(null);
   const previousStateRef = useRef();
 
-  // EphemeralState hook for synchronized object storage for game state
+  // LiveState hook for synchronized object storage for game state
   const {
     pokerStateStarted,
     state,
@@ -33,7 +33,7 @@ const MeetingStage = () => {
     onStartWaiting,
   } = usePokerState(pokerState);
 
-  // EphemeralPresence hook for tracking online users
+  // LivePresence hook for tracking online users
   const {
     presenceStarted,
     users,
@@ -51,7 +51,7 @@ const MeetingStage = () => {
     userStoryId
   );
 
-  // EphemeralTimer hook for tracking round timer
+  // LiveTimer hook for tracking round timer
   const { timerMilliRemaining, timerStarted, beginTimer, pauseTimer } =
     useTimer(timer, onStartDiscussion);
 

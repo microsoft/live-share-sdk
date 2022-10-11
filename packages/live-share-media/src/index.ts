@@ -12,4 +12,4 @@ export * from './MediaPlayerSynchronizer';
 export * from './MediaSessionActionThrottler';
 export * from './MediaSessionExtensions';
 export * from './RepeatedActionThrottler';
-export * from './VolumeLimiter';
+export * from './VolumeManager';

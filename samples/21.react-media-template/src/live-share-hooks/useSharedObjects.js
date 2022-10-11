@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { TeamsFluidClient } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { EphemeralMediaSession } from "@microsoft/live-share-media";
@@ -20,7 +20,7 @@ import { mediaList } from "../utils/media-list";
  *
  * @remarks
  * This is an application specific hook that defines the fluid schema of Distributed Data Structures (DDS)
- * used by the app and passes that schema to the `TeamsFluidClient` to create/load your Fluid container.
+ * used by the app and passes that schema to the `LiveShareClient` to create/load your Fluid container.
  *
  * @returns Shared objects managed by the apps fluid container.
  */
@@ -90,7 +90,7 @@ export function useSharedObjects() {
 
     // Create the client, join container, and set results
     console.log("useSharedObjects: joining container");
-    const client = new TeamsFluidClient(clientProps);
+    const client = new LiveShareClient(clientProps);
     client
       .joinContainer(schema, onFirstInitialize)
       .then((results) => {

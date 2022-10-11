@@ -4,10 +4,10 @@
  */
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
-import { IRuntimeSignaler } from "./EphemeralEventScope";
+import { IRuntimeSignaler } from "./LiveEventScope";
 
 /**
- * Callback function used to the get the current state of an ephemeral object that's being
+ * Callback function used to the get the current state of an live object that's being
  * synchronized.
  * @template TState Type of state object being synchronized.
  * @param connecting If true a "connect" message is being sent and the initial connecting state of the object is being requested.
@@ -16,7 +16,7 @@ import { IRuntimeSignaler } from "./EphemeralEventScope";
 export type GetSynchronizationState<TState extends object> = (connecting: boolean) => TState|undefined;
 
 /**
- * Callback function used to the receive the state update sent by a remote ephemeral object.
+ * Callback function used to the receive the state update sent by a remote live object.
  * @template TState Type of state object being synchronized.
  * @param connecting If true a "connect" message was received and `state` represents the remote objects initial state.
  * @param state The remote object initial or current state.
@@ -29,7 +29,7 @@ export type GetSynchronizationState<TState extends object> = (connecting: boolea
  * Duck type of something that provides the expected signalling functionality at the container level.
  *
  * @remarks
- * Simplifies the mocks needed to unit test the `EphemeralObjectSynchronizer`. Applications can
+ * Simplifies the mocks needed to unit test the `LiveObjectSynchronizer`. Applications can
  * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
  */
 export interface IContainerRuntimeSignaler {
@@ -39,11 +39,11 @@ export interface IContainerRuntimeSignaler {
 
 
 /**
- * Synchronizes the underlying state of an ephemeral object with all of the other instances of
+ * Synchronizes the underlying state of an live object with all of the other instances of
  * the object connected to the same container.
  *
  * @remarks
- * When a synchronizer for a ephemeral object is first created it will broadcast a `"connect"`
+ * When a synchronizer for a live object is first created it will broadcast a `"connect"`
  * message, containing the objects initial state, to all other instances of the object that are
  * currently running on other clients. Those instances will respond to the sent "connect" message
  * by broadcasting an `"update"` message containing the current state of their object.
@@ -52,37 +52,37 @@ export interface IContainerRuntimeSignaler {
  * in `updateState` callback with the remote objects state and the senders clientId for role
  * verification purposes. The logic for processing these state updates will vary but implementations
  * will generally want to include a timestamp in their state update so that clients can protect
- * against out-of-order and delayed updates. Deriving your state update from `IEphemeralEvent` and
- * using `EphemeralEvent.isNewer` to compare the received update with the current update makes this
+ * against out-of-order and delayed updates. Deriving your state update from `ILiveEvent` and
+ * using `LiveEvent.isNewer` to compare the received update with the current update makes this
  * simple.
  *
  * Once the initial "connect" event is sent, the synchronizer will periodically broadcast additional
- * "update" events containing the ephemeral objects current state. This redundancy helps to guard
+ * "update" events containing the live objects current state. This redundancy helps to guard
  * against missed events and can be used as a ping for scenarios like presence where users can
  * disconnect from the container without notice.  The rate at which these ping events are sent can be
- * adjusted globally by setting the static `EphemeralObjectSynchronizer.updateInterval` property.
+ * adjusted globally by setting the static `LiveObjectSynchronizer.updateInterval` property.
  *
  * While each new synchronizer instance will result in a separate "connect" message being sent, the
  * periodic updates that are sent get batched together into a single "update" message. This lets apps
- * add as many ephemeral objects to a container as they'd like without increasing the number of
+ * add as many live objects to a container as they'd like without increasing the number of
  * messages being broadcast to the container.
  *
- * Only a single synchronizer is allowed per ephemeral object. Attempting to create more than one
- * synchronizer for the same ephemeral object will result in an exception being raised.
+ * Only a single synchronizer is allowed per live object. Attempting to create more than one
+ * synchronizer for the same live object will result in an exception being raised.
  * @template TState Type of state object being synchronized. This object should be a simple JSON object that uses only serializable primitives.
  */
-export class EphemeralObjectSynchronizer<TState extends object> {
+export class LiveObjectSynchronizer<TState extends object> {
     private readonly _id: string;
     private readonly _containerRuntime: IContainerRuntimeSignaler;
     private _isDisposed = false;
 
     /**
-     * Creates a new `EphemeralObjectSynchronizer` instance.
+     * Creates a new `LiveObjectSynchronizer` instance.
      *
      * @remarks
      * Consumers should subscribe to the synchronizers `"received"` event to process the remote
-     * state updates being sent by other instances of the ephemeral object.
-     * @param id ID of the ephemeral object being synchronized. This should be the value of `this.id` in a class that derives from `DataObject`.
+     * state updates being sent by other instances of the live object.
+     * @param id ID of the live object being synchronized. This should be the value of `this.id` in a class that derives from `DataObject`.
      ^ @param runtime The objects local runtime. This should be the value of `this.runtime`.
      * @param containerRuntime The runtime for the objects container. This should be the value of `this.context.containerRuntime`.
      * @param getState A function called to retrieve the objects current state. This will be called prior to a "connect" or "update" message being sent.
@@ -92,7 +92,7 @@ export class EphemeralObjectSynchronizer<TState extends object> {
         this._id = id;
         this._containerRuntime = containerRuntime;
 
-        EphemeralObjectSynchronizer.registerObject<TState>(runtime, containerRuntime, id, { getState, updateState });
+        LiveObjectSynchronizer.registerObject<TState>(runtime, containerRuntime, id, { getState, updateState });
     }
 
     /**
@@ -104,7 +104,7 @@ export class EphemeralObjectSynchronizer<TState extends object> {
     public dispose(): void {
         if (!this._isDisposed) {
             this._isDisposed = true;
-            EphemeralObjectSynchronizer.unregisterObject(this._containerRuntime, this._id);
+            LiveObjectSynchronizer.unregisterObject(this._containerRuntime, this._id);
         }
     }
 
@@ -189,7 +189,7 @@ class ContainerSynchronizer {
 
     public registerObject(id: string, handlers: GetAndUpdateStateHandlers<object>): void {
         if (this._objects.has(id)) {
-            throw new Error(`EphemeralObjectSynchronizer: too many calls to registerObject() for object '${id}'`);
+            throw new Error(`LiveObjectSynchronizer: too many calls to registerObject() for object '${id}'`);
         }
 
         // Save object ref
@@ -214,9 +214,9 @@ class ContainerSynchronizer {
                 try {
                     this.sendGroupEvent(this._connectedKeys, UPDATE_EVENT);
                 } catch (err: any) {
-                    console.error(`EphemeralObjectSynchronizer: error sending update - ${err.toString()}`);
+                    console.error(`LiveObjectSynchronizer: error sending update - ${err.toString()}`);
                 }
-            }, EphemeralObjectSynchronizer.updateInterval);
+            }, LiveObjectSynchronizer.updateInterval);
         }
     }
 
@@ -251,7 +251,7 @@ class ContainerSynchronizer {
                     updates[id] = state;
                 }
             } catch (err: any) {
-                console.error(`EphemeralObjectSynchronizer: error getting an objects state - ${err.toString()}`);
+                console.error(`LiveObjectSynchronizer: error getting an objects state - ${err.toString()}`);
             }
         });
 
@@ -275,7 +275,7 @@ class ContainerSynchronizer {
                         handlers.updateState(connecting, state, senderId);
                     }
                 } catch (err: any) {
-                    console.error(`EphemeralObjectSynchronizer: error processing received update - ${err.toString()}`);
+                    console.error(`LiveObjectSynchronizer: error processing received update - ${err.toString()}`);
                 }
             }
         }

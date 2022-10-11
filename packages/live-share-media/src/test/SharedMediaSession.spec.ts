@@ -6,9 +6,9 @@
 import 'mocha';
 import { strict as assert } from 'assert';
 import { CollaborationSpace, CollaborationSpaceEvents, Deferred } from '@microsoft/teams-collaboration';
-import { LastMediaPositionState } from '../EphemeralMediaSessionCoordinator';
+import { LastMediaPositionState } from '../LiveMediaSessionCoordinator';
 import { ExtendedMediaMetadata, ExtendedMediaSessionActionDetails } from '../MediaSessionExtensions';
-import { SharedMediaSession } from '../EphemeralMediaSession';
+import { SharedMediaSession } from '../LiveMediaSession';
 
 export class TestMediaSession extends SharedMediaSession {
     private done = new Deferred<ExtendedMediaSessionActionDetails>();

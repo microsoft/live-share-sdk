@@ -4,17 +4,18 @@
  */
 
 import { ITokenProvider, ITokenResponse } from "@fluidframework/routerlicious-driver";
-import { TeamsClientApi, TestTeamsClientApi } from './TestTeamsClientApi';
+import { ILiveShareHost } from "../interfaces";
 
 /**
  * @hidden
- * Token Provider implementation for connecting to Cowatch Cloud endpoint
+ * Token Provider implementation for connecting to a Live Share Host
  */
-export class TeamsFluidTokenProvider implements ITokenProvider {
-    private _teamsClient?: TeamsClientApi;
+export class LiveShareTokenProvider implements ITokenProvider {
     private _frsToken?: string;
     private _documentId?: string;
     private _tenantId?: string;
+
+    public constructor (private readonly _host: ILiveShareHost) { }
 
     public async fetchOrdererToken(tenantId: string, documentId?: string, refresh?: boolean): Promise<ITokenResponse> {
         const tokenResponse = await this.fetchFluidToken(tenantId, documentId, refresh);
@@ -27,14 +28,12 @@ export class TeamsFluidTokenProvider implements ITokenProvider {
     }
 
     private async fetchFluidToken(tenantId: string, documentId?: string, refresh?: boolean): Promise<ITokenResponse> {
-        const teamsClient = await this.getTeamsClient();
-
         let fromCache: boolean;
         if (!this._frsToken
             || refresh
             || this._tenantId !== tenantId
             || this._documentId !== documentId) {
-            this._frsToken = await teamsClient.interactive.getFluidToken(documentId);
+            this._frsToken = await this._host.getFluidToken(documentId);
             fromCache = false;
         } else {
             fromCache = true;
@@ -47,17 +46,5 @@ export class TeamsFluidTokenProvider implements ITokenProvider {
             jwt: this._frsToken,
             fromCache,
         };
-    }
-
-    private async getTeamsClient(): Promise<TeamsClientApi> {
-        if (!this._teamsClient) {
-            if (window) {
-                this._teamsClient = (await import('@microsoft/teams-js') as any) as TeamsClientApi;
-            } else {
-                this._teamsClient = new TestTeamsClientApi();
-            }
-        }
-
-        return this._teamsClient;
     }
 }

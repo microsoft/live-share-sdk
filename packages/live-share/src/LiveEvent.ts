@@ -6,15 +6,15 @@
 import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IEvent } from "@fluidframework/common-definitions";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
-import { IEphemeralEvent, ITimestampProvider, IRoleVerifier, UserMeetingRole, IClientTimestamp } from "./interfaces";
-import { EphemeralEventScope } from './EphemeralEventScope';
-import { EphemeralEventTarget } from './EphemeralEventTarget';
+import { ILiveEvent, ITimestampProvider, IRoleVerifier, UserMeetingRole, IClientTimestamp } from "./interfaces";
+import { LiveEventScope } from './LiveEventScope';
+import { LiveEventTarget } from './LiveEventTarget';
 import { LocalRoleVerifier } from './LocalRoleVerifier';
 
 /**
- * Events supported by `EphemeralEvent` object.
+ * Events supported by `LiveEvent` object.
  */
-export enum EphemeralEventEvents {
+export enum LiveEventEvents {
     /**
      * An event has been sent or received.
      */
@@ -22,10 +22,10 @@ export enum EphemeralEventEvents {
 }
 
 /**
- * Event typings for `EphemeralEvent` class.
+ * Event typings for `LiveEvent` class.
  * @template TEvent Type of event to broadcast.
  */
-export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends IEvent {
+export interface ILiveEventEvents<TEvent extends ILiveEvent> extends IEvent {
     /**
      * A remote event was received or a local event was sent.
      * @param event Name of event.
@@ -37,33 +37,33 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
 }
 
 /**
- * Ephemeral fluid object that broadcasts an event to other clients and a set of static event 
+ * Live fluid object that broadcasts an event to other clients and a set of static event 
  * related helpers.
  * 
  * #### remarks
  * Applications should call `on('received', (evt, local) => {})` to listen for local events sent 
  * and remote events received. Events aren't guaranteed to be delivered so you should limit their 
  * use to sending events you're ok with potentially being missed. Reactions are a good use case for
- * `EphemeralEvents`. Use something like the `EphemeralState` class when syncing state. 
+ * `LiveEvents`. Use something like the `LiveState` class when syncing state. 
  * @template TEvent Type of event to broadcast.
  */
- export class EphemeralEvent<TEvent extends IEphemeralEvent = IEphemeralEvent> extends DataObject<{Events: IEphemeralEventEvents<TEvent>}> {
+ export class LiveEvent<TEvent extends ILiveEvent = ILiveEvent> extends DataObject<{Events: ILiveEventEvents<TEvent>}> {
     private static _timestampProvider: ITimestampProvider = new LocalTimestampProvider();
     private static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
     
-    private _eventTarget?: EphemeralEventTarget<TEvent>; 
+    private _eventTarget?: LiveEventTarget<TEvent>; 
 
     /**
      * The objects fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/live-share:EphemeralEvent`;
+    public static readonly TypeName = `@microsoft/live-share:LiveEvent`;
 
     /**
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        EphemeralEvent.TypeName,
-        EphemeralEvent,
+        LiveEvent.TypeName,
+        LiveEvent,
         [],
         {}
     );
@@ -89,25 +89,16 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      */
      public initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
         if (this._eventTarget) {
-            throw new Error(`EphemeralEvent already started.`);
+            throw new Error(`LiveEvent already started.`);
         }
 
-        const scope = new EphemeralEventScope(this.runtime, allowedRoles);
-        this._eventTarget = new EphemeralEventTarget(scope, 'event', (evt, local) => {
-            this.emit(EphemeralEventEvents.received, evt, local);
+        const scope = new LiveEventScope(this.runtime, allowedRoles);
+        this._eventTarget = new LiveEventTarget(scope, 'event', (evt, local) => {
+            this.emit(LiveEventEvents.received, evt, local);
         });
 
         return Promise.resolve();
     }
-
-    /**
-     * @deprecated initialize should be used instead
-     * Starts the object.
-     * @param allowedRoles Optional. List of roles allowed to send events.
-     */
-     public start(allowedRoles?: UserMeetingRole[]): Promise<void> {
-        return this.initialize(allowedRoles)
-     }
 
     /**
      * Broadcasts an event to all other clients.
@@ -122,7 +113,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      */
     public sendEvent(evt?: Partial<TEvent>): TEvent {
         if (!this._eventTarget) {
-            throw new Error(`EphemeralEvent not started.`);
+            throw new Error(`LiveEvent not started.`);
         }
 
         return this._eventTarget.sendEvent(evt);
@@ -132,7 +123,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      * Returns the current timestamp as the number of milliseconds sine the Unix Epoch.
      */
     public static getTimestamp(): number {
-        return EphemeralEvent._timestampProvider.getTimestamp();
+        return LiveEvent._timestampProvider.getTimestamp();
     }
 
     /**
@@ -141,7 +132,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      * @returns The list of roles for the client.
      */
     public static getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        return EphemeralEvent._roleVerifier.getClientRoles(clientId);
+        return LiveEvent._roleVerifier.getClientRoles(clientId);
     }
 
      /**
@@ -150,7 +141,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      * @returns The list of roles for the client.
      */
      public static registerClientId(clientId: string): Promise<UserMeetingRole[]> {
-        return EphemeralEvent._roleVerifier.registerClientId(clientId);
+        return LiveEvent._roleVerifier.registerClientId(clientId);
     }
 
     /**
@@ -160,14 +151,14 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      * @returns True if the client has one of the specified roles.
      */
     public static verifyRolesAllowed(clientId: string, allowedRoles: UserMeetingRole[]): Promise<boolean> {
-        return EphemeralEvent._roleVerifier.verifyRolesAllowed(clientId, allowedRoles);
+        return LiveEvent._roleVerifier.verifyRolesAllowed(clientId, allowedRoles);
     }
      
     /**
      * Returns true if a received event is newer then the current event.
      * 
      * #### remarks
-     * Used when building new Ephemeral objects to process state change events. The `isNewer()` 
+     * Used when building new Live objects to process state change events. The `isNewer()` 
      * method implements an algorithm that deals with conflicting events that have the same timestamp
      * and older events that should have debounced the current event.
      * 
@@ -220,7 +211,7 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      * Assigns a new timestamp provider.
      */
     public static setTimestampProvider(provider: ITimestampProvider): void {
-        EphemeralEvent._timestampProvider = provider;
+        LiveEvent._timestampProvider = provider;
     }
 
     /**
@@ -228,6 +219,6 @@ export interface IEphemeralEventEvents<TEvent extends IEphemeralEvent> extends I
      * Assigns a new role verifier.
      */
     public static setRoleVerifier(provider: IRoleVerifier): void {
-        EphemeralEvent._roleVerifier = provider;
+        LiveEvent._roleVerifier = provider;
     }
 }

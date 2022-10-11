@@ -7,27 +7,27 @@ import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
-import { EphemeralEvent } from "../EphemeralEvent";
+import { LiveEvent } from "../LiveEvent";
 import { Deferred } from './Deferred';
 import { MockTimestampProvider } from './MockTimestampProvider';
 import { MockRoleVerifier } from './MockRoleVerifier';
 import { LocalRoleVerifier } from '../LocalRoleVerifier';
 import { LocalTimestampProvider } from '../LocalTimestampProvider';
-import { UserMeetingRole, IEphemeralEvent } from "../interfaces";
+import { UserMeetingRole, ILiveShareEvent } from "../interfaces";
 
 
-describeNoCompat("EphemeralEvent", (getTestObjectProvider) => {
+describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
-    let object1: EphemeralEvent;
-    let object2: EphemeralEvent;
+    let object1: LiveEvent;
+    let object2: LiveEvent;
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(EphemeralEvent.factory);
-        object1 = await requestFluidObject<EphemeralEvent>(container1, "default");
+        const container1 = await provider.createContainer(LiveEvent.factory);
+        object1 = await requestFluidObject<LiveEvent>(container1, "default");
 
-        const container2 = await provider.loadContainer(EphemeralEvent.factory);
-        object2 = await requestFluidObject<EphemeralEvent>(container2, "default");
+        const container2 = await provider.loadContainer(LiveEvent.factory);
+        object2 = await requestFluidObject<LiveEvent>(container2, "default");
 
         // need to be connected to send signals
         if (!container1.connected) {
@@ -97,177 +97,177 @@ describeNoCompat("EphemeralEvent", (getTestObjectProvider) => {
 
     it("Should getTimestamp() using local timestamp provider", () => {
         const now = new Date().getTime();
-        const timestamp = EphemeralEvent.getTimestamp();
+        const timestamp = LiveEvent.getTimestamp();
         assert(timestamp >= now);
     });
 
     it("Should getTimestamp() using custom timestamp providers", () => {
         const mock = new MockTimestampProvider();
-        EphemeralEvent.setTimestampProvider(mock);
+        LiveEvent.setTimestampProvider(mock);
 
         const now = new Date().getTime();
-        const timestamp = EphemeralEvent.getTimestamp();
+        const timestamp = LiveEvent.getTimestamp();
         assert(timestamp >= now, `Unexpected timestamp value`);
         assert(mock.called, `Mock not called`);
 
         // Restore local provider
-        EphemeralEvent.setTimestampProvider(new LocalTimestampProvider());
+        LiveEvent.setTimestampProvider(new LocalTimestampProvider());
     });
 
     it("Should getClientRoles() using local role verifier", async () => {
-        const roles = await EphemeralEvent.getClientRoles('test');
+        const roles = await LiveEvent.getClientRoles('test');
         assert(Array.isArray(roles), `Return value not an array`);
         assert(roles.length > 0, `no roles returned`);
     });
 
     it("Should verifyRolesAllowed() using local role verifier", async () => {
-        const allowed = await EphemeralEvent.verifyRolesAllowed('test', [UserMeetingRole.presenter]);
+        const allowed = await LiveEvent.verifyRolesAllowed('test', [UserMeetingRole.presenter]);
         assert(allowed, `Role should be allowed`);
     });
 
     it("Should getClientRoles() using custom role verifier", async () => {
         const mock = new MockRoleVerifier([UserMeetingRole.presenter]);
-        EphemeralEvent.setRoleVerifier(mock);
+        LiveEvent.setRoleVerifier(mock);
 
-        const roles = await EphemeralEvent.getClientRoles('test');
+        const roles = await LiveEvent.getClientRoles('test');
         assert(Array.isArray(roles), `Return value not an array`);
         assert(roles.length == 1, `no roles returned`);
         assert(mock.called, `mock not called`);
         assert(mock.clientId == 'test', `Invalid clientId of ${mock.clientId}`);
 
         // Restore local verifier
-        EphemeralEvent.setRoleVerifier(new LocalRoleVerifier());
+        LiveEvent.setRoleVerifier(new LocalRoleVerifier());
     });
 
     it("Should verifyRolesAllowed() using custom role verifier", async () => {
         const mock = new MockRoleVerifier([UserMeetingRole.presenter]);
-        EphemeralEvent.setRoleVerifier(mock);
+        LiveEvent.setRoleVerifier(mock);
 
-        const allowed = await EphemeralEvent.verifyRolesAllowed('test', [UserMeetingRole.presenter]);
+        const allowed = await LiveEvent.verifyRolesAllowed('test', [UserMeetingRole.presenter]);
         assert(allowed, `Role should be allowed`);
         assert(mock.called, `mock not called`);
         assert(mock.clientId == 'test', `Invalid clientId of ${mock.clientId}`);
 
         // Restore local verifier
-        EphemeralEvent.setRoleVerifier(new LocalRoleVerifier());
+        LiveEvent.setRoleVerifier(new LocalRoleVerifier());
     });
 
     it("Should allow newer received events", () => {
-        const current: IEphemeralEvent = {
+        const current: ILiveShareEvent = {
             name: 'test',
             clientId: 'CA',
             timestamp: 1000
         };
 
-        const received: IEphemeralEvent = {
+        const received: ILiveShareEvent = {
             name: 'test',
             clientId: 'CB',
             timestamp: 1001
         };
 
-        const allowed = EphemeralEvent.isNewer(current, received);
+        const allowed = LiveEvent.isNewer(current, received);
         assert(allowed, `event blocked`);
     });
 
     it("Should block older received events", () => {
-        const current: IEphemeralEvent = {
+        const current: ILiveShareEvent = {
             name: 'test',
             clientId: 'CA',
             timestamp: 1000
         };
 
-        const received: IEphemeralEvent = {
+        const received: ILiveShareEvent = {
             name: 'test',
             clientId: 'CB',
             timestamp: 999
         };
 
-        const allowed = EphemeralEvent.isNewer(current, received);
+        const allowed = LiveEvent.isNewer(current, received);
         assert(!allowed, `event allowed`);
     });
 
     it("Should block events with same timestamp from same client", () => {
-        const current: IEphemeralEvent = {
+        const current: ILiveShareEvent = {
             name: 'test',
             clientId: 'CA',
             timestamp: 1000
         };
 
-        const received: IEphemeralEvent = {
+        const received: ILiveShareEvent = {
             name: 'test',
             clientId: 'CA',
             timestamp: 1000
         };
 
-        const allowed = EphemeralEvent.isNewer(current, received);
+        const allowed = LiveEvent.isNewer(current, received);
         assert(!allowed, `event allowed`);
     });
 
     it("Should allow events with same timestamp and a different clientId that sorts lower", () => {
-        const current: IEphemeralEvent = {
+        const current: ILiveShareEvent = {
             name: 'test',
             clientId: 'CB',
             timestamp: 1000
         };
 
-        const received: IEphemeralEvent = {
+        const received: ILiveShareEvent = {
             name: 'test',
             clientId: 'CA',
             timestamp: 1000
         };
 
-        const allowed = EphemeralEvent.isNewer(current, received);
+        const allowed = LiveEvent.isNewer(current, received);
         assert(allowed, `event blocked`);
     });
 
     it("Should block events with same timestamp and a different clientId that sorts higher", () => {
-        const current: IEphemeralEvent = {
+        const current: ILiveShareEvent = {
             name: 'test',
             clientId: 'CA',
             timestamp: 1000
         };
 
-        const received: IEphemeralEvent = {
+        const received: ILiveShareEvent = {
             name: 'test',
             clientId: 'CB',
             timestamp: 1000
         };
 
-        const allowed = EphemeralEvent.isNewer(current, received);
+        const allowed = LiveEvent.isNewer(current, received);
         assert(!allowed, `event allowed`);
     });
 
     it("Should debounce newer events", () => {
-        const current: IEphemeralEvent = {
+        const current: ILiveShareEvent = {
             name: 'test',
             clientId: 'CA',
             timestamp: 1000
         };
 
-        const received: IEphemeralEvent = {
+        const received: ILiveShareEvent = {
             name: 'test',
             clientId: 'CB',
             timestamp: 1050
         };
 
-        const allowed = EphemeralEvent.isNewer(current, received, 100);
+        const allowed = LiveEvent.isNewer(current, received, 100);
         assert(!allowed, `event allowed`);
     });
 
     it("Should allow older events that would have debounced the current event", () => {
-        const current: IEphemeralEvent = {
+        const current: ILiveShareEvent = {
             name: 'test',
             clientId: 'CA',
             timestamp: 1000
         };
 
-        const received: IEphemeralEvent = {
+        const received: ILiveShareEvent = {
             name: 'test',
             clientId: 'CB',
             timestamp: 950
         };
 
-        const allowed = EphemeralEvent.isNewer(current, received, 100);
+        const allowed = LiveEvent.isNewer(current, received, 100);
         assert(allowed, `event blocked`);
     });
 });

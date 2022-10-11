@@ -3,10 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { EphemeralTelemetryLogger, IEvent, TimeInterval } from '@microsoft/live-share';
+import { LiveTelemetryLogger, IEvent, TimeInterval } from '@microsoft/live-share';
 import EventEmitter from 'events';
 import { ExtendedMediaSessionAction, ExtendedMediaSessionPlaybackState, ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionActionDetails, MediaSessionCoordinatorEvents, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
-import { EphemeralMediaSession } from './EphemeralMediaSession';
+import { LiveMediaSession } from './LiveMediaSession';
 import { VolumeLimiter } from './VolumeLimiter';
 import { IMediaPlayer } from './IMediaPlayer';
 import { TelemetryEvents } from './internals';
@@ -50,9 +50,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private static SESSION_ACTIONS: ExtendedMediaSessionAction[] = ['play', 'pause', 'seekto', 'settrack', 'datachange', 'catchup', 'wait'];
     private static PLAYER_EVENTS: string[] = ['playing', 'pause', 'ratechange', 'timeupdate', 'ended', 'loadedmetadata', 'blocked'];
 
-    private _logger: EphemeralTelemetryLogger;
+    private _logger: LiveTelemetryLogger;
     private _player: IMediaPlayer;
-    private _mediaSession: EphemeralMediaSession;
+    private _mediaSession: LiveMediaSession;
     private _volumeLimiter: VolumeLimiter;
     private _onEnd?: () => void;
     private _onPlayerEvent: EventListener;
@@ -67,7 +67,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @param mediaSession Group MediaSession object being used.
      * @param onEnd Optional. Function to call when synchronizers `end()` method is called.
      */
-    constructor(player: IMediaPlayer, mediaSession: EphemeralMediaSession, onEnd: () => void) {
+    constructor(player: IMediaPlayer, mediaSession: LiveMediaSession, onEnd: () => void) {
         super();
         this._player = player;
         this._mediaSession = mediaSession;
@@ -232,7 +232,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     /**
      * Synchronizers media session.
      */
-    public get mediaSession(): EphemeralMediaSession {
+    public get mediaSession(): LiveMediaSession {
         return this._mediaSession;
     }
 

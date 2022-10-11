@@ -3,9 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IRoleVerifier, UserMeetingRole } from '../interfaces';
-import { TeamsClientApi, TestTeamsClientApi } from './TestTeamsClientApi';
-import {  waitForResult } from './utils';
+import { ILiveShareHost, IRoleVerifier, UserMeetingRole } from '../interfaces';
+import { waitForResult } from './utils';
 import { RequestCache } from './RequestCache';
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
@@ -16,15 +15,15 @@ const CACHE_LIFETIME = 60 * 60 * 1000;
  * @hidden
  */
 export class RoleVerifier implements IRoleVerifier {
-    private _teamsClient?: TeamsClientApi;
     private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> = new RequestCache(CACHE_LIFETIME);
     private readonly _getRequestCache: RequestCache<UserMeetingRole[]> = new RequestCache(CACHE_LIFETIME);
+
+    public constructor(private readonly _host: ILiveShareHost ) { }
 
     public async registerClientId(clientId: string): Promise<UserMeetingRole[]> {
         return this._registerRequestCache.cacheRequest(clientId, () => {
             return waitForResult(async () => {
-                const teamsClient = await this.getTeamsClient();
-                const rolesResult = await teamsClient.interactive.registerClientId(clientId);
+                const rolesResult = await this._host.registerClientId(clientId);
                 if (!rolesResult) {
                     return undefined;
                 } else if (Array.isArray(rolesResult)) {
@@ -69,8 +68,7 @@ export class RoleVerifier implements IRoleVerifier {
 
         return this._getRequestCache.cacheRequest(clientId, () => {
             return waitForResult(async () => {
-                const teamsClient = await this.getTeamsClient();
-                const rolesResult = await teamsClient.interactive.getClientRoles(clientId);
+                const rolesResult = await this._host.getClientRoles(clientId);
                 if (!rolesResult) {
                     return undefined;
                 } else if (Array.isArray(rolesResult)) {
@@ -119,17 +117,5 @@ export class RoleVerifier implements IRoleVerifier {
         }
 
         return true;
-    }
-
-    private async getTeamsClient(): Promise<TeamsClientApi> {
-        if (!this._teamsClient) {
-            if (window) {
-                this._teamsClient = (await import('@microsoft/teams-js') as any) as TeamsClientApi;
-            } else {
-                this._teamsClient = new TestTeamsClientApi();
-            }
-        }
-
-        return this._teamsClient;
     }
 }

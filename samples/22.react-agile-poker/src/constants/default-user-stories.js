@@ -1,12 +1,11 @@
-import { EphemeralEvent } from "@microsoft/live-share";
-import { v4 as uuid } from "uuid";
+import { LiveEvent } from "@microsoft/live-share";
 
 let defaultUserStories;
 export const getDefaultUserStories = () => {
   if (defaultUserStories) {
     return defaultUserStories;
   }
-  const currentTime = EphemeralEvent.getTimestamp();
+  const currentTime = LiveEvent.getTimestamp();
   defaultUserStories = [
     {
       id: "0",

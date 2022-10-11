@@ -41,7 +41,7 @@ const PlayerEvent = {
  * If your media player's interface doesn't follow the HTML interface, this example
  * will help show how to create a thin wrapper around your player to make it "look"
  * exactly like an HTML5 media element so the `MediaSynchronizer` can properly wire
- * up `EphemeralMediaSession` action handlers.
+ * up `LiveMediaSession` action handlers.
  *
  * @remarks
  *

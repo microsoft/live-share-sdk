@@ -5,12 +5,12 @@
 
 import { useEffect, useState } from "react";
 import {
-  EphemeralPresence,
-  EphemeralState,
+  LivePresence,
+  LiveState,
   LiveShareClient,
 } from "@microsoft/live-share";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
-import { EphemeralTimer } from "@microsoft/live-share";
+import { LiveTimer } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 
@@ -66,9 +66,9 @@ export function useSharedObjects() {
     // Define container schema
     const schema = {
       initialObjects: {
-        pokerState: EphemeralState,
-        presence: EphemeralPresence,
-        timer: EphemeralTimer,
+        pokerState: LiveState,
+        presence: LivePresence,
+        timer: LiveTimer,
         userStoriesMap: SharedMap,
       },
     };

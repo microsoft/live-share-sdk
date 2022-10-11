@@ -124,7 +124,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                             this.play();
                         }
                     }
-                    // block play if player state is playing when expected synced state is paused or none.
+                    // block play if player state is playing when expected synced state is paused.
                     // needed because cannot tell if its a user initiated event, so disallow play
                     if (this._expectedPlaybackState === 'paused') {
                         this._player.pause();

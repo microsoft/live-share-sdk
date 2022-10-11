@@ -3,88 +3,21 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { UserMeetingRole } from '../interfaces';
+import { 
+    ILiveShareHost, 
+    IFluidTenantInfo, 
+    IFluidContainerInfo,
+    INtpTimeInfo,
+    ContainerState,
+    UserMeetingRole 
+} from './interfaces';
 
 /**
- * @hidden
+ * Live Share Host implementation used for local testing.
  */
-export enum ContainerState {
-    added = 'Added',
-    alreadyExists = 'AlreadyExists',
-    conflict = 'Conflict',
-    notFound = 'NotFound',
-}
+export class TestLiveShareHost implements ILiveShareHost {
+    public static readonly LOCAL_MODE_TEST_TOKEN = `test-token`;
 
-/**
- * @hidden
- */
-export interface FluidContainerInfo {
-    containerState: ContainerState;
-    containerId: string | undefined;
-    shouldCreate: boolean;
-    retryAfter: number;
-}
-
-/**
- * @hidden
- */
-export interface NtpTimeInfo {
-    ntpTime: string;
-    ntpTimeInUTC: number;
-}
-
-/**
- * @hidden
- */
-export interface FluidTenantInfo {
-    tenantId: string;
-    ordererEndpoint: string;
-    storageEndpoint: string;
-    serviceEndpoint?: string;
-}
-
-/**
- * @hidden
- */
-export interface TeamsClientApi {
-    interactive: TeamsClientApiInteractive;
-    // Teams app namespace
-    app?: any;
-}
-
-/**
- * @hidden
- */
-export interface TeamsClientApiInteractive {
-    getFluidTenantInfo(): Promise<FluidTenantInfo>;
-    getFluidToken(containerId?: string): Promise<string>;
-    getFluidContainerId(): Promise<FluidContainerInfo>;
-    setFluidContainerId(containerId: string): Promise<FluidContainerInfo>;
-    getNtpTime(): Promise<NtpTimeInfo>;
-    registerClientId(clientId: string): Promise<UserMeetingRole[]>;
-    getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
-}
-
-/**
- * @hidden
- */
-export class TestTeamsClientApi implements TeamsClientApi {
-    constructor(getLocalTestContainerId?: () => string|undefined, setLocalTestContainerId?: (containerId: string) => void) {
-        this.interactive = new TestTeamsClientApiInteractive(getLocalTestContainerId, setLocalTestContainerId);
-    }
-
-    public readonly interactive: TestTeamsClientApiInteractive;
-}
-
-/**
- * @hidden
- */
-export const LOCAL_MODE_TEST_TOKEN = `test-token`;
-
-/**
- * @hidden
- */
-class TestTeamsClientApiInteractive implements TeamsClientApiInteractive {
     constructor (
         private _getLocalTestContainerId?: () => string|undefined,
         private _setLocalTestContainerId?: (containerId: string) => void) { }
@@ -95,7 +28,7 @@ class TestTeamsClientApiInteractive implements TeamsClientApiInteractive {
         UserMeetingRole.attendee
     ];
 
-    public getFluidTenantInfo(): Promise<FluidTenantInfo> {
+    public getFluidTenantInfo(): Promise<IFluidTenantInfo> {
         return Promise.resolve({
             tenantId: "local",
             ordererEndpoint: "http://localhost:7070",
@@ -105,10 +38,10 @@ class TestTeamsClientApiInteractive implements TeamsClientApiInteractive {
     }
 
     public getFluidToken(containerId?: string): Promise<string> {
-        return Promise.resolve(LOCAL_MODE_TEST_TOKEN);
+        return Promise.resolve(TestLiveShareHost.LOCAL_MODE_TEST_TOKEN);
     }
 
-    public getFluidContainerId(): Promise<FluidContainerInfo> {
+    public getFluidContainerId(): Promise<IFluidContainerInfo> {
         const containerId = this.getLocalTestContainerId();
         return Promise.resolve({
             containerState: containerId ? ContainerState.alreadyExists : ContainerState.notFound,
@@ -118,7 +51,7 @@ class TestTeamsClientApiInteractive implements TeamsClientApiInteractive {
         });
     }
 
-    public setFluidContainerId(containerId: string): Promise<FluidContainerInfo> {
+    public setFluidContainerId(containerId: string): Promise<IFluidContainerInfo> {
         this.setLocalTestContainerId(containerId);
         return Promise.resolve({
             containerState: ContainerState.added,
@@ -128,7 +61,7 @@ class TestTeamsClientApiInteractive implements TeamsClientApiInteractive {
         });
     }
 
-    public getNtpTime(): Promise<NtpTimeInfo> {
+    public getNtpTime(): Promise<INtpTimeInfo> {
         const now = new Date();
         return Promise.resolve({
             ntpTime: now.toUTCString(),

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import {
   EphemeralPresence,
   EphemeralState,
-  TeamsFluidClient,
+  LiveShareClient,
 } from "@microsoft/live-share";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { EphemeralTimer } from "@microsoft/live-share";
@@ -19,7 +19,7 @@ import { getDefaultUserStories } from "../constants/default-user-stories";
  *
  * @remarks
  * This is an application specific hook that defines the fluid schema of Distributed Data Structures (DDS)
- * used by the app and passes that schema to the `TeamsFluidClient` to create/load your Fluid container.
+ * used by the app and passes that schema to the `LiveShareClient` to create/load your Fluid container.
  *
  * @returns Shared objects managed by the apps fluid container.
  */
@@ -74,7 +74,7 @@ export function useSharedObjects() {
     };
 
     // Join Teams container
-    const client = new TeamsFluidClient(clientProps);
+    const client = new LiveShareClient(clientProps);
     client
       .joinContainer(schema, onFirstInitialize)
       .then((results) => setResults(results))

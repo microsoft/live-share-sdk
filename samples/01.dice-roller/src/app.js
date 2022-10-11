@@ -4,7 +4,7 @@
  */
 
 import { SharedMap } from "fluid-framework";
-import { TeamsFluidClient } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 import { app, pages, meeting } from "@microsoft/teams-js";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 
@@ -70,10 +70,10 @@ async function joinContainer() {
   let client;
   if (!!searchParams.get('inTeams')) {
       // Create client
-      client = new TeamsFluidClient();
+      client = new LiveShareClient();
   } else {
       // Create client and configure for testing
-      client = new TeamsFluidClient({
+      client = new LiveShareClient({
         connection: {
           type: 'local',
           tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),

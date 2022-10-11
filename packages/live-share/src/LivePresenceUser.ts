@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { EphemeralEvent } from './EphemeralEvent';
-import { IEphemeralEvent , UserMeetingRole} from './interfaces';
+import { LiveEvent } from './LiveEvent';
+import { ILiveEvent , UserMeetingRole} from './interfaces';
 import { TimeInterval } from './TimeInterval';
 import { cloneValue } from './internals';
 
@@ -32,7 +32,7 @@ export enum PresenceState {
 /**
  * @hidden
  */
-export interface IEphemeralPresenceEvent<TData = object> extends IEphemeralEvent {
+export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
     userId: string;
     state: PresenceState;
     data?: TData;
@@ -41,14 +41,14 @@ export interface IEphemeralPresenceEvent<TData = object> extends IEphemeralEvent
 /**
  * A use that presence is being tracked for.
  */
-export class EphemeralPresenceUser<TData = object> {
+export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
 
     /**
      * @hidden
      */
-    constructor(private _evt: IEphemeralPresenceEvent<TData>, private _expirationPeriod: TimeInterval, private _isLocalUser: boolean) {
-        this._lastUpdateTime = EphemeralEvent.getTimestamp();
+    constructor(private _evt: ILivePresenceEvent<TData>, private _expirationPeriod: TimeInterval, private _isLocalUser: boolean) {
+        this._lastUpdateTime = LiveEvent.getTimestamp();
     }
 
     /**
@@ -88,21 +88,21 @@ export class EphemeralPresenceUser<TData = object> {
      */
      public getRoles(): Promise<UserMeetingRole[]> {
         if (this._isLocalUser) {
-            return EphemeralEvent.registerClientId(this._evt.clientId!);
+            return LiveEvent.registerClientId(this._evt.clientId!);
         } else {
-            return EphemeralEvent.getClientRoles(this._evt.clientId!);
+            return LiveEvent.getClientRoles(this._evt.clientId!);
         }
     }
 
     /**
      * @hidden
      */
-    public updateReceived(evt: IEphemeralPresenceEvent<TData>): boolean {
+    public updateReceived(evt: ILivePresenceEvent<TData>): boolean {
         const current = this._evt;
-        if (EphemeralEvent.isNewer(current, evt)) {
+        if (LiveEvent.isNewer(current, evt)) {
             // Save updated event
             this._evt = evt;
-            this._lastUpdateTime = EphemeralEvent.getTimestamp();
+            this._lastUpdateTime = LiveEvent.getTimestamp();
 
             // Has anything changed?
             if (evt.state != current.state || JSON.stringify(evt.data) != JSON.stringify(current.data)) {
@@ -114,7 +114,7 @@ export class EphemeralPresenceUser<TData = object> {
     }
 
     private hasExpired(): boolean {
-        const now = EphemeralEvent.getTimestamp();
+        const now = LiveEvent.getTimestamp();
         const elapsed = now - this._lastUpdateTime;
         return (!this._isLocalUser && elapsed > this._expirationPeriod.milliseconds);
     }

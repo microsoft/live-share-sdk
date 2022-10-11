@@ -4,8 +4,8 @@
  */
 
 import { strict as assert } from "assert";
-import { EphemeralEventScope } from "../EphemeralEventScope";
-import { EphemeralEventTarget } from "../EphemeralEventTarget";
+import { LiveEventScope } from "../LiveEventScope";
+import { LiveEventSource } from "../LiveEventSource";
 import { MockRuntimeSignaler } from './MockRuntimeSignaler';
 
 function createConnectedSignalers() {
@@ -15,17 +15,18 @@ function createConnectedSignalers() {
     return {localRuntime, remoteRuntime};
 }
 
-describe("EphemeralEventTarget", () => {
-    it("Should receive events", (done) => {
+describe("LiveEventSource", () => {
+    it("Should send events", (done) => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new EphemeralEventScope(signalers.localRuntime);
-        const localTarget = new EphemeralEventTarget(localScope, 'test', (evt, local) => triggered++);
+        const localScope = new LiveEventScope(signalers.localRuntime);
+        localScope.onEvent('test', (evt, local) => triggered++);
 
-        const remoteScope = new EphemeralEventScope(signalers.remoteRuntime);
-        const remoteTarget = new EphemeralEventTarget(remoteScope, 'test', (evt, local) => triggered++);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
+        remoteScope.onEvent('test', (evt, local) => triggered++);
 
-        localTarget.sendEvent({});
+        const localSource = new LiveEventSource(localScope, 'test');
+        localSource.sendEvent({});
 
         // Verify is an async operation so wait some
         setTimeout(() => {

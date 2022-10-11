@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
+import { ILiveShareClientOptions, LiveShareClient } from "@microsoft/live-share";
 import { InkingManager, InputFilter, LiveCanvas } from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
@@ -20,7 +20,7 @@ export class InkingSurface {
     private _container!: IFluidContainer;
 
     private async internalStart() {
-        const clientOptions: ITeamsFluidClientOptions = {
+        const clientOptions: ILiveShareClientOptions = {
             connection: {
                 type: "local",
                 tokenProvider: new InsecureTokenProvider("", { id: "123" }),
@@ -28,7 +28,7 @@ export class InkingSurface {
             }
         };
 
-        const client = new TeamsFluidClient(clientOptions);
+        const client = new LiveShareClient(clientOptions);
 
         this._container = (await client.joinContainer(containerSchema)).container;
 

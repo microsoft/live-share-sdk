@@ -7,22 +7,22 @@ import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
-import { EphemeralTimer } from "../EphemeralTimer";
+import { LiveTimer } from "../LiveTimer";
 import { Deferred } from './Deferred';
 
-describeNoCompat("EphemeralTimer", (getTestObjectProvider) => {
+describeNoCompat("LiveTimer", (getTestObjectProvider) => {
     const milliTolerance = 30;
     let provider: ITestObjectProvider;
-    let object1: EphemeralTimer;
-    let object2: EphemeralTimer;
+    let object1: LiveTimer;
+    let object2: LiveTimer;
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(EphemeralTimer.factory);
-        object1 = await requestFluidObject<EphemeralTimer>(container1, "default");
+        const container1 = await provider.createContainer(LiveTimer.factory);
+        object1 = await requestFluidObject<LiveTimer>(container1, "default");
 
-        const container2 = await provider.loadContainer(EphemeralTimer.factory);
-        object2 = await requestFluidObject<EphemeralTimer>(container2, "default");
+        const container2 = await provider.loadContainer(LiveTimer.factory);
+        object2 = await requestFluidObject<LiveTimer>(container2, "default");
 
         // need to be connected to send signals
         if (!container1.connected) {
@@ -144,9 +144,9 @@ describeNoCompat("EphemeralTimer", (getTestObjectProvider) => {
         object2.initialize();
 
 
-        object1.start(20);
+        object1.start(40);
         setTimeout(() => {
-            object1.start(20);
+            object1.start(40);
             setTimeout(() => {
                 object1.start(20);
                 setTimeout(() => {

@@ -5,8 +5,8 @@
   "author": "Microsoft",
   "license": "MIT",
   "dependencies": {
-    "@microsoft/live-share": "~0.5.1",
-    "@microsoft/live-share-canvas": "~0.5.1",
+    "@microsoft/live-share": "1.0.0-preview.1",
+    "@microsoft/live-share-canvas": "1.0.0-preview.1",
     "@fluidframework/test-client-utils": "~1.2.3",
     "@microsoft/teams-js": "2.0.0-experimental.1",
     "@testing-library/jest-dom": "^5.16.2",
@@ -16,7 +16,7 @@
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "react-router-dom": "^6.2.2",
-    "react-scripts": "^5.0.1",
+    "react-scripts": "^4.0.0",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {

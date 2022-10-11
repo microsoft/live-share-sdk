@@ -11,7 +11,7 @@ import {
   EphemeralMediaSession,
   MediaPlayerSynchronizerEvents,
 } from "@microsoft/live-share-media";
-import { TeamsFluidClient } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 import { inTeams } from "../utils/inTeams";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { ConsoleLogger } from "./ConsoleLogger";
@@ -45,7 +45,7 @@ const MeetingStage = () => {
         window.localStorage.debug = "fluid:*";
 
         // Define Fluid document schema and create container
-        const client = new TeamsFluidClient({
+        const client = new LiveShareClient({
           connection,
           logger: new ConsoleLogger(),
         });

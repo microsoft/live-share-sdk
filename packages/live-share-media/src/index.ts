@@ -4,12 +4,12 @@
  */
 
 
-export * from './EphemeralMediaSession';
-export * from './EphemeralMediaSessionCoordinator';
-export * from './EphemeralMediaSessionCoordinatorSuspension';
+export * from './LiveMediaSession';
+export * from './LiveMediaSessionCoordinator';
+export * from './LiveMediaSessionCoordinatorSuspension';
 export * from './IMediaPlayer';
 export * from './MediaPlayerSynchronizer';
 export * from './MediaSessionActionThrottler';
 export * from './MediaSessionExtensions';
 export * from './RepeatedActionThrottler';
-export * from './VolumeLimiter';
+export * from './VolumeManager';

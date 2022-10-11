@@ -10,13 +10,13 @@
  * Wrap with a call to transmit() if the event should be transmitted to the telemetry service.
  */
 export const TelemetryEvents = {
-    EphemeralPresence: {
-        LocalPresenceChanged: 'EphemeralPresence:LocalPresenceChange',
-        RemotePresenceChanged: 'EphemeralPresence:RemotePresenceChange'
+    LivePresence: {
+        LocalPresenceChanged: 'LivePresence:LocalPresenceChange',
+        RemotePresenceChanged: 'LivePresence:RemotePresenceChange'
     },
-    EphemeralState: {
-        StateChanged: 'EphemeralState:StateChanged',
-        RoleVerificationError: 'EphemeralState:RoleVerificationError',
+    LiveState: {
+        StateChanged: 'LiveState:StateChanged',
+        RoleVerificationError: 'LiveState:RoleVerificationError',
     }
 }
 

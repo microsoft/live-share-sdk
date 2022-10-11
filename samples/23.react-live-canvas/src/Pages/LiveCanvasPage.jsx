@@ -1,4 +1,4 @@
-import { TeamsFluidClient } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 import { LiveCanvas, InkingTool } from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -73,7 +73,7 @@ export const LiveCanvasPage = () => {
   }, [inkingManager]);
 
   const initialize = async () => {
-    const client = new TeamsFluidClient(clientOptions);
+    const client = new LiveShareClient(clientOptions);
     const { container } = await client.joinContainer(containerSchema);
     setliveCanvas(container.initialObjects.liveCanvas);
   };

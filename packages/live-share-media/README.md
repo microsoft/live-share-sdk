@@ -52,7 +52,7 @@ This will use lerna to hoist and build all dependencies.
 ```javascript
 import * as microsoftTeams from "@microsoft/teams-js";
 import { TeamsFluidClient } from "@microsoft/live-share";
-import { EphemeralMediaSession } from "@microsoft/live-share-media";
+import { LiveMediaSession } from "@microsoft/live-share-media";
 
 // Initialize the Teams Client SDK
 await microsoftTeams.app.initialize();
@@ -61,7 +61,7 @@ await microsoftTeams.app.initialize();
 const client = new TeamsFluidClient();
 const schema = {
   initialObjects: {
-    mediaSession: EphemeralMediaSession,
+    mediaSession: LiveMediaSession,
     ...,
   },
 };
@@ -103,7 +103,7 @@ There are several code samples that are hosted in a separate GitHub repository.
 
 | Sample name          | Description                                                                                                                               | Javascript                                     |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](https://aka.ms/liveshare-reactvideo)    |
+| React Video          | Basic example showing how the LiveMediaSession object works with HTML5 video.                                                        | [View](https://aka.ms/liveshare-reactvideo)    |
 | React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](https://aka.ms/liveshare-mediatemplate) |
 
 ## Package Compatibility
@@ -112,8 +112,9 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 **It is critical that your app use the package dependencies listed in the table below.** Lookup the version of the `@microsoft/live-share` you're using and set any other dependencies in your package.json file to match:
 
-| @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-media | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
+| @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-(media or canvas) | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | --------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
+| 1.0.0-preview.1       | 2.0.0-experimental.1 | ~1.2.3 | 1.0.0-preview.1 (optional)  | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.5.1                | 2.0.0-experimental.1 | ~1.2.3          | ~0.5.1 (optional)           | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)           | ~0.59.0 (optional)           | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 

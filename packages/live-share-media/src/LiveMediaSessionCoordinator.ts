@@ -3,10 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { EphemeralEventScope, EphemeralTelemetryLogger, EphemeralEventTarget, IEphemeralEvent, IRuntimeSignaler, TimeInterval, UserMeetingRole } from '@microsoft/live-share';
+import { LiveEventScope, LiveTelemetryLogger, LiveEventTarget, ILiveEvent, IRuntimeSignaler, TimeInterval, UserMeetingRole } from '@microsoft/live-share';
 import { CoordinationWaitPoint, ExtendedMediaSessionActionDetails, ExtendedMediaMetadata, ExtendedMediaSessionPlaybackState, MediaSessionCoordinatorEvents, MediaSessionCoordinatorState, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
 import { TelemetryEvents, ITransportCommandEvent, ISetTrackEvent, IPositionUpdateEvent, GroupCoordinatorState, GroupCoordinatorStateEvents, ITriggerActionEvent, ISetTrackDataEvent } from './internals';
-import { EphemeralMediaSessionCoordinatorSuspension } from './EphemeralMediaSessionCoordinatorSuspension';
+import { LiveMediaSessionCoordinatorSuspension } from './LiveMediaSessionCoordinatorSuspension';
 import EventEmitter from "events";
 
 /**
@@ -38,13 +38,13 @@ export interface IMediaPlayerState {
 }
 
 /**
- * The `EphemeralMediaSessionCoordinator` tracks the playback & position state of all other 
+ * The `LiveMediaSessionCoordinator` tracks the playback & position state of all other 
  * clients being synchronized with. It is responsible for keeping the local media player
  * in sync with the group.  
  */
-export class EphemeralMediaSessionCoordinator extends EventEmitter  {
+export class LiveMediaSessionCoordinator extends EventEmitter  {
     private readonly _runtime: IRuntimeSignaler;
-    private readonly _logger: EphemeralTelemetryLogger;
+    private readonly _logger: LiveTelemetryLogger;
     private readonly _getPlayerState: () => IMediaPlayerState;
     private _positionUpdateInterval = new TimeInterval(2000);
     private _maxPlaybackDrift = new TimeInterval(1000);
@@ -52,13 +52,13 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
     private _hasInitialized = false;
 
     // Broadcast events
-    private _playEvent?: EphemeralEventTarget<ITransportCommandEvent>;
-    private _pauseEvent?: EphemeralEventTarget<ITransportCommandEvent>;
-    private _seekToEvent?: EphemeralEventTarget<ITransportCommandEvent>;
-    private _setTrackEvent?: EphemeralEventTarget<ISetTrackEvent>;
-    private _setTrackDataEvent?: EphemeralEventTarget<ISetTrackDataEvent>;
-    private _positionUpdateEvent?: EphemeralEventTarget<IPositionUpdateEvent>;
-    private _joinedEvent?: EphemeralEventTarget<IEphemeralEvent>;
+    private _playEvent?: LiveEventTarget<ITransportCommandEvent>;
+    private _pauseEvent?: LiveEventTarget<ITransportCommandEvent>;
+    private _seekToEvent?: LiveEventTarget<ITransportCommandEvent>;
+    private _setTrackEvent?: LiveEventTarget<ISetTrackEvent>;
+    private _setTrackDataEvent?: LiveEventTarget<ISetTrackDataEvent>;
+    private _positionUpdateEvent?: LiveEventTarget<IPositionUpdateEvent>;
+    private _joinedEvent?: LiveEventTarget<ILiveEvent>;
 
     // Distributed state
     private _groupState?: GroupCoordinatorState;
@@ -70,7 +70,7 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
     constructor(runtime: IRuntimeSignaler, getPlayerState: () => IMediaPlayerState) {
         super();
         this._runtime = runtime;
-        this._logger = new EphemeralTelemetryLogger(runtime);
+        this._logger = new LiveTelemetryLogger(runtime);
         this._getPlayerState = getPlayerState;
     }
 
@@ -177,15 +177,15 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      */
     public play(): void {
         if (!this._hasInitialized) {
-            throw new Error(`EphemeralMediaSessionCoordinator.play() called before initialize() called.`);
+            throw new Error(`LiveMediaSessionCoordinator.play() called before initialize() called.`);
         }
 
         if (!this._groupState?.playbackTrack.current.metadata) {
-            throw new Error(`EphemeralMediaSessionCoordinator.play() called before MediaSession.metadata assigned.`);
+            throw new Error(`LiveMediaSessionCoordinator.play() called before MediaSession.metadata assigned.`);
         }
 
         if (!this.canPlayPause) {
-            throw new Error(`EphemeralMediaSessionCoordinator.play() operation blocked.`);
+            throw new Error(`LiveMediaSessionCoordinator.play() operation blocked.`);
         }
 
         // Get projected position
@@ -208,15 +208,15 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      */
     public pause(): void {
         if (!this._hasInitialized) {
-            throw new Error(`EphemeralMediaSessionCoordinator.pause() called before initialize() called.`);
+            throw new Error(`LiveMediaSessionCoordinator.pause() called before initialize() called.`);
         }
 
         if (!this._groupState?.playbackTrack.current.metadata) {
-            throw new Error(`EphemeralMediaSessionCoordinator.pause() called before MediaSession.metadata assigned.`);
+            throw new Error(`LiveMediaSessionCoordinator.pause() called before MediaSession.metadata assigned.`);
         }
 
         if (!this.canPlayPause) {
-            throw new Error(`EphemeralMediaSessionCoordinator.pause() operation blocked.`);
+            throw new Error(`LiveMediaSessionCoordinator.pause() operation blocked.`);
         }
 
         // Get projected position
@@ -240,15 +240,15 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      */
     public seekTo(time: number): void {
         if (!this._hasInitialized) {
-            throw new Error(`EphemeralMediaSessionCoordinator.seekTo() called before initialize() called.`);
+            throw new Error(`LiveMediaSessionCoordinator.seekTo() called before initialize() called.`);
         }
 
         if (!this._groupState?.playbackTrack.current.metadata) {
-            throw new Error(`EphemeralMediaSessionCoordinator.seekTo() called before MediaSession.metadata assigned.`);
+            throw new Error(`LiveMediaSessionCoordinator.seekTo() called before MediaSession.metadata assigned.`);
         }
 
         if (!this.canSeek) {
-            throw new Error(`EphemeralMediaSessionCoordinator.seekTo() operation blocked.`);
+            throw new Error(`LiveMediaSessionCoordinator.seekTo() operation blocked.`);
         }
 
         // Send transport command
@@ -270,11 +270,11 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      */
     public setTrack(metadata: ExtendedMediaMetadata|null, waitPoints?: CoordinationWaitPoint[]): void {
         if (!this._hasInitialized) {
-            throw new Error(`EphemeralMediaSessionCoordinator.setTrack() called before initialize() called.`);
+            throw new Error(`LiveMediaSessionCoordinator.setTrack() called before initialize() called.`);
         }
 
         if (!this.canSetTrack) {
-            throw new Error(`EphemeralMediaSessionCoordinator.setTrack() operation blocked.`);
+            throw new Error(`LiveMediaSessionCoordinator.setTrack() operation blocked.`);
         }
 
         // Send transport command
@@ -298,11 +298,11 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      */
      public setTrackData(data: object|null): void {
         if (!this._hasInitialized) {
-            throw new Error(`EphemeralMediaSessionCoordinator.setTrackData() called before initialize() called.`);
+            throw new Error(`LiveMediaSessionCoordinator.setTrackData() called before initialize() called.`);
         }
 
         if (!this.canSetTrackData) {
-            throw new Error(`EphemeralMediaSessionCoordinator.setTrackData() operation blocked.`);
+            throw new Error(`LiveMediaSessionCoordinator.setTrackData() operation blocked.`);
         }
 
         // Send transport command
@@ -338,11 +338,11 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      */
     public beginSuspension(waitPoint?: CoordinationWaitPoint): MediaSessionCoordinatorSuspension {
         if (!this._hasInitialized) {
-            throw new Error(`EphemeralMediaSessionCoordinator.beginSuspension() called before initialize() called.`);
+            throw new Error(`LiveMediaSessionCoordinator.beginSuspension() called before initialize() called.`);
         }
 
         if (!this._groupState?.playbackTrack.current.metadata) {
-            throw new Error(`EphemeralMediaSessionCoordinator.beginSuspension() called before MediaSession.metadata assigned.`);
+            throw new Error(`LiveMediaSessionCoordinator.beginSuspension() called before MediaSession.metadata assigned.`);
         }
 
         // Tell group state that suspension is started
@@ -356,7 +356,7 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
         }
 
         // Return new suspension object
-        return new EphemeralMediaSessionCoordinatorSuspension(waitPoint, time => {
+        return new LiveMediaSessionCoordinatorSuspension(waitPoint, time => {
             if (waitPoint) {
                 this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.EndSuspensionAndWait, null, {position: waitPoint.position, maxClients: waitPoint.maxClients});
             } else {
@@ -384,7 +384,7 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      */
     public async initialize(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
         if (this._hasInitialized) {
-            throw new Error(`EphemeralMediaSessionCoordinator.initialize() already initialized.`);
+            throw new Error(`LiveMediaSessionCoordinator.initialize() already initialized.`);
         }
 
         // Create children
@@ -406,7 +406,7 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
      */
     public sendPositionUpdate(state: IMediaPlayerState): void {
         if (!this._hasInitialized) {
-            throw new Error(`EphemeralMediaSessionCoordinator.sendPositionUpdate() called before initialize() called.`);
+            throw new Error(`LiveMediaSessionCoordinator.sendPositionUpdate() called before initialize() called.`);
         }
 
         // Send position update event
@@ -416,29 +416,29 @@ export class EphemeralMediaSessionCoordinator extends EventEmitter  {
     
     protected async createChildren(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
         // Create event scopes
-        const scope = new EphemeralEventScope(this._runtime, acceptTransportChangesFrom);
-        const unrestrictedScope = new EphemeralEventScope(this._runtime);
+        const scope = new LiveEventScope(this._runtime, acceptTransportChangesFrom);
+        const unrestrictedScope = new LiveEventScope(this._runtime);
 
         // Initialize internal coordinator state
         this._groupState = new GroupCoordinatorState(this._runtime, this._maxPlaybackDrift, this._positionUpdateInterval, this._getPlayerState);
         this._groupState.on(GroupCoordinatorStateEvents.triggeraction, evt => this.emit(evt.name, evt));
 
         // Listen for track changes
-        this._setTrackEvent = new EphemeralEventTarget<ISetTrackEvent>(scope, 'setTrack', (event, local) => this._groupState!.handleSetTrack(event, local));
-        this._setTrackDataEvent = new EphemeralEventTarget<ISetTrackDataEvent>(scope, 'setTrackData', (event, local) => this._groupState!.handleSetTrackData(event, local));
+        this._setTrackEvent = new LiveEventTarget<ISetTrackEvent>(scope, 'setTrack', (event, local) => this._groupState!.handleSetTrack(event, local));
+        this._setTrackDataEvent = new LiveEventTarget<ISetTrackDataEvent>(scope, 'setTrackData', (event, local) => this._groupState!.handleSetTrackData(event, local));
 
         // Listen for transport commands
-        this._playEvent = new EphemeralEventTarget(scope, 'play', (event, local) => this._groupState!.handleTransportCommand(event, local));
-        this._pauseEvent = new EphemeralEventTarget(scope, 'pause', (event, local) => this._groupState!.handleTransportCommand(event, local));
-        this._seekToEvent = new EphemeralEventTarget(scope, 'seekTo', (event, local) => this._groupState!.handleTransportCommand(event, local));
+        this._playEvent = new LiveEventTarget(scope, 'play', (event, local) => this._groupState!.handleTransportCommand(event, local));
+        this._pauseEvent = new LiveEventTarget(scope, 'pause', (event, local) => this._groupState!.handleTransportCommand(event, local));
+        this._seekToEvent = new LiveEventTarget(scope, 'seekTo', (event, local) => this._groupState!.handleTransportCommand(event, local));
 
         // Listen for position updates
-        this._positionUpdateEvent = new EphemeralEventTarget(unrestrictedScope, 'positionUpdate', (event, local) => this._groupState!.handlePositionUpdate(event, local));
+        this._positionUpdateEvent = new LiveEventTarget(unrestrictedScope, 'positionUpdate', (event, local) => this._groupState!.handlePositionUpdate(event, local));
 
         // Listen for joined event
-        this._joinedEvent = new EphemeralEventTarget(unrestrictedScope, 'joined', (evt, local) => {
+        this._joinedEvent = new LiveEventTarget(unrestrictedScope, 'joined', (evt, local) => {
             // Immediately send a position update
-            this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemoteJoinReceived, null, {correlationId: EphemeralTelemetryLogger.formatCorrelationId(evt.clientId, evt.timestamp)});
+            this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemoteJoinReceived, null, {correlationId: LiveTelemetryLogger.formatCorrelationId(evt.clientId, evt.timestamp)});
             const state = this._getPlayerState();
             const update = this._groupState!.createPositionUpdateEvent(state);
             this._positionUpdateEvent?.sendEvent(update);

@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { EphemeralEvent, IRuntimeSignaler, TimeInterval } from '@microsoft/live-share';
+import { LiveEvent, IRuntimeSignaler, TimeInterval } from '@microsoft/live-share';
 import { GroupTransportState } from './GroupTransportState';
 import { GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
 import { CoordinationWaitPoint, ExtendedMediaSessionPlaybackState } from '../MediaSessionExtensions';
@@ -109,7 +109,7 @@ export class GroupPlaybackPosition {
      */
     public get maxPosition(): number {
         if (this._transportState.playbackState == 'playing') {
-            const now = EphemeralEvent.getTimestamp();
+            const now = LiveEvent.getTimestamp();
             const projected = this._transportState.startPosition + ((now - this._transportState.timestamp) / 1000);
             return this.limitProjectedPosition(projected);
         } else {
@@ -136,7 +136,7 @@ export class GroupPlaybackPosition {
      * @param callbackFn Function applied to each position,
      */
      public forEach(callbackFn: (position: ICurrentPlaybackPosition, projectedPosition: number) => void): void {
-        const now = EphemeralEvent.getTimestamp();
+        const now = LiveEvent.getTimestamp();
         const ignoreBefore = now - (this._updateInterval.milliseconds * 2);
         const shouldProject = !this._transportState.track.metadata?.liveStream;
         this._positions.forEach((value, key) => {

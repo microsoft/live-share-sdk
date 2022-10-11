@@ -3,19 +3,21 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-export * from './EphemeralEvent';
-export * from './EphemeralEventScope';
-export * from './EphemeralEventSource';
-export * from './EphemeralEventTarget';
-export * from './EphemeralEventTimer';
-export * from './EphemeralTelemetryLogger';
-export * from './EphemeralObjectSynchronizer';
-export * from './EphemeralPresence';
-export * from './EphemeralPresenceUser';
-export * from './EphemeralState';
-export * from './EphemeralTimer';
 export * from './interfaces';
+export * from './LiveEvent';
+export * from './LiveEventScope';
+export * from './LiveEventSource';
+export * from './LiveEventTarget';
+export * from './LiveEventTimer';
+export * from './LiveTelemetryLogger';
+export * from './LiveObjectSynchronizer';
+export * from './LivePresence';
+export * from './LivePresenceUser';
+export * from './LiveShareClient';
+export * from './LiveState';
+export * from './LiveTimer';
 export * from './LocalRoleVerifier';
 export * from './LocalTimestampProvider';
-export * from './TeamsFluidClient';
+export * from './testLiveShare';
+export * from './TestLiveShareHost';
 export * from './TimeInterval';

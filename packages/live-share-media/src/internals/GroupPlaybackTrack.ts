@@ -5,7 +5,7 @@
 
 import { IEvent } from '@microsoft/live-share';
 import EventEmitter from 'events';
-import { IMediaPlayerState } from '../EphemeralMediaSessionCoordinator';
+import { IMediaPlayerState } from '../LiveMediaSessionCoordinator';
 import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExtensions';
 
 /**

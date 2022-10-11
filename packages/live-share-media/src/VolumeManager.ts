@@ -9,7 +9,7 @@ import { IMediaPlayer } from './IMediaPlayer';
 export enum LimitLevelType { fixed, percentage }
 
 /**
- * Smooth audio level changes when selectedVolume is modified, or if volume limiting has started/ended.
+ * Smooth audio level changes when volume is modified, or if volume limiting has started/ended.
  */
 export class VolumeManager {
     private readonly _player: IMediaPlayer;
@@ -17,7 +17,7 @@ export class VolumeManager {
 
     // defaults to player volume
     private _volume = 0.0;
-    private _limited = false;
+    private _isLimiting = false;
     private _limitLevel = 0.1
     private _limitLevelType: LimitLevelType = LimitLevelType.fixed;
     private _startTime = 0;
@@ -35,6 +35,8 @@ export class VolumeManager {
      * @remarks
      * Expressed as a value between 0.0 and 1.0. The default value is 1.0.
      * Can be used for things like volume sliders.
+     *
+     * Does not return the current volume if limiting is enabled, but the desired volume.
      */
     public get volume(): number {
         return this._volume;
@@ -42,7 +44,7 @@ export class VolumeManager {
 
     public set volume(value: number) {
         if (value < 0 || value > 1.0) {
-            throw new Error(`VolumeManager: cannot set selectedVolume to ${value}. Level must be between 0.0 and 1.0.`);
+            throw new Error(`VolumeManager: cannot set volume to ${value}. Level must be between 0.0 and 1.0.`);
         }
 
         this._volume = value;
@@ -101,12 +103,19 @@ export class VolumeManager {
     }
 
     /**
+     * Whether or not volume limiting is currently enabled.
+     */
+    public get isLimiting(): boolean {
+        return this._isLimiting;
+    }
+
+    /**
      * Limits volume based on `level` and `levelType` properties.
      * @see `level`
      * @see `levelType`
      */
     public startLimiting(): void {
-        this._limited = true;
+        this._isLimiting = true;
         this.startAdjusting();
     }
 
@@ -114,7 +123,7 @@ export class VolumeManager {
      * Disables volume limit.
      */
     public stopLimiting(): void {
-        this._limited = false;
+        this._isLimiting = false;
         this.startAdjusting();
     }
 
@@ -155,13 +164,13 @@ export class VolumeManager {
 
     private computeTargetVolume(): number {
         if (this._limitLevelType == LimitLevelType.percentage) {
-            if (this._limited) {
+            if (this._isLimiting) {
                 return this._volume * this._limitLevel;
             } else {
                 return this._volume;
             }
         } else {
-            if (this._limited && this._volume > this._limitLevel) {
+            if (this._isLimiting && this._volume > this._limitLevel) {
                 return this._limitLevel;
             } else {
                 return this._volume;

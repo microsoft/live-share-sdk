@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { EphemeralEvent } from "@microsoft/live-share";
+import { LiveEvent } from "@microsoft/live-share";
 // eslint-disable-next-line
 import { SharedMap } from "fluid-framework";
 
@@ -62,7 +62,7 @@ export const useTakeControl = (
   // Set the local user ID
   const takeControl = useCallback(() => {
     if (!!localUserId && localUserIsEligiblePresenter) {
-      takeControlMap?.set(localUserId, EphemeralEvent.getTimestamp());
+      takeControlMap?.set(localUserId, LiveEvent.getTimestamp());
       if (!!sendNotification) {
         sendNotification("took control");
       }

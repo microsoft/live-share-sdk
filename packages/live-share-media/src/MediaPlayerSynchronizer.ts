@@ -2,8 +2,7 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the Microsoft Live Share SDK License.
  */
-
-import { LiveTelemetryLogger, IEvent, TimeInterval } from '@microsoft/live-share';
+import { LiveTelemetryLogger, IEvent } from '@microsoft/live-share';
 import EventEmitter from 'events';
 import { ExtendedMediaSessionAction, ExtendedMediaSessionPlaybackState, ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionActionDetails, MediaSessionCoordinatorEvents, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
 import { VolumeManager } from './VolumeManager';
@@ -30,7 +29,7 @@ export interface IMediaPlayerSynchronizerEvent extends IEvent {
  */
 export enum MediaPlayerSynchronizerEvents {
     /**
-     * 
+     *
      */
     coordinatorstatechange = 'coordinatorstatechange',
     groupaction = 'groupaction',
@@ -39,12 +38,12 @@ export enum MediaPlayerSynchronizerEvents {
 
 /**
  * Synchronizes a local HTML Media Element with a group of remote HTML Media Elements.
- * 
+ *
  * @remarks
  * All of an apps transport control commands should be routed through the synchronizer. If the
- * app is not currently joined to the group media session, the commands will be applied directly 
+ * app is not currently joined to the group media session, the commands will be applied directly
  * to the local player. When the group session is joined the commands will be broadcast to the
- * group in addition to being applied to the local player. 
+ * group in addition to being applied to the local player.
  */
 export class MediaPlayerSynchronizer extends EventEmitter {
     private static SESSION_ACTIONS: ExtendedMediaSessionAction[] = ['play', 'pause', 'seekto', 'settrack', 'datachange', 'catchup', 'wait'];
@@ -244,7 +243,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
     /**
      * If true the client is in a view only mode.
-     * 
+     *
      * @remarks
      * Toggling this value to true results in `mediaSession.coordinator.canPlayPause`,
      * `mediaSession.coordinator.canSeek`, `mediaSession.coordinator.canSetTrack`, and
@@ -317,9 +316,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
     /**
      * Begin a local seek operation.
-     * 
+     *
      * @remarks
-     * UI can call this when a user grabs a timeline scrubber and starts scrubbing the video to a 
+     * UI can call this when a user grabs a timeline scrubber and starts scrubbing the video to a
      * new playback position. The synchronizer will being a new suspension which temporarily
      * disconnects the client for the rest of the group for synchronization purposes. Calling
      * `endSeek()` will end the suspension and seek the group to the users final seek position.
@@ -358,10 +357,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
     /**
      * Tells the group to begin playing the current video.
-     * 
+     *
      * @remarks
-     * For proper operation apps should avoid calling `mediaSession.coordinator.play()` directly 
-     * and instead use the synchronizers `play()` method.  
+     * For proper operation apps should avoid calling `mediaSession.coordinator.play()` directly
+     * and instead use the synchronizers `play()` method.
      */
     public play(): void {
         this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PlayCalled);
@@ -373,10 +372,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
     /**
      * Tells the group to pause the current video.
-     * 
+     *
      * @remarks
-     * For proper operation apps should avoid calling `mediaSession.coordinator.pause()` directly 
-     * and instead use the synchronizers `pause()` method.  
+     * For proper operation apps should avoid calling `mediaSession.coordinator.pause()` directly
+     * and instead use the synchronizers `pause()` method.
      */
     public pause(): void {
         this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PauseCalled);
@@ -388,10 +387,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
     /**
      * Tells the group to seek the current video to a new playback position.
-     * 
+     *
      * @remarks
-     * For proper operation apps should avoid calling `mediaSession.coordinator.seekTo()` directly 
-     * and instead use the synchronizers `seekTo()` method.  
+     * For proper operation apps should avoid calling `mediaSession.coordinator.seekTo()` directly
+     * and instead use the synchronizers `seekTo()` method.
      */
     public seekTo(time: number): void {
         // Always seek player to new time.
@@ -407,10 +406,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
     /**
      * Tells the group to change to a new track.
-     * 
+     *
      * @remarks
-     * For proper operation apps should avoid calling `mediaSession.coordinator.setTrack()` directly 
-     * and instead use the synchronizers `setTrack()` method.  
+     * For proper operation apps should avoid calling `mediaSession.coordinator.setTrack()` directly
+     * and instead use the synchronizers `setTrack()` method.
      */
     public setTrack(track: ExtendedMediaMetadata, waitPoints?: CoordinationWaitPoint[]): void {
         this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SetTrackCalled);
@@ -421,10 +420,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
     /**
      * Updates the current tracks data object.
-     * 
+     *
      * @remarks
-     * For proper operation apps should avoid calling `mediaSession.coordinator.setTrackData()` directly 
-     * and instead use the synchronizers `setTrackData()` method.  
+     * For proper operation apps should avoid calling `mediaSession.coordinator.setTrackData()` directly
+     * and instead use the synchronizers `setTrackData()` method.
      */
     public setTrackData(data: object|null): void {
         this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SetTrackDataCalled);

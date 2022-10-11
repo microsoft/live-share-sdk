@@ -6,7 +6,7 @@
 // eslint-disable-next-line
 import { UserMeetingRole } from "@microsoft/live-share";
 // eslint-disable-next-line
-import { EphemeralMediaSession } from "@microsoft/live-share-media";
+import { LiveMediaSession } from "@microsoft/live-share-media";
 import { useState, useEffect, useCallback, useRef } from "react";
 // eslint-disable-next-line
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
@@ -14,7 +14,7 @@ import { inTeams } from "../utils/inTeams";
 import * as microsoftTeams from "@microsoft/teams-js";
 
 /**
- * Hook that synchronizes a media element using MediaSynchronizer and EphemeralMediaSession
+ * Hook that synchronizes a media element using MediaSynchronizer and LiveMediaSession
  *
  * @remarks
  * Works with any HTML5 <video> or <audio> element.
@@ -22,7 +22,7 @@ import * as microsoftTeams from "@microsoft/teams-js";
  * Any pause/play/seek events not sent through the MediaSynchronizer will be blocked
  * while MediaSynchronizer is synchronizing.
  *
- * @param {EphemeralMediaSession} mediaSession media session object from Fluid container.
+ * @param {LiveMediaSession} mediaSession media session object from Fluid container.
  * @param {any} selectedMediaItem selected media item from `usePlaylist` hook.
  * @param {AzureMediaPlayer} player amp player that matches <video> interface.
  * @param {boolean} localUserIsPresenting boolean when local user is presenting.
@@ -156,7 +156,7 @@ export const useMediaSession = (
     setSuspension(null);
   }, [suspension]);
 
-  // effect that sets up the EphemeralMediaSession and MediaSynchronizer
+  // effect that sets up the LiveMediaSession and MediaSynchronizer
   useEffect(() => {
     if (
       mediaSession &&

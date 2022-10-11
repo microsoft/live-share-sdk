@@ -7,7 +7,7 @@ import { debounce } from "lodash";
  *
  * @remarks
  *
- * @param {EphemeralPresence} presence presence object from Fluid container.
+ * @param {LivePresence} presence presence object from Fluid container.
  * @param {(string) => void} sendNotification callback method to send a notification through the useNotifications hook.
  * @returns `{playlistStarted, mediaItems, selectedMediaItem, addMediaItem, selectMediaId, nextTrack}` where:
  * - `playlistStarted` is a boolean indicating whether `playlistMap` event listeners were registered.

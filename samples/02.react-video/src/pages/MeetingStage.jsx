@@ -8,7 +8,7 @@ import { getVideoStyle } from "../styles/styles";
 import { getInitialMediaItem } from "../utils/getInitialMediaItem";
 import { DisplayError, MediaPlayerContainer } from "../components";
 import {
-  EphemeralMediaSession,
+  LiveMediaSession,
   MediaPlayerSynchronizerEvents,
 } from "@microsoft/live-share-media";
 import { LiveShareClient } from "@microsoft/live-share";
@@ -50,7 +50,7 @@ const MeetingStage = () => {
           logger: new ConsoleLogger(),
         });
         const schema = {
-          initialObjects: { mediaSession: EphemeralMediaSession },
+          initialObjects: { mediaSession: LiveMediaSession },
         };
         const { container } = await client.joinContainer(schema);
         const { mediaSession } = container.initialObjects;

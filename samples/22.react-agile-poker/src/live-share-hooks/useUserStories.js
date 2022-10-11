@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { EphemeralEvent } from "@microsoft/live-share";
+import { LiveEvent } from "@microsoft/live-share";
 import { v4 as uuid } from "uuid";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 
@@ -23,7 +23,7 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
       const id = uuid();
       userStoriesMap?.set(id, {
         text: userStoryText,
-        addedAt: EphemeralEvent.getTimestamp(),
+        addedAt: LiveEvent.getTimestamp(),
         addedBy: localUserId,
       });
     },

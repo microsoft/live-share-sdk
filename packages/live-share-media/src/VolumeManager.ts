@@ -6,7 +6,7 @@
 import { TimeInterval } from '@microsoft/live-share';
 import { IMediaPlayer } from './IMediaPlayer';
 
-export enum LevelType { fixed, percentage }
+export enum LimitLevelType { fixed, percentage }
 
 /**
  * Smooth audio level changes when selectedVolume is modified, or if volume limiting has started/ended.
@@ -16,17 +16,17 @@ export class VolumeManager {
     private readonly _volumeChangeDuration = new TimeInterval(500);
 
     // defaults to player volume
-    private _selectedVolume = 0.0;
+    private _volume = 0.0;
     private _limited = false;
-    private _level = 0.1
-    private _levelType: LevelType = LevelType.fixed;
+    private _limitLevel = 0.1
+    private _limitLevelType: LimitLevelType = LimitLevelType.fixed;
     private _startTime = 0;
     private _startVolume = 0;
     private _running = false;
 
     constructor(player: IMediaPlayer) {
         this._player = player;
-        this._selectedVolume = this._player.volume;
+        this._volume = this._player.volume;
     }
 
     /**
@@ -36,16 +36,16 @@ export class VolumeManager {
      * Expressed as a value between 0.0 and 1.0. The default value is 1.0.
      * Can be used for things like volume sliders.
      */
-    public get selectedVolume(): number {
-        return this._selectedVolume;
+    public get volume(): number {
+        return this._volume;
     }
 
-    public set selectedVolume(value: number) {
+    public set volume(value: number) {
         if (value < 0 || value > 1.0) {
             throw new Error(`VolumeManager: cannot set selectedVolume to ${value}. Level must be between 0.0 and 1.0.`);
         }
 
-        this._selectedVolume = value;
+        this._volume = value;
         this.startAdjusting();
     }
 
@@ -63,27 +63,27 @@ export class VolumeManager {
      * level should be lowered to. The default value of 0.1 would cause the volume to be lowered
      * to 10% of its starting value.
      */
-    public get level(): number {
-        return this._level;
+    public get limitLevel(): number {
+        return this._limitLevel;
     }
 
-    public set level(value: number) {
+    public set limitLevel(value: number) {
         if (value < 0 || value > 1.0) {
             throw new Error(`VolumeManager: cannot set level to ${value}. Level must be between 0.0 and 1.0.`);
         }
 
-        this._level = value;
+        this._limitLevel = value;
     }
 
     /**
      * The type of level represented by the `level` property.
      */
-    public get levelType(): LevelType {
-        return this._levelType;
+    public get limitLevelType(): LimitLevelType {
+        return this._limitLevelType;
     }
 
-    public set levelType(value: LevelType) {
-        this._levelType = value;
+    public set limitLevelType(value: LimitLevelType) {
+        this._limitLevelType = value;
     }
 
     /**
@@ -105,7 +105,7 @@ export class VolumeManager {
      * @see `level`
      * @see `levelType`
      */
-    public start(): void {
+    public startLimiting(): void {
         this._limited = true;
         this.startAdjusting();
     }
@@ -113,7 +113,7 @@ export class VolumeManager {
     /**
      * Disables volume limit.
      */
-    public stop(): void {
+    public stopLimiting(): void {
         this._limited = false;
         this.startAdjusting();
     }
@@ -154,17 +154,17 @@ export class VolumeManager {
     }
 
     private computeTargetVolume(): number {
-        if (this._levelType == LevelType.percentage) {
+        if (this._limitLevelType == LimitLevelType.percentage) {
             if (this._limited) {
-                return this._selectedVolume * this._level;
+                return this._volume * this._limitLevel;
             } else {
-                return this._selectedVolume;
+                return this._volume;
             }
         } else {
-            if (this._limited && this._selectedVolume > this._level) {
-                return this._level;
+            if (this._limited && this._volume > this._limitLevel) {
+                return this._limitLevel;
             } else {
-                return this._selectedVolume;
+                return this._volume;
             }
         }
     }

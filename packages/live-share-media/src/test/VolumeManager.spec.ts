@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { IMediaPlayer } from "../IMediaPlayer"
-import { LevelType, VolumeManager } from "../VolumeManager"
+import { LimitLevelType, VolumeManager } from "../VolumeManager"
 import { Deferred } from '@microsoft/live-share/src/test/Deferred';
 
 describe('VolumeManager', () => {
@@ -11,7 +11,7 @@ describe('VolumeManager', () => {
         const volumeManager = new VolumeManager(player);
 
         assert(player.volume == 1.0);
-        volumeManager.start();
+        volumeManager.startLimiting();
         setTimeout(() => {
             // check volume at halfway point
             assert(player.volume > 0.4);
@@ -20,7 +20,7 @@ describe('VolumeManager', () => {
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
-            assert(player.volume == volumeManager.level);
+            assert(player.volume == volumeManager.limitLevel);
             testAwait.resolve();
         }, volumeManager.volumeChangeDuration * 1000 + 20);
 
@@ -34,12 +34,12 @@ describe('VolumeManager', () => {
         const volumeManager = new VolumeManager(player);
 
         // limit at start
-        volumeManager.start();
+        volumeManager.startLimiting();
 
         // when limited all the way, test ramp up
         setTimeout(() => {
-            assert(player.volume == volumeManager.level);
-            volumeManager.stop();
+            assert(player.volume == volumeManager.limitLevel);
+            volumeManager.stopLimiting();
 
             setTimeout(() => {
                 // check volume at halfway point
@@ -49,7 +49,7 @@ describe('VolumeManager', () => {
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
-                assert(player.volume == volumeManager.selectedVolume);
+                assert(player.volume == volumeManager.volume);
                 testAwait.resolve();
             }, volumeManager.volumeChangeDuration * 1000 + 20);
 
@@ -65,16 +65,16 @@ describe('VolumeManager', () => {
 
         const volumeManager = new VolumeManager(player);
 
-        volumeManager.start();
+        volumeManager.startLimiting();
         setTimeout(() => {
             // check volume at halfway point, begin ramping other direction
             assert(player.volume > 0.4);
             assert(player.volume < 0.6);
-            volumeManager.stop();
+            volumeManager.stopLimiting();
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
-                assert(player.volume == volumeManager.selectedVolume);
+                assert(player.volume == volumeManager.volume);
                 testAwait.resolve();
             }, volumeManager.volumeChangeDuration * 1000 + 20);
 
@@ -90,7 +90,7 @@ describe('VolumeManager', () => {
 
         const volumeManager = new VolumeManager(player);
 
-        volumeManager.selectedVolume = 0.3;
+        volumeManager.volume = 0.3;
         setTimeout(() => {
             // check volume at halfway point
             assert(player.volume > 0.6);
@@ -99,7 +99,7 @@ describe('VolumeManager', () => {
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
-            assert(player.volume == volumeManager.selectedVolume);
+            assert(player.volume == volumeManager.volume);
             testAwait.resolve();
         }, volumeManager.volumeChangeDuration * 1000 + 20);
 
@@ -112,18 +112,18 @@ describe('VolumeManager', () => {
         player.volume = 1.0
         const volumeManager = new VolumeManager(player);
 
-        volumeManager.start();
+        volumeManager.startLimiting();
         setTimeout(() => {
             // check volume at halfway point, begin ramping other direction with lower selected volume
             assert(player.volume > 0.4);
             assert(player.volume < 0.6);
 
-            volumeManager.selectedVolume = 0.7;
-            volumeManager.stop();
+            volumeManager.volume = 0.7;
+            volumeManager.stopLimiting();
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
-                assert(player.volume === volumeManager.selectedVolume);
+                assert(player.volume === volumeManager.volume);
                 testAwait.resolve();
             }, volumeManager.volumeChangeDuration * 1000 + 20);
 
@@ -138,17 +138,17 @@ describe('VolumeManager', () => {
         player.volume = 1.0
 
         const volumeManager = new VolumeManager(player);
-        volumeManager.selectedVolume = 0.3;
+        volumeManager.volume = 0.3;
 
         setTimeout(() => {
             // check volume at halfway point
             assert(player.volume > 0.6);
             assert(player.volume < 0.7);
-            volumeManager.selectedVolume = 0.8;
+            volumeManager.volume = 0.8;
 
             setTimeout(() => {
                 // check volume at end with 20ms of leeway
-                assert(player.volume == volumeManager.selectedVolume);
+                assert(player.volume == volumeManager.volume);
                 testAwait.resolve();
             }, volumeManager.volumeChangeDuration * 1000 + 20);
         }, volumeManager.volumeChangeDuration * 1000 / 2);
@@ -162,10 +162,10 @@ describe('VolumeManager', () => {
         player.volume = 1.0
 
         const volumeManager = new VolumeManager(player);
-        volumeManager.levelType = LevelType.percentage;
-        volumeManager.level = 0.5;
+        volumeManager.limitLevelType = LimitLevelType.percentage;
+        volumeManager.limitLevel = 0.5;
 
-        volumeManager.start();
+        volumeManager.startLimiting();
 
         setTimeout(() => {
             // check volume at halfway point
@@ -175,7 +175,7 @@ describe('VolumeManager', () => {
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
-            assert(player.volume == volumeManager.level * volumeManager.selectedVolume);
+            assert(player.volume == volumeManager.limitLevel * volumeManager.volume);
             testAwait.resolve();
         }, volumeManager.volumeChangeDuration * 1000 + 20);
 

@@ -3,11 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { EphemeralTelemetryLogger, IEvent, TimeInterval } from '@microsoft/live-share';
+import { LiveTelemetryLogger, IEvent, TimeInterval } from '@microsoft/live-share';
 import EventEmitter from 'events';
 import { ExtendedMediaSessionAction, ExtendedMediaSessionPlaybackState, ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionActionDetails, MediaSessionCoordinatorEvents, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
-import { EphemeralMediaSession } from './EphemeralMediaSession';
 import { VolumeManager } from './VolumeManager';
+import { LiveMediaSession } from './LiveMediaSession';
 import { IMediaPlayer } from './IMediaPlayer';
 import { TelemetryEvents } from './internals';
 
@@ -50,9 +50,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private static SESSION_ACTIONS: ExtendedMediaSessionAction[] = ['play', 'pause', 'seekto', 'settrack', 'datachange', 'catchup', 'wait'];
     private static PLAYER_EVENTS: string[] = ['playing', 'pause', 'ratechange', 'timeupdate', 'ended', 'loadedmetadata', 'blocked'];
 
-    private _logger: EphemeralTelemetryLogger;
+    private _logger: LiveTelemetryLogger;
     private _player: IMediaPlayer;
-    private _mediaSession: EphemeralMediaSession;
+    private _mediaSession: LiveMediaSession;
     private _volumeManager: VolumeManager;
     private _onEnd?: () => void;
     private _onPlayerEvent: EventListener;
@@ -67,7 +67,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @param mediaSession Group MediaSession object being used.
      * @param onEnd Optional. Function to call when synchronizers `end()` method is called.
      */
-    constructor(player: IMediaPlayer, mediaSession: EphemeralMediaSession, onEnd: () => void) {
+    constructor(player: IMediaPlayer, mediaSession: LiveMediaSession, onEnd: () => void) {
         super();
         this._player = player;
         this._mediaSession = mediaSession;
@@ -124,15 +124,21 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                             this.play();
                         }
                     }
-                    // block play if player state is playing when expected synced state is paused
-                    // needed for YouTube because cannot tell if its a user initiated event, so disallow play (except when starting)
+                    // block play if player state is playing when expected synced state is paused.
+                    // needed because cannot tell if its a user initiated event, so disallow play
                     if (this._expectedPlaybackState === 'paused') {
+                        this._player.pause();
+                    }
+
+                    // block play if player state is playing when expected synced state is none.
+                    // needed because user who is not in control should not be able to start, so disallow play
+                    if (this._expectedPlaybackState === 'none') {
                         this._player.pause();
                     }
                     break;
                 case 'pause':
                     // block pause if player state is paused when expected synced state is playing
-                    // needed for YouTube because cannot tell if its a user initiated event, so disallow pause
+                    // needed because cannot tell if its a user initiated event, so disallow pause
                     if (this._expectedPlaybackState === 'playing') {
                         this._player.play();
                     }
@@ -232,7 +238,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     /**
      * Synchronizers media session.
      */
-    public get mediaSession(): EphemeralMediaSession {
+    public get mediaSession(): LiveMediaSession {
         return this._mediaSession;
     }
 

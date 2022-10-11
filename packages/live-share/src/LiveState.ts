@@ -5,18 +5,18 @@
 
 import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
 import { IEvent } from "@fluidframework/common-definitions";
-import { IEphemeralEvent, UserMeetingRole } from "./interfaces";
+import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { cloneValue, TelemetryEvents } from './internals';
-import { EphemeralEventScope } from './EphemeralEventScope';
-import { EphemeralEventTarget } from './EphemeralEventTarget';
-import { EphemeralTelemetryLogger } from './EphemeralTelemetryLogger';
-import { EphemeralEvent } from './EphemeralEvent';
-import { EphemeralObjectSynchronizer } from './EphemeralObjectSynchronizer';
+import { LiveEventScope } from './LiveEventScope';
+import { LiveEventTarget } from './LiveEventTarget';
+import { LiveTelemetryLogger } from './LiveTelemetryLogger';
+import { LiveEvent } from './LiveEvent';
+import { LiveObjectSynchronizer } from './LiveObjectSynchronizer';
 
 /**
- * Events supported by [EphemeralState` object.
+ * Events supported by [LiveState` object.
  */
-export enum EphemeralStateEvents {
+export enum LiveStateEvents {
     /**
      * The objects state has changed.
      */
@@ -24,12 +24,12 @@ export enum EphemeralStateEvents {
 }
 
 /**
- * Event typings for `EphemeralState` class.
+ * Event typings for `LiveState` class.
  * @template TData Optional data object that's synchronized with the state.
  */
-export interface IEphemeralStateEvents<TData = undefined> extends IEvent {
+export interface ILiveStateEvents<TData = undefined> extends IEvent {
     /**
-     * An `EphemeralState` objects state has changed.
+     * An `LiveState` objects state has changed.
      * @param event Name of event.
      * @param listener Function called when event is triggered.
      * @param listener.state The new state. Can be the same as the previous state.
@@ -40,22 +40,22 @@ export interface IEphemeralStateEvents<TData = undefined> extends IEvent {
 }
 
 /**
- * Ephemeral fluid object that synchronizes a named state and optional data value across clients.
+ * Live fluid object that synchronizes a named state and optional data value across clients.
  *
  * @remarks
- * The primary benefit of using the `EphemeralState` object in a Teams meeting, versus something
+ * The primary benefit of using the `LiveState` object in a Teams meeting, versus something
  * like a `SharedMap`, is that you can restrict the roles of who's allowed to perform state
  * changes.
  * @template TData Optional data object that's synchronized with the state.
  */
-export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphemeralStateEvents<TData>}> {
-    private _logger = new EphemeralTelemetryLogger(this.runtime);
+export class LiveState<TData = undefined> extends DataObject<{Events: ILiveStateEvents<TData>}> {
+    private _logger = new LiveTelemetryLogger(this.runtime);
     private _allowedRoles: UserMeetingRole[] = [];
-    private _currentState: IStateChangeEvent<TData> = {name: 'ChangeState', timestamp: 0, state: EphemeralState.INITIAL_STATE};
+    private _currentState: IStateChangeEvent<TData> = {name: 'ChangeState', timestamp: 0, state: LiveState.INITIAL_STATE};
 
-    private _scope?: EphemeralEventScope;
-    private _changeStateEvent?: EphemeralEventTarget<IStateChangeEvent<TData>>;
-    private _synchronizer?: EphemeralObjectSynchronizer<IStateChangeEvent<TData>>;
+    private _scope?: LiveEventScope;
+    private _changeStateEvent?: LiveEventTarget<IStateChangeEvent<TData>>;
+    private _synchronizer?: LiveObjectSynchronizer<IStateChangeEvent<TData>>;
 
     /**
      * The objects initial state if not explicitly initialized.
@@ -65,14 +65,14 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
     /**
      * The objects fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/live-share:EphemeralState`;
+    public static readonly TypeName = `@microsoft/live-share:LiveState`;
 
     /**
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        EphemeralState.TypeName,
-        EphemeralState,
+        LiveState.TypeName,
+        LiveState,
         [],
         {}
     );
@@ -110,19 +110,19 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
      * Starts the object.
      * @param allowedRoles Optional. List of roles allowed to make state changes.
      */
-    public async initialize(allowedRoles?: UserMeetingRole[], state = EphemeralState.INITIAL_STATE, data?: TData): Promise<void> {
+    public async initialize(allowedRoles?: UserMeetingRole[], state = LiveState.INITIAL_STATE, data?: TData): Promise<void> {
         if (this._scope) {
-            throw new Error(`EphemeralState already started.`);
+            throw new Error(`LiveState already started.`);
         }
 
         // Save off allowed roles
         this._allowedRoles = allowedRoles || [];
 
         // Create event scope
-        this._scope = new EphemeralEventScope(this.runtime, allowedRoles);
+        this._scope = new LiveEventScope(this.runtime, allowedRoles);
 
         // Listen for remote state changes
-        this._changeStateEvent = new EphemeralEventTarget(this._scope, 'ChangeState', (evt, local) => {
+        this._changeStateEvent = new LiveEventTarget(this._scope, 'ChangeState', (evt, local) => {
             if (!local) {
                 // Check for state change
                 this.remoteStateReceived(evt, evt.clientId!);
@@ -130,7 +130,7 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
         });
 
         // Create object synchronizer
-        this._synchronizer = new EphemeralObjectSynchronizer(this.id, this.runtime, this.context.containerRuntime, (connecting) => {
+        this._synchronizer = new LiveObjectSynchronizer(this.id, this.runtime, this.context.containerRuntime, (connecting) => {
                 // Return current state
                 return this._currentState;
             }, (connecting, state, sender) => {
@@ -139,15 +139,6 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
             });
 
         return Promise.resolve();
-    }
-
-    /**
-     * @deprecated initialize should be used instead
-     * Starts the object.
-     * @param allowedRoles Optional. List of roles allowed to make state changes.
-     */
-    public async start(allowedRoles?: UserMeetingRole[], state = EphemeralState.INITIAL_STATE, data?: TData): Promise<void> {
-        return this.initialize(allowedRoles, state, data)
     }
 
     /**
@@ -167,7 +158,7 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
      */
     public changeState(state: string, data?: TData): void {
         if (!this._scope) {
-            throw new Error(`EphemeralState not started.`);
+            throw new Error(`LiveState not started.`);
         }
 
         // Broadcast state change
@@ -181,13 +172,13 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
     }
 
     private remoteStateReceived(evt: IStateChangeEvent<TData>, sender: string): void {
-        EphemeralEvent.verifyRolesAllowed(sender, this._allowedRoles).then((allowed) => {
+        LiveEvent.verifyRolesAllowed(sender, this._allowedRoles).then((allowed) => {
             // Ensure that state is allowed, newer, and not the initial state.
-            if (allowed && EphemeralEvent.isNewer(this._currentState, evt) && evt.state !== EphemeralState.INITIAL_STATE) {
+            if (allowed && LiveEvent.isNewer(this._currentState, evt) && evt.state !== LiveState.INITIAL_STATE) {
                 this.updateState(evt, false);
             }
         }).catch((err) => {
-            this._logger.sendErrorEvent(TelemetryEvents.EphemeralState.RoleVerificationError, err);
+            this._logger.sendErrorEvent(TelemetryEvents.LiveState.RoleVerificationError, err);
         });
     }
 
@@ -195,12 +186,12 @@ export class EphemeralState<TData = undefined> extends DataObject<{Events: IEphe
         const oldState = this._currentState.state;
         const newState = evt.state;
         this._currentState = evt;
-        this.emit(EphemeralStateEvents.stateChanged, evt.state, cloneValue(evt.data), local);
-        this._logger.sendTelemetryEvent(TelemetryEvents.EphemeralState.StateChanged, {oldState, newState});
+        this.emit(LiveStateEvents.stateChanged, evt.state, cloneValue(evt.data), local);
+        this._logger.sendTelemetryEvent(TelemetryEvents.LiveState.StateChanged, {oldState, newState});
     }
 }
 
-interface IStateChangeEvent<T> extends IEphemeralEvent {
+interface IStateChangeEvent<T> extends ILiveEvent {
     state: string;
     data?: T;
 }

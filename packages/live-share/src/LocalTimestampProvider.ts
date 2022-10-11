@@ -21,7 +21,7 @@ export class LocalTimestampProvider implements ITimestampProvider {
 
     public getTimestamp(): number {
         if (!LocalTimestampProvider._warned) {
-            console.warn(`EphemeralEvent is using a LocalTimestampProvider which could cause issues when used across multiple clients.`);
+            console.warn(`LiveEvent is using a LocalTimestampProvider which could cause issues when used across multiple clients.`);
             LocalTimestampProvider._warned = true;
         }
 

@@ -4,8 +4,8 @@
  */
 
 import { strict as assert } from "assert";
-import { EphemeralEvent } from "../EphemeralEvent";
-import { EphemeralEventScope } from "../EphemeralEventScope";
+import { LiveEvent } from "../LiveEvent";
+import { LiveEventScope } from "../LiveEventScope";
 import { UserMeetingRole } from "../interfaces";
 import { MockRuntimeSignaler } from './MockRuntimeSignaler';
 import { MockRoleVerifier } from './MockRoleVerifier';
@@ -20,12 +20,12 @@ function createConnectedSignalers() {
     return {localRuntime, remoteRuntime};
 }
 
-describe("EphemeralEventScope", () => {
+describe("LiveEventScope", () => {
     it("Should raise local and remote events", (done) => {
         let triggered = 0;
         const now = new Date().getTime();
         const signalers = createConnectedSignalers();
-        const localScope = new EphemeralEventScope(signalers.localRuntime);
+        const localScope = new LiveEventScope(signalers.localRuntime);
         localScope.onEvent('test', (evt, local) => {
             assert(local == true, `Not a local event`);
             assert(evt != null, `Null event arg`);
@@ -36,7 +36,7 @@ describe("EphemeralEventScope", () => {
             triggered++;
         });
 
-        const remoteScope = new EphemeralEventScope(signalers.remoteRuntime);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
         remoteScope.onEvent('test', (evt, local) => {
             assert(local == false, `Unexpected local event`);
             assert(evt != null, `Null event arg`);
@@ -59,11 +59,11 @@ describe("EphemeralEventScope", () => {
     it("Should unsubscribe from events", (done) => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new EphemeralEventScope(signalers.localRuntime);
+        const localScope = new LiveEventScope(signalers.localRuntime);
         const handler = (evt, local) => triggered++;
         localScope.onEvent('test', handler);
 
-        const remoteScope = new EphemeralEventScope(signalers.remoteRuntime);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
         remoteScope.onEvent('test', handler);
 
         localScope.sendEvent('test', {});
@@ -83,14 +83,14 @@ describe("EphemeralEventScope", () => {
 
     it("Should verify senders role", (done) => {
         const verifier = new MockRoleVerifier([UserMeetingRole.organizer]);
-        EphemeralEvent.setRoleVerifier(verifier);
+        LiveEvent.setRoleVerifier(verifier);
         
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new EphemeralEventScope(signalers.localRuntime, [UserMeetingRole.organizer]);
+        const localScope = new LiveEventScope(signalers.localRuntime, [UserMeetingRole.organizer]);
         localScope.onEvent('test', (evt, local) => triggered++);
 
-        const remoteScope = new EphemeralEventScope(signalers.remoteRuntime, [UserMeetingRole.organizer]);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [UserMeetingRole.organizer]);
         remoteScope.onEvent('test', (evt, local) => triggered++);
 
         localScope.sendEvent('test', {});
@@ -99,21 +99,21 @@ describe("EphemeralEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            EphemeralEvent.setRoleVerifier(new LocalRoleVerifier());
+            LiveEvent.setRoleVerifier(new LocalRoleVerifier());
             done();
         }, 10);
     });
 
     it("Should block invalid senders", (done) => {
         const verifier = new MockRoleVerifier([]);
-        EphemeralEvent.setRoleVerifier(verifier);
+        LiveEvent.setRoleVerifier(verifier);
         
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new EphemeralEventScope(signalers.localRuntime, [UserMeetingRole.organizer]);
+        const localScope = new LiveEventScope(signalers.localRuntime, [UserMeetingRole.organizer]);
         localScope.onEvent('test', (evt, local) => triggered++);
 
-        const remoteScope = new EphemeralEventScope(signalers.remoteRuntime, [UserMeetingRole.organizer]);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [UserMeetingRole.organizer]);
         remoteScope.onEvent('test', (evt, local) => triggered++);
 
         localScope.sendEvent('test', {});
@@ -128,14 +128,14 @@ describe("EphemeralEventScope", () => {
 
     it("Should support event scopes with multiple roles", (done) => {
         const verifier = new MockRoleVerifier([UserMeetingRole.presenter]);
-        EphemeralEvent.setRoleVerifier(verifier);
+        LiveEvent.setRoleVerifier(verifier);
         
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new EphemeralEventScope(signalers.localRuntime, [UserMeetingRole.presenter, UserMeetingRole.organizer]);
+        const localScope = new LiveEventScope(signalers.localRuntime, [UserMeetingRole.presenter, UserMeetingRole.organizer]);
         localScope.onEvent('test', (evt, local) => triggered++);
 
-        const remoteScope = new EphemeralEventScope(signalers.remoteRuntime, [UserMeetingRole.presenter, UserMeetingRole.organizer]);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [UserMeetingRole.presenter, UserMeetingRole.organizer]);
         remoteScope.onEvent('test', (evt, local) => triggered++);
 
         localScope.sendEvent('test', {});
@@ -144,21 +144,21 @@ describe("EphemeralEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            EphemeralEvent.setRoleVerifier(new LocalRoleVerifier());
+            LiveEvent.setRoleVerifier(new LocalRoleVerifier());
             done();
         }, 10);
     });
 
     it("Should support senders with multiple roles", (done) => {
         const verifier = new MockRoleVerifier([UserMeetingRole.organizer, UserMeetingRole.presenter]);
-        EphemeralEvent.setRoleVerifier(verifier);
+        LiveEvent.setRoleVerifier(verifier);
         
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new EphemeralEventScope(signalers.localRuntime, [UserMeetingRole.presenter]);
+        const localScope = new LiveEventScope(signalers.localRuntime, [UserMeetingRole.presenter]);
         localScope.onEvent('test', (evt, local) => triggered++);
 
-        const remoteScope = new EphemeralEventScope(signalers.remoteRuntime, [UserMeetingRole.presenter]);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [UserMeetingRole.presenter]);
         remoteScope.onEvent('test', (evt, local) => triggered++);
 
         localScope.sendEvent('test', {});
@@ -167,25 +167,25 @@ describe("EphemeralEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            EphemeralEvent.setRoleVerifier(new LocalRoleVerifier());
+            LiveEvent.setRoleVerifier(new LocalRoleVerifier());
             done();
         }, 10);
     });
 
     it("Should support custom timestamp providers", (done) => {
         const provider = new MockTimestampProvider();
-        EphemeralEvent.setTimestampProvider(provider);
+        LiveEvent.setTimestampProvider(provider);
 
         let triggered = 0;
         const now = new Date().getTime();
         const signalers = createConnectedSignalers();
-        const localScope = new EphemeralEventScope(signalers.localRuntime);
+        const localScope = new LiveEventScope(signalers.localRuntime);
         localScope.onEvent('test', (evt, local) => {
             assert(evt.timestamp >= now);
             triggered++
         });
 
-        const remoteScope = new EphemeralEventScope(signalers.remoteRuntime);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
         remoteScope.onEvent('test', (evt, local) => {
             assert(evt.timestamp >= now);
             triggered++
@@ -197,7 +197,7 @@ describe("EphemeralEventScope", () => {
         setTimeout(() => {
             assert(provider.called, `provider not called`);
             assert(triggered == 2, `triggered == ${triggered}`);
-            EphemeralEvent.setTimestampProvider(new LocalTimestampProvider());
+            LiveEvent.setTimestampProvider(new LocalTimestampProvider());
             done();
         }, 10);
     });

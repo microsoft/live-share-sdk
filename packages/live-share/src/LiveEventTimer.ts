@@ -4,27 +4,27 @@
  */
 
 import { TimeInterval } from "./TimeInterval";
-import { EphemeralEventSource } from "./EphemeralEventSource";
-import { IEphemeralEvent } from "./interfaces";
+import { LiveEventSource } from "./LiveEventSource";
+import { ILiveEvent } from "./interfaces";
 
 /**
- * Periodically broadcasts an event to listening `EphemeralEventTarget` instances.
+ * Periodically broadcasts an event to listening `LiveEventTarget` instances.
  */
-export class EphemeralEventTimer<T extends IEphemeralEvent> {
-    private _eventSource: EphemeralEventSource<T>;
+export class LiveEventTimer<T extends ILiveEvent> {
+    private _eventSource: LiveEventSource<T>;
     private _createEvent: () => Partial<T>;
     private _delay: TimeInterval;
     private _isRunning = false;
     private _timer?: any;
 
     /**
-     * Creates a new `EphemeralEventTimer instance.
+     * Creates a new `LiveEventTimer instance.
      * @param eventSource Event source that will be used to emit events.
      * @param createEvent Function used to construct an event to send. This will be called at regular intervals prior to sending an event.
      * @param delay Period to delay for in milliseconds.
      * @param repeat Optional. If true the timer will repeat once `start` is called, otherwise a single event will be sent after the delay. Defaults to false.
      */
-    constructor(eventSource: EphemeralEventSource<T>, createEvent: () => Partial<T>, delay: number, repeat = false) {
+    constructor(eventSource: LiveEventSource<T>, createEvent: () => Partial<T>, delay: number, repeat = false) {
         this._eventSource = eventSource;
         this._createEvent = createEvent;
         this._delay = new TimeInterval(delay);

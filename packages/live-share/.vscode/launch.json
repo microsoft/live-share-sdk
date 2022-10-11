@@ -20,7 +20,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\test\\EphemeralEventTimer.spec.ts",
+            "program": "${workspaceFolder}\\src\\test\\LiveEventTimer.spec.ts",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]

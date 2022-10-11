@@ -23,7 +23,7 @@ const MeetingStage = () => {
   // Element ref for inking canvas
   const canvasRef = useRef(null);
 
-  // Fluid objects hook which uses TeamsFluidClient to create container
+  // Fluid objects hook which uses LiveShareClient to create container
   const {
     presence, // EphemeralPresence Fluid object
     mediaSession, // EphemeralMediaSession Fluid object

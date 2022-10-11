@@ -4,9 +4,9 @@
  */
 
 
-export * from './EphemeralMediaSession';
-export * from './EphemeralMediaSessionCoordinator';
-export * from './EphemeralMediaSessionCoordinatorSuspension';
+export * from './LiveMediaSession';
+export * from './LiveMediaSessionCoordinator';
+export * from './LiveMediaSessionCoordinatorSuspension';
 export * from './IMediaPlayer';
 export * from './MediaPlayerSynchronizer';
 export * from './MediaSessionActionThrottler';

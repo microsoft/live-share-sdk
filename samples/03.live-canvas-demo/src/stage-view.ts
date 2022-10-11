@@ -4,7 +4,7 @@
  */
 
 import * as Teams from "@microsoft/teams-js";
-import { EphemeralEvent, ITeamsFluidClientOptions, TeamsFluidClient } from "@microsoft/live-share";
+import { LiveEvent, ILiveShareClientOptions, LiveShareClient } from "@microsoft/live-share";
 import { InkingManager, InkingTool, IUserInfo, LiveCanvas } from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
@@ -82,7 +82,7 @@ export class StageView extends View {
     private _userInfo: IUserInfo;
 
     private async internalStart() {
-        const clientOptions: ITeamsFluidClientOptions | undefined = Utils.runningInTeams()
+        const clientOptions: ILiveShareClientOptions | undefined = Utils.runningInTeams()
             ? undefined
             : {
                 connection: {
@@ -92,7 +92,7 @@ export class StageView extends View {
                 }
             };
 
-        const client = new TeamsFluidClient(clientOptions);
+        const client = new LiveShareClient(clientOptions);
 
         this._container = (await client.joinContainer(containerSchema)).container;
 

@@ -78,7 +78,7 @@ export class VolumeManager {
     }
 
     /**
-     * The type of level represented by the `level` property.
+     * The type of level represented by the `limitLevel` property.
      */
     public get limitLevelType(): LimitLevelType {
         return this._limitLevelType;
@@ -110,9 +110,9 @@ export class VolumeManager {
     }
 
     /**
-     * Limits volume based on `level` and `levelType` properties.
-     * @see `level`
-     * @see `levelType`
+     * Limits volume based on `limitLevel` and `limitLevelType` properties.
+     * @see `limitLevel`
+     * @see `limitLevelType`
      */
     public startLimiting(): void {
         this._isLimiting = true;

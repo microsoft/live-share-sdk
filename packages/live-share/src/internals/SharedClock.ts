@@ -5,35 +5,35 @@
 
 import { ILiveShareHost, ITimestampProvider } from "../interfaces";
 
-const SHARED_CLOCK_IMPROVE_ACCURACY_INTERVAL =  5 * 1000;
+const SHARED_CLOCK_IMPROVE_ACCURACY_INTERVAL = 5 * 1000;
 const SHARED_CLOCK_IMPROVE_ACCURACY_ATTEMPTS = 5;
 
 /**
  * @hidden
  */
 interface IServerTimeOffset {
-  offset: number;
-  serverTimeInUtc: number;
-  localTimeInUtc: number;
-  requestLatency: number;
+    offset: number;
+    serverTimeInUtc: number;
+    localTimeInUtc: number;
+    requestLatency: number;
 }
 
 /**
  * @hidden
- * 
+ *
  */
- export class SharedClock implements ITimestampProvider {
+export class SharedClock implements ITimestampProvider {
     private _serverTime?: IServerTimeOffset;
     private _syncTimer?: any;
     private _retries = 0;
     private _lastTimeSent = 0;
 
-    public constructor(private readonly _host: ILiveShareHost) { }
+    public constructor(private readonly _host: ILiveShareHost) {}
 
     /**
      * Returns true if the clock has been started.
      */
-     public isRunning(): boolean {
+    public isRunning(): boolean {
         return !!this._serverTime;
     }
 
@@ -46,10 +46,10 @@ interface IServerTimeOffset {
         }
 
         // Return adjusted timestamp and save last
-        // - We never want to generate the same timestamp twice and we always want a greater 
-        //   timestamp then what we previously sent. This can happen if our accuracy improves 
+        // - We never want to generate the same timestamp twice and we always want a greater
+        //   timestamp then what we previously sent. This can happen if our accuracy improves
         //   and we end up with a smaller offset then before.
-        return this._lastTimeSent = Math.max(new Date().getTime() + this._serverTime.offset, this._lastTimeSent + 1);
+        return (this._lastTimeSent = Math.max(new Date().getTime() + this._serverTime.offset, this._lastTimeSent + 1));
     }
 
     public getMaxTimestampError(): number {
@@ -59,7 +59,6 @@ interface IServerTimeOffset {
 
         return Math.floor(this._serverTime.requestLatency / 2);
     }
-
 
     /**
      * Starts the clock
@@ -88,9 +87,9 @@ interface IServerTimeOffset {
 
     /**
      * Called in a loop to improve the accuracy of the clients timestamp offset.
-     * 
-     * The function will periodically call itself until we go 5 times without an improvement 
-     * to the calculated timestamp offset. 
+     *
+     * The function will periodically call itself until we go 5 times without an improvement
+     * to the calculated timestamp offset.
      */
     private async improveAccuracy(): Promise<void> {
         // Check for a more accurate time offset.
@@ -108,9 +107,7 @@ interface IServerTimeOffset {
         // Start sync timer timer
         if (this._retries <= SHARED_CLOCK_IMPROVE_ACCURACY_ATTEMPTS) {
             this._syncTimer = setTimeout(this.improveAccuracy.bind(this), SHARED_CLOCK_IMPROVE_ACCURACY_INTERVAL);
-        }
-        else
-        {
+        } else {
             this._syncTimer = undefined;
         }
     }
@@ -135,7 +132,7 @@ interface IServerTimeOffset {
             serverTimeInUtc: serverTimeInUtc,
             localTimeInUtc: now,
             requestLatency: requestLatency,
-            offset: serverTimeInUtc - now
+            offset: serverTimeInUtc - now,
         };
     }
 }

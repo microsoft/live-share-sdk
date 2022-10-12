@@ -9,10 +9,4 @@ import { useSharedObjects } from "./useSharedObjects";
 import { useTimer } from "./useTimer";
 import { useUserStories } from "./useUserStories";
 
-export {
-  usePokerState,
-  usePresence,
-  useSharedObjects,
-  useTimer,
-  useUserStories,
-};
+export { usePokerState, usePresence, useSharedObjects, useTimer, useUserStories };

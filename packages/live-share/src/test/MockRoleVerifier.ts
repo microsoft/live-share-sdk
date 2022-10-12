@@ -15,7 +15,7 @@ export class MockRoleVerifier implements IRoleVerifier {
     public blocked = false;
     public called = false;
     public clientId: string;
-    
+
     public getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
         this.called = true;
         this.clientId = clientId;

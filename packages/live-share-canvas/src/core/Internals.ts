@@ -13,9 +13,9 @@ export const TWO_PI: number = Math.PI * 2;
 const EPSILON = 0.000001;
 
 /**
-* Generates a unique Id.
-* @returns A unique Id.
-*/
+ * Generates a unique Id.
+ * @returns A unique Id.
+ */
 export function generateUniqueId(): string {
     return uuid();
 }
@@ -70,7 +70,7 @@ export interface IQuad {
  * or rectangles.
  */
 export interface IQuadPathSegment {
-    quad?: IQuad,
+    quad?: IQuad;
     endPoint: IPointerPoint;
     tipSize: number;
 }
@@ -113,8 +113,8 @@ export function computeQuadBetweenTwoCircles(
         p1: { x: center1.x - sinAlpha * r1, y: center1.y - cosAlpha * r1 },
         p2: { x: center2.x - sinAlpha * r2, y: center2.y - cosAlpha * r2 },
         p3: { x: center2.x + sinBeta * r2, y: center2.y + cosBeta * r2 },
-        p4: { x: center1.x + sinBeta * r1, y: center1.y + cosBeta * r1 }
-    }
+        p4: { x: center1.x + sinBeta * r1, y: center1.y + cosBeta * r1 },
+    };
 }
 
 /**
@@ -158,8 +158,8 @@ export function computeQuadBetweenTwoRectangles(
         p1: { x: center1.x - signDeltaY * halfWidth1, y: center1.y + signDeltaX * halfHeight1 },
         p2: { x: center1.x + signDeltaY * halfWidth1, y: center1.y - signDeltaX * halfHeight1 },
         p3: { x: center2.x + signDeltaY * halfWidth2, y: center2.y - signDeltaX * halfHeight2 },
-        p4: { x: center2.x - signDeltaY * halfWidth2, y: center2.y + signDeltaX * halfHeight2 }
-    }
+        p4: { x: center2.x - signDeltaY * halfWidth2, y: center2.y + signDeltaX * halfHeight2 },
+    };
 }
 
 /**
@@ -177,7 +177,7 @@ export function makeRectangle(center: IPoint, width: number, height: number): IR
         left: center.x - halfWidth,
         top: center.y - halfHeight,
         right: center.x + halfWidth,
-        bottom: center.y + halfHeight
+        bottom: center.y + halfHeight,
     };
 }
 
@@ -203,10 +203,12 @@ export function isRectangleInsideRectangle(r: IRect, containingRectangle: IRect)
     const bottomLeft = { x: r.left, y: r.bottom };
     const bottomRight = { x: r.right, y: r.bottom };
 
-    return isPointInsideRectangle(topLeft, containingRectangle) &&
+    return (
+        isPointInsideRectangle(topLeft, containingRectangle) &&
         isPointInsideRectangle(topRight, containingRectangle) &&
         isPointInsideRectangle(bottomLeft, containingRectangle) &&
-        isPointInsideRectangle(bottomRight, containingRectangle);
+        isPointInsideRectangle(bottomRight, containingRectangle)
+    );
 }
 
 /**
@@ -222,11 +224,13 @@ export function doRectanglesOverlap(r1: IRect, r2: IRect): boolean {
         const bottomLeft = { x: r1.left, y: r1.bottom };
         const bottomRight = { x: r1.right, y: r1.bottom };
 
-        return isPointInsideRectangle(topLeft, r2) ||
+        return (
+            isPointInsideRectangle(topLeft, r2) ||
             isPointInsideRectangle(topRight, r2) ||
             isPointInsideRectangle(bottomLeft, r2) ||
-            isPointInsideRectangle(bottomRight, r2);
-    }
+            isPointInsideRectangle(bottomRight, r2)
+        );
+    };
 
     return test(r1, r2) || test(r2, r1);
 }
@@ -243,24 +247,24 @@ export function segmentsMayIntersect(segment1: ISegment, segment2: ISegment): bo
     const s1: ISegment = {
         from: {
             x: Math.min(segment1.from.x, segment1.to.x),
-            y: Math.min(segment1.from.y, segment1.to.y)
+            y: Math.min(segment1.from.y, segment1.to.y),
         },
         to: {
             x: Math.max(segment1.from.x, segment1.to.x),
-            y: Math.max(segment1.from.y, segment1.to.y)
-        }
+            y: Math.max(segment1.from.y, segment1.to.y),
+        },
     };
 
     const s2: ISegment = {
         from: {
             x: Math.min(segment2.from.x, segment2.to.x),
-            y: Math.min(segment2.from.y, segment2.to.y)
+            y: Math.min(segment2.from.y, segment2.to.y),
         },
         to: {
             x: Math.max(segment2.from.x, segment2.to.x),
-            y: Math.max(segment2.from.y, segment2.to.y)
-        }
-    }
+            y: Math.max(segment2.from.y, segment2.to.y),
+        },
+    };
 
     return !(s1.to.x < s2.from.x || s1.from.x > s2.to.x || s1.to.y < s2.from.y || s1.from.y > s2.to.y);
 }
@@ -275,7 +279,7 @@ export function getRectangleSegments(rect: IRect): ISegment[] {
         { from: { x: rect.left, y: rect.top }, to: { x: rect.right, y: rect.top } },
         { from: { x: rect.right, y: rect.top }, to: { x: rect.right, y: rect.bottom } },
         { from: { x: rect.right, y: rect.bottom }, to: { x: rect.left, y: rect.bottom } },
-        { from: { x: rect.left, y: rect.bottom }, to: { x: rect.left, y: rect.top } }
+        { from: { x: rect.left, y: rect.bottom }, to: { x: rect.left, y: rect.top } },
     ];
 }
 
@@ -326,10 +330,12 @@ export function getSegmentsIntersection(s1: ISegment, s2: ISegment): IPoint | un
 
     const potentialResult = { x: (b2 * c2 - b1 * c1) * invDelta, y: (a1 * c1 - a2 * c2) * invDelta };
 
-    if (isInRange(potentialResult.x, s1.from.x, s1.to.x) &&
+    if (
+        isInRange(potentialResult.x, s1.from.x, s1.to.x) &&
         isInRange(potentialResult.x, s2.from.x, s2.to.x) &&
         isInRange(potentialResult.y, s1.from.y, s1.to.y) &&
-        isInRange(potentialResult.y, s2.from.y, s2.to.y)) {
+        isInRange(potentialResult.y, s2.from.y, s2.to.y)
+    ) {
         return potentialResult;
     }
 
@@ -392,12 +398,12 @@ export function computeEndArrow(from: IPoint, to: IPoint, arrowSize: number = 20
     return [
         {
             x: to.x - arrowSize * (unitDx - unitDy),
-            y: to.y - arrowSize * (unitDy + unitDx)
+            y: to.y - arrowSize * (unitDy + unitDx),
         },
         to,
         {
             x: to.x - arrowSize * (unitDx + unitDy),
-            y: to.y - arrowSize * (unitDy - unitDx)
-        }    
-    ]
+            y: to.y - arrowSize * (unitDy - unitDx),
+        },
+    ];
 }

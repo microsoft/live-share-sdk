@@ -9,7 +9,7 @@ import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { LiveState } from "../LiveState";
-import { Deferred } from './Deferred';
+import { Deferred } from "./Deferred";
 
 interface TestStateData {
     value: string;
@@ -21,8 +21,8 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
     let object2: LiveState<TestStateData>;
 
     // Temporarily change update interval
-    before(() => LiveObjectSynchronizer.updateInterval = 20);
-    after(() => LiveObjectSynchronizer.updateInterval = 15000);
+    before(() => (LiveObjectSynchronizer.updateInterval = 20));
+    after(() => (LiveObjectSynchronizer.updateInterval = 15000));
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
@@ -46,9 +46,9 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         object1.on("stateChanged", (state, data, local) => {
             try {
                 if (local) {
-                    assert(state == 'newState', `object1: state == '${state}'`);
-                    assert(typeof data == 'object', `object1: data is NULL`);
-                    assert(data.value == 'newValue', `object1: data == '${data}'`);
+                    assert(state == "newState", `object1: state == '${state}'`);
+                    assert(typeof data == "object", `object1: data is NULL`);
+                    assert(data.value == "newValue", `object1: data == '${data}'`);
                     object1done.resolve();
                 }
             } catch (err) {
@@ -61,9 +61,9 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         object2.on("stateChanged", (state, data, local) => {
             try {
                 if (!local) {
-                    assert(state == 'newState', `object2: state == '${state}'`);
-                    assert(typeof data == 'object', `object2: data is NULL`);
-                    assert(data.value == 'newValue', `object2: data == '${data}'`);
+                    assert(state == "newState", `object2: state == '${state}'`);
+                    assert(typeof data == "object", `object2: data is NULL`);
+                    assert(data.value == "newValue", `object2: data == '${data}'`);
                     object2done.resolve();
                 }
             } catch (err) {
@@ -72,7 +72,7 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         });
         await object2.initialize();
 
-        object1.changeState('newState', { value: 'newValue' });
+        object1.changeState("newState", { value: "newValue" });
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -83,8 +83,8 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         object1.on("stateChanged", (state, data, local) => {
             try {
                 if (!local) {
-                    assert(state == 'testState', `object1: state == '${state}'`);
-                    assert(data.value == 'secondValue', `object1: data == '${data}'`);
+                    assert(state == "testState", `object1: state == '${state}'`);
+                    assert(data.value == "secondValue", `object1: data == '${data}'`);
                     done.resolve();
                 }
             } catch (err) {
@@ -96,9 +96,9 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         object2.on("stateChanged", (state, data, local) => {
             try {
                 if (!local) {
-                    assert(state == 'testState', `object2: state == '${state}'`);
-                    assert(data.value == 'firstValue', `object2: data == '${data}'`);
-                    object2.changeState(state, { value: 'secondValue' });
+                    assert(state == "testState", `object2: state == '${state}'`);
+                    assert(data.value == "firstValue", `object2: data == '${data}'`);
+                    object2.changeState(state, { value: "secondValue" });
                 }
             } catch (err) {
                 done.reject(err);
@@ -106,7 +106,7 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         });
         await object2.initialize();
 
-        object1.changeState('testState', { value: 'firstValue' });
+        object1.changeState("testState", { value: "firstValue" });
 
         // Wait for events to trigger
         await done.promise;

@@ -3,11 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ITelemetryLogger } from '@fluidframework/common-definitions';
-import { IInboundSignalMessage } from '@fluidframework/runtime-definitions';
+import { ITelemetryLogger } from "@fluidframework/common-definitions";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { MockLogger } from "@fluidframework/telemetry-utils";
-import { IRuntimeSignaler } from '../LiveEventScope';
-import { v4 } from 'uuid';
+import { IRuntimeSignaler } from "../LiveEventScope";
+import { v4 } from "uuid";
 
 export class MockRuntimeSignaler implements IRuntimeSignaler {
     private _connected: MockRuntimeSignaler[] = [];
@@ -20,48 +20,48 @@ export class MockRuntimeSignaler implements IRuntimeSignaler {
         this.logger = new MockLogger();
     }
 
-    public clientId: string|undefined;
+    public clientId: string | undefined;
     public connected: boolean;
     public logger: ITelemetryLogger;
-    
+
     public connect(): void {
         if (!this.connected) {
             this.connected = true;
             this.clientId = v4();
-            this._connectedListeners.forEach(fn => fn(this.clientId!));
+            this._connectedListeners.forEach((fn) => fn(this.clientId!));
         }
     }
 
     public on(event: "connected", listener: (clientId: string) => void): this;
-    public on(event: 'signal', listener: (message: IInboundSignalMessage, local: boolean) => void): this;
+    public on(event: "signal", listener: (message: IInboundSignalMessage, local: boolean) => void): this;
     public on(event: string, listener: any) {
         switch (event) {
-            case 'connected': 
+            case "connected":
                 this._connectedListeners.push(listener);
                 break;
-            case 'signal':
+            case "signal":
                 this._signalListeners.push(listener);
                 break;
         }
         return this;
     }
-    
+
     public submitSignal(type: string, content: any): void {
         const msg: IInboundSignalMessage = {
             clientId: this.clientId || null,
             content: content,
-            type: type
-        }
+            type: type,
+        };
 
         // Raise local event
         this.emit(msg, true);
 
         // Raise remote events
-        this._connected.forEach(runtime => runtime.emit(msg, false));
+        this._connected.forEach((runtime) => runtime.emit(msg, false));
     }
 
     private emit(message: IInboundSignalMessage, local: boolean): void {
-        this._signalListeners.forEach(fn => fn(message, local));
+        this._signalListeners.forEach((fn) => fn(message, local));
     }
 
     public static connectRuntimes(runtimes: MockRuntimeSignaler[]): void {

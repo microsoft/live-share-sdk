@@ -23,7 +23,7 @@ export type LiveEventListener<TEvent extends ILiveEvent> = (evt: TEvent, local: 
  * A way to verify we can signal, a way to send a signal, and a way to listen for incoming signals
  */
 export interface IRuntimeSignaler {
-    readonly clientId: string|undefined;
+    readonly clientId: string | undefined;
     readonly connected: boolean;
     readonly logger: ITelemetryLogger;
     on(event: "connected", listener: (clientId: string) => void): this;
@@ -46,7 +46,7 @@ export interface IRuntimeSignaler {
  * events.
  */
 export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
-    private readonly emitter  = new EventEmitter();
+    private readonly emitter = new EventEmitter();
     private readonly _runtime: IRuntimeSignaler;
     private _allowedRoles: UserMeetingRole[];
 
@@ -74,21 +74,28 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             // Only call listeners when the runtime is connected and if the signal has an
             // identifiable sender clientId.  The listener is responsible for deciding how
             // it wants to handle local/remote signals
-            // eslint-disable-next-line no-null/no-null
             if (this._runtime.connected && clientId !== null) {
-                LiveEvent.verifyRolesAllowed(clientId, this._allowedRoles).then((value) => {
-                    if (value) {
-                        this.emitter.emit(message.type, message.content, local);
-                    } else {
-                        this._runtime.logger.sendErrorEvent({eventName: 'SharedEvent:invalidRole' }, new Error(`The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(this._allowedRoles)}.`));
-                    }
-                }).catch((err) => {
-                    this._runtime.logger.sendErrorEvent({eventName: 'SharedEvent:invalidRole' }, err);
-                });
+                LiveEvent.verifyRolesAllowed(clientId, this._allowedRoles)
+                    .then((value) => {
+                        if (value) {
+                            this.emitter.emit(message.type, message.content, local);
+                        } else {
+                            this._runtime.logger.sendErrorEvent(
+                                { eventName: "SharedEvent:invalidRole" },
+                                new Error(
+                                    `The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(
+                                        this._allowedRoles
+                                    )}.`
+                                )
+                            );
+                        }
+                    })
+                    .catch((err) => {
+                        this._runtime.logger.sendErrorEvent({ eventName: "SharedEvent:invalidRole" }, err);
+                    });
             }
         });
     }
-
 
     /**
      * List of roles allowed to send events through this scope.
@@ -143,10 +150,10 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
     public sendEvent<TEvent extends ILiveEvent>(eventName: string, evt: Partial<TEvent> = {}): TEvent {
         // Clone passed in event and fill out required props.
         const clone: TEvent = {
-            ...evt as TEvent,
+            ...(evt as TEvent),
             clientId: this._runtime.clientId,
             name: eventName,
-            timestamp: LiveEvent.getTimestamp()
+            timestamp: LiveEvent.getTimestamp(),
         };
 
         // Send event

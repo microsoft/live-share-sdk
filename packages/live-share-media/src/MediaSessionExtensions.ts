@@ -11,11 +11,17 @@ export interface MediaSessionCoordinatorSuspension {
 export type MediaSessionCoordinatorState = "closed" | "waiting" | "joined";
 
 export enum MediaSessionCoordinatorEvents {
-    coordinatorstatechange = 'coordinatorstatechange',
-    triggeraction = 'triggeraction'
+    coordinatorstatechange = "coordinatorstatechange",
+    triggeraction = "triggeraction",
 }
 
-export type ExtendedMediaSessionAction = MediaSessionAction |  "settrack" | "wait" | "catchup" | "datachange" | "blocked";
+export type ExtendedMediaSessionAction =
+    | MediaSessionAction
+    | "settrack"
+    | "wait"
+    | "catchup"
+    | "datachange"
+    | "blocked";
 
 export type ExtendedMediaSessionPlaybackState = MediaSessionPlaybackState | "suspended" | "waiting" | "ended";
 
@@ -30,7 +36,7 @@ export interface CoordinationWaitPoint {
     maxClients?: number;
 }
 
-export interface ExtendedMediaSessionActionDetails  {
+export interface ExtendedMediaSessionActionDetails {
     action: ExtendedMediaSessionAction;
     fastSeek?: boolean | null;
     seekOffset?: number | null;

@@ -3,14 +3,14 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { 
-    ILiveShareHost, 
-    IFluidTenantInfo, 
+import {
+    ILiveShareHost,
+    IFluidTenantInfo,
     IFluidContainerInfo,
     INtpTimeInfo,
     ContainerState,
-    UserMeetingRole 
-} from './interfaces';
+    UserMeetingRole,
+} from "./interfaces";
 
 /**
  * Live Share Host implementation used for local testing.
@@ -18,14 +18,15 @@ import {
 export class TestLiveShareHost implements ILiveShareHost {
     public static readonly LOCAL_MODE_TEST_TOKEN = `test-token`;
 
-    constructor (
-        private _getLocalTestContainerId?: () => string|undefined,
-        private _setLocalTestContainerId?: (containerId: string) => void) { }
+    constructor(
+        private _getLocalTestContainerId?: () => string | undefined,
+        private _setLocalTestContainerId?: (containerId: string) => void
+    ) {}
 
     public clientsMeetingRoles: UserMeetingRole[] = [
         UserMeetingRole.organizer,
         UserMeetingRole.presenter,
-        UserMeetingRole.attendee
+        UserMeetingRole.attendee,
     ];
 
     public getFluidTenantInfo(): Promise<IFluidTenantInfo> {
@@ -33,7 +34,7 @@ export class TestLiveShareHost implements ILiveShareHost {
             tenantId: "local",
             ordererEndpoint: "http://localhost:7070",
             storageEndpoint: "http://localhost:7070",
-            serviceEndpoint:  "http://localhost:7070"
+            serviceEndpoint: "http://localhost:7070",
         });
     }
 
@@ -47,7 +48,7 @@ export class TestLiveShareHost implements ILiveShareHost {
             containerState: containerId ? ContainerState.alreadyExists : ContainerState.notFound,
             shouldCreate: !containerId,
             containerId: containerId,
-            retryAfter: 0
+            retryAfter: 0,
         });
     }
 
@@ -57,7 +58,7 @@ export class TestLiveShareHost implements ILiveShareHost {
             containerState: ContainerState.added,
             containerId: containerId,
             shouldCreate: false,
-            retryAfter: 0
+            retryAfter: 0,
         });
     }
 
@@ -65,7 +66,7 @@ export class TestLiveShareHost implements ILiveShareHost {
         const now = new Date();
         return Promise.resolve({
             ntpTime: now.toUTCString(),
-            ntpTimeInUTC: now.getTime()
+            ntpTimeInUTC: now.getTime(),
         });
     }
 
@@ -77,7 +78,7 @@ export class TestLiveShareHost implements ILiveShareHost {
         return Promise.resolve(this.clientsMeetingRoles);
     }
 
-    private getLocalTestContainerId(): string|undefined {
+    private getLocalTestContainerId(): string | undefined {
         if (this._getLocalTestContainerId) {
             return this._getLocalTestContainerId();
         } else if (window.location.hash) {
@@ -94,5 +95,4 @@ export class TestLiveShareHost implements ILiveShareHost {
             window.location.hash = containerId;
         }
     }
-
 }

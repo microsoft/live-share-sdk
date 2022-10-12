@@ -21,7 +21,7 @@ export class LocalRoleVerifier implements IRoleVerifier {
     public defaultRoles: UserMeetingRole[] = [
         UserMeetingRole.organizer,
         UserMeetingRole.presenter,
-        UserMeetingRole.attendee
+        UserMeetingRole.attendee,
     ];
 
     public addClient(clientId: string, roles: UserMeetingRole[]): this {
@@ -35,7 +35,7 @@ export class LocalRoleVerifier implements IRoleVerifier {
         if (!clientId) {
             throw new Error(`LocalRoleVerifier: called getClientRoles() without a clientId`);
         }
-        
+
         let roles: UserMeetingRole[];
         if (this.roleCache.has(clientId)) {
             roles = this.roleCache.get(clientId)!;

@@ -3,20 +3,24 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
-import { LiveTelemetryLogger, UserMeetingRole } from '@microsoft/live-share';
-import { MediaPlayerSynchronizer } from './MediaPlayerSynchronizer';
-import { ITriggerActionEvent, TelemetryEvents } from './internals';
-import { MediaSessionCoordinatorEvents, ExtendedMediaSessionAction, ExtendedMediaSessionActionDetails } from './MediaSessionExtensions';
-import { LiveMediaSessionCoordinator, IMediaPlayerState } from './LiveMediaSessionCoordinator';
-import { MediaSessionActionThrottler } from './MediaSessionActionThrottler';
-import { RepeatedActionThrottler } from './RepeatedActionThrottler';
-import { IMediaPlayer } from './IMediaPlayer';
+import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { LiveTelemetryLogger, UserMeetingRole } from "@microsoft/live-share";
+import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer";
+import { ITriggerActionEvent, TelemetryEvents } from "./internals";
+import {
+    MediaSessionCoordinatorEvents,
+    ExtendedMediaSessionAction,
+    ExtendedMediaSessionActionDetails,
+} from "./MediaSessionExtensions";
+import { LiveMediaSessionCoordinator, IMediaPlayerState } from "./LiveMediaSessionCoordinator";
+import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler";
+import { RepeatedActionThrottler } from "./RepeatedActionThrottler";
+import { IMediaPlayer } from "./IMediaPlayer";
 
 /**
  * Live fluid object that synchronizes media playback across multiple clients.
  */
- export class LiveMediaSession extends DataObject {
+export class LiveMediaSession extends DataObject {
     private _actionThrottler: MediaSessionActionThrottler = new RepeatedActionThrottler();
     private _logger?: LiveTelemetryLogger;
     private _requestPlayerStateHandler?: () => IMediaPlayerState;
@@ -27,34 +31,29 @@ import { IMediaPlayer } from './IMediaPlayer';
     // Position update timer
     private _updateTimer: any;
     private _lastUpdateTime: number = 0;
-    
+
     /**
      * The objects fluid type name.
      */
-     public static readonly TypeName = `@microsoft/fluid-media:SharedMediaSession`;
+    public static readonly TypeName = `@microsoft/fluid-media:SharedMediaSession`;
 
     /**
      * The objects fluid type factory.
      */
-     public static readonly factory = new DataObjectFactory(
-        LiveMediaSession.TypeName,
-        LiveMediaSession,
-        [],
-        {}
-    );
+    public static readonly factory = new DataObjectFactory(LiveMediaSession.TypeName, LiveMediaSession, [], {});
 
     /**
      * Extension point that lets applications replace the default logic for throttling the sessions
      * local sync behavior.
-     * 
+     *
      * @remarks
-     * The `LiveMediaCoordinator` is fairly aggressive at wanting to keep the local media player 
-     * in sync with the rest of the group. This aggressiveness can result in the coordinator sending 
-     * new sync actions before the local player has finished responding to the previous sync action. 
+     * The `LiveMediaCoordinator` is fairly aggressive at wanting to keep the local media player
+     * in sync with the rest of the group. This aggressiveness can result in the coordinator sending
+     * new sync actions before the local player has finished responding to the previous sync action.
      * The `ActionThrottler` gives apps fine grain control over how aggressive they want sync to be.
-     * 
-     * By default, a `RepeatedAction` throttler is used which prevents the same sync action from 
-     * being sent within an adjustable time period.    
+     *
+     * By default, a `RepeatedAction` throttler is used which prevents the same sync action from
+     * being sent within an adjustable time period.
      */
     public get actionThrottler(): MediaSessionActionThrottler {
         return this._actionThrottler;
@@ -76,7 +75,7 @@ import { IMediaPlayer } from './IMediaPlayer';
      * Returns true if the object has been initialized.
      */
     public get isStarted(): boolean {
-        return this.isInitialized
+        return this.isInitialized;
     }
 
     /**
@@ -88,7 +87,7 @@ import { IMediaPlayer } from './IMediaPlayer';
 
     /**
      * Returns the logger used by the session and coordinator.
-     * 
+     *
      * @remarks
      * This is used by the `MediaPlayerSynchronizer` to log events.
      */
@@ -98,10 +97,10 @@ import { IMediaPlayer } from './IMediaPlayer';
 
     /**
      * initialize the object.
-     * @param acceptTransportChangesFrom Optional. List of roles allowed to group transport 
+     * @param acceptTransportChangesFrom Optional. List of roles allowed to group transport
      * operations like play/pause/seek/setTrack.
      */
-     public initialize(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
+    public initialize(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
         return this.coordinator.initialize(acceptTransportChangesFrom);
     }
 
@@ -114,7 +113,6 @@ import { IMediaPlayer } from './IMediaPlayer';
         if (handler) {
             // add handler
             this._actionHandlers.set(action, handler);
-
         } else if (this._actionHandlers.has(action)) {
             // remove handler
             this._actionHandlers.delete(action);
@@ -122,8 +120,8 @@ import { IMediaPlayer } from './IMediaPlayer';
     }
 
     /**
-     * Registers a handler that will be queried anytime the group coordinate needs to know the 
-     * local players transport state and position. 
+     * Registers a handler that will be queried anytime the group coordinate needs to know the
+     * local players transport state and position.
      */
     public setRequestPlayerStateHandler(handler: () => IMediaPlayerState) {
         this._requestPlayerStateHandler = handler;
@@ -166,35 +164,43 @@ import { IMediaPlayer } from './IMediaPlayer';
     }
 
     protected async hasInitialized(): Promise<void> {
-        this. _logger = new LiveTelemetryLogger(this.runtime);
+        this._logger = new LiveTelemetryLogger(this.runtime);
 
         // Create coordinator and listen for triggered actions
         this._coordinator = new LiveMediaSessionCoordinator(this.runtime, () => this.getCurrentPlayerState());
         this._coordinator.on(MediaSessionCoordinatorEvents.triggeraction, (event: ITriggerActionEvent) => {
             // Pre-process actions
             const details = event.details;
-            const seekTime = typeof details.seekTime == 'number' ? details.seekTime : -1;
+            const seekTime = typeof details.seekTime == "number" ? details.seekTime : -1;
             switch (details.action) {
-                case 'play':
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.PlayAction, null, {position: seekTime});
+                case "play":
+                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.PlayAction, null, {
+                        position: seekTime,
+                    });
                     break;
-                case 'pause':
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.PauseAction, null, {position: seekTime});
+                case "pause":
+                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.PauseAction, null, {
+                        position: seekTime,
+                    });
                     break;
-                case 'seekto':
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.SeekToAction, null, {position: seekTime});
+                case "seekto":
+                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.SeekToAction, null, {
+                        position: seekTime,
+                    });
                     break;
-                case 'settrack':
+                case "settrack":
                     this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.SetTrackAction);
                     break;
-                case 'datachange':
+                case "datachange":
                     this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.DataChangeAction);
                     break;
-                case 'catchup':
+                case "catchup":
                     // Default to seekto if catchup not implemented
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.CatchUpAction, null, {position: seekTime});
-                    if (!this._actionHandlers.has('catchup')) {
-                        details.action = 'seekto';
+                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.CatchUpAction, null, {
+                        position: seekTime,
+                    });
+                    if (!this._actionHandlers.has("catchup")) {
+                        details.action = "seekto";
                     }
                     break;
             }
@@ -208,15 +214,19 @@ import { IMediaPlayer } from './IMediaPlayer';
         // Was a wait point hit?
         if (state.positionState && this.coordinator.isInitialized) {
             const waitPoint = this.coordinator.findNextWaitPoint();
-            if (waitPoint && state.positionState.position != undefined && state.positionState.position >= waitPoint.position) {
+            if (
+                waitPoint &&
+                state.positionState.position != undefined &&
+                state.positionState.position >= waitPoint.position
+            ) {
                 // Ensure handler registered
-                if (!this._actionHandlers.has('wait')) {
+                if (!this._actionHandlers.has("wait")) {
                     throw new Error(`SharedMediaSession: wait point hit but no 'wait' action registered.`);
                 }
 
                 // Begin suspension for wait point
                 const suspension = this.coordinator.beginSuspension(waitPoint);
-                this.dispatchAction({action: 'wait', suspension: suspension});
+                this.dispatchAction({ action: "wait", suspension: suspension });
             }
         }
     }
@@ -229,7 +239,7 @@ import { IMediaPlayer } from './IMediaPlayer';
         return this._requestPlayerStateHandler();
     }
 
-    private dispatchAction(details: MediaSessionActionDetails|ExtendedMediaSessionActionDetails): void {
+    private dispatchAction(details: MediaSessionActionDetails | ExtendedMediaSessionActionDetails): void {
         if (this._actionHandlers.has(details.action)) {
             const handler = this._actionHandlers.get(details.action);
             this._actionThrottler.throttled(details, handler);

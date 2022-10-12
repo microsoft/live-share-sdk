@@ -4,13 +4,13 @@
  */
 
 /**
- * Base interface for all event objects. 
+ * Base interface for all event objects.
  */
 export interface IEvent {
     /**
      * Additional event properties.
      */
-    [key:string]: any;
+    [key: string]: any;
 
     /**
      * Name of the event.
@@ -32,7 +32,7 @@ export interface IClientTimestamp {
      */
     timestamp: number;
 }
-  
+
 /**
  * Base interface for all live share events.
  */
@@ -42,7 +42,7 @@ export interface ILiveEvent extends IEvent, IClientTimestamp {}
  * Removes the base properties from an event that derives from `ILiveEvent`.
  * @template TEvent Type of event.
  */
-export type OutgoingLiveEvent<TEvent extends ILiveEvent> = Omit<TEvent, 'name' | 'clientId' | 'timestamp'>; 
+export type OutgoingLiveEvent<TEvent extends ILiveEvent> = Omit<TEvent, "name" | "clientId" | "timestamp">;
 
 /**
  * Allowed roles during a meeting.
@@ -51,27 +51,27 @@ export enum UserMeetingRole {
     /**
      * The user is an external guest user.
      */
-    guest = 'Guest',
+    guest = "Guest",
 
     /**
      * The user is a standard meeting attendee.
      */
-    attendee = 'Attendee',
+    attendee = "Attendee",
 
     /**
      * The user has presenter privileges for the meeting.
      */
-    presenter = 'Presenter',
+    presenter = "Presenter",
 
     /**
      * The user is a meeting organizer.
      */
-    organizer = 'Organizer',
+    organizer = "Organizer",
 }
 
 /**
  * @hidden
- * A provider that generates timestamps. 
+ * A provider that generates timestamps.
  */
 export interface ITimestampProvider {
     /**
@@ -102,10 +102,10 @@ export interface IRoleVerifier {
      * @param clientId Client ID to map to current user.
      * @returns The list of roles for the client.
      */
-     registerClientId(clientId: string): Promise<UserMeetingRole[]>;
+    registerClientId(clientId: string): Promise<UserMeetingRole[]>;
 
     /**
-     * Verifies that a client has one of the specified roles. 
+     * Verifies that a client has one of the specified roles.
      * @param clientId Client ID to inspect.
      * @param allowedRoles User roles that are allowed.
      * @returns True if the client has one of the specified roles.
@@ -119,26 +119,26 @@ export interface IRoleVerifier {
 export enum ContainerState {
     /**
      * The call to `LiveShareHost.setContainerId()` successfully created the container mapping
-     * for the current Live Share session. 
+     * for the current Live Share session.
      */
-    added = 'Added',
+    added = "Added",
 
     /**
      * A container mapping for the current Live Share Session already exists and should be used
      * when joining the sessions Fluid container.
      */
-    alreadyExists = 'AlreadyExists',
+    alreadyExists = "AlreadyExists",
 
     /**
      * The call to `LiveShareHost.setContainerId()` failed to create the container mapping due to
-     * another client having already set the container ID for the current Live Share session. 
-     */    
-    conflict = 'Conflict',
+     * another client having already set the container ID for the current Live Share session.
+     */
+    conflict = "Conflict",
 
     /**
      * A container mapping for the current Live Share session doesn't exist yet.
      */
-    notFound = 'NotFound',
+    notFound = "NotFound",
 }
 
 /**
@@ -172,7 +172,7 @@ export interface IFluidContainerInfo {
 }
 
 /**
- * Returned from `LiveShareHost.getNtpTime()` to specify the global timestamp for the current 
+ * Returned from `LiveShareHost.getNtpTime()` to specify the global timestamp for the current
  * Live Share session.
  */
 export interface INtpTimeInfo {
@@ -204,14 +204,14 @@ export interface IFluidTenantInfo {
 
     /**
      * @deprecated
-     * As of Fluid 1.0 this configuration information has been deprecated in favor of 
+     * As of Fluid 1.0 this configuration information has been deprecated in favor of
      * `serviceEndpoint`.
      */
     ordererEndpoint: string;
 
     /**
      * @deprecated
-     * As of Fluid 1.0 this configuration information has been deprecated in favor of 
+     * As of Fluid 1.0 this configuration information has been deprecated in favor of
      * `serviceEndpoint`.
      */
     storageEndpoint: string;
@@ -222,7 +222,7 @@ export interface IFluidTenantInfo {
  */
 export interface ILiveShareHost {
     /**
-     * Returns the Fluid service endpoint and tenant to use for the current session. 
+     * Returns the Fluid service endpoint and tenant to use for the current session.
      */
     getFluidTenantInfo(): Promise<IFluidTenantInfo>;
 
@@ -234,27 +234,26 @@ export interface ILiveShareHost {
 
     /**
      * Returns the container mapping information for the current session.
-     * 
+     *
      * @remarks
      * Hosts are required to implement a container mapping service that stores the container ID for
-     * the current session. 
-     * 
-     * TODO: add creation protocol details 
+     * the current session.
+     *
+     * TODO: add creation protocol details
      */
     getFluidContainerId(): Promise<IFluidContainerInfo>;
 
     /**
      * Attempts to save the ID of the Fluid container created to the hosts mapping service.
-     * 
+     *
      * @remarks
-     * Hosts should return a `containerState` of "Added" if the mapping was successfully saved, 
+     * Hosts should return a `containerState` of "Added" if the mapping was successfully saved,
      * otherwise a state of "Conflict" should be returned to indicate that another client has
-     * already saved a container ID for the current session. 
+     * already saved a container ID for the current session.
      * @param containerId Id of the Fluid container that was created.
-     * @returns Information indicating the success of mapping assignment. 
+     * @returns Information indicating the success of mapping assignment.
      */
     setFluidContainerId(containerId: string): Promise<IFluidContainerInfo>;
-
 
     /**
      * Returns the global timestamp for the current session.
@@ -263,9 +262,9 @@ export interface ILiveShareHost {
 
     /**
      * Registers the local clients Fluid client ID with the hosts role verification service.
-     * 
+     *
      * @remarks
-     * Hosts should expect this to be called anytime the Fluid clients underlying socket connects 
+     * Hosts should expect this to be called anytime the Fluid clients underlying socket connects
      * or reconnects.
      * @param clientId Unique ID assigned to the local Fluid client.
      * @returns An array of meeting roles assigned to the local user.

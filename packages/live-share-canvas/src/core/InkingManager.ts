@@ -7,10 +7,16 @@ import { EventEmitter } from "events";
 import { CanvasReferencePoint, InkingCanvas, DryCanvas, WetCanvas, LaserPointerCanvas } from "../canvas";
 import { IPoint, IPointerPoint, IRect, screenToViewport, viewportToScreen } from "./Geometry";
 import { Stroke, IStroke, IStrokeCreationOptions, StrokeType, StrokeMode } from "./Stroke";
-import { InputFilter, InputFilterCollection, JitterFilter, IPointerEvent, InputProvider,
-    PointerInputProvider, IPointerMoveEvent } from "../input";
-import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultLineBrush, DefaultPenBrush,
-    IBrush } from "./Brush";
+import {
+    InputFilter,
+    InputFilterCollection,
+    JitterFilter,
+    IPointerEvent,
+    InputProvider,
+    PointerInputProvider,
+    IPointerMoveEvent,
+} from "../input";
+import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultLineBrush, DefaultPenBrush, IBrush } from "./Brush";
 import { makeRectangle, generateUniqueId, computeEndArrow, isPointInsideRectangle } from "./Internals";
 
 /**
@@ -22,7 +28,7 @@ export enum InkingTool {
     highlighter = 2,
     eraser = 3,
     pointEraser = 4,
-    line = 5
+    line = 5,
 }
 
 type StrokeBasedTool = InkingTool.pen | InkingTool.line | InkingTool.laserPointer | InkingTool.highlighter;
@@ -85,7 +91,7 @@ export const BeginStrokeEvent = "BeginStroke";
 
 export enum StrokeEndState {
     ended,
-    cancelled
+    cancelled,
 }
 
 /**
@@ -118,8 +124,8 @@ export const AddPointsEvent = "AddPoints";
  */
 export interface IWetStroke extends IStroke {
     /**
-    * The type of the wet stroke.
-    */
+     * The type of the wet stroke.
+     */
     readonly type: StrokeType;
     /**
      * The wet stroke's mode.
@@ -132,10 +138,10 @@ export interface IWetStroke extends IStroke {
      */
     straighten(p: IPointerPoint): IPointerPoint;
     /**
-    * Ends the wet stroke.
-    * @param p Optional. The points at which the stroke ends. If not specified,
-    * the stroke ends at the last added point.
-    */
+     * Ends the wet stroke.
+     * @param p Optional. The points at which the stroke ends. If not specified,
+     * the stroke ends at the last added point.
+     */
     end(): void;
     /**
      * Cancels the wet stroke.
@@ -159,10 +165,9 @@ class ChangeLog {
             }
         }
 
-        changes._addedStrokes.forEach(
-            (value: IStroke) => {
-                this._addedStrokes.set(value.id, value);
-            });
+        changes._addedStrokes.forEach((value: IStroke) => {
+            this._addedStrokes.set(value.id, value);
+        });
     }
 
     public addStroke(stroke: IStroke) {
@@ -190,7 +195,7 @@ class EphemeralCanvas extends DryCanvas {
     private _removalTimeout?: number;
 
     constructor(readonly clientId: string, parentElement?: HTMLElement) {
-        super(parentElement)
+        super(parentElement);
     }
 
     scheduleRemoval(onRemoveCallback: (canvas: EphemeralCanvas) => void) {
@@ -198,15 +203,11 @@ class EphemeralCanvas extends DryCanvas {
             window.clearTimeout(this._removalTimeout);
         }
 
-        this._removalTimeout = window.setTimeout(
-            () => {
-                this.fadeOut();
+        this._removalTimeout = window.setTimeout(() => {
+            this.fadeOut();
 
-                onRemoveCallback(this);
-            },
-            InkingManager.ephemeralCanvasRemovalDelay
-        )
-
+            onRemoveCallback(this);
+        }, InkingManager.ephemeralCanvasRemovalDelay);
     }
 }
 
@@ -218,13 +219,13 @@ export interface IAddRemoveStrokeOptions {
      * Optional. Indicates if the canvas must be fully re-rendered at once after the
      * stroke has been added or removed. Defaults to `false`.
      */
-    forceReRender?: boolean,
+    forceReRender?: boolean;
     /**
      * Optional. Indicates whether the add or remove operation should be added to the
      * change log, which in turn will lead to `StrokeAddedEvent` or `StrokeRemovedEvent`
      * begin emitted. Defaults to `true`.
      */
-    addToChangeLog?: boolean
+    addToChangeLog?: boolean;
 }
 
 abstract class WetStroke extends Stroke implements IWetStroke {
@@ -240,7 +241,8 @@ abstract class WetStroke extends Stroke implements IWetStroke {
         private _canvas: InkingCanvas,
         readonly type: StrokeType,
         readonly mode: StrokeMode,
-        options?: IStrokeCreationOptions) {
+        options?: IStrokeCreationOptions
+    ) {
         super(options);
 
         this._canvas.setBrush(this.brush);
@@ -318,15 +320,14 @@ class WetLineStroke extends WetStroke {
 
             if (Math.abs(result.x - firstPoint.x) > Math.abs(result.y - firstPoint.y)) {
                 result.y = firstPoint.y;
-            }
-            else {
+            } else {
                 result.x = firstPoint.x;
             }
         }
 
         return result;
     }
-    
+
     addPoints(...points: IPointerPoint[]): boolean {
         if (this.length === 0) {
             this.addPoint(points[0]);
@@ -334,8 +335,7 @@ class WetLineStroke extends WetStroke {
             if (points.length > 1) {
                 this.addPoint(points[points.length - 1]);
             }
-        }
-        else {
+        } else {
             const firstPoint = this.getPointAt(0);
 
             this.clear();
@@ -414,10 +414,10 @@ export class InkingManager extends EventEmitter {
         filterPoint(p: IPointerPoint): IPointerPoint {
             return {
                 ...this._owner.screenToViewport(p),
-                pressure: p.pressure
+                pressure: p.pressure,
             };
         }
-    }
+    };
 
     private readonly _hostElement: HTMLElement;
     private readonly _canvasPoolHost: HTMLElement;
@@ -427,7 +427,7 @@ export class InkingManager extends EventEmitter {
     private _penBrush: IBrush = { ...DefaultPenBrush };
     private _lineBrush: IBrush = { ...DefaultLineBrush };
     private _highlighterBrush: IBrush = { ...DefaultHighlighterBrush };
-    private _laserPointerBrush: IBrush = { ...DefaultLaserPointerBrush }
+    private _laserPointerBrush: IBrush = { ...DefaultLaserPointerBrush };
     private _tool: InkingTool = InkingTool.pen;
     private _inputProvider!: InputProvider;
     private _currentStroke?: IWetStroke;
@@ -459,7 +459,7 @@ export class InkingManager extends EventEmitter {
             const entry = entries[0];
 
             this._canvasPoolHost.style.width = entry.contentRect.width + "px";
-            this._canvasPoolHost.style.height = entry.contentRect.height + "px";;
+            this._canvasPoolHost.style.height = entry.contentRect.height + "px";
 
             this._dryCanvas.resize(entry.contentRect.width, entry.contentRect.height);
 
@@ -474,11 +474,9 @@ export class InkingManager extends EventEmitter {
         this._dryCanvas.offset = this._offset;
         this._dryCanvas.scale = this._scale;
 
-        const sortedStrokes = [...this._strokes.values()].sort(
-            (stroke1: IStroke, stroke2: IStroke) => {
-                return stroke1.timeStamp - stroke2.timeStamp
-            }
-        )
+        const sortedStrokes = [...this._strokes.values()].sort((stroke1: IStroke, stroke2: IStroke) => {
+            return stroke1.timeStamp - stroke2.timeStamp;
+        });
 
         for (const stroke of sortedStrokes) {
             this._dryCanvas.renderStroke(stroke);
@@ -490,12 +488,11 @@ export class InkingManager extends EventEmitter {
             window.cancelAnimationFrame(this._reRenderTimeout);
         }
 
-        this._reRenderTimeout = window.requestAnimationFrame(
-            () => {
-                this.reRender();
+        this._reRenderTimeout = window.requestAnimationFrame(() => {
+            this.reRender();
 
-                this._reRenderTimeout = undefined;
-            });
+            this._reRenderTimeout = undefined;
+        });
     }
 
     private flushChangeLog() {
@@ -515,14 +512,11 @@ export class InkingManager extends EventEmitter {
 
     private scheduleChangeLogFlush() {
         if (this._changeLogFlushTimeout === undefined) {
-            this._changeLogFlushTimeout = window.setTimeout(
-                () => {
-                    this._changeLogFlushTimeout = undefined;
+            this._changeLogFlushTimeout = window.setTimeout(() => {
+                this._changeLogFlushTimeout = undefined;
 
-                    this.flushChangeLog();
-                },
-                InkingManager.changeLogFlushInterval
-            )
+                this.flushChangeLog();
+            }, InkingManager.changeLogFlushInterval);
         }
     }
 
@@ -536,15 +530,13 @@ export class InkingManager extends EventEmitter {
 
     private schedulePointEraseProcessing() {
         if (this._pointEraseProcessingInterval === undefined) {
-            this._pointEraseProcessingInterval = window.setTimeout(
-                () => {
-                    this.processPendingPointErasePoints();
+            this._pointEraseProcessingInterval = window.setTimeout(() => {
+                this.processPendingPointErasePoints();
 
-                    this._pointEraseProcessingInterval = undefined;
+                this._pointEraseProcessingInterval = undefined;
 
-                    this.scheduleChangeLogFlush();
-                },
-                InkingManager.pointEraserProcessingInterval);
+                this.scheduleChangeLogFlush();
+            }, InkingManager.pointEraserProcessingInterval);
         }
     }
 
@@ -583,7 +575,12 @@ export class InkingManager extends EventEmitter {
             case InkingTool.line:
             case InkingTool.highlighter:
             case InkingTool.laserPointer:
-                const mode = this.tool === InkingTool.line ? StrokeMode.line : (e.ctrlKey && InkingManager.enableStrokeModifierHotKeys ? StrokeMode.line : StrokeMode.freeHand);
+                const mode =
+                    this.tool === InkingTool.line
+                        ? StrokeMode.line
+                        : e.ctrlKey && InkingManager.enableStrokeModifierHotKeys
+                        ? StrokeMode.line
+                        : StrokeMode.freeHand;
                 const brush = { ...this.getBrushForTool(this.tool) };
 
                 if (e.altKey && InkingManager.enableStrokeModifierHotKeys) {
@@ -594,7 +591,8 @@ export class InkingManager extends EventEmitter {
                     this.tool === InkingTool.laserPointer ? StrokeType.ephemeral : StrokeType.persistent,
                     mode,
                     filteredPoint,
-                    { brush });
+                    { brush }
+                );
 
                 this.notifyBeginStroke(this._currentStroke);
 
@@ -627,20 +625,19 @@ export class InkingManager extends EventEmitter {
                         StrokeMode.freeHand,
                         filteredPoint,
                         {
-                            brush: this.getBrushForTool(this.tool)
-                        });
+                            brush: this.getBrushForTool(this.tool),
+                        }
+                    );
 
                     this.notifyBeginStroke(this._currentStroke);
-                }
-                else {
+                } else {
                     const filteredPoint = this._inputFilters.filterPoint(e);
 
                     this._currentStroke.addPoints(filteredPoint);
 
                     this.notifyAddPoints(this._currentStroke.id, filteredPoint);
                 }
-            }
-            else {
+            } else {
                 const filteredPoint = this._inputFilters.filterPoint(e);
 
                 this.queuePointerMovedNotification(filteredPoint);
@@ -659,8 +656,7 @@ export class InkingManager extends EventEmitter {
                 this._currentStroke.addPoints(filteredPoint);
 
                 this.notifyAddPoints(this._currentStroke.id, filteredPoint);
-            }
-            else {
+            } else {
                 switch (this.tool) {
                     case InkingTool.eraser:
                         this.erase(filteredPoint);
@@ -707,24 +703,22 @@ export class InkingManager extends EventEmitter {
             const filteredPoint = this._inputFilters.filterPoint(e);
 
             this.cancelCurrentStroke(filteredPoint);
-        }
-        else {
+        } else {
             this.queuePointerMovedNotification();
         }
-    }
+    };
 
     private internalAddStroke(stroke: IStroke, options?: IAddRemoveStrokeOptions) {
         const effectiveOptions: Required<IAddRemoveStrokeOptions> = {
-            forceReRender: options ? (options.forceReRender ?? false) : false,
-            addToChangeLog: options ? (options.addToChangeLog ?? true) : true
+            forceReRender: options ? options.forceReRender ?? false : false,
+            addToChangeLog: options ? options.addToChangeLog ?? true : true,
         };
 
         if (effectiveOptions.forceReRender || this._strokes.has(stroke.id)) {
             this._strokes.set(stroke.id, stroke);
 
             effectiveOptions.forceReRender ? this.reRender() : this.scheduleReRender();
-        }
-        else {
+        } else {
             this._strokes.set(stroke.id, stroke);
 
             if (!this._reRenderTimeout) {
@@ -754,40 +748,33 @@ export class InkingManager extends EventEmitter {
 
                 ephemeralCanvas.renderStroke(stroke);
 
-                ephemeralCanvas.scheduleRemoval(
-                    (sender: EphemeralCanvas) => {
-                        this._ephemeralCanvases.delete(sender.clientId);
-                    }
-                );
-            }
-            else if (stroke.type === StrokeType.persistent) {
+                ephemeralCanvas.scheduleRemoval((sender: EphemeralCanvas) => {
+                    this._ephemeralCanvases.delete(sender.clientId);
+                });
+            } else if (stroke.type === StrokeType.persistent) {
                 this.internalAddStroke(stroke);
             }
         }
-    }
+    };
 
     private internalErase(p: IPoint): ChangeLog {
         const result = new ChangeLog();
         const eraserRect = makeRectangle(p, this.eraserSize, this.eraserSize);
 
-        this._strokes.forEach(
-            (stroke: IStroke) => {
-                if (stroke.length === 1) {
-                    if (isPointInsideRectangle(stroke.getPointAt(0), eraserRect)) {
-                        result.removeStroke(stroke.id);
-                    }
-                }
-                else if (stroke.intersectsWithRectangle(eraserRect)) {
+        this._strokes.forEach((stroke: IStroke) => {
+            if (stroke.length === 1) {
+                if (isPointInsideRectangle(stroke.getPointAt(0), eraserRect)) {
                     result.removeStroke(stroke.id);
                 }
+            } else if (stroke.intersectsWithRectangle(eraserRect)) {
+                result.removeStroke(stroke.id);
             }
-        )
+        });
 
         if (result.hasChanges) {
-            result.getRemovedStrokes().forEach(
-                (id: string) => {
-                    this._strokes.delete(id);
-                });
+            result.getRemovedStrokes().forEach((id: string) => {
+                this._strokes.delete(id);
+            });
 
             this.scheduleReRender();
 
@@ -801,30 +788,26 @@ export class InkingManager extends EventEmitter {
         const result = new ChangeLog();
         const eraserRect = makeRectangle(p, this.eraserSize, this.eraserSize);
 
-        this._strokes.forEach(
-            (stroke: IStroke) => {
-                const strokes = stroke.pointErase(eraserRect);
+        this._strokes.forEach((stroke: IStroke) => {
+            const strokes = stroke.pointErase(eraserRect);
 
-                if (strokes) {
-                    result.removeStroke(stroke.id);
+            if (strokes) {
+                result.removeStroke(stroke.id);
 
-                    for (const s of strokes) {
-                        result.addStroke(s);
-                    }
+                for (const s of strokes) {
+                    result.addStroke(s);
                 }
             }
-        );
+        });
 
         if (result.hasChanges) {
-            result.getRemovedStrokes().forEach(
-                (id: string) => {
-                    this._strokes.delete(id);
-                });
+            result.getRemovedStrokes().forEach((id: string) => {
+                this._strokes.delete(id);
+            });
 
-            result.getAddedStrokes().forEach(
-                (stroke: IStroke) => {
-                    this._strokes.set(stroke.id, stroke);
-                });
+            result.getAddedStrokes().forEach((stroke: IStroke) => {
+                this._strokes.set(stroke.id, stroke);
+            });
 
             this.scheduleReRender();
 
@@ -839,19 +822,16 @@ export class InkingManager extends EventEmitter {
             window.clearTimeout(this._pointerMovedNotificationTimeout);
         }
 
-        this._pointerMovedNotificationTimeout = window.setTimeout(
-            () => {
-                this.notifyPointerMoved(position);
+        this._pointerMovedNotificationTimeout = window.setTimeout(() => {
+            this.notifyPointerMoved(position);
 
-                this._pointerMovedNotificationTimeout = undefined;
-            },
-            InkingManager.pointerMovedNotificationDelay
-        );
+            this._pointerMovedNotificationTimeout = undefined;
+        }, InkingManager.pointerMovedNotificationDelay);
     }
 
     private notifyPointerMoved(position?: IPoint) {
         const eventArgs: IPointerMovedEventArgs = {
-            position
+            position,
         };
 
         this.emit(PointerMovedEvent, eventArgs);
@@ -879,8 +859,8 @@ export class InkingManager extends EventEmitter {
             brush: stroke.brush,
             startPoint: stroke.getPointAt(0),
             type: stroke.type,
-            mode: stroke.mode
-        }
+            mode: stroke.mode,
+        };
 
         this.emit(BeginStrokeEvent, eventArgs);
     }
@@ -888,8 +868,8 @@ export class InkingManager extends EventEmitter {
     private notifyAddPoints(strokeId: string, ...points: IPointerPoint[]) {
         const eventArgs: IAddPointsEventArgs = {
             strokeId,
-            points
-        }
+            points,
+        };
 
         this.emit(AddPointsEvent, eventArgs);
     }
@@ -898,8 +878,8 @@ export class InkingManager extends EventEmitter {
         const eventArgs: IAddPointsEventArgs = {
             strokeId,
             points: endPoint ? [endPoint] : [],
-            endState: isCancelled ? StrokeEndState.cancelled : StrokeEndState.ended
-        }
+            endState: isCancelled ? StrokeEndState.cancelled : StrokeEndState.ended,
+        };
 
         this.emit(AddPointsEvent, eventArgs);
     }
@@ -1015,8 +995,12 @@ export class InkingManager extends EventEmitter {
         strokeType: StrokeType,
         strokeKind: StrokeMode,
         startPoint: IPointerPoint,
-        options?: IStrokeCreationOptions): IWetStroke {
-        const canvas = strokeType === StrokeType.laserPointer ? new LaserPointerCanvas(this._canvasPoolHost) : new WetCanvas(this._canvasPoolHost);
+        options?: IStrokeCreationOptions
+    ): IWetStroke {
+        const canvas =
+            strokeType === StrokeType.laserPointer
+                ? new LaserPointerCanvas(this._canvasPoolHost)
+                : new WetCanvas(this._canvasPoolHost);
         canvas.resize(this.clientWidth, this.clientHeight);
         canvas.offset = this.offset;
         canvas.scale = this.scale;
@@ -1025,8 +1009,7 @@ export class InkingManager extends EventEmitter {
 
         if (strokeKind === StrokeMode.line) {
             stroke = new WetLineStroke(canvas, strokeType, strokeKind, options);
-        }
-        else {
+        } else {
             stroke = new WetFreehandStroke(canvas, strokeType, strokeKind, options);
         }
 
@@ -1070,8 +1053,8 @@ export class InkingManager extends EventEmitter {
     public removeStroke(id: string, options?: IAddRemoveStrokeOptions) {
         if (this._strokes.delete(id)) {
             const effectiveOptions: Required<IAddRemoveStrokeOptions> = {
-                forceReRender: options ? (options.forceReRender ?? false) : false,
-                addToChangeLog: options ? (options.addToChangeLog ?? true) : true
+                forceReRender: options ? options.forceReRender ?? false : false,
+                addToChangeLog: options ? options.addToChangeLog ?? true : true,
             };
 
             effectiveOptions.forceReRender ? this.reRender() : this.scheduleReRender();
@@ -1120,11 +1103,10 @@ export class InkingManager extends EventEmitter {
     public screenToViewport(p: IPoint): IPoint {
         return screenToViewport(
             p,
-            this.referencePoint === "center"
-                ? { x: this.centerX, y: this.centerY }
-                : { x: 0, y: 0 },
+            this.referencePoint === "center" ? { x: this.centerX, y: this.centerY } : { x: 0, y: 0 },
             this.offset,
-            this.scale);
+            this.scale
+        );
     }
 
     /**
@@ -1135,11 +1117,10 @@ export class InkingManager extends EventEmitter {
     public viewportToScreen(p: IPoint): IPoint {
         return viewportToScreen(
             p,
-            this.referencePoint === "center"
-                ? { x: this.centerX, y: this.centerY }
-                : { x: 0, y: 0 },
+            this.referencePoint === "center" ? { x: this.centerX, y: this.centerY } : { x: 0, y: 0 },
             this.offset,
-            this.scale);
+            this.scale
+        );
     }
 
     /**
@@ -1377,7 +1358,7 @@ export class InkingManager extends EventEmitter {
             left: topLeft.x,
             top: topLeft.y,
             right: bottomRight.x,
-            bottom: bottomRight.y
-        }
+            bottom: bottomRight.y,
+        };
     }
 }

@@ -21,84 +21,76 @@ import { useState, useEffect, useRef, useMemo } from "react";
  * - `localUserIsEligiblePresenter` is a boolean indicating whether the local user is an eligible presenter.
  */
 export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
-  const usersRef = useRef([]);
-  const [users, setUsers] = useState(usersRef.current);
-  const [localUser, setLocalUser] = useState(null);
-  const [presenceStarted, setStarted] = useState(false);
+    const usersRef = useRef([]);
+    const [users, setUsers] = useState(usersRef.current);
+    const [localUser, setLocalUser] = useState(null);
+    const [presenceStarted, setStarted] = useState(false);
 
-  // Local user is an eligible presenter
-  const localUserIsEligiblePresenter = useMemo(() => {
-    if (acceptPlaybackChangesFrom.length === 0) {
-      return true;
-    }
-    if (!presence || !localUser) {
-      return false;
-    }
-    return (
-      localUser.roles.filter((role) => acceptPlaybackChangesFrom.includes(role))
-        .length > 0
-    );
-  }, [localUser, presence, acceptPlaybackChangesFrom]);
-
-  // Effect which registers SharedPresence event listeners before joining space
-  useEffect(() => {
-    if (presence && !presence.isInitialized && context) {
-      // Register presenceChanged event listener
-      presence.on("presenceChanged", (userPresence, local) => {
-        console.log("usePresence: presence received", userPresence, local);
-        if (local) {
-          const user = {
-            userId: userPresence.userId,
-            state: userPresence.state,
-            data: userPresence.data,
-            timestamp: userPresence.timestamp,
-            roles: [],
-          };
-          // Get the roles of the local user
-          userPresence
-            .getRoles()
-            .then((roles) => {
-              user.roles = roles;
-              // Set local user state
-              setLocalUser(user);
-            })
-            .catch((err) => {
-              console.error("usePresence: getRoles error", err);
-              // Set local user state
-              setLocalUser(user);
-            });
+    // Local user is an eligible presenter
+    const localUserIsEligiblePresenter = useMemo(() => {
+        if (acceptPlaybackChangesFrom.length === 0) {
+            return true;
         }
-        // Set users local state
-        const userArray = presence.toArray();
-        setUsers(userArray);
-      });
-      const userPrincipalName =
-        context?.user.userPrincipalName ?? "someone@contoso.com";
-      const name = `@${userPrincipalName.split("@")[0]}`;
-      // Start presence tracking
-      console.log(
-        "usePresence: starting presence for userId",
-        context?.user.id,
-        context?.user.displayName
-      );
-      presence
-        .initialize(undefined, {
-          teamsUserId: context.user?.id,
-          joinedTimestamp: LiveEvent.getTimestamp(),
-          name,
-        })
-        .then(() => {
-          console.log("usePresence: started presence");
-          setStarted(true);
-        })
-        .catch((error) => console.error(error));
-    }
-  }, [presence, context, setUsers, setLocalUser]);
+        if (!presence || !localUser) {
+            return false;
+        }
+        return localUser.roles.filter((role) => acceptPlaybackChangesFrom.includes(role)).length > 0;
+    }, [localUser, presence, acceptPlaybackChangesFrom]);
 
-  return {
-    presenceStarted,
-    localUser,
-    users,
-    localUserIsEligiblePresenter,
-  };
+    // Effect which registers SharedPresence event listeners before joining space
+    useEffect(() => {
+        if (presence && !presence.isInitialized && context) {
+            // Register presenceChanged event listener
+            presence.on("presenceChanged", (userPresence, local) => {
+                console.log("usePresence: presence received", userPresence, local);
+                if (local) {
+                    const user = {
+                        userId: userPresence.userId,
+                        state: userPresence.state,
+                        data: userPresence.data,
+                        timestamp: userPresence.timestamp,
+                        roles: [],
+                    };
+                    // Get the roles of the local user
+                    userPresence
+                        .getRoles()
+                        .then((roles) => {
+                            user.roles = roles;
+                            // Set local user state
+                            setLocalUser(user);
+                        })
+                        .catch((err) => {
+                            console.error("usePresence: getRoles error", err);
+                            // Set local user state
+                            setLocalUser(user);
+                        });
+                }
+                // Set users local state
+                const userArray = presence.toArray();
+                setUsers(userArray);
+            });
+            const userPrincipalName = context?.user.userPrincipalName ?? "someone@contoso.com";
+            const name = `@${userPrincipalName.split("@")[0]}`;
+            // Start presence tracking
+            console.log("usePresence: starting presence for userId", context?.user.id, context?.user.displayName);
+            presence
+                .initialize(undefined, {
+                    teamsUserId: context.user?.id,
+                    joinedTimestamp: LiveEvent.getTimestamp(),
+                    name,
+                })
+                .then(() => {
+                    console.log("usePresence: started presence");
+                    setStarted(true);
+                })
+                .catch((error) => console.error(error));
+        }
+    }, [presence, context, setUsers, setLocalUser]);
+
+    return {
+        presenceStarted,
+        localUser,
+        users,
+        localUserIsEligiblePresenter,
+    };
 };

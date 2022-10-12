@@ -1,18 +1,37 @@
 import "mocha";
 import { strict as assert } from "assert";
-import { toCssRgbaColor, fromCssColor, IColor, IRect, IPoint, expandRect, screenToViewport, viewportToScreen, ISegment } from "../core";
+import {
+    toCssRgbaColor,
+    fromCssColor,
+    IColor,
+    IRect,
+    IPoint,
+    expandRect,
+    screenToViewport,
+    viewportToScreen,
+    ISegment,
+} from "../core";
 import { assertObjectsEqual } from "./Utils.spec";
-import { doRectanglesOverlap, getSegmentsIntersection, isPointInsideRectangle, isRectangleInsideRectangle, segmentsMayIntersect } from "../core/Internals";
+import {
+    doRectanglesOverlap,
+    getSegmentsIntersection,
+    isPointInsideRectangle,
+    isRectangleInsideRectangle,
+    segmentsMayIntersect,
+} from "../core/Internals";
 
 const testColor: IColor = { r: 193, g: 221, b: 202 };
 const serializedTestColor = "#C1DDCA";
 
-describe('Color', () => {
+describe("Color", () => {
     it("serializes to CSS rgba()", async () => {
         const rgbaColor = toCssRgbaColor(testColor, 0.8);
         const expectedRgbaColor = "rgba(193,221,202,0.8)";
 
-        assert(rgbaColor === expectedRgbaColor, `Color didn't serialize as expected: expected = ${expectedRgbaColor}, actual = ${rgbaColor}`);
+        assert(
+            rgbaColor === expectedRgbaColor,
+            `Color didn't serialize as expected: expected = ${expectedRgbaColor}, actual = ${rgbaColor}`
+        );
     });
 
     it("deserializes from #RRGGBB format", async () => {
@@ -26,8 +45,8 @@ const testRect: IRect = {
     left: 50,
     top: 30,
     right: 90,
-    bottom: 100
-}
+    bottom: 100,
+};
 
 interface IUnionRectTest {
     sourceRect: IRect;
@@ -35,54 +54,54 @@ interface IUnionRectTest {
     expected: IRect;
 }
 
-describe('Geometry', () => {
+describe("Geometry", () => {
     it("expandRect", async () => {
         const tests: IUnionRectTest[] = [
             {
                 sourceRect: testRect,
                 point: { x: 30, y: 50 },
-                expected: { ...testRect, left: 30 }
+                expected: { ...testRect, left: 30 },
             },
             {
                 sourceRect: testRect,
                 point: { x: 30, y: 20 },
-                expected: { ...testRect, left: 30, top: 20 }
+                expected: { ...testRect, left: 30, top: 20 },
             },
             {
                 sourceRect: testRect,
                 point: { x: 60, y: 20 },
-                expected: { ...testRect, top: 20 }
+                expected: { ...testRect, top: 20 },
             },
             {
                 sourceRect: testRect,
                 point: { x: 100, y: 20 },
-                expected: { ...testRect, right: 100, top: 20 }
+                expected: { ...testRect, right: 100, top: 20 },
             },
             {
                 sourceRect: testRect,
                 point: { x: 100, y: 50 },
-                expected: { ...testRect, right: 100 }
+                expected: { ...testRect, right: 100 },
             },
             {
                 sourceRect: testRect,
                 point: { x: 100, y: 110 },
-                expected: { ...testRect, right: 100, bottom: 110 }
+                expected: { ...testRect, right: 100, bottom: 110 },
             },
             {
                 sourceRect: testRect,
                 point: { x: 60, y: 110 },
-                expected: { ...testRect, bottom: 110 }
+                expected: { ...testRect, bottom: 110 },
             },
             {
                 sourceRect: testRect,
                 point: { x: 30, y: 110 },
-                expected: { ...testRect, left: 30, bottom: 110 }
+                expected: { ...testRect, left: 30, bottom: 110 },
             },
             {
                 sourceRect: testRect,
                 point: { x: 60, y: 60 },
-                expected: { ...testRect }
-            }
+                expected: { ...testRect },
+            },
         ];
 
         for (const test of tests) {
@@ -115,13 +134,18 @@ describe('Geometry', () => {
         const tests: IPointTest[] = [
             { p: { x: 20, y: 50 }, expected: false },
             { p: { x: 40, y: 10 }, expected: false },
-            { p: { x: 40, y: 30 }, expected: true }
+            { p: { x: 40, y: 30 }, expected: true },
         ];
 
         for (const test of tests) {
             const actual = isPointInsideRectangle(test.p, r);
 
-            assert(actual === test.expected, `isPointInsideRectangle is incorrect for p = ${JSON.stringify(test.p)} and r = ${r}. Expected = ${test.expected}, actual = ${actual}`);
+            assert(
+                actual === test.expected,
+                `isPointInsideRectangle is incorrect for p = ${JSON.stringify(test.p)} and r = ${r}. Expected = ${
+                    test.expected
+                }, actual = ${actual}`
+            );
         }
     });
 
@@ -137,13 +161,18 @@ describe('Geometry', () => {
             { r: { left: 110, top: 110, right: 140, bottom: 140 }, expected: false },
             { r: { left: 75, top: 75, right: 140, bottom: 140 }, expected: false },
             { r: { left: 0, top: 0, right: 75, bottom: 75 }, expected: false },
-            { r: { left: 60, top: 60, right: 90, bottom: 90 }, expected: true }
+            { r: { left: 60, top: 60, right: 90, bottom: 90 }, expected: true },
         ];
 
         for (const test of tests) {
             const actual = isRectangleInsideRectangle(test.r, r);
 
-            assert(actual === test.expected, `isRectangleInsideRectangle is incorrect for r1 = ${JSON.stringify(test.r)} and r2 = ${r}. Expected = ${test.expected}, actual = ${actual}`);
+            assert(
+                actual === test.expected,
+                `isRectangleInsideRectangle is incorrect for r1 = ${JSON.stringify(test.r)} and r2 = ${r}. Expected = ${
+                    test.expected
+                }, actual = ${actual}`
+            );
         }
     });
 
@@ -154,103 +183,119 @@ describe('Geometry', () => {
             { r: { left: 110, top: 110, right: 140, bottom: 140 }, expected: false },
             { r: { left: 75, top: 75, right: 140, bottom: 140 }, expected: true },
             { r: { left: 0, top: 0, right: 75, bottom: 75 }, expected: true },
-            { r: { left: 60, top: 60, right: 90, bottom: 90 }, expected: true }
+            { r: { left: 60, top: 60, right: 90, bottom: 90 }, expected: true },
         ];
 
         for (const test of tests) {
             const actual = doRectanglesOverlap(test.r, r);
 
-            assert(actual === test.expected, `doRectanglesOverlap is incorrect for r1 = ${JSON.stringify(test.r)} and r2 = ${r}. Expected = ${test.expected}, actual = ${actual}`);
+            assert(
+                actual === test.expected,
+                `doRectanglesOverlap is incorrect for r1 = ${JSON.stringify(test.r)} and r2 = ${r}. Expected = ${
+                    test.expected
+                }, actual = ${actual}`
+            );
         }
     });
 
     interface ISegmentTest {
-        s: ISegment,
-        expected: boolean
+        s: ISegment;
+        expected: boolean;
     }
 
     it("segmentsMayIntersect", async () => {
         const s: ISegment = {
             from: { x: 50, y: 80 },
-            to: { x: 80, y: 50 }
+            to: { x: 80, y: 50 },
         };
         const tests: ISegmentTest[] = [
             {
                 s: {
                     from: { x: 0, y: 80 },
-                    to: { x: 40, y: 50 }
+                    to: { x: 40, y: 50 },
                 },
-                expected: false
+                expected: false,
             },
             {
                 s: {
                     from: { x: 60, y: 0 },
-                    to: { x: 70, y: 90 }
+                    to: { x: 70, y: 90 },
                 },
-                expected: true
+                expected: true,
             },
             {
                 s: {
                     from: { x: 60, y: 0 },
-                    to: { x: 70, y: 40 }
+                    to: { x: 70, y: 40 },
                 },
-                expected: false
+                expected: false,
             },
             {
                 s: {
                     from: { x: 60, y: 85 },
-                    to: { x: 70, y: 100 }
+                    to: { x: 70, y: 100 },
                 },
-                expected: false
-            }
+                expected: false,
+            },
         ];
 
         for (const test of tests) {
             const actual = segmentsMayIntersect(test.s, s);
 
-            assert(actual === test.expected, `segmentsMayIntersect is incorrect for s1 = ${JSON.stringify(test.s)} and s2 = ${s}. Expected = ${test.expected}, actual = ${actual}`);
+            assert(
+                actual === test.expected,
+                `segmentsMayIntersect is incorrect for s1 = ${JSON.stringify(test.s)} and s2 = ${s}. Expected = ${
+                    test.expected
+                }, actual = ${actual}`
+            );
         }
     });
 
     interface ISegmentIntersectionTest {
-        s: ISegment,
-        expected?: IPoint
+        s: ISegment;
+        expected?: IPoint;
     }
 
     it("getSegmentsIntersection", async () => {
         const s: ISegment = {
             from: { x: 1, y: 1 },
-            to: { x: 5, y: 5 }
+            to: { x: 5, y: 5 },
         };
         const tests: ISegmentIntersectionTest[] = [
             {
                 s: {
                     from: { x: 0, y: 3 },
-                    to: { x: 3, y: 0 }
+                    to: { x: 3, y: 0 },
                 },
-                expected: { x: 1.5, y: 1.5 }
+                expected: { x: 1.5, y: 1.5 },
             },
             {
                 s: {
                     from: { x: 0, y: 3 },
-                    to: { x: 3, y: 6 }
-                }
-            }
+                    to: { x: 3, y: 6 },
+                },
+            },
         ];
 
         for (const test of tests) {
             const actual = getSegmentsIntersection(test.s, s);
 
             if (actual && test.expected) {
-                assertObjectsEqual(test.expected, actual, `getSegmentsIntersection is incorrect for s1 = ${JSON.stringify(test.s)} and s2 = ${s}`);
-            }
-            else if (!actual && !test.expected) {
+                assertObjectsEqual(
+                    test.expected,
+                    actual,
+                    `getSegmentsIntersection is incorrect for s1 = ${JSON.stringify(test.s)} and s2 = ${s}`
+                );
+            } else if (!actual && !test.expected) {
                 // The test passed
-            }
-            else {
-                assert(false, `getSegmentsIntersection is incorrect for s1 = ${JSON.stringify(test.s)} and s2 = ${s}. Expected = ${JSON.stringify(test.expected)}, actual = ${JSON.stringify(actual)}`);
+            } else {
+                assert(
+                    false,
+                    `getSegmentsIntersection is incorrect for s1 = ${JSON.stringify(
+                        test.s
+                    )} and s2 = ${s}. Expected = ${JSON.stringify(test.expected)}, actual = ${JSON.stringify(actual)}`
+                );
             }
         }
     });
 });
-

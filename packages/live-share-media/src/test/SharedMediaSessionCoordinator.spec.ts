@@ -3,33 +3,39 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import 'mocha';
-import { strict as assert } from 'assert';
-import { SimulatedBroadcastHub, SimulatedCollaborationSpace, IParticipant, ParticipantRole, Deferred } from '@microsoft/teams-collaboration';
-import { ExtendedMediaMetadata } from './MediaSessionExtensions';
-import { ICurrentPlaybackPosition } from './coordinatorState';
-import { TestMediaSession } from './SharedMediaSession.spec';
+import "mocha";
+import { strict as assert } from "assert";
+import {
+    SimulatedBroadcastHub,
+    SimulatedCollaborationSpace,
+    IParticipant,
+    ParticipantRole,
+    Deferred,
+} from "@microsoft/teams-collaboration";
+import { ExtendedMediaMetadata } from "./MediaSessionExtensions";
+import { ICurrentPlaybackPosition } from "./coordinatorState";
+import { TestMediaSession } from "./SharedMediaSession.spec";
 
-describe('SharedMediaSessionCoordinator', () => {
-    const user1: IParticipant = { participantId: 'user1', role: ParticipantRole.organizer };
-    const user2: IParticipant = { participantId: 'user2', role: ParticipantRole.participant };
+describe("SharedMediaSessionCoordinator", () => {
+    const user1: IParticipant = { participantId: "user1", role: ParticipantRole.organizer };
+    const user2: IParticipant = { participantId: "user2", role: ParticipantRole.participant };
     const testTrack: ExtendedMediaMetadata = {
-        trackIdentifier: 'https://example.org/test.mp3',
-        title: 'Test Title',
-        album: 'Test Album',
-        artist: 'The Testers',
-        artwork: []
+        trackIdentifier: "https://example.org/test.mp3",
+        title: "Test Title",
+        album: "Test Album",
+        artist: "The Testers",
+        artwork: [],
     };
     const leaderPosition: Partial<ICurrentPlaybackPosition> = {
-        playbackState: 'playing',
+        playbackState: "playing",
         position: 25.0,
-        duration: 600.0
+        duration: 600.0,
     };
 
     const laggerPosition: Partial<ICurrentPlaybackPosition> = {
-        playbackState: 'playing',
+        playbackState: "playing",
         position: 20.0,
-        duration: 600.0
+        duration: 600.0,
     };
 
     it('should send "joined" event when joined.', async () => {
@@ -41,10 +47,10 @@ describe('SharedMediaSessionCoordinator', () => {
             let cnt = 0;
             const session = new TestMediaSession(space1);
             await space2.join();
-            space2.socket.addBroadcastListener(session.name, 'joined', async (event) => {
+            space2.socket.addBroadcastListener(session.name, "joined", async (event) => {
                 cnt++;
             });
-    
+
             await space1.join();
             assert(cnt == 1, `joined event not sent`);
         } finally {
@@ -64,7 +70,7 @@ describe('SharedMediaSessionCoordinator', () => {
             const session = new TestMediaSession(space1, testTrack);
             session.coordinator.positionUpdateInterval = 0.02;
             await space2.join();
-            space2.socket.addBroadcastListener(session.name, 'positionUpdate', async (event) => {
+            space2.socket.addBroadcastListener(session.name, "positionUpdate", async (event) => {
                 cnt++;
                 if (cnt > 1) {
                     done.resolve();
@@ -88,7 +94,7 @@ describe('SharedMediaSessionCoordinator', () => {
         try {
             const session1 = new TestMediaSession(space1, testTrack);
             const session2 = new TestMediaSession(space2, testTrack);
-            
+
             await space1.join();
             await space2.join();
 
@@ -100,7 +106,7 @@ describe('SharedMediaSessionCoordinator', () => {
 
             // Wait for action to be broadcast
             await session2.waitForAction(async (details) => {
-                assert(details.action == 'play', `wrong action received`);
+                assert(details.action == "play", `wrong action received`);
             });
         } finally {
             await space1.leave();
@@ -116,7 +122,7 @@ describe('SharedMediaSessionCoordinator', () => {
         try {
             const session1 = new TestMediaSession(space1, testTrack);
             const session2 = new TestMediaSession(space2, testTrack);
-            
+
             await session1.coordinator.join();
             await space2.join();
 
@@ -125,12 +131,12 @@ describe('SharedMediaSessionCoordinator', () => {
 
             // Wait for action to be broadcast
             await session2.waitForAction(async (details) => {
-                assert(details.action == 'play', `didn't start playback`);
-                
+                assert(details.action == "play", `didn't start playback`);
+
                 // Pause playback
                 await session1.coordinator.pause();
                 await session2.waitForAction(async (details) => {
-                    assert(details.action == 'pause', `didn't pause playback`);
+                    assert(details.action == "pause", `didn't pause playback`);
                 });
             });
         } finally {
@@ -147,7 +153,7 @@ describe('SharedMediaSessionCoordinator', () => {
         try {
             const session1 = new TestMediaSession(space1, testTrack);
             const session2 = new TestMediaSession(space2, testTrack);
-            
+
             await session1.coordinator.join();
             await space2.join();
 
@@ -156,13 +162,13 @@ describe('SharedMediaSessionCoordinator', () => {
 
             // Wait for action to be broadcast
             await session2.waitForAction(async (details) => {
-                assert(details.action == 'play', `didn't start playback`);
-                
+                assert(details.action == "play", `didn't start playback`);
+
                 // Seek to position
                 await session1.coordinator.seekTo(2.3);
                 await session2.waitForAction(async (details) => {
-                    assert(details.action == 'seekto', `wong action received "${details.action}"`);
-                    assert(details.seekTime >= 2.3, `wrong seek position "${details.seekTime}"`)
+                    assert(details.action == "seekto", `wong action received "${details.action}"`);
+                    assert(details.seekTime >= 2.3, `wrong seek position "${details.seekTime}"`);
                 });
             });
         } finally {
@@ -179,7 +185,7 @@ describe('SharedMediaSessionCoordinator', () => {
         try {
             const session1 = new TestMediaSession(space1);
             const session2 = new TestMediaSession(space2);
-            
+
             await space1.join();
             await space2.join();
 
@@ -188,9 +194,15 @@ describe('SharedMediaSessionCoordinator', () => {
 
             // Wait for action to be broadcast
             await session2.waitForAction(async (details) => {
-                assert(details.action == 'settrack', `wrong action received "${details.action}"`);
-                assert(JSON.stringify(session1.metadata) == JSON.stringify(testTrack), `session1 has wrong track: ${JSON.stringify(session1.metadata)}`);
-                assert(JSON.stringify(session2.metadata) == JSON.stringify(testTrack), `session2 has wrong track: ${JSON.stringify(session2.metadata)}`);
+                assert(details.action == "settrack", `wrong action received "${details.action}"`);
+                assert(
+                    JSON.stringify(session1.metadata) == JSON.stringify(testTrack),
+                    `session1 has wrong track: ${JSON.stringify(session1.metadata)}`
+                );
+                assert(
+                    JSON.stringify(session2.metadata) == JSON.stringify(testTrack),
+                    `session2 has wrong track: ${JSON.stringify(session2.metadata)}`
+                );
             });
         } finally {
             await space1.leave();
@@ -210,7 +222,7 @@ describe('SharedMediaSessionCoordinator', () => {
     //         const session2 = new TestMediaSession(testTrack, laggerPosition);
     //         const coordinator2 = new SharedMediaSessionCoordinator(space2, session2, session2.name);
     //         coordinator2.positionUpdateInterval = 0.02;
-            
+
     //         await session1.coordinator.join();
     //         await coordinator2.join();
 
@@ -227,5 +239,4 @@ describe('SharedMediaSessionCoordinator', () => {
     //         await space2.leave();
     //     }
     // });
-
 });

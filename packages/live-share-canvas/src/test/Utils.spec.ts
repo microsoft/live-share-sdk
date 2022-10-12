@@ -1,5 +1,5 @@
-import 'mocha';
-import { strict as assert } from 'assert';
+import "mocha";
+import { strict as assert } from "assert";
 import { Stroke, IPointerPoint, IColor, IRect } from "../core";
 
 export const coordinateSerializationPrecision = Stroke["coordinateSerializationPrecision"] as number;
@@ -27,8 +27,8 @@ export function reducePointPrecision(p: IPointerPoint): IPointerPoint {
     return {
         x: reducePrecision(p.x, coordinateSerializationPrecision),
         y: reducePrecision(p.y, coordinateSerializationPrecision),
-        pressure: reducePrecision(p.pressure, pressureSerializationPrecision)
-    }
+        pressure: reducePrecision(p.pressure, pressureSerializationPrecision),
+    };
 }
 
 export function reducePointArrayPrecision(points: IPointerPoint[]): IPointerPoint[] {
@@ -42,7 +42,10 @@ export function reducePointArrayPrecision(points: IPointerPoint[]): IPointerPoin
 }
 
 export function assertPointArraysEqual(points1: IPointerPoint[], points2: IPointerPoint[]) {
-    assert(points1.length === points2.length, `Point arrays lengths should be equal but are not (${points1.length} vs ${points2.length})`);
+    assert(
+        points1.length === points2.length,
+        `Point arrays lengths should be equal but are not (${points1.length} vs ${points2.length})`
+    );
 
     for (let i = 0; i < points1.length; i++) {
         assertObjectsEqual(points1[i], points2[i], "Points are not equal");
@@ -53,6 +56,9 @@ export function assertObjectsEqual(expected: Object, actual: Object, errorMessag
     const propertyNames = Object.getOwnPropertyNames(expected);
 
     for (const p of propertyNames) {
-        assert(expected[p] === actual[p], errorMessage + ` (expected = ${JSON.stringify(expected)}, actual = ${JSON.stringify(actual)})`);
+        assert(
+            expected[p] === actual[p],
+            errorMessage + ` (expected = ${JSON.stringify(expected)}, actual = ${JSON.stringify(actual)})`
+        );
     }
 }

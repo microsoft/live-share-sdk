@@ -6,18 +6,18 @@
 /**
  * @hidden
  */
-export function cloneValue<T>(value: T|undefined): T|undefined {
-    return typeof value == 'object' ? JSON.parse(JSON.stringify(value)) : value;
+export function cloneValue<T>(value: T | undefined): T | undefined {
+    return typeof value == "object" ? JSON.parse(JSON.stringify(value)) : value;
 }
 
 /**
  * @hidden
  */
 export function decodeBase64(data: string): string {
-    if (typeof atob == 'function') {
+    if (typeof atob == "function") {
         return atob(data);
     } else {
-        return Buffer.from(data, 'base64').toString();
+        return Buffer.from(data, "base64").toString();
     }
 }
 
@@ -26,11 +26,11 @@ export function decodeBase64(data: string): string {
  */
 export const parseJwt = (token: string) => {
     try {
-      return JSON.parse(decodeBase64(token.split(".")[1]));
+        return JSON.parse(decodeBase64(token.split(".")[1]));
     } catch (e) {
-      return null;
+        return null;
     }
-}
+};
 
 /**
  * @hidden
@@ -45,8 +45,8 @@ export function waitForDelay(delay: number): Promise<void> {
  * @hidden
  */
 export function waitForResult<TResult>(
-    fnRequest: () => Promise<TResult|undefined>,
-    fnSucceeded: (result: TResult|undefined) => boolean,
+    fnRequest: () => Promise<TResult | undefined>,
+    fnSucceeded: (result: TResult | undefined) => boolean,
     fnTimeout: () => Error,
     retrySchedule: number[]
 ): Promise<TResult> {
@@ -68,8 +68,11 @@ export function waitForResult<TResult>(
 }
 
 // BUGBUG: Workaround for Teams Client not rejecting errors :(
-function timeoutRequest<TResult>(fnRequest: () => Promise<TResult|undefined>, timeout: number): Promise<TResult|undefined> {
-    return new Promise<TResult|undefined>(async (resolve) => {
+function timeoutRequest<TResult>(
+    fnRequest: () => Promise<TResult | undefined>,
+    timeout: number
+): Promise<TResult | undefined> {
+    return new Promise<TResult | undefined>(async (resolve) => {
         const hTimer = setTimeout(() => {
             resolve(undefined);
         }, timeout);

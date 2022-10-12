@@ -59,13 +59,13 @@ export abstract class InkingCanvas {
 
         const default2DOptions: CanvasRenderingContext2DSettings = {
             alpha: true,
-            desynchronized: false
+            desynchronized: false,
         };
 
-        const context: CanvasRenderingContext2D | null = canvas.getContext('2d', default2DOptions);
+        const context: CanvasRenderingContext2D | null = canvas.getContext("2d", default2DOptions);
 
         if (context === null) {
-            throw new Error('Could not get 2D context from canvas.');
+            throw new Error("Could not get 2D context from canvas.");
         }
 
         return context;
@@ -85,10 +85,7 @@ export abstract class InkingCanvas {
         if (this._parentElement) {
             this._parentElement.appendChild(context.canvas);
 
-            this.resizeLayer(
-                context,
-                this.clientDimensions.width,
-                this.clientDimensions.height);
+            this.resizeLayer(context, this.clientDimensions.width, this.clientDimensions.height);
         }
     }
 
@@ -107,7 +104,7 @@ export abstract class InkingCanvas {
                 width: clientWidth,
                 height: clientHeight,
                 halfWidth: clientWidth * 0.5,
-                halfHeight: clientHeight * 0.5
+                halfHeight: clientHeight * 0.5,
             };
         }
 
@@ -123,12 +120,12 @@ export abstract class InkingCanvas {
             this.render();
 
             this._renderTimeout = undefined;
-        }
+        };
 
         this._renderTimeout = window.requestAnimationFrame(doRender);
     }
 
-    protected viewportToScreen(p: IPoint): IPointerPoint
+    protected viewportToScreen(p: IPoint): IPointerPoint;
     protected viewportToScreen(p: IPointerPoint): IPointerPoint {
         return {
             ...viewportToScreen(
@@ -139,7 +136,7 @@ export abstract class InkingCanvas {
                 this.offset,
                 this.scale
             ),
-            pressure: p.pressure
+            pressure: p.pressure,
         };
     }
 
@@ -218,7 +215,8 @@ export abstract class InkingCanvas {
         context: CanvasRenderingContext2D,
         center: IPoint,
         halfWidth: number,
-        halfHeight: number): void {
+        halfHeight: number
+    ): void {
         const left: number = center.x - halfWidth;
         const right: number = center.x + halfWidth;
         const top: number = center.y - halfHeight;
@@ -253,12 +251,7 @@ export abstract class InkingCanvas {
     protected renderCircle(context: CanvasRenderingContext2D, center: IPoint, radius: number): void {
         const transformedCenter = this.viewportToScreen(center);
 
-        context.arc(
-            transformedCenter.x,
-            transformedCenter.y,
-            radius * this._scale,
-            0,
-            TWO_PI);
+        context.arc(transformedCenter.x, transformedCenter.y, radius * this._scale, 0, TWO_PI);
     }
 
     /**
@@ -298,10 +291,10 @@ export abstract class InkingCanvas {
     referencePoint: CanvasReferencePoint = "center";
 
     /**
-    * Creates a new InkingCanvas instance, attached to the provided HTMLElement.
-    * @param _parentElement The HTML element this canvas is attached to. InkingCanvas
-    * dynamically creates an HTML5 Canvas element and adds it as a child to `parentElement`.
-    */
+     * Creates a new InkingCanvas instance, attached to the provided HTMLElement.
+     * @param _parentElement The HTML element this canvas is attached to. InkingCanvas
+     * dynamically creates an HTML5 Canvas element and adds it as a child to `parentElement`.
+     */
     constructor(private _parentElement?: HTMLElement) {
         this._context = this.createLayer();
 
@@ -319,20 +312,17 @@ export abstract class InkingCanvas {
             if (opacity > 0) {
                 this.canvas.style.opacity = opacity.toString();
 
-                this._additionalLayers.forEach(
-                    (context: CanvasRenderingContext2D) => {
-                        context.canvas.style.opacity = opacity.toString();
-                    }
-                )
+                this._additionalLayers.forEach((context: CanvasRenderingContext2D) => {
+                    context.canvas.style.opacity = opacity.toString();
+                });
 
                 window.setTimeout(doFadeOut, InkingCanvas.fadeOutDuration / 10);
 
                 opacity -= 0.1;
-            }
-            else {
+            } else {
                 this.removeFromDOM();
             }
-        }
+        };
 
         window.setTimeout(doFadeOut, InkingCanvas.fadeOutDuration / 10);
     }
@@ -343,11 +333,9 @@ export abstract class InkingCanvas {
     removeFromDOM() {
         this.removeLayerFromDOM(this.context);
 
-        this._additionalLayers.forEach(
-            (layer: CanvasRenderingContext2D) => {
-                this.removeLayerFromDOM(layer);
-            }
-        )
+        this._additionalLayers.forEach((layer: CanvasRenderingContext2D) => {
+            this.removeLayerFromDOM(layer);
+        });
 
         this._additionalLayers.clear();
 
@@ -364,11 +352,9 @@ export abstract class InkingCanvas {
 
         this.resizeLayer(this.context, width, height);
 
-        this._additionalLayers.forEach(
-            (context: CanvasRenderingContext2D) => {
-                this.resizeLayer(context, width, height);
-            }
-        );
+        this._additionalLayers.forEach((context: CanvasRenderingContext2D) => {
+            this.resizeLayer(context, width, height);
+        });
     }
 
     /**
@@ -383,15 +369,13 @@ export abstract class InkingCanvas {
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
             context.restore();
-        }
+        };
 
         clearLayer(this.context);
 
-        this._additionalLayers.forEach(
-            (context: CanvasRenderingContext2D) => {
-                clearLayer(context);
-            }
-        )
+        this._additionalLayers.forEach((context: CanvasRenderingContext2D) => {
+            clearLayer(context);
+        });
     }
 
     /**
@@ -434,8 +418,7 @@ export abstract class InkingCanvas {
 
         if (!this.rendersAsynchronously()) {
             this.render();
-        }
-        else {
+        } else {
             this.scheduleRender();
         }
 
@@ -462,16 +445,13 @@ export abstract class InkingCanvas {
         if (stroke.length === 1) {
             this.beginStroke(stroke.getPointAt(0));
             this.endStroke(stroke.getPointAt(0));
-        }
-        else {
+        } else {
             for (let i = 0; i < stroke.length; i++) {
                 if (i === 0) {
                     this.beginStroke(stroke.getPointAt(i));
-                }
-                else if (i === stroke.length - 1) {
+                } else if (i === stroke.length - 1) {
                     this.endStroke(stroke.getPointAt(i));
-                }
-                else {
+                } else {
                     this.addPoint(stroke.getPointAt(i));
                 }
             }

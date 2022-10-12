@@ -4,14 +4,15 @@
  */
 
 import { IBrush, DefaultPenBrush } from "./Brush";
+import { getSquaredDistanceBetweenPoints, IPoint, IPointerPoint, IRect, ISegment, expandRect } from "./Geometry";
 import {
-    getSquaredDistanceBetweenPoints, IPoint, IPointerPoint, IRect, ISegment,
-    expandRect
-} from "./Geometry";
-import {
-    doRectanglesOverlap, getSegmentIntersectionsWithRectangle, getSegmentsIntersection,
-    isPointInsideRectangle, isRectangleInsideRectangle, segmentMayIntersectWithRectangle,
-    generateUniqueId
+    doRectanglesOverlap,
+    getSegmentIntersectionsWithRectangle,
+    getSegmentsIntersection,
+    isPointInsideRectangle,
+    isRectangleInsideRectangle,
+    segmentMayIntersectWithRectangle,
+    generateUniqueId,
 } from "./Internals";
 
 /**
@@ -56,7 +57,7 @@ export enum StrokeMode {
     /**
      * A straight line stroke between two points.
      */
-    line = 1
+    line = 1,
 }
 
 /**
@@ -76,7 +77,7 @@ export enum StrokeType {
      * Persistent stroke, that remains on the canvas until
      * erased.
      */
-    persistent = 2
+    persistent = 2,
 }
 
 /**
@@ -189,7 +190,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
      * `Stroke.pressureSerializationPrecision`
      * - All X, Y and P are expressed as integers. This allows to not use a
      * decimal point which saves three characters per point
-     * 
+     *
      * @returns The serialized points.
      */
     private serializePoints(): string {
@@ -201,7 +202,9 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         for (let i = 0; i < this._points.length; i++) {
             const p = this._points[i];
 
-            result += `${(p.x * coordinateMultiplier).toFixed(0)},${(p.y * coordinateMultiplier).toFixed(0)},${(p.pressure * pressureMultiplier).toFixed(0)}`;
+            result += `${(p.x * coordinateMultiplier).toFixed(0)},${(p.y * coordinateMultiplier).toFixed(0)},${(
+                p.pressure * pressureMultiplier
+            ).toFixed(0)}`;
 
             if (i < this._points.length - 1) {
                 result += ",";
@@ -233,8 +236,8 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
                 const point: IPointerPoint = {
                     x: currentValues[0] / coordinateMultiplier,
                     y: currentValues[1] / coordinateMultiplier,
-                    pressure: currentValues[2] / pressureMultiplier
-                }
+                    pressure: currentValues[2] / pressureMultiplier,
+                };
 
                 result.push(point);
 
@@ -273,8 +276,8 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
             clientId: options ? options.clientId : undefined,
             timeStamp: options ? options.timeStamp : undefined,
             brush: options ? options.brush : undefined,
-            points: options ? options.points : undefined
-        }
+            points: options ? options.points : undefined,
+        };
 
         this._id = effectiveOptions.id ?? generateUniqueId();
         this._clientId = effectiveOptions.clientId;
@@ -319,9 +322,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
 
         for (const p of this) {
             if (previousPoint) {
-                const intersections = getSegmentIntersectionsWithRectangle(
-                    { from: previousPoint, to: p },
-                    rectangle);
+                const intersections = getSegmentIntersectionsWithRectangle({ from: previousPoint, to: p }, rectangle);
 
                 if (intersections.length > 0) {
                     return true;
@@ -369,7 +370,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
                 left: Number.MAX_VALUE,
                 top: Number.MAX_VALUE,
                 right: -Number.MAX_VALUE,
-                bottom: -Number.MAX_VALUE
+                bottom: -Number.MAX_VALUE,
             };
 
             for (const p of this) {
@@ -426,14 +427,12 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
         }
 
         const createNewStroke: () => Stroke = () => {
-            return new Stroke(
-                {
-                    clientId: this.clientId,
-                    timeStamp: this.timeStamp,
-                    brush: this.brush
-                }
-            );
-        }
+            return new Stroke({
+                clientId: this.clientId,
+                timeStamp: this.timeStamp,
+                brush: this.brush,
+            });
+        };
 
         let previousPoint: IPointerPoint | undefined = undefined;
 
@@ -454,16 +453,14 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
 
                             currentStroke.addPoint({ ...intersections[0], pressure: previousPoint.pressure });
                             currentStroke.addPoint(p);
-                        }
-                        else {
+                        } else {
                             currentStroke.addPoint({ ...intersections[0], pressure: p.pressure });
 
                             generatedStrokes.push(currentStroke);
 
                             currentStroke = createNewStroke();
                         }
-                    }
-                    else if (intersections.length === 2) {
+                    } else if (intersections.length === 2) {
                         // Two intersections, we need to cut the part that's inside the eraser rectangle
                         const d1 = getSquaredDistanceBetweenPoints(previousPoint, intersections[0]);
                         const d2 = getSquaredDistanceBetweenPoints(previousPoint, intersections[1]);
@@ -477,8 +474,10 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
                         currentStroke = createNewStroke();
                         currentStroke.addPoint({ ...intersections[secondIndex], pressure: previousPoint.pressure });
                         currentStroke.addPoint(p);
-                    }
-                    else if (!isPointInsideRectangle(previousPoint, eraserRect) && !isPointInsideRectangle(p, eraserRect)) {
+                    } else if (
+                        !isPointInsideRectangle(previousPoint, eraserRect) &&
+                        !isPointInsideRectangle(p, eraserRect)
+                    ) {
                         // The segment is fully outside the eraser rectangle, we keep it and add it to the current stroke
                         if (currentStroke.length === 0) {
                             currentStroke.addPoint(previousPoint);
@@ -486,12 +485,10 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
 
                         currentStroke.addPoint(p);
                     }
-                }
-                else {
+                } else {
                     currentStroke.addPoint(p);
                 }
-            }
-            else {
+            } else {
                 currentStroke.addPoint(p);
             }
 
@@ -516,10 +513,10 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
             cId: this.clientId,
             t: this.timeStamp,
             br: this.brush,
-            d: this.serializePoints()
+            d: this.serializePoints(),
         };
 
-        return JSON.stringify(strokeData);;
+        return JSON.stringify(strokeData);
     }
 
     /**
@@ -545,10 +542,10 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
             next: () => {
                 return {
                     done: this._iteratorCounter === this._points.length,
-                    value: this._points[this._iteratorCounter++]
-                }
-            }
-        }
+                    value: this._points[this._iteratorCounter++],
+                };
+            },
+        };
     }
 
     /**

@@ -3,16 +3,15 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent } from '@microsoft/live-share';
-import EventEmitter from 'events';
-import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
-
+import { IEvent } from "@microsoft/live-share";
+import EventEmitter from "events";
+import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
 
 /**
  * @hidden
  */
- export interface IPlaybackTrackData {
-    data: object|null;
+export interface IPlaybackTrackData {
+    data: object | null;
     timestamp: number;
     clientId: string;
 }
@@ -20,28 +19,28 @@ import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from './GroupPlaybackTra
 /**
  * @hidden
  */
- export enum PlaybackTrackDataEvents {
-    dataChange = 'dataChange'
+export enum PlaybackTrackDataEvents {
+    dataChange = "dataChange",
 }
 
 /**
  * @hidden
  */
 export interface IPlaybackTrackDataChangeEvent extends IEvent {
-    data: object|null;
+    data: object | null;
 }
 
 /**
  * @hidden
  */
- export class GroupPlaybackTrackData extends EventEmitter {
+export class GroupPlaybackTrackData extends EventEmitter {
     private _track: GroupPlaybackTrack;
     private _current: IPlaybackTrackData;
 
     constructor(track: GroupPlaybackTrack) {
         super();
         this._track = track;
-        this._current = { data: null, timestamp: 0, clientId: '' };
+        this._current = { data: null, timestamp: 0, clientId: "" };
 
         // Listen for track changes
         this._track.on(GroupPlaybackTrackEvents.trackChange, () => {
@@ -49,8 +48,8 @@ export interface IPlaybackTrackDataChangeEvent extends IEvent {
             this._current = {
                 data: null,
                 timestamp: this._track.current.timestamp,
-                clientId: this._track.current.clientId
-            }
+                clientId: this._track.current.clientId,
+            };
         });
     }
 
@@ -58,7 +57,7 @@ export interface IPlaybackTrackDataChangeEvent extends IEvent {
         return this._current;
     }
 
-    public get data(): object|null {
+    public get data(): object | null {
         return this.current.data;
     }
 

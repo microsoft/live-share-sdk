@@ -3,13 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { MediaSessionCoordinatorSuspension, CoordinationWaitPoint } from './MediaSessionExtensions';
+import { MediaSessionCoordinatorSuspension, CoordinationWaitPoint } from "./MediaSessionExtensions";
 
 export class LiveMediaSessionCoordinatorSuspension implements MediaSessionCoordinatorSuspension {
     private _waitPoint?: CoordinationWaitPoint;
     private _onEnd: (seekTo?: number) => void;
 
-    constructor(waitPoint: CoordinationWaitPoint|undefined, onEnd: (seekTo?: number) => void) {
+    constructor(waitPoint: CoordinationWaitPoint | undefined, onEnd: (seekTo?: number) => void) {
         this._waitPoint = waitPoint;
         this._onEnd = onEnd;
     }
@@ -17,7 +17,7 @@ export class LiveMediaSessionCoordinatorSuspension implements MediaSessionCoordi
     /**
      * Returns an optional wait point associated with the suspension.
      */
-    public get waitPoint(): CoordinationWaitPoint|undefined {
+    public get waitPoint(): CoordinationWaitPoint | undefined {
         return this._waitPoint;
     }
 

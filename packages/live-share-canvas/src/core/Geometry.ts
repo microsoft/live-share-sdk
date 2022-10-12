@@ -7,23 +7,23 @@
  * Defines a 2D point.
  */
 export interface IPoint {
-    x: number,
-    y: number
+    x: number;
+    y: number;
 }
 
 /**
  * Defines a 2D point with pointer pressure.
  */
 export interface IPointerPoint extends IPoint {
-    pressure: number
+    pressure: number;
 }
 
 /**
  * Defines a segment between two points.
  */
 export interface ISegment {
-    from: IPoint,
-    to: IPoint
+    from: IPoint;
+    to: IPoint;
 }
 
 /**
@@ -57,8 +57,8 @@ export function expandRect(rect: IRect, point: IPoint): IRect {
         left: Math.min(rect.left, point.x),
         right: Math.max(rect.right, point.x),
         top: Math.min(rect.top, point.y),
-        bottom: Math.max(rect.bottom, point.y)
-    }
+        bottom: Math.max(rect.bottom, point.y),
+    };
 }
 
 /**
@@ -90,12 +90,17 @@ export function getSquaredDistanceBetweenPoints(p1: IPoint, p2: IPoint): number 
  * @param scale The viewport scale. Defaults to 1 if the provided value is less than or equal to 0.
  * @returns The converted point.
  */
-export function screenToViewport(p: IPoint, viewportReferencePoint: IPoint, viewportOffset: IPoint, scale: number): IPoint {
+export function screenToViewport(
+    p: IPoint,
+    viewportReferencePoint: IPoint,
+    viewportOffset: IPoint,
+    scale: number
+): IPoint {
     const effectiveScale = scale > 0 ? scale : 1;
 
     return {
         x: (p.x - viewportOffset.x - viewportReferencePoint.x) / effectiveScale,
-        y: (p.y - viewportOffset.y - viewportReferencePoint.y) / effectiveScale
+        y: (p.y - viewportOffset.y - viewportReferencePoint.y) / effectiveScale,
     };
 }
 
@@ -107,11 +112,16 @@ export function screenToViewport(p: IPoint, viewportReferencePoint: IPoint, view
  * @param scale The viewport scale. Defaults to 1 if the provided value is less than or equal to 0.
  * @returns The converted point.
  */
-export function viewportToScreen(p: IPoint, viewportReferencePoint: IPoint, viewportOffset: IPoint, scale: number): IPoint {
+export function viewportToScreen(
+    p: IPoint,
+    viewportReferencePoint: IPoint,
+    viewportOffset: IPoint,
+    scale: number
+): IPoint {
     const effectiveScale = scale > 0 ? scale : 1;
 
     return {
         x: p.x * effectiveScale + viewportReferencePoint.x + viewportOffset.x,
-        y: p.y * effectiveScale + viewportReferencePoint.y + viewportOffset.y
+        y: p.y * effectiveScale + viewportReferencePoint.y + viewportOffset.y,
     };
 }

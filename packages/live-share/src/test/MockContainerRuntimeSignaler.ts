@@ -3,9 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from '@fluidframework/runtime-definitions';
-import { IContainerRuntimeSignaler } from '../LiveObjectSynchronizer';
-import { v4 } from 'uuid';
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
+import { IContainerRuntimeSignaler } from "../LiveObjectSynchronizer";
+import { v4 } from "uuid";
 
 export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {
     private _connected: MockContainerRuntimeSignaler[] = [];
@@ -17,17 +17,17 @@ export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {
         this.clientId = hasClientId ? v4() : undefined;
     }
 
-    public clientId: string|undefined;
+    public clientId: string | undefined;
 
     public getSentSignals(type: string): IInboundSignalMessage[] {
-        return this._sentSignals.filter(message => message.type == type);
+        return this._sentSignals.filter((message) => message.type == type);
     }
 
     public getReceivedSignals(type: string): IInboundSignalMessage[] {
-        return this._receivedSignals.filter(message => message.type == type);
+        return this._receivedSignals.filter((message) => message.type == type);
     }
 
-    public on(event: 'signal', listener: (message: IInboundSignalMessage, local: boolean) => void): this {
+    public on(event: "signal", listener: (message: IInboundSignalMessage, local: boolean) => void): this {
         this._listeners.push((message, local) => {
             if (local) {
                 this._sentSignals.push(message);
@@ -38,23 +38,23 @@ export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {
         });
         return this;
     }
-    
+
     public submitSignal(type: string, content: any): void {
         const msg: IInboundSignalMessage = {
             clientId: this.clientId || null,
             content: content,
-            type: type
-        }
+            type: type,
+        };
 
         // Raise local event
         this.emit(msg, true);
 
         // Raise remote events
-        this._connected.forEach(runtime => runtime.emit(msg, false));
+        this._connected.forEach((runtime) => runtime.emit(msg, false));
     }
 
     private emit(message: IInboundSignalMessage, local: boolean): void {
-        this._listeners.forEach(fn => fn(message, local));
+        this._listeners.forEach((fn) => fn(message, local));
     }
 
     public static connectContainers(runtimes: MockContainerRuntimeSignaler[]): void {
@@ -69,4 +69,3 @@ export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {
         }
     }
 }
-

@@ -6,13 +6,13 @@
 import { strict as assert } from "assert";
 import { LiveEventScope } from "../LiveEventScope";
 import { LiveEventSource } from "../LiveEventSource";
-import { MockRuntimeSignaler } from './MockRuntimeSignaler';
+import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
     const remoteRuntime = new MockRuntimeSignaler();
     MockRuntimeSignaler.connectRuntimes([localRuntime, remoteRuntime]);
-    return {localRuntime, remoteRuntime};
+    return { localRuntime, remoteRuntime };
 }
 
 describe("LiveEventSource", () => {
@@ -20,12 +20,12 @@ describe("LiveEventSource", () => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
         const localScope = new LiveEventScope(signalers.localRuntime);
-        localScope.onEvent('test', (evt, local) => triggered++);
+        localScope.onEvent("test", (evt, local) => triggered++);
 
         const remoteScope = new LiveEventScope(signalers.remoteRuntime);
-        remoteScope.onEvent('test', (evt, local) => triggered++);
+        remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        const localSource = new LiveEventSource(localScope, 'test');
+        const localSource = new LiveEventSource(localScope, "test");
         localSource.sendEvent({});
 
         // Verify is an async operation so wait some

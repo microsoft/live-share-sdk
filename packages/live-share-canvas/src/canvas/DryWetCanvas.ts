@@ -35,23 +35,26 @@ export abstract class DryWetCanvas extends InkingCanvas {
 
                 const segment: IQuadPathSegment = {
                     endPoint: p,
-                    tipSize: pressureAdjustedTip
+                    tipSize: pressureAdjustedTip,
                 };
 
                 if (previousPoint !== undefined) {
-                    segment.quad = this.brush.tip === "ellipse"
-                        ? computeQuadBetweenTwoCircles(
-                            p,
-                            pressureAdjustedTip,
-                            previousPoint,
-                            previousPointPressureAdjustedTip)
-                        : computeQuadBetweenTwoRectangles(
-                            p,
-                            pressureAdjustedTip,
-                            pressureAdjustedTip,
-                            previousPoint,
-                            previousPointPressureAdjustedTip,
-                            previousPointPressureAdjustedTip);
+                    segment.quad =
+                        this.brush.tip === "ellipse"
+                            ? computeQuadBetweenTwoCircles(
+                                  p,
+                                  pressureAdjustedTip,
+                                  previousPoint,
+                                  previousPointPressureAdjustedTip
+                              )
+                            : computeQuadBetweenTwoRectangles(
+                                  p,
+                                  pressureAdjustedTip,
+                                  pressureAdjustedTip,
+                                  previousPoint,
+                                  previousPointPressureAdjustedTip,
+                                  previousPointPressureAdjustedTip
+                              );
                 }
 
                 result.push(segment);
@@ -79,13 +82,8 @@ export abstract class DryWetCanvas extends InkingCanvas {
 
             if (this.brush.tip === "ellipse") {
                 this.renderCircle(context, item.endPoint, item.tipSize);
-            }
-            else {
-                this.renderRectangle(
-                    context,
-                    item.endPoint,
-                    item.tipSize,
-                    item.tipSize);
+            } else {
+                this.renderRectangle(context, item.endPoint, item.tipSize, item.tipSize);
             }
         }
 
@@ -104,7 +102,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
     /**
      * Converts the current brush's color to a CSS color.
      * @param color The color to convert.
-     * @returns A CSS color. 
+     * @returns A CSS color.
      */
     protected getBrushCssColor(): string {
         return toCssRgbaColor(this.brush.color, this.brush.type === "highlighter" ? 0.5 : 1);
@@ -154,8 +152,7 @@ export abstract class DryWetCanvas extends InkingCanvas {
             }
 
             this.renderQuadPath(this._innerLayer, path);
-        }
-        else if (this._innerLayer) {
+        } else if (this._innerLayer) {
             this.removeLayer(this._innerLayer);
 
             this._innerLayer = undefined;

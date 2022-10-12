@@ -15,7 +15,7 @@ export class LiveShareTokenProvider implements ITokenProvider {
     private _documentId?: string;
     private _tenantId?: string;
 
-    public constructor (private readonly _host: ILiveShareHost) { }
+    public constructor(private readonly _host: ILiveShareHost) {}
 
     public async fetchOrdererToken(tenantId: string, documentId?: string, refresh?: boolean): Promise<ITokenResponse> {
         const tokenResponse = await this.fetchFluidToken(tenantId, documentId, refresh);
@@ -29,10 +29,7 @@ export class LiveShareTokenProvider implements ITokenProvider {
 
     private async fetchFluidToken(tenantId: string, documentId?: string, refresh?: boolean): Promise<ITokenResponse> {
         let fromCache: boolean;
-        if (!this._frsToken
-            || refresh
-            || this._tenantId !== tenantId
-            || this._documentId !== documentId) {
+        if (!this._frsToken || refresh || this._tenantId !== tenantId || this._documentId !== documentId) {
             this._frsToken = await this._host.getFluidToken(documentId);
             fromCache = false;
         } else {

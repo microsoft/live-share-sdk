@@ -6,12 +6,4 @@ import { useTakeControl } from "./useTakeControl";
 import { usePlaylist } from "./usePlaylist";
 import { useLiveCanvas } from "./useLiveCanvas";
 
-export {
-  useSharedObjects,
-  usePresence,
-  useMediaSession,
-  useNotifications,
-  useTakeControl,
-  usePlaylist,
-  useLiveCanvas,
-};
+export { useSharedObjects, usePresence, useMediaSession, useNotifications, useTakeControl, usePlaylist, useLiveCanvas };

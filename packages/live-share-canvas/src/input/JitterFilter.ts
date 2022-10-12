@@ -34,7 +34,7 @@ export class JitterFilter extends InputFilter {
             const output: IPointerPoint = {
                 x: JitterFilter.iir(p.x, this._out1.x, this._out2.x),
                 y: JitterFilter.iir(p.y, this._out1.y, this._out2.y),
-                pressure: p.pressure
+                pressure: p.pressure,
             };
 
             this._out2 = this._out1;

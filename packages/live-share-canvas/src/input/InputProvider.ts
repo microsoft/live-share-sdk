@@ -28,7 +28,7 @@ export type EventListener<TArgs> = (args: TArgs) => void;
 
 /**
  * Defines a typed multicast event, i.e. an event that
- * can have multiple listeners. 
+ * can have multiple listeners.
  */
 export interface IMulticastEvent<TArgs> {
     on(listener: EventListener<TArgs>): void;
@@ -39,7 +39,7 @@ export interface IMulticastEvent<TArgs> {
  * Implements a simple typed multicast event.
  */
 export class MulticastEvent<TArgs> {
-    private _listeners = new Set<EventListener<TArgs>>;
+    private _listeners = new Set<EventListener<TArgs>>();
 
     on(listener: EventListener<TArgs>) {
         if (!this._listeners.has(listener)) {

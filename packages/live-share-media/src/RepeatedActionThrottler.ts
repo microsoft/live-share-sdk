@@ -3,15 +3,15 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TimeInterval } from '@microsoft/live-share';
-import { MediaSessionActionThrottler } from './MediaSessionActionThrottler';
-import { ExtendedMediaSessionActionDetails, ExtendedMediaSessionAction } from './MediaSessionExtensions';
+import { TimeInterval } from "@microsoft/live-share";
+import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler";
+import { ExtendedMediaSessionActionDetails, ExtendedMediaSessionAction } from "./MediaSessionExtensions";
 
 /**
  *  A Throttler that passes through all actions but will only let an action be repeated once every 2 seconds.
  */
 export class RepeatedActionThrottler extends MediaSessionActionThrottler {
-    private static FILTERED_ACTIONS: ExtendedMediaSessionAction[] = ['play', 'pause', 'seekto', 'catchup'];
+    private static FILTERED_ACTIONS: ExtendedMediaSessionAction[] = ["play", "pause", "seekto", "catchup"];
     private _repeatInterval = new TimeInterval(2000);
     private _lastActionSentTime?: number;
     private _lastActionSent?: string;
@@ -47,7 +47,7 @@ export class RepeatedActionThrottler extends MediaSessionActionThrottler {
 
     private getChangeKey(details: ExtendedMediaSessionActionDetails): string {
         switch (details.action) {
-            case 'seekto':
+            case "seekto":
                 return `seekto:${details.seekTime}`;
             default:
                 return details.action;

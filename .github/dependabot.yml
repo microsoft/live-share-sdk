@@ -1,0 +1,55 @@
+version: 2
+updates:
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
+      day: "monday"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/packages/live-share"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/packages/live-share-canvas"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/packages/live-share-media"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/samples/01.dice-roller"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/samples/02.react-video"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/samples/03.live-canvas-demo"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/samples/21.react-media-template"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/samples/22.react-agile-poker"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"

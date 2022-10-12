@@ -1,13 +1,6 @@
 {
     "parser": "@typescript-eslint/parser",
-    // Specifies the ESLint parser
-    "extends": [
-        "plugin:@typescript-eslint/recommended",
-        "plugin:prettier/recommended",
-        "plugin:react/recommended",
-        "prettier/@typescript-eslint",
-        "react"
-    ],
+    "extends": ["plugin:prettier/recommended", "plugin:react/recommended", "react"],
     "parserOptions": {
         "ecmaVersion": 2015,
         // Allows for the parsing of modern ECMAScript features
@@ -15,7 +8,6 @@
     },
     "rules": {
         // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
-        "@typescript-eslint/no-use-before-define": "off",
         "@typescript-eslint/no-namespace": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/explicit-member-accessibility": "off",

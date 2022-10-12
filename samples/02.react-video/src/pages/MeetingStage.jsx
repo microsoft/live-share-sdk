@@ -73,10 +73,10 @@ const MeetingStage = () => {
         );
         await mediaSession.initialize();
       } catch (err) {
-        setError(error);
+        setError(err);
       }
     })();
-  }, []);
+  });
 
   // When a user clicks play, call play in synchronizer
   const play = () => {
@@ -94,6 +94,7 @@ const MeetingStage = () => {
   };
 
   if (error) {
+    console.error(error);
     return <DisplayError error={error} />;
   }
 

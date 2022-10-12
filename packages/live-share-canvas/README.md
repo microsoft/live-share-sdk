@@ -43,15 +43,11 @@ This will use lerna to hoist and build all dependencies.
 ```
 
 ```javascript
-import * as microsoftTeams from "@microsoft/teams-js";
-import { TeamsFluidClient } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 import { LiveCanvas, InkingManager, InkingTool } from "@microsoft/live-share-canvas";
 
-// Initialize the Teams Client SDK
-await microsoftTeams.app.initialize();
-
 // Setup the Fluid container
-const client = new TeamsFluidClient();
+const client = new LiveShareClient();
 const containerSchema = {
     initialObjects: {
         // Include a LiveCanvas in your container schema

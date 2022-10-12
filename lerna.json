@@ -1,6 +1,5 @@
 {
   "packages": [
-    "../microsoft-teams-library-js/packages/teams-js",
     "packages/*",
     "samples/01.dice-roller",
     "samples/02.react-video",

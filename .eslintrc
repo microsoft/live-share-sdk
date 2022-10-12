@@ -1,6 +1,7 @@
 {
     "parser": "@typescript-eslint/parser",
-    "extends": ["plugin:prettier/recommended", "plugin:react/recommended", "react"],
+    "extends": ["plugin:prettier/recommended", "plugin:react/recommended", "plugin:react/jsx-runtime"],
+    "plugins": ["react"],
     "parserOptions": {
         "ecmaVersion": 2015,
         // Allows for the parsing of modern ECMAScript features
@@ -15,7 +16,8 @@
         "@typescript-eslint/interface-name-prefix": "off",
         "@typescript-eslint/no-empty-function": "off",
         "@typescript-eslint/explicit-function-return-type": "off",
-        "@typescript-eslint/explicit-module-boundary-types": "off"
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "react/react-in-jsx-scope": "off"
     },
     "overrides": [
         {

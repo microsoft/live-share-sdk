@@ -11,7 +11,7 @@
         "clean": "lerna run clean",
         "build": "lerna run build",
         "build:docs": "typedoc",
-        "doctor": "eslint **/*.{j,t}s{,x} --fix"
+        "doctor": "eslint packages/**/*.{j,t}s --fix"
     },
     "author": "",
     "license": "Microsoft",

@@ -3,8 +3,8 @@
  * Licensed under the MIT License.
  */
 
-import { LiveShareClient } from "@microsoft/live-share";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
+import { LiveShareHost } from "@microsoft/teams-js";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
 import { SharedMap } from "fluid-framework";
@@ -36,22 +36,12 @@ export function useSharedObjects() {
       : new URL(window.location);
     const inTeams = !!url.searchParams.get("inTeams");
 
-    let connection;
-    if (!inTeams) {
-      // Configure for local testing (optional).
-      connection = {
-        type: 'local',
-        tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
-        endpoint: "http://localhost:7070"
-      };
+    let client;
+    if (inTeams) {
+      client = new LiveShareClient(new LiveShareHost());
+    } else {
+      client = new LiveShareClient(new TestLiveShareHost());
     }
-
-    // Define any additional client settings (optional).
-    // - connection: A custom Fluid Relay Service connection to use.
-    // - logger: A fluid logger to use.
-    const clientProps = {
-      connection,
-    };
 
     // To reset the stored container-id, uncomment below:
     // localStorage.clear();
@@ -90,7 +80,6 @@ export function useSharedObjects() {
 
     // Create the client, join container, and set results
     console.log("useSharedObjects: joining container");
-    const client = new LiveShareClient(clientProps);
     client
       .joinContainer(schema, onFirstInitialize)
       .then((results) => {

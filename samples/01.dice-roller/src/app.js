@@ -4,9 +4,8 @@
  */
 
 import { SharedMap } from "fluid-framework";
-import { LiveShareClient } from "@microsoft/live-share";
-import { app, pages, meeting } from "@microsoft/teams-js";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
+import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
 const searchParams = new URL(window.location).searchParams;
 const root = document.getElementById("content");
@@ -70,16 +69,10 @@ async function joinContainer() {
   let client;
   if (!!searchParams.get('inTeams')) {
       // Create client
-      client = new LiveShareClient();
+      client = new LiveShareClient(new LiveShareHost());
   } else {
       // Create client and configure for testing
-      client = new LiveShareClient({
-        connection: {
-          type: 'local',
-          tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
-          endpoint: "http://localhost:7070"
-        }
-      });
+      client = new LiveShareClient(new TestLiveShareHost());
   }
 
   // Join container

@@ -18,6 +18,5 @@ export * from './LiveState';
 export * from './LiveTimer';
 export * from './LocalRoleVerifier';
 export * from './LocalTimestampProvider';
-export * from './testLiveShare';
 export * from './TestLiveShareHost';
 export * from './TimeInterval';

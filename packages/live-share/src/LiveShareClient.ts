@@ -6,7 +6,8 @@
 
 import {
     LiveShareTokenProvider,
-    SharedClock, RoleVerifier, DefaultTeamsHost
+    SharedClock, 
+    RoleVerifier
 } from './internals';
 import {
     AzureClient,
@@ -18,7 +19,8 @@ import {
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { LiveEvent } from "./LiveEvent";
 import { ILiveShareHost, ContainerState } from './interfaces';
-import { TestLiveShareHost } from './TestLiveShareHost';
+import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { IUser } from '@fluidframework/azure-client';
 
 /**
  * @hidden
@@ -42,48 +44,26 @@ export interface ILiveShareClientOptions {
       * Optional. A logger instance to receive diagnostic messages.
       */
     readonly logger?: ITelemetryBaseLogger,
-
-    /**
-     * Optional. Function to lookup the ID of the container to use for local testing.
-     *
-     * @remarks
-     * The default implementation attempts to retrieve the containerId from the `window.location.hash`.
-     *
-     * If the function returns 'undefined' a new container will be created.
-     * @returns ID of the container to connect to or `undefined` if a new container should be created.
-     */
-    readonly getLocalTestContainerId?: () => string|undefined;
-
-    /**
-     * Optional. Function to save the ID of a newly created local test container.
-     *
-     * @remarks
-     * The default implementation updates `window.location.hash` with the ID of the newly created
-     * container.
-     * @param containerId The ID of the container that was created.
-     */
-     readonly setLocalTestContainerId?: (containerId: string) => void;
 }
 
 /**
  * Client used to connect to fluid containers within a Microsoft Teams context.
  */
 export class LiveShareClient {
-    private _host?: ILiveShareHost;
+    private _host: ILiveShareHost;
     private readonly _options: ILiveShareClientOptions;
     private _clock?: SharedClock;
     private _roleVerifier?: RoleVerifier;
 
     /**
      * Creates a new `TeamsFluidClient` instance.
+     * @param host Host for the current Live Share session.
      * @param options Optional. Configuration options for the client.
-     * @param host Optional. Host for the current Live Share session. If not specified the host 
-     * will attempt to be automatically determined.
      */
-    constructor(options?: ILiveShareClientOptions, host?: ILiveShareHost) {
+    constructor(host: ILiveShareHost, options?: ILiveShareClientOptions) {
         // Save props
-        this._options = Object.assign({} as ILiveShareClientOptions, options);
         this._host = host;
+        this._options = Object.assign({} as ILiveShareClientOptions, options);
     }
 
     /**
@@ -117,8 +97,6 @@ export class LiveShareClient {
     }> {
         performance.mark(`TeamsSync: join container`);
         try {
-            const host = await this.getHost();
-            
             // Configure role verifier and timestamp provider
             const pRoleVerifier = this.initializeRoleVerifier();
             const pTimestampProvider = this.initializeTimestampProvider();
@@ -126,7 +104,7 @@ export class LiveShareClient {
             // Initialize FRS connection config
             let config: AzureConnectionConfig | undefined = this._options.connection;
             if (!config) {
-                const frsTenantInfo = await host.getFluidTenantInfo();
+                const frsTenantInfo = await this._host.getFluidTenantInfo();
                 
                 // Compute endpoint
                 let endpoint = frsTenantInfo.serviceEndpoint;
@@ -143,14 +121,14 @@ export class LiveShareClient {
                     config = {
                         type: 'local',
                         endpoint: endpoint!,
-                        tokenProvider: new LiveShareTokenProvider(host)
+                        tokenProvider: new InsecureTokenProvider("",  { id: "123", name: "Test User" } as IUser)
                     };
                 } else {
                     config = {
                         type: 'remote',
                         tenantId: frsTenantInfo.tenantId,
                         endpoint: endpoint!,
-                        tokenProvider: new LiveShareTokenProvider(host)
+                        tokenProvider: new LiveShareTokenProvider(this._host)
                     } as AzureRemoteConnectionConfig;
                 }
             }
@@ -206,8 +184,7 @@ export class LiveShareClient {
      */
     protected async initializeRoleVerifier(): Promise<void> {
         if (!this._roleVerifier && !this.isTesting) {
-            const host = await this.getHost();
-            this._roleVerifier = new RoleVerifier(host);
+            this._roleVerifier = new RoleVerifier(this._host);
 
             // Register role verifier as current verifier for events
             LiveEvent.setRoleVerifier(this._roleVerifier);
@@ -221,8 +198,7 @@ export class LiveShareClient {
      */
     protected async initializeTimestampProvider(): Promise<void> {
         if (!this._clock && !this.isTesting) {
-            const host = await this.getHost();
-            this._clock = new SharedClock(host);
+            this._clock = new SharedClock(this._host);
 
             // Register clock as current timestamp provider for events
             LiveEvent.setTimestampProvider(this._clock);
@@ -239,10 +215,8 @@ export class LiveShareClient {
         services: AzureContainerServices;
         created: boolean;
     }> {
-        const host = await this.getHost();
-
         // Get container ID mapping
-        const containerInfo = await host.getFluidContainerId();
+        const containerInfo = await this._host.getFluidContainerId();
 
         // Create container on first access
         if (containerInfo.shouldCreate) {
@@ -262,8 +236,6 @@ export class LiveShareClient {
         services: AzureContainerServices;
         created: boolean;
     }> {
-        const host = await this.getHost();
-
         // Create and initialize container
         const { container, services } = await client.createContainer(fluidContainerSchema);
         if (onInitializeContainer) {
@@ -274,7 +246,7 @@ export class LiveShareClient {
         const newContainerId = await container.attach();
 
         // Attempt to save container ID mapping
-        const containerInfo = await host.setFluidContainerId(newContainerId);
+        const containerInfo = await this._host.setFluidContainerId(newContainerId);
         if (containerInfo.containerState != ContainerState.added) {
             // Delete created container
             container.dispose();
@@ -291,27 +263,4 @@ export class LiveShareClient {
             setTimeout(() => resolve(), delay);
         });
     }
-
-    private async getHost(): Promise<ILiveShareHost> {
-        if (!this._host) {
-            if (window && !this.isTesting) {
-                this._host = await DefaultTeamsHost.getTeamsHost();
-            } else {
-                this._host = new TestLiveShareHost(this._options.getLocalTestContainerId, this._options.setLocalTestContainerId);
-            }
-        }
-
-        return this._host;
-    }
-}
-
-interface ITeamsClientApi {
-    liveShare: {
-        getHost(): ILiveShareHost;
-    }
-}
-
-// Register client class as a global window variable
-if (typeof window == 'object') {
-    (window as any)['53de46f8-db62-4b8d-ae81-330f828ac86c'] = LiveShareClient;
 }

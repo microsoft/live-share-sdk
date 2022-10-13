@@ -107,6 +107,8 @@ export class LiveTimer extends DataObject<{
   private _playEvent?: LiveEventTarget<IPlayEvent>;
   private _pauseEvent?: LiveEventTarget<IPauseEvent>;
   private _synchronizer?: LiveObjectSynchronizer<ITimerConfig>;
+  private _defaultTickRate = 20;
+  private _tickRate = this._defaultTickRate;
 
   /**
    * The objects fluid type/name.
@@ -134,8 +136,27 @@ export class LiveTimer extends DataObject<{
    * @deprecated isInitialized should be used instead
    * Returns true if the object has been initialized.
    */
-   public get isStarted(): boolean {
+  public get isStarted(): boolean {
     return this.isInitialized
+  }
+
+  /**
+   * Tick rate for timer in milliseconds. The default tick rate is 20 milliseconds
+   *
+   * @remarks
+   * Tick rate is used to evaluate how often onTick callback is called.
+   * A high tick rate can also result in the started, played, paused, and finished 
+   * callbacks being called slightly later.
+   * 
+   * If the tick rate is the default tick rate or lower, timer will tick 
+   * at the framerate of the browser.
+   */
+  public get tickRate(): number {
+    return this._tickRate;
+  }
+
+  public set tickRate(value: number) {
+    this._tickRate = value;
   }
 
   /**
@@ -372,10 +393,10 @@ export class LiveTimer extends DataObject<{
   }
 
   private scheduleAnimationFrame(callback: FrameRequestCallback): void {
-    if (typeof requestAnimationFrame == "function") {
+    if (this._tickRate <= this._defaultTickRate && typeof requestAnimationFrame == "function") {
         requestAnimationFrame(callback);
     } else {
-        setTimeout(callback, 20);
+        setTimeout(callback, this._tickRate);
     }
   }
 }

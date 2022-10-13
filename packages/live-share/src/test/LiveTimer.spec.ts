@@ -198,4 +198,29 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
     });
+
+    it("500 milli tick rate", async () => {
+        const object1done = new Deferred();
+        object1.tickRate = 500;
+        let tickCounter = 0;
+        object1.on("onTick", () => {
+            tickCounter += 1;
+        });
+
+        object1.on("finished", (config) => {
+            console.log(config)
+            if (tickCounter == 3) {
+                object1done.resolve();
+            } else {
+                object1done.reject(tickCounter)
+            }
+        });
+
+
+        object1.initialize();
+        object1.start(1600);
+
+        // Wait for events to trigger
+        await object1done.promise;
+    });
 });

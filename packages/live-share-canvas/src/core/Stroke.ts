@@ -401,6 +401,19 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
     pointErase(eraserRect: IRect): IStroke[] | undefined {
         const boundingRect = this.getBoundingRect();
 
+        if (this.length === 1) {
+            if (isPointInsideRectangle(this.getPointAt(0), eraserRect)) {
+                // The single point stroke is inside the eraser rectangle, so the whole
+                // stroke needs to be erased
+                return [];
+            }
+            else {
+                // The single point stroke is outside the eraser rectangle, so there's
+                // nothing to erase
+                return undefined;
+            }
+        }
+
         if (isRectangleInsideRectangle(boundingRect, eraserRect)) {
             // The whole stroke is inside the eraser, so it needs to be fully deleted
             return [];

@@ -11,7 +11,7 @@ import { InputFilter, InputFilterCollection, JitterFilter, IPointerEvent, InputP
     PointerInputProvider, IPointerMoveEvent } from "../input";
 import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultLineBrush, DefaultPenBrush,
     IBrush } from "./Brush";
-import { makeRectangle, generateUniqueId, computeEndArrow } from "./Internals";
+import { makeRectangle, generateUniqueId, computeEndArrow, isPointInsideRectangle } from "./Internals";
 
 /**
  * Defines available inking tools.
@@ -772,7 +772,12 @@ export class InkingManager extends EventEmitter {
 
         this._strokes.forEach(
             (stroke: IStroke) => {
-                if (stroke.intersectsWithRectangle(eraserRect)) {
+                if (stroke.length === 1) {
+                    if (isPointInsideRectangle(stroke.getPointAt(0), eraserRect)) {
+                        result.removeStroke(stroke.id);
+                    }
+                }
+                else if (stroke.intersectsWithRectangle(eraserRect)) {
                     result.removeStroke(stroke.id);
                 }
             }

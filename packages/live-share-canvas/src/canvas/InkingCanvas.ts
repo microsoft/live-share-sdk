@@ -459,15 +459,21 @@ export abstract class InkingCanvas {
     renderStroke(stroke: IStroke) {
         this.setBrush(stroke.brush);
 
-        for (let i = 0; i < stroke.length; i++) {
-            if (i === 0) {
-                this.beginStroke(stroke.getPointAt(i));
-            }
-            else if (i === stroke.length - 1) {
-                this.endStroke(stroke.getPointAt(i));
-            }
-            else {
-                this.addPoint(stroke.getPointAt(i));
+        if (stroke.length === 1) {
+            this.beginStroke(stroke.getPointAt(0));
+            this.endStroke(stroke.getPointAt(0));
+        }
+        else {
+            for (let i = 0; i < stroke.length; i++) {
+                if (i === 0) {
+                    this.beginStroke(stroke.getPointAt(i));
+                }
+                else if (i === stroke.length - 1) {
+                    this.endStroke(stroke.getPointAt(i));
+                }
+                else {
+                    this.addPoint(stroke.getPointAt(i));
+                }
             }
         }
     }

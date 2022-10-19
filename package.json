@@ -11,7 +11,7 @@
         "clean": "lerna run clean",
         "build": "lerna run build",
         "build:docs": "typedoc",
-        "doctor": "eslint packages/**/*.{j,t}s --fix"
+        "doctor": "eslint **/src/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "author": "",
     "license": "Microsoft",

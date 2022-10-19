@@ -55,7 +55,11 @@ export default function App() {
                 <Router>
                     <Routes>
                         <Route exact path={"/"} element={<MeetingStage />} />
-                        <Route exact path={"/sidepanel"} element={<SidePanel />} />
+                        <Route
+                            exact
+                            path={"/sidepanel"}
+                            element={<SidePanel />}
+                        />
                         <Route exact path={"/config"} element={<TabConfig />} />
                     </Routes>
                 </Router>

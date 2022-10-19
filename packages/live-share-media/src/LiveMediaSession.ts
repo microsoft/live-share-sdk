@@ -12,7 +12,10 @@ import {
     ExtendedMediaSessionAction,
     ExtendedMediaSessionActionDetails,
 } from "./MediaSessionExtensions";
-import { LiveMediaSessionCoordinator, IMediaPlayerState } from "./LiveMediaSessionCoordinator";
+import {
+    LiveMediaSessionCoordinator,
+    IMediaPlayerState,
+} from "./LiveMediaSessionCoordinator";
 import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler";
 import { RepeatedActionThrottler } from "./RepeatedActionThrottler";
 import { IMediaPlayer } from "./IMediaPlayer";
@@ -21,11 +24,13 @@ import { IMediaPlayer } from "./IMediaPlayer";
  * Live fluid object that synchronizes media playback across multiple clients.
  */
 export class LiveMediaSession extends DataObject {
-    private _actionThrottler: MediaSessionActionThrottler = new RepeatedActionThrottler();
+    private _actionThrottler: MediaSessionActionThrottler =
+        new RepeatedActionThrottler();
     private _logger?: LiveTelemetryLogger;
     private _requestPlayerStateHandler?: () => IMediaPlayerState;
     private _coordinator?: LiveMediaSessionCoordinator;
-    private readonly _actionHandlers: Map<string, MediaSessionActionHandler> = new Map();
+    private readonly _actionHandlers: Map<string, MediaSessionActionHandler> =
+        new Map();
     private _synchronizing?: MediaPlayerSynchronizer;
 
     // Position update timer
@@ -40,7 +45,12 @@ export class LiveMediaSession extends DataObject {
     /**
      * The objects fluid type factory.
      */
-    public static readonly factory = new DataObjectFactory(LiveMediaSession.TypeName, LiveMediaSession, [], {});
+    public static readonly factory = new DataObjectFactory(
+        LiveMediaSession.TypeName,
+        LiveMediaSession,
+        [],
+        {}
+    );
 
     /**
      * Extension point that lets applications replace the default logic for throttling the sessions
@@ -100,7 +110,9 @@ export class LiveMediaSession extends DataObject {
      * @param acceptTransportChangesFrom Optional. List of roles allowed to group transport
      * operations like play/pause/seek/setTrack.
      */
-    public initialize(acceptTransportChangesFrom?: UserMeetingRole[]): Promise<void> {
+    public initialize(
+        acceptTransportChangesFrom?: UserMeetingRole[]
+    ): Promise<void> {
         return this.coordinator.initialize(acceptTransportChangesFrom);
     }
 
@@ -109,7 +121,10 @@ export class LiveMediaSession extends DataObject {
      * @param action Name of the action to register a handler for.
      * @param handler Function called when the action is triggered.
      */
-    public setActionHandler(action: ExtendedMediaSessionAction, handler: MediaSessionActionHandler | null): void {
+    public setActionHandler(
+        action: ExtendedMediaSessionAction,
+        handler: MediaSessionActionHandler | null
+    ): void {
         if (handler) {
             // add handler
             this._actionHandlers.set(action, handler);
@@ -140,7 +155,9 @@ export class LiveMediaSession extends DataObject {
 
         // Start position update timer
         if (!this._updateTimer) {
-            this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.BeginPositionUpdateTimer);
+            this.logger.sendTelemetryEvent(
+                TelemetryEvents.MediaSession.BeginPositionUpdateTimer
+            );
             this._updateTimer = setInterval(() => {
                 // Get current state
                 const state = this.getCurrentPlayerState();
@@ -151,7 +168,10 @@ export class LiveMediaSession extends DataObject {
                 // Send position update if interval hit
                 const now = new Date().getTime();
                 const delta = (now - this._lastUpdateTime) / 1000;
-                if (this.coordinator.isInitialized && delta >= this.coordinator.positionUpdateInterval) {
+                if (
+                    this.coordinator.isInitialized &&
+                    delta >= this.coordinator.positionUpdateInterval
+                ) {
                     this._lastUpdateTime = now;
                     this.coordinator.sendPositionUpdate(state);
                 }
@@ -167,47 +187,73 @@ export class LiveMediaSession extends DataObject {
         this._logger = new LiveTelemetryLogger(this.runtime);
 
         // Create coordinator and listen for triggered actions
-        this._coordinator = new LiveMediaSessionCoordinator(this.runtime, () => this.getCurrentPlayerState());
-        this._coordinator.on(MediaSessionCoordinatorEvents.triggeraction, (event: ITriggerActionEvent) => {
-            // Pre-process actions
-            const details = event.details;
-            const seekTime = typeof details.seekTime == "number" ? details.seekTime : -1;
-            switch (details.action) {
-                case "play":
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.PlayAction, null, {
-                        position: seekTime,
-                    });
-                    break;
-                case "pause":
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.PauseAction, null, {
-                        position: seekTime,
-                    });
-                    break;
-                case "seekto":
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.SeekToAction, null, {
-                        position: seekTime,
-                    });
-                    break;
-                case "settrack":
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.SetTrackAction);
-                    break;
-                case "datachange":
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.DataChangeAction);
-                    break;
-                case "catchup":
-                    // Default to seekto if catchup not implemented
-                    this.logger.sendTelemetryEvent(TelemetryEvents.MediaSession.CatchUpAction, null, {
-                        position: seekTime,
-                    });
-                    if (!this._actionHandlers.has("catchup")) {
-                        details.action = "seekto";
-                    }
-                    break;
-            }
+        this._coordinator = new LiveMediaSessionCoordinator(this.runtime, () =>
+            this.getCurrentPlayerState()
+        );
+        this._coordinator.on(
+            MediaSessionCoordinatorEvents.triggeraction,
+            (event: ITriggerActionEvent) => {
+                // Pre-process actions
+                const details = event.details;
+                const seekTime =
+                    typeof details.seekTime == "number" ? details.seekTime : -1;
+                switch (details.action) {
+                    case "play":
+                        this.logger.sendTelemetryEvent(
+                            TelemetryEvents.MediaSession.PlayAction,
+                            null,
+                            {
+                                position: seekTime,
+                            }
+                        );
+                        break;
+                    case "pause":
+                        this.logger.sendTelemetryEvent(
+                            TelemetryEvents.MediaSession.PauseAction,
+                            null,
+                            {
+                                position: seekTime,
+                            }
+                        );
+                        break;
+                    case "seekto":
+                        this.logger.sendTelemetryEvent(
+                            TelemetryEvents.MediaSession.SeekToAction,
+                            null,
+                            {
+                                position: seekTime,
+                            }
+                        );
+                        break;
+                    case "settrack":
+                        this.logger.sendTelemetryEvent(
+                            TelemetryEvents.MediaSession.SetTrackAction
+                        );
+                        break;
+                    case "datachange":
+                        this.logger.sendTelemetryEvent(
+                            TelemetryEvents.MediaSession.DataChangeAction
+                        );
+                        break;
+                    case "catchup":
+                        // Default to seekto if catchup not implemented
+                        this.logger.sendTelemetryEvent(
+                            TelemetryEvents.MediaSession.CatchUpAction,
+                            null,
+                            {
+                                position: seekTime,
+                            }
+                        );
+                        if (!this._actionHandlers.has("catchup")) {
+                            details.action = "seekto";
+                        }
+                        break;
+                }
 
-            // Dispatch action
-            this.dispatchAction(details);
-        });
+                // Dispatch action
+                this.dispatchAction(details);
+            }
+        );
     }
 
     private checkWaitPointHit(state: IMediaPlayerState): void {
@@ -221,7 +267,9 @@ export class LiveMediaSession extends DataObject {
             ) {
                 // Ensure handler registered
                 if (!this._actionHandlers.has("wait")) {
-                    throw new Error(`SharedMediaSession: wait point hit but no 'wait' action registered.`);
+                    throw new Error(
+                        `SharedMediaSession: wait point hit but no 'wait' action registered.`
+                    );
                 }
 
                 // Begin suspension for wait point
@@ -233,13 +281,17 @@ export class LiveMediaSession extends DataObject {
 
     private getCurrentPlayerState(): IMediaPlayerState {
         if (!this._requestPlayerStateHandler) {
-            throw new Error(`SharedMediaSession: no getPlayerState callback configured.`);
+            throw new Error(
+                `SharedMediaSession: no getPlayerState callback configured.`
+            );
         }
 
         return this._requestPlayerStateHandler();
     }
 
-    private dispatchAction(details: MediaSessionActionDetails | ExtendedMediaSessionActionDetails): void {
+    private dispatchAction(
+        details: MediaSessionActionDetails | ExtendedMediaSessionActionDetails
+    ): void {
         if (this._actionHandlers.has(details.action)) {
             const handler = this._actionHandlers.get(details.action);
             this._actionThrottler.throttled(details, handler);

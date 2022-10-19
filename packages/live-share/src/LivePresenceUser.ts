@@ -109,7 +109,10 @@ export class LivePresenceUser<TData = object> {
             this._lastUpdateTime = LiveEvent.getTimestamp();
 
             // Has anything changed?
-            if (evt.state != current.state || JSON.stringify(evt.data) != JSON.stringify(current.data)) {
+            if (
+                evt.state != current.state ||
+                JSON.stringify(evt.data) != JSON.stringify(current.data)
+            ) {
                 return true;
             }
         }
@@ -120,6 +123,8 @@ export class LivePresenceUser<TData = object> {
     private hasExpired(): boolean {
         const now = LiveEvent.getTimestamp();
         const elapsed = now - this._lastUpdateTime;
-        return !this._isLocalUser && elapsed > this._expirationPeriod.milliseconds;
+        return (
+            !this._isLocalUser && elapsed > this._expirationPeriod.milliseconds
+        );
     }
 }

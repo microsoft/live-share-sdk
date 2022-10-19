@@ -42,7 +42,10 @@ export interface ILiveEvent extends IEvent, IClientTimestamp {}
  * Removes the base properties from an event that derives from `ILiveEvent`.
  * @template TEvent Type of event.
  */
-export type OutgoingLiveEvent<TEvent extends ILiveEvent> = Omit<TEvent, "name" | "clientId" | "timestamp">;
+export type OutgoingLiveEvent<TEvent extends ILiveEvent> = Omit<
+    TEvent,
+    "name" | "clientId" | "timestamp"
+>;
 
 /**
  * Allowed roles during a meeting.
@@ -110,7 +113,10 @@ export interface IRoleVerifier {
      * @param allowedRoles User roles that are allowed.
      * @returns True if the client has one of the specified roles.
      */
-    verifyRolesAllowed(clientId: string, allowedRoles: UserMeetingRole[]): Promise<boolean>;
+    verifyRolesAllowed(
+        clientId: string,
+        allowedRoles: UserMeetingRole[]
+    ): Promise<boolean>;
 }
 
 /**

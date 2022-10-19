@@ -6,7 +6,13 @@
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
-import { ILiveEvent, ITimestampProvider, IRoleVerifier, UserMeetingRole, IClientTimestamp } from "./interfaces";
+import {
+    ILiveEvent,
+    ITimestampProvider,
+    IRoleVerifier,
+    UserMeetingRole,
+    IClientTimestamp,
+} from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { LocalRoleVerifier } from "./LocalRoleVerifier";
@@ -47,10 +53,13 @@ export interface ILiveEventEvents<TEvent extends ILiveEvent> extends IEvent {
  * `LiveEvents`. Use something like the `LiveState` class when syncing state.
  * @template TEvent Type of event to broadcast.
  */
-export class LiveEvent<TEvent extends ILiveEvent = ILiveEvent> extends DataObject<{
+export class LiveEvent<
+    TEvent extends ILiveEvent = ILiveEvent
+> extends DataObject<{
     Events: ILiveEventEvents<TEvent>;
 }> {
-    private static _timestampProvider: ITimestampProvider = new LocalTimestampProvider();
+    private static _timestampProvider: ITimestampProvider =
+        new LocalTimestampProvider();
     private static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
 
     private _eventTarget?: LiveEventTarget<TEvent>;
@@ -63,7 +72,12 @@ export class LiveEvent<TEvent extends ILiveEvent = ILiveEvent> extends DataObjec
     /**
      * The objects fluid type factory.
      */
-    public static readonly factory = new DataObjectFactory(LiveEvent.TypeName, LiveEvent, [], {});
+    public static readonly factory = new DataObjectFactory(
+        LiveEvent.TypeName,
+        LiveEvent,
+        [],
+        {}
+    );
 
     /**
      * Returns true if the object has been initialized.
@@ -90,9 +104,13 @@ export class LiveEvent<TEvent extends ILiveEvent = ILiveEvent> extends DataObjec
         }
 
         const scope = new LiveEventScope(this.runtime, allowedRoles);
-        this._eventTarget = new LiveEventTarget(scope, "event", (evt, local) => {
-            this.emit(LiveEventEvents.received, evt, local);
-        });
+        this._eventTarget = new LiveEventTarget(
+            scope,
+            "event",
+            (evt, local) => {
+                this.emit(LiveEventEvents.received, evt, local);
+            }
+        );
 
         return Promise.resolve();
     }
@@ -137,7 +155,9 @@ export class LiveEvent<TEvent extends ILiveEvent = ILiveEvent> extends DataObjec
      * @param clientId Client ID to map to current user.
      * @returns The list of roles for the client.
      */
-    public static registerClientId(clientId: string): Promise<UserMeetingRole[]> {
+    public static registerClientId(
+        clientId: string
+    ): Promise<UserMeetingRole[]> {
         return LiveEvent._roleVerifier.registerClientId(clientId);
     }
 
@@ -147,8 +167,14 @@ export class LiveEvent<TEvent extends ILiveEvent = ILiveEvent> extends DataObjec
      * @param allowedRoles User roles that are allowed.
      * @returns True if the client has one of the specified roles.
      */
-    public static verifyRolesAllowed(clientId: string, allowedRoles: UserMeetingRole[]): Promise<boolean> {
-        return LiveEvent._roleVerifier.verifyRolesAllowed(clientId, allowedRoles);
+    public static verifyRolesAllowed(
+        clientId: string,
+        allowedRoles: UserMeetingRole[]
+    ): Promise<boolean> {
+        return LiveEvent._roleVerifier.verifyRolesAllowed(
+            clientId,
+            allowedRoles
+        );
     }
 
     /**
@@ -179,7 +205,9 @@ export class LiveEvent<TEvent extends ILiveEvent = ILiveEvent> extends DataObjec
         if (current) {
             if (current.timestamp == received.timestamp) {
                 // In a case where both clientId's are blank that's the local client in a disconnected state
-                const cmp = (current.clientId || "").localeCompare(received.clientId || "");
+                const cmp = (current.clientId || "").localeCompare(
+                    received.clientId || ""
+                );
                 if (cmp <= 0) {
                     // - cmp == 0 is same user. We use to identify events for same user as newer but
                     //   that was causing us to fire duplicate state & presence change events. The better

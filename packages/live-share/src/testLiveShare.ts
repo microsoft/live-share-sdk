@@ -1,5 +1,11 @@
-import type { AzureContainerServices, IUser } from "@fluidframework/azure-client";
-import type { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
+import type {
+    AzureContainerServices,
+    IUser,
+} from "@fluidframework/azure-client";
+import type {
+    ContainerSchema,
+    IFluidContainer,
+} from "@fluidframework/fluid-static";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { ILiveShareHost } from "./interfaces";
 import { TestLiveShareHost } from "./TestLiveShareHost";
@@ -21,7 +27,9 @@ export namespace testLiveShare {
      *
      * @beta
      */
-    export async function initialize(options?: ILiveShareClientOptions): Promise<void> {
+    export async function initialize(
+        options?: ILiveShareClientOptions
+    ): Promise<void> {
         if (initializing || client) {
             throw new Error("Live Share has already been initialized.");
         }
@@ -31,7 +39,10 @@ export namespace testLiveShare {
             {
                 connection: {
                     type: "local",
-                    tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" } as IUser),
+                    tokenProvider: new InsecureTokenProvider("", {
+                        id: "123",
+                        name: "Test User",
+                    } as IUser),
                     endpoint: "http://localhost:7070",
                 },
             },
@@ -40,7 +51,10 @@ export namespace testLiveShare {
 
         try {
             initializing = true;
-            host = new TestLiveShareHost(options.getLocalTestContainerId, options.setLocalTestContainerId);
+            host = new TestLiveShareHost(
+                options.getLocalTestContainerId,
+                options.setLocalTestContainerId
+            );
             client = new LiveShareClient(options, host);
         } finally {
             initializing = false;
@@ -69,7 +83,10 @@ export namespace testLiveShare {
         created: boolean;
     }> {
         if (client) {
-            return await client.joinContainer(fluidContainerSchema, onContainerFirstCreated);
+            return await client.joinContainer(
+                fluidContainerSchema,
+                onContainerFirstCreated
+            );
         } else {
             throw new Error("Live Share must first be initialized");
         }

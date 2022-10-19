@@ -45,14 +45,18 @@ export class TestLiveShareHost implements ILiveShareHost {
     public getFluidContainerId(): Promise<IFluidContainerInfo> {
         const containerId = this.getLocalTestContainerId();
         return Promise.resolve({
-            containerState: containerId ? ContainerState.alreadyExists : ContainerState.notFound,
+            containerState: containerId
+                ? ContainerState.alreadyExists
+                : ContainerState.notFound,
             shouldCreate: !containerId,
             containerId: containerId,
             retryAfter: 0,
         });
     }
 
-    public setFluidContainerId(containerId: string): Promise<IFluidContainerInfo> {
+    public setFluidContainerId(
+        containerId: string
+    ): Promise<IFluidContainerInfo> {
         this.setLocalTestContainerId(containerId);
         return Promise.resolve({
             containerState: ContainerState.added,

@@ -33,7 +33,9 @@ export class LocalRoleVerifier implements IRoleVerifier {
         LocalRoleVerifier.ensureWarned();
 
         if (!clientId) {
-            throw new Error(`LocalRoleVerifier: called getClientRoles() without a clientId`);
+            throw new Error(
+                `LocalRoleVerifier: called getClientRoles() without a clientId`
+            );
         }
 
         let roles: UserMeetingRole[];
@@ -51,11 +53,16 @@ export class LocalRoleVerifier implements IRoleVerifier {
         return Promise.resolve(this.defaultRoles);
     }
 
-    public async verifyRolesAllowed(clientId: string, allowedRoles: UserMeetingRole[]): Promise<boolean> {
+    public async verifyRolesAllowed(
+        clientId: string,
+        allowedRoles: UserMeetingRole[]
+    ): Promise<boolean> {
         LocalRoleVerifier.ensureWarned();
 
         if (!clientId) {
-            throw new Error(`LocalRoleVerifier: called verifyRolesAllowed() without a clientId`);
+            throw new Error(
+                `LocalRoleVerifier: called verifyRolesAllowed() without a clientId`
+            );
         }
 
         if (Array.isArray(allowedRoles) && allowedRoles.length > 0) {
@@ -77,7 +84,9 @@ export class LocalRoleVerifier implements IRoleVerifier {
 
     private static ensureWarned(): void {
         if (!LocalRoleVerifier._warned) {
-            console.warn(`The LocalRoleVerifier is being used. This should only be used for local testing purposes.`);
+            console.warn(
+                `The LocalRoleVerifier is being used. This should only be used for local testing purposes.`
+            );
             LocalRoleVerifier._warned = true;
         }
     }

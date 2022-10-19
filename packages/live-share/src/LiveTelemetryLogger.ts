@@ -66,7 +66,10 @@ export class LiveTelemetryLogger {
         additionalProperties?: Partial<ILiveTelemetryProperties>
     ): void {
         if (this._runtime.logger) {
-            const evt: ITelemetryGenericEvent = this.createTelemetryEvent(eventName, additionalProperties);
+            const evt: ITelemetryGenericEvent = this.createTelemetryEvent(
+                eventName,
+                additionalProperties
+            );
             this._runtime.logger.sendTelemetryEvent(evt, error);
         }
     }
@@ -83,7 +86,10 @@ export class LiveTelemetryLogger {
         additionalProperties?: Partial<ILiveTelemetryProperties>
     ): void {
         if (this._runtime.logger) {
-            const evt: ITelemetryErrorEvent = this.createTelemetryEvent(eventName, additionalProperties);
+            const evt: ITelemetryErrorEvent = this.createTelemetryEvent(
+                eventName,
+                additionalProperties
+            );
             this._runtime.logger.sendErrorEvent(evt, error);
         }
     }
@@ -118,13 +124,19 @@ export class LiveTelemetryLogger {
         return {
             eventName: eventName,
             clientId: this._runtime.clientId,
-            correlationId: LiveTelemetryLogger.formatCorrelationId(this._runtime.clientId, now),
+            correlationId: LiveTelemetryLogger.formatCorrelationId(
+                this._runtime.clientId,
+                now
+            ),
             timestamp: now,
             ...additionalProperties,
         } as ILiveTelemetryProperties as T;
     }
 
-    public static formatCorrelationId(clientId: string | undefined, timestamp: number): string {
+    public static formatCorrelationId(
+        clientId: string | undefined,
+        timestamp: number
+    ): string {
         return `${clientId}:${timestamp}`;
     }
 }

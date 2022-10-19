@@ -5,7 +5,14 @@
 
 import { InkingSurface } from "./inking-surface";
 import { DrawingSimulation } from "./drawing-simulation";
-import { InputFilter, IPointerPoint, IWetStroke, LiveCanvas, Stroke, WetCanvas } from "@microsoft/live-share-canvas";
+import {
+    InputFilter,
+    IPointerPoint,
+    IWetStroke,
+    LiveCanvas,
+    Stroke,
+    WetCanvas,
+} from "@microsoft/live-share-canvas";
 
 var localInkingSurface: InkingSurface;
 var simulatedInkingSurface: InkingSurface;
@@ -21,7 +28,7 @@ function setupButton(buttonId: string, onClick: () => void) {
 var wetStrokeTestFailures = 0;
 
 function delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const allTestsCompletedPrefix = "AllTestsCompleted: ";
@@ -31,24 +38,38 @@ const dryCanvasTestFailedPrefix = "DryCanvasTestFailed: ";
 async function testWetStroke() {
     await delay(100);
 
-    const localWetStroke: IWetStroke = (localInkingSurface.inkingManager as any)._currentStroke;
+    const localWetStroke: IWetStroke = (localInkingSurface.inkingManager as any)
+        ._currentStroke;
 
     if (localWetStroke) {
-        const localWetStrokeContext: CanvasRenderingContext2D = (localWetStroke as any)._canvas._context;
+        const localWetStrokeContext: CanvasRenderingContext2D = (
+            localWetStroke as any
+        )._canvas._context;
 
-        const remoteWetStroke: IWetStroke = (simulatedInkingSurface.getLiveCanvas() as any)._wetStrokes.get(localWetStroke.id);
+        const remoteWetStroke: IWetStroke = (
+            simulatedInkingSurface.getLiveCanvas() as any
+        )._wetStrokes.get(localWetStroke.id);
 
         if (remoteWetStroke) {
             if (localWetStroke.length !== remoteWetStroke.length) {
-                console.warn(`${wetStrokeTestFailedPrefix}Local stroke has ${localWetStroke.length} points, remote stroke has ${remoteWetStroke.length} points.`);
-            }
-            else {
+                console.warn(
+                    `${wetStrokeTestFailedPrefix}Local stroke has ${localWetStroke.length} points, remote stroke has ${remoteWetStroke.length} points.`
+                );
+            } else {
                 for (let i = 0; i < localWetStroke.length; i++) {
                     const p1 = localWetStroke.getPointAt(i);
                     const p2 = remoteWetStroke.getPointAt(i);
 
-                    if (p1.x !== p2.x || p1.y !== p2.y || p1.pressure !== p2.pressure) {
-                        console.warn(`${wetStrokeTestFailedPrefix}Points at index ${i} are different: ${JSON.stringify(p1)} !== ${JSON.stringify(p2)}`);
+                    if (
+                        p1.x !== p2.x ||
+                        p1.y !== p2.y ||
+                        p1.pressure !== p2.pressure
+                    ) {
+                        console.warn(
+                            `${wetStrokeTestFailedPrefix}Points at index ${i} are different: ${JSON.stringify(
+                                p1
+                            )} !== ${JSON.stringify(p2)}`
+                        );
                     }
                 }
             }
@@ -56,7 +77,9 @@ async function testWetStroke() {
             (localWetStroke as any)._canvas.render();
             (remoteWetStroke as any)._canvas.render();
 
-            const remoteWetStrokeContext: CanvasRenderingContext2D = (remoteWetStroke as any)._canvas._context;
+            const remoteWetStrokeContext: CanvasRenderingContext2D = (
+                remoteWetStroke as any
+            )._canvas._context;
 
             const localDataURL = localWetStrokeContext.canvas.toDataURL();
             const remoteDataURL = remoteWetStrokeContext.canvas.toDataURL();
@@ -99,12 +122,25 @@ async function performTest() {
     const dryCanvasTestPassed = testDryCanvas();
 
     if (!dryCanvasTestPassed) {
-        console.warn(dryCanvasTestFailedPrefix + "Rendering was different on local and remote.");
+        console.warn(
+            dryCanvasTestFailedPrefix +
+                "Rendering was different on local and remote."
+        );
     }
 
-    console.log(`${allTestsCompletedPrefix}${dryCanvasTestPassed && wetStrokeTestFailures === 0 ? "Passes" : "Failed"}`);
+    console.log(
+        `${allTestsCompletedPrefix}${
+            dryCanvasTestPassed && wetStrokeTestFailures === 0
+                ? "Passes"
+                : "Failed"
+        }`
+    );
 
-    displayTestResults(`Wet stroke failures: ${wetStrokeTestFailures} - Dry canvas test: ${dryCanvasTestPassed ? "Passed" : "Failed"}`);
+    displayTestResults(
+        `Wet stroke failures: ${wetStrokeTestFailures} - Dry canvas test: ${
+            dryCanvasTestPassed ? "Passed" : "Failed"
+        }`
+    );
 }
 
 // This filter forces coordinate precision to be reduced the same ways they are
@@ -134,28 +170,35 @@ window.onload = async () => {
     (WetCanvas as any).forceSynchronousRendering = true;
 
     const localInkHost = document.getElementById("localInkHost");
-    const simulatedRemoteInkHost = document.getElementById("simulatedRemoteInkHost");
+    const simulatedRemoteInkHost = document.getElementById(
+        "simulatedRemoteInkHost"
+    );
 
     if (localInkHost && simulatedRemoteInkHost) {
-        localInkingSurface = new InkingSurface(localInkHost, [new PrecisionReducerFilter()]);
+        localInkingSurface = new InkingSurface(localInkHost, [
+            new PrecisionReducerFilter(),
+        ]);
         simulatedInkingSurface = new InkingSurface(simulatedRemoteInkHost, []);
 
         await localInkingSurface.start();
         await simulatedInkingSurface.start();
 
-        setupButton("btnClear", () => { localInkingSurface.inkingManager.clear(); });
-        setupButton("btnStartTest", () => { performTest(); });
+        setupButton("btnClear", () => {
+            localInkingSurface.inkingManager.clear();
+        });
+        setupButton("btnStartTest", () => {
+            performTest();
+        });
 
         const params = new URLSearchParams(window.location.search);
         const config = params.get("startTest");
-    
+
         if (config && config.toLowerCase() === "true") {
             // Give everything time to settle. Without this, the first wet stroke test
             // tends to fail.
             await delay(1000);
-    
+
             performTest();
         }
     }
-}
-
+};

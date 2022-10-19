@@ -54,11 +54,20 @@ export enum LiveTimerEvents {
 }
 
 export interface ILiveTimerEvents extends IEvent {
-    (event: "started", listener: (config: ITimerConfig, local: boolean) => void): any;
+    (
+        event: "started",
+        listener: (config: ITimerConfig, local: boolean) => void
+    ): any;
 
-    (event: "played", listener: (config: ITimerConfig, local: boolean) => void): any;
+    (
+        event: "played",
+        listener: (config: ITimerConfig, local: boolean) => void
+    ): any;
 
-    (event: "paused", listener: (config: ITimerConfig, local: boolean) => void): any;
+    (
+        event: "paused",
+        listener: (config: ITimerConfig, local: boolean) => void
+    ): any;
 
     (event: "finished", listener: (config: ITimerConfig) => void): any;
 
@@ -103,7 +112,12 @@ export class LiveTimer extends DataObject<{
     /**
      * The objects fluid type factory.
      */
-    public static readonly factory = new DataObjectFactory(LiveTimer.TypeName, LiveTimer, [], {});
+    public static readonly factory = new DataObjectFactory(
+        LiveTimer.TypeName,
+        LiveTimer,
+        [],
+        {}
+    );
 
     /**
      * Returns true if the object has been initialized.
@@ -156,8 +170,16 @@ export class LiveTimer extends DataObject<{
         this._scope = new LiveEventScope(this.runtime, allowedRoles);
 
         // TODO: make enum for event type names
-        this._playEvent = new LiveEventTarget(this._scope, "Play", (event, local) => this._handlePlay(event, local));
-        this._pauseEvent = new LiveEventTarget(this._scope, "Pause", (event, local) => this._handlePause(event, local));
+        this._playEvent = new LiveEventTarget(
+            this._scope,
+            "Play",
+            (event, local) => this._handlePlay(event, local)
+        );
+        this._pauseEvent = new LiveEventTarget(
+            this._scope,
+            "Pause",
+            (event, local) => this._handlePause(event, local)
+        );
 
         // Create object synchronizer
         this._synchronizer = new LiveObjectSynchronizer<ITimerConfig>(
@@ -213,8 +235,14 @@ export class LiveTimer extends DataObject<{
             throw new Error(`LiveTimer not started.`);
         }
 
-        if (!this._currentConfig.running && this._currentConfig.position < this._currentConfig.duration) {
-            this.playInternal(this._currentConfig.duration, this._currentConfig.position);
+        if (
+            !this._currentConfig.running &&
+            this._currentConfig.position < this._currentConfig.duration
+        ) {
+            this.playInternal(
+                this._currentConfig.duration,
+                this._currentConfig.position
+            );
         }
     }
 
@@ -245,7 +273,9 @@ export class LiveTimer extends DataObject<{
             const event = this._pauseEvent!.sendEvent({
                 duration: this._currentConfig.duration,
                 position:
-                    this._currentConfig.position + (LiveEvent.getTimestamp() - this._currentConfig.configChangedAt),
+                    this._currentConfig.position +
+                    (LiveEvent.getTimestamp() -
+                        this._currentConfig.configChangedAt),
             });
 
             // Update local state immediately
@@ -281,7 +311,10 @@ export class LiveTimer extends DataObject<{
                     clientId: config.clientId,
                 };
 
-                const isConfigNewer = LiveEvent.isNewer(currentClientTimestamp, newClientTimestamp);
+                const isConfigNewer = LiveEvent.isNewer(
+                    currentClientTimestamp,
+                    newClientTimestamp
+                );
 
                 if (allowed && isConfigNewer && config.clientId) {
                     this.updateConfig(config, false);
@@ -362,7 +395,10 @@ export class LiveTimer extends DataObject<{
     }
 
     private scheduleAnimationFrame(callback: FrameRequestCallback): void {
-        if (this._tickRate <= this._defaultTickRate && typeof requestAnimationFrame == "function") {
+        if (
+            this._tickRate <= this._defaultTickRate &&
+            typeof requestAnimationFrame == "function"
+        ) {
             requestAnimationFrame(callback);
         } else {
             setTimeout(callback, this._tickRate);

@@ -36,7 +36,14 @@ export interface ILiveStateEvents<TData = undefined> extends IEvent {
      * @param listener.data Optional data object for the new state.
      * @param listener.local If true, a local state change occurred.
      */
-    (event: "stateChanged", listener: (state: string, data: TData | undefined, local: boolean) => void): any;
+    (
+        event: "stateChanged",
+        listener: (
+            state: string,
+            data: TData | undefined,
+            local: boolean
+        ) => void
+    ): any;
 }
 
 /**
@@ -48,7 +55,9 @@ export interface ILiveStateEvents<TData = undefined> extends IEvent {
  * changes.
  * @template TData Optional data object that's synchronized with the state.
  */
-export class LiveState<TData = undefined> extends DataObject<{ Events: ILiveStateEvents<TData> }> {
+export class LiveState<TData = undefined> extends DataObject<{
+    Events: ILiveStateEvents<TData>;
+}> {
     private _logger = new LiveTelemetryLogger(this.runtime);
     private _allowedRoles: UserMeetingRole[] = [];
     private _currentState: IStateChangeEvent<TData> = {
@@ -74,7 +83,12 @@ export class LiveState<TData = undefined> extends DataObject<{ Events: ILiveStat
     /**
      * The objects fluid type factory.
      */
-    public static readonly factory = new DataObjectFactory(LiveState.TypeName, LiveState, [], {});
+    public static readonly factory = new DataObjectFactory(
+        LiveState.TypeName,
+        LiveState,
+        [],
+        {}
+    );
 
     /**
      * Returns true if the object has been initialized.
@@ -125,12 +139,16 @@ export class LiveState<TData = undefined> extends DataObject<{ Events: ILiveStat
         this._scope = new LiveEventScope(this.runtime, allowedRoles);
 
         // Listen for remote state changes
-        this._changeStateEvent = new LiveEventTarget(this._scope, "ChangeState", (evt, local) => {
-            if (!local) {
-                // Check for state change
-                this.remoteStateReceived(evt, evt.clientId!);
+        this._changeStateEvent = new LiveEventTarget(
+            this._scope,
+            "ChangeState",
+            (evt, local) => {
+                if (!local) {
+                    // Check for state change
+                    this.remoteStateReceived(evt, evt.clientId!);
+                }
             }
-        });
+        );
 
         // Create object synchronizer
         this._synchronizer = new LiveObjectSynchronizer(
@@ -172,7 +190,10 @@ export class LiveState<TData = undefined> extends DataObject<{ Events: ILiveStat
 
         // Broadcast state change
         const clone = cloneValue(data);
-        const evt = this._changeStateEvent!.sendEvent({ state: state, data: clone });
+        const evt = this._changeStateEvent!.sendEvent({
+            state: state,
+            data: clone,
+        });
 
         // Update local state immediately
         // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
@@ -180,16 +201,26 @@ export class LiveState<TData = undefined> extends DataObject<{ Events: ILiveStat
         this.updateState(evt, true);
     }
 
-    private remoteStateReceived(evt: IStateChangeEvent<TData>, sender: string): void {
+    private remoteStateReceived(
+        evt: IStateChangeEvent<TData>,
+        sender: string
+    ): void {
         LiveEvent.verifyRolesAllowed(sender, this._allowedRoles)
             .then((allowed) => {
                 // Ensure that state is allowed, newer, and not the initial state.
-                if (allowed && LiveEvent.isNewer(this._currentState, evt) && evt.state !== LiveState.INITIAL_STATE) {
+                if (
+                    allowed &&
+                    LiveEvent.isNewer(this._currentState, evt) &&
+                    evt.state !== LiveState.INITIAL_STATE
+                ) {
                     this.updateState(evt, false);
                 }
             })
             .catch((err) => {
-                this._logger.sendErrorEvent(TelemetryEvents.LiveState.RoleVerificationError, err);
+                this._logger.sendErrorEvent(
+                    TelemetryEvents.LiveState.RoleVerificationError,
+                    err
+                );
             });
     }
 
@@ -197,8 +228,16 @@ export class LiveState<TData = undefined> extends DataObject<{ Events: ILiveStat
         const oldState = this._currentState.state;
         const newState = evt.state;
         this._currentState = evt;
-        this.emit(LiveStateEvents.stateChanged, evt.state, cloneValue(evt.data), local);
-        this._logger.sendTelemetryEvent(TelemetryEvents.LiveState.StateChanged, { oldState, newState });
+        this.emit(
+            LiveStateEvents.stateChanged,
+            evt.state,
+            cloneValue(evt.data),
+            local
+        );
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.LiveState.StateChanged,
+            { oldState, newState }
+        );
     }
 }
 

@@ -22,7 +22,9 @@ export default function App() {
                 microsoftTeams.app
                     .initialize()
                     .then(() => {
-                        console.log("App.js: initializing client SDK initialized");
+                        console.log(
+                            "App.js: initializing client SDK initialized"
+                        );
                         microsoftTeams.app.notifyAppLoaded();
                         microsoftTeams.app.notifySuccess();
                         setInitialized(true);

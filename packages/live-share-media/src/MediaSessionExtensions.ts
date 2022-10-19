@@ -23,7 +23,11 @@ export type ExtendedMediaSessionAction =
     | "datachange"
     | "blocked";
 
-export type ExtendedMediaSessionPlaybackState = MediaSessionPlaybackState | "suspended" | "waiting" | "ended";
+export type ExtendedMediaSessionPlaybackState =
+    | MediaSessionPlaybackState
+    | "suspended"
+    | "waiting"
+    | "ended";
 
 export interface ExtendedMediaMetadata extends MediaMetadata {
     trackIdentifier: string;

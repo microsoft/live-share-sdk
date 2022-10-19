@@ -3,7 +3,12 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveShareTokenProvider, SharedClock, RoleVerifier, DefaultTeamsHost } from "./internals";
+import {
+    LiveShareTokenProvider,
+    SharedClock,
+    RoleVerifier,
+    DefaultTeamsHost,
+} from "./internals";
 import {
     AzureClient,
     AzureConnectionConfig,
@@ -21,9 +26,18 @@ import { TestLiveShareHost } from "./TestLiveShareHost";
  * Map v0.59 orderer endpoints to new v1.0 service endpoints
  */
 const ordererEndpointMap = new Map<string, string>()
-    .set("https://alfred.westus2.fluidrelay.azure.com", "https://us.fluidrelay.azure.com")
-    .set("https://alfred.westeurope.fluidrelay.azure.com", "https://eu.fluidrelay.azure.com")
-    .set("https://alfred.southeastasia.fluidrelay.azure.com", "https://global.fluidrelay.azure.com");
+    .set(
+        "https://alfred.westus2.fluidrelay.azure.com",
+        "https://us.fluidrelay.azure.com"
+    )
+    .set(
+        "https://alfred.westeurope.fluidrelay.azure.com",
+        "https://eu.fluidrelay.azure.com"
+    )
+    .set(
+        "https://alfred.southeastasia.fluidrelay.azure.com",
+        "https://global.fluidrelay.azure.com"
+    );
 
 /**
  * Options used to configure the `TeamsFluidClient` class.
@@ -123,7 +137,8 @@ export class LiveShareClient {
             const pTimestampProvider = this.initializeTimestampProvider();
 
             // Initialize FRS connection config
-            let config: AzureConnectionConfig | undefined = this._options.connection;
+            let config: AzureConnectionConfig | undefined =
+                this._options.connection;
             if (!config) {
                 const frsTenantInfo = await host.getFluidTenantInfo();
 
@@ -131,7 +146,9 @@ export class LiveShareClient {
                 let endpoint = frsTenantInfo.serviceEndpoint;
                 if (!endpoint) {
                     if (ordererEndpointMap.has(frsTenantInfo.ordererEndpoint)) {
-                        endpoint = ordererEndpointMap.get(frsTenantInfo.ordererEndpoint);
+                        endpoint = ordererEndpointMap.get(
+                            frsTenantInfo.ordererEndpoint
+                        );
                     } else {
                         throw new Error(
                             `TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.ordererEndpoint}`
@@ -163,10 +180,19 @@ export class LiveShareClient {
             });
 
             // Create container on first access
-            const pContainer = this.getOrCreateContainer(client, fluidContainerSchema, 0, onContainerFirstCreated);
+            const pContainer = this.getOrCreateContainer(
+                client,
+                fluidContainerSchema,
+                0,
+                onContainerFirstCreated
+            );
 
             // Wait in parallel for everything to finish initializing.
-            const result = await Promise.all([pContainer, pRoleVerifier, pTimestampProvider]);
+            const result = await Promise.all([
+                pContainer,
+                pRoleVerifier,
+                pTimestampProvider,
+            ]);
 
             performance.mark(`TeamsSync: container connecting`);
 
@@ -176,18 +202,24 @@ export class LiveShareClient {
             container.on("connected", async () => {
                 if (!connected) {
                     connected = true;
-                    performance.measure(`TeamsSync: container connected`, `TeamsSync: container connecting`);
+                    performance.measure(
+                        `TeamsSync: container connected`,
+                        `TeamsSync: container connecting`
+                    );
                 }
 
                 // Register any new clientId's
                 // - registerClientId() will only register a client on first use
                 if (this._roleVerifier) {
-                    const connections = services.audience.getMyself()?.connections ?? [];
+                    const connections =
+                        services.audience.getMyself()?.connections ?? [];
                     for (let i = 0; i < connections.length; i++) {
                         try {
                             const clientId = connections[i]?.id;
                             if (clientId) {
-                                await this._roleVerifier?.registerClientId(clientId);
+                                await this._roleVerifier?.registerClientId(
+                                    clientId
+                                );
                             }
                         } catch (err: any) {
                             console.error(err.toString());
@@ -198,7 +230,10 @@ export class LiveShareClient {
 
             return result[0];
         } finally {
-            performance.measure(`TeamsSync: container joined`, `TeamsSync: join container`);
+            performance.measure(
+                `TeamsSync: container joined`,
+                `TeamsSync: join container`
+            );
         }
     }
 
@@ -252,14 +287,35 @@ export class LiveShareClient {
 
         // Create container on first access
         if (containerInfo.shouldCreate) {
-            return await this.createNewContainer(client, fluidContainerSchema, tries, onInitializeContainer);
+            return await this.createNewContainer(
+                client,
+                fluidContainerSchema,
+                tries,
+                onInitializeContainer
+            );
         } else if (containerInfo.containerId) {
-            return { created: false, ...(await client.getContainer(containerInfo.containerId, fluidContainerSchema)) };
-        } else if (tries < this.maxContainerLookupTries && containerInfo.retryAfter > 0) {
+            return {
+                created: false,
+                ...(await client.getContainer(
+                    containerInfo.containerId,
+                    fluidContainerSchema
+                )),
+            };
+        } else if (
+            tries < this.maxContainerLookupTries &&
+            containerInfo.retryAfter > 0
+        ) {
             await this.wait(containerInfo.retryAfter);
-            return await this.getOrCreateContainer(client, fluidContainerSchema, tries + 1, onInitializeContainer);
+            return await this.getOrCreateContainer(
+                client,
+                fluidContainerSchema,
+                tries + 1,
+                onInitializeContainer
+            );
         } else {
-            throw new Error(`TeamsFluidClient: timed out attempting to create or get container for current context.`);
+            throw new Error(
+                `TeamsFluidClient: timed out attempting to create or get container for current context.`
+            );
         }
     }
 
@@ -276,7 +332,9 @@ export class LiveShareClient {
         const host = await this.getHost();
 
         // Create and initialize container
-        const { container, services } = await client.createContainer(fluidContainerSchema);
+        const { container, services } = await client.createContainer(
+            fluidContainerSchema
+        );
         if (onInitializeContainer) {
             onInitializeContainer(container);
         }
@@ -291,7 +349,13 @@ export class LiveShareClient {
             container.dispose();
 
             // Get mapped container ID
-            return { created: false, ...(await client.getContainer(containerInfo.containerId!, fluidContainerSchema)) };
+            return {
+                created: false,
+                ...(await client.getContainer(
+                    containerInfo.containerId!,
+                    fluidContainerSchema
+                )),
+            };
         } else {
             return { container, services, created: true };
         }

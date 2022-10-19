@@ -47,7 +47,9 @@ export class VolumeManager {
 
     public set volume(value: number) {
         if (value < 0 || value > 1.0) {
-            throw new Error(`VolumeManager: cannot set volume to ${value}. Level must be between 0.0 and 1.0.`);
+            throw new Error(
+                `VolumeManager: cannot set volume to ${value}. Level must be between 0.0 and 1.0.`
+            );
         }
 
         this._volume = value;
@@ -74,7 +76,9 @@ export class VolumeManager {
 
     public set limitLevel(value: number) {
         if (value < 0 || value > 1.0) {
-            throw new Error(`VolumeManager: cannot set level to ${value}. Level must be between 0.0 and 1.0.`);
+            throw new Error(
+                `VolumeManager: cannot set level to ${value}. Level must be between 0.0 and 1.0.`
+            );
         }
 
         this._limitLevel = value;
@@ -133,7 +137,10 @@ export class VolumeManager {
     private startAdjusting() {
         const adjustVolume = () => {
             // Schedule next animation frame if volume change not finished
-            if (this.millisSinceVolumeChangeStart() <= this._volumeChangeDuration.milliseconds) {
+            if (
+                this.millisSinceVolumeChangeStart() <=
+                this._volumeChangeDuration.milliseconds
+            ) {
                 this._player.volume = this.computeInterpolatedVolume();
                 this.scheduleAnimationFrame(adjustVolume);
             } else {
@@ -161,7 +168,9 @@ export class VolumeManager {
     private computeInterpolatedVolume(): number {
         const volumeChangeMillis = this._volumeChangeDuration.milliseconds;
         const volumeDifference = this.computeTargetVolume() - this._startVolume;
-        const adjustmentFromStart = (volumeDifference / volumeChangeMillis) * this.millisSinceVolumeChangeStart();
+        const adjustmentFromStart =
+            (volumeDifference / volumeChangeMillis) *
+            this.millisSinceVolumeChangeStart();
         return this._startVolume + adjustmentFromStart;
     }
 

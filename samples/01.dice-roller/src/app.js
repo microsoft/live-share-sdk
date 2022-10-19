@@ -31,7 +31,7 @@ async function start() {
     let view = searchParams.get("view") || "stage";
 
     // Check if we are running on stage.
-    if (!!searchParams.get("inTeams")) {
+    if (searchParams.get("inTeams")) {
         // Initialize teams app
         await app.initialize();
 
@@ -65,7 +65,7 @@ async function start() {
 async function joinContainer() {
     // Are we running in teams?
     let client;
-    if (!!searchParams.get("inTeams")) {
+    if (searchParams.get("inTeams")) {
         // Create client
         client = new LiveShareClient();
     } else {
@@ -73,7 +73,10 @@ async function joinContainer() {
         client = new LiveShareClient({
             connection: {
                 type: "local",
-                tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
+                tokenProvider: new InsecureTokenProvider("", {
+                    id: "123",
+                    name: "Test User",
+                }),
                 endpoint: "http://localhost:7070",
             },
         });
@@ -106,7 +109,8 @@ function renderStage(diceMap, elem) {
     const dice = elem.querySelector(".dice");
 
     // Set the value at our dataKey with a random number between 1 and 6.
-    rollButton.onclick = () => diceMap.set(diceValueKey, Math.floor(Math.random() * 6) + 1);
+    rollButton.onclick = () =>
+        diceMap.set(diceValueKey, Math.floor(Math.random() * 6) + 1);
 
     // Get the current value of the shared data to update the view whenever it changes.
     const updateDice = () => {

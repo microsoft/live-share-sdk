@@ -30,7 +30,10 @@ export class LocalTimestampProvider implements ITimestampProvider {
         // Return timestamp and save last
         // - We never want to generate the same timestamp twice and we always want a greater
         //   timestamp then what we previously sent.
-        return (this._lastTimeSent = Math.max(new Date().getTime(), this._lastTimeSent + 1));
+        return (this._lastTimeSent = Math.max(
+            new Date().getTime(),
+            this._lastTimeSent + 1
+        ));
     }
 
     public getMaxTimestampError(): number {

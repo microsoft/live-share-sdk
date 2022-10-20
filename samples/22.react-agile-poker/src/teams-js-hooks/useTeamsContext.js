@@ -19,7 +19,11 @@ export const useTeamsContext = () => {
                 microsoftTeams.app
                     .getContext()
                     .then((context) => {
-                        console.log(`useTeamsContext: received context: ${JSON.stringify(context)}`);
+                        console.log(
+                            `useTeamsContext: received context: ${JSON.stringify(
+                                context
+                            )}`
+                        );
                         setCtx(context);
                     })
                     .catch((error) => console.error(error));

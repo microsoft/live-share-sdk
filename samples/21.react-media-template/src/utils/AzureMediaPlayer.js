@@ -129,7 +129,7 @@ export class AzureMediaPlayer extends EventTarget {
      * @param {number} value timestamp in seconds
      */
     set currentTime(value) {
-        return this._player.currentTime(value);
+        this._player.currentTime(value);
     }
 
     get duration() {
@@ -259,10 +259,17 @@ export class AzureMediaPlayer extends EventTarget {
             this.dispatchEvent(new Event(PlayerEvent.ready));
             this._startPositionTracker();
             Object.entries(PlayerEvent).forEach(([_, value]) => {
-                this._player.addEventListener(value, this._onStateChangeEvent.bind(this));
+                this._player.addEventListener(
+                    value,
+                    this._onStateChangeEvent.bind(this)
+                );
             });
         }
-        this._player = window.amp(videoElement, this._options, onReady.bind(this));
+        this._player = window.amp(
+            videoElement,
+            this._options,
+            onReady.bind(this)
+        );
     }
 
     //---------------------------------------------------------------------------------------------
@@ -284,7 +291,8 @@ export class AzureMediaPlayer extends EventTarget {
                 const now = new Date().getTime();
                 const position = this.currentTime;
                 if (this._track.lastPositionCheck > 0) {
-                    const movement = Math.abs(position - this._track.lastPosition) * 1000;
+                    const movement =
+                        Math.abs(position - this._track.lastPosition) * 1000;
                     const range = now - this._track.lastPositionCheck + 2000;
                     if (movement > range) {
                         this.dispatchEvent(new Event(PlayerEvent.seeked));
@@ -313,7 +321,9 @@ export class AzureMediaPlayer extends EventTarget {
             this._track.skipTo = undefined;
 
             // Seek to adjusted position
-            const adjustment = adjustPosition ? (new Date().getTime() - skipTo.timeAdded) / 1000 : 0;
+            const adjustment = adjustPosition
+                ? (new Date().getTime() - skipTo.timeAdded) / 1000
+                : 0;
             this.currentTime = skipTo.position + adjustment;
         }
     }
@@ -392,7 +402,8 @@ export function loadAzureMediaPlayerScript() {
             const linkTag = document.createElement("link");
             linkTag.rel = "stylesheet";
             scriptTag.id = "amp-azure";
-            scriptTag.src = "//amp.azure.net/libs/amp/latest/azuremediaplayer.min.js";
+            scriptTag.src =
+                "//amp.azure.net/libs/amp/latest/azuremediaplayer.min.js";
             linkTag.href = `//amp.azure.net/libs/amp/latest/skins/amp-default/azuremediaplayer.min.css`;
             document.body.appendChild(scriptTag);
             document.head.insertBefore(linkTag, document.head.firstChild);

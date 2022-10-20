@@ -63,7 +63,8 @@ export class MulticastEvent<TArgs> {
  */
 export abstract class InputProvider {
     protected readonly pointerDownEvent = new MulticastEvent<IPointerEvent>();
-    protected readonly pointerMoveEvent = new MulticastEvent<IPointerMoveEvent>();
+    protected readonly pointerMoveEvent =
+        new MulticastEvent<IPointerMoveEvent>();
     protected readonly pointerUpEvent = new MulticastEvent<IPointerEvent>();
     protected readonly pointerEnterEvent = new MulticastEvent<IPointerEvent>();
     protected readonly pointerLeaveEvent = new MulticastEvent<IPointerEvent>();

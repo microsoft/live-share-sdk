@@ -14,7 +14,8 @@ export const formatTimeValue = (milliseconds) => {
     if (minutes >= 60) {
         const hours = Math.floor(minutes / 60);
         const minutesRemainder = Math.floor(minutes % 60);
-        const minutesFormatted = minutesRemainder >= 10 ? minutesRemainder : `0${minutesRemainder}`;
+        const minutesFormatted =
+            minutesRemainder >= 10 ? minutesRemainder : `0${minutesRemainder}`;
         return `${hours}:${minutesFormatted}:${secondsFormatted}`;
     }
     return `${minutes}:${secondsFormatted}`;

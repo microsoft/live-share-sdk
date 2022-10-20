@@ -17,8 +17,14 @@ import { ICurrentPlaybackPosition } from "./coordinatorState";
 import { TestMediaSession } from "./SharedMediaSession.spec";
 
 describe("SharedMediaSessionCoordinator", () => {
-    const user1: IParticipant = { participantId: "user1", role: ParticipantRole.organizer };
-    const user2: IParticipant = { participantId: "user2", role: ParticipantRole.participant };
+    const user1: IParticipant = {
+        participantId: "user1",
+        role: ParticipantRole.organizer,
+    };
+    const user2: IParticipant = {
+        participantId: "user2",
+        role: ParticipantRole.participant,
+    };
     const testTrack: ExtendedMediaMetadata = {
         trackIdentifier: "https://example.org/test.mp3",
         title: "Test Title",
@@ -47,9 +53,13 @@ describe("SharedMediaSessionCoordinator", () => {
             let cnt = 0;
             const session = new TestMediaSession(space1);
             await space2.join();
-            space2.socket.addBroadcastListener(session.name, "joined", async (event) => {
-                cnt++;
-            });
+            space2.socket.addBroadcastListener(
+                session.name,
+                "joined",
+                async (event) => {
+                    cnt++;
+                }
+            );
 
             await space1.join();
             assert(cnt == 1, `joined event not sent`);
@@ -70,12 +80,16 @@ describe("SharedMediaSessionCoordinator", () => {
             const session = new TestMediaSession(space1, testTrack);
             session.coordinator.positionUpdateInterval = 0.02;
             await space2.join();
-            space2.socket.addBroadcastListener(session.name, "positionUpdate", async (event) => {
-                cnt++;
-                if (cnt > 1) {
-                    done.resolve();
+            space2.socket.addBroadcastListener(
+                session.name,
+                "positionUpdate",
+                async (event) => {
+                    cnt++;
+                    if (cnt > 1) {
+                        done.resolve();
+                    }
                 }
-            });
+            );
 
             await session.coordinator.join();
             await session.coordinator.play();
@@ -167,8 +181,14 @@ describe("SharedMediaSessionCoordinator", () => {
                 // Seek to position
                 await session1.coordinator.seekTo(2.3);
                 await session2.waitForAction(async (details) => {
-                    assert(details.action == "seekto", `wong action received "${details.action}"`);
-                    assert(details.seekTime >= 2.3, `wrong seek position "${details.seekTime}"`);
+                    assert(
+                        details.action == "seekto",
+                        `wong action received "${details.action}"`
+                    );
+                    assert(
+                        details.seekTime >= 2.3,
+                        `wrong seek position "${details.seekTime}"`
+                    );
                 });
             });
         } finally {
@@ -194,14 +214,23 @@ describe("SharedMediaSessionCoordinator", () => {
 
             // Wait for action to be broadcast
             await session2.waitForAction(async (details) => {
-                assert(details.action == "settrack", `wrong action received "${details.action}"`);
                 assert(
-                    JSON.stringify(session1.metadata) == JSON.stringify(testTrack),
-                    `session1 has wrong track: ${JSON.stringify(session1.metadata)}`
+                    details.action == "settrack",
+                    `wrong action received "${details.action}"`
                 );
                 assert(
-                    JSON.stringify(session2.metadata) == JSON.stringify(testTrack),
-                    `session2 has wrong track: ${JSON.stringify(session2.metadata)}`
+                    JSON.stringify(session1.metadata) ==
+                        JSON.stringify(testTrack),
+                    `session1 has wrong track: ${JSON.stringify(
+                        session1.metadata
+                    )}`
+                );
+                assert(
+                    JSON.stringify(session2.metadata) ==
+                        JSON.stringify(testTrack),
+                    `session2 has wrong track: ${JSON.stringify(
+                        session2.metadata
+                    )}`
                 );
             });
         } finally {

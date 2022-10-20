@@ -4,8 +4,18 @@
  */
 
 import { InkingCanvas } from "./InkingCanvas";
-import { getPressureAdjustedSize, IPointerPoint, DefaultPenBrush, IBrush, toCssRgbaColor } from "../core";
-import { computeQuadBetweenTwoCircles, computeQuadBetweenTwoRectangles, IQuadPathSegment } from "../core/Internals";
+import {
+    getPressureAdjustedSize,
+    IPointerPoint,
+    DefaultPenBrush,
+    IBrush,
+    toCssRgbaColor,
+} from "../core";
+import {
+    computeQuadBetweenTwoCircles,
+    computeQuadBetweenTwoRectangles,
+    IQuadPathSegment,
+} from "../core/Internals";
 
 /**
  * Represents the base class from wet and dry canvases, implementing the common rendering logic.
@@ -25,13 +35,23 @@ export abstract class DryWetCanvas extends InkingCanvas {
 
             if (this._pendingPointsStartIndex > 0) {
                 previousPoint = this._points[this._pendingPointsStartIndex - 1];
-                previousPointPressureAdjustedTip = getPressureAdjustedSize(tipHalfSize, previousPoint.pressure);
+                previousPointPressureAdjustedTip = getPressureAdjustedSize(
+                    tipHalfSize,
+                    previousPoint.pressure
+                );
             }
 
-            for (let i = this._pendingPointsStartIndex; i < this._points.length; i++) {
+            for (
+                let i = this._pendingPointsStartIndex;
+                i < this._points.length;
+                i++
+            ) {
                 const p = this._points[i];
 
-                let pressureAdjustedTip = getPressureAdjustedSize(tipHalfSize, p.pressure);
+                let pressureAdjustedTip = getPressureAdjustedSize(
+                    tipHalfSize,
+                    p.pressure
+                );
 
                 const segment: IQuadPathSegment = {
                     endPoint: p,
@@ -67,7 +87,10 @@ export abstract class DryWetCanvas extends InkingCanvas {
         return result;
     }
 
-    private renderQuadPath(context: CanvasRenderingContext2D, path: IQuadPathSegment[]) {
+    private renderQuadPath(
+        context: CanvasRenderingContext2D,
+        path: IQuadPathSegment[]
+    ) {
         const cssColor = this.getBrushCssColor();
 
         context.strokeStyle = cssColor;
@@ -83,7 +106,12 @@ export abstract class DryWetCanvas extends InkingCanvas {
             if (this.brush.tip === "ellipse") {
                 this.renderCircle(context, item.endPoint, item.tipSize);
             } else {
-                this.renderRectangle(context, item.endPoint, item.tipSize, item.tipSize);
+                this.renderRectangle(
+                    context,
+                    item.endPoint,
+                    item.tipSize,
+                    item.tipSize
+                );
             }
         }
 
@@ -105,7 +133,10 @@ export abstract class DryWetCanvas extends InkingCanvas {
      * @returns A CSS color.
      */
     protected getBrushCssColor(): string {
-        return toCssRgbaColor(this.brush.color, this.brush.type === "highlighter" ? 0.5 : 1);
+        return toCssRgbaColor(
+            this.brush.color,
+            this.brush.type === "highlighter" ? 0.5 : 1
+        );
     }
 
     /**
@@ -227,11 +258,15 @@ export class WetCanvas extends DryWetCanvas {
     private static readonly forceSynchronousRendering = false;
 
     protected rendersAsynchronously(): boolean {
-        return WetCanvas.forceSynchronousRendering ? false : super.rendersAsynchronously();
+        return WetCanvas.forceSynchronousRendering
+            ? false
+            : super.rendersAsynchronously();
     }
 
     protected rendersProgressively(): boolean {
-        return WetCanvas.forceSynchronousRendering ? false : super.rendersProgressively();
+        return WetCanvas.forceSynchronousRendering
+            ? false
+            : super.rendersProgressively();
     }
 
     protected getBrushCssColor(): string {
@@ -250,10 +285,12 @@ export class WetCanvas extends DryWetCanvas {
     protected adjustOpacity(context: CanvasRenderingContext2D) {
         switch (this.brush.type) {
             case "laser":
-                context.canvas.style.opacity = InkingCanvas.laserShadowOpacity.toString();
+                context.canvas.style.opacity =
+                    InkingCanvas.laserShadowOpacity.toString();
                 break;
             case "highlighter":
-                context.canvas.style.opacity = InkingCanvas.highlighterOpacity.toString();
+                context.canvas.style.opacity =
+                    InkingCanvas.highlighterOpacity.toString();
                 break;
             default:
                 super.adjustOpacity(context);

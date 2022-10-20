@@ -26,7 +26,8 @@ export const useNotifications = (notificationEvent, context) => {
     const sendNotification = useCallback(
         async (notificationText) => {
             console.log("useNotifications: sending a notification");
-            const userPrincipalName = context?.user.userPrincipalName ?? "Someone@contoso.com";
+            const userPrincipalName =
+                context?.user.userPrincipalName ?? "Someone@contoso.com";
             const name = userPrincipalName.split("@")[0];
             // Emit the event
             notificationEvent?.sendEvent({
@@ -44,7 +45,9 @@ export const useNotifications = (notificationEvent, context) => {
                 if (local) {
                     setNotificationToDisplay(`You ${event.text}`);
                 } else {
-                    setNotificationToDisplay(`${event.senderName} ${event.text}`);
+                    setNotificationToDisplay(
+                        `${event.senderName} ${event.text}`
+                    );
                 }
             });
             console.log("useNotifications: starting notifications");

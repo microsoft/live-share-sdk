@@ -75,11 +75,15 @@ export const usePresence = (presence, context) => {
                         });
                 }
                 // Update our local state
-                const updatedUsers = presence.toArray().filter((user) => user.state === PresenceState.online);
+                const updatedUsers = presence
+                    .toArray()
+                    .filter((user) => user.state === PresenceState.online);
                 setUsers(updatedUsers);
             });
             const defaultAvatarInformation = getRandomAvatar();
-            const userPrincipalName = context?.user.userPrincipalName ?? `${defaultAvatarInformation.name}@contoso.com`;
+            const userPrincipalName =
+                context?.user.userPrincipalName ??
+                `${defaultAvatarInformation.name}@contoso.com`;
             const name = userPrincipalName.split("@")[0];
 
             presence.presenceUpdateInterval = 5;

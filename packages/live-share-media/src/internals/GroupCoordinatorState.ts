@@ -18,12 +18,23 @@ import {
     ExtendedMediaSessionPlaybackState,
     ExtendedMediaSessionActionDetails,
 } from "../MediaSessionExtensions";
-import { GroupPlaybackTrack, GroupPlaybackTrackEvents, IPlaybackTrack } from "./GroupPlaybackTrack";
+import {
+    GroupPlaybackTrack,
+    GroupPlaybackTrackEvents,
+    IPlaybackTrack,
+} from "./GroupPlaybackTrack";
 import { GroupTransportState, ITransportState } from "./GroupTransportState";
-import { GroupPlaybackPosition, ICurrentPlaybackPosition } from "./GroupPlaybackPosition";
+import {
+    GroupPlaybackPosition,
+    ICurrentPlaybackPosition,
+} from "./GroupPlaybackPosition";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import { GroupTransportStateEvents } from "./GroupTransportState";
-import { GroupPlaybackTrackData, PlaybackTrackDataEvents, IPlaybackTrackData } from "./GroupPlaybackTrackData";
+import {
+    GroupPlaybackTrackData,
+    PlaybackTrackDataEvents,
+    IPlaybackTrackData,
+} from "./GroupPlaybackTrackData";
 import { TelemetryEvents } from "./consts";
 
 /**
@@ -113,60 +124,104 @@ export class GroupCoordinatorState extends EventEmitter {
         this._logger = new LiveTelemetryLogger(runtime);
         this._maxPlaybackDrift = maxPlaybackDrift;
         this._playbackTrack = new GroupPlaybackTrack(getMediaPlayerState);
-        this._playbackTrackData = new GroupPlaybackTrackData(this._playbackTrack);
-        this._transportState = new GroupTransportState(this._playbackTrack, getMediaPlayerState);
-        this._playbackPosition = new GroupPlaybackPosition(this._transportState, this._runtime, positionUpdateInterval);
+        this._playbackTrackData = new GroupPlaybackTrackData(
+            this._playbackTrack
+        );
+        this._transportState = new GroupTransportState(
+            this._playbackTrack,
+            getMediaPlayerState
+        );
+        this._playbackPosition = new GroupPlaybackPosition(
+            this._transportState,
+            this._runtime,
+            positionUpdateInterval
+        );
         this._getMediaPlayerState = getMediaPlayerState;
 
         // Listen track related events
         this._playbackTrack.on(GroupPlaybackTrackEvents.trackChange, (evt) => {
             if (!this.isSuspended) {
-                this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackChanged);
+                this._logger.sendTelemetryEvent(
+                    TelemetryEvents.GroupCoordinator.TrackChanged
+                );
                 this.emitSetTrack(evt.metadata!);
             } else {
-                this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackChangeDelayed);
+                this._logger.sendTelemetryEvent(
+                    TelemetryEvents.GroupCoordinator.TrackChangeDelayed
+                );
             }
         });
 
         // Listen for track data changes
-        this._playbackTrackData.on(PlaybackTrackDataEvents.dataChange, (evt) => {
-            if (!this.isSuspended && !this.isWaiting) {
-                this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackDataChanged);
-                this.emitTriggerAction({ action: "datachange", data: evt.data });
-            } else {
-                this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackDataChangeDelayed);
+        this._playbackTrackData.on(
+            PlaybackTrackDataEvents.dataChange,
+            (evt) => {
+                if (!this.isSuspended && !this.isWaiting) {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.TrackDataChanged
+                    );
+                    this.emitTriggerAction({
+                        action: "datachange",
+                        data: evt.data,
+                    });
+                } else {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.TrackDataChangeDelayed
+                    );
+                }
             }
-        });
+        );
 
         // Listen to transport related events
-        this._transportState.on(GroupTransportStateEvents.transportStateChange, (evt) => {
-            if (!this.isSuspended && !this.isWaiting) {
-                this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportStateChanged, null, {
-                    action: evt.action,
-                    seekTime: evt.seekTime,
-                });
+        this._transportState.on(
+            GroupTransportStateEvents.transportStateChange,
+            (evt) => {
+                if (!this.isSuspended && !this.isWaiting) {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.TransportStateChanged,
+                        null,
+                        {
+                            action: evt.action,
+                            seekTime: evt.seekTime,
+                        }
+                    );
 
-                // Trigger action
-                switch (evt.action) {
-                    case "play":
-                        this.emitTriggerAction({ action: "play", seekTime: evt.seekTime });
-                        break;
+                    // Trigger action
+                    switch (evt.action) {
+                        case "play":
+                            this.emitTriggerAction({
+                                action: "play",
+                                seekTime: evt.seekTime,
+                            });
+                            break;
 
-                    case "pause":
-                        this.emitTriggerAction({ action: "pause", seekTime: evt.seekTime });
-                        break;
+                        case "pause":
+                            this.emitTriggerAction({
+                                action: "pause",
+                                seekTime: evt.seekTime,
+                            });
+                            break;
 
-                    case "seekto":
-                        this.emitTriggerAction({ action: "seekto", seekTime: evt.seekTime });
-                        break;
+                        case "seekto":
+                            this.emitTriggerAction({
+                                action: "seekto",
+                                seekTime: evt.seekTime,
+                            });
+                            break;
+                    }
+                } else {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator
+                            .TransportStateChangeDelayed,
+                        null,
+                        {
+                            action: evt.action,
+                            seekTime: evt.seekTime,
+                        }
+                    );
                 }
-            } else {
-                this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportStateChangeDelayed, null, {
-                    action: evt.action,
-                    seekTime: evt.seekTime,
-                });
             }
-        });
+        );
     }
 
     public get playbackTrack(): GroupPlaybackTrack {
@@ -221,7 +276,9 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
-    public createPositionUpdateEvent(state: IMediaPlayerState): Partial<IPositionUpdateEvent> {
+    public createPositionUpdateEvent(
+        state: IMediaPlayerState
+    ): Partial<IPositionUpdateEvent> {
         const { positionState, playbackState } = state;
         if (this.isSuspended) {
             // Report suspension state
@@ -257,9 +314,16 @@ export class GroupCoordinatorState extends EventEmitter {
         });
 
         if (updated) {
-            this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemoteSetTrackReceived, null, {
-                correlationId: LiveTelemetryLogger.formatCorrelationId(event.clientId, event.timestamp),
-            });
+            this._logger.sendTelemetryEvent(
+                TelemetryEvents.SessionCoordinator.RemoteSetTrackReceived,
+                null,
+                {
+                    correlationId: LiveTelemetryLogger.formatCorrelationId(
+                        event.clientId,
+                        event.timestamp
+                    ),
+                }
+            );
         }
     }
 
@@ -273,13 +337,23 @@ export class GroupCoordinatorState extends EventEmitter {
         });
 
         if (updated) {
-            this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemoteSetTrackReceived, null, {
-                correlationId: LiveTelemetryLogger.formatCorrelationId(event.clientId, event.timestamp),
-            });
+            this._logger.sendTelemetryEvent(
+                TelemetryEvents.SessionCoordinator.RemoteSetTrackReceived,
+                null,
+                {
+                    correlationId: LiveTelemetryLogger.formatCorrelationId(
+                        event.clientId,
+                        event.timestamp
+                    ),
+                }
+            );
         }
     }
 
-    public handleTransportCommand(event: ITransportCommandEvent, local: boolean): void {
+    public handleTransportCommand(
+        event: ITransportCommandEvent,
+        local: boolean
+    ): void {
         // Ensure change is for current track
         // - Will trigger a 'trackChange' event if newer track.
         this.playbackTrack.updateTrack(event.track);
@@ -305,29 +379,50 @@ export class GroupCoordinatorState extends EventEmitter {
             const updated = this.transportState.updateState(newState);
 
             if (updated) {
-                const correlationId = LiveTelemetryLogger.formatCorrelationId(event.clientId, event.timestamp);
+                const correlationId = LiveTelemetryLogger.formatCorrelationId(
+                    event.clientId,
+                    event.timestamp
+                );
                 switch (event.name) {
                     case "play":
-                        this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemotePlayReceived, null, {
-                            correlationId: correlationId,
-                        });
+                        this._logger.sendTelemetryEvent(
+                            TelemetryEvents.SessionCoordinator
+                                .RemotePlayReceived,
+                            null,
+                            {
+                                correlationId: correlationId,
+                            }
+                        );
                         break;
                     case "pause":
-                        this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemotePauseReceived, null, {
-                            correlationId: correlationId,
-                        });
+                        this._logger.sendTelemetryEvent(
+                            TelemetryEvents.SessionCoordinator
+                                .RemotePauseReceived,
+                            null,
+                            {
+                                correlationId: correlationId,
+                            }
+                        );
                         break;
                     case "seekTo":
-                        this._logger.sendTelemetryEvent(TelemetryEvents.SessionCoordinator.RemoteSeekToReceived, null, {
-                            correlationId: correlationId,
-                        });
+                        this._logger.sendTelemetryEvent(
+                            TelemetryEvents.SessionCoordinator
+                                .RemoteSeekToReceived,
+                            null,
+                            {
+                                correlationId: correlationId,
+                            }
+                        );
                         break;
                 }
             }
         }
     }
 
-    public handlePositionUpdate(event: IPositionUpdateEvent, local: boolean): void {
+    public handlePositionUpdate(
+        event: IPositionUpdateEvent,
+        local: boolean
+    ): void {
         // Ensure change is for current track
         // - Will trigger a 'trackChange' event if newer track.
         this.playbackTrack.updateTrack(event.track);
@@ -366,12 +461,14 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "playing":
                             if (event.playbackState != this._lastStateChange) {
                                 this._logger.sendTelemetryEvent(
-                                    TelemetryEvents.GroupCoordinator.BeginSoftSuspension,
+                                    TelemetryEvents.GroupCoordinator
+                                        .BeginSoftSuspension,
                                     null,
                                     { playbackState: event.playbackState }
                                 );
                                 this._lastStateChange = event.playbackState;
-                                this._lastStateChangeTime = LiveEvent.getTimestamp();
+                                this._lastStateChangeTime =
+                                    LiveEvent.getTimestamp();
                             }
                             break;
                     }
@@ -396,14 +493,20 @@ export class GroupCoordinatorState extends EventEmitter {
 
     public async syncLocalMediaSession(): Promise<void> {
         // Skip further syncs if we're waiting or in a "soft suspension".
-        const softSuspensionDelta = LiveEvent.getTimestamp() - this._lastStateChangeTime;
+        const softSuspensionDelta =
+            LiveEvent.getTimestamp() - this._lastStateChangeTime;
         if (!this.isWaiting && softSuspensionDelta >= 1000) {
-            let { metadata, trackData, positionState, playbackState } = this._getMediaPlayerState();
-            this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.CheckingForSyncIssues);
+            let { metadata, trackData, positionState, playbackState } =
+                this._getMediaPlayerState();
+            this._logger.sendTelemetryEvent(
+                TelemetryEvents.GroupCoordinator.CheckingForSyncIssues
+            );
 
             // Check for track change
             if (!this.playbackTrack.compare(metadata)) {
-                this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackOutOfSync);
+                this._logger.sendTelemetryEvent(
+                    TelemetryEvents.GroupCoordinator.TrackOutOfSync
+                );
                 this.emitSetTrack(this.playbackTrack.metadata!);
                 return;
             }
@@ -414,7 +517,10 @@ export class GroupCoordinatorState extends EventEmitter {
             //   else has finished the video.
             // - Should another user seek or press play after the video has ended that will cause
             //   a transport action to trigger which will take the player out of the ended state.
-            if (playbackState != "ended" && !this._playbackPosition.trackEnded) {
+            if (
+                playbackState != "ended" &&
+                !this._playbackPosition.trackEnded
+            ) {
                 // Ensure we have a position
                 let position = positionState?.position;
                 if (position == undefined) {
@@ -424,20 +530,35 @@ export class GroupCoordinatorState extends EventEmitter {
                 // Check for catchup
                 // - Target can return -1 in cases where there is no position tracking data
                 const target = this.playbackPosition.targetPosition;
-                if (target >= 0.0 && Math.abs(target - position) >= this._maxPlaybackDrift.seconds) {
-                    this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.PositionOutOfSync, null, {
-                        current: position,
-                        target: target,
+                if (
+                    target >= 0.0 &&
+                    Math.abs(target - position) >=
+                        this._maxPlaybackDrift.seconds
+                ) {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.PositionOutOfSync,
+                        null,
+                        {
+                            current: position,
+                            target: target,
+                        }
+                    );
+                    await this.emitTriggerAction({
+                        action: "catchup",
+                        seekTime: target,
                     });
-                    await this.emitTriggerAction({ action: "catchup", seekTime: target });
                 }
 
                 // Sync transport state
                 if (this.transportState.playbackState != playbackState) {
-                    this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TransportOutOfSync, null, {
-                        current: playbackState,
-                        target: this.transportState.playbackState,
-                    });
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.TransportOutOfSync,
+                        null,
+                        {
+                            current: playbackState,
+                            target: this.transportState.playbackState,
+                        }
+                    );
                     switch (this.transportState.playbackState) {
                         case "playing":
                             await this.emitTriggerAction({ action: "play" });
@@ -449,9 +570,17 @@ export class GroupCoordinatorState extends EventEmitter {
                 }
 
                 // Sync track data
-                if (JSON.stringify(this.playbackTrackData.data) != JSON.stringify(trackData)) {
-                    this._logger.sendTelemetryEvent(TelemetryEvents.GroupCoordinator.TrackDataOutOfSync);
-                    await this.emitTriggerAction({ action: "datachange", data: this.playbackTrackData.data });
+                if (
+                    JSON.stringify(this.playbackTrackData.data) !=
+                    JSON.stringify(trackData)
+                ) {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.TrackDataOutOfSync
+                    );
+                    await this.emitTriggerAction({
+                        action: "datachange",
+                        data: this.playbackTrackData.data,
+                    });
                 }
             }
         }
@@ -465,7 +594,9 @@ export class GroupCoordinatorState extends EventEmitter {
         this.emitTriggerAction({ action: "settrack", metadata: metadata });
     }
 
-    private emitTriggerAction(details: ExtendedMediaSessionActionDetails): void {
+    private emitTriggerAction(
+        details: ExtendedMediaSessionActionDetails
+    ): void {
         const evt: ITriggerActionEvent = {
             name: GroupCoordinatorStateEvents.triggeraction,
             details: details,

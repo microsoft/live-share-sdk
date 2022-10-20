@@ -3,10 +3,17 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveEvent, IRuntimeSignaler, TimeInterval } from "@microsoft/live-share";
+import {
+    LiveEvent,
+    IRuntimeSignaler,
+    TimeInterval,
+} from "@microsoft/live-share";
 import { GroupTransportState } from "./GroupTransportState";
 import { GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
-import { CoordinationWaitPoint, ExtendedMediaSessionPlaybackState } from "../MediaSessionExtensions";
+import {
+    CoordinationWaitPoint,
+    ExtendedMediaSessionPlaybackState,
+} from "../MediaSessionExtensions";
 
 /**
  *Per client position
@@ -30,18 +37,25 @@ export class GroupPlaybackPosition {
     private _updateInterval: TimeInterval;
     private _positions: Map<string, ICurrentPlaybackPosition>;
 
-    constructor(transportState: GroupTransportState, runtime: IRuntimeSignaler, updateInterval: TimeInterval) {
+    constructor(
+        transportState: GroupTransportState,
+        runtime: IRuntimeSignaler,
+        updateInterval: TimeInterval
+    ) {
         this._transportState = transportState;
         this._runtime = runtime;
         this._updateInterval = updateInterval;
         this._positions = new Map();
 
         // Listen for track change
-        this._transportState.track.on(GroupPlaybackTrackEvents.trackChange, (_) => {
-            // Reset position tracking and duration
-            this._positions = new Map();
-            this.mediaDuration = undefined;
-        });
+        this._transportState.track.on(
+            GroupPlaybackTrackEvents.trackChange,
+            (_) => {
+                // Reset position tracking and duration
+                this._positions = new Map();
+                this.mediaDuration = undefined;
+            }
+        );
     }
 
     /**
@@ -87,9 +101,16 @@ export class GroupPlaybackPosition {
     public get clientsWaiting(): number {
         let cnt = 0;
         const waitPoint = this.localPosition?.waitPoint;
-        if (waitPoint && (waitPoint.maxClients == undefined || this.totalClients <= waitPoint.maxClients)) {
+        if (
+            waitPoint &&
+            (waitPoint.maxClients == undefined ||
+                this.totalClients <= waitPoint.maxClients)
+        ) {
             this.forEach((position, projectedPosition) => {
-                if (position.playbackState == "suspended" && position.waitPoint) {
+                if (
+                    position.playbackState == "suspended" &&
+                    position.waitPoint
+                ) {
                     cnt++;
                 } else if (position.position < waitPoint.position) {
                     cnt++;
@@ -109,7 +130,9 @@ export class GroupPlaybackPosition {
     public get maxPosition(): number {
         if (this._transportState.playbackState == "playing") {
             const now = LiveEvent.getTimestamp();
-            const projected = this._transportState.startPosition + (now - this._transportState.timestamp) / 1000;
+            const projected =
+                this._transportState.startPosition +
+                (now - this._transportState.timestamp) / 1000;
             return this.limitProjectedPosition(projected);
         } else {
             return this._transportState.startPosition;
@@ -133,7 +156,12 @@ export class GroupPlaybackPosition {
      * Enumerates every reported playback position.
      * @param callbackFn Function applied to each position,
      */
-    public forEach(callbackFn: (position: ICurrentPlaybackPosition, projectedPosition: number) => void): void {
+    public forEach(
+        callbackFn: (
+            position: ICurrentPlaybackPosition,
+            projectedPosition: number
+        ) => void
+    ): void {
         const now = LiveEvent.getTimestamp();
         const ignoreBefore = now - this._updateInterval.milliseconds * 2;
         const shouldProject = !this._transportState.track.metadata?.liveStream;
@@ -180,7 +208,10 @@ export class GroupPlaybackPosition {
         // Compute max progress
         let progress = -1;
         this.forEach((position, projectedPosition) => {
-            if (projectedPosition <= maxPosition && projectedPosition > progress) {
+            if (
+                projectedPosition <= maxPosition &&
+                projectedPosition > progress
+            ) {
                 progress = projectedPosition;
             }
         });
@@ -189,6 +220,8 @@ export class GroupPlaybackPosition {
     }
 
     private limitProjectedPosition(position: number): number {
-        return this.mediaDuration != undefined ? Math.min(position, this.mediaDuration) : position;
+        return this.mediaDuration != undefined
+            ? Math.min(position, this.mediaDuration)
+            : position;
     }
 }

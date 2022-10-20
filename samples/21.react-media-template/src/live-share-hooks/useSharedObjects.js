@@ -38,7 +38,10 @@ export function useSharedObjects() {
             // Configure for local testing (optional).
             connection = {
                 type: "local",
-                tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
+                tokenProvider: new InsecureTokenProvider("", {
+                    id: "123",
+                    name: "Test User",
+                }),
                 endpoint: "http://localhost:7070",
             };
         }
@@ -67,7 +70,10 @@ export function useSharedObjects() {
                     timeAdded: LiveEvent.getTimestamp(),
                 });
             });
-            container.initialObjects.playlistMap.set("selected-media-id", mediaList[0].id);
+            container.initialObjects.playlistMap.set(
+                "selected-media-id",
+                mediaList[0].id
+            );
         };
 
         // Define container schema

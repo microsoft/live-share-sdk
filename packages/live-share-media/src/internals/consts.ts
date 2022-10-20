@@ -10,7 +10,8 @@
  */
 export const TelemetryEvents = {
     MediaPlayerSynchronizer: {
-        SynchronizationStarted: "MediaPlayerSynchronizer:SynchronizationStarted",
+        SynchronizationStarted:
+            "MediaPlayerSynchronizer:SynchronizationStarted",
         PlayerEvent: "MediaPlayerSynchronizer:PlayerEvent",
         PlayAction: "MediaPlayerSynchronizer:PlayAction",
         PauseAction: "MediaPlayerSynchronizer:PauseAction",
@@ -18,10 +19,16 @@ export const TelemetryEvents = {
         CatchupAction: "MediaPlayerSynchronizer:CatchupAction",
         SetTrackAction: "MediaPlayerSynchronizer:SetTrackAction",
         DataChangeAction: "MediaPlayerSynchronizer:DataChangeAction",
-        UserTappedVideoToPlay: transmit("MediaPlayerSynchronizer:UserTappedVideoToPlay"),
-        PlaybackRateChangeBlocked: "MediaPlayerSynchronizer:PlaybackRateChangeBlocked",
-        PlayerBlockedOperation: transmit("MediaPlayerSynchronizer:PlayerBlockedOperation"),
-        SeekingPlayerToStartPosition: "MediaPlayerSynchronizer:SeekingPlayerToStartPosition",
+        UserTappedVideoToPlay: transmit(
+            "MediaPlayerSynchronizer:UserTappedVideoToPlay"
+        ),
+        PlaybackRateChangeBlocked:
+            "MediaPlayerSynchronizer:PlaybackRateChangeBlocked",
+        PlayerBlockedOperation: transmit(
+            "MediaPlayerSynchronizer:PlayerBlockedOperation"
+        ),
+        SeekingPlayerToStartPosition:
+            "MediaPlayerSynchronizer:SeekingPlayerToStartPosition",
         BeginSeekCalled: "MediaPlayerSynchronizer:BeginSeekCalled",
         EndSeekCalled: "MediaPlayerSynchronizer:EndSeekCalled",
         PlayCalled: "MediaPlayerSynchronizer:PlayCalled",
@@ -46,15 +53,25 @@ export const TelemetryEvents = {
         SetTrackCalled: transmit("SessionCoordinator:SetTrackCalled"),
         SetTrackDataCalled: "SessionCoordinator:SetTrackDataCalled",
         BeginSuspension: "SessionCoordinator:BeginSuspension",
-        BeginSuspensionAndWait: transmit("SessionCoordinator:BeginSuspensionAndWait"),
+        BeginSuspensionAndWait: transmit(
+            "SessionCoordinator:BeginSuspensionAndWait"
+        ),
         EndSuspension: "SessionCoordinator:EndSuspension",
-        EndSuspensionAndWait: transmit("SessionCoordinator:EndSuspensionAndWait"),
+        EndSuspensionAndWait: transmit(
+            "SessionCoordinator:EndSuspensionAndWait"
+        ),
         RemoteJoinReceived: "SessionCoordinator:RemoteJoinReceived",
-        RemoteSetTrackReceived: transmit("SessionCoordinator:RemoteSetTrackReceived"),
-        RemoteSetTrackDataReceived: transmit("SessionCoordinator:RemoteSetTrackDataReceived"),
+        RemoteSetTrackReceived: transmit(
+            "SessionCoordinator:RemoteSetTrackReceived"
+        ),
+        RemoteSetTrackDataReceived: transmit(
+            "SessionCoordinator:RemoteSetTrackDataReceived"
+        ),
         RemotePlayReceived: transmit("SessionCoordinator:RemotePlayReceived"),
         RemotePauseReceived: transmit("SessionCoordinator:RemotePauseReceived"),
-        RemoteSeekToReceived: transmit("SessionCoordinator:RemoteSeekToReceived"),
+        RemoteSeekToReceived: transmit(
+            "SessionCoordinator:RemoteSeekToReceived"
+        ),
     },
     GroupCoordinator: {
         TrackChanged: "GroupCoordinator:TrackChanged",
@@ -62,7 +79,8 @@ export const TelemetryEvents = {
         TrackDataChanged: "GroupCoordinator:TrackDataChanged",
         TrackDataChangeDelayed: "GroupCoordinator:TrackDataChangeDelayed",
         TransportStateChanged: "GroupCoordinator:TransportStateChanged",
-        TransportStateChangeDelayed: "GroupCoordinator:TransportStateChangeDelayed",
+        TransportStateChangeDelayed:
+            "GroupCoordinator:TransportStateChangeDelayed",
         BeginSoftSuspension: "GroupCoordinator:BeginSoftSuspension",
         CheckingForSyncIssues: "GroupCoordinator:CheckingForSyncIssues",
         TrackOutOfSync: transmit("GroupCoordinator:TrackOutOfSync"),

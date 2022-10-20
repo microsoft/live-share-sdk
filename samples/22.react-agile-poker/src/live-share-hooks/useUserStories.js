@@ -32,7 +32,9 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
 
     const assignPoints = useCallback(
         (points) => {
-            const updatedStory = userStories.find((story) => story.id === userStory.id);
+            const updatedStory = userStories.find(
+                (story) => story.id === userStory.id
+            );
             if (userStory) {
                 userStoriesMap?.set(userStory.id, {
                     text: updatedStory.text,
@@ -63,7 +65,13 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
             userStoriesMap.on("valueChanged", refreshUserStories);
             refreshUserStories();
         }
-    }, [userStoriesMap, userStoriesStarted, setUserStories, setStarted, refreshUserStories]);
+    }, [
+        userStoriesMap,
+        userStoriesStarted,
+        setUserStories,
+        setStarted,
+        refreshUserStories,
+    ]);
 
     return {
         userStoriesStarted,

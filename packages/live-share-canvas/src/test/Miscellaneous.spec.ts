@@ -37,7 +37,11 @@ describe("Color", () => {
     it("deserializes from #RRGGBB format", async () => {
         const deserializedColor = fromCssColor(serializedTestColor);
 
-        assertObjectsEqual(deserializedColor, testColor, `Colors are not equal`);
+        assertObjectsEqual(
+            deserializedColor,
+            testColor,
+            `Colors are not equal`
+        );
     });
 });
 
@@ -107,7 +111,11 @@ describe("Geometry", () => {
         for (const test of tests) {
             const actual = expandRect(test.sourceRect, test.point);
 
-            assertObjectsEqual(test.expected, actual, `Didn't produce the expected rectangle.`);
+            assertObjectsEqual(
+                test.expected,
+                actual,
+                `Didn't produce the expected rectangle.`
+            );
         }
     });
 
@@ -116,8 +124,18 @@ describe("Geometry", () => {
         const referencePoint = { x: 17, y: 44 };
         const offset = { x: -50, y: 50 };
 
-        const viewPortPoint = screenToViewport(expected, referencePoint, offset, 0.7);
-        const backToScreenPoint = viewportToScreen(viewPortPoint, referencePoint, offset, 0.7);
+        const viewPortPoint = screenToViewport(
+            expected,
+            referencePoint,
+            offset,
+            0.7
+        );
+        const backToScreenPoint = viewportToScreen(
+            viewPortPoint,
+            referencePoint,
+            offset,
+            0.7
+        );
 
         const actual = { ...backToScreenPoint, pressure: 1 };
 
@@ -142,7 +160,9 @@ describe("Geometry", () => {
 
             assert(
                 actual === test.expected,
-                `isPointInsideRectangle is incorrect for p = ${JSON.stringify(test.p)} and r = ${r}. Expected = ${
+                `isPointInsideRectangle is incorrect for p = ${JSON.stringify(
+                    test.p
+                )} and r = ${r}. Expected = ${
                     test.expected
                 }, actual = ${actual}`
             );
@@ -158,8 +178,14 @@ describe("Geometry", () => {
         const r: IRect = { left: 50, top: 50, right: 100, bottom: 100 };
         const tests: IRectangleTest[] = [
             { r: { left: 0, top: 0, right: 40, bottom: 40 }, expected: false },
-            { r: { left: 110, top: 110, right: 140, bottom: 140 }, expected: false },
-            { r: { left: 75, top: 75, right: 140, bottom: 140 }, expected: false },
+            {
+                r: { left: 110, top: 110, right: 140, bottom: 140 },
+                expected: false,
+            },
+            {
+                r: { left: 75, top: 75, right: 140, bottom: 140 },
+                expected: false,
+            },
             { r: { left: 0, top: 0, right: 75, bottom: 75 }, expected: false },
             { r: { left: 60, top: 60, right: 90, bottom: 90 }, expected: true },
         ];
@@ -169,7 +195,9 @@ describe("Geometry", () => {
 
             assert(
                 actual === test.expected,
-                `isRectangleInsideRectangle is incorrect for r1 = ${JSON.stringify(test.r)} and r2 = ${r}. Expected = ${
+                `isRectangleInsideRectangle is incorrect for r1 = ${JSON.stringify(
+                    test.r
+                )} and r2 = ${r}. Expected = ${
                     test.expected
                 }, actual = ${actual}`
             );
@@ -180,8 +208,14 @@ describe("Geometry", () => {
         const r: IRect = { left: 50, top: 50, right: 100, bottom: 100 };
         const tests: IRectangleTest[] = [
             { r: { left: 0, top: 0, right: 40, bottom: 40 }, expected: false },
-            { r: { left: 110, top: 110, right: 140, bottom: 140 }, expected: false },
-            { r: { left: 75, top: 75, right: 140, bottom: 140 }, expected: true },
+            {
+                r: { left: 110, top: 110, right: 140, bottom: 140 },
+                expected: false,
+            },
+            {
+                r: { left: 75, top: 75, right: 140, bottom: 140 },
+                expected: true,
+            },
             { r: { left: 0, top: 0, right: 75, bottom: 75 }, expected: true },
             { r: { left: 60, top: 60, right: 90, bottom: 90 }, expected: true },
         ];
@@ -191,7 +225,9 @@ describe("Geometry", () => {
 
             assert(
                 actual === test.expected,
-                `doRectanglesOverlap is incorrect for r1 = ${JSON.stringify(test.r)} and r2 = ${r}. Expected = ${
+                `doRectanglesOverlap is incorrect for r1 = ${JSON.stringify(
+                    test.r
+                )} and r2 = ${r}. Expected = ${
                     test.expected
                 }, actual = ${actual}`
             );
@@ -244,7 +280,9 @@ describe("Geometry", () => {
 
             assert(
                 actual === test.expected,
-                `segmentsMayIntersect is incorrect for s1 = ${JSON.stringify(test.s)} and s2 = ${s}. Expected = ${
+                `segmentsMayIntersect is incorrect for s1 = ${JSON.stringify(
+                    test.s
+                )} and s2 = ${s}. Expected = ${
                     test.expected
                 }, actual = ${actual}`
             );
@@ -284,7 +322,9 @@ describe("Geometry", () => {
                 assertObjectsEqual(
                     test.expected,
                     actual,
-                    `getSegmentsIntersection is incorrect for s1 = ${JSON.stringify(test.s)} and s2 = ${s}`
+                    `getSegmentsIntersection is incorrect for s1 = ${JSON.stringify(
+                        test.s
+                    )} and s2 = ${s}`
                 );
             } else if (!actual && !test.expected) {
                 // The test passed
@@ -293,7 +333,9 @@ describe("Geometry", () => {
                     false,
                     `getSegmentsIntersection is incorrect for s1 = ${JSON.stringify(
                         test.s
-                    )} and s2 = ${s}. Expected = ${JSON.stringify(test.expected)}, actual = ${JSON.stringify(actual)}`
+                    )} and s2 = ${s}. Expected = ${JSON.stringify(
+                        test.expected
+                    )}, actual = ${JSON.stringify(actual)}`
                 );
             }
         }

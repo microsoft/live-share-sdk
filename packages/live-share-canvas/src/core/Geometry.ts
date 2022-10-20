@@ -42,7 +42,10 @@ export interface IRect {
  * @param pressure The pressure.
  * @returns The adjusted size.
  */
-export function getPressureAdjustedSize(baseSize: number, pressure: number): number {
+export function getPressureAdjustedSize(
+    baseSize: number,
+    pressure: number
+): number {
     return baseSize * (pressure * 1.5 + 0.25);
 }
 
@@ -78,7 +81,10 @@ export function getDistanceBetweenPoints(p1: IPoint, p2: IPoint): number {
  * @param p2 The second point.
  * @returns The square of the distance between `p1` and `p2`.
  */
-export function getSquaredDistanceBetweenPoints(p1: IPoint, p2: IPoint): number {
+export function getSquaredDistanceBetweenPoints(
+    p1: IPoint,
+    p2: IPoint
+): number {
     return (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
 }
 

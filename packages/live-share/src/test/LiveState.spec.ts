@@ -27,17 +27,27 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
     beforeEach(async () => {
         provider = getTestObjectProvider();
         const container1 = await provider.createContainer(LiveState.factory);
-        object1 = await requestFluidObject<LiveState<TestStateData>>(container1, "default");
+        object1 = await requestFluidObject<LiveState<TestStateData>>(
+            container1,
+            "default"
+        );
 
         const container2 = await provider.loadContainer(LiveState.factory);
-        object2 = await requestFluidObject<LiveState<TestStateData>>(container2, "default");
+        object2 = await requestFluidObject<LiveState<TestStateData>>(
+            container2,
+            "default"
+        );
 
         // need to be connected to send signals
         if (!container1.connected) {
-            await new Promise((resolve) => container1.once("connected", resolve));
+            await new Promise((resolve) =>
+                container1.once("connected", resolve)
+            );
         }
         if (!container2.connected) {
-            await new Promise((resolve) => container2.once("connected", resolve));
+            await new Promise((resolve) =>
+                container2.once("connected", resolve)
+            );
         }
     });
 
@@ -48,7 +58,10 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                 if (local) {
                     assert(state == "newState", `object1: state == '${state}'`);
                     assert(typeof data == "object", `object1: data is NULL`);
-                    assert(data.value == "newValue", `object1: data == '${data}'`);
+                    assert(
+                        data.value == "newValue",
+                        `object1: data == '${data}'`
+                    );
                     object1done.resolve();
                 }
             } catch (err) {
@@ -63,7 +76,10 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                 if (!local) {
                     assert(state == "newState", `object2: state == '${state}'`);
                     assert(typeof data == "object", `object2: data is NULL`);
-                    assert(data.value == "newValue", `object2: data == '${data}'`);
+                    assert(
+                        data.value == "newValue",
+                        `object2: data == '${data}'`
+                    );
                     object2done.resolve();
                 }
             } catch (err) {
@@ -83,8 +99,14 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         object1.on("stateChanged", (state, data, local) => {
             try {
                 if (!local) {
-                    assert(state == "testState", `object1: state == '${state}'`);
-                    assert(data.value == "secondValue", `object1: data == '${data}'`);
+                    assert(
+                        state == "testState",
+                        `object1: state == '${state}'`
+                    );
+                    assert(
+                        data.value == "secondValue",
+                        `object1: data == '${data}'`
+                    );
                     done.resolve();
                 }
             } catch (err) {
@@ -96,8 +118,14 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         object2.on("stateChanged", (state, data, local) => {
             try {
                 if (!local) {
-                    assert(state == "testState", `object2: state == '${state}'`);
-                    assert(data.value == "firstValue", `object2: data == '${data}'`);
+                    assert(
+                        state == "testState",
+                        `object2: state == '${state}'`
+                    );
+                    assert(
+                        data.value == "firstValue",
+                        `object2: data == '${data}'`
+                    );
                     object2.changeState(state, { value: "secondValue" });
                 }
             } catch (err) {

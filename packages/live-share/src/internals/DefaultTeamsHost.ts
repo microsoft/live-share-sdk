@@ -32,7 +32,9 @@ export class DefaultTeamsHost implements ILiveShareHost {
         return this._interactive.getFluidContainerId();
     }
 
-    public setFluidContainerId(containerId: string): Promise<IFluidContainerInfo> {
+    public setFluidContainerId(
+        containerId: string
+    ): Promise<IFluidContainerInfo> {
         return this._interactive.setFluidContainerId(containerId);
     }
 
@@ -49,7 +51,9 @@ export class DefaultTeamsHost implements ILiveShareHost {
     }
 
     public static async getTeamsHost(): Promise<ILiveShareHost> {
-        const teamsApi = (await import("@microsoft/teams-js")) as any as TeamsClientApi;
+        const teamsApi = (await import(
+            "@microsoft/teams-js"
+        )) as any as TeamsClientApi;
         if (teamsApi.liveShare) {
             return teamsApi.liveShare.getHost();
         } else if (teamsApi.interactive) {

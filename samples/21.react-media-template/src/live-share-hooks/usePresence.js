@@ -34,7 +34,11 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
         if (!presence || !localUser) {
             return false;
         }
-        return localUser.roles.filter((role) => acceptPlaybackChangesFrom.includes(role)).length > 0;
+        return (
+            localUser.roles.filter((role) =>
+                acceptPlaybackChangesFrom.includes(role)
+            ).length > 0
+        );
     }, [localUser, presence, acceptPlaybackChangesFrom]);
 
     // Effect which registers SharedPresence event listeners before joining space
@@ -42,7 +46,11 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
         if (presence && !presence.isInitialized && context) {
             // Register presenceChanged event listener
             presence.on("presenceChanged", (userPresence, local) => {
-                console.log("usePresence: presence received", userPresence, local);
+                console.log(
+                    "usePresence: presence received",
+                    userPresence,
+                    local
+                );
                 if (local) {
                     const user = {
                         userId: userPresence.userId,
@@ -69,10 +77,15 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
                 const userArray = presence.toArray();
                 setUsers(userArray);
             });
-            const userPrincipalName = context?.user.userPrincipalName ?? "someone@contoso.com";
+            const userPrincipalName =
+                context?.user.userPrincipalName ?? "someone@contoso.com";
             const name = `@${userPrincipalName.split("@")[0]}`;
             // Start presence tracking
-            console.log("usePresence: starting presence for userId", context?.user.id, context?.user.displayName);
+            console.log(
+                "usePresence: starting presence for userId",
+                context?.user.id,
+                context?.user.displayName
+            );
             presence
                 .initialize(undefined, {
                     teamsUserId: context.user?.id,

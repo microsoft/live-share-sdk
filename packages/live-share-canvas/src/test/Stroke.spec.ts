@@ -1,7 +1,11 @@
 import "mocha";
 import { strict as assert } from "assert";
 import { Stroke } from "../core/Stroke";
-import { assertPointArraysEqual, copyPointArrayAndDuplidateEachPoint, reducePointArrayPrecision } from "./Utils.spec";
+import {
+    assertPointArraysEqual,
+    copyPointArrayAndDuplidateEachPoint,
+    reducePointArrayPrecision,
+} from "./Utils.spec";
 import { IPointerPoint } from "../core";
 
 const testPoints: IPointerPoint[] = [
@@ -447,7 +451,10 @@ describe("Stroke", () => {
 
         const serializedStroke = stroke.serialize();
 
-        assert(serializedStroke === expectedSerialedStroke, `The stroke didn't serialize as expected.`);
+        assert(
+            serializedStroke === expectedSerialedStroke,
+            `The stroke didn't serialize as expected.`
+        );
     });
 
     it("deserializes as expected", async () => {
@@ -458,12 +465,17 @@ describe("Stroke", () => {
         const stroke = new Stroke();
         stroke.deserialize(serialedStroke);
 
-        assert(stroke.id === id, `Deserialized stroke id should be ${id} but is ${stroke.id}`);
+        assert(
+            stroke.id === id,
+            `Deserialized stroke id should be ${id} but is ${stroke.id}`
+        );
         assert(
             stroke.timeStamp === timeStamp,
             `Deserialized stroke timeStamp should be ${timeStamp} but is ${stroke.timeStamp}`
         );
 
-        assertPointArraysEqual(reducePointArrayPrecision(testPoints), [...stroke]);
+        assertPointArraysEqual(reducePointArrayPrecision(testPoints), [
+            ...stroke,
+        ]);
     });
 });

@@ -42,19 +42,26 @@ export class SharedClock implements ITimestampProvider {
      */
     public getTimestamp(): number {
         if (!this._serverTime) {
-            throw new Error(`SharedClock: can't call getTimestamp() before calling initialize().`);
+            throw new Error(
+                `SharedClock: can't call getTimestamp() before calling initialize().`
+            );
         }
 
         // Return adjusted timestamp and save last
         // - We never want to generate the same timestamp twice and we always want a greater
         //   timestamp then what we previously sent. This can happen if our accuracy improves
         //   and we end up with a smaller offset then before.
-        return (this._lastTimeSent = Math.max(new Date().getTime() + this._serverTime.offset, this._lastTimeSent + 1));
+        return (this._lastTimeSent = Math.max(
+            new Date().getTime() + this._serverTime.offset,
+            this._lastTimeSent + 1
+        ));
     }
 
     public getMaxTimestampError(): number {
         if (!this._serverTime) {
-            throw new Error(`SharedClock: can't call getTimestamp() before calling initialize().`);
+            throw new Error(
+                `SharedClock: can't call getTimestamp() before calling initialize().`
+            );
         }
 
         return Math.floor(this._serverTime.requestLatency / 2);
@@ -69,7 +76,10 @@ export class SharedClock implements ITimestampProvider {
         try {
             await this.improveAccuracy();
         } finally {
-            performance.measure(`TeamsSync: clock startup`, `TeamsSync: starting clock`);
+            performance.measure(
+                `TeamsSync: clock startup`,
+                `TeamsSync: starting clock`
+            );
         }
     }
 
@@ -94,7 +104,10 @@ export class SharedClock implements ITimestampProvider {
     private async improveAccuracy(): Promise<void> {
         // Check for a more accurate time offset.
         const offset = await this.getSessionTimeOffset();
-        if (!this._serverTime || offset.requestLatency < this._serverTime.requestLatency) {
+        if (
+            !this._serverTime ||
+            offset.requestLatency < this._serverTime.requestLatency
+        ) {
             // We got a more accurate time offset.
             //this.logger.trace(`SharedClock accuracy improved to ${offset.offset}ms by latency of ${offset.requestLatency}ms.`);
             this._serverTime = offset;
@@ -106,7 +119,10 @@ export class SharedClock implements ITimestampProvider {
 
         // Start sync timer timer
         if (this._retries <= SHARED_CLOCK_IMPROVE_ACCURACY_ATTEMPTS) {
-            this._syncTimer = setTimeout(this.improveAccuracy.bind(this), SHARED_CLOCK_IMPROVE_ACCURACY_INTERVAL);
+            this._syncTimer = setTimeout(
+                this.improveAccuracy.bind(this),
+                SHARED_CLOCK_IMPROVE_ACCURACY_INTERVAL
+            );
         } else {
             this._syncTimer = undefined;
         }
@@ -125,7 +141,8 @@ export class SharedClock implements ITimestampProvider {
 
         // Compute request latency and session time.
         const requestLatency = endCall - startCall;
-        const serverTimeInUtc = serverTime.ntpTimeInUTC + Math.floor(requestLatency / 2);
+        const serverTimeInUtc =
+            serverTime.ntpTimeInUTC + Math.floor(requestLatency / 2);
 
         // Return offset
         return {

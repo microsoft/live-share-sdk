@@ -9,7 +9,10 @@ import { v4 } from "uuid";
 
 export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {
     private _connected: MockContainerRuntimeSignaler[] = [];
-    private _listeners: ((message: IInboundSignalMessage, local: boolean) => void)[] = [];
+    private _listeners: ((
+        message: IInboundSignalMessage,
+        local: boolean
+    ) => void)[] = [];
     private _sentSignals: IInboundSignalMessage[] = [];
     private _receivedSignals: IInboundSignalMessage[] = [];
 
@@ -27,7 +30,10 @@ export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {
         return this._receivedSignals.filter((message) => message.type == type);
     }
 
-    public on(event: "signal", listener: (message: IInboundSignalMessage, local: boolean) => void): this {
+    public on(
+        event: "signal",
+        listener: (message: IInboundSignalMessage, local: boolean) => void
+    ): this {
         this._listeners.push((message, local) => {
             if (local) {
                 this._sentSignals.push(message);
@@ -57,7 +63,9 @@ export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {
         this._listeners.forEach((fn) => fn(message, local));
     }
 
-    public static connectContainers(runtimes: MockContainerRuntimeSignaler[]): void {
+    public static connectContainers(
+        runtimes: MockContainerRuntimeSignaler[]
+    ): void {
         for (let i = 0; i < runtimes.length; i++) {
             const rt = runtimes[i];
             for (let j = 0; j < runtimes.length; j++) {

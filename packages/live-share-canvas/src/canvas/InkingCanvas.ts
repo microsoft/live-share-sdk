@@ -3,7 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IPointerPoint, IPoint, viewportToScreen, IStroke, IBrush } from "../core";
+import {
+    IPointerPoint,
+    IPoint,
+    viewportToScreen,
+    IStroke,
+    IBrush,
+} from "../core";
 import { IQuad, TWO_PI } from "../core/Internals";
 
 /**
@@ -40,7 +46,8 @@ export abstract class InkingCanvas {
     public static highlighterOpacity = 0.5;
 
     private _context: CanvasRenderingContext2D;
-    private _additionalLayers: Set<CanvasRenderingContext2D> = new Set<CanvasRenderingContext2D>();
+    private _additionalLayers: Set<CanvasRenderingContext2D> =
+        new Set<CanvasRenderingContext2D>();
     private _strokeStarted: boolean = false;
     private _brush!: IBrush;
     private _offset: Readonly<IPoint> = { x: 0, y: 0 };
@@ -62,7 +69,10 @@ export abstract class InkingCanvas {
             desynchronized: false,
         };
 
-        const context: CanvasRenderingContext2D | null = canvas.getContext("2d", default2DOptions);
+        const context: CanvasRenderingContext2D | null = canvas.getContext(
+            "2d",
+            default2DOptions
+        );
 
         if (context === null) {
             throw new Error("Could not get 2D context from canvas.");
@@ -71,7 +81,11 @@ export abstract class InkingCanvas {
         return context;
     }
 
-    private resizeLayer(context: CanvasRenderingContext2D, width: number, height: number) {
+    private resizeLayer(
+        context: CanvasRenderingContext2D,
+        width: number,
+        height: number
+    ) {
         context.canvas.style.width = `${width}px`;
         context.canvas.style.height = `${height}px`;
 
@@ -85,7 +99,11 @@ export abstract class InkingCanvas {
         if (this._parentElement) {
             this._parentElement.appendChild(context.canvas);
 
-            this.resizeLayer(context, this.clientDimensions.width, this.clientDimensions.height);
+            this.resizeLayer(
+                context,
+                this.clientDimensions.width,
+                this.clientDimensions.height
+            );
         }
     }
 
@@ -97,8 +115,12 @@ export abstract class InkingCanvas {
 
     private get clientDimensions(): IDimensions {
         if (!this._clientDimensions) {
-            const clientWidth = this._parentElement ? this._parentElement.clientWidth : 100;
-            const clientHeight = this._parentElement ? this._parentElement.clientHeight : 100;
+            const clientWidth = this._parentElement
+                ? this._parentElement.clientWidth
+                : 100;
+            const clientHeight = this._parentElement
+                ? this._parentElement.clientHeight
+                : 100;
 
             this._clientDimensions = {
                 width: clientWidth,
@@ -125,13 +147,15 @@ export abstract class InkingCanvas {
         this._renderTimeout = window.requestAnimationFrame(doRender);
     }
 
-    protected viewportToScreen(p: IPoint): IPointerPoint;
     protected viewportToScreen(p: IPointerPoint): IPointerPoint {
         return {
             ...viewportToScreen(
                 p,
                 this.referencePoint === "center"
-                    ? { x: this.clientDimensions.halfWidth, y: this.clientDimensions.halfHeight }
+                    ? {
+                          x: this.clientDimensions.halfWidth,
+                          y: this.clientDimensions.halfHeight,
+                      }
                     : { x: 0, y: 0 },
                 this.offset,
                 this.scale
@@ -248,10 +272,20 @@ export abstract class InkingCanvas {
      * @param center The center of the circle, in pixels.
      * @param radius The radius of the circle, in pixels.
      */
-    protected renderCircle(context: CanvasRenderingContext2D, center: IPoint, radius: number): void {
+    protected renderCircle(
+        context: CanvasRenderingContext2D,
+        center: IPoint,
+        radius: number
+    ): void {
         const transformedCenter = this.viewportToScreen(center);
 
-        context.arc(transformedCenter.x, transformedCenter.y, radius * this._scale, 0, TWO_PI);
+        context.arc(
+            transformedCenter.x,
+            transformedCenter.y,
+            radius * this._scale,
+            0,
+            TWO_PI
+        );
     }
 
     /**
@@ -312,9 +346,11 @@ export abstract class InkingCanvas {
             if (opacity > 0) {
                 this.canvas.style.opacity = opacity.toString();
 
-                this._additionalLayers.forEach((context: CanvasRenderingContext2D) => {
-                    context.canvas.style.opacity = opacity.toString();
-                });
+                this._additionalLayers.forEach(
+                    (context: CanvasRenderingContext2D) => {
+                        context.canvas.style.opacity = opacity.toString();
+                    }
+                );
 
                 window.setTimeout(doFadeOut, InkingCanvas.fadeOutDuration / 10);
 
@@ -366,7 +402,12 @@ export abstract class InkingCanvas {
 
             // Reset transform to identity to clear the whole canvas
             context.setTransform(1, 0, 0, 1, 0, 0);
-            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+            context.clearRect(
+                0,
+                0,
+                context.canvas.width,
+                context.canvas.height
+            );
 
             context.restore();
         };

@@ -5,7 +5,13 @@ export const useVisibleVideoSize = (viewportWidth, viewportHeight) => {
     const [videoSize, setVideoSize] = useState(videoSizeRef.current);
     // Effect for calculating the rectangle that matches the visible video size
     useEffect(() => {
-        const result = { width: 0, height: 0, xOffset: 0, yOffset: 0, fScaleToTargetWidth: true };
+        const result = {
+            width: 0,
+            height: 0,
+            xOffset: 0,
+            yOffset: 0,
+            fScaleToTargetWidth: true,
+        };
         const videoWidth = 1920;
         const videoHeight = 1080;
 
@@ -35,7 +41,10 @@ export const useVisibleVideoSize = (viewportWidth, viewportHeight) => {
         }
         result.xOffset = Math.floor((viewportWidth - result.width) / 2);
         result.yOffset = Math.floor((viewportHeight - result.height) / 2);
-        if (result.xOffset !== videoSizeRef.current?.xOffset || result.yOffset !== videoSizeRef.current?.yOffset) {
+        if (
+            result.xOffset !== videoSizeRef.current?.xOffset ||
+            result.yOffset !== videoSizeRef.current?.yOffset
+        ) {
             videoSizeRef.current = result;
             setVideoSize(videoSizeRef.current);
         }

@@ -8,6 +8,8 @@ function getInitialMediaId() {
 
 export function getInitialMediaItem() {
     const mediaId = getInitialMediaId();
-    const mediaItem = mediaId ? mediaList.find((mediaItem) => mediaItem.id === mediaId) : mediaList[0];
+    const mediaItem = mediaId
+        ? mediaList.find((mediaItem) => mediaItem.id === mediaId)
+        : mediaList[0];
     return mediaItem;
 }

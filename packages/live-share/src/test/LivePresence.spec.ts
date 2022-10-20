@@ -25,17 +25,27 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
     beforeEach(async () => {
         provider = getTestObjectProvider();
         const container1 = await provider.createContainer(LivePresence.factory);
-        object1 = await requestFluidObject<LivePresence<{ foo: string }>>(container1, "default");
+        object1 = await requestFluidObject<LivePresence<{ foo: string }>>(
+            container1,
+            "default"
+        );
 
         const container2 = await provider.loadContainer(LivePresence.factory);
-        object2 = await requestFluidObject<LivePresence<{ foo: string }>>(container2, "default");
+        object2 = await requestFluidObject<LivePresence<{ foo: string }>>(
+            container2,
+            "default"
+        );
 
         // need to be connected to send signals
         if (!container1.connected) {
-            await new Promise((resolve) => container1.once("connected", resolve));
+            await new Promise((resolve) =>
+                container1.once("connected", resolve)
+            );
         }
         if (!container2.connected) {
-            await new Promise((resolve) => container2.once("connected", resolve));
+            await new Promise((resolve) =>
+                container2.once("connected", resolve)
+            );
         }
     });
 
@@ -45,9 +55,18 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             try {
                 if (!local) {
                     assert(user != null, `user1: Null user arg`);
-                    assert(user.userId == "user2", `user1: Unexpected LOCAL userId: ${user.userId}`);
-                    assert(user.state == PresenceState.online, `user1: Unexpected presence state of ${user.state}`);
-                    assert(user.data == undefined, `user1: Unexpected data object of ${user.data}`);
+                    assert(
+                        user.userId == "user2",
+                        `user1: Unexpected LOCAL userId: ${user.userId}`
+                    );
+                    assert(
+                        user.state == PresenceState.online,
+                        `user1: Unexpected presence state of ${user.state}`
+                    );
+                    assert(
+                        user.data == undefined,
+                        `user1: Unexpected data object of ${user.data}`
+                    );
                     object1done.resolve();
                 }
             } catch (err) {
@@ -64,9 +83,18 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             try {
                 if (local) {
                     assert(user != null, `user2: Null user arg`);
-                    assert(user.userId == "user2", `user2: Unexpected REMOTE userId: ${user.userId}`);
-                    assert(user.state == PresenceState.online, `user2: Unexpected presence state of ${user.state}`);
-                    assert(user.data == undefined, `user2: Unexpected data object of ${user.data}`);
+                    assert(
+                        user.userId == "user2",
+                        `user2: Unexpected REMOTE userId: ${user.userId}`
+                    );
+                    assert(
+                        user.state == PresenceState.online,
+                        `user2: Unexpected presence state of ${user.state}`
+                    );
+                    assert(
+                        user.data == undefined,
+                        `user2: Unexpected data object of ${user.data}`
+                    );
                     object2done.resolve();
                 }
             } catch (err) {
@@ -84,8 +112,14 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         object1.on("presenceChanged", (user, local) => {
             try {
                 if (local) {
-                    assert(user.state == PresenceState.away, `user1: Unexpected presence state of ${user.state}`);
-                    assert(user.data == undefined, `user1: Unexpected data object of ${user.data}`);
+                    assert(
+                        user.state == PresenceState.away,
+                        `user1: Unexpected presence state of ${user.state}`
+                    );
+                    assert(
+                        user.data == undefined,
+                        `user1: Unexpected data object of ${user.data}`
+                    );
                     object1done.resolve();
                 }
             } catch (err) {
@@ -98,8 +132,14 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         object2.on("presenceChanged", (user, local) => {
             try {
                 if (local) {
-                    assert(user.state == PresenceState.offline, `user2: Unexpected presence state of ${user.state}`);
-                    assert(user.data == undefined, `user2: Unexpected data object of ${user.data}`);
+                    assert(
+                        user.state == PresenceState.offline,
+                        `user2: Unexpected presence state of ${user.state}`
+                    );
+                    assert(
+                        user.data == undefined,
+                        `user2: Unexpected data object of ${user.data}`
+                    );
                     object2done.resolve();
                 }
             } catch (err) {
@@ -118,7 +158,10 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             try {
                 if (local) {
                     assert(user.data, `user1: NULL data`);
-                    assert(user.data.foo == "bar", `user1: Unexpected data object of ${user.data}`);
+                    assert(
+                        user.data.foo == "bar",
+                        `user1: Unexpected data object of ${user.data}`
+                    );
                     object1done.resolve();
                 }
             } catch (err) {
@@ -135,14 +178,21 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             try {
                 if (local) {
                     assert(user.data, `user2: NULL data`);
-                    assert(user.data.foo == "bar", `user2: Unexpected data object of ${user.data}`);
+                    assert(
+                        user.data.foo == "bar",
+                        `user2: Unexpected data object of ${user.data}`
+                    );
                     object2done.resolve();
                 }
             } catch (err) {
                 object2done.reject(err);
             }
         });
-        await object2.initialize("user2", { foo: "bar" }, PresenceState.offline);
+        await object2.initialize(
+            "user2",
+            { foo: "bar" },
+            PresenceState.offline
+        );
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -156,7 +206,10 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 if (!local) {
                     if (triggered) {
                         assert(user.data, `user1: NULL data`);
-                        assert(user.data.foo == "bar", `user1: Unexpected data object of ${user.data}`);
+                        assert(
+                            user.data.foo == "bar",
+                            `user1: Unexpected data object of ${user.data}`
+                        );
                         assert(user.state == PresenceState.offline);
                         object1done.resolve();
                     } else {
@@ -312,9 +365,15 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         const user1 = object1.getPresenceForUser("user1");
         const user2 = object1.getPresenceForUser("user2");
 
-        assert(user1 && user1.userId == "user1", `user1: missing or wrong user returned`);
+        assert(
+            user1 && user1.userId == "user1",
+            `user1: missing or wrong user returned`
+        );
         assert(user1.isLocalUser, `user1: not local user`);
-        assert(user2 && user2.userId == "user2", `user2: missing or wrong user returned`);
+        assert(
+            user2 && user2.userId == "user2",
+            `user2: missing or wrong user returned`
+        );
         assert(!user2.isLocalUser, `user2: is local user`);
     });
 
@@ -339,7 +398,10 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         let count = 0;
         object1.forEach((user) => {
             count++;
-            assert(user.state == PresenceState.online, `user[${user.userId}] is ${user.state}`);
+            assert(
+                user.state == PresenceState.online,
+                `user[${user.userId}] is ${user.state}`
+            );
         });
 
         assert(count == 2, `Wrong number of users`);

@@ -5,7 +5,10 @@
 
 import { IEvent } from "@microsoft/live-share";
 import EventEmitter from "events";
-import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
+import {
+    GroupPlaybackTrack,
+    GroupPlaybackTrackEvents,
+} from "./GroupPlaybackTrack";
 
 /**
  * @hidden
@@ -69,7 +72,10 @@ export class GroupPlaybackTrackData extends EventEmitter {
         }
 
         // Ignore state changes that have the same timestamp and the clientId sorts higher.
-        if (event.timestamp == current.timestamp && event.clientId.localeCompare(current.clientId) > 0) {
+        if (
+            event.timestamp == current.timestamp &&
+            event.clientId.localeCompare(current.clientId) > 0
+        ) {
             return false;
         }
 
@@ -82,7 +88,10 @@ export class GroupPlaybackTrackData extends EventEmitter {
         this._current = event;
 
         // Notify listeners
-        this.emit(PlaybackTrackDataEvents.dataChange, { type: PlaybackTrackDataEvents.dataChange, data: event.data });
+        this.emit(PlaybackTrackDataEvents.dataChange, {
+            type: PlaybackTrackDataEvents.dataChange,
+            data: event.data,
+        });
 
         return true;
     }

@@ -11,7 +11,10 @@ import { v4 } from "uuid";
 
 export class MockRuntimeSignaler implements IRuntimeSignaler {
     private _connected: MockRuntimeSignaler[] = [];
-    private _signalListeners: ((message: IInboundSignalMessage, local: boolean) => void)[] = [];
+    private _signalListeners: ((
+        message: IInboundSignalMessage,
+        local: boolean
+    ) => void)[] = [];
     private _connectedListeners: ((clientId: string) => void)[] = [];
 
     public constructor(hasClientId = true, isConnected = true) {
@@ -33,7 +36,10 @@ export class MockRuntimeSignaler implements IRuntimeSignaler {
     }
 
     public on(event: "connected", listener: (clientId: string) => void): this;
-    public on(event: "signal", listener: (message: IInboundSignalMessage, local: boolean) => void): this;
+    public on(
+        event: "signal",
+        listener: (message: IInboundSignalMessage, local: boolean) => void
+    ): this;
     public on(event: string, listener: any) {
         switch (event) {
             case "connected":

@@ -15,7 +15,10 @@ export class LaserPointerCanvas extends WetCanvas {
     private _trailingPointsRemovalInterval?: number;
 
     private scheduleTrailingPointsRemoval() {
-        if (this._trailingPointsRemovalInterval === undefined && this.points.length > 1) {
+        if (
+            this._trailingPointsRemovalInterval === undefined &&
+            this.points.length > 1
+        ) {
             this._trailingPointsRemovalInterval = window.setTimeout(() => {
                 const pointsToRemove = Math.ceil((this.points.length - 1) / 5);
 
@@ -23,7 +26,8 @@ export class LaserPointerCanvas extends WetCanvas {
 
                 if (this.points.length > 0) {
                     let currentPressure = 0.5;
-                    const pressureStep = (0.9 - currentPressure) / this.points.length;
+                    const pressureStep =
+                        (0.9 - currentPressure) / this.points.length;
 
                     for (let i = this.points.length - 1; i >= 0; i--) {
                         this.points[i].pressure = currentPressure;

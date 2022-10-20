@@ -43,7 +43,9 @@ export class PointerInputProvider extends InputProvider {
 
             this._activePointerId = pointerId;
         } catch (e) {
-            console.error(`Could not capture pointer with id ${pointerId}: ${e}`);
+            console.error(
+                `Could not capture pointer with id ${pointerId}: ${e}`
+            );
         }
     }
 
@@ -52,7 +54,9 @@ export class PointerInputProvider extends InputProvider {
             try {
                 this.element.releasePointerCapture(this._activePointerId);
             } catch (e) {
-                console.error(`Could not release pointer with id ${this._activePointerId}: ${e}`);
+                console.error(
+                    `Could not release pointer with id ${this._activePointerId}: ${e}`
+                );
             }
 
             this._activePointerId = undefined;

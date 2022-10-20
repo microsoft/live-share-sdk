@@ -87,10 +87,14 @@ describe("LiveEventScope", () => {
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime, [UserMeetingRole.organizer]);
+        const localScope = new LiveEventScope(signalers.localRuntime, [
+            UserMeetingRole.organizer,
+        ]);
         localScope.onEvent("test", (evt, local) => triggered++);
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [UserMeetingRole.organizer]);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [
+            UserMeetingRole.organizer,
+        ]);
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
         localScope.sendEvent("test", {});
@@ -110,10 +114,14 @@ describe("LiveEventScope", () => {
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime, [UserMeetingRole.organizer]);
+        const localScope = new LiveEventScope(signalers.localRuntime, [
+            UserMeetingRole.organizer,
+        ]);
         localScope.onEvent("test", (evt, local) => triggered++);
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [UserMeetingRole.organizer]);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [
+            UserMeetingRole.organizer,
+        ]);
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
         localScope.sendEvent("test", {});
@@ -156,15 +164,22 @@ describe("LiveEventScope", () => {
     });
 
     it("Should support senders with multiple roles", (done) => {
-        const verifier = new MockRoleVerifier([UserMeetingRole.organizer, UserMeetingRole.presenter]);
+        const verifier = new MockRoleVerifier([
+            UserMeetingRole.organizer,
+            UserMeetingRole.presenter,
+        ]);
         LiveEvent.setRoleVerifier(verifier);
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime, [UserMeetingRole.presenter]);
+        const localScope = new LiveEventScope(signalers.localRuntime, [
+            UserMeetingRole.presenter,
+        ]);
         localScope.onEvent("test", (evt, local) => triggered++);
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [UserMeetingRole.presenter]);
+        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [
+            UserMeetingRole.presenter,
+        ]);
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
         localScope.sendEvent("test", {});

@@ -62,7 +62,12 @@ export const useMediaSession = (
                 sendNotification(`changed the ${selectedMediaItem.type}`);
             }
         },
-        [synchronizerRef, selectedMediaItem, localUserIsPresenting, sendNotification]
+        [
+            synchronizerRef,
+            selectedMediaItem,
+            localUserIsPresenting,
+            sendNotification,
+        ]
     );
 
     // callback method to play through the synchronizer
@@ -75,7 +80,8 @@ export const useMediaSession = (
             // Stop following the presenter and play
             if (!suspension) {
                 // Suspends media session coordinator until suspension is ended
-                const newSuspension = mediaSession.coordinator.beginSuspension();
+                const newSuspension =
+                    mediaSession.coordinator.beginSuspension();
                 setSuspension(newSuspension);
             }
             player.play();
@@ -101,7 +107,8 @@ export const useMediaSession = (
             // Stop following the presenter and pause
             if (!suspension) {
                 // Suspends media session coordinator until suspension is ended
-                const newSuspension = mediaSession.coordinator.beginSuspension();
+                const newSuspension =
+                    mediaSession.coordinator.beginSuspension();
                 setSuspension(newSuspension);
             }
             player.pause();
@@ -127,7 +134,8 @@ export const useMediaSession = (
             } else {
                 // Stop following the presenter and seek
                 if (!suspension) {
-                    const newSuspension = mediaSession.coordinator.beginSuspension();
+                    const newSuspension =
+                        mediaSession.coordinator.beginSuspension();
                     setSuspension(newSuspension);
                 }
                 player.currentTime = timestamp;
@@ -153,8 +161,16 @@ export const useMediaSession = (
 
     // effect that sets up the LiveMediaSession and MediaSynchronizer
     useEffect(() => {
-        if (mediaSession && !mediaSession.isInitialized && !synchronizerRef.current && selectedMediaItem && player) {
-            console.log("useSharedSynchronizer: setting up player for synchronizer");
+        if (
+            mediaSession &&
+            !mediaSession.isInitialized &&
+            !synchronizerRef.current &&
+            selectedMediaItem &&
+            player
+        ) {
+            console.log(
+                "useSharedSynchronizer: setting up player for synchronizer"
+            );
             // Query the HTML5 media element from the document and set initial src
             // Begin synchronizing a MediaSynchronizer for the player and set reference
             synchronizerRef.current = mediaSession.synchronize(player);
@@ -168,22 +184,39 @@ export const useMediaSession = (
                 setStarted(true);
                 if (inTeams()) {
                     // Set up audio ducking
-                    console.log("useMediaSession: registering speaking state change handler");
-                    microsoftTeams.meeting.registerSpeakingStateChangeHandler((speakingState) => {
-                        console.log("audio state changed:", speakingState.isSpeakingDetected);
-                        if (speakingState.isSpeakingDetected && !volumeTimer.current) {
-                            volumeTimer.current = setInterval(() => {
-                                synchronizerRef.current?.volumeLimiter?.lowerVolume();
-                            }, 250);
-                        } else if (volumeTimer.current) {
-                            clearInterval(volumeTimer.current);
-                            volumeTimer.current = undefined;
+                    console.log(
+                        "useMediaSession: registering speaking state change handler"
+                    );
+                    microsoftTeams.meeting.registerSpeakingStateChangeHandler(
+                        (speakingState) => {
+                            console.log(
+                                "audio state changed:",
+                                speakingState.isSpeakingDetected
+                            );
+                            if (
+                                speakingState.isSpeakingDetected &&
+                                !volumeTimer.current
+                            ) {
+                                volumeTimer.current = setInterval(() => {
+                                    synchronizerRef.current?.volumeLimiter?.lowerVolume();
+                                }, 250);
+                            } else if (volumeTimer.current) {
+                                clearInterval(volumeTimer.current);
+                                volumeTimer.current = undefined;
+                            }
                         }
-                    });
+                    );
                 }
             });
         }
-    }, [mediaSession, selectedMediaItem, player, acceptPlaybackChangesFrom, localUserIsPresenting, setStarted]);
+    }, [
+        mediaSession,
+        selectedMediaItem,
+        player,
+        acceptPlaybackChangesFrom,
+        localUserIsPresenting,
+        setStarted,
+    ]);
 
     // Hook to set player to view only mode when user is not the presenter and set track if needed
     useEffect(() => {

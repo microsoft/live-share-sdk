@@ -6,8 +6,14 @@
 import { IEvent, LiveEvent } from "@microsoft/live-share";
 import EventEmitter from "events";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
-import { ExtendedMediaSessionPlaybackState, ExtendedMediaSessionAction } from "../MediaSessionExtensions";
-import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
+import {
+    ExtendedMediaSessionPlaybackState,
+    ExtendedMediaSessionAction,
+} from "../MediaSessionExtensions";
+import {
+    GroupPlaybackTrack,
+    GroupPlaybackTrackEvents,
+} from "./GroupPlaybackTrack";
 
 /**
  * @hidden
@@ -42,7 +48,10 @@ export class GroupTransportState extends EventEmitter {
     private _track: GroupPlaybackTrack;
     private _current: ITransportState;
 
-    constructor(track: GroupPlaybackTrack, getMediaPlayerState: () => IMediaPlayerState) {
+    constructor(
+        track: GroupPlaybackTrack,
+        getMediaPlayerState: () => IMediaPlayerState
+    ) {
         super();
         this._getMediaPlayerState = getMediaPlayerState;
         this._track = track;
@@ -86,7 +95,10 @@ export class GroupTransportState extends EventEmitter {
     }
 
     public compare(state: ITransportState): boolean {
-        return this.current.playbackState == state.playbackState && this.current.startPosition == state.startPosition;
+        return (
+            this.current.playbackState == state.playbackState &&
+            this.current.startPosition == state.startPosition
+        );
     }
 
     public updateState(state: ITransportState): boolean {
@@ -102,7 +114,10 @@ export class GroupTransportState extends EventEmitter {
         }
 
         // Ignore state changes that have the same timestamp and the clientId sorts higher.
-        if (state.timestamp == originalState.timestamp && state.clientId.localeCompare(originalState.clientId) > 0) {
+        if (
+            state.timestamp == originalState.timestamp &&
+            state.clientId.localeCompare(originalState.clientId) > 0
+        ) {
             return false;
         }
 
@@ -111,7 +126,10 @@ export class GroupTransportState extends EventEmitter {
 
         // Trigger transport change
         const playerState = this._getMediaPlayerState().playbackState;
-        if (originalState.playbackState == state.playbackState && playerState != "ended") {
+        if (
+            originalState.playbackState == state.playbackState &&
+            playerState != "ended"
+        ) {
             this.emit(GroupTransportStateEvents.transportStateChange, {
                 type: GroupTransportStateEvents.transportStateChange,
                 action: "seekto",
@@ -119,7 +137,8 @@ export class GroupTransportState extends EventEmitter {
             });
         } else if (state.playbackState == "playing") {
             const now = LiveEvent.getTimestamp();
-            const projectedPosition = state.startPosition + (now - state.timestamp) / 1000;
+            const projectedPosition =
+                state.startPosition + (now - state.timestamp) / 1000;
             this.emit(GroupTransportStateEvents.transportStateChange, {
                 type: GroupTransportStateEvents.transportStateChange,
                 action: "play",

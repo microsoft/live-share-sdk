@@ -17,8 +17,16 @@ export class JitterFilter extends InputFilter {
     private static readonly _b: number = -0.5;
     private static readonly _ab: number = 1 - JitterFilter._a - JitterFilter._b;
 
-    private static iir(input: number, output1: number, output2: number): number {
-        return JitterFilter._ab * input + JitterFilter._a * output1 + JitterFilter._b * output2;
+    private static iir(
+        input: number,
+        output1: number,
+        output2: number
+    ): number {
+        return (
+            JitterFilter._ab * input +
+            JitterFilter._a * output1 +
+            JitterFilter._b * output2
+        );
     }
 
     private _out1?: IPointerPoint;

@@ -5,9 +5,16 @@
 
 import "mocha";
 import { strict as assert } from "assert";
-import { CollaborationSpace, CollaborationSpaceEvents, Deferred } from "@microsoft/teams-collaboration";
+import {
+    CollaborationSpace,
+    CollaborationSpaceEvents,
+    Deferred,
+} from "@microsoft/teams-collaboration";
 import { LastMediaPositionState } from "../LiveMediaSessionCoordinator";
-import { ExtendedMediaMetadata, ExtendedMediaSessionActionDetails } from "../MediaSessionExtensions";
+import {
+    ExtendedMediaMetadata,
+    ExtendedMediaSessionActionDetails,
+} from "../MediaSessionExtensions";
 import { SharedMediaSession } from "../LiveMediaSession";
 
 export class TestMediaSession extends SharedMediaSession {
@@ -32,9 +39,15 @@ export class TestMediaSession extends SharedMediaSession {
             this.playbackState = playbackState;
         }
         if (positionState) {
-            this.playbackPosition = positionState.position != undefined ? positionState.position : 0.0;
+            this.playbackPosition =
+                positionState.position != undefined
+                    ? positionState.position
+                    : 0.0;
             this.duration = positionState.duration;
-            this.playbackRate = positionState.playbackRate != undefined ? positionState.playbackRate : 1;
+            this.playbackRate =
+                positionState.playbackRate != undefined
+                    ? positionState.playbackRate
+                    : 1;
         }
 
         this.setActionHandler("play", (details) => {
@@ -119,10 +132,16 @@ export class TestMediaSession extends SharedMediaSession {
 
         this.playbackPosition = this.currentTime;
         this.playbackState = "paused";
-        this.setPositionState({ position: this.currentTime, duration: this.duration, playbackRate: this.playbackRate });
+        this.setPositionState({
+            position: this.currentTime,
+            duration: this.duration,
+            playbackRate: this.playbackRate,
+        });
     }
 
-    public async waitForAction(handler: (details: ExtendedMediaSessionActionDetails) => Promise<void>): Promise<void> {
+    public async waitForAction(
+        handler: (details: ExtendedMediaSessionActionDetails) => Promise<void>
+    ): Promise<void> {
         const details = await this.done.promise;
         this.done = new Deferred<ExtendedMediaSessionActionDetails>();
         await handler(details);

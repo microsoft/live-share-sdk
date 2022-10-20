@@ -14,16 +14,22 @@ const CACHE_LIFETIME = 60 * 60 * 1000;
  * @hidden
  */
 export class RoleVerifier implements IRoleVerifier {
-    private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> = new RequestCache(CACHE_LIFETIME);
-    private readonly _getRequestCache: RequestCache<UserMeetingRole[]> = new RequestCache(CACHE_LIFETIME);
+    private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> =
+        new RequestCache(CACHE_LIFETIME);
+    private readonly _getRequestCache: RequestCache<UserMeetingRole[]> =
+        new RequestCache(CACHE_LIFETIME);
 
     public constructor(private readonly _host: ILiveShareHost) {}
 
-    public async registerClientId(clientId: string): Promise<UserMeetingRole[]> {
+    public async registerClientId(
+        clientId: string
+    ): Promise<UserMeetingRole[]> {
         return this._registerRequestCache.cacheRequest(clientId, () => {
             return waitForResult(
                 async () => {
-                    const rolesResult = await this._host.registerClientId(clientId);
+                    const rolesResult = await this._host.registerClientId(
+                        clientId
+                    );
                     if (!rolesResult) {
                         return undefined;
                     } else if (Array.isArray(rolesResult)) {
@@ -51,7 +57,9 @@ export class RoleVerifier implements IRoleVerifier {
                     }
                 },
                 () => {
-                    return new Error(`RoleVerifier: timed out registering local client ID`);
+                    return new Error(
+                        `RoleVerifier: timed out registering local client ID`
+                    );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE
             );
@@ -60,7 +68,9 @@ export class RoleVerifier implements IRoleVerifier {
 
     public async getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
         if (!clientId) {
-            throw new Error(`RoleVerifier: called getCLientRoles() without a clientId`);
+            throw new Error(
+                `RoleVerifier: called getCLientRoles() without a clientId`
+            );
         }
 
         // Check for local client ID
@@ -73,7 +83,9 @@ export class RoleVerifier implements IRoleVerifier {
         return this._getRequestCache.cacheRequest(clientId, () => {
             return waitForResult(
                 async () => {
-                    const rolesResult = await this._host.getClientRoles(clientId);
+                    const rolesResult = await this._host.getClientRoles(
+                        clientId
+                    );
                     if (!rolesResult) {
                         return undefined;
                     } else if (Array.isArray(rolesResult)) {
@@ -101,16 +113,23 @@ export class RoleVerifier implements IRoleVerifier {
                     }
                 },
                 () => {
-                    return new Error(`RoleVerifier: timed out getting roles for a remote client ID`);
+                    return new Error(
+                        `RoleVerifier: timed out getting roles for a remote client ID`
+                    );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE
             );
         });
     }
 
-    public async verifyRolesAllowed(clientId: string, allowedRoles: UserMeetingRole[]): Promise<boolean> {
+    public async verifyRolesAllowed(
+        clientId: string,
+        allowedRoles: UserMeetingRole[]
+    ): Promise<boolean> {
         if (!clientId) {
-            throw new Error(`RoleVerifier: called verifyRolesAllowed() without a clientId`);
+            throw new Error(
+                `RoleVerifier: called verifyRolesAllowed() without a clientId`
+            );
         }
 
         if (Array.isArray(allowedRoles) && allowedRoles.length > 0) {

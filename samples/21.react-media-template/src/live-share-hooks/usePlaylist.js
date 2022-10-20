@@ -32,7 +32,7 @@ export const usePlaylist = (playlistMap, sendNotification) => {
                 const itemToAdd = searchList.find((item) => item.id === id);
                 if (itemToAdd) {
                     playlistMap.set(id, itemToAdd);
-                    if (!!sendNotification) {
+                    if (sendNotification) {
                         sendNotification("added a video to the playlist");
                     }
                 }
@@ -90,7 +90,9 @@ export const usePlaylist = (playlistMap, sendNotification) => {
     }, [playlistMap, playlistStarted, setStarted, debouncedRefresh]);
 
     const selectedMediaItem =
-        selectedMediaIndex >= 0 && mediaItems.length > selectedMediaIndex ? mediaItems[selectedMediaIndex] : null;
+        selectedMediaIndex >= 0 && mediaItems.length > selectedMediaIndex
+            ? mediaItems[selectedMediaIndex]
+            : null;
 
     return {
         playlistStarted,

@@ -16,7 +16,13 @@ import { SharedMap } from "fluid-framework";
  * - `localUserIsPresenting` is a callback method to pause through the synchronizer.
  * - `takeControl` is a callback method to seek a video to a given timestamp (in seconds).
  */
-export const useTakeControl = (takeControlMap, localUserId, localUserIsEligiblePresenter, users, sendNotification) => {
+export const useTakeControl = (
+    takeControlMap,
+    localUserId,
+    localUserIsEligiblePresenter,
+    users,
+    sendNotification
+) => {
     const [history, setHistory] = useState({});
     const [takeControlStarted, setStarted] = useState(false);
 
@@ -57,11 +63,16 @@ export const useTakeControl = (takeControlMap, localUserId, localUserIsEligibleP
     const takeControl = useCallback(() => {
         if (!!localUserId && localUserIsEligiblePresenter) {
             takeControlMap?.set(localUserId, LiveEvent.getTimestamp());
-            if (!!sendNotification) {
+            if (sendNotification) {
                 sendNotification("took control");
             }
         }
-    }, [takeControlMap, localUserId, localUserIsEligiblePresenter, sendNotification]);
+    }, [
+        takeControlMap,
+        localUserId,
+        localUserIsEligiblePresenter,
+        sendNotification,
+    ]);
 
     // Refresh local state with latest values from takeControlMap
     const refreshControlMap = useCallback(() => {
@@ -80,7 +91,13 @@ export const useTakeControl = (takeControlMap, localUserId, localUserIsEligibleP
             console.log("useTakeControl: started take control");
             setStarted(true);
         }
-    }, [takeControlMap, localUserId, takeControlStarted, refreshControlMap, setStarted]);
+    }, [
+        takeControlMap,
+        localUserId,
+        takeControlStarted,
+        refreshControlMap,
+        setStarted,
+    ]);
 
     return {
         takeControlStarted,

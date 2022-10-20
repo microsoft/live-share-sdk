@@ -4,9 +4,27 @@
  */
 
 import { EventEmitter } from "events";
-import { CanvasReferencePoint, InkingCanvas, DryCanvas, WetCanvas, LaserPointerCanvas } from "../canvas";
-import { IPoint, IPointerPoint, IRect, screenToViewport, viewportToScreen } from "./Geometry";
-import { Stroke, IStroke, IStrokeCreationOptions, StrokeType, StrokeMode } from "./Stroke";
+import {
+    CanvasReferencePoint,
+    InkingCanvas,
+    DryCanvas,
+    WetCanvas,
+    LaserPointerCanvas,
+} from "../canvas";
+import {
+    IPoint,
+    IPointerPoint,
+    IRect,
+    screenToViewport,
+    viewportToScreen,
+} from "./Geometry";
+import {
+    Stroke,
+    IStroke,
+    IStrokeCreationOptions,
+    StrokeType,
+    StrokeMode,
+} from "./Stroke";
 import {
     InputFilter,
     InputFilterCollection,
@@ -16,8 +34,19 @@ import {
     PointerInputProvider,
     IPointerMoveEvent,
 } from "../input";
-import { DefaultHighlighterBrush, DefaultLaserPointerBrush, DefaultLineBrush, DefaultPenBrush, IBrush } from "./Brush";
-import { makeRectangle, generateUniqueId, computeEndArrow, isPointInsideRectangle } from "./Internals";
+import {
+    DefaultHighlighterBrush,
+    DefaultLaserPointerBrush,
+    DefaultLineBrush,
+    DefaultPenBrush,
+    IBrush,
+} from "./Brush";
+import {
+    makeRectangle,
+    generateUniqueId,
+    computeEndArrow,
+    isPointInsideRectangle,
+} from "./Internals";
 
 /**
  * Defines available inking tools.
@@ -31,7 +60,11 @@ export enum InkingTool {
     line = 5,
 }
 
-type StrokeBasedTool = InkingTool.pen | InkingTool.line | InkingTool.laserPointer | InkingTool.highlighter;
+type StrokeBasedTool =
+    | InkingTool.pen
+    | InkingTool.line
+    | InkingTool.laserPointer
+    | InkingTool.highlighter;
 
 /**
  * The event emitted by InkingManager when the canvas is cleared.
@@ -318,7 +351,10 @@ class WetLineStroke extends WetStroke {
         if (this.length > 0) {
             const firstPoint = this.getPointAt(0);
 
-            if (Math.abs(result.x - firstPoint.x) > Math.abs(result.y - firstPoint.y)) {
+            if (
+                Math.abs(result.x - firstPoint.x) >
+                Math.abs(result.y - firstPoint.y)
+            ) {
                 result.y = firstPoint.y;
             } else {
                 result.x = firstPoint.x;
@@ -351,10 +387,16 @@ class WetLineStroke extends WetStroke {
             this.canvas.addPoint(this.getPointAt(1));
 
             if (this.brush.endArrow === "open") {
-                const arrowPath = computeEndArrow(this.getPointAt(0), this.getPointAt(1));
+                const arrowPath = computeEndArrow(
+                    this.getPointAt(0),
+                    this.getPointAt(1)
+                );
 
                 for (let i = 0; i < arrowPath.length; i++) {
-                    const p = { ...arrowPath[i], pressure: this.getPointAt(1).pressure };
+                    const p = {
+                        ...arrowPath[i],
+                        pressure: this.getPointAt(1).pressure,
+                    };
 
                     this.addPoint(p);
                     this.canvas.addPoint(p);
@@ -447,9 +489,15 @@ export class InkingManager extends EventEmitter {
     private _clientHeight?: number;
     private _centerX?: number;
     private _centerY?: number;
-    private _ephemeralCanvases: Map<string, EphemeralCanvas> = new Map<string, EphemeralCanvas>();
+    private _ephemeralCanvases: Map<string, EphemeralCanvas> = new Map<
+        string,
+        EphemeralCanvas
+    >();
 
-    private onHostResized = (entries: ResizeObserverEntry[], observer: ResizeObserver) => {
+    private onHostResized = (
+        entries: ResizeObserverEntry[],
+        observer: ResizeObserver
+    ) => {
         this._clientWidth = undefined;
         this._clientHeight = undefined;
         this._centerX = undefined;
@@ -461,7 +509,10 @@ export class InkingManager extends EventEmitter {
             this._canvasPoolHost.style.width = entry.contentRect.width + "px";
             this._canvasPoolHost.style.height = entry.contentRect.height + "px";
 
-            this._dryCanvas.resize(entry.contentRect.width, entry.contentRect.height);
+            this._dryCanvas.resize(
+                entry.contentRect.width,
+                entry.contentRect.height
+            );
 
             // Re-render synchronously to avoid flicker
             this.reRender();
@@ -474,9 +525,11 @@ export class InkingManager extends EventEmitter {
         this._dryCanvas.offset = this._offset;
         this._dryCanvas.scale = this._scale;
 
-        const sortedStrokes = [...this._strokes.values()].sort((stroke1: IStroke, stroke2: IStroke) => {
-            return stroke1.timeStamp - stroke2.timeStamp;
-        });
+        const sortedStrokes = [...this._strokes.values()].sort(
+            (stroke1: IStroke, stroke2: IStroke) => {
+                return stroke1.timeStamp - stroke2.timeStamp;
+            }
+        );
 
         for (const stroke of sortedStrokes) {
             this._dryCanvas.renderStroke(stroke);
@@ -575,12 +628,14 @@ export class InkingManager extends EventEmitter {
             case InkingTool.line:
             case InkingTool.highlighter:
             case InkingTool.laserPointer:
+                // eslint-disable-next-line no-case-declarations
                 const mode =
                     this.tool === InkingTool.line
                         ? StrokeMode.line
                         : e.ctrlKey && InkingManager.enableStrokeModifierHotKeys
                         ? StrokeMode.line
                         : StrokeMode.freeHand;
+                // eslint-disable-next-line no-case-declarations
                 const brush = { ...this.getBrushForTool(this.tool) };
 
                 if (e.altKey && InkingManager.enableStrokeModifierHotKeys) {
@@ -588,7 +643,9 @@ export class InkingManager extends EventEmitter {
                 }
 
                 this._currentStroke = this.beginWetStroke(
-                    this.tool === InkingTool.laserPointer ? StrokeType.ephemeral : StrokeType.persistent,
+                    this.tool === InkingTool.laserPointer
+                        ? StrokeType.ephemeral
+                        : StrokeType.persistent,
                     mode,
                     filteredPoint,
                     { brush }
@@ -650,7 +707,8 @@ export class InkingManager extends EventEmitter {
 
             if (this._currentStroke) {
                 if (e.shiftKey && InkingManager.enableStrokeModifierHotKeys) {
-                    filteredPoint = this._currentStroke.straighten(filteredPoint);
+                    filteredPoint =
+                        this._currentStroke.straighten(filteredPoint);
                 }
 
                 this._currentStroke.addPoints(filteredPoint);
@@ -708,7 +766,10 @@ export class InkingManager extends EventEmitter {
         }
     };
 
-    private internalAddStroke(stroke: IStroke, options?: IAddRemoveStrokeOptions) {
+    private internalAddStroke(
+        stroke: IStroke,
+        options?: IAddRemoveStrokeOptions
+    ) {
         const effectiveOptions: Required<IAddRemoveStrokeOptions> = {
             forceReRender: options ? options.forceReRender ?? false : false,
             addToChangeLog: options ? options.addToChangeLog ?? true : true,
@@ -717,7 +778,9 @@ export class InkingManager extends EventEmitter {
         if (effectiveOptions.forceReRender || this._strokes.has(stroke.id)) {
             this._strokes.set(stroke.id, stroke);
 
-            effectiveOptions.forceReRender ? this.reRender() : this.scheduleReRender();
+            effectiveOptions.forceReRender
+                ? this.reRender()
+                : this.scheduleReRender();
         } else {
             this._strokes.set(stroke.id, stroke);
 
@@ -734,16 +797,24 @@ export class InkingManager extends EventEmitter {
     private wetStrokeEnded = (stroke: IWetStroke, isCancelled: boolean) => {
         if (!isCancelled) {
             if (stroke.type === StrokeType.ephemeral) {
-                const effectiveClientId = stroke.clientId ?? InkingManager.localClientId;
+                const effectiveClientId =
+                    stroke.clientId ?? InkingManager.localClientId;
 
-                let ephemeralCanvas = this._ephemeralCanvases.get(effectiveClientId);
+                let ephemeralCanvas =
+                    this._ephemeralCanvases.get(effectiveClientId);
 
                 if (!ephemeralCanvas) {
-                    ephemeralCanvas = new EphemeralCanvas(effectiveClientId, this._canvasPoolHost);
+                    ephemeralCanvas = new EphemeralCanvas(
+                        effectiveClientId,
+                        this._canvasPoolHost
+                    );
                     ephemeralCanvas.offset = this.offset;
                     ephemeralCanvas.scale = this.scale;
 
-                    this._ephemeralCanvases.set(effectiveClientId, ephemeralCanvas);
+                    this._ephemeralCanvases.set(
+                        effectiveClientId,
+                        ephemeralCanvas
+                    );
                 }
 
                 ephemeralCanvas.renderStroke(stroke);
@@ -874,22 +945,34 @@ export class InkingManager extends EventEmitter {
         this.emit(AddPointsEvent, eventArgs);
     }
 
-    private notifyEndStroke(strokeId: string, endPoint?: IPointerPoint, isCancelled: boolean = false) {
+    private notifyEndStroke(
+        strokeId: string,
+        endPoint?: IPointerPoint,
+        isCancelled: boolean = false
+    ) {
         const eventArgs: IAddPointsEventArgs = {
             strokeId,
             points: endPoint ? [endPoint] : [],
-            endState: isCancelled ? StrokeEndState.cancelled : StrokeEndState.ended,
+            endState: isCancelled
+                ? StrokeEndState.cancelled
+                : StrokeEndState.ended,
         };
 
         this.emit(AddPointsEvent, eventArgs);
     }
 
-    private createInputFilterCollection(inputFilters?: InputFilter[]): InputFilterCollection {
+    private createInputFilterCollection(
+        inputFilters?: InputFilter[]
+    ): InputFilterCollection {
         const result = new InputFilterCollection();
 
-        inputFilters ? result.addFilters(...inputFilters) : result.addFilters(new JitterFilter());
+        inputFilters
+            ? result.addFilters(...inputFilters)
+            : result.addFilters(new JitterFilter());
 
-        result.addFilters(new InkingManager.ScreenToViewportCoordinateTransform(this));
+        result.addFilters(
+            new InkingManager.ScreenToViewportCoordinateTransform(this)
+        );
 
         return result;
     }
@@ -1010,7 +1093,12 @@ export class InkingManager extends EventEmitter {
         if (strokeKind === StrokeMode.line) {
             stroke = new WetLineStroke(canvas, strokeType, strokeKind, options);
         } else {
-            stroke = new WetFreehandStroke(canvas, strokeType, strokeKind, options);
+            stroke = new WetFreehandStroke(
+                canvas,
+                strokeType,
+                strokeKind,
+                options
+            );
         }
 
         stroke.onStrokeEnded = this.wetStrokeEnded;
@@ -1057,7 +1145,9 @@ export class InkingManager extends EventEmitter {
                 addToChangeLog: options ? options.addToChangeLog ?? true : true,
             };
 
-            effectiveOptions.forceReRender ? this.reRender() : this.scheduleReRender();
+            effectiveOptions.forceReRender
+                ? this.reRender()
+                : this.scheduleReRender();
 
             if (effectiveOptions.addToChangeLog) {
                 this._changeLog.removeStroke(id);
@@ -1103,7 +1193,9 @@ export class InkingManager extends EventEmitter {
     public screenToViewport(p: IPoint): IPoint {
         return screenToViewport(
             p,
-            this.referencePoint === "center" ? { x: this.centerX, y: this.centerY } : { x: 0, y: 0 },
+            this.referencePoint === "center"
+                ? { x: this.centerX, y: this.centerY }
+                : { x: 0, y: 0 },
             this.offset,
             this.scale
         );
@@ -1117,7 +1209,9 @@ export class InkingManager extends EventEmitter {
     public viewportToScreen(p: IPoint): IPoint {
         return viewportToScreen(
             p,
-            this.referencePoint === "center" ? { x: this.centerX, y: this.centerY } : { x: 0, y: 0 },
+            this.referencePoint === "center"
+                ? { x: this.centerX, y: this.centerY }
+                : { x: 0, y: 0 },
             this.offset,
             this.scale
         );
@@ -1352,7 +1446,10 @@ export class InkingManager extends EventEmitter {
      */
     get viewPort(): IRect {
         const topLeft = this.screenToViewport({ x: 0, y: 0 });
-        const bottomRight = this.screenToViewport({ x: this.clientWidth, y: this.clientHeight });
+        const bottomRight = this.screenToViewport({
+            x: this.clientWidth,
+            y: this.clientHeight,
+        });
 
         return {
             left: topLeft.x,

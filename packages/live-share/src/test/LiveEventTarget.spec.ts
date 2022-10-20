@@ -20,10 +20,18 @@ describe("LiveEventTarget", () => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
         const localScope = new LiveEventScope(signalers.localRuntime);
-        const localTarget = new LiveEventTarget(localScope, "test", (evt, local) => triggered++);
+        const localTarget = new LiveEventTarget(
+            localScope,
+            "test",
+            (evt, local) => triggered++
+        );
 
         const remoteScope = new LiveEventScope(signalers.remoteRuntime);
-        const remoteTarget = new LiveEventTarget(remoteScope, "test", (evt, local) => triggered++);
+        const remoteTarget = new LiveEventTarget(
+            remoteScope,
+            "test",
+            (evt, local) => triggered++
+        );
 
         localTarget.sendEvent({});
 

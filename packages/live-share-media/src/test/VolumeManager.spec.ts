@@ -172,7 +172,9 @@ describe("VolumeManager", () => {
 
         setTimeout(() => {
             // check volume at end with 20ms of leeway
-            assert(player.volume == volumeManager.limitLevel * volumeManager.volume);
+            assert(
+                player.volume == volumeManager.limitLevel * volumeManager.volume
+            );
             testAwait.resolve();
         }, volumeManager.volumeChangeDuration * 1000 + 20);
 

@@ -3,7 +3,19 @@
  * Licensed under the MIT License.
  */
 
-const randomFrontNames = ["Dog", "Cat", "Clippy", "Micro", "Snake", "Dr", "Dino", "Gamer", "Rock", "Paper", "Scissors"];
+const randomFrontNames = [
+    "Dog",
+    "Cat",
+    "Clippy",
+    "Micro",
+    "Snake",
+    "Dr",
+    "Dino",
+    "Gamer",
+    "Rock",
+    "Paper",
+    "Scissors",
+];
 
 const randomBackNames = [
     "Dev",
@@ -34,7 +46,9 @@ export const getRandomAvatar = () => {
     for (let i = 0; i <= 99; i++) {
         randomNumbers.push(i);
     }
-    const randomName = `${random(randomFrontNames)}${random(randomBackNames)}${random(randomNumbers)}`;
+    const randomName = `${random(randomFrontNames)}${random(
+        randomBackNames
+    )}${random(randomNumbers)}`;
 
     return {
         name: randomName,

@@ -12,7 +12,10 @@ import { Deferred } from "./Deferred";
 function createConnectedSignalers() {
     const localContainer = new MockContainerRuntimeSignaler();
     const remoteContainer = new MockContainerRuntimeSignaler();
-    MockContainerRuntimeSignaler.connectContainers([localContainer, remoteContainer]);
+    MockContainerRuntimeSignaler.connectContainers([
+        localContainer,
+        remoteContainer,
+    ]);
     return { localContainer, remoteContainer };
 }
 
@@ -34,8 +37,14 @@ describe("LiveObjectSynchronizer", () => {
             },
             (connecting, state, sender) => {
                 try {
-                    assert(typeof state == "object", `local: missing state received`);
-                    assert(state.client == "remote", `local: invalid state received: ${state}`);
+                    assert(
+                        typeof state == "object",
+                        `local: missing state received`
+                    );
+                    assert(
+                        state.client == "remote",
+                        `local: invalid state received: ${state}`
+                    );
                     assert(sender, `local: sender  ID not received`);
                     if (connecting) {
                         done.resolve();
@@ -71,13 +80,22 @@ describe("LiveObjectSynchronizer", () => {
             localRuntime,
             signalers.localContainer,
             (connecting) => {
-                assert(localRuntime.connected, `local: sending connect before connected`);
+                assert(
+                    localRuntime.connected,
+                    `local: sending connect before connected`
+                );
                 return { client: "local" };
             },
             (connecting, state, sender) => {
                 try {
-                    assert(typeof state == "object", `local: missing state received`);
-                    assert(state.client == "remote", `local: invalid state received: ${state}`);
+                    assert(
+                        typeof state == "object",
+                        `local: missing state received`
+                    );
+                    assert(
+                        state.client == "remote",
+                        `local: invalid state received: ${state}`
+                    );
                     assert(sender, `local: sender  ID not received`);
                     if (connecting) {
                         done.resolve();
@@ -94,7 +112,10 @@ describe("LiveObjectSynchronizer", () => {
             remoteRuntime,
             signalers.remoteContainer,
             (connecting) => {
-                assert(remoteRuntime.connected, `remote: sending connect before connected`);
+                assert(
+                    remoteRuntime.connected,
+                    `remote: sending connect before connected`
+                );
                 return { client: "remote" };
             },
             (connecting, state, sender) => {}
@@ -124,8 +145,14 @@ describe("LiveObjectSynchronizer", () => {
             },
             (connecting, state, sender) => {
                 try {
-                    assert(typeof state == "object", `local: missing state received`);
-                    assert(state.client == "remote", `local: invalid state received: ${state}`);
+                    assert(
+                        typeof state == "object",
+                        `local: missing state received`
+                    );
+                    assert(
+                        state.client == "remote",
+                        `local: invalid state received: ${state}`
+                    );
                     assert(sender, `local: sender  ID not received`);
                     if (!connecting) {
                         received++;

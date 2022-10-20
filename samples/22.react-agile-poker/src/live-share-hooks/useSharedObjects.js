@@ -4,7 +4,11 @@
  */
 
 import { useEffect, useState } from "react";
-import { LivePresence, LiveState, LiveShareClient } from "@microsoft/live-share";
+import {
+    LivePresence,
+    LiveState,
+    LiveShareClient,
+} from "@microsoft/live-share";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { LiveTimer } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework";
@@ -35,7 +39,10 @@ export function useSharedObjects() {
             // Configure for local testing (optional).
             connection = {
                 type: "local",
-                tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
+                tokenProvider: new InsecureTokenProvider("", {
+                    id: "123",
+                    name: "Test User",
+                }),
                 endpoint: "http://localhost:7070",
             };
         }
@@ -55,7 +62,10 @@ export function useSharedObjects() {
             // Setup any initial state here
             const defaultUserStories = getDefaultUserStories();
             defaultUserStories.forEach((userStory) => {
-                container.initialObjects.userStoriesMap.set(userStory.id, userStory);
+                container.initialObjects.userStoriesMap.set(
+                    userStory.id,
+                    userStory
+                );
             });
         };
 

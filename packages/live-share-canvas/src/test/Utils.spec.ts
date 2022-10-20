@@ -2,10 +2,16 @@ import "mocha";
 import { strict as assert } from "assert";
 import { Stroke, IPointerPoint, IColor, IRect } from "../core";
 
-export const coordinateSerializationPrecision = Stroke["coordinateSerializationPrecision"] as number;
-export const pressureSerializationPrecision = Stroke["pressureSerializationPrecision"] as number;
+export const coordinateSerializationPrecision = Stroke[
+    "coordinateSerializationPrecision"
+] as number;
+export const pressureSerializationPrecision = Stroke[
+    "pressureSerializationPrecision"
+] as number;
 
-export function copyPointArrayAndDuplidateEachPoint(source: IPointerPoint[]): IPointerPoint[] {
+export function copyPointArrayAndDuplidateEachPoint(
+    source: IPointerPoint[]
+): IPointerPoint[] {
     const result: IPointerPoint[] = [];
 
     for (const p of source) {
@@ -31,7 +37,9 @@ export function reducePointPrecision(p: IPointerPoint): IPointerPoint {
     };
 }
 
-export function reducePointArrayPrecision(points: IPointerPoint[]): IPointerPoint[] {
+export function reducePointArrayPrecision(
+    points: IPointerPoint[]
+): IPointerPoint[] {
     const result: IPointerPoint[] = [];
 
     for (const p of points) {
@@ -41,7 +49,10 @@ export function reducePointArrayPrecision(points: IPointerPoint[]): IPointerPoin
     return result;
 }
 
-export function assertPointArraysEqual(points1: IPointerPoint[], points2: IPointerPoint[]) {
+export function assertPointArraysEqual(
+    points1: IPointerPoint[],
+    points2: IPointerPoint[]
+) {
     assert(
         points1.length === points2.length,
         `Point arrays lengths should be equal but are not (${points1.length} vs ${points2.length})`
@@ -52,13 +63,20 @@ export function assertPointArraysEqual(points1: IPointerPoint[], points2: IPoint
     }
 }
 
-export function assertObjectsEqual(expected: Object, actual: Object, errorMessage: string) {
+export function assertObjectsEqual(
+    expected: Object,
+    actual: Object,
+    errorMessage: string
+) {
     const propertyNames = Object.getOwnPropertyNames(expected);
 
     for (const p of propertyNames) {
         assert(
             expected[p] === actual[p],
-            errorMessage + ` (expected = ${JSON.stringify(expected)}, actual = ${JSON.stringify(actual)})`
+            errorMessage +
+                ` (expected = ${JSON.stringify(
+                    expected
+                )}, actual = ${JSON.stringify(actual)})`
         );
     }
 }

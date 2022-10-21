@@ -205,13 +205,22 @@ export abstract class InkingCanvas {
     }
 
     /**
+     * Convert a pair of numbers to IPointerPoint, an object consisting of x and y coordinates in pixels
+     * @param x
+     * @param y
+     * @returns IPointerPoint
+     */
+    protected numsToIPointerPoint(x: number, y: number) {
+        return { x: x, y: y } as IPointerPoint;
+    }
+
+    /**
      * Starts a new sub-path, at the specified coordinates.
      * @param context The target canvas context.
-     * @param x The x coordinate, in pixels.
-     * @param y The y coordinate, in pixels.
+     * @param IPointerPoint: The x and y coordinate, in pixels.
      */
-    protected moveTo(context: CanvasRenderingContext2D, x: number, y: number) {
-        const transformedPoint = this.viewportToScreen({ x, y });
+    protected moveTo(context: CanvasRenderingContext2D, point: IPointerPoint) {
+        const transformedPoint = this.viewportToScreen(point);
 
         context.moveTo(transformedPoint.x, transformedPoint.y);
     }
@@ -222,8 +231,8 @@ export abstract class InkingCanvas {
      * @param x The x coordinate, in pixels.
      * @param y The y coordinate, in pixels.
      */
-    protected lineTo(context: CanvasRenderingContext2D, x: number, y: number) {
-        const transformedPoint = this.viewportToScreen({ x, y });
+    protected lineTo(context: CanvasRenderingContext2D, point: IPointerPoint) {
+        const transformedPoint = this.viewportToScreen(point);
 
         context.lineTo(transformedPoint.x, transformedPoint.y);
     }
@@ -246,11 +255,11 @@ export abstract class InkingCanvas {
         const top: number = center.y - halfHeight;
         const bottom: number = center.y + halfHeight;
 
-        this.moveTo(context, left, top);
-        this.lineTo(context, right, top);
-        this.lineTo(context, right, bottom);
-        this.lineTo(context, left, bottom);
-        this.lineTo(context, left, top);
+        this.moveTo(context, this.numsToIPointerPoint(left, top));
+        this.lineTo(context, this.numsToIPointerPoint(right, top));
+        this.lineTo(context, this.numsToIPointerPoint(right, bottom));
+        this.lineTo(context, this.numsToIPointerPoint(left, bottom));
+        this.lineTo(context, this.numsToIPointerPoint(left, top));
     }
 
     /**
@@ -259,11 +268,11 @@ export abstract class InkingCanvas {
      * @param quad The quad to render.
      */
     protected renderQuad(context: CanvasRenderingContext2D, quad: IQuad): void {
-        this.moveTo(context, quad.p1.x, quad.p1.y);
-        this.lineTo(context, quad.p2.x, quad.p2.y);
-        this.lineTo(context, quad.p3.x, quad.p3.y);
-        this.lineTo(context, quad.p4.x, quad.p4.y);
-        this.lineTo(context, quad.p1.x, quad.p1.y);
+        this.moveTo(context, this.numsToIPointerPoint(quad.p1.x, quad.p1.y));
+        this.lineTo(context, this.numsToIPointerPoint(quad.p2.x, quad.p2.y));
+        this.lineTo(context, this.numsToIPointerPoint(quad.p3.x, quad.p3.y));
+        this.lineTo(context, this.numsToIPointerPoint(quad.p4.x, quad.p4.y));
+        this.lineTo(context, this.numsToIPointerPoint(quad.p1.x, quad.p1.y));
     }
 
     /**
@@ -274,7 +283,7 @@ export abstract class InkingCanvas {
      */
     protected renderCircle(
         context: CanvasRenderingContext2D,
-        center: IPoint,
+        center: IPointerPoint,
         radius: number
     ): void {
         const transformedCenter = this.viewportToScreen(center);

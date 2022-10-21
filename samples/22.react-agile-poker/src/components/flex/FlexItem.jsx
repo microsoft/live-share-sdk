@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { mergeClasses } from "@fluentui/react-components";
 import { getFlexItemStyles } from "./FlexStyles";
 

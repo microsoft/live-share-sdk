@@ -36,10 +36,14 @@ export class MockRuntimeSignaler implements IRuntimeSignaler {
     }
 
     public on(event: "connected", listener: (clientId: string) => void): this;
+    // Note: the following is not actually a duplicate
+    // eslint-disable-next-line no-dupe-class-members
     public on(
         event: "signal",
         listener: (message: IInboundSignalMessage, local: boolean) => void
     ): this;
+    // Note: the following is not actually a duplicate
+    // eslint-disable-next-line no-dupe-class-members
     public on(event: string, listener: any) {
         switch (event) {
             case "connected":

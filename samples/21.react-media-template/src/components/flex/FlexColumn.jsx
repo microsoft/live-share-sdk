@@ -37,3 +37,18 @@ export const FlexColumn = (props) => {
         </div>
     );
 };
+
+FlexColumn.propTypes = {
+    children: PropTypes.node,
+    className: string,
+    fill: "both" | "height" | "width" | "view",
+    gap: "smaller" | "small" | "medium" | "large",
+    hAlign: "start" | "center" | "end",
+    inline: PropTypes.bool,
+    name: PropTypes.string,
+    role: PropTypes.string,
+    spaceBetween: PropTypes.bool,
+    style: PropTypes.object,
+    transparent: PropTypes.bool,
+    vAlign: "start" | "center" | "end",
+};

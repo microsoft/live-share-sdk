@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { mergeClasses } from "@fluentui/react-components";
 import { getFlexRowStyles } from "./FlexStyles";
 
@@ -35,4 +36,19 @@ export const FlexRow = (props) => {
             {children}
         </div>
     );
+};
+
+FlexRow.propTypes = {
+    children: PropTypes.node,
+    className: string,
+    fill: "both" | "height" | "width" | "view",
+    gap: "smaller" | "small" | "medium" | "large",
+    hAlign: "start" | "center" | "end",
+    inline: PropTypes.bool,
+    name: PropTypes.string,
+    role: PropTypes.string,
+    spaceBetween: PropTypes.bool,
+    style: PropTypes.object,
+    transparent: PropTypes.bool,
+    vAlign: "start" | "center" | "end",
 };

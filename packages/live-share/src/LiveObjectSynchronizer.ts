@@ -13,7 +13,9 @@ import { IRuntimeSignaler } from "./LiveEventScope";
  * @param connecting If true a "connect" message is being sent and the initial connecting state of the object is being requested.
  * @returns The objects current state or undefined if not known or available.
  */
-export type GetSynchronizationState<TState extends object> = (connecting: boolean) => TState|undefined;
+export type GetSynchronizationState<TState extends object> = (
+    connecting: boolean
+) => TState | undefined;
 
 /**
  * Callback function used to the receive the state update sent by a remote live object.
@@ -22,8 +24,11 @@ export type GetSynchronizationState<TState extends object> = (connecting: boolea
  * @param state The remote object initial or current state.
  * @param senderId The clientId of the sender provider for role verification purposes.
  */
- export type UpdateSynchronizationState<TState extends object> = (connecting: boolean, state: TState|undefined, senderId: string) => void;
-
+export type UpdateSynchronizationState<TState extends object> = (
+    connecting: boolean,
+    state: TState | undefined,
+    senderId: string
+) => void;
 
 /**
  * Duck type of something that provides the expected signalling functionality at the container level.
@@ -33,10 +38,12 @@ export type GetSynchronizationState<TState extends object> = (connecting: boolea
  * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
  */
 export interface IContainerRuntimeSignaler {
-    on(event: "signal", listener: (message: IInboundSignalMessage, local: boolean) => void): this;
+    on(
+        event: "signal",
+        listener: (message: IInboundSignalMessage, local: boolean) => void
+    ): this;
     submitSignal(type: string, content: any): void;
 }
-
 
 /**
  * Synchronizes the underlying state of an live object with all of the other instances of
@@ -88,11 +95,22 @@ export class LiveObjectSynchronizer<TState extends object> {
      * @param getState A function called to retrieve the objects current state. This will be called prior to a "connect" or "update" message being sent.
      * @param updateState A function called to process a state update received from a remote instance. This will be called anytime a "connect" or "update" message is received.
      */
-    constructor(id: string, runtime: IRuntimeSignaler, containerRuntime: IContainerRuntimeSignaler, getState: GetSynchronizationState<TState>, updateState: UpdateSynchronizationState<TState>) {
+    constructor(
+        id: string,
+        runtime: IRuntimeSignaler,
+        containerRuntime: IContainerRuntimeSignaler,
+        getState: GetSynchronizationState<TState>,
+        updateState: UpdateSynchronizationState<TState>
+    ) {
         this._id = id;
         this._containerRuntime = containerRuntime;
 
-        LiveObjectSynchronizer.registerObject<TState>(runtime, containerRuntime, id, { getState, updateState });
+        LiveObjectSynchronizer.registerObject<TState>(
+            runtime,
+            containerRuntime,
+            id,
+            { getState, updateState }
+        );
     }
 
     /**
@@ -104,7 +122,10 @@ export class LiveObjectSynchronizer<TState extends object> {
     public dispose(): void {
         if (!this._isDisposed) {
             this._isDisposed = true;
-            LiveObjectSynchronizer.unregisterObject(this._containerRuntime, this._id);
+            LiveObjectSynchronizer.unregisterObject(
+                this._containerRuntime,
+                this._id
+            );
         }
     }
 
@@ -112,7 +133,12 @@ export class LiveObjectSynchronizer<TState extends object> {
 
     private static _synchronizers = new Map<any, ContainerSynchronizer>();
 
-    private static registerObject<TState extends object>(runtime: IRuntimeSignaler, containerRuntime: IContainerRuntimeSignaler, id: string, handlers: GetAndUpdateStateHandlers<TState>): void {
+    private static registerObject<TState extends object>(
+        runtime: IRuntimeSignaler,
+        containerRuntime: IContainerRuntimeSignaler,
+        id: string,
+        handlers: GetAndUpdateStateHandlers<TState>
+    ): void {
         // Get/create containers synchronizer
         let synchronizer = this._synchronizers.get(containerRuntime);
         if (!synchronizer) {
@@ -121,11 +147,17 @@ export class LiveObjectSynchronizer<TState extends object> {
         }
 
         // Register object
-        synchronizer.registerObject(id, (handlers as unknown) as GetAndUpdateStateHandlers<object>);
+        synchronizer.registerObject(
+            id,
+            handlers as unknown as GetAndUpdateStateHandlers<object>
+        );
     }
 
-    private static unregisterObject(containerRuntime: IContainerRuntimeSignaler, id: string): void {
-        let synchronizer = this._synchronizers.get(containerRuntime)
+    private static unregisterObject(
+        containerRuntime: IContainerRuntimeSignaler,
+        id: string
+    ): void {
+        let synchronizer = this._synchronizers.get(containerRuntime);
         if (synchronizer) {
             const lastObject = synchronizer.unregisterObject(id);
             if (lastObject) {
@@ -135,28 +167,34 @@ export class LiveObjectSynchronizer<TState extends object> {
     }
 }
 
-const CONNECT_EVENT = 'connect';
-const UPDATE_EVENT = 'update';
+const CONNECT_EVENT = "connect";
+const UPDATE_EVENT = "update";
 
 interface GetAndUpdateStateHandlers<TState extends object> {
     getState: GetSynchronizationState<TState>;
-    updateState: UpdateSynchronizationState<TState>
+    updateState: UpdateSynchronizationState<TState>;
 }
 
 interface StateSyncEventContent {
-    [id: string]: object|undefined;
+    [id: string]: object | undefined;
 }
 
 class ContainerSynchronizer {
     private readonly _runtime: IRuntimeSignaler;
     private readonly _containerRuntime: IContainerRuntimeSignaler;
-    private readonly _objects = new Map<string, GetAndUpdateStateHandlers<object>>();
+    private readonly _objects = new Map<
+        string,
+        GetAndUpdateStateHandlers<object>
+    >();
     private _unconnectedKeys: string[] = [];
     private _connectedKeys: string[] = [];
     private _refCount = 0;
     private _hTimer: any;
 
-    constructor(runtime: IRuntimeSignaler, containerRuntime: IContainerRuntimeSignaler) {
+    constructor(
+        runtime: IRuntimeSignaler,
+        containerRuntime: IContainerRuntimeSignaler
+    ) {
         // Listen for runtime to connect/re-connect
         this._runtime = runtime;
         this._runtime.on("connected", (clientId) => {
@@ -165,7 +203,9 @@ class ContainerSynchronizer {
                 this.sendGroupEvent(this._unconnectedKeys, CONNECT_EVENT);
 
                 // Move keys to connected list
-                this._connectedKeys = this._connectedKeys.concat(this._unconnectedKeys);
+                this._connectedKeys = this._connectedKeys.concat(
+                    this._unconnectedKeys
+                );
                 this._unconnectedKeys = [];
             }
         });
@@ -174,22 +214,35 @@ class ContainerSynchronizer {
         this._containerRuntime = containerRuntime;
         this._containerRuntime.on("signal", (message, local) => {
             // Ignore local signals
-            if (!local && typeof message.content == 'object') {
+            if (!local && typeof message.content == "object") {
                 switch (message.type) {
                     case CONNECT_EVENT:
-                        this.dispatchUpdates(message.clientId!, message.content, true);
+                        this.dispatchUpdates(
+                            message.clientId!,
+                            message.content,
+                            true
+                        );
                         break;
                     case UPDATE_EVENT:
-                        this.dispatchUpdates(message.clientId!, message.content, false);
+                        this.dispatchUpdates(
+                            message.clientId!,
+                            message.content,
+                            false
+                        );
                         break;
                 }
             }
         });
     }
 
-    public registerObject(id: string, handlers: GetAndUpdateStateHandlers<object>): void {
+    public registerObject(
+        id: string,
+        handlers: GetAndUpdateStateHandlers<object>
+    ): void {
         if (this._objects.has(id)) {
-            throw new Error(`LiveObjectSynchronizer: too many calls to registerObject() for object '${id}'`);
+            throw new Error(
+                `LiveObjectSynchronizer: too many calls to registerObject() for object '${id}'`
+            );
         }
 
         // Save object ref
@@ -199,7 +252,7 @@ class ContainerSynchronizer {
         if (this._runtime.connected) {
             // Send single connect event
             const connectState: StateSyncEventContent = {
-                [id]: handlers.getState(true)
+                [id]: handlers.getState(true),
             };
             this._containerRuntime.submitSignal(CONNECT_EVENT, connectState);
             this._connectedKeys.push(id);
@@ -214,7 +267,9 @@ class ContainerSynchronizer {
                 try {
                     this.sendGroupEvent(this._connectedKeys, UPDATE_EVENT);
                 } catch (err: any) {
-                    console.error(`LiveObjectSynchronizer: error sending update - ${err.toString()}`);
+                    console.error(
+                        `LiveObjectSynchronizer: error sending update - ${err.toString()}`
+                    );
                 }
             }, LiveObjectSynchronizer.updateInterval);
         }
@@ -233,8 +288,12 @@ class ContainerSynchronizer {
             }
 
             // Remove id from key lists
-            this._connectedKeys = this._connectedKeys.filter(key => key != id);
-            this._unconnectedKeys = this._unconnectedKeys.filter(key => key != id);
+            this._connectedKeys = this._connectedKeys.filter(
+                (key) => key != id
+            );
+            this._unconnectedKeys = this._unconnectedKeys.filter(
+                (key) => key != id
+            );
         }
 
         return false;
@@ -247,22 +306,28 @@ class ContainerSynchronizer {
             try {
                 // Ignore components that return undefined
                 const state = this._objects.get(id)?.getState(false);
-                if (typeof state == 'object') {
+                if (typeof state == "object") {
                     updates[id] = state;
                 }
             } catch (err: any) {
-                console.error(`LiveObjectSynchronizer: error getting an objects state - ${err.toString()}`);
+                console.error(
+                    `LiveObjectSynchronizer: error getting an objects state - ${err.toString()}`
+                );
             }
         });
 
         // Send event if we have any updates to broadcast
-        // - `send` is only set if at least one component returns an update. 
+        // - `send` is only set if at least one component returns an update.
         if (Object.keys(updates).length > 0) {
             this._containerRuntime.submitSignal(evt, updates);
         }
     }
 
-    private dispatchUpdates(senderId: string, updates: StateSyncEventContent, connecting: boolean): void {
+    private dispatchUpdates(
+        senderId: string,
+        updates: StateSyncEventContent,
+        connecting: boolean
+    ): void {
         const keys: string[] = [];
         for (const id in updates) {
             // Dispatch received state update
@@ -271,11 +336,13 @@ class ContainerSynchronizer {
                 try {
                     keys.push(id);
                     const state = updates[id];
-                    if (typeof state == 'object') {
+                    if (typeof state == "object") {
                         handlers.updateState(connecting, state, senderId);
                     }
                 } catch (err: any) {
-                    console.error(`LiveObjectSynchronizer: error processing received update - ${err.toString()}`);
+                    console.error(
+                        `LiveObjectSynchronizer: error processing received update - ${err.toString()}`
+                    );
                 }
             }
         }

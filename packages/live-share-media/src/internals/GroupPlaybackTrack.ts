@@ -3,46 +3,53 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent } from '@microsoft/live-share';
-import EventEmitter from 'events';
-import { IMediaPlayerState } from '../LiveMediaSessionCoordinator';
-import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExtensions';
+import { IEvent } from "@microsoft/live-share";
+import EventEmitter from "events";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import {
+    CoordinationWaitPoint,
+    ExtendedMediaMetadata,
+} from "../MediaSessionExtensions";
 
 /**
  * @hidden
  */
- export interface IPlaybackTrack {
-    metadata: ExtendedMediaMetadata|null;
+export interface IPlaybackTrack {
+    metadata: ExtendedMediaMetadata | null;
     waitPoints: CoordinationWaitPoint[];
     timestamp: number;
     clientId: string;
 }
 
-
 /**
  * @hidden
  */
- export enum GroupPlaybackTrackEvents {
-    trackChange = 'trackChange'
+export enum GroupPlaybackTrackEvents {
+    trackChange = "trackChange",
 }
 
 /**
  * @hidden
  */
- export interface IPlaybackTrackChangeEvent extends IEvent {
-    metadata: ExtendedMediaMetadata|null;
+export interface IPlaybackTrackChangeEvent extends IEvent {
+    metadata: ExtendedMediaMetadata | null;
 }
 
 /**
  * @hidden
  */
- export class GroupPlaybackTrack extends EventEmitter {
+export class GroupPlaybackTrack extends EventEmitter {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _current: IPlaybackTrack;
 
     constructor(getMediaPlayerState: () => IMediaPlayerState) {
         super();
-        this._current = { metadata: null, waitPoints: [], timestamp: 0, clientId: '' };
+        this._current = {
+            metadata: null,
+            waitPoints: [],
+            timestamp: 0,
+            clientId: "",
+        };
         this._getMediaPlayerState = getMediaPlayerState;
     }
 
@@ -55,7 +62,7 @@ import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExt
         return this._current;
     }
 
-    public get metadata(): ExtendedMediaMetadata|null {
+    public get metadata(): ExtendedMediaMetadata | null {
         return this.current.metadata;
     }
 
@@ -77,7 +84,9 @@ import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExt
         return true;
     }
 
-    public findNextWaitPoint(lastWaitPoint: CoordinationWaitPoint|undefined): CoordinationWaitPoint|undefined {
+    public findNextWaitPoint(
+        lastWaitPoint: CoordinationWaitPoint | undefined
+    ): CoordinationWaitPoint | undefined {
         const waitPoints = this._current.waitPoints || [];
         for (const waitPoint of waitPoints) {
             if (lastWaitPoint && waitPoint.position <= lastWaitPoint.position) {
@@ -98,14 +107,22 @@ import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExt
 
         // Is this the same track?
         const current = this.current;
-        if (GroupPlaybackTrack.compareMetadata(this.current.metadata, track.metadata)) {
+        if (
+            GroupPlaybackTrack.compareMetadata(
+                this.current.metadata,
+                track.metadata
+            )
+        ) {
             // Add any dynamic wait points.
             track.waitPoints.forEach((waitPoint) => {
                 this.addWaitPoint(waitPoint);
             });
 
             // Ignore if same playback state
-            if (track.timestamp == current.timestamp && track.clientId == current.clientId) {
+            if (
+                track.timestamp == current.timestamp &&
+                track.clientId == current.clientId
+            ) {
                 return false;
             }
         }
@@ -117,7 +134,10 @@ import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExt
 
         // Ignore state changes that are from a clientId that sorts higher then the current one.
         // - current.clientId should not be empty if current.timestamp != 0
-        if (track.timestamp == current.timestamp && track.clientId.localeCompare(current.clientId) > 0) {
+        if (
+            track.timestamp == current.timestamp &&
+            track.clientId.localeCompare(current.clientId) > 0
+        ) {
             return false;
         }
 
@@ -125,16 +145,25 @@ import { CoordinationWaitPoint, ExtendedMediaMetadata } from '../MediaSessionExt
         this._current = track;
 
         // Notify listeners
-        this.emit(GroupPlaybackTrackEvents.trackChange, { name: GroupPlaybackTrackEvents.trackChange, metadata: track.metadata });
+        this.emit(GroupPlaybackTrackEvents.trackChange, {
+            name: GroupPlaybackTrackEvents.trackChange,
+            metadata: track.metadata,
+        });
 
         return true;
     }
 
-    public compare(metadata: ExtendedMediaMetadata|null): boolean {
-        return GroupPlaybackTrack.compareMetadata(this.current.metadata, metadata);
+    public compare(metadata: ExtendedMediaMetadata | null): boolean {
+        return GroupPlaybackTrack.compareMetadata(
+            this.current.metadata,
+            metadata
+        );
     }
 
-    public static compareMetadata(current: ExtendedMediaMetadata|null, metadata: ExtendedMediaMetadata|null): boolean {
+    public static compareMetadata(
+        current: ExtendedMediaMetadata | null,
+        metadata: ExtendedMediaMetadata | null
+    ): boolean {
         // Only compare when we have two metadata instances
         if (current && metadata) {
             return JSON.stringify(current) == JSON.stringify(metadata);

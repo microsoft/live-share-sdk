@@ -11,14 +11,14 @@
  */
 export const TelemetryEvents = {
     LivePresence: {
-        LocalPresenceChanged: 'LivePresence:LocalPresenceChange',
-        RemotePresenceChanged: 'LivePresence:RemotePresenceChange'
+        LocalPresenceChanged: "LivePresence:LocalPresenceChange",
+        RemotePresenceChanged: "LivePresence:RemotePresenceChange",
     },
     LiveState: {
-        StateChanged: 'LiveState:StateChanged',
-        RoleVerificationError: 'LiveState:RoleVerificationError',
-    }
-}
+        StateChanged: "LiveState:StateChanged",
+        RoleVerificationError: "LiveState:RoleVerificationError",
+    },
+};
 
 /**
  * @hidden

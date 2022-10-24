@@ -11,12 +11,11 @@ export class ConfigView extends View {
     private onSavePagesConfig = async (saveEvent: pages.config.SaveEvent) => {
         const host = "https://" + window.location.host;
 
-        await pages.config.setConfig(
-            {
-                contentUrl: window.location.origin + '?inTeams=1&view=sideBar',
-                websiteUrl: window.location.origin,
-                suggestedDisplayName: "Live Share Canvas demo"
-            });
+        await pages.config.setConfig({
+            contentUrl: window.location.origin + "?inTeams=1&view=sideBar",
+            websiteUrl: window.location.origin,
+            suggestedDisplayName: "Live Share Canvas demo",
+        });
 
         saveEvent.notifySuccess();
     };

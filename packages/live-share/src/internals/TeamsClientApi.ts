@@ -3,15 +3,14 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { 
-    IFluidTenantInfo, 
+import {
+    IFluidTenantInfo,
     IFluidContainerInfo,
     INtpTimeInfo,
     ContainerState,
-    UserMeetingRole, 
-    ILiveShareHost
-} from '../interfaces';
-
+    UserMeetingRole,
+    ILiveShareHost,
+} from "../interfaces";
 
 /**
  * @hidden

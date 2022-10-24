@@ -4,8 +4,16 @@
  */
 
 import * as Teams from "@microsoft/teams-js";
-import { LiveEvent, ILiveShareClientOptions, LiveShareClient } from "@microsoft/live-share";
-import { InkingManager, InkingTool, IUserInfo, LiveCanvas } from "@microsoft/live-share-canvas";
+import {
+    ILiveShareClientOptions,
+    LiveShareClient,
+} from "@microsoft/live-share";
+import {
+    InkingManager,
+    InkingTool,
+    IUserInfo,
+    LiveCanvas,
+} from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 import * as Utils from "./utils";
@@ -57,8 +65,8 @@ const appTemplate = `
 
 const containerSchema = {
     initialObjects: {
-        liveCanvas: LiveCanvas
-    }
+        liveCanvas: LiveCanvas,
+    },
 };
 
 export class StageView extends View {
@@ -68,8 +76,8 @@ export class StageView extends View {
     private offsetBy(x: number, y: number) {
         this._inkingManager.offset = {
             x: this._inkingManager.offset.x + x,
-            y: this._inkingManager.offset.y + y
-        }
+            y: this._inkingManager.offset.y + y,
+        };
 
         this.updateBackgroundImagePosition();
     }
@@ -82,19 +90,24 @@ export class StageView extends View {
     private _userInfo: IUserInfo;
 
     private async internalStart() {
-        const clientOptions: ILiveShareClientOptions | undefined = Utils.runningInTeams()
-            ? undefined
-            : {
-                connection: {
-                    type: "local",
-                    tokenProvider: new InsecureTokenProvider("", { id: "123" }),
-                    endpoint: "http://localhost:7070"
-                }
-            };
+        const clientOptions: ILiveShareClientOptions | undefined =
+            Utils.runningInTeams()
+                ? undefined
+                : {
+                      connection: {
+                          type: "local",
+                          tokenProvider: new InsecureTokenProvider("", {
+                              id: "123",
+                          }),
+                          endpoint: "http://localhost:7070",
+                      },
+                  };
 
         const client = new LiveShareClient(clientOptions);
 
-        this._container = (await client.joinContainer(containerSchema)).container;
+        this._container = (
+            await client.joinContainer(containerSchema)
+        ).container;
 
         const inkingHost = document.getElementById("inkingHost");
 
@@ -102,7 +115,7 @@ export class StageView extends View {
             const liveCanvas = this.getLiveCanvas();
             liveCanvas.onGetLocalUserInfo = () => {
                 return this._userInfo;
-            }
+            };
 
             this._inkingManager = new InkingManager(inkingHost);
 
@@ -110,7 +123,9 @@ export class StageView extends View {
 
             this._inkingManager.activate();
 
-            this._hostResizeObserver = new ResizeObserver(() => { this.updateBackgroundImagePosition(); });
+            this._hostResizeObserver = new ResizeObserver(() => {
+                this.updateBackgroundImagePosition();
+            });
             this._hostResizeObserver.observe(inkingHost);
 
             /*
@@ -128,16 +143,31 @@ export class StageView extends View {
     private updateBackgroundImagePosition() {
         const backgroundImage = document.getElementById("backgroundImage");
 
-        if (backgroundImage && this._inkingManager && this._backgroundImageWidth && this._backgroundImageHeight) {
+        if (
+            backgroundImage &&
+            this._inkingManager &&
+            this._backgroundImageWidth &&
+            this._backgroundImageHeight
+        ) {
             backgroundImage.style.removeProperty("visibility");
 
-            const actualWidth = this._backgroundImageWidth * this._inkingManager.scale;
-            const actualHeight = this._backgroundImageHeight * this._inkingManager.scale;
+            const actualWidth =
+                this._backgroundImageWidth * this._inkingManager.scale;
+            const actualHeight =
+                this._backgroundImageHeight * this._inkingManager.scale;
 
             backgroundImage.style.width = actualWidth + "px";
             backgroundImage.style.height = actualHeight + "px";
-            backgroundImage.style.left = (this._inkingManager.centerX + this._inkingManager.offset.x - this._backgroundImageWidth / 2 * this._inkingManager.scale) + "px";
-            backgroundImage.style.top = (this._inkingManager.centerY + this._inkingManager.offset.y - this._backgroundImageHeight / 2 * this._inkingManager.scale) + "px";
+            backgroundImage.style.left =
+                this._inkingManager.centerX +
+                this._inkingManager.offset.x -
+                (this._backgroundImageWidth / 2) * this._inkingManager.scale +
+                "px";
+            backgroundImage.style.top =
+                this._inkingManager.centerY +
+                this._inkingManager.offset.y -
+                (this._backgroundImageHeight / 2) * this._inkingManager.scale +
+                "px";
         }
     }
 
@@ -148,7 +178,9 @@ export class StageView extends View {
 
         Utils.loadTemplate(appTemplate, document.body);
 
-        const backgroundImage = document.getElementById("backgroundImage") as HTMLImageElement;
+        const backgroundImage = document.getElementById(
+            "backgroundImage"
+        ) as HTMLImageElement;
 
         if (backgroundImage) {
             const showBackgroundImage = () => {
@@ -156,17 +188,14 @@ export class StageView extends View {
                 this._backgroundImageHeight = backgroundImage.naturalHeight;
 
                 this.updateBackgroundImagePosition();
-            }
+            };
 
             if (backgroundImage.complete) {
                 showBackgroundImage();
-            }
-            else {
-                backgroundImage.addEventListener(
-                    "load",
-                    () => {
-                        showBackgroundImage();
-                    });
+            } else {
+                backgroundImage.addEventListener("load", () => {
+                    showBackgroundImage();
+                });
             }
         }
 
@@ -176,80 +205,99 @@ export class StageView extends View {
             if (button) {
                 button.onclick = onClick;
             }
-        }
+        };
 
-        setupButton("btnStroke", () => { this._inkingManager.tool = InkingTool.pen });
-        setupButton(
-            "btnArrow", () => {
-                this._inkingManager.tool = InkingTool.line;
-                this._inkingManager.lineBrush.endArrow = "open";
-            });
-        setupButton("btnLaserPointer", () => { this._inkingManager.tool = InkingTool.laserPointer });
-        setupButton("btnHighlighter", () => { this._inkingManager.tool = InkingTool.highlighter });
-        setupButton("btnEraser", () => { this._inkingManager.tool = InkingTool.eraser });
-        setupButton("btnPointEraser", () => { this._inkingManager.tool = InkingTool.pointEraser });
+        setupButton("btnStroke", () => {
+            this._inkingManager.tool = InkingTool.pen;
+        });
+        setupButton("btnArrow", () => {
+            this._inkingManager.tool = InkingTool.line;
+            this._inkingManager.lineBrush.endArrow = "open";
+        });
+        setupButton("btnLaserPointer", () => {
+            this._inkingManager.tool = InkingTool.laserPointer;
+        });
+        setupButton("btnHighlighter", () => {
+            this._inkingManager.tool = InkingTool.highlighter;
+        });
+        setupButton("btnEraser", () => {
+            this._inkingManager.tool = InkingTool.eraser;
+        });
+        setupButton("btnPointEraser", () => {
+            this._inkingManager.tool = InkingTool.pointEraser;
+        });
 
-        setupButton("btnBlack", () => { this._inkingManager.penBrush.color = { r: 0, g: 0, b: 0 } });
-        setupButton("btnYellow", () => { this._inkingManager.penBrush.color = { r: 255, g: 252, b: 0 } });
-        setupButton("btnGreen", () => { this._inkingManager.penBrush.color = { r: 0, g: 255, b: 0 } });
-        setupButton("btnRed", () => { this._inkingManager.penBrush.color = { r: 255, g: 0, b: 0 } });
-        setupButton("btnBlue", () => { this._inkingManager.penBrush.color = { r: 0, g: 105, b: 175 } });
+        setupButton("btnBlack", () => {
+            this._inkingManager.penBrush.color = { r: 0, g: 0, b: 0 };
+        });
+        setupButton("btnYellow", () => {
+            this._inkingManager.penBrush.color = { r: 255, g: 252, b: 0 };
+        });
+        setupButton("btnGreen", () => {
+            this._inkingManager.penBrush.color = { r: 0, g: 255, b: 0 };
+        });
+        setupButton("btnRed", () => {
+            this._inkingManager.penBrush.color = { r: 255, g: 0, b: 0 };
+        });
+        setupButton("btnBlue", () => {
+            this._inkingManager.penBrush.color = { r: 0, g: 105, b: 175 };
+        });
 
-        setupButton("btnClear", () => { this._inkingManager.clear(); });
+        setupButton("btnClear", () => {
+            this._inkingManager.clear();
+        });
 
-        setupButton("btnOffsetLeft", () => { this.offsetBy(-10, 0); });
-        setupButton("btnOffsetUp", () => { this.offsetBy(0, -10); });
-        setupButton("btnOffsetRight", () => { this.offsetBy(10, 0); });
-        setupButton("btnOffsetDown", () => { this.offsetBy(0, 10); });
+        setupButton("btnOffsetLeft", () => {
+            this.offsetBy(-10, 0);
+        });
+        setupButton("btnOffsetUp", () => {
+            this.offsetBy(0, -10);
+        });
+        setupButton("btnOffsetRight", () => {
+            this.offsetBy(10, 0);
+        });
+        setupButton("btnOffsetDown", () => {
+            this.offsetBy(0, 10);
+        });
 
-        setupButton(
-            "btnResetView",
-            () => {
-                this._inkingManager.offset = {
-                    x: 0,
-                    y: 0
-                }
+        setupButton("btnResetView", () => {
+            this._inkingManager.offset = {
+                x: 0,
+                y: 0,
+            };
 
-                this._inkingManager.scale = 1;
+            this._inkingManager.scale = 1;
+
+            this.updateBackgroundImagePosition();
+        });
+
+        setupButton("btnZoomOut", () => {
+            if (this._inkingManager.scale > 0.1) {
+                this._inkingManager.scale -= 0.1;
 
                 this.updateBackgroundImagePosition();
             }
-        );
+        });
+        setupButton("btnZoomIn", () => {
+            this._inkingManager.scale += 0.1;
 
-        setupButton(
-            "btnZoomOut",
-            () => {
-                if (this._inkingManager.scale > 0.1) {
-                    this._inkingManager.scale -= 0.1;
+            this.updateBackgroundImagePosition();
+        });
 
-                    this.updateBackgroundImagePosition();
-                }
+        setupButton("btnToggleCursorShare", () => {
+            const liveCanvas = this.getLiveCanvas();
+            const isCursorShared = liveCanvas.isCursorShared;
+
+            liveCanvas.isCursorShared = !isCursorShared;
+
+            const button = document.getElementById("btnToggleCursorShare");
+
+            if (button) {
+                button.innerText = liveCanvas.isCursorShared
+                    ? "Stop sharing cursor"
+                    : "Share cursor";
             }
-        );
-        setupButton(
-            "btnZoomIn",
-            () => {
-                this._inkingManager.scale += 0.1;
-
-                this.updateBackgroundImagePosition();
-            }
-        );
-
-        setupButton(
-            "btnToggleCursorShare",
-            () => {
-                const liveCanvas = this.getLiveCanvas();
-                const isCursorShared = liveCanvas.isCursorShared;
-
-                liveCanvas.isCursorShared = !isCursorShared;
-
-                const button = document.getElementById("btnToggleCursorShare");
-
-                if (button) {
-                    button.innerText = liveCanvas.isCursorShared ? "Stop sharing cursor" : "Share cursor";
-                }
-            }
-        );
+        });
     }
 
     async start() {
@@ -259,11 +307,13 @@ export class StageView extends View {
             Teams.app.notifySuccess();
         }
 
-        this.internalStart().catch(
-            (error) => {
-                console.error(error)
+        this.internalStart().catch((error) => {
+            console.error(error);
 
-                Utils.loadTemplate(`<div>Error: ${JSON.stringify(error)}</div>`, document.body);
-            });
+            Utils.loadTemplate(
+                `<div>Error: ${JSON.stringify(error)}</div>`,
+                document.body
+            );
+        });
     }
 }

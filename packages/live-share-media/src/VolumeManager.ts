@@ -3,10 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TimeInterval } from '@microsoft/live-share';
-import { IMediaPlayer } from './IMediaPlayer';
+import { TimeInterval } from "@microsoft/live-share";
+import { IMediaPlayer } from "./IMediaPlayer";
 
-export enum LimitLevelType { fixed, percentage }
+export enum LimitLevelType {
+    fixed,
+    percentage,
+}
 
 /**
  * Smooth audio level changes when volume is modified, or if volume limiting has started/ended.
@@ -18,7 +21,7 @@ export class VolumeManager {
     // defaults to player volume
     private _volume = 0.0;
     private _isLimiting = false;
-    private _limitLevel = 0.1
+    private _limitLevel = 0.1;
     private _limitLevelType: LimitLevelType = LimitLevelType.fixed;
     private _startTime = 0;
     private _startVolume = 0;
@@ -44,7 +47,9 @@ export class VolumeManager {
 
     public set volume(value: number) {
         if (value < 0 || value > 1.0) {
-            throw new Error(`VolumeManager: cannot set volume to ${value}. Level must be between 0.0 and 1.0.`);
+            throw new Error(
+                `VolumeManager: cannot set volume to ${value}. Level must be between 0.0 and 1.0.`
+            );
         }
 
         this._volume = value;
@@ -71,7 +76,9 @@ export class VolumeManager {
 
     public set limitLevel(value: number) {
         if (value < 0 || value > 1.0) {
-            throw new Error(`VolumeManager: cannot set level to ${value}. Level must be between 0.0 and 1.0.`);
+            throw new Error(
+                `VolumeManager: cannot set level to ${value}. Level must be between 0.0 and 1.0.`
+            );
         }
 
         this._limitLevel = value;
@@ -130,19 +137,22 @@ export class VolumeManager {
     private startAdjusting() {
         const adjustVolume = () => {
             // Schedule next animation frame if volume change not finished
-            if (this.millisSinceVolumeChangeStart() <= this._volumeChangeDuration.milliseconds) {
+            if (
+                this.millisSinceVolumeChangeStart() <=
+                this._volumeChangeDuration.milliseconds
+            ) {
                 this._player.volume = this.computeInterpolatedVolume();
                 this.scheduleAnimationFrame(adjustVolume);
             } else {
                 this._player.volume = this.computeTargetVolume();
                 this._running = false;
             }
-        }
+        };
 
         this._startTime = new Date().getTime();
         this._startVolume = this._player.volume;
         if (!this._running) {
-            this._running = true
+            this._running = true;
             this.scheduleAnimationFrame(adjustVolume);
         }
     }
@@ -156,9 +166,11 @@ export class VolumeManager {
     }
 
     private computeInterpolatedVolume(): number {
-        const volumeChangeMillis = this._volumeChangeDuration.milliseconds
-        const volumeDifference = this.computeTargetVolume() - this._startVolume
-        const adjustmentFromStart = volumeDifference / volumeChangeMillis * this.millisSinceVolumeChangeStart()
+        const volumeChangeMillis = this._volumeChangeDuration.milliseconds;
+        const volumeDifference = this.computeTargetVolume() - this._startVolume;
+        const adjustmentFromStart =
+            (volumeDifference / volumeChangeMillis) *
+            this.millisSinceVolumeChangeStart();
         return this._startVolume + adjustmentFromStart;
     }
 

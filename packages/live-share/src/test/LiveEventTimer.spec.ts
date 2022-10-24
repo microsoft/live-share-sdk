@@ -6,14 +6,14 @@
 import { strict as assert } from "assert";
 import { LiveEventScope } from "../LiveEventScope";
 import { LiveEventTarget } from "../LiveEventTarget";
-import { LiveEventTimer } from '../LiveEventTimer';
-import { MockRuntimeSignaler } from './MockRuntimeSignaler';
+import { LiveEventTimer } from "../LiveEventTimer";
+import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
     const remoteRuntime = new MockRuntimeSignaler();
     MockRuntimeSignaler.connectRuntimes([localRuntime, remoteRuntime]);
-    return {localRuntime, remoteRuntime};
+    return { localRuntime, remoteRuntime };
 }
 
 describe("LiveEventTimer", () => {
@@ -22,20 +22,35 @@ describe("LiveEventTimer", () => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
         const localScope = new LiveEventScope(signalers.localRuntime);
-        const localTarget = new LiveEventTarget(localScope, 'test', (evt, local) => triggered++);
-        const localTimer = new LiveEventTimer(localTarget, () => {
-            created++;
-            return {};
-        }, 10);
+        const localTarget = new LiveEventTarget(
+            localScope,
+            "test",
+            (evt, local) => triggered++
+        );
+        const localTimer = new LiveEventTimer(
+            localTarget,
+            () => {
+                created++;
+                return {};
+            },
+            10
+        );
 
         const remoteScope = new LiveEventScope(signalers.remoteRuntime);
-        const remoteTarget = new LiveEventTarget(remoteScope, 'test', (evt, local) => triggered++);
+        const remoteTarget = new LiveEventTarget(
+            remoteScope,
+            "test",
+            (evt, local) => triggered++
+        );
 
         localTimer.start();
         assert(created == 0);
         setTimeout(() => {
             assert(created == 1, `Message creation count is ${created}`);
-            assert(triggered == created * 2, `Messages created is ${created} but received is an unexpected ${triggered}`);
+            assert(
+                triggered == created * 2,
+                `Messages created is ${created} but received is an unexpected ${triggered}`
+            );
             localTimer.stop();
             done();
         }, 50);
@@ -46,20 +61,36 @@ describe("LiveEventTimer", () => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
         const localScope = new LiveEventScope(signalers.localRuntime);
-        const localTarget = new LiveEventTarget(localScope, 'test', (evt, local) => triggered++);
-        const localTimer = new LiveEventTimer(localTarget, () => {
-            created++;
-            return {};
-        }, 5, true);
+        const localTarget = new LiveEventTarget(
+            localScope,
+            "test",
+            (evt, local) => triggered++
+        );
+        const localTimer = new LiveEventTimer(
+            localTarget,
+            () => {
+                created++;
+                return {};
+            },
+            5,
+            true
+        );
 
         const remoteScope = new LiveEventScope(signalers.remoteRuntime);
-        const remoteTarget = new LiveEventTarget(remoteScope, 'test', (evt, local) => triggered++);
+        const remoteTarget = new LiveEventTarget(
+            remoteScope,
+            "test",
+            (evt, local) => triggered++
+        );
 
         localTimer.start();
         assert(created == 0);
         setTimeout(() => {
             assert(created > 1, `Message creation count is ${created}`);
-            assert(triggered == created * 2, `Messages created is ${created} but received is an unexpected ${triggered}`);
+            assert(
+                triggered == created * 2,
+                `Messages created is ${created} but received is an unexpected ${triggered}`
+            );
             localTimer.stop();
             done();
         }, 50);

@@ -24,7 +24,12 @@ export class LiveEventTimer<T extends ILiveEvent> {
      * @param delay Period to delay for in milliseconds.
      * @param repeat Optional. If true the timer will repeat once `start` is called, otherwise a single event will be sent after the delay. Defaults to false.
      */
-    constructor(eventSource: LiveEventSource<T>, createEvent: () => Partial<T>, delay: number, repeat = false) {
+    constructor(
+        eventSource: LiveEventSource<T>,
+        createEvent: () => Partial<T>,
+        delay: number,
+        repeat = false
+    ) {
         this._eventSource = eventSource;
         this._createEvent = createEvent;
         this._delay = new TimeInterval(delay);
@@ -101,7 +106,8 @@ export class LiveEventTimer<T extends ILiveEvent> {
                 // We want to send an every ${this.delay} milliseconds so we subtract the duration
                 // of the time it took us to emit the event.  If it took longer then ${this.delay}
                 // we will skip to the next interval (hence the %mod% operation.)
-                const duration = (new Date().getTime() - startedAt) % this.delay;
+                const duration =
+                    (new Date().getTime() - startedAt) % this.delay;
                 this.delayedEmit(this.delay - duration);
             }
         }, delay);

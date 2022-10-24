@@ -42,6 +42,6 @@ export function getRandomUserInfo(): IUserInfo {
     const lastName = getRandomValue(lastNames);
 
     return {
-        displayName: `${firstName} ${lastName}`
-    }
+        displayName: `${firstName} ${lastName}`,
+    };
 }

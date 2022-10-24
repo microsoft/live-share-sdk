@@ -3,7 +3,15 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { BasicColors, IColor, InkingManager, InputProvider, IPoint, IPointerEvent, IPointerMoveEvent } from "@microsoft/live-share-canvas";
+import {
+    BasicColors,
+    IColor,
+    InkingManager,
+    InputProvider,
+    IPoint,
+    IPointerEvent,
+    IPointerMoveEvent,
+} from "@microsoft/live-share-canvas";
 
 const strokeColors: IColor[] = [
     BasicColors.black,
@@ -13,7 +21,7 @@ const strokeColors: IColor[] = [
     BasicColors.purple,
     BasicColors.magenta,
     BasicColors.violet,
-    BasicColors.gray
+    BasicColors.gray,
 ];
 
 class DummyInputProvider extends InputProvider {
@@ -45,18 +53,16 @@ export class DrawingSimulation {
 
         const offset = {
             x: (this.inkingManager.clientWidth - sineWidth) * Math.random(),
-            y: this.inkingManager.clientHeight * Math.random()
-        }
+            y: this.inkingManager.clientHeight * Math.random(),
+        };
 
         const result: IPoint[] = [];
 
         for (let i = 0; i < DrawingSimulation.pointsPerStroke; i++) {
-            result.push(
-                {
-                    x: x + offset.x,
-                    y: Math.sin(x) * sineHeight * Math.random() * 1.5 + offset.y
-                }
-            );
+            result.push({
+                x: x + offset.x,
+                y: Math.sin(x) * sineHeight * Math.random() * 1.5 + offset.y,
+            });
 
             x += sineStep;
         }
@@ -65,7 +71,9 @@ export class DrawingSimulation {
     }
 
     private getRandomColor(): IColor {
-        return strokeColors[Math.floor(Math.random() * (strokeColors.length - 1))];
+        return strokeColors[
+            Math.floor(Math.random() * (strokeColors.length - 1))
+        ];
     }
 
     public async draw(midDrawCallback: () => Promise<void>) {
@@ -81,17 +89,18 @@ export class DrawingSimulation {
                     ctrlKey: false,
                     shiftKey: false,
                     ...points[pointIndex],
-                    pressure: 0.5
+                    pressure: 0.5,
                 };
 
                 if (pointIndex === 0) {
                     this._dummyInputProvider.emitPointerDownEvent(p);
-                }
-                else if (pointIndex === points.length - 1) {
+                } else if (pointIndex === points.length - 1) {
                     this._dummyInputProvider.emitPointerUpEvent(p);
-                }
-                else {
-                    this._dummyInputProvider.emitPointerMoveEvent( { ...p, isPointerDown: true });
+                } else {
+                    this._dummyInputProvider.emitPointerMoveEvent({
+                        ...p,
+                        isPointerDown: true,
+                    });
                 }
 
                 if (pointIndex === halfWayIndex) {

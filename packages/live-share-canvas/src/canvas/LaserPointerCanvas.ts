@@ -15,30 +15,32 @@ export class LaserPointerCanvas extends WetCanvas {
     private _trailingPointsRemovalInterval?: number;
 
     private scheduleTrailingPointsRemoval() {
-        if (this._trailingPointsRemovalInterval === undefined && this.points.length > 1) {
-            this._trailingPointsRemovalInterval = window.setTimeout(
-                () => {
-                    const pointsToRemove = Math.ceil((this.points.length - 1) / 5);
+        if (
+            this._trailingPointsRemovalInterval === undefined &&
+            this.points.length > 1
+        ) {
+            this._trailingPointsRemovalInterval = window.setTimeout(() => {
+                const pointsToRemove = Math.ceil((this.points.length - 1) / 5);
 
-                    this.points.splice(0, pointsToRemove);
+                this.points.splice(0, pointsToRemove);
 
-                    if (this.points.length > 0) {
-                        let currentPressure = 0.5;
-                        const pressureStep = (0.9 - currentPressure) / this.points.length;
+                if (this.points.length > 0) {
+                    let currentPressure = 0.5;
+                    const pressureStep =
+                        (0.9 - currentPressure) / this.points.length;
 
-                        for (let i = this.points.length - 1; i >= 0; i--) {
-                            this.points[i].pressure = currentPressure;
+                    for (let i = this.points.length - 1; i >= 0; i--) {
+                        this.points[i].pressure = currentPressure;
 
-                            currentPressure -= pressureStep;
-                        }
+                        currentPressure -= pressureStep;
                     }
+                }
 
-                    this._trailingPointsRemovalInterval = undefined;
+                this._trailingPointsRemovalInterval = undefined;
 
-                    this.scheduleRender();
-                    this.scheduleTrailingPointsRemoval();
-                },
-                LaserPointerCanvas.TrailingPointsRemovalInterval);
+                this.scheduleRender();
+                this.scheduleTrailingPointsRemoval();
+            }, LaserPointerCanvas.TrailingPointsRemovalInterval);
         }
     }
 

@@ -14,15 +14,15 @@ import { SidePanelAccordion } from "./SidePanelAccordion";
 import { WaitingRoom } from "./WaitingRoom";
 
 export {
-  AddUserStory,
-  CostingGame,
-  DiscussionRoom,
-  ErrorPane,
-  FlexColumn,
-  FlexRow,
-  FlexItem,
-  GameContainer,
-  GameTimer,
-  SidePanelAccordion,
-  WaitingRoom,
+    AddUserStory,
+    CostingGame,
+    DiscussionRoom,
+    ErrorPane,
+    FlexColumn,
+    FlexRow,
+    FlexItem,
+    GameContainer,
+    GameTimer,
+    SidePanelAccordion,
+    WaitingRoom,
 };

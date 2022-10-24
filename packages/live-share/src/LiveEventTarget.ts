@@ -16,14 +16,20 @@ import { ILiveEvent } from "./interfaces";
  * events to other instances of itself.
  * @template TEvent Type of event to broadcast.
  */
-export class LiveEventTarget<TEvent extends ILiveEvent = ILiveEvent> extends LiveEventSource<TEvent> {
+export class LiveEventTarget<
+    TEvent extends ILiveEvent = ILiveEvent
+> extends LiveEventSource<TEvent> {
     /**
      * Creates a new `LiveEventTarget` instance.
      * @param scope Scope to use for sending events.
      * @param eventName Name of the event to broadcast.
      * @param listener Function to call when an event is sent or received.
      */
-    constructor(scope: LiveEventScope, eventName: string, listener: LiveEventListener<TEvent>) {
+    constructor(
+        scope: LiveEventScope,
+        eventName: string,
+        listener: LiveEventListener<TEvent>
+    ) {
         super(scope, eventName);
         scope.onEvent(eventName, listener);
     }

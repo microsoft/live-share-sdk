@@ -1,25 +1,34 @@
 {
-  "name": "build",
-  "version": "1.0.0",
-  "description": "build file for Live Share SDK",
-  "main": "index.js",
-  "scripts": {
-    "install": "npm run hoist",
-    "prehoist": "shx cp package-lock.json package-lock.bak && shx cp -n package-lock.json lerna-package-lock.json && shx rm package-lock.json && shx cp lerna-package-lock.json package-lock.json",
-    "hoist": "lerna bootstrap --hoist",
-    "posthoist": "shx cp package-lock.json lerna-package-lock.json && shx cp package-lock.bak package-lock.json && shx rm package-lock.bak",
-    "clean": "lerna run clean",
-    "build": "lerna run build",
-    "build:docs": "typedoc"
-  },
-  "author": "",
-  "license": "Microsoft",
-  "dependencies": {
-    "lerna": "^5.5.1"
-  },
-  "devDependencies": {
-    "shx": "^0.3.4",
-    "typedoc": "^0.22.15",
-    "typescript": "^4.6.4"
-  }
+    "name": "build",
+    "version": "1.0.0",
+    "description": "build file for Live Share SDK",
+    "main": "index.js",
+    "scripts": {
+        "install": "npm run hoist",
+        "prehoist": "shx cp package-lock.json package-lock.bak && shx cp -n package-lock.json lerna-package-lock.json && shx rm package-lock.json && shx cp lerna-package-lock.json package-lock.json",
+        "hoist": "lerna bootstrap --hoist",
+        "posthoist": "shx cp package-lock.json lerna-package-lock.json && shx cp package-lock.bak package-lock.json && shx rm package-lock.bak",
+        "clean": "lerna run clean",
+        "build": "lerna run build",
+        "build:docs": "typedoc",
+        "doctor": "eslint **/src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
+    },
+    "author": "",
+    "license": "Microsoft",
+    "dependencies": {
+        "lerna": "^5.5.1"
+    },
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^5.39.0",
+        "@typescript-eslint/parser": "^5.40.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-prettier": "^3.4.1",
+        "eslint-plugin-react": "^7.31.9",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "prettier": "^2.5.0",
+        "shx": "^0.3.4",
+        "typedoc": "^0.22.15",
+        "typescript": "^4.6.4"
+    }
 }

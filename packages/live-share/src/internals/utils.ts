@@ -6,18 +6,18 @@
 /**
  * @hidden
  */
-export function cloneValue<T>(value: T|undefined): T|undefined {
-    return typeof value == 'object' ? JSON.parse(JSON.stringify(value)) : value;
+export function cloneValue<T>(value: T | undefined): T | undefined {
+    return typeof value == "object" ? JSON.parse(JSON.stringify(value)) : value;
 }
 
 /**
  * @hidden
  */
 export function decodeBase64(data: string): string {
-    if (typeof atob == 'function') {
+    if (typeof atob == "function") {
         return atob(data);
     } else {
-        return Buffer.from(data, 'base64').toString();
+        return Buffer.from(data, "base64").toString();
     }
 }
 
@@ -26,11 +26,11 @@ export function decodeBase64(data: string): string {
  */
 export const parseJwt = (token: string) => {
     try {
-      return JSON.parse(decodeBase64(token.split(".")[1]));
+        return JSON.parse(decodeBase64(token.split(".")[1]));
     } catch (e) {
-      return null;
+        return null;
     }
-}
+};
 
 /**
  * @hidden
@@ -45,35 +45,40 @@ export function waitForDelay(delay: number): Promise<void> {
  * @hidden
  */
 export function waitForResult<TResult>(
-    fnRequest: () => Promise<TResult|undefined>,
-    fnSucceeded: (result: TResult|undefined) => boolean,
+    fnRequest: () => Promise<TResult | undefined>,
+    fnSucceeded: (result: TResult | undefined) => boolean,
     fnTimeout: () => Error,
     retrySchedule: number[]
 ): Promise<TResult> {
     let retries: number = 0;
-    return new Promise<TResult>(async (resolve, reject) => {
-        while (true) {
-            const result = await timeoutRequest(fnRequest, 250 * (retries + 1));
-            if (fnSucceeded(result)) {
-                resolve(result!);
-                break;
-            } else if (retries >= retrySchedule.length) {
-                reject(fnTimeout());
-                break;
-            } else {
-                await waitForDelay(retrySchedule[retries++]);
-            }
+    return new Promise<TResult>((resolve, reject) => {
+        for (;;) {
+            timeoutRequest(fnRequest, 250 * (retries + 1)).then(
+                (result) => {
+                    if (fnSucceeded(result)) {
+                        resolve(result!);
+                    } else if (retries >= retrySchedule.length) {
+                        reject(fnTimeout());
+                    } else {
+                        waitForDelay(retrySchedule[retries++]);
+                    }
+                },
+                (e) => reject(e)
+            );
         }
     });
 }
 
 // BUGBUG: Workaround for Teams Client not rejecting errors :(
-function timeoutRequest<TResult>(fnRequest: () => Promise<TResult|undefined>, timeout: number): Promise<TResult|undefined> {
-    return new Promise<TResult|undefined>(async (resolve) => {
+function timeoutRequest<TResult>(
+    fnRequest: () => Promise<TResult | undefined>,
+    timeout: number
+): Promise<TResult | undefined> {
+    return new Promise<TResult | undefined>((resolve) => {
         const hTimer = setTimeout(() => {
             resolve(undefined);
         }, timeout);
-        const result = await fnRequest();
+        const result = fnRequest();
         clearTimeout(hTimer);
         resolve(result);
     });

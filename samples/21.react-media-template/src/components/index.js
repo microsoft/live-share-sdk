@@ -7,13 +7,13 @@ import { FlexRow, FlexColumn, FlexItem } from "./flex";
 import { LiveSharePage } from "./LiveSharePage";
 
 export {
-  MediaPlayerContainer,
-  MediaCard,
-  LiveNotifications,
-  PageError,
-  ListWrapper,
-  FlexRow,
-  FlexColumn,
-  FlexItem,
-  LiveSharePage,
+    MediaPlayerContainer,
+    MediaCard,
+    LiveNotifications,
+    PageError,
+    ListWrapper,
+    FlexRow,
+    FlexColumn,
+    FlexItem,
+    LiveSharePage,
 };

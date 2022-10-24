@@ -7,4 +7,3 @@ export * from "./InputFilter";
 export * from "./InputProvider";
 export * from "./JitterFilter";
 export * from "./PointerInputProvider";
-

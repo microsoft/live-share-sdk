@@ -8,32 +8,27 @@ import { useEffect } from "react";
 import { inTeams } from "../utils/inTeams";
 
 const TabConfig = () => {
+    useEffect(() => {
+        if (!inTeams()) {
+            return;
+        }
 
-  useEffect(() => {
-    if (!inTeams()) {
-      return;
-    }
+        microsoftTeams.pages.config.registerOnSaveHandler(function (saveEvent) {
+            microsoftTeams.pages.config.setConfig({
+                suggestedDisplayName: "LiveCanvasSample",
+                contentUrl: `${window.location.origin}/sidepanel?inTeams=true`,
+            });
+            saveEvent.notifySuccess();
+        });
 
-    microsoftTeams.pages.config.registerOnSaveHandler(function (saveEvent) {
-      microsoftTeams.pages.config.setConfig({
-        suggestedDisplayName: "LiveCanvasSample",
-        contentUrl: `${window.location.origin}/sidepanel?inTeams=true`,
-      });
-      saveEvent.notifySuccess();
-    });
-
-    microsoftTeams.pages.config.setValidityState(true);
-  }, []);
-  return (
-    <div>
-      <header block align="center">
-        Welcome to Live Canvas React sample!
-      </header>
-      <header block align="center">
-        Press the save button to continue.
-      </header>
-    </div>
-  );
+        microsoftTeams.pages.config.setValidityState(true);
+    }, []);
+    return (
+        <div>
+            <header>Welcome to Live Canvas React sample!</header>
+            <header>Press the save button to continue.</header>
+        </div>
+    );
 };
 
 export default TabConfig;

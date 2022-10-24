@@ -12,13 +12,13 @@ function pointerEventToIPointerEvent(e: PointerEvent): IPointerEvent {
         shiftKey: e.shiftKey,
         x: e.offsetX,
         y: e.offsetY,
-        pressure: e.pressure > 0 ? e.pressure : 0.5
-    }
+        pressure: e.pressure > 0 ? e.pressure : 0.5,
+    };
 }
 
 function getCoalescedEvents(event: PointerEvent): PointerEvent[] {
     // getCoalescedEvents isn't supported in Safari
-    if ('getCoalescedEvents' in event) {
+    if ("getCoalescedEvents" in event) {
         const events: PointerEvent[] = event.getCoalescedEvents();
 
         // Older versions of Firefox can return an empty list.
@@ -32,8 +32,8 @@ function getCoalescedEvents(event: PointerEvent): PointerEvent[] {
 }
 
 /**
-* InputProvider implementation that hooks into a DOM element's pointer events.
-*/
+ * InputProvider implementation that hooks into a DOM element's pointer events.
+ */
 export class PointerInputProvider extends InputProvider {
     private _activePointerId?: number;
 
@@ -42,9 +42,10 @@ export class PointerInputProvider extends InputProvider {
             this.element.setPointerCapture(pointerId);
 
             this._activePointerId = pointerId;
-        }
-        catch (e) {
-            console.error(`Could not capture pointer with id ${pointerId}: ${e}`);
+        } catch (e) {
+            console.error(
+                `Could not capture pointer with id ${pointerId}: ${e}`
+            );
         }
     }
 
@@ -52,9 +53,10 @@ export class PointerInputProvider extends InputProvider {
         if (this._activePointerId !== undefined) {
             try {
                 this.element.releasePointerCapture(this._activePointerId);
-            }
-            catch (e) {
-                console.error(`Could not release pointer with id ${this._activePointerId}: ${e}`);
+            } catch (e) {
+                console.error(
+                    `Could not release pointer with id ${this._activePointerId}: ${e}`
+                );
             }
 
             this._activePointerId = undefined;
@@ -87,14 +89,12 @@ export class PointerInputProvider extends InputProvider {
 
                 const coalescedEvents = getCoalescedEvents(e);
 
-                coalescedEvents.forEach(
-                    (evt: PointerEvent) => {
-                        this.pointerMoveEvent.emit(
-                            {
-                                ...pointerEventToIPointerEvent(evt),
-                                isPointerDown
-                            });
+                coalescedEvents.forEach((evt: PointerEvent) => {
+                    this.pointerMoveEvent.emit({
+                        ...pointerEventToIPointerEvent(evt),
+                        isPointerDown,
                     });
+                });
             }
 
             e.preventDefault();
@@ -140,21 +140,21 @@ export class PointerInputProvider extends InputProvider {
     activate() {
         super.activate();
 
-        this.element.addEventListener('pointerdown', this.onPointerDown);
-        this.element.addEventListener('pointermove', this.onPointerMove);
-        this.element.addEventListener('pointerup', this.onPointerUp);
-        this.element.addEventListener('pointerenter', this.onPointerEnter);
-        this.element.addEventListener('pointerleave', this.onPointerLeave);
+        this.element.addEventListener("pointerdown", this.onPointerDown);
+        this.element.addEventListener("pointermove", this.onPointerMove);
+        this.element.addEventListener("pointerup", this.onPointerUp);
+        this.element.addEventListener("pointerenter", this.onPointerEnter);
+        this.element.addEventListener("pointerleave", this.onPointerLeave);
     }
 
     deactivate() {
         super.deactivate();
 
-        this.element.removeEventListener('pointerdown', this.onPointerDown);
-        this.element.removeEventListener('pointermove', this.onPointerMove);
-        this.element.removeEventListener('pointerup', this.onPointerUp);
-        this.element.removeEventListener('pointerenter', this.onPointerEnter);
-        this.element.removeEventListener('pointerleave', this.onPointerLeave);
+        this.element.removeEventListener("pointerdown", this.onPointerDown);
+        this.element.removeEventListener("pointermove", this.onPointerMove);
+        this.element.removeEventListener("pointerup", this.onPointerUp);
+        this.element.removeEventListener("pointerenter", this.onPointerEnter);
+        this.element.removeEventListener("pointerleave", this.onPointerLeave);
     }
 
     constructor(readonly element: HTMLElement) {

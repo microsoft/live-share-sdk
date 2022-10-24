@@ -7,11 +7,11 @@ import { usePlaylist } from "./usePlaylist";
 import { useLiveCanvas } from "./useLiveCanvas";
 
 export {
-  useSharedObjects,
-  usePresence,
-  useMediaSession,
-  useNotifications,
-  useTakeControl,
-  usePlaylist,
-  useLiveCanvas,
+    useSharedObjects,
+    usePresence,
+    useMediaSession,
+    useNotifications,
+    useTakeControl,
+    usePlaylist,
+    useLiveCanvas,
 };

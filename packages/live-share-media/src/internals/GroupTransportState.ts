@@ -3,17 +3,22 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent, LiveEvent } from '@microsoft/live-share';
-import EventEmitter from 'events';
-import { IMediaPlayerState } from '../LiveMediaSessionCoordinator';
-import { ExtendedMediaSessionPlaybackState, ExtendedMediaSessionAction } from '../MediaSessionExtensions';
-import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
-
+import { IEvent, LiveEvent } from "@microsoft/live-share";
+import EventEmitter from "events";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import {
+    ExtendedMediaSessionPlaybackState,
+    ExtendedMediaSessionAction,
+} from "../MediaSessionExtensions";
+import {
+    GroupPlaybackTrack,
+    GroupPlaybackTrackEvents,
+} from "./GroupPlaybackTrack";
 
 /**
  * @hidden
  */
- export interface ITransportState {
+export interface ITransportState {
     playbackState: ExtendedMediaSessionPlaybackState;
     startPosition: number;
     timestamp: number;
@@ -24,7 +29,7 @@ import { GroupPlaybackTrack, GroupPlaybackTrackEvents } from './GroupPlaybackTra
  * @hidden
  */
 export enum GroupTransportStateEvents {
-    transportStateChange = 'transportStateChange'
+    transportStateChange = "transportStateChange",
 }
 
 /**
@@ -38,31 +43,34 @@ export interface ITransportStateChangeEvent extends IEvent {
 /**
  * @hidden
  */
- export class GroupTransportState extends EventEmitter {
+export class GroupTransportState extends EventEmitter {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _track: GroupPlaybackTrack;
     private _current: ITransportState;
 
-    constructor(track: GroupPlaybackTrack, getMediaPlayerState: () => IMediaPlayerState) {
+    constructor(
+        track: GroupPlaybackTrack,
+        getMediaPlayerState: () => IMediaPlayerState
+    ) {
         super();
         this._getMediaPlayerState = getMediaPlayerState;
         this._track = track;
         this._current = {
-            playbackState: 'none',
+            playbackState: "none",
             startPosition: 0.0,
             timestamp: 0,
-            clientId: ''
+            clientId: "",
         };
 
         // Listen for track changes
         this._track.on(GroupPlaybackTrackEvents.trackChange, () => {
             // Track changed so reset state to stopped ad position 0.0
             this._current = {
-                playbackState: 'none',
+                playbackState: "none",
                 startPosition: 0.0,
                 timestamp: this._track.current.timestamp,
-                clientId: this._track.current.clientId
-            }
+                clientId: this._track.current.clientId,
+            };
         });
     }
 
@@ -87,7 +95,10 @@ export interface ITransportStateChangeEvent extends IEvent {
     }
 
     public compare(state: ITransportState): boolean {
-        return this.current.playbackState == state.playbackState && this.current.startPosition == state.startPosition;
+        return (
+            this.current.playbackState == state.playbackState &&
+            this.current.startPosition == state.startPosition
+        );
     }
 
     public updateState(state: ITransportState): boolean {
@@ -103,7 +114,10 @@ export interface ITransportStateChangeEvent extends IEvent {
         }
 
         // Ignore state changes that have the same timestamp and the clientId sorts higher.
-        if (state.timestamp == originalState.timestamp && state.clientId.localeCompare(originalState.clientId) > 0) {
+        if (
+            state.timestamp == originalState.timestamp &&
+            state.clientId.localeCompare(originalState.clientId) > 0
+        ) {
             return false;
         }
 
@@ -112,14 +126,30 @@ export interface ITransportStateChangeEvent extends IEvent {
 
         // Trigger transport change
         const playerState = this._getMediaPlayerState().playbackState;
-        if (originalState.playbackState == state.playbackState && playerState != 'ended') {
-            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'seekto', seekTime: state.startPosition });
-        } else if (state.playbackState == 'playing') {
+        if (
+            originalState.playbackState == state.playbackState &&
+            playerState != "ended"
+        ) {
+            this.emit(GroupTransportStateEvents.transportStateChange, {
+                type: GroupTransportStateEvents.transportStateChange,
+                action: "seekto",
+                seekTime: state.startPosition,
+            });
+        } else if (state.playbackState == "playing") {
             const now = LiveEvent.getTimestamp();
-            const projectedPosition = state.startPosition + ((now - state.timestamp) / 1000);
-            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'play', seekTime: projectedPosition});
+            const projectedPosition =
+                state.startPosition + (now - state.timestamp) / 1000;
+            this.emit(GroupTransportStateEvents.transportStateChange, {
+                type: GroupTransportStateEvents.transportStateChange,
+                action: "play",
+                seekTime: projectedPosition,
+            });
         } else {
-            this.emit(GroupTransportStateEvents.transportStateChange, { type: GroupTransportStateEvents.transportStateChange, action: 'pause', seekTime: state.startPosition});
+            this.emit(GroupTransportStateEvents.transportStateChange, {
+                type: GroupTransportStateEvents.transportStateChange,
+                action: "pause",
+                seekTime: state.startPosition,
+            });
         }
 
         return true;

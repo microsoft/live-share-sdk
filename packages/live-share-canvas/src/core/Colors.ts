@@ -8,7 +8,7 @@ import { forceIntoRange } from "./Internals";
 /**
  * Defines an RGB color
  */
- export interface IColor {
+export interface IColor {
     readonly r: number; // 0 - 255
     readonly g: number; // 0 - 255
     readonly b: number; // 0 - 255
@@ -19,7 +19,7 @@ import { forceIntoRange } from "./Internals";
  * @param color The color to convert.
  * @returns A string representing the CSS rgba() representation of the color.
  */
- export function toCssRgbaColor(color: IColor, alpha: number = 1): string {
+export function toCssRgbaColor(color: IColor, alpha: number = 1): string {
     const r = forceIntoRange(color.r, 0, 255);
     const g = forceIntoRange(color.g, 0, 255);
     const b = forceIntoRange(color.b, 0, 255);
@@ -65,14 +65,14 @@ export function lightenColor(color: IColor, intensity: number): IColor {
     const lightenChannel = (channel: number) => {
         const delta = 255 - channel;
 
-        return channel + Math.round(delta / 100 * intensity);
-    }
+        return channel + Math.round((delta / 100) * intensity);
+    };
 
     return {
         r: lightenChannel(color.r),
         g: lightenChannel(color.g),
-        b: lightenChannel(color.b)
-    }
+        b: lightenChannel(color.b),
+    };
 }
 
 /**
@@ -81,7 +81,7 @@ export function lightenColor(color: IColor, intensity: number): IColor {
  * @param intensity The intensity of the darkening. Must be between 0 and 100.
  * @returns The darkened color.
  */
- export function darkenColor(color: IColor, intensity: number): IColor {
+export function darkenColor(color: IColor, intensity: number): IColor {
     if (intensity < 0 || intensity > 100) {
         return color;
     }
@@ -89,14 +89,14 @@ export function lightenColor(color: IColor, intensity: number): IColor {
     const darkenChannel = (channel: number) => {
         const delta = 255 - channel;
 
-        return channel - Math.round(channel / 100 * intensity);
-    }
+        return channel - Math.round((channel / 100) * intensity);
+    };
 
     return {
         r: darkenChannel(color.r),
         g: darkenChannel(color.g),
-        b: darkenChannel(color.b)
-    }
+        b: darkenChannel(color.b),
+    };
 }
 
 /**
@@ -113,7 +113,7 @@ export const BasicColors = {
     yellow: fromCssColor("#ffff00"),
     magenta: fromCssColor("#ea33f6"),
     violet: fromCssColor("#8719cc"),
-    purple: fromCssColor("#76147d")
+    purple: fromCssColor("#76147d"),
 };
 
 /**
@@ -135,7 +135,7 @@ export const PenColors = {
     black: fromCssColor("#000000"),
     darkGray: fromCssColor("#333333"),
     lightGray: fromCssColor("#849398"),
-    white: fromCssColor("#ffffff")
+    white: fromCssColor("#ffffff"),
 };
 
 /**
@@ -157,5 +157,5 @@ export const HighlighterColors = {
     red: fromCssColor("#ff2500"),
     lightGray: fromCssColor("#e6e6e6"),
     gray: fromCssColor("#969696"),
-    black: fromCssColor("#000000")
+    black: fromCssColor("#000000"),
 };

@@ -14,7 +14,10 @@ export class RequestCache<TResult = any> {
         this._cacheLifetime = cacheLifetime;
     }
 
-    public cacheRequest(key: string, fnRequest: () => Promise<TResult>): Promise<TResult> {
+    public cacheRequest(
+        key: string,
+        fnRequest: () => Promise<TResult>
+    ): Promise<TResult> {
         const startTime = new Date().getTime();
         let entry: RequestCacheEntry<TResult>;
         if (this._cache.has(key)) {

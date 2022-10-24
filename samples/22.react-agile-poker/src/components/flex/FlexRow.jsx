@@ -40,7 +40,7 @@ export const FlexRow = (props) => {
 
 FlexRow.propTypes = {
     children: PropTypes.node,
-    className: string,
+    className: PropTypes.string,
     fill: "both" | "height" | "width" | "view",
     gap: "smaller" | "small" | "medium" | "large",
     hAlign: "start" | "center" | "end",

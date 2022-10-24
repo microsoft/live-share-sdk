@@ -3,15 +3,15 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
+import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
-import { cloneValue, TelemetryEvents } from './internals';
-import { LiveEventScope } from './LiveEventScope';
-import { LiveEventTarget } from './LiveEventTarget';
-import { LiveTelemetryLogger } from './LiveTelemetryLogger';
-import { LiveEvent } from './LiveEvent';
-import { LiveObjectSynchronizer } from './LiveObjectSynchronizer';
+import { cloneValue, TelemetryEvents } from "./internals";
+import { LiveEventScope } from "./LiveEventScope";
+import { LiveEventTarget } from "./LiveEventTarget";
+import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
+import { LiveEvent } from "./LiveEvent";
+import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
 
 /**
  * Events supported by [LiveState` object.
@@ -20,7 +20,7 @@ export enum LiveStateEvents {
     /**
      * The objects state has changed.
      */
-    stateChanged = 'stateChanged'
+    stateChanged = "stateChanged",
 }
 
 /**
@@ -36,7 +36,14 @@ export interface ILiveStateEvents<TData = undefined> extends IEvent {
      * @param listener.data Optional data object for the new state.
      * @param listener.local If true, a local state change occurred.
      */
-     (event: 'stateChanged', listener: (state: string, data: TData|undefined, local: boolean) => void): any;
+    (
+        event: "stateChanged",
+        listener: (
+            state: string,
+            data: TData | undefined,
+            local: boolean
+        ) => void
+    ): any;
 }
 
 /**
@@ -48,10 +55,16 @@ export interface ILiveStateEvents<TData = undefined> extends IEvent {
  * changes.
  * @template TData Optional data object that's synchronized with the state.
  */
-export class LiveState<TData = undefined> extends DataObject<{Events: ILiveStateEvents<TData>}> {
+export class LiveState<TData = undefined> extends DataObject<{
+    Events: ILiveStateEvents<TData>;
+}> {
     private _logger = new LiveTelemetryLogger(this.runtime);
     private _allowedRoles: UserMeetingRole[] = [];
-    private _currentState: IStateChangeEvent<TData> = {name: 'ChangeState', timestamp: 0, state: LiveState.INITIAL_STATE};
+    private _currentState: IStateChangeEvent<TData> = {
+        name: "ChangeState",
+        timestamp: 0,
+        state: LiveState.INITIAL_STATE,
+    };
 
     private _scope?: LiveEventScope;
     private _changeStateEvent?: LiveEventTarget<IStateChangeEvent<TData>>;
@@ -60,7 +73,7 @@ export class LiveState<TData = undefined> extends DataObject<{Events: ILiveState
     /**
      * The objects initial state if not explicitly initialized.
      */
-    public static readonly INITIAL_STATE = '';
+    public static readonly INITIAL_STATE = "";
 
     /**
      * The objects fluid type/name.
@@ -89,7 +102,7 @@ export class LiveState<TData = undefined> extends DataObject<{Events: ILiveState
      * Returns true if the object has been initialized.
      */
     public get isStarted(): boolean {
-        return this.isInitialized
+        return this.isInitialized;
     }
 
     /**
@@ -110,7 +123,11 @@ export class LiveState<TData = undefined> extends DataObject<{Events: ILiveState
      * Starts the object.
      * @param allowedRoles Optional. List of roles allowed to make state changes.
      */
-    public async initialize(allowedRoles?: UserMeetingRole[], state = LiveState.INITIAL_STATE, data?: TData): Promise<void> {
+    public async initialize(
+        allowedRoles?: UserMeetingRole[],
+        state = LiveState.INITIAL_STATE,
+        data?: TData
+    ): Promise<void> {
         if (this._scope) {
             throw new Error(`LiveState already started.`);
         }
@@ -122,21 +139,31 @@ export class LiveState<TData = undefined> extends DataObject<{Events: ILiveState
         this._scope = new LiveEventScope(this.runtime, allowedRoles);
 
         // Listen for remote state changes
-        this._changeStateEvent = new LiveEventTarget(this._scope, 'ChangeState', (evt, local) => {
-            if (!local) {
-                // Check for state change
-                this.remoteStateReceived(evt, evt.clientId!);
+        this._changeStateEvent = new LiveEventTarget(
+            this._scope,
+            "ChangeState",
+            (evt, local) => {
+                if (!local) {
+                    // Check for state change
+                    this.remoteStateReceived(evt, evt.clientId!);
+                }
             }
-        });
+        );
 
         // Create object synchronizer
-        this._synchronizer = new LiveObjectSynchronizer(this.id, this.runtime, this.context.containerRuntime, (connecting) => {
+        this._synchronizer = new LiveObjectSynchronizer(
+            this.id,
+            this.runtime,
+            this.context.containerRuntime,
+            (connecting) => {
                 // Return current state
                 return this._currentState;
-            }, (connecting, state, sender) => {
+            },
+            (connecting, state, sender) => {
                 // Check for state change
                 this.remoteStateReceived(state!, sender);
-            });
+            }
+        );
 
         return Promise.resolve();
     }
@@ -163,7 +190,10 @@ export class LiveState<TData = undefined> extends DataObject<{Events: ILiveState
 
         // Broadcast state change
         const clone = cloneValue(data);
-        const evt = this._changeStateEvent!.sendEvent({ state: state, data: clone });
+        const evt = this._changeStateEvent!.sendEvent({
+            state: state,
+            data: clone,
+        });
 
         // Update local state immediately
         // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
@@ -171,23 +201,43 @@ export class LiveState<TData = undefined> extends DataObject<{Events: ILiveState
         this.updateState(evt, true);
     }
 
-    private remoteStateReceived(evt: IStateChangeEvent<TData>, sender: string): void {
-        LiveEvent.verifyRolesAllowed(sender, this._allowedRoles).then((allowed) => {
-            // Ensure that state is allowed, newer, and not the initial state.
-            if (allowed && LiveEvent.isNewer(this._currentState, evt) && evt.state !== LiveState.INITIAL_STATE) {
-                this.updateState(evt, false);
-            }
-        }).catch((err) => {
-            this._logger.sendErrorEvent(TelemetryEvents.LiveState.RoleVerificationError, err);
-        });
+    private remoteStateReceived(
+        evt: IStateChangeEvent<TData>,
+        sender: string
+    ): void {
+        LiveEvent.verifyRolesAllowed(sender, this._allowedRoles)
+            .then((allowed) => {
+                // Ensure that state is allowed, newer, and not the initial state.
+                if (
+                    allowed &&
+                    LiveEvent.isNewer(this._currentState, evt) &&
+                    evt.state !== LiveState.INITIAL_STATE
+                ) {
+                    this.updateState(evt, false);
+                }
+            })
+            .catch((err) => {
+                this._logger.sendErrorEvent(
+                    TelemetryEvents.LiveState.RoleVerificationError,
+                    err
+                );
+            });
     }
 
     private updateState(evt: IStateChangeEvent<TData>, local: boolean) {
         const oldState = this._currentState.state;
         const newState = evt.state;
         this._currentState = evt;
-        this.emit(LiveStateEvents.stateChanged, evt.state, cloneValue(evt.data), local);
-        this._logger.sendTelemetryEvent(TelemetryEvents.LiveState.StateChanged, {oldState, newState});
+        this.emit(
+            LiveStateEvents.stateChanged,
+            evt.state,
+            cloneValue(evt.data),
+            local
+        );
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.LiveState.StateChanged,
+            { oldState, newState }
+        );
     }
 }
 

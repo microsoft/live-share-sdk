@@ -8,8 +8,6 @@ import { ConfigView } from "./config-view";
 import { StageView } from "./stage-view";
 import { SidebarView } from "./sidebar-view";
 
-var view: View;
-
 window.onload = () => {
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get("view") || "stage";
@@ -29,5 +27,4 @@ window.onload = () => {
     }
 
     view.start();
-}
-
+};

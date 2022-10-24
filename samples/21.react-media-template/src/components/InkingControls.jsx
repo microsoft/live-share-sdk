@@ -8,59 +8,59 @@ import eraserAsset from "../assets/eraser.svg";
 import { InkingControlButton } from "./InkingControlButton";
 
 export const InkingControls = ({ inkingManager, setIsEnabled, isEnabled }) => {
-  const [selectedTool, setSelectedTool] = useState(inkingManager.tool);
-  const onSelectTool = useCallback(
-    (tool) => {
-      if (tool !== selectedTool) {
-        inkingManager.tool = tool;
-        setSelectedTool(tool);
-      }
-      if (isEnabled && tool === selectedTool) {
-        setIsEnabled(false);
-      } else {
-        setIsEnabled(true);
-      }
-    },
-    [inkingManager, isEnabled, selectedTool]
-  );
+    const [selectedTool, setSelectedTool] = useState(inkingManager.tool);
+    const onSelectTool = useCallback(
+        (tool) => {
+            if (tool !== selectedTool) {
+                inkingManager.tool = tool;
+                setSelectedTool(tool);
+            }
+            if (isEnabled && tool === selectedTool) {
+                setIsEnabled(false);
+            } else {
+                setIsEnabled(true);
+            }
+        },
+        [inkingManager, isEnabled, selectedTool]
+    );
 
-  useEffect(() => {
-    if (inkingManager) {
-      // Change default color of pen brush
-      inkingManager.penBrush.color = fromCssColor("#E3182D");
-    }
-  }, [inkingManager]);
+    useEffect(() => {
+        if (inkingManager) {
+            // Change default color of pen brush
+            inkingManager.penBrush.color = fromCssColor("#E3182D");
+        }
+    }, [inkingManager]);
 
-  return (
-    <FlexRow marginSpacer style={{ marginLeft: "8px", marginRight: "4px" }}>
-      <InkingControlButton
-        tool={InkingTool.laserPointer}
-        isEnabled={isEnabled}
-        selectedTool={selectedTool}
-        imageAsset={laserPointerAsset}
-        onSelectTool={onSelectTool}
-      />
-      <InkingControlButton
-        tool={InkingTool.pen}
-        isEnabled={isEnabled}
-        selectedTool={selectedTool}
-        imageAsset={penAsset}
-        onSelectTool={onSelectTool}
-      />
-      <InkingControlButton
-        tool={InkingTool.highlighter}
-        isEnabled={isEnabled}
-        selectedTool={selectedTool}
-        imageAsset={highlighterAsset}
-        onSelectTool={onSelectTool}
-      />
-      <InkingControlButton
-        tool={InkingTool.eraser}
-        isEnabled={isEnabled}
-        selectedTool={selectedTool}
-        imageAsset={eraserAsset}
-        onSelectTool={onSelectTool}
-      />
-    </FlexRow>
-  );
+    return (
+        <FlexRow marginSpacer style={{ marginLeft: "8px", marginRight: "4px" }}>
+            <InkingControlButton
+                tool={InkingTool.laserPointer}
+                isEnabled={isEnabled}
+                selectedTool={selectedTool}
+                imageAsset={laserPointerAsset}
+                onSelectTool={onSelectTool}
+            />
+            <InkingControlButton
+                tool={InkingTool.pen}
+                isEnabled={isEnabled}
+                selectedTool={selectedTool}
+                imageAsset={penAsset}
+                onSelectTool={onSelectTool}
+            />
+            <InkingControlButton
+                tool={InkingTool.highlighter}
+                isEnabled={isEnabled}
+                selectedTool={selectedTool}
+                imageAsset={highlighterAsset}
+                onSelectTool={onSelectTool}
+            />
+            <InkingControlButton
+                tool={InkingTool.eraser}
+                isEnabled={isEnabled}
+                selectedTool={selectedTool}
+                imageAsset={eraserAsset}
+                onSelectTool={onSelectTool}
+            />
+        </FlexRow>
+    );
 };

@@ -3,21 +3,26 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ITelemetryErrorEvent, ITelemetryGenericEvent, ITelemetryPerformanceEvent, ITelemetryProperties } from "@fluidframework/common-definitions";
+import {
+    ITelemetryErrorEvent,
+    ITelemetryGenericEvent,
+    ITelemetryPerformanceEvent,
+    ITelemetryProperties,
+} from "@fluidframework/common-definitions";
 import { LiveEvent } from "./LiveEvent";
-import { IRuntimeSignaler } from './LiveEventScope';
+import { IRuntimeSignaler } from "./LiveEventScope";
 
 /**
  * Properties included on all events sent by `LiveTelemetryLogger`.
  */
 export interface ILiveTelemetryProperties extends ITelemetryProperties {
     /**
-     * Optional. ID of the client if it's been assigned by the runtime. 
+     * Optional. ID of the client if it's been assigned by the runtime.
      */
     clientId?: string;
 
     /**
-     * ID used to correlate multiple events for an operation. Typically of the form of 
+     * ID used to correlate multiple events for an operation. Typically of the form of
      * `${clientId}:${timestamp}` but may include the clientId of the sender when logging
      * that an event was received.
      */
@@ -43,7 +48,7 @@ export class LiveTelemetryLogger {
 
     /**
      * Creates a new `LiveTelemetryLogger` instance.
-     * @param runtime Containers runtime instance. 
+     * @param runtime Containers runtime instance.
      */
     public constructor(runtime: IRuntimeSignaler) {
         this._runtime = runtime;
@@ -51,61 +56,87 @@ export class LiveTelemetryLogger {
 
     /**
      * Sends a generic telemetry event.
-     * @param eventName Name of the event to send. 
-     * @param error Optional. Error object to send with event. 
+     * @param eventName Name of the event to send.
+     * @param error Optional. Error object to send with event.
      * @param additionalProperties Optional. Additional properties to include with event.
      */
-    public sendTelemetryEvent(eventName: string, error?: any, additionalProperties?: Partial<ILiveTelemetryProperties>): void {
+    public sendTelemetryEvent(
+        eventName: string,
+        error?: any,
+        additionalProperties?: Partial<ILiveTelemetryProperties>
+    ): void {
         if (this._runtime.logger) {
-            const evt: ITelemetryGenericEvent = this.createTelemetryEvent(eventName, additionalProperties);
+            const evt: ITelemetryGenericEvent = this.createTelemetryEvent(
+                eventName,
+                additionalProperties
+            );
             this._runtime.logger.sendTelemetryEvent(evt, error);
         }
     }
 
     /**
      * Sends an error event.
-     * @param eventName Name of the event to send. 
-     * @param error Optional. Error object to send with event. 
+     * @param eventName Name of the event to send.
+     * @param error Optional. Error object to send with event.
      * @param additionalProperties Optional. Additional properties to include with event.
      */
-     public sendErrorEvent(eventName: string, error?: any, additionalProperties?: Partial<ILiveTelemetryProperties>): void {
+    public sendErrorEvent(
+        eventName: string,
+        error?: any,
+        additionalProperties?: Partial<ILiveTelemetryProperties>
+    ): void {
         if (this._runtime.logger) {
-            const evt: ITelemetryErrorEvent = this.createTelemetryEvent(eventName, additionalProperties);
+            const evt: ITelemetryErrorEvent = this.createTelemetryEvent(
+                eventName,
+                additionalProperties
+            );
             this._runtime.logger.sendErrorEvent(evt, error);
         }
     }
-    
+
     /**
      * Sends a performance telemetry event.
      * @param eventName Name of the event to send.
-     * @param duration The duration of the event in milliseconds. 
-     * @param error Optional. Error object to send with event. 
+     * @param duration The duration of the event in milliseconds.
+     * @param error Optional. Error object to send with event.
      * @param additionalProperties Optional. Additional properties to include with event.
      */
-     public sendPerformanceEvent(eventName: string, duration: number, error?: any, additionalProperties?: Partial<ILiveTelemetryProperties>): void {
+    public sendPerformanceEvent(
+        eventName: string,
+        duration: number,
+        error?: any,
+        additionalProperties?: Partial<ILiveTelemetryProperties>
+    ): void {
         if (this._runtime.logger) {
             const evt: ITelemetryPerformanceEvent = {
                 duration: duration,
-                ...this.createTelemetryEvent(eventName, additionalProperties)
+                ...this.createTelemetryEvent(eventName, additionalProperties),
             };
             this._runtime.logger.sendPerformanceEvent(evt, error);
         }
     }
 
-    private createTelemetryEvent<T extends ILiveTelemetryProperties>(eventName: string, additionalProperties?: Partial<ILiveTelemetryProperties>): T {
+    private createTelemetryEvent<T extends ILiveTelemetryProperties>(
+        eventName: string,
+        additionalProperties?: Partial<ILiveTelemetryProperties>
+    ): T {
         const now = LiveEvent.getTimestamp();
         return {
             eventName: eventName,
             clientId: this._runtime.clientId,
-            correlationId: LiveTelemetryLogger.formatCorrelationId(this._runtime.clientId, now),
+            correlationId: LiveTelemetryLogger.formatCorrelationId(
+                this._runtime.clientId,
+                now
+            ),
             timestamp: now,
-            ...additionalProperties
+            ...additionalProperties,
         } as ILiveTelemetryProperties as T;
     }
 
-    public static formatCorrelationId(clientId: string|undefined, timestamp: number): string {
-        return `${clientId}:${timestamp}`
+    public static formatCorrelationId(
+        clientId: string | undefined,
+        timestamp: number
+    ): string {
+        return `${clientId}:${timestamp}`;
     }
 }
-
-

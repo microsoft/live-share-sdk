@@ -16,74 +16,74 @@ const root = document.getElementById("content");
 const diceValueKey = "dice-value-key";
 
 const containerSchema = {
-  initialObjects: { diceMap: SharedMap }
+    initialObjects: { diceMap: SharedMap },
 };
 
 function onContainerFirstCreated(container) {
-  // Set initial state of the rolled dice to 1.
-  container.initialObjects.diceMap.set(diceValueKey, 1);
+    // Set initial state of the rolled dice to 1.
+    container.initialObjects.diceMap.set(diceValueKey, 1);
 }
-
 
 // STARTUP LOGIC
 
 async function start() {
+    // Check for page to display
+    let view = searchParams.get("view") || "stage";
 
-  // Check for page to display
-  let view = searchParams.get('view') || 'stage';
+    // Check if we are running on stage.
+    if (searchParams.get("inTeams")) {
+        // Initialize teams app
+        await app.initialize();
 
-  // Check if we are running on stage.
-  if (!!searchParams.get('inTeams')) {
-
-    // Initialize teams app
-    await app.initialize();
-
-    // Get our frameContext from context of our app in Teams
-    const context = await app.getContext();
-    if (context.page.frameContext == 'meetingStage') {
-      view = 'stage';
+        // Get our frameContext from context of our app in Teams
+        const context = await app.getContext();
+        if (context.page.frameContext == "meetingStage") {
+            view = "stage";
+        }
     }
-  }
 
-  // Load the requested view
-  switch (view) {
-    case 'content':
-      renderSideBar(root);
-      break;
-    case 'config':
-      renderSettings(root);
-      break;
-    case 'stage':
-    default:
-      try {
-        const { container } = await joinContainer();
-        renderStage(container.initialObjects.diceMap, root);
-      } catch (error) {
-        renderError(root, error);
-      }
-      break;
-  }
+    // Load the requested view
+    switch (view) {
+        case "content":
+            renderSideBar(root);
+            break;
+        case "config":
+            renderSettings(root);
+            break;
+        case "stage":
+        default:
+            try {
+                const { container } = await joinContainer();
+                renderStage(container.initialObjects.diceMap, root);
+            } catch (error) {
+                renderError(root, error);
+            }
+            break;
+    }
 }
 
 async function joinContainer() {
-  // Are we running in teams?
-  let client;
-  if (!!searchParams.get('inTeams')) {
-      // Create client
-      client = new LiveShareClient();
-  } else {
-      // Create client and configure for testing
-      client = new LiveShareClient({
-        connection: {
-          type: 'local',
-          tokenProvider: new InsecureTokenProvider("", { id: "123", name: "Test User" }),
-          endpoint: "http://localhost:7070"
-        }
-      });
-  }
+    // Are we running in teams?
+    let client;
+    if (searchParams.get("inTeams")) {
+        // Create client
+        client = new LiveShareClient();
+    } else {
+        // Create client and configure for testing
+        client = new LiveShareClient({
+            connection: {
+                type: "local",
+                tokenProvider: new InsecureTokenProvider("", {
+                    id: "123",
+                    name: "Test User",
+                }),
+                endpoint: "http://localhost:7070",
+            },
+        });
+    }
 
-  // Join container
-  return await client.joinContainer(containerSchema, onContainerFirstCreated);
+    // Join container
+    return await client.joinContainer(containerSchema, onContainerFirstCreated);
 }
 
 // STAGE VIEW
@@ -109,7 +109,8 @@ function renderStage(diceMap, elem) {
     const dice = elem.querySelector(".dice");
 
     // Set the value at our dataKey with a random number between 1 and 6.
-    rollButton.onclick = () => diceMap.set(diceValueKey, Math.floor(Math.random() * 6) + 1);
+    rollButton.onclick = () =>
+        diceMap.set(diceValueKey, Math.floor(Math.random() * 6) + 1);
 
     // Get the current value of the shared data to update the view whenever it changes.
     const updateDice = () => {
@@ -145,17 +146,17 @@ function renderSideBar(elem) {
     const shareToStageButton = document.createElement("button");
     shareToStageButton["innerHTML"] = "Share to Stage";
     shareToStageButton.onclick = shareToStage;
-    elem.appendChild(shareToStageButton)
+    elem.appendChild(shareToStageButton);
 }
 
 function shareToStage() {
-  meeting.shareAppContentToStage((error, result) => {
-    if (!error) {
-      console.log("Started sharing, sharedToStage result")
-    } else {
-      console.warn("SharingToStageError", error);
-    }
-  }, window.location.origin + '?inTeams=1&view=stage');
+    meeting.shareAppContentToStage((error, result) => {
+        if (!error) {
+            console.log("Started sharing, sharedToStage result");
+        } else {
+            console.warn("SharingToStageError", error);
+        }
+    }, window.location.origin + "?inTeams=1&view=stage");
 }
 
 // SETTINGS VIEW
@@ -178,14 +179,14 @@ function renderSettings(elem) {
     elem.appendChild(settingsTemplate.content.cloneNode(true));
 
     // Save the configurable tab
-    pages.config.registerOnSaveHandler(saveEvent => {
-      pages.config.setConfig({
-        websiteUrl: window.location.origin,
-        contentUrl: window.location.origin + '?inTeams=1&view=content',
-        entityId: 'DiceRollerFluidLiveShare',
-        suggestedDisplayName: 'DiceRollerFluidLiveShare'
-      });
-      saveEvent.notifySuccess();
+    pages.config.registerOnSaveHandler((saveEvent) => {
+        pages.config.setConfig({
+            websiteUrl: window.location.origin,
+            contentUrl: window.location.origin + "?inTeams=1&view=content",
+            entityId: "DiceRollerFluidLiveShare",
+            suggestedDisplayName: "DiceRollerFluidLiveShare",
+        });
+        saveEvent.notifySuccess();
     });
 
     // Enable the Save button in config dialog
@@ -196,7 +197,7 @@ function renderSettings(elem) {
 
 const errorTemplate = document.createElement("template");
 
-errorTemplate["inner"+"HTML"] = `
+errorTemplate["inner" + "HTML"] = `
   <style>
     .wrapper { text-align: center; color: red }
     .error-title { font-size: large; font-weight: bolder; }
@@ -216,7 +217,7 @@ function renderError(elem, error) {
 
     // Refresh the page on click
     refreshButton.onclick = () => {
-      window.location.reload();
+        window.location.reload();
     };
     console.error(error);
     const errorTextContent = error.toString();

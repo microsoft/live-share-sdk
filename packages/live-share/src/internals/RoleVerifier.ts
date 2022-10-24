@@ -7,7 +7,7 @@ import { ILiveShareHost, IRoleVerifier, UserMeetingRole } from '../interfaces';
 import { waitForResult } from './utils';
 import { RequestCache } from './RequestCache';
 
-const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
+const EXPONENTIAL_BACKOFF_SCHEDULE = [250, 500, 700, 1000];
 const CACHE_LIFETIME = 60 * 60 * 1000;
 
 

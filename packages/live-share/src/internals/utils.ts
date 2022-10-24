@@ -53,7 +53,7 @@ export function waitForResult<TResult>(
     let retries: number = 0;
     return new Promise<TResult>(async (resolve, reject) => {
         while (true) {
-            const result = await timeoutRequest(fnRequest, 250 * (retries + 1));
+            const result = await timeoutRequest(fnRequest, 500 * (retries + 1));
             if (fnSucceeded(result)) {
                 resolve(result!);
                 break;

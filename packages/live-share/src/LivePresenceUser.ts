@@ -43,6 +43,7 @@ export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
  */
 export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
+    private readonly _clients: string[] = [];
 
     /**
      * @hidden
@@ -52,6 +53,7 @@ export class LivePresenceUser<TData = object> {
         private _expirationPeriod: TimeInterval,
         private _isLocalUser: boolean
     ) {
+        this.updateClients(this._evt);
         this._lastUpdateTime = LiveEvent.getTimestamp();
     }
 
@@ -99,9 +101,18 @@ export class LivePresenceUser<TData = object> {
     }
 
     /**
+     * Returns true if the presence object is from the specified client.
+     * @param clientId The ID of the client to lookup.
+     */
+    public isFromClient(clientId: string): boolean {
+        return this._clients.indexOf(clientId) >= 0;
+    }
+
+    /**
      * @hidden
      */
     public updateReceived(evt: ILivePresenceEvent<TData>): boolean {
+        this.updateClients(evt);
         const current = this._evt;
         if (LiveEvent.isNewer(current, evt)) {
             // Save updated event
@@ -126,5 +137,12 @@ export class LivePresenceUser<TData = object> {
         return (
             !this._isLocalUser && elapsed > this._expirationPeriod.milliseconds
         );
+    }
+
+    private updateClients(evt: ILivePresenceEvent<TData>): void {
+        // The user can be logged into multiple clients so add client to list if missing.
+        if (evt.clientId && this._clients.indexOf(evt.clientId) < 0) {
+            this._clients.push(evt.clientId);
+        }
     }
 }

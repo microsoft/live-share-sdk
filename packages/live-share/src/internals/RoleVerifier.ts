@@ -75,7 +75,7 @@ export class RoleVerifier implements IRoleVerifier {
 
         // Check for local client ID
         // - For the local client we want to short circuit any network calls and just use the
-        //   cached value from the registerClientId() call. 
+        //   cached value from the registerClientId() call.
         if (this._registerRequestCache.has(clientId)) {
             return await this.registerClientId(clientId);
         }
@@ -83,29 +83,22 @@ export class RoleVerifier implements IRoleVerifier {
         return this._getRequestCache.cacheRequest(clientId, () => {
             return waitForResult(
                 async () => {
-                    try {
-                        const rolesResult = await this._host.getClientRoles(
-                            clientId
-                        );
-                        if (!rolesResult) {
-                            return undefined;
-                        } else if (Array.isArray(rolesResult)) {
+                    const rolesResult = await this._host.getClientRoles(
+                        clientId
+                    );
+                    if (!rolesResult) {
+                        return undefined;
+                    } else if (Array.isArray(rolesResult)) {
+                        return rolesResult;
+                    } else {
+                        //TODO: Mobile client return type is object.
+                        // clean up after mobile fixes return type.
+                        const rolesArray = (rolesResult as any).userRoles;
+                        if (!rolesArray) {
                             return rolesResult;
                         } else {
-                            //TODO: Mobile client return type is object.
-                            // clean up after mobile fixes return type.
-                            const rolesArray = (rolesResult as any).userRoles;
-                            if (!rolesArray) {
-                                return rolesResult;
-                            } else {
-                                return rolesArray;
-                            }
+                            return rolesArray;
                         }
-                    } catch (error) {
-                        console.log("getClientRoles: error verifying roles" + error)
-                        // Assume it's due to local client id not being registered
-                        // retry registering with current user id
-                        return await this.registerClientId(clientId);
                     }
                 },
                 (result) => {

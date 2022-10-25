@@ -1,6 +1,7 @@
 {
     "entryPoints": [
         "packages/live-share/",
+        "packages/live-share-canvas/",
         "packages/live-share-media/"
     ],
     "entryPointStrategy": "packages",

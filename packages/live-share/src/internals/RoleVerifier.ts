@@ -8,7 +8,7 @@ import { waitForResult } from './utils';
 import { RequestCache } from './RequestCache';
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [250, 500, 700, 1000];
-const CACHE_LIFETIME = 60 * 60 * 1000;
+const CACHE_LIFETIME = 10 * 60 * 1000;
 
 
 /**
@@ -62,7 +62,7 @@ export class RoleVerifier implements IRoleVerifier {
         // Check for local client ID
         // - For the local client we want to short circuit any network calls and just use the
         //   cached value from the registerClientId() call. 
-        if (this._registerRequestCache.has(clientId)) {
+        if (!this._registerRequestCache.has(clientId)) {
             return await this.registerClientId(clientId);
         }
 

@@ -377,6 +377,37 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         assert(!user2.isLocalUser, `user2: is local user`);
     });
 
+    it("Should getPresenceForClient()", async () => {
+        const ready = new Deferred();
+        object1.on("presenceChanged", (user, local) => {
+            if (!local) {
+                ready.resolve();
+            }
+        });
+        await object1.initialize("user1");
+        await object2.initialize("user2", undefined, PresenceState.away);
+
+        // Wait for ready and get client ID's
+        await ready.promise;
+        const client1 = (object1 as any)._currentPresence.clientId;
+        const client2 = (object2 as any)._currentPresence.clientId;
+
+        // Perform test
+        const user1 = object1.getPresenceForClient(client1);
+        const user2 = object1.getPresenceForClient(client2);
+
+        assert(
+            user1 && user1.userId == "user1",
+            `user1: missing or wrong user returned`
+        );
+        assert(user1.isLocalUser, `user1: not local user`);
+        assert(
+            user2 && user2.userId == "user2",
+            `user2: missing or wrong user returned`
+        );
+        assert(!user2.isLocalUser, `user2: is local user`);
+    });
+
     it("Should send periodic presence updates", async () => {
         const ready = new Deferred();
         object1.on("presenceChanged", (user, local) => {

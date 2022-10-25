@@ -41,7 +41,7 @@ export const useTakeControl = (
         userId: user.userId,
         state: user.state,
         data: user.data,
-        lastInControlTimestamp: !!teamsUserId ? history.get(teamsUserId) : 0,
+        lastInControlTimestamp: teamsUserId ? history.get(teamsUserId) : 0,
       });
     });
     mappedOnlineUsers.sort((a, b) => {
@@ -67,7 +67,7 @@ export const useTakeControl = (
   const takeControl = useCallback(() => {
     if (!!localUserId && localUserIsEligiblePresenter) {
       takeControlMap?.set(localUserId, LiveEvent.getTimestamp());
-      if (!!sendNotification) {
+      if (sendNotification) {
         sendNotification("took control");
       }
     }

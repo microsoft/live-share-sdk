@@ -4,7 +4,7 @@
  */
 
 import * as microsoftTeams from "@microsoft/teams-js";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { getFlexColumnStyles } from "../styles/layouts";
 import { mergeClasses, Title2, Subtitle2 } from "@fluentui/react-components";
 

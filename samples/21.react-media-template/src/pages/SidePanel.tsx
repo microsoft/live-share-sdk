@@ -14,6 +14,7 @@ import * as liveShareHooks from "../live-share-hooks";
 import { useSharingStatus } from "../teams-js-hooks/useSharingStatus";
 import { TabbedList } from "../components/TabbedList";
 import { ACCEPT_PLAYBACK_CHANGES_FROM } from "../constants/allowed-roles";
+import React from "react";
 
 const SidePanel = () => {
   const context = useTeamsContext();
@@ -37,7 +38,7 @@ const SidePanel = () => {
   const { takeControlStarted, takeControl } = liveShareHooks.useTakeControl(
     localUserIsEligiblePresenter,
     users,
-    (notificationText: String) => { /* noOp */ },
+    (notificationText: string) => { /* noOp */ },
     takeControlMap,
     localUser?.data?.teamsUserId,
   );

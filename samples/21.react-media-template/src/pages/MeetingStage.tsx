@@ -14,6 +14,7 @@ import {
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
 import { ACCEPT_PLAYBACK_CHANGES_FROM } from "../constants/allowed-roles";
 import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
+import React from "react";
 
 const MeetingStage = () => {
   // Teams context

@@ -8,6 +8,7 @@ import { getFlexItemStyles, getFlexRowStyles } from "../styles/layouts";
 import { MediaCard } from "./MediaCard";
 import { FC, useMemo, useState } from "react";
 import { MediaItem } from "../utils/media-list";
+import React from "react";
 
 export const TabbedList: FC<{
   mediaItems: MediaItem[],

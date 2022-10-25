@@ -1,5 +1,6 @@
 import { Image, Button } from "@fluentui/react-components";
 import { InkingTool } from "@microsoft/live-share-canvas";
+import React from "react";
 import { FC } from "react";
 
 export const InkingControlButton: FC<{

@@ -33,6 +33,7 @@ import { InkCanvas } from "./InkCanvas";
 import { InkingControls } from "./InkingControls";
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
 import { InkingManager } from "@microsoft/live-share-canvas";
+import React from "react";
 
 const events = [
   "loadstart",

@@ -44,7 +44,11 @@ export const useSharingStatus = (context?: microsoftTeams.app.Context) => {
         }, 2000);
       }
     }
-    return () => clearInterval(intervalIdRef.current);
+    return () => {
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
+      }
+    };
   }, [context, setSharingActive, intervalIdRef]);
 
   return sharingActive;

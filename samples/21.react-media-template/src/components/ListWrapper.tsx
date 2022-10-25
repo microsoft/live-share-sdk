@@ -4,6 +4,7 @@
  */
 
 import { mergeClasses } from "@fluentui/react-components";
+import React from "react";
 import { FC, ReactNode } from "react";
 import { getFlexColumnStyles, getFlexItemStyles } from "../styles/layouts";
 

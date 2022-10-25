@@ -13,6 +13,7 @@ import { Delete20Regular } from "@fluentui/react-icons";
 import { getFlexRowStyles, getFlexItemStyles } from "../styles/layouts";
 import { FC } from "react";
 import { MediaItem } from "../utils/media-list";
+import React from "react";
 
 export const MediaCard: FC<{
   mediaItem: MediaItem, 

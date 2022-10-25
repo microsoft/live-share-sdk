@@ -129,7 +129,7 @@ export class AzureMediaPlayer extends EventTarget {
    * @param {number} value timestamp in seconds
    */
   set currentTime(value) {
-    return this._player.currentTime(value);
+    this._player.currentTime(value);
   }
 
   get duration() {

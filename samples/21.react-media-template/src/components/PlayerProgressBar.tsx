@@ -11,6 +11,7 @@ import { debounce } from "lodash";
 import useResizeObserver from "use-resize-observer";
 import { getFlexItemStyles } from "../styles/layouts";
 import { formatTimeValue } from "../utils/format";
+import React from "react";
 
 const PlayerProgressBar: FC<{
   currentTime: number,

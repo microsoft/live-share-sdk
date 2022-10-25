@@ -294,6 +294,24 @@ export class LivePresence<TData extends object = object> extends DataObject<{
     }
 
     /**
+     * Returns the current presence info for a specific client ID.
+     * @param clientId The ID of the client to retrieve.
+     * @returns The current presence information for the client if they've connected to the space.
+     */
+    public getPresenceForClient(
+        clientId: string
+    ): LivePresenceUser<TData> | undefined {
+        for (let i = 0; i < this._users.length; i++) {
+            const user = this._users[i];
+            if (user.isFromClient(clientId)) {
+                return user;
+            }
+        }
+
+        return undefined;
+    }
+
+    /**
      * Returns the current presence info for a specific user.
      * @param userId The ID of the user to retrieve.
      * @returns The current presence information for the user if they've connected to the space.

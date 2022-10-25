@@ -27,32 +27,43 @@ export const useTeamsContext = () => {
           })
           .catch((error) => console.error(error));
       } else {
-        const fakeHost: app.AppHostInfo = {
-          name: microsoftTeams.HostName.teams,
-          clientType: microsoftTeams.HostClientType.web,
-          sessionId: ""
-        }
-
-        const fakeAppInfo: app.AppInfo = {
-          locale: "",
-          theme: "",
-          sessionId: "",
-          host: fakeHost
-        }
-
-        const fakePageInfo: app.PageInfo = {
-          id: "",
-          frameContext: microsoftTeams.FrameContexts.meetingStage
-        }
-
-        const fakeContext: app.Context = {
-          app: fakeAppInfo,
-          page: fakePageInfo
-        }
-        setCtx(fakeContext)
+        console.log("useTeamsContext: Creating fake Teams context");
+        setCtx(createFakeContext())
       }
     }
   }, [ctx?.user?.id]);
 
   return ctx;
 };
+
+const createFakeContext = () => {
+  const fakeHost: app.AppHostInfo = {
+    name: microsoftTeams.HostName.teams,
+    clientType: microsoftTeams.HostClientType.web,
+    sessionId: ""
+  }
+
+  const fakeAppInfo: app.AppInfo = {
+    locale: "",
+    theme: "",
+    sessionId: "",
+    host: fakeHost
+  }
+
+  const fakePageInfo: app.PageInfo = {
+    id: "",
+    frameContext: microsoftTeams.FrameContexts.meetingStage
+  }
+  
+  const fakeUserInfo: app.UserInfo = {
+    id: `user${Math.abs(Math.random() * 999999999)}`
+  }
+
+  const fakeContext: app.Context = {
+    app: fakeAppInfo,
+    page: fakePageInfo,
+    user: fakeUserInfo
+  }
+
+  return fakeContext;
+}

@@ -36,7 +36,7 @@ Your app is ready to be deployed!
 
 ### Create the app package to sideload into Teams
 
-1. Open `.\manifest\manifest.json` and update values in it, including your [Application ID](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/msipcthin2/application-id).
+1. Open `.\manifest\manifest.json` and update values in it, including your [Application ID](https://learn.microsoft.com/microsoftteams/platform/resources/schema/manifest-schema#id.
 2. You must replace `https://<<BASE_URI_DOMAIN>>` with the https path to your ngrok tunnel.
 3. It is recommended that you also update the following fields.
     - Set `developer.name` to your name.

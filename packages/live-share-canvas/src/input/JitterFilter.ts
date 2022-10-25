@@ -17,8 +17,16 @@ export class JitterFilter extends InputFilter {
     private static readonly _b: number = -0.5;
     private static readonly _ab: number = 1 - JitterFilter._a - JitterFilter._b;
 
-    private static iir(input: number, output1: number, output2: number): number {
-        return JitterFilter._ab * input + JitterFilter._a * output1 + JitterFilter._b * output2;
+    private static iir(
+        input: number,
+        output1: number,
+        output2: number
+    ): number {
+        return (
+            JitterFilter._ab * input +
+            JitterFilter._a * output1 +
+            JitterFilter._b * output2
+        );
     }
 
     private _out1?: IPointerPoint;
@@ -34,7 +42,7 @@ export class JitterFilter extends InputFilter {
             const output: IPointerPoint = {
                 x: JitterFilter.iir(p.x, this._out1.x, this._out2.x),
                 y: JitterFilter.iir(p.y, this._out1.y, this._out2.y),
-                pressure: p.pressure
+                pressure: p.pressure,
             };
 
             this._out2 = this._out1;

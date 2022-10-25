@@ -3,15 +3,22 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveShareClientOptions, LiveShareClient } from "@microsoft/live-share";
-import { InkingManager, InputFilter, LiveCanvas } from "@microsoft/live-share-canvas";
+import {
+    ILiveShareClientOptions,
+    LiveShareClient,
+} from "@microsoft/live-share";
+import {
+    InkingManager,
+    InputFilter,
+    LiveCanvas,
+} from "@microsoft/live-share-canvas";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 
 const containerSchema = {
     initialObjects: {
-        liveCanvas: LiveCanvas
-    }
+        liveCanvas: LiveCanvas,
+    },
 };
 
 export class InkingSurface {
@@ -24,13 +31,15 @@ export class InkingSurface {
             connection: {
                 type: "local",
                 tokenProvider: new InsecureTokenProvider("", { id: "123" }),
-                endpoint: "http://localhost:7070"
-            }
+                endpoint: "http://localhost:7070",
+            },
         };
 
         const client = new LiveShareClient(clientOptions);
 
-        this._container = (await client.joinContainer(containerSchema)).container;
+        this._container = (
+            await client.joinContainer(containerSchema)
+        ).container;
 
         const liveCanvas = this.getLiveCanvas();
 
@@ -42,7 +51,10 @@ export class InkingSurface {
         this._inkingManager.activate();
     }
 
-    constructor(hostElement: HTMLElement, private _inputFilters?: InputFilter[]) {
+    constructor(
+        hostElement: HTMLElement,
+        private _inputFilters?: InputFilter[]
+    ) {
         this._hostElement = hostElement;
     }
 
@@ -53,12 +65,11 @@ export class InkingSurface {
     async start() {
         try {
             await this.internalStart();
-        }
-        catch (error) {
-            console.error(error)
+        } catch (error) {
+            console.error(error);
 
             document.body.innerText = `Error: ${JSON.stringify(error)}`;
-        };
+        }
     }
 
     getContext(): CanvasRenderingContext2D {

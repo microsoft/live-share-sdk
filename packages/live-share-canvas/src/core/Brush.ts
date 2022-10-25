@@ -16,7 +16,7 @@ export type BrushTipShape = "ellipse" | "rectangle";
 export type BrushType = "pen" | "highlighter" | "laser";
 
 /**
- * 
+ *
  */
 export type ArrowType = "none" | "open";
 
@@ -27,7 +27,7 @@ export interface IBrush {
     /**
      * The type of the brush.
      */
-    type: BrushType,
+    type: BrushType;
     /**
      * The main color of the brush.
      */
@@ -54,7 +54,7 @@ export const DefaultPenBrush: Readonly<IBrush> = {
     type: "pen",
     color: PenColors.black,
     tip: "ellipse",
-    tipSize: 10
+    tipSize: 10,
 };
 
 /**
@@ -64,7 +64,7 @@ export const DefaultLineBrush: Readonly<IBrush> = {
     type: "pen",
     color: PenColors.black,
     tip: "ellipse",
-    tipSize: 10
+    tipSize: 10,
 };
 
 /**
@@ -74,7 +74,7 @@ export const DefaultHighlighterBrush: IBrush = {
     type: "highlighter",
     color: HighlighterColors.yellow,
     tip: "rectangle",
-    tipSize: 10
+    tipSize: 10,
 };
 
 /**
@@ -84,5 +84,5 @@ export const DefaultLaserPointerBrush: IBrush = {
     type: "laser",
     color: BasicColors.red,
     tip: "ellipse",
-    tipSize: 10
+    tipSize: 10,
 };

@@ -3,17 +3,21 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
+import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
-import { LiveEventScope } from './LiveEventScope';
-import { LiveEventTarget } from './LiveEventTarget';
-import { LivePresenceUser, PresenceState, ILivePresenceEvent } from './LivePresenceUser';
-import { LiveObjectSynchronizer } from './LiveObjectSynchronizer';
-import { LiveTelemetryLogger } from './LiveTelemetryLogger';
-import { cloneValue, TelemetryEvents } from './internals';
-import { TimeInterval } from './TimeInterval';
-import { v4 } from 'uuid';
-import { LiveEvent } from './LiveEvent';
+import { LiveEventScope } from "./LiveEventScope";
+import { LiveEventTarget } from "./LiveEventTarget";
+import {
+    LivePresenceUser,
+    PresenceState,
+    ILivePresenceEvent,
+} from "./LivePresenceUser";
+import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
+import { cloneValue, TelemetryEvents } from "./internals";
+import { TimeInterval } from "./TimeInterval";
+import { v4 } from "uuid";
+import { LiveEvent } from "./LiveEvent";
 
 /**
  * Events supported by `LivePresence` object.
@@ -22,14 +26,15 @@ export enum LivePresenceEvents {
     /**
      * The presence for the local or a remote user has changed.
      */
-    presenceChanged = 'presenceChanged'
+    presenceChanged = "presenceChanged",
 }
 
 /**
  * Event typings for `LivePresence` class.
  * @template TData Type of data object to share with clients.
  */
-export interface ILivePresenceEvents<TData extends object = object> extends IEvent {
+export interface ILivePresenceEvents<TData extends object = object>
+    extends IEvent {
     /**
      * The presence information for the local or a remote user has changed.
      * @param event Name of event.
@@ -37,23 +42,28 @@ export interface ILivePresenceEvents<TData extends object = object> extends IEve
      * @param listener.user Presence information that changed.
      * @param listener.local If true the local users presence changed.
      */
-     (event: 'presenceChanged', listener: (user: LivePresenceUser<TData>, local: boolean) => void): any;
+    (
+        event: "presenceChanged",
+        listener: (user: LivePresenceUser<TData>, local: boolean) => void
+    ): any;
 }
 
 /**
  * Live fluid object that synchronizes presence information for the user with other clients.
  * @template TData Type of data object to share with clients.
  */
-export class LivePresence<TData extends object = object> extends DataObject<{Events: ILivePresenceEvents<TData>}> {
+export class LivePresence<TData extends object = object> extends DataObject<{
+    Events: ILivePresenceEvents<TData>;
+}> {
     private _logger = new LiveTelemetryLogger(this.runtime);
     private _expirationPeriod = new TimeInterval(20000);
     private _users: LivePresenceUser<TData>[] = [];
     private _currentPresence: ILivePresenceEvent<TData> = {
-        name: 'UpdatePresence',
+        name: "UpdatePresence",
         timestamp: 0,
-        userId: '',
+        userId: "",
         state: PresenceState.offline,
-        data: undefined
+        data: undefined,
     };
 
     private _scope?: LiveEventScope;
@@ -87,7 +97,7 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
      * Returns true if the object has been initialized.
      */
     public get isStarted(): boolean {
-        return this.isInitialized
+        return this.isInitialized;
     }
 
     /**
@@ -107,7 +117,7 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
     /**
      * Optional data object shared by the user.
      */
-     public get data(): TData | undefined {
+    public get data(): TData | undefined {
         return cloneValue(this._currentPresence.data);
     }
 
@@ -131,7 +141,11 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
      * @param data Optional. Custom data object to sshare. A deep copy of the data object is saved to avoid any accidental modifications.
      * @param state Optional. Initial presence state. Defaults to `PresenceState.online`.
      */
-    public async initialize(userId?: string, data?: TData, state = PresenceState.online): Promise<void> {
+    public async initialize(
+        userId?: string,
+        data?: TData,
+        state = PresenceState.online
+    ): Promise<void> {
         if (this._scope) {
             throw new Error(`LivePresence: already started.`);
         }
@@ -150,15 +164,25 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
         this._scope = new LiveEventScope(this.runtime);
 
         // Listen for PresenceUpdated event (allow local presence changes to be echoed back)
-        this._updatePresenceEvent = new LiveEventTarget(this._scope, 'UpdatePresence', (evt, local) => {
-            if (!local) {
-                // Update users list
-                this.updateMembersList(evt, local);
+        this._updatePresenceEvent = new LiveEventTarget(
+            this._scope,
+            "UpdatePresence",
+            (evt, local) => {
+                if (!local) {
+                    // Update users list
+                    this.updateMembersList(evt, local);
+                }
             }
-        });
-        
+        );
+
         // Create object synchronizer
-        this._synchronizer = new LiveObjectSynchronizer<ILivePresenceEvent<TData>>(this.id, this.runtime, this.context.containerRuntime, (connecting) => {
+        this._synchronizer = new LiveObjectSynchronizer<
+            ILivePresenceEvent<TData>
+        >(
+            this.id,
+            this.runtime,
+            this.context.containerRuntime,
+            (connecting) => {
                 // Update timestamp for current presence
                 // - If we don't do this the user will timeout and show as "offline" for all other
                 //   clients. That's because the LiveEvent.isNewer() check will fail.  Updating
@@ -168,10 +192,12 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
 
                 // Return current presence
                 return this._currentPresence;
-            }, (connecting, state, sender) => {
+            },
+            (connecting, state, sender) => {
                 // Add user to list
                 this.updateMembersList(state!, false);
-            });
+            }
+        );
 
         // Add local user to list
         this.updateMembersList(this._currentPresence, true);
@@ -193,10 +219,9 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
      */
     public toArray(): LivePresenceUser<TData>[] {
         const list: LivePresenceUser<TData>[] = [];
-        this.forEach(presence => list.push(presence));
+        this.forEach((presence) => list.push(presence));
         return list;
     }
-
 
     /**
      * Updates the users presence state and/or shared data object.
@@ -217,7 +242,7 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
             const evt = this._updatePresenceEvent!.sendEvent({
                 userId: this._currentPresence.userId,
                 state: state ?? this._currentPresence.state,
-                data: cloneValue(data) ?? this._currentPresence.data
+                data: cloneValue(data) ?? this._currentPresence.data,
             });
 
             evt.clientId = clientId;
@@ -236,8 +261,11 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
      * @param callback.user Current presence information for a user.
      * @param filter Optional. Presence state to filter enumeration to.
      */
-    public forEach(callback: (user: LivePresenceUser<TData>) => void, filter?: PresenceState): void {
-        this._users.forEach(user => {
+    public forEach(
+        callback: (user: LivePresenceUser<TData>) => void,
+        filter?: PresenceState
+    ): void {
+        this._users.forEach((user) => {
             // Ensure user matches filter
             if (filter == undefined || user.state == filter) {
                 callback(user);
@@ -253,7 +281,7 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
     public getCount(filter?: PresenceState): number {
         if (filter != undefined) {
             let cnt = 0;
-            this._users.forEach(user => {
+            this._users.forEach((user) => {
                 if (user.state == filter) {
                     cnt++;
                 }
@@ -270,8 +298,10 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
      * @param userId The ID of the user to retrieve.
      * @returns The current presence information for the user if they've connected to the space.
      */
-    public getPresenceForUser(userId: string): LivePresenceUser<TData> | undefined {
-        for(let i = 0; i < this._users.length; i++) {
+    public getPresenceForUser(
+        userId: string
+    ): LivePresenceUser<TData> | undefined {
+        for (let i = 0; i < this._users.length; i++) {
             const user = this._users[i];
             if (user.userId == userId) {
                 return user;
@@ -281,14 +311,22 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
         return undefined;
     }
 
-    private updateMembersList(evt: ILivePresenceEvent<TData>, local: boolean): void {
-
+    private updateMembersList(
+        evt: ILivePresenceEvent<TData>,
+        local: boolean
+    ): void {
         const emitEvent = (user: LivePresenceUser<TData>) => {
             this.emit(LivePresenceEvents.presenceChanged, user, local);
             if (local) {
-                this._logger.sendTelemetryEvent(TelemetryEvents.LivePresence.LocalPresenceChanged, {user: evt});
+                this._logger.sendTelemetryEvent(
+                    TelemetryEvents.LivePresence.LocalPresenceChanged,
+                    { user: evt }
+                );
             } else {
-                this._logger.sendTelemetryEvent(TelemetryEvents.LivePresence.RemotePresenceChanged, {user: evt});
+                this._logger.sendTelemetryEvent(
+                    TelemetryEvents.LivePresence.RemotePresenceChanged,
+                    { user: evt }
+                );
             }
         };
 
@@ -312,7 +350,11 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
         }
 
         // Insert new user and send change event
-        const newUser = new LivePresenceUser<TData>(evt, this._expirationPeriod, evt.userId == this._currentPresence.userId);
+        const newUser = new LivePresenceUser<TData>(
+            evt,
+            this._expirationPeriod,
+            evt.userId == this._currentPresence.userId
+        );
         this._users.splice(pos, 0, newUser);
         emitEvent(newUser);
     }
@@ -320,14 +362,14 @@ export class LivePresence<TData extends object = object> extends DataObject<{Eve
     private waitUntilConnected(): Promise<string> {
         return new Promise((resolve) => {
             const onConnected = (clientId: string) => {
-                this.runtime.off('connected', onConnected);
+                this.runtime.off("connected", onConnected);
                 resolve(clientId);
             };
 
             if (this.runtime.connected) {
                 resolve(this.runtime.clientId as string);
             } else {
-                this.runtime.on('connected', onConnected);
+                this.runtime.on("connected", onConnected);
             }
         });
     }

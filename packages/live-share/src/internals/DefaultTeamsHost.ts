@@ -3,22 +3,22 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { 
-    ILiveShareHost, 
-    IFluidTenantInfo, 
+import {
+    ILiveShareHost,
+    IFluidTenantInfo,
     IFluidContainerInfo,
     INtpTimeInfo,
     ContainerState,
-    UserMeetingRole 
-} from '../interfaces';
-import { TeamsClientApi, TeamsClientApiInteractive } from './TeamsClientApi';
+    UserMeetingRole,
+} from "../interfaces";
+import { TeamsClientApi, TeamsClientApiInteractive } from "./TeamsClientApi";
 
 /**
  * @hidden
  * Live Share Host implementation used if one isn't passed into the LiveShareClient and teams is detected.
  */
 export class DefaultTeamsHost implements ILiveShareHost {
-    constructor (private _interactive: TeamsClientApiInteractive) {}
+    constructor(private _interactive: TeamsClientApiInteractive) {}
 
     public getFluidTenantInfo(): Promise<IFluidTenantInfo> {
         return this._interactive.getFluidTenantInfo();
@@ -32,7 +32,9 @@ export class DefaultTeamsHost implements ILiveShareHost {
         return this._interactive.getFluidContainerId();
     }
 
-    public setFluidContainerId(containerId: string): Promise<IFluidContainerInfo> {
+    public setFluidContainerId(
+        containerId: string
+    ): Promise<IFluidContainerInfo> {
         return this._interactive.setFluidContainerId(containerId);
     }
 
@@ -45,11 +47,13 @@ export class DefaultTeamsHost implements ILiveShareHost {
     }
 
     public async getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        return await this._interactive.getClientRoles(clientId) ?? [];
+        return (await this._interactive.getClientRoles(clientId)) ?? [];
     }
 
     public static async getTeamsHost(): Promise<ILiveShareHost> {
-        const teamsApi = (await import('@microsoft/teams-js') as any) as TeamsClientApi;
+        const teamsApi = (await import(
+            "@microsoft/teams-js"
+        )) as any as TeamsClientApi;
         if (teamsApi.liveShare) {
             return teamsApi.liveShare.getHost();
         } else if (teamsApi.interactive) {

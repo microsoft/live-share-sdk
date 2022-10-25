@@ -6,16 +6,16 @@
 import { useState, useRef, useCallback } from "react";
 
 export const useStateRef = (initialValue) => {
-  const reference = useRef(initialValue);
-  const [state, setState] = useState(reference.current);
+    const reference = useRef(initialValue);
+    const [state, setState] = useState(reference.current);
 
-  const setValue = useCallback(
-    (value) => {
-      reference.current = value;
-      setState(reference.current);
-    },
-    [reference, setState]
-  );
+    const setValue = useCallback(
+        (value) => {
+            reference.current = value;
+            setState(reference.current);
+        },
+        [reference, setState]
+    );
 
-  return [state, reference, setValue];
+    return [state, reference, setValue];
 };

@@ -3,19 +3,47 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from '@fluidframework/aqueduct';
-import { IFluidHandle } from '@fluidframework/core-interfaces';
-import { IValueChanged, SharedMap } from '@fluidframework/map';
-import { ISequencedDocumentMessage } from '@fluidframework/protocol-definitions';
+import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { IFluidHandle } from "@fluidframework/core-interfaces";
+import { IValueChanged, SharedMap } from "@fluidframework/map";
+import { ISequencedDocumentMessage } from "@fluidframework/protocol-definitions";
 import {
-    AddPointsEvent, BeginStrokeEvent, ClearEvent, IAddPointsEventArgs, IAddRemoveStrokeOptions, IBeginStrokeEventArgs,
-    InkingManager, IPointerMovedEventArgs, IWetStroke, PointerMovedEvent, StrokeEndState, StrokesAddedEvent, StrokesRemovedEvent
-} from './InkingManager';
-import { IPointerPoint, getDistanceBetweenPoints, IPoint, IRect, expandRect } from './Geometry';
+    AddPointsEvent,
+    BeginStrokeEvent,
+    ClearEvent,
+    IAddPointsEventArgs,
+    IAddRemoveStrokeOptions,
+    IBeginStrokeEventArgs,
+    InkingManager,
+    IPointerMovedEventArgs,
+    IWetStroke,
+    PointerMovedEvent,
+    StrokeEndState,
+    StrokesAddedEvent,
+    StrokesRemovedEvent,
+} from "./InkingManager";
+import {
+    IPointerPoint,
+    getDistanceBetweenPoints,
+    IPoint,
+    IRect,
+    expandRect,
+} from "./Geometry";
 import { IStroke, Stroke, StrokeType } from "./Stroke";
-import { LiveEventScope, LiveEventTarget, ILiveEvent, UserMeetingRole } from '@microsoft/live-share';
-import { IBrush } from './Brush';
-import { BasicColors, darkenColor, IColor, lightenColor, toCssRgbaColor } from './Colors';
+import {
+    LiveEventScope,
+    LiveEventTarget,
+    ILiveEvent,
+    UserMeetingRole,
+} from "@microsoft/live-share";
+import { IBrush } from "./Brush";
+import {
+    BasicColors,
+    darkenColor,
+    IColor,
+    lightenColor,
+    toCssRgbaColor,
+} from "./Colors";
 
 enum InkingEventNames {
     pointerMove = "PointerMove",
@@ -43,12 +71,18 @@ interface ISharedCursor {
     isCursorShared?: boolean;
 }
 
-type IBeginWetStrokeEvent = ILiveEvent & IBeginStrokeEventArgs & ISharedCursor & IUserInfo;
-type IAddWetStrokePointsEvent = ILiveEvent & IAddPointsEventArgs & ISharedCursor & IUserInfo;
+type IBeginWetStrokeEvent = ILiveEvent &
+    IBeginStrokeEventArgs &
+    ISharedCursor &
+    IUserInfo;
+type IAddWetStrokePointsEvent = ILiveEvent &
+    IAddPointsEventArgs &
+    ISharedCursor &
+    IUserInfo;
 
 class LiveStroke {
     /**
-     * Configures the delay before wet stroke events are emitted, to greatly reduce the 
+     * Configures the delay before wet stroke events are emitted, to greatly reduce the
      * number of events emitted and improve performance.
      */
     private static readonly wetStrokeEventsStreamDelay = 60;
@@ -76,8 +110,7 @@ class LiveStroke {
 
             if (threshold < this.simplificationThreshold) {
                 this._points.splice(index + 1, 1);
-            }
-            else {
+            } else {
                 index++;
             }
         }
@@ -89,7 +122,8 @@ class LiveStroke {
         readonly id: string,
         readonly type: StrokeType,
         readonly brush: IBrush,
-        readonly simplificationThreshold: number) { }
+        readonly simplificationThreshold: number
+    ) {}
 
     get points(): IPointerPoint[] {
         return this._points;
@@ -101,15 +135,13 @@ class LiveStroke {
 
     scheduleProcessing(onProcessedCallback: (stroke: LiveStroke) => void) {
         if (this._processTimeout === undefined) {
-            this._processTimeout = window.setTimeout(
-                () => {
-                    this.process();
+            this._processTimeout = window.setTimeout(() => {
+                this.process();
 
-                    this._processTimeout = undefined;
+                this._processTimeout = undefined;
 
-                    onProcessedCallback(this);
-                },
-                LiveStroke.wetStrokeEventsStreamDelay);
+                onProcessedCallback(this);
+            }, LiveStroke.wetStrokeEventsStreamDelay);
         }
     }
 }
@@ -129,7 +161,10 @@ export abstract class LiveCursor {
      * Initializes a new instance of `LiveCursor`.
      * @param info The cursor info.
      */
-    constructor(public readonly clientId: string, public readonly userInfo?: IUserInfo) { }
+    constructor(
+        public readonly clientId: string,
+        public readonly userInfo?: IUserInfo
+    ) {}
 
     /**
      * Updates the position of the cursor.
@@ -166,8 +201,8 @@ export abstract class LiveCursor {
 }
 
 interface ICursorColor {
-    readonly backgroundColor: IColor,
-    readonly textColor: IColor
+    readonly backgroundColor: IColor;
+    readonly textColor: IColor;
 }
 
 class BuiltInLiveCursor extends LiveCursor {
@@ -179,7 +214,7 @@ class BuiltInLiveCursor extends LiveCursor {
         { backgroundColor: BasicColors.magenta, textColor: BasicColors.white },
         { backgroundColor: BasicColors.violet, textColor: BasicColors.white },
         { backgroundColor: BasicColors.gray, textColor: BasicColors.white },
-        { backgroundColor: BasicColors.silver, textColor: BasicColors.black }
+        { backgroundColor: BasicColors.silver, textColor: BasicColors.black },
     ];
     private static currentColorIndex = 0;
 
@@ -189,10 +224,10 @@ class BuiltInLiveCursor extends LiveCursor {
 
     protected internalRender(): HTMLElement {
         const arrowPath: IPoint[] = [
-            { x: 0, y: 0},
-            { x: 10, y: 30},
-            { x: 17, y: 17},
-            { x: 30, y: 10}
+            { x: 0, y: 0 },
+            { x: 10, y: 30 },
+            { x: 17, y: 17 },
+            { x: 30, y: 10 },
         ];
 
         if (!this._arrowPathData || !this._arrowBounds) {
@@ -202,8 +237,8 @@ class BuiltInLiveCursor extends LiveCursor {
                 left: Number.MAX_VALUE,
                 top: Number.MAX_VALUE,
                 right: Number.MIN_VALUE,
-                bottom: Number.MIN_VALUE
-            }
+                bottom: Number.MIN_VALUE,
+            };
 
             for (let i = 0; i < arrowPath.length; i++) {
                 const p = arrowPath[i];
@@ -221,39 +256,59 @@ class BuiltInLiveCursor extends LiveCursor {
         const arrowStrokeWidth = 10;
 
         const textColor = toCssRgbaColor(this._color.textColor);
-        const arrowBorderColor = toCssRgbaColor(lightenColor(this._color.backgroundColor, 80));
+        const arrowBorderColor = toCssRgbaColor(
+            lightenColor(this._color.backgroundColor, 80)
+        );
         const backgroundColor = toCssRgbaColor(this._color.backgroundColor);
 
         let visualTemplate = `
-            <svg viewbox="-${arrowStrokeWidth} -${arrowStrokeWidth} ${2 * arrowStrokeWidth + arrowWidth} ${2 * arrowStrokeWidth + arrowHeight}"
+            <svg viewbox="-${arrowStrokeWidth} -${arrowStrokeWidth} ${
+            2 * arrowStrokeWidth + arrowWidth
+        } ${2 * arrowStrokeWidth + arrowHeight}"
                 width="${arrowWidth}" height="${arrowHeight}" style="filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, .7)">
-                <path d="${this._arrowPathData}" stroke="${arrowBorderColor}" stroke-width="10" stroke-linejoin="round" stroke-opacity="0.90"/>
-                <path d="${this._arrowPathData}" fill="${backgroundColor}" stroke="${backgroundColor}" stroke-width="2" stroke-linejoin="round"/>
+                <path d="${
+                    this._arrowPathData
+                }" stroke="${arrowBorderColor}" stroke-width="10" stroke-linejoin="round" stroke-opacity="0.90"/>
+                <path d="${
+                    this._arrowPathData
+                }" fill="${backgroundColor}" stroke="${backgroundColor}" stroke-width="2" stroke-linejoin="round"/>
             </svg>`;
 
         if (this.userInfo) {
             if (this.userInfo.displayName && !this.userInfo.pictureUri) {
                 visualTemplate += `
                     <div style="display: flex; align-items: center; box-shadow: 0 0 2px black; background-color: ${backgroundColor};
-                        height: ${arrowHeight}px; color: ${textColor}; border-radius: ${arrowHeight / 2}px / 50%;
-                        border-top-left-radius: 4px; padding: 2px 8px; margin: ${arrowHeight * 0.75}px 0 0 -${arrowWidth * 0.25}px;
+                        height: ${arrowHeight}px; color: ${textColor}; border-radius: ${
+                    arrowHeight / 2
+                }px / 50%;
+                        border-top-left-radius: 4px; padding: 2px 8px; margin: ${
+                            arrowHeight * 0.75
+                        }px 0 0 -${arrowWidth * 0.25}px;
                         white-space: nowrap; font-size: 12px; font-family: sans-serif">
                         ${this.userInfo.displayName}
                     </div>`;
-            }
-            else if (this.userInfo.pictureUri && !this.userInfo.displayName) {
+            } else if (this.userInfo.pictureUri && !this.userInfo.displayName) {
                 visualTemplate += `
-                    <img src="${this.userInfo.pictureUri}" style="width: ${arrowHeight * 1.1}px; height: ${arrowHeight * 1.1}px;
+                    <img src="${this.userInfo.pictureUri}" style="width: ${
+                    arrowHeight * 1.1
+                }px; height: ${arrowHeight * 1.1}px;
                         border-radius: 50%; box-shadow: 0 0 2px black;
-                        margin: ${arrowHeight * 0.75}px 0 0 -${arrowWidth * 0.25}px;">`;
-            }
-            else if (this.userInfo.pictureUri && this.userInfo.displayName) {
+                        margin: ${arrowHeight * 0.75}px 0 0 -${
+                    arrowWidth * 0.25
+                }px;">`;
+            } else if (this.userInfo.pictureUri && this.userInfo.displayName) {
                 visualTemplate += `
                     <div style="display: flex; flex-direction: row; align-items: center; background-color: ${backgroundColor}; color: ${textColor};
-                        border-radius: ${arrowHeight / 2}px / 50%; margin: ${arrowHeight * 0.75}px 0 0 -${arrowWidth * 0.25}px;
+                        border-radius: ${arrowHeight / 2}px / 50%; margin: ${
+                    arrowHeight * 0.75
+                }px 0 0 -${arrowWidth * 0.25}px;
                         padding: 2px; white-space: nowrap; font-size: 12px; font-family: sans-serif; box-shadow: 0 0 2px black">
-                        <img src="${this.userInfo.pictureUri}" style="width: ${arrowHeight * 1.1}px; height: ${arrowHeight * 1.1}px; border-radius: 50%;">
-                        <div style="padding: 0 8px">${this.userInfo.displayName}</div>
+                        <img src="${this.userInfo.pictureUri}" style="width: ${
+                    arrowHeight * 1.1
+                }px; height: ${arrowHeight * 1.1}px; border-radius: 50%;">
+                        <div style="padding: 0 8px">${
+                            this.userInfo.displayName
+                        }</div>
                     </div>`;
             }
         }
@@ -274,11 +329,15 @@ class BuiltInLiveCursor extends LiveCursor {
     constructor(public clientId: string, public readonly userInfo?: IUserInfo) {
         super(clientId, userInfo);
 
-        this._color = BuiltInLiveCursor.cursorColors[BuiltInLiveCursor.currentColorIndex];
+        this._color =
+            BuiltInLiveCursor.cursorColors[BuiltInLiveCursor.currentColorIndex];
 
         BuiltInLiveCursor.currentColorIndex++;
 
-        if (BuiltInLiveCursor.currentColorIndex >= BuiltInLiveCursor.cursorColors.length) {
+        if (
+            BuiltInLiveCursor.currentColorIndex >=
+            BuiltInLiveCursor.cursorColors.length
+        ) {
             BuiltInLiveCursor.currentColorIndex = 0;
         }
     }
@@ -328,12 +387,23 @@ export class LiveCanvas extends DataObject {
     private _inkingManager?: InkingManager;
     private _processingIncomingChanges = false;
     private _dryInkMap!: SharedMap;
-    private _wetStrokes: Map<string, IWetStroke> = new Map<string, IWetStroke>();
+    private _wetStrokes: Map<string, IWetStroke> = new Map<
+        string,
+        IWetStroke
+    >();
     private _pointerMovedEventTarget!: LiveEventTarget<IPointerMovedEvent>;
     private _beginWetStrokeEventTarget!: LiveEventTarget<IBeginWetStrokeEvent>;
     private _addWetStrokePointEventTarget!: LiveEventTarget<IAddWetStrokePointsEvent>;
-    private _allowedRoles: UserMeetingRole[] = [UserMeetingRole.guest, UserMeetingRole.attendee, UserMeetingRole.organizer, UserMeetingRole.presenter];
-    private _pendingLiveStrokes: Map<string, LiveStroke> = new Map<string, LiveStroke>();
+    private _allowedRoles: UserMeetingRole[] = [
+        UserMeetingRole.guest,
+        UserMeetingRole.attendee,
+        UserMeetingRole.organizer,
+        UserMeetingRole.presenter,
+    ];
+    private _pendingLiveStrokes: Map<string, LiveStroke> = new Map<
+        string,
+        LiveStroke
+    >();
     private _liveCursorsMap = new Map<string, LiveCursor>();
     private _liveCursorsHost!: HTMLElement;
     private _isCursorShared: boolean = false;
@@ -342,18 +412,17 @@ export class LiveCanvas extends DataObject {
     private liveStrokeProcessed = (liveStroke: LiveStroke) => {
         const userInfo = this.getLocalUserInfo();
 
-        this._addWetStrokePointEventTarget.sendEvent(
-            {
-                name: InkingEventNames.addWetStrokePoints,
-                isCursorShared: this.isCursorShared ? true : undefined,
-                displayName: userInfo?.displayName,
-                strokeId: liveStroke.id,
-                points: liveStroke.points,
-                endState: liveStroke.endState
-            });
+        this._addWetStrokePointEventTarget.sendEvent({
+            name: InkingEventNames.addWetStrokePoints,
+            isCursorShared: this.isCursorShared ? true : undefined,
+            displayName: userInfo?.displayName,
+            strokeId: liveStroke.id,
+            points: liveStroke.points,
+            endState: liveStroke.endState,
+        });
 
         liveStroke.clear();
-    }
+    };
 
     private getLocalUserInfo(): IUserInfo | undefined {
         return this.onGetLocalUserInfo ? this.onGetLocalUserInfo() : undefined;
@@ -368,14 +437,14 @@ export class LiveCanvas extends DataObject {
                     if (this.isCursorShared) {
                         const userInfo = this.getLocalUserInfo();
 
-                        this._pointerMovedEventTarget.sendEvent(
-                            {
-                                position: eventArgs.position,
-                                displayName: userInfo?.displayName,
-                                pictureUri: userInfo?.pictureUri
-                            });
+                        this._pointerMovedEventTarget.sendEvent({
+                            position: eventArgs.position,
+                            displayName: userInfo?.displayName,
+                            pictureUri: userInfo?.pictureUri,
+                        });
                     }
-                });
+                }
+            );
             this._inkingManager.on(
                 BeginStrokeEvent,
                 (eventArgs: IBeginStrokeEventArgs) => {
@@ -392,22 +461,27 @@ export class LiveCanvas extends DataObject {
 
                     const userInfo = this.getLocalUserInfo();
 
-                    this._beginWetStrokeEventTarget.sendEvent(
-                        {
-                            name: InkingEventNames.beginWetStroke,
-                            isCursorShared: this.isCursorShared ? true : undefined,
-                            displayName: userInfo?.displayName,
-                            pictureUri: userInfo?.pictureUri,
-                            ...eventArgs
-                        });
-                });
+                    this._beginWetStrokeEventTarget.sendEvent({
+                        name: InkingEventNames.beginWetStroke,
+                        isCursorShared: this.isCursorShared ? true : undefined,
+                        displayName: userInfo?.displayName,
+                        pictureUri: userInfo?.pictureUri,
+                        ...eventArgs,
+                    });
+                }
+            );
             this._inkingManager.on(
                 AddPointsEvent,
                 (eventArgs: IAddPointsEventArgs) => {
-                    const liveStroke = this._pendingLiveStrokes.get(eventArgs.strokeId);
+                    const liveStroke = this._pendingLiveStrokes.get(
+                        eventArgs.strokeId
+                    );
 
                     if (liveStroke !== undefined) {
-                        if (!eventArgs.endState && eventArgs.points.length > 0) {
+                        if (
+                            !eventArgs.endState &&
+                            eventArgs.points.length > 0
+                        ) {
                             liveStroke.points.push(...eventArgs.points);
                         }
 
@@ -418,10 +492,13 @@ export class LiveCanvas extends DataObject {
                         }
 
                         if (eventArgs.points.length > 0) {
-                            liveStroke.scheduleProcessing(this.liveStrokeProcessed);
+                            liveStroke.scheduleProcessing(
+                                this.liveStrokeProcessed
+                            );
                         }
                     }
-                });
+                }
+            );
         }
 
         // Setup incoming events
@@ -436,11 +513,13 @@ export class LiveCanvas extends DataObject {
                         evt.clientId,
                         {
                             displayName: evt.displayName,
-                            pictureUri: evt.pictureUri
+                            pictureUri: evt.pictureUri,
                         },
-                        evt.position);
+                        evt.position
+                    );
                 }
-            });
+            }
+        );
 
         this._beginWetStrokeEventTarget = new LiveEventTarget(
             scope,
@@ -455,27 +534,32 @@ export class LiveCanvas extends DataObject {
                             id: evt.strokeId,
                             clientId: evt.clientId,
                             timeStamp: evt.timestamp,
-                            brush: evt.brush
-                        });
+                            brush: evt.brush,
+                        }
+                    );
 
                     this._wetStrokes.set(evt.strokeId, stroke);
 
                     if (evt.clientId) {
-                        if (evt.type !== StrokeType.persistent || !evt.isCursorShared) {
+                        if (
+                            evt.type !== StrokeType.persistent ||
+                            !evt.isCursorShared
+                        ) {
                             this.removeCursor(evt.clientId);
-                        }
-                        else {
+                        } else {
                             this.updateCursorPosition(
                                 evt.clientId,
                                 {
                                     displayName: evt.displayName,
-                                    pictureUri: evt.pictureUri
+                                    pictureUri: evt.pictureUri,
                                 },
-                                evt.startPoint);
+                                evt.startPoint
+                            );
                         }
                     }
                 }
-            });
+            }
+        );
 
         this._addWetStrokePointEventTarget = new LiveEventTarget(
             scope,
@@ -494,28 +578,35 @@ export class LiveCanvas extends DataObject {
                         // re-rendered in full fidelity.
                         if (evt.endState === StrokeEndState.cancelled) {
                             stroke.cancel();
-                        }
-                        else if (evt.endState === StrokeEndState.ended && stroke.type === StrokeType.ephemeral) {
+                        } else if (
+                            evt.endState === StrokeEndState.ended &&
+                            stroke.type === StrokeType.ephemeral
+                        ) {
                             stroke.end();
                         }
 
                         if (evt.clientId) {
-                            if (stroke.type !== StrokeType.persistent || evt.endState || !evt.isCursorShared) {
+                            if (
+                                stroke.type !== StrokeType.persistent ||
+                                evt.endState ||
+                                !evt.isCursorShared
+                            ) {
                                 this.removeCursor(evt.clientId);
-                            }
-                            else {
+                            } else {
                                 this.updateCursorPosition(
                                     evt.clientId,
                                     {
                                         displayName: evt.displayName,
-                                        pictureUri: evt.pictureUri
+                                        pictureUri: evt.pictureUri,
                                     },
-                                    evt.points[evt.points.length - 1]);
+                                    evt.points[evt.points.length - 1]
+                                );
                             }
                         }
                     }
                 }
-            });
+            }
+        );
     }
 
     private setupStorageProcessing(): void {
@@ -523,13 +614,12 @@ export class LiveCanvas extends DataObject {
             const inkingManager = this._inkingManager;
 
             // Setup incoming dry ink changes
-            this._dryInkMap.forEach(
-                (value: string) => {
-                    const stroke = new Stroke();
-                    stroke.deserialize(value);
+            this._dryInkMap.forEach((value: string) => {
+                const stroke = new Stroke();
+                stroke.deserialize(value);
 
-                    inkingManager.addStroke(stroke);
-                });
+                inkingManager.addStroke(stroke);
+            });
 
             this._dryInkMap.on(
                 "valueChanged",
@@ -538,17 +628,25 @@ export class LiveCanvas extends DataObject {
 
                     try {
                         if (!local) {
-                            const serializedStroke: string | undefined = this._dryInkMap.get(changed.key);
-                            const addRemoveOptions: IAddRemoveStrokeOptions = { forceReRender: true, addToChangeLog: false };
+                            const serializedStroke: string | undefined =
+                                this._dryInkMap.get(changed.key);
+                            const addRemoveOptions: IAddRemoveStrokeOptions = {
+                                forceReRender: true,
+                                addToChangeLog: false,
+                            };
 
                             if (serializedStroke !== undefined) {
-                                const stroke = inkingManager.getStroke(changed.key) ?? new Stroke();
+                                const stroke =
+                                    inkingManager.getStroke(changed.key) ??
+                                    new Stroke();
                                 stroke.deserialize(serializedStroke);
 
                                 // If we received a stroke that happens to be an ongoing wet stroke,
                                 // cancel the wet stroke so it's removed from the screen and replace
                                 // it with the full fidelity version we just received.
-                                const wetStroke = this._wetStrokes.get(stroke.id);
+                                const wetStroke = this._wetStrokes.get(
+                                    stroke.id
+                                );
 
                                 if (wetStroke) {
                                     wetStroke.cancel();
@@ -556,17 +654,22 @@ export class LiveCanvas extends DataObject {
                                     this._wetStrokes.delete(wetStroke.id);
                                 }
 
-                                inkingManager.addStroke(stroke, addRemoveOptions);
-                            }
-                            else {
-                                inkingManager.removeStroke(changed.key, addRemoveOptions);
+                                inkingManager.addStroke(
+                                    stroke,
+                                    addRemoveOptions
+                                );
+                            } else {
+                                inkingManager.removeStroke(
+                                    changed.key,
+                                    addRemoveOptions
+                                );
                             }
                         }
-                    }
-                    finally {
+                    } finally {
                         this._processingIncomingChanges = false;
                     }
-                });
+                }
+            );
 
             this._dryInkMap.on(
                 "op",
@@ -579,51 +682,43 @@ export class LiveCanvas extends DataObject {
                                 inkingManager.clear();
                             }
                         }
-                    }
-                    finally {
+                    } finally {
                         this._processingIncomingChanges = false;
                     }
-                });
+                }
+            );
 
             // Setup outgoing dry ink changes.
-            inkingManager.on(
-                StrokesAddedEvent,
-                (strokes: IStroke[]): void => {
-                    if (!this._processingIncomingChanges) {
-                        for (let stroke of strokes) {
-                            this._dryInkMap.set(stroke.id, stroke.serialize());
-                        }
+            inkingManager.on(StrokesAddedEvent, (strokes: IStroke[]): void => {
+                if (!this._processingIncomingChanges) {
+                    for (let stroke of strokes) {
+                        this._dryInkMap.set(stroke.id, stroke.serialize());
                     }
-                });
-            inkingManager.on(
-                StrokesRemovedEvent,
-                (ids: string[]): void => {
-                    if (!this._processingIncomingChanges) {
-                        for (let id of ids) {
-                            this._dryInkMap.delete(id);
-                        }
+                }
+            });
+            inkingManager.on(StrokesRemovedEvent, (ids: string[]): void => {
+                if (!this._processingIncomingChanges) {
+                    for (let id of ids) {
+                        this._dryInkMap.delete(id);
                     }
-                });
-            inkingManager.on(
-                ClearEvent,
-                (): void => {
-                    if (!this._processingIncomingChanges) {
-                        this._dryInkMap.clear();
-                    }
-                });
+                }
+            });
+            inkingManager.on(ClearEvent, (): void => {
+                if (!this._processingIncomingChanges) {
+                    this._dryInkMap.clear();
+                }
+            });
         }
     }
 
     private sweepLiveCursors() {
         const cursorsToSweep: string[] = [];
 
-        this._liveCursorsMap.forEach(
-            (liveCursor: LiveCursor) => {
-                if (liveCursor.idleTime > LiveCanvas.liveCursorIdleLifetime) {
-                    cursorsToSweep.push(liveCursor.clientId);
-                }
+        this._liveCursorsMap.forEach((liveCursor: LiveCursor) => {
+            if (liveCursor.idleTime > LiveCanvas.liveCursorIdleLifetime) {
+                cursorsToSweep.push(liveCursor.clientId);
             }
-        );
+        });
 
         for (let cursorId of cursorsToSweep) {
             this.removeCursor(cursorId);
@@ -632,18 +727,15 @@ export class LiveCanvas extends DataObject {
 
     private scheduleLiveCursorSweep() {
         if (this._liveCursorSweepTimeout === undefined) {
-            this._liveCursorSweepTimeout = window.setTimeout(
-                () => {
-                    this._liveCursorSweepTimeout = undefined;
+            this._liveCursorSweepTimeout = window.setTimeout(() => {
+                this._liveCursorSweepTimeout = undefined;
 
-                    this.sweepLiveCursors();
+                this.sweepLiveCursors();
 
-                    if (this._liveCursorsMap.size > 0) {
-                        this.scheduleLiveCursorSweep();
-                    }
-                },
-                LiveCanvas.liveCursorSweepFrequency
-            )
+                if (this._liveCursorsMap.size > 0) {
+                    this.scheduleLiveCursorSweep();
+                }
+            }, LiveCanvas.liveCursorSweepFrequency);
         }
     }
 
@@ -680,35 +772,45 @@ export class LiveCanvas extends DataObject {
         // we don't lose the color it got automatically attributed.
     }
 
-    private updateCursorPosition(clientId: string, userInfo?: IUserInfo, position?: IPoint) {
+    private updateCursorPosition(
+        clientId: string,
+        userInfo?: IUserInfo,
+        position?: IPoint
+    ) {
         if (this._inkingManager) {
             if (position) {
                 const liveCursor = this.getCursor(clientId, userInfo);
 
-                const screenPosition = this._inkingManager.viewportToScreen(position);
+                const screenPosition =
+                    this._inkingManager.viewportToScreen(position);
 
                 liveCursor.setPosition(screenPosition);
-            }
-            else {
+            } else {
                 this.removeCursor(clientId);
             }
         }
     }
 
     protected async initializingFirstTime(): Promise<void> {
-        this._dryInkMap = SharedMap.create(this.runtime, LiveCanvas.dryInkMapKey);
+        this._dryInkMap = SharedMap.create(
+            this.runtime,
+            LiveCanvas.dryInkMapKey
+        );
 
         this.root.set(LiveCanvas.dryInkMapKey, this._dryInkMap.handle);
     }
 
     protected async hasInitialized(): Promise<void> {
-        const handle = this.root.get<IFluidHandle<SharedMap>>(LiveCanvas.dryInkMapKey);
+        const handle = this.root.get<IFluidHandle<SharedMap>>(
+            LiveCanvas.dryInkMapKey
+        );
 
         if (handle) {
             this._dryInkMap = await handle.get();
-        }
-        else {
-            throw new Error(`Unable to get SharedMap with key "${LiveCanvas.dryInkMapKey}"`);
+        } else {
+            throw new Error(
+                `Unable to get SharedMap with key "${LiveCanvas.dryInkMapKey}"`
+            );
         }
     }
 

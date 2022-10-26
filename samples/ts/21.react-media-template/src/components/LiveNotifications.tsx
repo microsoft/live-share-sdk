@@ -7,6 +7,7 @@ import { useEffect, useState, useRef, FC } from "react";
 import { getFlexColumnStyles } from "../styles/layouts";
 import { mergeClasses } from "@fluentui/react-components";
 import { getLiveNotificationStyles, getPillStyles } from "../styles/styles";
+import React from "react";
 
 interface Notification {
   id: string;

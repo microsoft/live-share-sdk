@@ -18,7 +18,7 @@ import { SharedMap } from "fluid-framework";
  * - `selectMediaId` is a callback method for persisting the media item users intend to watch.
  * - `nextTrack` is a callback method for selecting the next video in the playlist.
  */
-export const usePlaylist = (sendNotification: (text: string) => void, playlistMap?: SharedMap, ) => {
+export const usePlaylist = (sendNotification: (text: string) => void, playlistMap?: SharedMap) => {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [selectedId, setSelectedId] = useState();
   const [playlistStarted, setStarted] = useState(false);
@@ -33,7 +33,7 @@ export const usePlaylist = (sendNotification: (text: string) => void, playlistMa
         const itemToAdd = searchList.find((item) => item.id === id);
         if (itemToAdd) {
           playlistMap?.set(id, itemToAdd);
-          if (!!sendNotification) {
+          if (sendNotification) {
             sendNotification("added a video to the playlist");
           }
         }

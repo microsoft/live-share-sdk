@@ -1,11 +1,8 @@
 import { useState, useCallback, useEffect, FC } from "react";
 import { InkingTool, fromCssColor, InkingManager } from "@microsoft/live-share-canvas";
 import { FlexRow } from "./flex";
-import laserPointerAsset from "../assets/laser-pointer.svg";
-import penAsset from "../assets/pen.svg";
-import highlighterAsset from "../assets/highlighter.svg";
-import eraserAsset from "../assets/eraser.svg";
 import { InkingControlButton } from "./InkingControlButton";
+import React from "react";
 
 interface InkingControlsProps {
   inkingManager: InkingManager,
@@ -43,28 +40,28 @@ export const InkingControls: FC<InkingControlsProps> = ({ inkingManager, setIsEn
         tool={InkingTool.laserPointer}
         isEnabled={isEnabled}
         selectedTool={selectedTool}
-        imageAsset={laserPointerAsset}
+        imageAsset={"../assets/laser-pointer.svg"}
         onSelectTool={onSelectTool}
       />
       <InkingControlButton
         tool={InkingTool.pen}
         isEnabled={isEnabled}
         selectedTool={selectedTool}
-        imageAsset={penAsset}
+        imageAsset={"../assets/pen.svg"}
         onSelectTool={onSelectTool}
       />
       <InkingControlButton
         tool={InkingTool.highlighter}
         isEnabled={isEnabled}
         selectedTool={selectedTool}
-        imageAsset={highlighterAsset}
+        imageAsset={"../assets/highlighter.svg"}
         onSelectTool={onSelectTool}
       />
       <InkingControlButton
         tool={InkingTool.eraser}
         isEnabled={isEnabled}
         selectedTool={selectedTool}
-        imageAsset={eraserAsset}
+        imageAsset={"../assets/eraser.svg"}
         onSelectTool={onSelectTool}
       />
     </FlexRow>

@@ -51,7 +51,6 @@ export const usePresence = (acceptPlaybackChangesFrom: UserMeetingRole[], presen
 
   // Effect which registers SharedPresence event listeners before joining space
   useEffect(() => {
-    console.log(presence, presence && !presence.isInitialized, context)
     if (presence && !presence.isInitialized && context) {
       // Register presenceChanged event listener
       presence.on("presenceChanged", (userPresence: LivePresenceUser<IUserData>, local) => {

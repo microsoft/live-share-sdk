@@ -8,6 +8,7 @@ import { waitForResult } from './utils';
 import { RequestCache } from './RequestCache';
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
+// 5 minutes
 const CACHE_LIFETIME = 5 * 60 * 1000;
 
 

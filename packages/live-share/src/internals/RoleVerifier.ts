@@ -83,7 +83,7 @@ export class RoleVerifier implements IRoleVerifier {
         return this._getRequestCache.cacheRequest(clientId, () => {
             return waitForResult(
                 async () => {
-                    let rolesResult;
+                    let rolesResult: UserMeetingRole[] | undefined;
                     try {
                         rolesResult = await this._host.getClientRoles(clientId);
                     } catch (error) {
@@ -92,7 +92,7 @@ export class RoleVerifier implements IRoleVerifier {
                         // Our service is first writer wins, so we will not overwrite
                         // if previous states exist.
                         console.warn(
-                            "getClientRolesError:" + JSON.stringify(error)
+                            "getClientRolesError: " + JSON.stringify(error)
                         );
                         return await this.registerClientId(clientId);
                     }

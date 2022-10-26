@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { mergeClasses } from "@fluentui/react-components";
 import { getFlexColumnStyles } from "./FlexStyles";
 
@@ -40,15 +41,15 @@ export const FlexColumn = (props) => {
 
 FlexColumn.propTypes = {
     children: PropTypes.node,
-    className: string,
-    fill: "both" | "height" | "width" | "view",
-    gap: "smaller" | "small" | "medium" | "large",
-    hAlign: "start" | "center" | "end",
+    className: PropTypes.string,
+    fill: PropTypes.oneOf(["both", "height", "width", "view"]),
+    gap: PropTypes.oneOf(["smaller", "small", "medium", "large"]),
+    hAlign: PropTypes.oneOf(["start", "center", "end"]),
     inline: PropTypes.bool,
     name: PropTypes.string,
     role: PropTypes.string,
     spaceBetween: PropTypes.bool,
     style: PropTypes.object,
     transparent: PropTypes.bool,
-    vAlign: "start" | "center" | "end",
+    vAlign: PropTypes.oneOf(["start", "center", "end"]),
 };

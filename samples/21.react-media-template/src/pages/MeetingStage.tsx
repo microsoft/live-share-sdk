@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, ReactNode, FC } from "react";
 import * as liveShareHooks from "../live-share-hooks";
 import {
   LiveNotifications,
@@ -16,7 +16,7 @@ import { ACCEPT_PLAYBACK_CHANGES_FROM } from "../constants/allowed-roles";
 import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 import React from "react";
 
-const MeetingStage = () => {
+const MeetingStage: FC = () => {
   // Teams context
   const context = useTeamsContext();
   // Media player
@@ -117,7 +117,6 @@ const MeetingStage = () => {
   }, [selectedMediaItem, player, setPlayer]);
 
   const started = useMemo(() => {
-    console.log(notificationStarted, mediaSessionStarted, presenceStarted, takeControlStarted, playlistStarted)
     return [
       notificationStarted,
       mediaSessionStarted,
@@ -132,8 +131,6 @@ const MeetingStage = () => {
     takeControlStarted,
     playlistStarted,
   ]);
-
-  console.log("started", started);
 
   // Render the media player
   return (

@@ -8,30 +8,29 @@ import React from "react";
 import { FC, ReactNode } from "react";
 import { getFlexColumnStyles, getFlexItemStyles } from "../styles/layouts";
 
-export const ListWrapper: FC<{children: ReactNode}> = ({ children }) => {
-
-  const flexColumnStyles = getFlexColumnStyles();
-  const flexItemStyles = getFlexItemStyles();
-  return (
-    <div
-      className={mergeClasses(
-        flexColumnStyles.root,
-        flexColumnStyles.fill,
-        flexColumnStyles.vAlignStart,
-        flexColumnStyles.scroll
-      )}
-    >
-      <div
-        className={mergeClasses(
-          flexColumnStyles.root,
-          flexColumnStyles.fill,
-          flexColumnStyles.vAlignStart,
-          flexColumnStyles.smallGap,
-          flexItemStyles.grow,
-        )}
-      >
-        { children }
-      </div>
-    </div>
-  );
+export const ListWrapper: FC<{ children: ReactNode }> = ({ children }) => {
+    const flexColumnStyles = getFlexColumnStyles();
+    const flexItemStyles = getFlexItemStyles();
+    return (
+        <div
+            className={mergeClasses(
+                flexColumnStyles.root,
+                flexColumnStyles.fill,
+                flexColumnStyles.vAlignStart,
+                flexColumnStyles.scroll
+            )}
+        >
+            <div
+                className={mergeClasses(
+                    flexColumnStyles.root,
+                    flexColumnStyles.fill,
+                    flexColumnStyles.vAlignStart,
+                    flexColumnStyles.smallGap,
+                    flexItemStyles.grow
+                )}
+            >
+                {children}
+            </div>
+        </div>
+    );
 };

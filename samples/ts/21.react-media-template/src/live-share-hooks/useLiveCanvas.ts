@@ -7,40 +7,43 @@ import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import { useCallback, useEffect, useState } from "react";
 
 /**
- * 
+ *
  * @param {LiveCanvas} liveCanvas Fluid LiveCanvas Data object
  * @param {HTMLElement} hostingElement Hosting Element where LiveCanvas needs to be attached.
  * @returns LiveCanvas callback helpers and inking manager.
  */
-export const useLiveCanvas = (liveCanvas?: LiveCanvas, hostingElement?: HTMLElement) => {
-  const [inkingManager, setInkingManager] = useState<InkingManager>();
-  const [error, setError] = useState<any>(undefined);
+export const useLiveCanvas = (
+    liveCanvas?: LiveCanvas,
+    hostingElement?: HTMLElement
+) => {
+    const [inkingManager, setInkingManager] = useState<InkingManager>();
+    const [error, setError] = useState<any>(undefined);
 
-  const startInkingManager = useCallback(async () => {
-    if (!liveCanvas || !hostingElement) {
-        return;
-    }
+    const startInkingManager = useCallback(async () => {
+        if (!liveCanvas || !hostingElement) {
+            return;
+        }
 
-    try {
-      const inkingHost = hostingElement;
-      const inkManager = new InkingManager(inkingHost);
-      await liveCanvas.initialize(inkManager);
+        try {
+            const inkingHost = hostingElement;
+            const inkManager = new InkingManager(inkingHost);
+            await liveCanvas.initialize(inkManager);
 
-      // Activate the InkingManager so it starts handling pointer input
-      inkManager.activate();
-      setInkingManager(inkManager);
-    } catch (error) {
-        console.error(error);
-        setError(error);
-    }
-  }, [liveCanvas, hostingElement]);
+            // Activate the InkingManager so it starts handling pointer input
+            inkManager.activate();
+            setInkingManager(inkManager);
+        } catch (error) {
+            console.error(error);
+            setError(error);
+        }
+    }, [liveCanvas, hostingElement]);
 
-  useEffect(() => {
-    startInkingManager();
-  }, [startInkingManager]);
+    useEffect(() => {
+        startInkingManager();
+    }, [startInkingManager]);
 
-  return {
-    inkingManager,
-    error,    
-  }
-}
+    return {
+        inkingManager,
+        error,
+    };
+};

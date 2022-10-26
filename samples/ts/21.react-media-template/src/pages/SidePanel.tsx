@@ -17,112 +17,122 @@ import { ACCEPT_PLAYBACK_CHANGES_FROM } from "../constants/allowed-roles";
 import React from "react";
 
 const SidePanel: FC = () => {
-  const context = useTeamsContext();
-  const sharingActive = useSharingStatus(context);
-  const navigate = useNavigate();
+    const context = useTeamsContext();
+    const sharingActive = useSharingStatus(context);
+    const navigate = useNavigate();
 
-  const {
-    container,
-    playlistMap,
-    notificationEvent,
-    presence,
-    takeControlMap,
-  } = liveShareHooks.useSharedObjects();
+    const {
+        container,
+        playlistMap,
+        notificationEvent,
+        presence,
+        takeControlMap,
+    } = liveShareHooks.useSharedObjects();
 
-  const { notificationStarted, sendNotification } =
-    liveShareHooks.useNotifications(notificationEvent, context);
+    const { notificationStarted, sendNotification } =
+        liveShareHooks.useNotifications(notificationEvent, context);
 
-  const { presenceStarted, localUser, users, localUserIsEligiblePresenter } =
-    liveShareHooks.usePresence(ACCEPT_PLAYBACK_CHANGES_FROM, presence, context);
+    const { presenceStarted, localUser, users, localUserIsEligiblePresenter } =
+        liveShareHooks.usePresence(
+            ACCEPT_PLAYBACK_CHANGES_FROM,
+            presence,
+            context
+        );
 
-  const { takeControlStarted, takeControl } = liveShareHooks.useTakeControl(
-    localUserIsEligiblePresenter,
-    users,
-    (notificationText: string) => { /* noOp */ },
-    takeControlMap,
-    localUser?.data?.teamsUserId,
-  );
+    const { takeControlStarted, takeControl } = liveShareHooks.useTakeControl(
+        localUserIsEligiblePresenter,
+        users,
+        (notificationText: string) => {
+            /* noOp */
+        },
+        takeControlMap,
+        localUser?.data?.teamsUserId
+    );
 
-  const {
-    playlistStarted,
-    mediaItems,
-    selectedMediaItem,
-    selectMediaId,
-    addMediaItem,
-    removeMediaItem,
-  } = liveShareHooks.usePlaylist(sendNotification, playlistMap);
+    const {
+        playlistStarted,
+        mediaItems,
+        selectedMediaItem,
+        selectMediaId,
+        addMediaItem,
+        removeMediaItem,
+    } = liveShareHooks.usePlaylist(sendNotification, playlistMap);
 
-  useEffect(() => {
-    if (context && playlistStarted) {
-      if (context.page?.frameContext === "meetingStage") {
-        // User shared the app directly to stage, redirect automatically
-        selectMediaId(mediaList[0].id);
-        navigate({
-          pathname: "/",
-          search: `?inTeams=true`,
-        });
-      }
-    }
-  }, [context, playlistStarted, navigate, selectMediaId]);
-
-  const selectMedia = useCallback(
-    (mediaItem) => {
-      // Take control
-      takeControl();
-      // Set the selected media ID in the playlist map
-      selectMediaId(mediaItem.id);
-      if (inTeams()) {
-        // If not already sharing to stage, share to stage
-        if (!sharingActive) {
-          microsoftTeams.meeting.shareAppContentToStage((error) => {
-            if (error) {
-              console.error(error);
+    useEffect(() => {
+        if (context && playlistStarted) {
+            if (context.page?.frameContext === "meetingStage") {
+                // User shared the app directly to stage, redirect automatically
+                selectMediaId(mediaList[0].id);
+                navigate({
+                    pathname: "/",
+                    search: `?inTeams=true`,
+                });
             }
-          }, `${window.location.origin}/?inTeams=true`);
         }
-      } else {
-        // When testing locally, open in a new browser tab
-        window.open(`${window.location.origin}/`);
-      }
-    },
-    [sharingActive, selectMediaId, takeControl]
-  );
+    }, [context, playlistStarted, navigate, selectMediaId]);
 
-  const started = useMemo(() => {
-    console.log("~~~ SidePanel.jsx:");
-    console.log(" notificationStarted:", notificationStarted);
-    console.log(" presenceStarted:", presenceStarted);
-    console.log(" takeControlStarted:", takeControlStarted);
-    console.log(" playlistStarted:", playlistStarted);
-    console.log("~~~");
-    return [
-      notificationStarted,
-      presenceStarted,
-      takeControlStarted,
-      playlistStarted,
-    ].every((value) => value === true);
-  }, [
-    notificationStarted,
-    presenceStarted,
-    takeControlStarted,
-    playlistStarted,
-  ]);
+    const selectMedia = useCallback(
+        (mediaItem) => {
+            // Take control
+            takeControl();
+            // Set the selected media ID in the playlist map
+            selectMediaId(mediaItem.id);
+            if (inTeams()) {
+                // If not already sharing to stage, share to stage
+                if (!sharingActive) {
+                    microsoftTeams.meeting.shareAppContentToStage((error) => {
+                        if (error) {
+                            console.error(error);
+                        }
+                    }, `${window.location.origin}/?inTeams=true`);
+                }
+            } else {
+                // When testing locally, open in a new browser tab
+                window.open(`${window.location.origin}/`);
+            }
+        },
+        [sharingActive, selectMediaId, takeControl]
+    );
 
-  return (
-    <LiveSharePage context={context} container={container} started={started}>
-      <ListWrapper>
-        <TabbedList
-          mediaItems={mediaItems}
-          browseItems={searchList}
-          sharingActive={sharingActive}
-          nowPlayingId={selectedMediaItem?.id}
-          addMediaItem={addMediaItem}
-          removeMediaItem={removeMediaItem}
-          selectMedia={selectMedia}
-        />
-      </ListWrapper>
-    </LiveSharePage>
-  );
+    const started = useMemo(() => {
+        console.log("~~~ SidePanel.jsx:");
+        console.log(" notificationStarted:", notificationStarted);
+        console.log(" presenceStarted:", presenceStarted);
+        console.log(" takeControlStarted:", takeControlStarted);
+        console.log(" playlistStarted:", playlistStarted);
+        console.log("~~~");
+        return [
+            notificationStarted,
+            presenceStarted,
+            takeControlStarted,
+            playlistStarted,
+        ].every((value) => value === true);
+    }, [
+        notificationStarted,
+        presenceStarted,
+        takeControlStarted,
+        playlistStarted,
+    ]);
+
+    return (
+        <LiveSharePage
+            context={context}
+            container={container}
+            started={started}
+        >
+            <ListWrapper>
+                <TabbedList
+                    mediaItems={mediaItems}
+                    browseItems={searchList}
+                    sharingActive={sharingActive}
+                    nowPlayingId={selectedMediaItem?.id}
+                    addMediaItem={addMediaItem}
+                    removeMediaItem={removeMediaItem}
+                    selectMedia={selectMedia}
+                />
+            </ListWrapper>
+        </LiveSharePage>
+    );
 };
 
 export default SidePanel;

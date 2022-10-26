@@ -20,49 +20,55 @@ import { useState, useEffect, useCallback } from "react";
  * - `notificationToDisplay` is the most recent notification to display.
  * - `sendNotification` is a callback method for sending a notification to other users in session.
  */
-export const useNotifications = (notificationEvent?: LiveEvent, context?: app.Context) => {
-  const [notificationToDisplay, setNotificationToDisplay] = useState<string>();
-  const [notificationStarted, setStarted] = useState(false);
+export const useNotifications = (
+    notificationEvent?: LiveEvent,
+    context?: app.Context
+) => {
+    const [notificationToDisplay, setNotificationToDisplay] =
+        useState<string>();
+    const [notificationStarted, setStarted] = useState(false);
 
-  const sendNotification = useCallback(
-    async (notificationText) => {
-      console.log("useNotifications: sending a notification");
-      const userPrincipalName =
-        context?.user?.userPrincipalName ?? "Someone@contoso.com";
-      const name = userPrincipalName.split("@")[0];
-      // Emit the event
-      notificationEvent?.sendEvent({
-        text: notificationText,
-        senderName: name,
-      });
-    },
-    [notificationEvent, context]
-  );
+    const sendNotification = useCallback(
+        async (notificationText) => {
+            console.log("useNotifications: sending a notification");
+            const userPrincipalName =
+                context?.user?.userPrincipalName ?? "Someone@contoso.com";
+            const name = userPrincipalName.split("@")[0];
+            // Emit the event
+            notificationEvent?.sendEvent({
+                text: notificationText,
+                senderName: name,
+            });
+        },
+        [notificationEvent, context]
+    );
 
-  useEffect(() => {
-    if (notificationEvent && !notificationEvent.isInitialized) {
-      notificationEvent.on("received", (event, local) => {
-        // Display notification differently for local vs. remote users
-        if (local) {
-          setNotificationToDisplay(`You ${event.text}`);
-        } else {
-          setNotificationToDisplay(`${event.senderName} ${event.text}`);
+    useEffect(() => {
+        if (notificationEvent && !notificationEvent.isInitialized) {
+            notificationEvent.on("received", (event, local) => {
+                // Display notification differently for local vs. remote users
+                if (local) {
+                    setNotificationToDisplay(`You ${event.text}`);
+                } else {
+                    setNotificationToDisplay(
+                        `${event.senderName} ${event.text}`
+                    );
+                }
+            });
+            console.log("useNotifications: starting notifications");
+            notificationEvent
+                .initialize()
+                .then(() => {
+                    console.log("useNotifications: notifications started");
+                    setStarted(true);
+                })
+                .catch((error) => console.error(error));
         }
-      });
-      console.log("useNotifications: starting notifications");
-      notificationEvent
-        .initialize()
-        .then(() => {
-          console.log("useNotifications: notifications started");
-          setStarted(true);
-        })
-        .catch((error) => console.error(error));
-    }
-  }, [notificationEvent, setNotificationToDisplay, setStarted]);
+    }, [notificationEvent, setNotificationToDisplay, setStarted]);
 
-  return {
-    notificationStarted,
-    notificationToDisplay,
-    sendNotification,
-  };
+    return {
+        notificationStarted,
+        notificationToDisplay,
+        sendNotification,
+    };
 };

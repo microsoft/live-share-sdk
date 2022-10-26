@@ -9,37 +9,37 @@ import { getFlexColumnStyles } from "../styles/layouts";
 import { mergeClasses, Title2, Subtitle2 } from "@fluentui/react-components";
 
 const TabConfig: FC = () => {
-  useEffect(() => {
-    microsoftTeams.pages.config.registerOnSaveHandler(function (saveEvent) {
-      microsoftTeams.pages.config.setConfig({
-        suggestedDisplayName: "Contoso",
-        contentUrl: `${window.location.origin}/sidepanel?inTeams=true`,
-      });
-      saveEvent.notifySuccess();
-    });
+    useEffect(() => {
+        microsoftTeams.pages.config.registerOnSaveHandler(function (saveEvent) {
+            microsoftTeams.pages.config.setConfig({
+                suggestedDisplayName: "Contoso",
+                contentUrl: `${window.location.origin}/sidepanel?inTeams=true`,
+            });
+            saveEvent.notifySuccess();
+        });
 
-    microsoftTeams.pages.config.setValidityState(true);
-  }, []);
+        microsoftTeams.pages.config.setValidityState(true);
+    }, []);
 
-  const flexColumnStyles = getFlexColumnStyles();
-  return (
-    <div
-      className={mergeClasses(
-        flexColumnStyles.root,
-        flexColumnStyles.hAlignCenter,
-        flexColumnStyles.vAlignCenter,
-        flexColumnStyles.fill,
-        flexColumnStyles.smallGap
-      )}
-    >
-      <Title2 block align="center">
-        Welcome to Contoso Media!
-      </Title2>
-      <Subtitle2 block align="center">
-        Press the save button to continue.
-      </Subtitle2>
-    </div>
-  );
+    const flexColumnStyles = getFlexColumnStyles();
+    return (
+        <div
+            className={mergeClasses(
+                flexColumnStyles.root,
+                flexColumnStyles.hAlignCenter,
+                flexColumnStyles.vAlignCenter,
+                flexColumnStyles.fill,
+                flexColumnStyles.smallGap
+            )}
+        >
+            <Title2 block align="center">
+                Welcome to Contoso Media!
+            </Title2>
+            <Subtitle2 block align="center">
+                Press the save button to continue.
+            </Subtitle2>
+        </div>
+    );
 };
 
 export default TabConfig;

@@ -6,7 +6,12 @@
 // eslint-disable-next-line
 import { UserMeetingRole } from "@microsoft/live-share";
 // eslint-disable-next-line
-import { ExtendedMediaMetadata, LiveMediaSession, MediaPlayerSynchronizer, MediaSessionCoordinatorSuspension } from "@microsoft/live-share-media";
+import {
+    ExtendedMediaMetadata,
+    LiveMediaSession,
+    MediaPlayerSynchronizer,
+    MediaSessionCoordinatorSuspension,
+} from "@microsoft/live-share-media";
 import { useState, useEffect, useCallback, useRef } from "react";
 // eslint-disable-next-line
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
@@ -39,203 +44,209 @@ import { MediaItem } from "../utils/media-list";
  * - `endSuspension` is a callback method to end the active suspension.
  */
 export const useMediaSession = (
-  localUserIsPresenting: boolean,
-  acceptPlaybackChangesFrom: UserMeetingRole[],
-  sendNotification: (text: string) => void,
-  mediaSession?: LiveMediaSession,
-  selectedMediaItem?: MediaItem,
-  player?: AzureMediaPlayer,
+    localUserIsPresenting: boolean,
+    acceptPlaybackChangesFrom: UserMeetingRole[],
+    sendNotification: (text: string) => void,
+    mediaSession?: LiveMediaSession,
+    selectedMediaItem?: MediaItem,
+    player?: AzureMediaPlayer
 ) => {
-  const synchronizerRef = useRef<MediaPlayerSynchronizer>();
-  const [mediaSessionStarted, setStarted] = useState(false);
-  const [suspension, setSuspension] = useState<MediaSessionCoordinatorSuspension>();
+    const synchronizerRef = useRef<MediaPlayerSynchronizer>();
+    const [mediaSessionStarted, setStarted] = useState(false);
+    const [suspension, setSuspension] =
+        useState<MediaSessionCoordinatorSuspension>();
 
-  // callback method to change the selected track src
-  const setTrack = useCallback(
-    async (trackId) => {
-      if (localUserIsPresenting) {
-        const metadata: ExtendedMediaMetadata = {
-          trackIdentifier: trackId,
-          liveStream: false,
-          album: "",
-          artist: "",
-          artwork: [],
-          title: selectedMediaItem ? selectedMediaItem?.title : ""
-        };
-        synchronizerRef.current?.setTrack(metadata);
-        sendNotification(`changed the ${selectedMediaItem?.type}`);
-      }
-    },
-    [
-      synchronizerRef,
-      selectedMediaItem,
-      localUserIsPresenting,
-      sendNotification,
-    ]
-  );
-
-  // callback method to play through the synchronizer
-  const play = useCallback(async () => {
-    if (localUserIsPresenting) {
-      // Synchronize the play action
-      synchronizerRef.current?.play();
-      sendNotification(`played the ${selectedMediaItem?.type}`);
-    } else {
-      // Stop following the presenter and play
-      if (!suspension) {
-        // Suspends media session coordinator until suspension is ended
-        const newSuspension = mediaSession?.coordinator.beginSuspension();
-        setSuspension(newSuspension);
-      }
-      player?.play();
-    }
-  }, [
-    synchronizerRef,
-    selectedMediaItem,
-    localUserIsPresenting,
-    player,
-    suspension,
-    mediaSession,
-    setSuspension,
-    sendNotification,
-  ]);
-
-  // callback method to play through the synchronizer
-  const pause = useCallback(async () => {
-    if (localUserIsPresenting) {
-      // Synchronize the pause action
-      synchronizerRef.current?.pause();
-      sendNotification(`paused the ${selectedMediaItem?.type}`);
-    } else {
-      // Stop following the presenter and pause
-      if (!suspension) {
-        // Suspends media session coordinator until suspension is ended
-        const newSuspension = mediaSession?.coordinator.beginSuspension();
-        setSuspension(newSuspension);
-      }
-      player?.pause();
-    }
-  }, [
-    synchronizerRef,
-    selectedMediaItem,
-    localUserIsPresenting,
-    player,
-    suspension,
-    mediaSession,
-    setSuspension,
-    sendNotification,
-  ]);
-
-  // callback method to seek a video to a given timestamp (in seconds)
-  const seekTo = useCallback(
-    async (timestamp) => {
-      if (localUserIsPresenting) {
-        // Synchronize the seek action
-        synchronizerRef.current?.seekTo(timestamp);
-        sendNotification(`seeked the ${selectedMediaItem?.type}`);
-      } else {
-        // Stop following the presenter and seek
-        if (!suspension) {
-          const newSuspension = mediaSession?.coordinator.beginSuspension();
-          setSuspension(newSuspension);
-        }
-        if (player) {
-          player.currentTime = timestamp;
-        }
-      }
-    },
-    [
-      synchronizerRef,
-      selectedMediaItem,
-      localUserIsPresenting,
-      player,
-      suspension,
-      mediaSession,
-      setSuspension,
-      sendNotification,
-    ]
-  );
-
-  // If a suspension is active, end it. Called when "Follow presenter" button is clicked.
-  const endSuspension = useCallback(() => {
-    suspension?.end();
-    setSuspension(undefined);
-  }, [suspension]);
-
-  // effect that sets up the LiveMediaSession and MediaSynchronizer
-  useEffect(() => {
-    if (
-      mediaSession &&
-      !mediaSession.isInitialized &&
-      !synchronizerRef.current &&
-      selectedMediaItem &&
-      player
-    ) {
-      console.log("useSharedSynchronizer: setting up player for synchronizer");
-      // Query the HTML5 media element from the document and set initial src
-      // Begin synchronizing a MediaSynchronizer for the player and set reference
-      synchronizerRef.current = mediaSession.synchronize(player);
-
-      // Default to viewOnly mode; this will get set to false for the current presenter below
-      synchronizerRef.current.viewOnly = !localUserIsPresenting;
-
-      // Start synchronizing the media session
-      mediaSession.initialize(acceptPlaybackChangesFrom).then(() => {
-        console.log("useSharedSynchronizer: now synchronizing player");
-        setStarted(true);
-        if (inTeams()) {
-          // Set up audio ducking
-          console.log(
-            "useMediaSession: registering speaking state change handler"
-          );
-          microsoftTeams.meeting.registerSpeakingStateChangeHandler(
-            (speakingState) => {
-              console.log(
-                "audio state changed:",
-                speakingState.isSpeakingDetected
-              );
-              if (speakingState.isSpeakingDetected) {
-                synchronizerRef.current?.volumeManager?.startLimiting();
-              } else {
-                synchronizerRef.current?.volumeManager?.stopLimiting();
-              }
+    // callback method to change the selected track src
+    const setTrack = useCallback(
+        async (trackId) => {
+            if (localUserIsPresenting) {
+                const metadata: ExtendedMediaMetadata = {
+                    trackIdentifier: trackId,
+                    liveStream: false,
+                    album: "",
+                    artist: "",
+                    artwork: [],
+                    title: selectedMediaItem ? selectedMediaItem?.title : "",
+                };
+                synchronizerRef.current?.setTrack(metadata);
+                sendNotification(`changed the ${selectedMediaItem?.type}`);
             }
-          );
+        },
+        [
+            synchronizerRef,
+            selectedMediaItem,
+            localUserIsPresenting,
+            sendNotification,
+        ]
+    );
+
+    // callback method to play through the synchronizer
+    const play = useCallback(async () => {
+        if (localUserIsPresenting) {
+            // Synchronize the play action
+            synchronizerRef.current?.play();
+            sendNotification(`played the ${selectedMediaItem?.type}`);
+        } else {
+            // Stop following the presenter and play
+            if (!suspension) {
+                // Suspends media session coordinator until suspension is ended
+                const newSuspension =
+                    mediaSession?.coordinator.beginSuspension();
+                setSuspension(newSuspension);
+            }
+            player?.play();
         }
-      });
-    }
-  }, [
-    mediaSession,
-    selectedMediaItem,
-    player,
-    acceptPlaybackChangesFrom,
-    localUserIsPresenting,
-    setStarted,
-  ]);
+    }, [
+        synchronizerRef,
+        selectedMediaItem,
+        localUserIsPresenting,
+        player,
+        suspension,
+        mediaSession,
+        setSuspension,
+        sendNotification,
+    ]);
 
-  // Hook to set player to view only mode when user is not the presenter and set track if needed
-  useEffect(() => {
-    if (synchronizerRef.current) {
-      synchronizerRef.current.viewOnly = !localUserIsPresenting;
-      const currentSrc = synchronizerRef.current.player.src;
-      if (currentSrc && currentSrc === selectedMediaItem?.src) {
-        return;
-      }
-      if (selectedMediaItem) {
-        const trackSrc = [{ src: selectedMediaItem.src }];
-        setTrack(trackSrc);
-      }
-    }
-  }, [localUserIsPresenting, synchronizerRef, selectedMediaItem, setTrack]);
+    // callback method to play through the synchronizer
+    const pause = useCallback(async () => {
+        if (localUserIsPresenting) {
+            // Synchronize the pause action
+            synchronizerRef.current?.pause();
+            sendNotification(`paused the ${selectedMediaItem?.type}`);
+        } else {
+            // Stop following the presenter and pause
+            if (!suspension) {
+                // Suspends media session coordinator until suspension is ended
+                const newSuspension =
+                    mediaSession?.coordinator.beginSuspension();
+                setSuspension(newSuspension);
+            }
+            player?.pause();
+        }
+    }, [
+        synchronizerRef,
+        selectedMediaItem,
+        localUserIsPresenting,
+        player,
+        suspension,
+        mediaSession,
+        setSuspension,
+        sendNotification,
+    ]);
 
-  // Return relevant objects and callbacks UI layer
-  return {
-    mediaSessionStarted,
-    suspended: !!suspension,
-    play,
-    pause,
-    seekTo,
-    setTrack,
-    endSuspension,
-  };
+    // callback method to seek a video to a given timestamp (in seconds)
+    const seekTo = useCallback(
+        async (timestamp) => {
+            if (localUserIsPresenting) {
+                // Synchronize the seek action
+                synchronizerRef.current?.seekTo(timestamp);
+                sendNotification(`seeked the ${selectedMediaItem?.type}`);
+            } else {
+                // Stop following the presenter and seek
+                if (!suspension) {
+                    const newSuspension =
+                        mediaSession?.coordinator.beginSuspension();
+                    setSuspension(newSuspension);
+                }
+                if (player) {
+                    player.currentTime = timestamp;
+                }
+            }
+        },
+        [
+            synchronizerRef,
+            selectedMediaItem,
+            localUserIsPresenting,
+            player,
+            suspension,
+            mediaSession,
+            setSuspension,
+            sendNotification,
+        ]
+    );
+
+    // If a suspension is active, end it. Called when "Follow presenter" button is clicked.
+    const endSuspension = useCallback(() => {
+        suspension?.end();
+        setSuspension(undefined);
+    }, [suspension]);
+
+    // effect that sets up the LiveMediaSession and MediaSynchronizer
+    useEffect(() => {
+        if (
+            mediaSession &&
+            !mediaSession.isInitialized &&
+            !synchronizerRef.current &&
+            selectedMediaItem &&
+            player
+        ) {
+            console.log(
+                "useSharedSynchronizer: setting up player for synchronizer"
+            );
+            // Query the HTML5 media element from the document and set initial src
+            // Begin synchronizing a MediaSynchronizer for the player and set reference
+            synchronizerRef.current = mediaSession.synchronize(player);
+
+            // Default to viewOnly mode; this will get set to false for the current presenter below
+            synchronizerRef.current.viewOnly = !localUserIsPresenting;
+
+            // Start synchronizing the media session
+            mediaSession.initialize(acceptPlaybackChangesFrom).then(() => {
+                console.log("useSharedSynchronizer: now synchronizing player");
+                setStarted(true);
+                if (inTeams()) {
+                    // Set up audio ducking
+                    console.log(
+                        "useMediaSession: registering speaking state change handler"
+                    );
+                    microsoftTeams.meeting.registerSpeakingStateChangeHandler(
+                        (speakingState) => {
+                            console.log(
+                                "audio state changed:",
+                                speakingState.isSpeakingDetected
+                            );
+                            if (speakingState.isSpeakingDetected) {
+                                synchronizerRef.current?.volumeManager?.startLimiting();
+                            } else {
+                                synchronizerRef.current?.volumeManager?.stopLimiting();
+                            }
+                        }
+                    );
+                }
+            });
+        }
+    }, [
+        mediaSession,
+        selectedMediaItem,
+        player,
+        acceptPlaybackChangesFrom,
+        localUserIsPresenting,
+        setStarted,
+    ]);
+
+    // Hook to set player to view only mode when user is not the presenter and set track if needed
+    useEffect(() => {
+        if (synchronizerRef.current) {
+            synchronizerRef.current.viewOnly = !localUserIsPresenting;
+            const currentSrc = synchronizerRef.current.player.src;
+            if (currentSrc && currentSrc === selectedMediaItem?.src) {
+                return;
+            }
+            if (selectedMediaItem) {
+                const trackSrc = [{ src: selectedMediaItem.src }];
+                setTrack(trackSrc);
+            }
+        }
+    }, [localUserIsPresenting, synchronizerRef, selectedMediaItem, setTrack]);
+
+    // Return relevant objects and callbacks UI layer
+    return {
+        mediaSessionStarted,
+        suspended: !!suspension,
+        play,
+        pause,
+        seekTo,
+        setTrack,
+        endSuspension,
+    };
 };

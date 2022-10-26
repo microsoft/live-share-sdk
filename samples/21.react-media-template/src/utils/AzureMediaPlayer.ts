@@ -36,6 +36,29 @@ const PlayerEvent = {
   loadStart: "loadstart",
 };
 
+declare global {
+  interface Window {
+    amp: any; // turn off type checking
+  }
+}
+
+interface TrackState {
+  started: boolean,
+  ended: boolean,
+  error?: any,
+  loaded: boolean,
+  paused: boolean,
+  playing: boolean,
+  src: string,
+  lastPosition: number,
+  lastPositionCheck: number,
+  skipTo?: {
+    timeAdded: number,
+    position: number
+  },
+  autoPause: boolean,
+}
+
 /**
  * Class for AzureMediaPlayer HTML shiv for compatibility with `MediaSynchronizer`.
  * If your media player's interface doesn't follow the HTML interface, this example
@@ -50,12 +73,12 @@ const PlayerEvent = {
  * @param {any} options Optional. AMP player options.
  */
 export class AzureMediaPlayer extends EventTarget {
-  _videoElementId;
-  _player;
+  _videoElementId: string;
+  _player: any;
   _options;
 
   // Position tracking
-  _positionTimer;
+  _positionTimer: NodeJS.Timeout | undefined;
 
   // Track state
   _track = emptyTrackState("");
@@ -65,7 +88,7 @@ export class AzureMediaPlayer extends EventTarget {
   // we mute and try again
   _autoplayPolicyChecked = false;
 
-  constructor(videoElementId, src, options = {}) {
+  constructor(videoElementId: string, src: string, options = {}) {
     super();
     this._videoElementId = videoElementId;
     const defaultOptions = {
@@ -82,38 +105,30 @@ export class AzureMediaPlayer extends EventTarget {
   //---------------------------------------------------------------------------------------------
   // Player Source
   //---------------------------------------------------------------------------------------------
-  get currentSrc() {
+  get currentSrc(): string {
     return this._track.src;
   }
-  get src() {
+  get src(): string {
     return this._track.src;
   }
   /**
    * @param {src} value
    */
-  set src(value) {
+  set src(value: string) {
     if (this._track.src !== value) {
       this._track = emptyTrackState(value);
     }
   }
 
   //---------------------------------------------------------------------------------------------
-  // Network state
-  //---------------------------------------------------------------------------------------------
-
-  get networkState() {
-    return this._player.networkState();
-  }
-
-  //---------------------------------------------------------------------------------------------
   // Ready state
   //---------------------------------------------------------------------------------------------
 
-  get readyState() {
+  get readyState(): number {
     return this._player.readyState();
   }
 
-  get seeking() {
+  get seeking(): boolean {
     return false;
   }
 
@@ -121,59 +136,59 @@ export class AzureMediaPlayer extends EventTarget {
   // Playback state
   //---------------------------------------------------------------------------------------------
 
-  get currentTime() {
+  get currentTime(): number {
     return this._player.currentTime();
   }
 
   /**
    * @param {number} value timestamp in seconds
    */
-  set currentTime(value) {
+  set currentTime(value: number) {
     this._player.currentTime(value);
   }
 
-  get duration() {
+  get duration(): number {
     return this._player.duration();
   }
 
-  get paused() {
+  get paused(): boolean {
     return this._player.paused();
   }
 
-  get playbackQuality() {
+  get playbackQuality(): string {
     return this._player.playbackQuality();
   }
 
   /**
    * @param {string} value playback quality (e.g., 'default')
    */
-  set playbackQuality(value) {
+  set playbackQuality(value: string) {
     this._player.playbackQuality(value);
   }
 
-  get playbackRate() {
+  get playbackRate(): number {
     return this._player.playbackRate();
   }
 
-  // /**
-  //  * @param {string} value (e.g., 1.0)
-  //  */
-  set playbackRate(value) {
+  /**
+   * @param {number} value (e.g., 1.0)
+   */
+  set playbackRate(value: number) {
     this._player.playbackRate(value);
   }
 
-  get ended() {
+  get ended(): boolean {
     return this._player.ended();
   }
 
-  get autoplay() {
+  get autoplay(): boolean {
     return this._player.autoplay();
   }
 
   /**
    * @param {boolean} value
    */
-  set autoplay(value) {
+  set autoplay(value: boolean) {
     this._player.autoplay(value);
   }
 
@@ -181,22 +196,22 @@ export class AzureMediaPlayer extends EventTarget {
   // Player Controls
   //---------------------------------------------------------------------------------------------
 
-  get muted() {
+  get muted(): boolean {
     return this._player.muted();
   }
 
-  set muted(value) {
+  set muted(value: boolean) {
     this._player.muted(value);
   }
 
-  get volume() {
+  get volume(): number {
     return this._player.volume();
   }
 
   /**
    * @param {number} value volume between 0 and 100
    */
-  set volume(value) {
+  set volume(value: number) {
     this._player.volume(value);
   }
 
@@ -204,11 +219,11 @@ export class AzureMediaPlayer extends EventTarget {
   // Transport Controls
   //---------------------------------------------------------------------------------------------
 
-  load() {
+  load(): void {
     this._player.src(this._track.src);
   }
 
-  async play() {
+  async play(): Promise<void> {
     this._player.play();
     if (!this._autoplayPolicyChecked) {
       this._autoplayPolicyChecked = true;
@@ -222,7 +237,7 @@ export class AzureMediaPlayer extends EventTarget {
     return Promise.resolve();
   }
 
-  pause() {
+  pause(): void {
     this._player.pause();
   }
 
@@ -230,19 +245,19 @@ export class AzureMediaPlayer extends EventTarget {
   // AMP Variables
   //---------------------------------------------------------------------------------------------
 
-  get currentPlaybackBitrate() {
+  get currentPlaybackBitrate(): number {
     return this._player.currentPlaybackBitrate();
   }
 
-  get currentDownloadBitrate() {
+  get currentDownloadBitrate(): number {
     return this._player.currentDownloadBitrate();
   }
 
-  get currentHeuristicProfile() {
+  get currentHeuristicProfile(): string {
     return this._player.currentHeuristicProfile();
   }
 
-  get resolution() {
+  get resolution(): string {
     return `${this._player.videoWidth()}x${this._player.videoHeight()}`;
   }
 
@@ -250,12 +265,12 @@ export class AzureMediaPlayer extends EventTarget {
   // Player Setup
   //---------------------------------------------------------------------------------------------
 
-  async _setupPlayer() {
+  async _setupPlayer(): Promise<void> {
     await loadAzureMediaPlayerScript();
     const videoElement = document.getElementById(this._videoElementId);
-    function onReady() {
+    function onReady(this: AzureMediaPlayer) {
       this._player.disablePictureInPicture = true;
-      this._player.src(this._track.src);
+      this._player.src({ src: this._track.src });
       this.dispatchEvent(new Event(PlayerEvent.ready));
       this._startPositionTracker();
       Object.entries(PlayerEvent).forEach(([_, value]) => {
@@ -272,7 +287,7 @@ export class AzureMediaPlayer extends EventTarget {
   // Position Tracking
   //---------------------------------------------------------------------------------------------
 
-  _startPositionTracker() {
+  _startPositionTracker(): void {
     if (this._positionTimer === undefined) {
       this._positionTimer = setInterval(() => {
         // Is the player playing?
@@ -301,7 +316,7 @@ export class AzureMediaPlayer extends EventTarget {
     }
   }
 
-  _stopPositionTracker() {
+  _stopPositionTracker(): void {
     if (this._positionTimer !== undefined) {
       clearInterval(this._positionTimer);
       this._positionTimer = undefined;
@@ -310,7 +325,7 @@ export class AzureMediaPlayer extends EventTarget {
     }
   }
 
-  _applySkipTo(adjustPosition) {
+  _applySkipTo(adjustPosition: boolean): void {
     if (this._track.skipTo && this._player) {
       const skipTo = this._track.skipTo;
       this._track.skipTo = undefined;
@@ -327,7 +342,7 @@ export class AzureMediaPlayer extends EventTarget {
   // Player Events
   //---------------------------------------------------------------------------------------------
 
-  _onStateChangeEvent(event) {
+  _onStateChangeEvent(event: any): void {
     // Dispatch state
     switch (event.type) {
       case PlayerEvent.playing:
@@ -342,14 +357,14 @@ export class AzureMediaPlayer extends EventTarget {
         }
 
         this._blockedState = BlockDetectionState.unblocked;
-        this._applySkipTo(true);
+        // this._applySkipTo(true);
         break;
       case PlayerEvent.pause:
         this._track.ended = false;
         this._track.playing = false;
         this._track.paused = true;
         this._blockedState = BlockDetectionState.unblocked;
-        this._applySkipTo(false);
+        // this._applySkipTo(false);
         break;
       case PlayerEvent.ended:
         this.load();
@@ -369,7 +384,7 @@ export class AzureMediaPlayer extends EventTarget {
   }
 }
 
-function emptyTrackState(src) {
+function emptyTrackState(src: string): TrackState {
   return {
     started: false,
     ended: false,
@@ -388,11 +403,11 @@ function emptyTrackState(src) {
 //---------------------------------------------------------------------------------------------
 // Azure Media Player Loader
 //---------------------------------------------------------------------------------------------
-let loaded = false;
+let loaded: Promise<void> | undefined = undefined;
 
-export function loadAzureMediaPlayerScript() {
+export function loadAzureMediaPlayerScript(): Promise<void> {
   if (!loaded && !window.amp) {
-    loaded = new Promise((resolve, reject) => {
+    loaded = new Promise<void>((resolve, reject) => {
       const scriptTag = document.createElement("script");
       const linkTag = document.createElement("link");
       linkTag.rel = "stylesheet";

@@ -106,8 +106,7 @@ const MeetingStage = () => {
   useEffect(() => {
     if (!player && selectedMediaItem) {
       // Setup Azure Media Player
-      const src = [{ src: selectedMediaItem.src }];
-      const amp = new AzureMediaPlayer("video", src);
+      const amp = new AzureMediaPlayer("video", selectedMediaItem.src );
       // Set player when AzureMediaPlayer is ready to go
       const onReady = () => {
         setPlayer(amp);

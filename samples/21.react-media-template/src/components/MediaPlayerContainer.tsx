@@ -49,14 +49,14 @@ const events = [
 ];
 
 interface PlayerState {
-  isPlaying: boolean, 
-  playbackStarted: boolean, 
-  duration: number, 
-  currentTime: number, 
-  muted: boolean, 
-  volume: number, 
-  currentPlaybackBitrate?: number, 
-  currentHeuristicProfile: undefined, 
+  isPlaying: boolean,
+  playbackStarted: boolean,
+  duration: number,
+  currentTime: number,
+  muted: boolean,
+  volume: number,
+  currentPlaybackBitrate?: number,
+  currentHeuristicProfile?: string,
   resolution?: string
 }
 

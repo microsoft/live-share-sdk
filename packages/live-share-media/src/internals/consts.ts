@@ -10,67 +10,85 @@
  */
 export const TelemetryEvents = {
     MediaPlayerSynchronizer: {
-        SynchronizationStarted: 'MediaPlayerSynchronizer:SynchronizationStarted',
-        PlayerEvent: 'MediaPlayerSynchronizer:PlayerEvent',
-        PlayAction: 'MediaPlayerSynchronizer:PlayAction',
-        PauseAction: 'MediaPlayerSynchronizer:PauseAction',
-        SeekToAction: 'MediaPlayerSynchronizer:SeekToAction',
-        CatchupAction: 'MediaPlayerSynchronizer:CatchupAction',
-        SetTrackAction: 'MediaPlayerSynchronizer:SetTrackAction',
-        DataChangeAction: 'MediaPlayerSynchronizer:DataChangeAction',
-        UserTappedVideoToPlay: transmit('MediaPlayerSynchronizer:UserTappedVideoToPlay'),
-        PlaybackRateChangeBlocked: 'MediaPlayerSynchronizer:PlaybackRateChangeBlocked',
-        PlayerBlockedOperation: transmit('MediaPlayerSynchronizer:PlayerBlockedOperation'),
-        SeekingPlayerToStartPosition: 'MediaPlayerSynchronizer:SeekingPlayerToStartPosition',
-        BeginSeekCalled: 'MediaPlayerSynchronizer:BeginSeekCalled',
-        EndSeekCalled: 'MediaPlayerSynchronizer:EndSeekCalled',
-        PlayCalled: 'MediaPlayerSynchronizer:PlayCalled',
-        PauseCalled: 'MediaPlayerSynchronizer:PauseCalled',
-        SeekToCalled: 'MediaPlayerSynchronizer:SeekToCalled',
-        SetTrackCalled: 'MediaPlayerSynchronizer:SetTrackCalled',
-        SetTrackDataCalled: 'MediaPlayerSynchronizer:SetTrackDataCalled',
+        SynchronizationStarted:
+            "MediaPlayerSynchronizer:SynchronizationStarted",
+        PlayerEvent: "MediaPlayerSynchronizer:PlayerEvent",
+        PlayAction: "MediaPlayerSynchronizer:PlayAction",
+        PauseAction: "MediaPlayerSynchronizer:PauseAction",
+        SeekToAction: "MediaPlayerSynchronizer:SeekToAction",
+        CatchupAction: "MediaPlayerSynchronizer:CatchupAction",
+        SetTrackAction: "MediaPlayerSynchronizer:SetTrackAction",
+        DataChangeAction: "MediaPlayerSynchronizer:DataChangeAction",
+        UserTappedVideoToPlay: transmit(
+            "MediaPlayerSynchronizer:UserTappedVideoToPlay"
+        ),
+        PlaybackRateChangeBlocked:
+            "MediaPlayerSynchronizer:PlaybackRateChangeBlocked",
+        PlayerBlockedOperation: transmit(
+            "MediaPlayerSynchronizer:PlayerBlockedOperation"
+        ),
+        SeekingPlayerToStartPosition:
+            "MediaPlayerSynchronizer:SeekingPlayerToStartPosition",
+        BeginSeekCalled: "MediaPlayerSynchronizer:BeginSeekCalled",
+        EndSeekCalled: "MediaPlayerSynchronizer:EndSeekCalled",
+        PlayCalled: "MediaPlayerSynchronizer:PlayCalled",
+        PauseCalled: "MediaPlayerSynchronizer:PauseCalled",
+        SeekToCalled: "MediaPlayerSynchronizer:SeekToCalled",
+        SetTrackCalled: "MediaPlayerSynchronizer:SetTrackCalled",
+        SetTrackDataCalled: "MediaPlayerSynchronizer:SetTrackDataCalled",
     },
     MediaSession: {
-        PlayAction: transmit('MediaSession:PlayAction'),
-        PauseAction: transmit('MediaSession:PauseAction'),
-        SeekToAction: transmit('MediaSession:SeekToAction'),
-        CatchUpAction: transmit('MediaSession:CatchUpAction'),
-        SetTrackAction: transmit('MediaSession:SetTrackAction'),
-        DataChangeAction: 'MediaSession:DataChangeAction',
-        BeginPositionUpdateTimer: 'MediaSession:BeginPositionUpdateTimer',
+        PlayAction: transmit("MediaSession:PlayAction"),
+        PauseAction: transmit("MediaSession:PauseAction"),
+        SeekToAction: transmit("MediaSession:SeekToAction"),
+        CatchUpAction: transmit("MediaSession:CatchUpAction"),
+        SetTrackAction: transmit("MediaSession:SetTrackAction"),
+        DataChangeAction: "MediaSession:DataChangeAction",
+        BeginPositionUpdateTimer: "MediaSession:BeginPositionUpdateTimer",
     },
     SessionCoordinator: {
-        PlayCalled: transmit('SessionCoordinator:PlayCalled'),
-        PauseCalled: transmit('SessionCoordinator:PauseCalled'),
-        SeekToCalled: transmit('SessionCoordinator:SeekToCalled'),
-        SetTrackCalled: transmit('SessionCoordinator:SetTrackCalled'),
-        SetTrackDataCalled: 'SessionCoordinator:SetTrackDataCalled',
-        BeginSuspension: 'SessionCoordinator:BeginSuspension',
-        BeginSuspensionAndWait: transmit('SessionCoordinator:BeginSuspensionAndWait'),
-        EndSuspension: 'SessionCoordinator:EndSuspension',
-        EndSuspensionAndWait: transmit('SessionCoordinator:EndSuspensionAndWait'),
-        RemoteJoinReceived: 'SessionCoordinator:RemoteJoinReceived',
-        RemoteSetTrackReceived: transmit('SessionCoordinator:RemoteSetTrackReceived'),
-        RemoteSetTrackDataReceived: transmit('SessionCoordinator:RemoteSetTrackDataReceived'),
-        RemotePlayReceived: transmit('SessionCoordinator:RemotePlayReceived'),
-        RemotePauseReceived: transmit('SessionCoordinator:RemotePauseReceived'),
-        RemoteSeekToReceived: transmit('SessionCoordinator:RemoteSeekToReceived'),
+        PlayCalled: transmit("SessionCoordinator:PlayCalled"),
+        PauseCalled: transmit("SessionCoordinator:PauseCalled"),
+        SeekToCalled: transmit("SessionCoordinator:SeekToCalled"),
+        SetTrackCalled: transmit("SessionCoordinator:SetTrackCalled"),
+        SetTrackDataCalled: "SessionCoordinator:SetTrackDataCalled",
+        BeginSuspension: "SessionCoordinator:BeginSuspension",
+        BeginSuspensionAndWait: transmit(
+            "SessionCoordinator:BeginSuspensionAndWait"
+        ),
+        EndSuspension: "SessionCoordinator:EndSuspension",
+        EndSuspensionAndWait: transmit(
+            "SessionCoordinator:EndSuspensionAndWait"
+        ),
+        RemoteJoinReceived: "SessionCoordinator:RemoteJoinReceived",
+        RemoteSetTrackReceived: transmit(
+            "SessionCoordinator:RemoteSetTrackReceived"
+        ),
+        RemoteSetTrackDataReceived: transmit(
+            "SessionCoordinator:RemoteSetTrackDataReceived"
+        ),
+        RemotePlayReceived: transmit("SessionCoordinator:RemotePlayReceived"),
+        RemotePauseReceived: transmit("SessionCoordinator:RemotePauseReceived"),
+        RemoteSeekToReceived: transmit(
+            "SessionCoordinator:RemoteSeekToReceived"
+        ),
     },
     GroupCoordinator: {
-        TrackChanged: 'GroupCoordinator:TrackChanged',
-        TrackChangeDelayed: 'GroupCoordinator:TrackChangeDelayed',
-        TrackDataChanged: 'GroupCoordinator:TrackDataChanged',
-        TrackDataChangeDelayed: 'GroupCoordinator:TrackDataChangeDelayed',
-        TransportStateChanged: 'GroupCoordinator:TransportStateChanged',
-        TransportStateChangeDelayed: 'GroupCoordinator:TransportStateChangeDelayed',
-        BeginSoftSuspension: 'GroupCoordinator:BeginSoftSuspension',
-        CheckingForSyncIssues: 'GroupCoordinator:CheckingForSyncIssues',
-        TrackOutOfSync: transmit('GroupCoordinator:TrackOutOfSync'),
-        TrackDataOutOfSync: transmit('GroupCoordinator:TrackDataOutOfSync'),
-        TransportOutOfSync: transmit('GroupCoordinator:TransportOutOfSync'),
-        PositionOutOfSync: transmit('GroupCoordinator:PositionOutOfSync'),
-    }
-}
+        TrackChanged: "GroupCoordinator:TrackChanged",
+        TrackChangeDelayed: "GroupCoordinator:TrackChangeDelayed",
+        TrackDataChanged: "GroupCoordinator:TrackDataChanged",
+        TrackDataChangeDelayed: "GroupCoordinator:TrackDataChangeDelayed",
+        TransportStateChanged: "GroupCoordinator:TransportStateChanged",
+        TransportStateChangeDelayed:
+            "GroupCoordinator:TransportStateChangeDelayed",
+        BeginSoftSuspension: "GroupCoordinator:BeginSoftSuspension",
+        CheckingForSyncIssues: "GroupCoordinator:CheckingForSyncIssues",
+        TrackOutOfSync: transmit("GroupCoordinator:TrackOutOfSync"),
+        TrackDataOutOfSync: transmit("GroupCoordinator:TrackDataOutOfSync"),
+        TransportOutOfSync: transmit("GroupCoordinator:TransportOutOfSync"),
+        PositionOutOfSync: transmit("GroupCoordinator:PositionOutOfSync"),
+    },
+};
 
 /**
  * @hidden

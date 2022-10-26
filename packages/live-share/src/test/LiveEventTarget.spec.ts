@@ -6,13 +6,13 @@
 import { strict as assert } from "assert";
 import { LiveEventScope } from "../LiveEventScope";
 import { LiveEventTarget } from "../LiveEventTarget";
-import { MockRuntimeSignaler } from './MockRuntimeSignaler';
+import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
     const remoteRuntime = new MockRuntimeSignaler();
     MockRuntimeSignaler.connectRuntimes([localRuntime, remoteRuntime]);
-    return {localRuntime, remoteRuntime};
+    return { localRuntime, remoteRuntime };
 }
 
 describe("LiveEventTarget", () => {
@@ -20,10 +20,18 @@ describe("LiveEventTarget", () => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
         const localScope = new LiveEventScope(signalers.localRuntime);
-        const localTarget = new LiveEventTarget(localScope, 'test', (evt, local) => triggered++);
+        const localTarget = new LiveEventTarget(
+            localScope,
+            "test",
+            (evt, local) => triggered++
+        );
 
         const remoteScope = new LiveEventScope(signalers.remoteRuntime);
-        const remoteTarget = new LiveEventTarget(remoteScope, 'test', (evt, local) => triggered++);
+        const remoteTarget = new LiveEventTarget(
+            remoteScope,
+            "test",
+            (evt, local) => triggered++
+        );
 
         localTarget.sendEvent({});
 

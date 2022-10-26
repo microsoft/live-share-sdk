@@ -26,13 +26,11 @@ export class SidebarView extends View {
                 meeting.shareAppContentToStage((error, result) => {
                     if (!error) {
                         console.log("Started sharing to stage");
-                    }
-                    else {
+                    } else {
                         console.warn("shareAppContentToStage failed", error);
                     }
-                },
-                window.location.origin + '?inTeams=1&view=stage');
-            }
+                }, window.location.origin + "?inTeams=1&view=stage");
+            };
         }
     }
 

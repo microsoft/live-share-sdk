@@ -3,7 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ITokenProvider, ITokenResponse } from "@fluidframework/routerlicious-driver";
+import {
+    ITokenProvider,
+    ITokenResponse,
+} from "@fluidframework/routerlicious-driver";
 import { ILiveShareHost } from "../interfaces";
 
 /**
@@ -15,24 +18,46 @@ export class LiveShareTokenProvider implements ITokenProvider {
     private _documentId?: string;
     private _tenantId?: string;
 
-    public constructor (private readonly _host: ILiveShareHost) { }
+    public constructor(private readonly _host: ILiveShareHost) {}
 
-    public async fetchOrdererToken(tenantId: string, documentId?: string, refresh?: boolean): Promise<ITokenResponse> {
-        const tokenResponse = await this.fetchFluidToken(tenantId, documentId, refresh);
+    public async fetchOrdererToken(
+        tenantId: string,
+        documentId?: string,
+        refresh?: boolean
+    ): Promise<ITokenResponse> {
+        const tokenResponse = await this.fetchFluidToken(
+            tenantId,
+            documentId,
+            refresh
+        );
         return tokenResponse;
     }
 
-    public async fetchStorageToken(tenantId: string, documentId?: string, refresh?: boolean): Promise<ITokenResponse> {
-        const tokenResponse = await this.fetchFluidToken(tenantId, documentId, refresh);
+    public async fetchStorageToken(
+        tenantId: string,
+        documentId?: string,
+        refresh?: boolean
+    ): Promise<ITokenResponse> {
+        const tokenResponse = await this.fetchFluidToken(
+            tenantId,
+            documentId,
+            refresh
+        );
         return tokenResponse;
     }
 
-    private async fetchFluidToken(tenantId: string, documentId?: string, refresh?: boolean): Promise<ITokenResponse> {
+    private async fetchFluidToken(
+        tenantId: string,
+        documentId?: string,
+        refresh?: boolean
+    ): Promise<ITokenResponse> {
         let fromCache: boolean;
-        if (!this._frsToken
-            || refresh
-            || this._tenantId !== tenantId
-            || this._documentId !== documentId) {
+        if (
+            !this._frsToken ||
+            refresh ||
+            this._tenantId !== tenantId ||
+            this._documentId !== documentId
+        ) {
             this._frsToken = await this._host.getFluidToken(documentId);
             fromCache = false;
         } else {

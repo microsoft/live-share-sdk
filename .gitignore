@@ -356,3 +356,6 @@ package-lock.bak
 package.json.lerna_backup
 
 build
+
+# Live Share SDK: generated docs main.js file interferes with ADO linter.
+docs/assets/main.js

@@ -8,7 +8,7 @@ import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 import { useNavigate } from "react-router-dom";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { inTeams } from "../utils/inTeams";
-import { mediaList, searchList } from "../utils/media-list";
+import { MediaItem, mediaList, searchList } from "../utils/media-list";
 import { ListWrapper, LiveSharePage } from "../components";
 import * as liveShareHooks from "../live-share-hooks";
 import { useSharingStatus } from "../teams-js-hooks/useSharingStatus";
@@ -72,7 +72,7 @@ const SidePanel: FC = () => {
     }, [context, playlistStarted, navigate, selectMediaId]);
 
     const selectMedia = useCallback(
-        (mediaItem) => {
+        (mediaItem: MediaItem) => {
             // Take control
             takeControl();
             // Set the selected media ID in the playlist map

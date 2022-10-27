@@ -32,16 +32,8 @@ export const searchList: MediaItem[] = [
         src: "https://livesharemedia-usw22.streaming.media.azure.net/8bf16f5f-d4b0-437b-8121-d780abe744c9/Onboarding_Video11_Final_H264.ism/manifest(format=mpd-time-cmaf,encryption=cbc)",
         type: "video",
     },
-    // {
-    //   id: "2",
-    //   thumbnailImage:
-    //     "https://by3302files.storage.live.com/y4mHWAobY6Eko5RrNOulkHfCymSqTxMZSIoivl3uOeNnteXJU2Gq_WY7TKfubdN0kJr04SThB11E_O4x0_sr-ic0v4yY3KE91R-Vv5gSYre76_xwKT7pc1KBl23yIgf3qgKaU2RFRWLF8WpEjoidwxxpSaqsSjhYXHFM26xqHGwUyxO8jobogFVw8RZ4GcIPYTl?width=660&height=374&cropmode=none",
-    //   title: "Beach 4K",
-    //   src: "https://livesharemedia-usw22.streaming.media.azure.net/39bd117d-0f75-40d2-8abe-fb7d49cf1157/pexels-ivan-khmelyuk-7222009.ism/manifest(format=mpd-time-cmaf,encryption=cbc)",
-    //   type: "video",
-    // },
     {
-        id: "3",
+        id: "2",
         thumbnailImage:
             "https://by3302files.storage.live.com/y4mUBBvkvbh4U8GCw-auQJ4c0e9AoU9jk7OmqL1HoI5uv0ah2IVSngvGqhg4l-1P2w2rA1CqunF16uhBvYU_FXRpQq_UtsDg6cXovkskMxi-3tO-_r41HJg6Y2a_u0qkUl1amExyG7yl3Q8fmAvMRrXEg5D1ouyYX82YP9BqQDRFJlgVx9tCFk-jfLGVO1nMIru?width=660&height=369&cropmode=none",
         title: "3 app tips in Teams",
@@ -49,7 +41,7 @@ export const searchList: MediaItem[] = [
         type: "video",
     },
     {
-        id: "4",
+        id: "3",
         thumbnailImage:
             "https://by3302files.storage.live.com/y4mvA_fpovY-RkRbEAK3JFfyFJIJaikw2iFDNYeAPncjPRJ7jRfiJyVFiSk9Sq5qNXS7NpzBgBP9NHFr_I2KMs8qUgxkGTPebP86JQOHuezGclUtVPsmtzfA-7yYWJxFsRowzB6v6okwDQdC9il2Xq6183WBGgKWCwiCTX0HZ9ELVQFdUwfgxTK5BwEb79r_mPh?width=660&height=370&cropmode=none",
         title: "Reply to a message demo",
@@ -57,7 +49,7 @@ export const searchList: MediaItem[] = [
         type: "video",
     },
     {
-        id: "5",
+        id: "4",
         thumbnailImage:
             "https://by3302files.storage.live.com/y4mL6V3p0Sqx7xCXX96BYtVxG-GSNNQ573Cc_SP769NWcpdjhhfOG9ZjzlndGQBqeoEkVARmtoW0rwyRe3Up7ldUin3YUhte0MSh5aYpxi68IDDJ19drmIDC6VF_h3w_2tPANAl27g15f4w42aANYhPM4VyeREVKp3ItAUNoULO6NXbQPooDXpfQMN4fYuNdqL6?width=660&height=374&cropmode=none",
         title: "Standout presenter demo",
@@ -65,7 +57,7 @@ export const searchList: MediaItem[] = [
         type: "video",
     },
     {
-        id: "6",
+        id: "5",
         thumbnailImage:
             "https://by3302files.storage.live.com/y4m9tgZXn-22LyDf-IU2Wg_GMJE-JPMHbmO2fXO2DzI9ZGKYKguArpqcLTgmIOaIeaMDKoEDOOvYnIkHsys_Q7WvM8hHOGGJVwvHs1ksd12jiG8ZecJvevz_K7wE2VqqqG5Z3bZnDpuWvlolYmgzd_StHgYZodbmtHbNFrf5AUekdx8uNfDIptlP7Rqnt-mpO7P?width=1443&height=811&cropmode=none",
         title: "Hang Gliding",
@@ -73,7 +65,7 @@ export const searchList: MediaItem[] = [
         type: "video",
     },
     {
-        id: "7",
+        id: "6",
         thumbnailImage:
             "https://by3302files.storage.live.com/y4mzi99em6H2SBgawxkOet8pPzlPhQC2L4RWj8-qK3wZBhL_Ybol_8p04L_in28Phl7_D9hOMjl97aEjD93ZB7X18COjmHysfs0bK93goF_FMDBBEJUXAHbmkgvUHFj45VWtEN3n6BSoXZlvZWQXYoDRoGtuBLVMK7wbFUoYxE6ZJR0i8xvycB7bEQ2eJ2iSuVR?width=256&height=136&cropmode=none",
         title: "Dog Days",

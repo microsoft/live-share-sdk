@@ -32,7 +32,7 @@ const TabConfig: FC = () => {
                 flexColumnStyles.smallGap
             )}
         >
-            <Title2 block align="center">
+            <Title2 as="h2" block align="center">
                 Welcome to Contoso Media!
             </Title2>
             <Subtitle2 block align="center">

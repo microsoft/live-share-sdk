@@ -112,7 +112,6 @@ export const getLiveNotificationStyles = makeStyles({
     root: {
         pointerEvents: "none",
         position: "absolute",
-        zIndex: 200,
         top: "5px",
         left: "4px",
         right: "4px",

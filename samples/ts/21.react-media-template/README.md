@@ -39,7 +39,7 @@ Tab configuration page doesn't do anything in browser.
 
 ## Testing the app in Teams
 
-There are two options for testing this sample in Teams. The first is to use Ngrok to serve and tunnel the app locally, before zipping the app package.
+There are two options for testing this sample in Teams. The first is to use ngrok to serve and tunnel the app locally, before zipping the app package.
 
 Alternatively, you can use our ready-to-use [demo app package](../demo-manifests/ContosoMedia.zip). After downloading the zip file, you can skip ahead to the [Test it out](#test-it-out) section.
 

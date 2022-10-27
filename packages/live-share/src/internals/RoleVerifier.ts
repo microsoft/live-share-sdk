@@ -84,9 +84,19 @@ export class RoleVerifier implements IRoleVerifier {
         return this._getRequestCache.cacheRequest(clientId, () => {
             return waitForResult(
                 async () => {
-                    const rolesResult = await this._host.getClientRoles(
-                        clientId
-                    );
+                    let rolesResult: UserMeetingRole[] | undefined;
+                    try {
+                        rolesResult = await this._host.getClientRoles(clientId);
+                    } catch (error) {
+                        // Error is thrown when client id is not registered
+                        // Assume Client Id is local and to be newly registered.
+                        // Our service is first writer wins, so we will not overwrite
+                        // if previous states exist.
+                        console.warn(
+                            "getClientRolesError: " + JSON.stringify(error)
+                        );
+                        return await this.registerClientId(clientId);
+                    }
                     if (!rolesResult) {
                         return undefined;
                     } else if (Array.isArray(rolesResult)) {

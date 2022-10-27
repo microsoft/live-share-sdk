@@ -51,16 +51,16 @@ Alternatively, you can use our ready-to-use [demo app package](../demo-manifests
 
 ### Create the app package to sideload into Teams
 
-1. Open [/manifest/manifest.json](./manifest/manifest.json) and update values in it.
+1. Open `.\manifest\manifest.json` and update values in it, including your [Application ID](https://learn.microsoft.com/microsoftteams/platform/resources/schema/manifest-schema#id.
 2. You must replace `https://<<BASE_URI_DOMAIN>>` with the https path to your ngrok tunnel.
 3. It is recommended that you also update the following fields.
-   - Set `developer.name` to your name.
-   - Update `developer.websiteUrl` with your website.
-   - Update `developer.privacyUrl` with your privacy policy.
-   - Update `developer.termsOfUseUrl` with your terms of use.
+    - Set `developer.name` to your name.
+    - Update `developer.websiteUrl` with your website.
+    - Update `developer.privacyUrl` with your privacy policy.
+    - Update `developer.termsOfUseUrl` with your terms of use.
 4. Create a zip file with the contents of `.\manifest` directory so that manifest.json, color.png, and outline.png are in the root directory of the zip file.
-   - On Windows, select all files in `.\manifest` directory and compress them to zip.
-   - Give your zip file a descriptive name, e.g. `ContosoMediaTemplate`.
+    - On Windows, select all files in `.\manifest` directory and compress them to zip.
+    - Give your zip file a descriptive name, e.g. `ContosoMediaTemplate`.
 
 ### Test it out
 
@@ -68,7 +68,7 @@ Alternatively, you can use our ready-to-use [demo app package](../demo-manifests
 2. Join the meeting.
 3. In the meeting window, tap on **+ Apps** and tap on **Manage apps** in the flyout that opens.
 4. In the **Manage apps** pane, tap on **Upload a custom app**.
-   - _Don't see the option to **Upload a custom app?!** Follow [instructions here](https://docs.microsoft.com/en-us/microsoftteams/teams-custom-app-policies-and-settings) to enable custom-apps in your tenant._
+    - _Don't see the option to **Upload a custom app?!** Follow [instructions here](https://docs.microsoft.com/en-us/microsoftteams/teams-custom-app-policies-and-settings) to enable custom-apps in your tenant._
 5. Select the zip file you created earlier and upload it.
 6. In the dialog that shows up, tap **Add** to add your sample app into the meeting.
 7. Now, back in the meeting window, tap **+ Apps** again and type the name of your app in the _Find an app_ textbox.

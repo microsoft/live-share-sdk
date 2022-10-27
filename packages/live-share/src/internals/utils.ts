@@ -53,7 +53,7 @@ export function waitForResult<TResult>(
     let retries: number = 0;
     return new Promise<TResult>((resolve, reject) => {
         for (;;) {
-            timeoutRequest(fnRequest, 250 * (retries + 1)).then(
+            timeoutRequest(fnRequest, 500 * (retries + 1)).then(
                 (result) => {
                     if (fnSucceeded(result)) {
                         resolve(result!);

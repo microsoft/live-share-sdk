@@ -35,7 +35,7 @@ const TabConfig: FC = () => {
             <Title2 as="h2" block align="center">
                 Welcome to Contoso Media!
             </Title2>
-            <Subtitle2 block align="center">
+            <Subtitle2 as="p" block align="center">
                 Press the save button to continue.
             </Subtitle2>
         </div>

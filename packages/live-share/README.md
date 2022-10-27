@@ -74,7 +74,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-(media or canvas) | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | --------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| 1.0.0-preview.1       | 2.0.0-experimental.1 | ~1.2.3 | 1.0.0-preview.1 (optional)  | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
+| 1.0.0-preview.2       | 2.0.0-experimental.1 | ~1.2.3 | 1.0.0-preview.2 (optional)  | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.5.1                | 2.0.0-experimental.1 | ~1.2.3          | ~0.5.1 (optional)           | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)           | ~0.59.0 (optional)           | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 

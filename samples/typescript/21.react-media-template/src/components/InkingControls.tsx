@@ -52,6 +52,7 @@ export const InkingControls: FC<InkingControlsProps> = ({
 
     return (
         <FlexRow marginSpacer style={{ marginLeft: "8px", marginRight: "4px" }}>
+            {/* TODO: (Corina) fix marginSpacer usage to gap="small" */}
             <InkingControlButton
                 tool={InkingTool.laserPointer}
                 isEnabled={isEnabled}

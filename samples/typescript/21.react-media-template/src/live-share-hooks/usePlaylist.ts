@@ -31,7 +31,7 @@ export const usePlaylist = (
     }, [selectedId, mediaItems]);
 
     const addMediaItem = useCallback(
-        (id) => {
+        (id: string) => {
             if (!mediaItems.find((item) => item.id === id)) {
                 const itemToAdd = searchList.find((item) => item.id === id);
                 if (itemToAdd) {
@@ -46,14 +46,14 @@ export const usePlaylist = (
     );
 
     const removeMediaItem = useCallback(
-        (id) => {
+        (id: string) => {
             playlistMap?.delete(id);
         },
         [playlistMap]
     );
 
     const selectMediaId = useCallback(
-        (id) => {
+        (id: string) => {
             playlistMap?.set("selected-media-id", id);
         },
         [playlistMap]

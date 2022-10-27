@@ -3,9 +3,7 @@
  * Licensed under the MIT License.
  */
 
-// eslint-disable-next-line
 import { UserMeetingRole } from "@microsoft/live-share";
-// eslint-disable-next-line
 import {
     ExtendedMediaMetadata,
     LiveMediaSession,
@@ -13,7 +11,6 @@ import {
     MediaSessionCoordinatorSuspension,
 } from "@microsoft/live-share-media";
 import { useState, useEffect, useCallback, useRef } from "react";
-// eslint-disable-next-line
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
 import { inTeams } from "../utils/inTeams";
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -58,7 +55,7 @@ export const useMediaSession = (
 
     // callback method to change the selected track src
     const setTrack = useCallback(
-        async (trackId) => {
+        async (trackId: string) => {
             if (localUserIsPresenting) {
                 const metadata: ExtendedMediaMetadata = {
                     trackIdentifier: trackId,
@@ -136,7 +133,7 @@ export const useMediaSession = (
 
     // callback method to seek a video to a given timestamp (in seconds)
     const seekTo = useCallback(
-        async (timestamp) => {
+        async (timestamp: number) => {
             if (localUserIsPresenting) {
                 // Synchronize the seek action
                 synchronizerRef.current?.seekTo(timestamp);
@@ -233,8 +230,7 @@ export const useMediaSession = (
                 return;
             }
             if (selectedMediaItem) {
-                const trackSrc = [{ src: selectedMediaItem.src }];
-                setTrack(trackSrc);
+                setTrack(selectedMediaItem.src);
             }
         }
     }, [localUserIsPresenting, synchronizerRef, selectedMediaItem, setTrack]);

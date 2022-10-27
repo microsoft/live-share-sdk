@@ -63,9 +63,9 @@ const MeetingStage: FC = () => {
     } = liveShareHooks.useTakeControl(
         localUserIsEligiblePresenter,
         users,
-        sendNotification,
         takeControlMap,
-        localUser?.data?.teamsUserId
+        localUser?.data?.teamsUserId,
+        sendNotification
     );
 
     // Playlist map

@@ -20,9 +20,9 @@ import { IUserData } from "./usePresence";
 export const useTakeControl = (
     localUserIsEligiblePresenter: boolean,
     users: LivePresenceUser<IUserData>[],
-    sendNotification: (text: string) => void,
     takeControlMap?: SharedMap,
-    localUserId?: string
+    localUserId?: string,
+    sendNotification?: (text: string) => void
 ) => {
     const [history, setHistory] = useState(new Map<string, number>());
     const [takeControlStarted, setStarted] = useState(false);

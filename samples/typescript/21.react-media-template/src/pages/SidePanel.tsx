@@ -42,9 +42,6 @@ const SidePanel: FC = () => {
     const { takeControlStarted, takeControl } = liveShareHooks.useTakeControl(
         localUserIsEligiblePresenter,
         users,
-        (notificationText: string) => {
-            /* noOp */
-        },
         takeControlMap,
         localUser?.data?.teamsUserId
     );

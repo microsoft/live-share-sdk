@@ -1,18 +1,17 @@
 import { Image, Button } from "@fluentui/react-components";
 import { InkingTool } from "@microsoft/live-share-canvas";
-import React from "react";
+import React, { ReactNode } from "react";
 import { FC } from "react";
 
 export const InkingControlButton: FC<{
     tool: InkingTool;
     selectedTool: InkingTool;
     isEnabled: boolean;
-    imageAsset: string;
     onSelectTool: (tool: InkingTool) => void;
-}> = ({ tool, selectedTool, isEnabled, imageAsset, onSelectTool }) => {
+    children: ReactNode;
+}> = ({ tool, selectedTool, isEnabled, onSelectTool, children }) => {
     return (
-        <Button
-            appearance="transparent"
+        <div
             style={{
                 borderBottom:
                     selectedTool === tool && isEnabled
@@ -25,7 +24,7 @@ export const InkingControlButton: FC<{
                 onSelectTool(tool);
             }}
         >
-            <Image src={imageAsset} width={24} height={24} />
-        </Button>
+            {children}
+        </div>
     );
 };

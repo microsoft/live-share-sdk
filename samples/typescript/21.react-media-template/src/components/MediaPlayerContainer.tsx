@@ -202,13 +202,11 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
             <div className={videoStyle.root} onClick={togglePlayPause}>
                 {children}
             </div>
-            {inkingManager && (
-                <InkCanvas
-                    canvasRef={canvasRef}
-                    isEnabled={inkActive}
-                    inkingManager={inkingManager}
-                />
-            )}
+            <InkCanvas
+                canvasRef={canvasRef}
+                isEnabled={inkActive}
+                inkingManager={inkingManager}
+            />
             <div
                 className={flexColumnStyles.root}
                 style={{

@@ -62,6 +62,6 @@ export const App = () => {
             </FluentProvider>
         );
     } else {
-        return <div></div>;
+        return null;
     }
 };

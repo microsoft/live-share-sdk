@@ -9,7 +9,7 @@ const REFERENCE_HEIGHT = 1080;
 
 export const InkCanvas: FC<{
     isEnabled: boolean;
-    inkingManager: InkingManager;
+    inkingManager?: InkingManager;
     canvasRef: MutableRefObject<HTMLDivElement | undefined>;
 }> = ({ isEnabled, inkingManager, canvasRef }) => {
     const { ref: resizeRef, width = 1, height = 1 } = useResizeObserver();

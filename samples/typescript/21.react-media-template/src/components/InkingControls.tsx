@@ -7,6 +7,14 @@ import {
 import { FlexRow } from "./flex";
 import { InkingControlButton } from "./InkingControlButton";
 import React from "react";
+// @ts-ignore
+import { ReactComponent as LaserPointerIcon } from "../assets/laser-pointer.svg";
+// @ts-ignore
+import { ReactComponent as PenIcon } from "../assets/pen.svg";
+// @ts-ignore
+import { ReactComponent as HighlighterIcon } from "../assets/highlighter.svg";
+// @ts-ignore
+import { ReactComponent as EraserIcon } from "../assets/eraser.svg";
 
 interface InkingControlsProps {
     inkingManager: InkingManager;
@@ -48,30 +56,34 @@ export const InkingControls: FC<InkingControlsProps> = ({
                 tool={InkingTool.laserPointer}
                 isEnabled={isEnabled}
                 selectedTool={selectedTool}
-                imageAsset={"../assets/laser-pointer.svg"}
                 onSelectTool={onSelectTool}
-            />
+            >
+                <LaserPointerIcon />
+            </InkingControlButton>
             <InkingControlButton
                 tool={InkingTool.pen}
                 isEnabled={isEnabled}
                 selectedTool={selectedTool}
-                imageAsset={"../assets/pen.svg"}
                 onSelectTool={onSelectTool}
-            />
+            >
+                <PenIcon />
+            </InkingControlButton>
             <InkingControlButton
                 tool={InkingTool.highlighter}
                 isEnabled={isEnabled}
                 selectedTool={selectedTool}
-                imageAsset={"../assets/highlighter.svg"}
                 onSelectTool={onSelectTool}
-            />
+            >
+                <HighlighterIcon />
+            </InkingControlButton>
             <InkingControlButton
                 tool={InkingTool.eraser}
                 isEnabled={isEnabled}
                 selectedTool={selectedTool}
-                imageAsset={"../assets/eraser.svg"}
                 onSelectTool={onSelectTool}
-            />
+            >
+                <EraserIcon />
+            </InkingControlButton>
         </FlexRow>
     );
 };

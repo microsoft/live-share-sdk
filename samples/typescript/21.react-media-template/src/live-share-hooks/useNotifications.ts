@@ -29,7 +29,7 @@ export const useNotifications = (
     const [notificationStarted, setStarted] = useState(false);
 
     const sendNotification = useCallback(
-        async (notificationText) => {
+        async (notificationText: string) => {
             console.log("useNotifications: sending a notification");
             const userPrincipalName =
                 context?.user?.userPrincipalName ?? "Someone@contoso.com";

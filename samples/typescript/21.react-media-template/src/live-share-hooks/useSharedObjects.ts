@@ -10,7 +10,7 @@ import {
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
-import { IFluidContainer, SharedMap } from "fluid-framework";
+import { ContainerSchema, IFluidContainer, SharedMap } from "fluid-framework";
 import { useEffect, useState } from "react";
 import { LiveEvent, LivePresence } from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";
@@ -84,7 +84,7 @@ export function useSharedObjects() {
         };
 
         // Define container schema
-        const schema = {
+        const schema: ContainerSchema = {
             initialObjects: {
                 presence: LivePresence,
                 mediaSession: LiveMediaSession,

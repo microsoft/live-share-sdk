@@ -21,7 +21,7 @@ export const InkingControls: FC<InkingControlsProps> = ({
 }) => {
     const [selectedTool, setSelectedTool] = useState(inkingManager.tool);
     const onSelectTool = useCallback(
-        (tool) => {
+        (tool: InkingTool) => {
             if (tool !== selectedTool) {
                 inkingManager.tool = tool;
                 setSelectedTool(tool);

@@ -8,7 +8,6 @@ export const FlexItem: FC<{
     noShrink?: boolean;
     style?: CSSProperties;
 }> = ({ children, grow, noShrink, style }) => {
-    // const { children, grow, noShrink, style } = props;
     const flexItemStyles = getFlexItemStyles();
     const mergedClasses = mergeClasses(
         grow ? flexItemStyles.grow : "",

@@ -17,7 +17,7 @@ export const useLiveCanvas = (
     hostingElement?: HTMLElement
 ) => {
     const [inkingManager, setInkingManager] = useState<InkingManager>();
-    const [error, setError] = useState<any>(undefined);
+    const [error, setError] = useState<any>();
 
     const startInkingManager = useCallback(async () => {
         if (!liveCanvas || !hostingElement) {

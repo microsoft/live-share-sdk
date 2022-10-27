@@ -1,4 +1,4 @@
-# React Media Template Sample
+# TypeScript: React Media Template Sample
 
 This repository contains a simple app that enables all connected clients to watch videos together, build a shared playlist, transfer who is in control, and annotate over the video.\
 You can use this sample as a template to build a robust media synchronization feature into your app, or use it as an example.\

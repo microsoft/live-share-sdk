@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-canvas",
-    "version": "1.0.0-preview.2",
+    "version": "1.0.0-preview.3",
     "description": "Live Share extension library for collaborative inking.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "fluid-framework": "~1.2.3",
-        "@microsoft/live-share": "1.0.0-preview.2"
+        "@microsoft/live-share": "1.0.0-preview.3"
     },
     "devDependencies": {
         "@types/assert": "^1.5.6",

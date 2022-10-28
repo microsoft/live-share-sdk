@@ -51,20 +51,18 @@ export function waitForResult<TResult>(
     retrySchedule: number[]
 ): Promise<TResult> {
     let retries: number = 0;
-    return new Promise<TResult>((resolve, reject) => {
-        for (;;) {
-            timeoutRequest(fnRequest, 500 * (retries + 1)).then(
-                (result) => {
-                    if (fnSucceeded(result)) {
-                        resolve(result!);
-                    } else if (retries >= retrySchedule.length) {
-                        reject(fnTimeout());
-                    } else {
-                        waitForDelay(retrySchedule[retries++]);
-                    }
-                },
-                (e) => reject(e)
-            );
+    return new Promise<TResult>(async (resolve, reject) => {
+        while (true) {
+            const result = await timeoutRequest(fnRequest, 500 * (retries + 1));
+            if (fnSucceeded(result)) {
+                resolve(result!);
+                break;
+            } else if (retries >= retrySchedule.length) {
+                reject(fnTimeout());
+                break;
+            } else {
+                await waitForDelay(retrySchedule[retries++]);
+            }
         }
     });
 }
@@ -74,11 +72,11 @@ function timeoutRequest<TResult>(
     fnRequest: () => Promise<TResult | undefined>,
     timeout: number
 ): Promise<TResult | undefined> {
-    return new Promise<TResult | undefined>((resolve) => {
+    return new Promise<TResult | undefined>(async (resolve) => {
         const hTimer = setTimeout(() => {
             resolve(undefined);
         }, timeout);
-        const result = fnRequest();
+        const result = await fnRequest();
         clearTimeout(hTimer);
         resolve(result);
     });

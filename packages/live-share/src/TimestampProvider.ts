@@ -22,20 +22,11 @@ interface IServerTimeOffset {
  * Default `ITimestampProvider` implementation.
  *
  */
-export class DefaultTimestampProvider implements ITimestampProvider {
-    private readonly _host: ILiveShareHost;
+export abstract class TimestampProvider implements ITimestampProvider {
     private _serverTime?: IServerTimeOffset;
     private _syncTimer?: any;
     private _retries = 0;
     private _lastTimeSent = 0;
-
-    /**
-     * Creates a new `DefaultTimestampProvider` instance.
-     * @param host The current Live Share Host instance.
-     */
-    public constructor(host: ILiveShareHost) {
-        this._host = host;
-    }
 
     /**
      * Returns true if the provider has been started.
@@ -50,7 +41,7 @@ export class DefaultTimestampProvider implements ITimestampProvider {
     public getTimestamp(): number {
         if (!this._serverTime) {
             throw new Error(
-                `DefaultTimestampProvider: can't call getTimestamp() before calling initialize().`
+                `TimestampProvider: can't call getTimestamp() before calling start().`
             );
         }
 
@@ -106,12 +97,9 @@ export class DefaultTimestampProvider implements ITimestampProvider {
     }
 
     /**
-     * Returns the hosts computed 
-     * @returns 
+     * Returns the derived classes computed NTP time. 
      */
-    protected getNtpTime(): Promise<INtpTimeInfo> {
-        return this._host.getNtpTime();
-    }
+    protected abstract getNtpTime(): Promise<INtpTimeInfo>;
 
     /**
      * Called in a loop to improve the accuracy of the clients timestamp offset.

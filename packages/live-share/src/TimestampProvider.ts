@@ -31,7 +31,7 @@ export abstract class TimestampProvider implements ITimestampProvider {
     /**
      * Returns true if the provider has been started.
      */
-    public isRunning(): boolean {
+    public get isRunning(): boolean {
         return !!this._serverTime;
     }
 
@@ -88,12 +88,12 @@ export abstract class TimestampProvider implements ITimestampProvider {
      * Stops the provider if its running.
      */
     public stop(): void {
-        this._serverTime = undefined;
-        this._retries = 0;
         if (this._syncTimer) {
             clearTimeout(this._syncTimer);
             this._syncTimer = undefined;
         }
+        this._serverTime = undefined;
+        this._retries = 0;
     }
 
     /**

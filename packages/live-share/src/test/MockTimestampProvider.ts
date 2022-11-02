@@ -12,4 +12,9 @@ export class MockTimestampProvider implements ITimestampProvider {
         this.called = true;
         return new Date().getTime();
     }
+
+    public getMaxTimestampError(): number {
+        this.called = true;
+        return 0;
+    }
 }

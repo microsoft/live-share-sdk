@@ -87,7 +87,6 @@ interface IPauseEvent extends ILiveEvent {
 export class LiveTimer extends DataObject<{
     Events: ILiveTimerEvents;
 }> {
-    // private _logger = new LiveTelemetryLogger(this.runtime);
     private _allowedRoles: UserMeetingRole[] = [];
     private _currentConfig: ITimerConfig = {
         configChangedAt: 0,
@@ -187,12 +186,10 @@ export class LiveTimer extends DataObject<{
             this.runtime,
             this.context.containerRuntime,
             (connecting) => {
-                console.log("remote state returned");
                 // Return current state
                 return this._currentConfig;
             },
             (connecting, state, sender) => {
-                console.log("remote state received");
                 // Check for state change
                 this.remoteConfigReceived(state!, sender);
             }

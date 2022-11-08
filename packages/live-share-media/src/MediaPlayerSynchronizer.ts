@@ -167,22 +167,31 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                             this.play();
                         }
                     }
-                    // block play if player state is playing when expected synced state is paused.
+                    // block play if player state is playing when expected synced state is paused and coordinator is not suspended.
                     // needed because cannot tell if its a user initiated event, so disallow play
-                    if (this._expectedPlaybackState === "paused") {
+                    if (
+                        this._expectedPlaybackState === "paused" &&
+                        !this._mediaSession.coordinator.isSuspended
+                    ) {
                         this._player.pause();
                     }
 
-                    // block play if player state is playing when expected synced state is none.
+                    // block play if player state is playing when expected synced state is none and coordinator is not suspended.
                     // needed because user who is not in control should not be able to start, so disallow play
-                    if (this._expectedPlaybackState === "none") {
+                    if (
+                        this._expectedPlaybackState === "none" &&
+                        !this._mediaSession.coordinator.isSuspended
+                    ) {
                         this._player.pause();
                     }
                     break;
                 case "pause":
-                    // block pause if player state is paused when expected synced state is playing
+                    // block pause if player state is paused when expected synced state is playing and coordinator is not suspended.
                     // needed because cannot tell if its a user initiated event, so disallow pause
-                    if (this._expectedPlaybackState === "playing") {
+                    if (
+                        this._expectedPlaybackState === "playing" &&
+                        !this._mediaSession.coordinator.isSuspended
+                    ) {
                         this._player.play();
                     }
                     break;

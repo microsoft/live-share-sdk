@@ -145,7 +145,6 @@ const PlayerProgressBar: FC<{
                         max={durationToDivideBy}
                         value={localCurrentTime}
                         disabled={isPlaybackDisabled}
-                        // TODO: ts errors
                         style={
                             {
                                 "--oneplayer-play-progress-percent": `${

@@ -146,15 +146,20 @@ const PlayerProgressBar: FC<{
                         value={localCurrentTime}
                         disabled={isPlaybackDisabled}
                         // TODO: ts errors
-                        // style={
-                        //   {
-                        //     "--oneplayer-play-progress-percent": `${(localCurrentTime / durationToDivideBy) * 100}%`,
-                        //     "--oneplayer-buff-progress-percent": `${
-                        //       ((duration * bufferLoadedPercent) / durationToDivideBy) * 100
-                        //     }%`,
-                        //     "--fui-slider-thumb-size": "1rem",
-                        //   }
-                        // }
+                        style={
+                            {
+                                "--oneplayer-play-progress-percent": `${
+                                    (localCurrentTime / durationToDivideBy) *
+                                    100
+                                }%`,
+                                "--oneplayer-buff-progress-percent": `${
+                                    ((duration * bufferLoadedPercent) /
+                                        durationToDivideBy) *
+                                    100
+                                }%`,
+                                "--fui-slider-thumb-size": "1rem",
+                            } as any
+                        }
                         input={{
                             className: styles.input,
                             "aria-valuemin": 0,

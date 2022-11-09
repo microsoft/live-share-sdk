@@ -157,7 +157,7 @@ export const MediaPlayerContainer = ({
         <div
             className={mergeClasses(
                 flexColumnStyles.root,
-                playerControlStyles.pointerTrackerContainer
+                playerControlStyles.root
             )}
             onMouseMove={() => {
                 setShowControls(true);

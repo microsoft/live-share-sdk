@@ -22,7 +22,8 @@ export const getVideoStyle = makeStyles({
 });
 
 export const getPlayerControlStyles = makeStyles({
-    pointerTrackerContainer: {
+    root: {
+        backgroundColor: "black",
         position: "absolute",
         zIndex: 0,
         top: "0",

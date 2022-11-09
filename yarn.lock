@@ -3856,33 +3856,6 @@
     "npmlog" "^6.0.2"
     "write-file-atomic" "^4.0.1"
 
-"@microsoft/live-share-canvas@1.0.0-preview.1":
-  "integrity" "sha512-G4qZNHU5MeI2/9YYnOtcp6e6HW7BMRK3icDJRaMXlu+FqVJB5TvGDtsvFWJVCt1vCOrsCurQjwDJmMUaERiaUA=="
-  "resolved" "https://registry.npmjs.org/@microsoft/live-share-canvas/-/live-share-canvas-1.0.0-preview.1.tgz"
-  "version" "1.0.0-preview.1"
-  dependencies:
-    "@microsoft/live-share" "1.0.0-preview.1"
-    "fluid-framework" "~1.2.3"
-
-"@microsoft/live-share-media@1.0.0-preview.1":
-  "integrity" "sha512-YymS1Ddi2coBEN8sirHmWMifaSBsi9UQXJjyjjAxNUjq60UqT80E5PtLq16XTeNP4Dj6CyV8ZqtCtJS/PHaRig=="
-  "resolved" "https://registry.npmjs.org/@microsoft/live-share-media/-/live-share-media-1.0.0-preview.1.tgz"
-  "version" "1.0.0-preview.1"
-  dependencies:
-    "@microsoft/live-share" "1.0.0-preview.1"
-    "fluid-framework" "~1.2.3"
-
-"@microsoft/live-share@1.0.0-preview.1":
-  "integrity" "sha512-TO2b5S4UeF9gAaRwibteoJjxld2z2bKeFxpofL7SKxm35BrVPlMa5+up5/oLsHJAbaOYeCerMYh1zu9i51/TvA=="
-  "resolved" "https://registry.npmjs.org/@microsoft/live-share/-/live-share-1.0.0-preview.1.tgz"
-  "version" "1.0.0-preview.1"
-  dependencies:
-    "@fluidframework/azure-client" "~1.0.2"
-    "@fluidframework/test-utils" "~1.2.3"
-    "@microsoft/teams-js" "2.0.0-experimental.1"
-    "fluid-framework" "~1.2.3"
-    "uuid" "^8.3.2"
-
 "@microsoft/teams-js@2.0.0-experimental.1":
   "integrity" "sha512-gZX2FudbtpzqfT4+7uZoDGS2xGUchfvNxC3xu68IbpS58p3KFXTfvpQEUd7oTRY01PYi96w8AHrj7qy5x4xFcg=="
   "resolved" "https://registry.npmjs.org/@microsoft/teams-js/-/teams-js-2.0.0-experimental.1.tgz"
@@ -4803,6 +4776,13 @@
   "resolved" "https://registry.npmjs.org/@types/range-parser/-/range-parser-1.2.4.tgz"
   "version" "1.2.4"
 
+"@types/react-dom@^18.0.8", "@types/react-dom@>=16.8.0 <19.0.0":
+  "integrity" "sha512-C3GYO0HLaOkk9dDAz3Dl4sbe4AKUGTCfFIZsz3n/82dPNN8Du533HzKatDxeUYWu24wJgMP1xICqkWk1YOLOIw=="
+  "resolved" "https://registry.npmjs.org/@types/react-dom/-/react-dom-18.0.8.tgz"
+  "version" "18.0.8"
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-dom@<18.0.0":
   "integrity" "sha512-rLVtIfbwyur2iFKykP2w0pl/1unw26b5td16d5xMgp7/yjTHomkyxPYChFoCr/FtEX1lN9wY6lFj1qvKdS5kDw=="
   "resolved" "https://registry.npmjs.org/@types/react-dom/-/react-dom-17.0.18.tgz"
@@ -4810,14 +4790,7 @@
   dependencies:
     "@types/react" "^17"
 
-"@types/react-dom@>=16.8.0 <19.0.0":
-  "integrity" "sha512-C3GYO0HLaOkk9dDAz3Dl4sbe4AKUGTCfFIZsz3n/82dPNN8Du533HzKatDxeUYWu24wJgMP1xICqkWk1YOLOIw=="
-  "resolved" "https://registry.npmjs.org/@types/react-dom/-/react-dom-18.0.8.tgz"
-  "version" "18.0.8"
-  dependencies:
-    "@types/react" "*"
-
-"@types/react@*", "@types/react@>=16.8.0 <19.0.0":
+"@types/react@*", "@types/react@^18.0.24", "@types/react@>=16.8.0 <19.0.0":
   "integrity" "sha512-wRJWT6ouziGUy+9uX0aW4YOJxAY0bG6/AOk5AW5QSvZqI7dk6VBIbXvcVgIw/W5Jrl24f77df98GEKTJGOLx7Q=="
   "resolved" "https://registry.npmjs.org/@types/react/-/react-18.0.24.tgz"
   "version" "18.0.24"

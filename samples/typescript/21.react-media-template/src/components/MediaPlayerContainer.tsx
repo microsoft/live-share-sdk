@@ -11,6 +11,7 @@ import {
     MutableRefObject,
     ReactNode,
 } from "react";
+import useResizeObserver from "use-resize-observer";
 import PlayerProgressBar from "./PlayerProgressBar";
 import { formatTimeValue } from "../utils/format";
 import {
@@ -35,12 +36,16 @@ import {
     getFlexItemStyles,
     getFlexRowStyles,
 } from "../styles/layouts";
-import { getPlayerControlStyles, getVideoStyle } from "../styles/styles";
+import {
+    getPlayerControlStyles,
+    getResizeReferenceStyles,
+    getVideoStyle,
+} from "../styles/styles";
 import { InkCanvas } from "./InkCanvas";
 import { InkingControls } from "./InkingControls";
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
 import { InkingManager } from "@microsoft/live-share-canvas";
-import React from "react";
+import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
 
 const events = [
     "loadstart",
@@ -111,6 +116,8 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
         currentHeuristicProfile: undefined,
         resolution: undefined,
     });
+    const { ref: resizeRef, width = 1, height = 1 } = useResizeObserver();
+    const videoSize = useVisibleVideoSize(width, height);
 
     const hideControls = useCallback(() => {
         setShowControls(false);
@@ -187,6 +194,7 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
     const flexItemStyles = getFlexItemStyles();
     const playerControlStyles = getPlayerControlStyles();
     const videoStyle = getVideoStyle();
+    const resizeReferenceStyles = getResizeReferenceStyles();
 
     return (
         <div
@@ -199,13 +207,24 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
                 debouncedHideControls();
             }}
         >
-            <div className={videoStyle.root} onClick={togglePlayPause}>
+            <div className={resizeReferenceStyles.root} ref={resizeRef} />
+            <div
+                className={videoStyle.root}
+                onClick={togglePlayPause}
+                style={{
+                    left: `${videoSize?.xOffset || 0}px`,
+                    top: `${videoSize?.yOffset || 0}px`,
+                    width: `${videoSize?.width || 0}px`,
+                    height: `${videoSize?.height || 0}px`,
+                }}
+            >
                 {children}
             </div>
             <InkCanvas
                 canvasRef={canvasRef}
                 isEnabled={inkActive}
                 inkingManager={inkingManager}
+                videoSize={videoSize}
             />
             <div
                 className={flexColumnStyles.root}

@@ -3,7 +3,8 @@
  * Licensed under the MIT License.
  */
 
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
+import useResizeObserver from "use-resize-observer";
 import PlayerProgressBar from "./PlayerProgressBar";
 import { formatTimeValue } from "../utils/format";
 import {
@@ -28,9 +29,14 @@ import {
     getFlexItemStyles,
     getFlexRowStyles,
 } from "../styles/layouts";
-import { getPlayerControlStyles, getVideoStyle } from "../styles/styles";
+import {
+    getPlayerControlStyles,
+    getResizeReferenceStyles,
+    getVideoStyle,
+} from "../styles/styles";
 import { InkCanvas } from "./InkCanvas";
 import { InkingControls } from "./InkingControls";
+import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
 
 const events = [
     "loadstart",
@@ -73,12 +79,14 @@ export const MediaPlayerContainer = ({
         currentHeuristicProfile: undefined,
         resolution: undefined,
     });
+    const { ref: resizeRef, width = 1, height = 1 } = useResizeObserver();
+    const videoSize = useVisibleVideoSize(width, height);
 
     const hideControls = useCallback(() => {
         setShowControls(false);
     }, [setShowControls]);
     // eslint-disable-next-line
-  const debouncedHideControls = useCallback(debounce(hideControls, 2500), [
+    const debouncedHideControls = useCallback(debounce(hideControls, 2500), [
         hideControls,
     ]);
 
@@ -143,6 +151,7 @@ export const MediaPlayerContainer = ({
     const flexItemStyles = getFlexItemStyles();
     const playerControlStyles = getPlayerControlStyles();
     const videoStyle = getVideoStyle();
+    const resizeReferenceStyles = getResizeReferenceStyles();
 
     return (
         <div
@@ -155,13 +164,24 @@ export const MediaPlayerContainer = ({
                 debouncedHideControls();
             }}
         >
-            <div className={videoStyle.root} onClick={togglePlayPause}>
+            <div className={resizeReferenceStyles.root} ref={resizeRef} />
+            <div
+                className={videoStyle.root}
+                onClick={togglePlayPause}
+                style={{
+                    left: `${videoSize?.xOffset || 0}px`,
+                    top: `${videoSize?.yOffset || 0}px`,
+                    width: `${videoSize?.width || 0}px`,
+                    height: `${videoSize?.height || 0}px`,
+                }}
+            >
                 {children}
             </div>
             <InkCanvas
                 canvasRef={canvasRef}
                 isEnabled={inkActive}
                 inkingManager={inkingManager}
+                videoSize={videoSize}
             />
             <div
                 className={flexColumnStyles.root}

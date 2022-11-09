@@ -9,10 +9,6 @@ import { tokens } from "@fluentui/react-theme";
 export const getVideoStyle = makeStyles({
     root: {
         cursor: "pointer",
-        left: "0",
-        top: "0",
-        bottom: "0",
-        right: "0",
         zIndex: 0,
         position: "fixed",
         backgroundColor: "black",
@@ -95,7 +91,7 @@ export const getPillStyles = makeStyles({
     },
 });
 
-export const getInkCanvasStyles = makeStyles({
+export const getResizeReferenceStyles = makeStyles({
     root: {
         position: "absolute",
         zIndex: 0,

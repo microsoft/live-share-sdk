@@ -22,7 +22,8 @@ export const getVideoStyle = makeStyles({
 });
 
 export const getPlayerControlStyles = makeStyles({
-    pointerTrackerContainer: {
+    root: {
+        backgroundColor: "black",
         position: "absolute",
         zIndex: 0,
         top: "0",
@@ -107,7 +108,8 @@ export const getResizeReferenceStyles = makeStyles({
 export const getLiveNotificationStyles = makeStyles({
     root: {
         pointerEvents: "none",
-        position: "absolute",
+        position: "fixed",
+        zIndex: 3,
         top: "5px",
         left: "4px",
         right: "4px",

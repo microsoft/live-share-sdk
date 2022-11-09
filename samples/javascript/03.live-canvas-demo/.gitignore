@@ -9,7 +9,8 @@
 /coverage
 
 # production
-/build
+/bin
+/dist
 
 # misc
 .DS_Store
@@ -24,5 +25,3 @@ yarn-error.log*
 
 .npmrc
 azcopy.exe
-
-package-lock.json

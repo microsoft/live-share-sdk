@@ -131,7 +131,7 @@ const MeetingStage = () => {
 
     // Render the media player
     return (
-        <div style={{ backgroundColor: "black" }}>
+        <div>
             {/* Display error if container failed to load */}
             {error && <PageError error={error} />}
             {/* Live Share wrapper to show loading indicator before setup */}

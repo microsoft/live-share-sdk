@@ -1,15 +1,14 @@
-import React, { useEffect } from "react";
-import useResizeObserver from "use-resize-observer";
-import { getInkCanvasStyles } from "../styles/styles";
-import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
+import { useEffect } from "react";
 import { useEventListener } from "../utils/useEventListener";
 
 const REFERENCE_HEIGHT = 1080;
 
-export const InkCanvas = ({ isEnabled, inkingManager, canvasRef }) => {
-    const { ref: resizeRef, width = 1, height = 1 } = useResizeObserver();
-    const videoSize = useVisibleVideoSize(width, height);
-
+export const InkCanvas = ({
+    isEnabled,
+    inkingManager,
+    canvasRef,
+    videoSize,
+}) => {
     const onMouseEvent = (event) => {
         if (isEnabled) {
             event.preventDefault();
@@ -32,11 +31,9 @@ export const InkCanvas = ({ isEnabled, inkingManager, canvasRef }) => {
     useEventListener("mousedown", onMouseEvent, canvasRef.current);
     useEventListener("mouseup", onMouseEvent, canvasRef.current);
     useEventListener("mousemove", onMouseEvent, canvasRef.current);
-    const inkStyles = getInkCanvasStyles();
 
     return (
         <>
-            <div className={inkStyles.root} ref={resizeRef} />
             <div
                 className="noselect"
                 ref={canvasRef}

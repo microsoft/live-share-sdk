@@ -30,7 +30,6 @@ export const LiveSharePage = ({ children, context, container, started }) => {
                         top: "0px",
                         bottom: "0px",
                         zIndex: 9999,
-                        backgroundColor: "#201F1F",
                     }}
                 >
                     <Spinner />
@@ -44,7 +43,11 @@ export const LiveSharePage = ({ children, context, container, started }) => {
                     </Text>
                 </FlexColumn>
             )}
-            <div style={{ visibility: loadText ? "hidden" : undefined }}>
+            <div
+                style={{
+                    visibility: loadText ? "hidden" : undefined,
+                }}
+            >
                 {children}
             </div>
         </>

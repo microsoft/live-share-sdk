@@ -1,20 +1,23 @@
-import React, { FC, MutableRefObject, useEffect } from "react";
-import useResizeObserver from "use-resize-observer";
-import { getInkCanvasStyles } from "../styles/styles";
-import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
+import { FC, MutableRefObject, useEffect } from "react";
+import { VideoSize } from "../utils/useVisibleVideoSize";
 import { useEventListener } from "../utils/useEventListener";
 import { InkingManager } from "@microsoft/live-share-canvas";
 
 const REFERENCE_HEIGHT = 1080;
 
-export const InkCanvas: FC<{
+interface IInkCanvasProps {
     isEnabled: boolean;
     inkingManager?: InkingManager;
     canvasRef: MutableRefObject<HTMLDivElement | undefined>;
-}> = ({ isEnabled, inkingManager, canvasRef }) => {
-    const { ref: resizeRef, width = 1, height = 1 } = useResizeObserver();
-    const videoSize = useVisibleVideoSize(width, height);
+    videoSize: VideoSize | undefined;
+}
 
+export const InkCanvas: FC<IInkCanvasProps> = ({
+    isEnabled,
+    inkingManager,
+    canvasRef,
+    videoSize,
+}) => {
     const onMouseEvent = (event: Event) => {
         if (isEnabled) {
             event.preventDefault();
@@ -37,11 +40,9 @@ export const InkCanvas: FC<{
     useEventListener("mousedown", onMouseEvent, canvasRef.current);
     useEventListener("mouseup", onMouseEvent, canvasRef.current);
     useEventListener("mousemove", onMouseEvent, canvasRef.current);
-    const inkStyles = getInkCanvasStyles();
 
     return (
         <>
-            <div className={inkStyles.root} ref={resizeRef} />
             <div
                 className="noselect"
                 ref={canvasRef as MutableRefObject<HTMLDivElement>}

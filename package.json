@@ -11,7 +11,8 @@
         "clean": "lerna run clean",
         "build": "lerna run build",
         "build:docs": "typedoc",
-        "doctor": "eslint **/src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
+        "doctor": "eslint **/src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern",
+        "postinstall": "lerna run --parallel generate:pkgLock"
     },
     "author": "",
     "license": "Microsoft",

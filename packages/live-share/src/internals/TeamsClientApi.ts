@@ -7,7 +7,6 @@ import {
     IFluidTenantInfo,
     IFluidContainerInfo,
     INtpTimeInfo,
-    ContainerState,
     UserMeetingRole,
     ILiveShareHost,
 } from "../interfaces";

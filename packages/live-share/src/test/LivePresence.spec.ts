@@ -35,18 +35,6 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             container2,
             "default"
         );
-
-        // need to be connected to send signals
-        if (!container1.connected) {
-            await new Promise((resolve) =>
-                container1.once("connected", resolve)
-            );
-        }
-        if (!container2.connected) {
-            await new Promise((resolve) =>
-                container2.once("connected", resolve)
-            );
-        }
     });
 
     it("Should exchange initial presence information", async () => {

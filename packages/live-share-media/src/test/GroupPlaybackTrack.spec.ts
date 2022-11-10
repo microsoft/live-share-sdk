@@ -5,28 +5,16 @@
 
 import "mocha";
 import { strict as assert } from "assert";
-import {
-    IParticipant,
-    ParticipantRole,
-    Deferred,
-} from "@microsoft/teams-collaboration";
+import { Deferred } from "@microsoft/live-share/src/test/Deferred";
 import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
-    ITrackChangeEvent,
+    IPlaybackTrackChangeEvent,
 } from "../internals/GroupPlaybackTrack";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import { ExtendedMediaMetadata } from "../MediaSessionExtensions";
 
 describe("GroupPlaybackTrack", () => {
-    const user1: IParticipant = {
-        participantId: "user1",
-        role: ParticipantRole.organizer,
-    };
-    const user2: IParticipant = {
-        participantId: "user2",
-        role: ParticipantRole.participant,
-    };
-
     const track1 = {
         trackIdentifier: "track1",
         title: "Test Track 1",
@@ -36,12 +24,26 @@ describe("GroupPlaybackTrack", () => {
         title: "Test Track 2",
     } as ExtendedMediaMetadata;
 
+    let nullMediaPlayerState: IMediaPlayerState = {
+        metadata: null,
+        trackData: null,
+        playbackState: "playing",
+    };
+
+    let mediaPlayerState2: IMediaPlayerState = {
+        metadata: track2,
+        trackData: null,
+        playbackState: "playing",
+    };
+
     it('should fire "trackChange" event when no media', async () => {
         const done = new Deferred();
-        const playbackTrack = new GroupPlaybackTrack(() => null);
-        playbackTrack.addEventListener(
+        const playbackTrack = new GroupPlaybackTrack(
+            () => nullMediaPlayerState
+        );
+        playbackTrack.addListener(
             GroupPlaybackTrackEvents.trackChange,
-            (event: ITrackChangeEvent) => {
+            (event: IPlaybackTrackChangeEvent) => {
                 try {
                     assert(event.metadata, `no metadata`);
                     assert(
@@ -59,7 +61,7 @@ describe("GroupPlaybackTrack", () => {
             metadata: track1,
             waitPoints: [],
             timestamp: 1,
-            socketId: "a",
+            clientId: "a",
         });
 
         await done.promise;
@@ -67,13 +69,13 @@ describe("GroupPlaybackTrack", () => {
 
     it("should switch tracks", async () => {
         let cnt = 0;
-        let metadata: ExtendedMediaMetadata = null;
-        const playbackTrack = new GroupPlaybackTrack(() => metadata);
-        playbackTrack.addEventListener(
+        let mediaPlayerState = mediaPlayerState2;
+        const playbackTrack = new GroupPlaybackTrack(() => mediaPlayerState);
+        playbackTrack.addListener(
             GroupPlaybackTrackEvents.trackChange,
-            (event: ITrackChangeEvent) => {
+            (event: IPlaybackTrackChangeEvent) => {
                 cnt++;
-                metadata = event.metadata;
+                mediaPlayerState.metadata = event.metadata;
             }
         );
 
@@ -81,27 +83,30 @@ describe("GroupPlaybackTrack", () => {
             metadata: track1,
             waitPoints: [],
             timestamp: 1,
-            socketId: "a",
+            clientId: "a",
         });
         await playbackTrack.updateTrack({
             metadata: track2,
             waitPoints: [],
             timestamp: 2,
-            socketId: "b",
+            clientId: "a",
         });
         assert(cnt == 2, `called trackChange event ${cnt} times`);
-        assert(metadata.trackIdentifier == "track2", `wrong track set`);
+        assert(
+            mediaPlayerState.metadata?.trackIdentifier == "track2",
+            `wrong track set`
+        );
     });
 
     it("should ignore track changes with older timestamps", async () => {
         let cnt = 0;
-        let metadata: ExtendedMediaMetadata = null;
-        const playbackTrack = new GroupPlaybackTrack(() => metadata);
-        playbackTrack.addEventListener(
+        let mediaPlayerState = nullMediaPlayerState;
+        const playbackTrack = new GroupPlaybackTrack(() => mediaPlayerState);
+        playbackTrack.addListener(
             GroupPlaybackTrackEvents.trackChange,
-            (event: ITrackChangeEvent) => {
+            (event: IPlaybackTrackChangeEvent) => {
                 cnt++;
-                metadata = event.metadata;
+                mediaPlayerState.metadata = event.metadata;
             }
         );
 
@@ -109,13 +114,13 @@ describe("GroupPlaybackTrack", () => {
             metadata: track1,
             waitPoints: [],
             timestamp: 3,
-            socketId: "a",
+            clientId: "a",
         });
         await playbackTrack.updateTrack({
             metadata: track2,
             waitPoints: [],
             timestamp: 2,
-            socketId: "b",
+            clientId: "b",
         });
         assert(cnt == 1, `called trackChange event ${cnt} times`);
     });

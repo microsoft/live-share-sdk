@@ -37,18 +37,6 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
             container2,
             "default"
         );
-
-        // need to be connected to send signals
-        if (!container1.connected) {
-            await new Promise((resolve) =>
-                container1.once("connected", resolve)
-            );
-        }
-        if (!container2.connected) {
-            await new Promise((resolve) =>
-                container2.once("connected", resolve)
-            );
-        }
     });
 
     it("Should changeState() to new state and value", async () => {
@@ -104,7 +92,7 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                         `object1: state == '${state}'`
                     );
                     assert(
-                        data.value == "secondValue",
+                        data?.value == "secondValue",
                         `object1: data == '${data}'`
                     );
                     done.resolve();
@@ -123,7 +111,7 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                         `object2: state == '${state}'`
                     );
                     assert(
-                        data.value == "firstValue",
+                        data?.value == "firstValue",
                         `object2: data == '${data}'`
                     );
                     object2.changeState(state, { value: "secondValue" });

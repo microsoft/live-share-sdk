@@ -1,8 +1,11 @@
 {
-  "extends": "../../../packages/live-share/tsconfig.json",
-  "include": ["./src"],
-  "compilerOptions": {
-    "jsx": "react-jsx"
-  },
-  "files": ["src/index.tsx"]
+    "extends": "../../../packages/live-share/tsconfig.json",
+    "include": ["./src"],
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "outDir": "./build",
+        "strict": true
+    },
+    "files": ["src/index.tsx"],
+    "exclude": ["build", "node_modules"]
 }

@@ -23,5 +23,4 @@ yarn-debug.log*
 yarn-error.log*
 
 .npmrc
-
-**/*.tsbuildinfo
+azcopy.exe

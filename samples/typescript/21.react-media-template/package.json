@@ -3,7 +3,7 @@
     "version": "0.4.0",
     "private": true,
     "author": "Microsoft",
-    "license": "MIT",
+    "license": "SEE LICENSE IN LICENSE",
     "dependencies": {
         "@fluentui/react-components": "^9.2.0",
         "@fluentui/react-icons": "^2.0.179",
@@ -44,6 +44,7 @@
     },
     "scripts": {
         "clean": "npx shx rm -rf build",
+        "generate:pkgLock": "npm i --package-lock-only",
         "start": "start-server-and-test start:server 7070 start:client",
         "start:client": "react-scripts start",
         "start:server": "npx @fluidframework/azure-local-service@latest",

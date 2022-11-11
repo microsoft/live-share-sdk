@@ -69,6 +69,11 @@ export class LiveShareClient {
      * @param options Optional. Configuration options for the client.
      */
     constructor(host: ILiveShareHost, options?: ILiveShareClientOptions) {
+        // Validate host passed in
+        if (!host || typeof host.getFluidTenantInfo != 'function') {
+            throw new Error(`LiveShareClient: host not passed in`);
+        }
+        
         // Save props
         this._host = host;
         this._options = Object.assign({} as ILiveShareClientOptions, options);

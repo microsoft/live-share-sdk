@@ -11,10 +11,10 @@ import {
     LiveMediaSession,
     MediaPlayerSynchronizerEvents,
 } from "@microsoft/live-share-media";
-import { LiveShareClient } from "@microsoft/live-share";
+import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import { inTeams } from "../utils/inTeams";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { ConsoleLogger } from "./ConsoleLogger";
+import { LiveShareHost } from "@microsoft/teams-js";
 
 const MeetingStage = () => {
     // Initial media item selected in SidePanel.jsx
@@ -32,24 +32,17 @@ const MeetingStage = () => {
             try {
                 // Set the initial video src for the player element
                 videoElement.current.src = initialMediaItem.current.src;
-                let connection;
-                if (!inTeams()) {
-                    // Configure for local testing (optional).
-                    connection = {
-                        type: "local",
-                        tokenProvider: new InsecureTokenProvider("", {
-                            id: "123",
-                            name: "Test User",
-                        }),
-                        endpoint: "http://localhost:7070",
-                    };
-                }
+
                 // Enable debugger
                 window.localStorage.debug = "fluid:*";
 
+                // Are we in teams?
+                const host = inTeams()
+                    ? LiveShareHost.create()
+                    : TestLiveShareHost.create();
+
                 // Define Fluid document schema and create container
-                const client = new LiveShareClient({
-                    connection,
+                const client = new LiveShareClient(host, {
                     logger: new ConsoleLogger(),
                 });
                 const schema = {

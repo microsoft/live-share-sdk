@@ -5,8 +5,8 @@
 
 import * as Teams from "@microsoft/teams-js";
 import {
-    ILiveShareClientOptions,
     LiveShareClient,
+    TestLiveShareHost,
 } from "@microsoft/live-share";
 import {
     InkingManager,
@@ -14,7 +14,6 @@ import {
     IUserInfo,
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 import * as Utils from "./utils";
 import { View } from "./view";
@@ -90,12 +89,8 @@ export class StageView extends View {
     private _userInfo: IUserInfo;
 
     private async internalStart() {
-        let client: LiveShareClient;
-        if (Utils.runningInTeams()) {
-            client = new LiveShareClient(new Teams.LiveShareHost());
-        } else {
-            client = new LiveShareClient(new TestLiveShareHost());
-        }
+        const host = Utils.runningInTeams() ? Teams.LiveShareHost.create() : TestLiveShareHost.create();
+        const client = new LiveShareClient(host);
 
         this._container = (
             await client.joinContainer(containerSchema)

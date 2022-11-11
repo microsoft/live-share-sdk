@@ -8,7 +8,7 @@ import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveTimer } from "../LiveTimer";
-import { Deferred } from './Deferred';
+import { Deferred } from "./Deferred";
 
 describeNoCompat("LiveTimer", (getTestObjectProvider) => {
     const milliTolerance = 30;
@@ -25,11 +25,15 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         object2 = await requestFluidObject<LiveTimer>(container2, "default");
 
         // need to be connected to send signals
-        if (!container1.connected) {
-            await new Promise((resolve) => container1.once("connected", resolve));
+        if (!container1.connect) {
+            await new Promise((resolve) =>
+                container1.once("connected", resolve)
+            );
         }
-        if (!container2.connected) {
-            await new Promise((resolve) => container2.once("connected", resolve));
+        if (!container2.connect) {
+            await new Promise((resolve) =>
+                container2.once("connected", resolve)
+            );
         }
     });
 
@@ -41,7 +45,10 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
                 assert(local == true, `Not a local event`);
                 assert(config != null, `Null config arg`);
                 assert(config.clientId != null, `Missing clientId`);
-                assert(typeof config.configChangedAt == 'number', `Missing timestamp`);
+                assert(
+                    typeof config.configChangedAt == "number",
+                    `Missing timestamp`
+                );
                 assert(config.configChangedAt >= now, `Timestamp too old`);
                 object1done.resolve();
             } catch (err) {
@@ -56,7 +63,10 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
                 assert(local == false, `Unexpected local event`);
                 assert(config != null, `Null config arg`);
                 assert(config.clientId != null, `Missing clientId`);
-                assert(typeof config.configChangedAt == 'number', `Missing timestamp`);
+                assert(
+                    typeof config.configChangedAt == "number",
+                    `Missing timestamp`
+                );
                 assert(config.configChangedAt >= now, `Timestamp too old`);
                 object2done.resolve();
             } catch (err) {
@@ -80,14 +90,18 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
             // Try second call to initialize.
             await object1.initialize();
             assert(false, `exception not thrown`);
-        } catch (err) { }
+        } catch (err) {
+            console.error("there was an error");
+        }
     });
 
     it("Should throw error if start(duration) called before initialize", async () => {
         try {
             await object1.start(10);
             assert(false, `exception not thrown`);
-        } catch (err) { }
+        } catch (err) {
+            console.error("there was an error");
+        }
     });
 
     it("pause and play, check resumes at correct position", async () => {
@@ -98,8 +112,11 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         });
         object1.on("played", (config, local) => {
             try {
-                assert(pausePosition !== 0, 'never paused')
-                assert(config.position === pausePosition, `did not resume at pause position`)
+                assert(pausePosition !== 0, "never paused");
+                assert(
+                    config.position === pausePosition,
+                    `did not resume at pause position`
+                );
                 object1done.resolve();
             } catch (err) {
                 object1done.reject(err);
@@ -110,8 +127,11 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         const object2done = new Deferred();
         object2.on("played", (config, local) => {
             try {
-                assert(pausePosition !== 0, 'never paused')
-                assert(config.position === pausePosition, `did not resume at pause position`)
+                assert(pausePosition !== 0, "never paused");
+                assert(
+                    config.position === pausePosition,
+                    `did not resume at pause position`
+                );
                 object2done.resolve();
             } catch (err) {
                 object2done.reject(err);
@@ -122,11 +142,11 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         object1.start(50);
 
         setTimeout(() => {
-            object1.pause()
+            object1.pause();
             setTimeout(() => {
-                object2.play()
-            }, 20)
-        }, 20)
+                object2.play();
+            }, 20);
+        }, 20);
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -137,12 +157,15 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         let startedCounter = 0;
         let finishedCounter = 0;
 
-        object2.on("started", (config, local) => { startedCounter += 1; });
-        object2.on("finished", (config) => { finishedCounter += 1 });
+        object2.on("started", (config, local) => {
+            startedCounter += 1;
+        });
+        object2.on("finished", (config) => {
+            finishedCounter += 1;
+        });
 
         object1.initialize();
         object2.initialize();
-
 
         object1.start(40);
         setTimeout(() => {
@@ -151,14 +174,14 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
                 object1.start(20);
                 setTimeout(() => {
                     testDone.resolve();
-                }, 30)
-            }, 10)
-        }, 10)
+                }, 30);
+            }, 10);
+        }, 10);
 
         // Wait for events to trigger
-        await testDone.promise
-        assert(startedCounter === 3, `${startedCounter}`)
-        assert(finishedCounter === 1, `${finishedCounter}`)
+        await testDone.promise;
+        assert(startedCounter === 3, `${startedCounter}`);
+        assert(finishedCounter === 1, `${finishedCounter}`);
     });
 
     it("finish callback called within 30ms of ending", async () => {
@@ -168,8 +191,12 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
             try {
                 assert(config != null, `Null config arg`);
                 assert(config.clientId != null, `Missing clientId`);
-                assert(typeof config.configChangedAt == 'number', `Missing timestamp`);
-                const milliDifference = config.configChangedAt - now - config.duration
+                assert(
+                    typeof config.configChangedAt == "number",
+                    `Missing timestamp`
+                );
+                const milliDifference =
+                    config.configChangedAt - now - config.duration;
                 assert(milliDifference <= milliTolerance, `${milliDifference}`);
                 object1done.resolve();
             } catch (err) {
@@ -183,8 +210,12 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
             try {
                 assert(config != null, `Null config arg`);
                 assert(config.clientId != null, `Missing clientId`);
-                assert(typeof config.configChangedAt == 'number', `Missing timestamp`);
-                const milliDifference = config.configChangedAt - now - config.duration
+                assert(
+                    typeof config.configChangedAt == "number",
+                    `Missing timestamp`
+                );
+                const milliDifference =
+                    config.configChangedAt - now - config.duration;
                 assert(milliDifference <= milliTolerance, `${milliDifference}`);
                 object2done.resolve();
             } catch (err) {
@@ -197,5 +228,29 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
+    });
+
+    it("500 milli tick rate", async () => {
+        const object1done = new Deferred();
+        object1.tickRate = 500;
+        let tickCounter = 0;
+        object1.on("onTick", () => {
+            tickCounter += 1;
+        });
+
+        object1.on("finished", (config) => {
+            console.log(config);
+            if (tickCounter == 3) {
+                object1done.resolve();
+            } else {
+                object1done.reject(tickCounter);
+            }
+        });
+
+        object1.initialize();
+        object1.start(1600);
+
+        // Wait for events to trigger
+        await object1done.promise;
     });
 });

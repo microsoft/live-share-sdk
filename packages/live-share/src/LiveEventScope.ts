@@ -4,7 +4,10 @@
  */
 
 import EventEmitter from "events";
-import { IErrorEvent, ITelemetryLogger } from "@fluidframework/common-definitions";
+import {
+    IErrorEvent,
+    ITelemetryLogger,
+} from "@fluidframework/common-definitions";
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
@@ -16,18 +19,24 @@ import { LiveEvent } from "./LiveEvent";
  * @param evt The event that was sent/received.
  * @param local If true the `evt` is an event that was sent.
  */
-export type LiveEventListener<TEvent extends ILiveEvent> = (evt: TEvent, local: boolean) => void;
+export type LiveEventListener<TEvent extends ILiveEvent> = (
+    evt: TEvent,
+    local: boolean
+) => void;
 
 /**
  * Duck type of something that provides the expected signalling functionality:
  * A way to verify we can signal, a way to send a signal, and a way to listen for incoming signals
  */
 export interface IRuntimeSignaler {
-    readonly clientId: string|undefined;
+    readonly clientId: string | undefined;
     readonly connected: boolean;
     readonly logger: ITelemetryLogger;
     on(event: "connected", listener: (clientId: string) => void): this;
-    on(event: "signal", listener: (message: IInboundSignalMessage, local: boolean) => void): this;
+    on(
+        event: "signal",
+        listener: (message: IInboundSignalMessage, local: boolean) => void
+    ): this;
     submitSignal(type: string, content: any): void;
 }
 
@@ -46,7 +55,7 @@ export interface IRuntimeSignaler {
  * events.
  */
 export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
-    private readonly emitter  = new EventEmitter();
+    private readonly emitter = new EventEmitter();
     private readonly _runtime: IRuntimeSignaler;
     private _allowedRoles: UserMeetingRole[];
 
@@ -74,21 +83,35 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             // Only call listeners when the runtime is connected and if the signal has an
             // identifiable sender clientId.  The listener is responsible for deciding how
             // it wants to handle local/remote signals
-            // eslint-disable-next-line no-null/no-null
             if (this._runtime.connected && clientId !== null) {
-                LiveEvent.verifyRolesAllowed(clientId, this._allowedRoles).then((value) => {
-                    if (value) {
-                        this.emitter.emit(message.type, message.content, local);
-                    } else {
-                        this._runtime.logger.sendErrorEvent({eventName: 'SharedEvent:invalidRole' }, new Error(`The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(this._allowedRoles)}.`));
-                    }
-                }).catch((err) => {
-                    this._runtime.logger.sendErrorEvent({eventName: 'SharedEvent:invalidRole' }, err);
-                });
+                LiveEvent.verifyRolesAllowed(clientId, this._allowedRoles)
+                    .then((value) => {
+                        if (value) {
+                            this.emitter.emit(
+                                message.type,
+                                message.content,
+                                local
+                            );
+                        } else {
+                            this._runtime.logger.sendErrorEvent(
+                                { eventName: "SharedEvent:invalidRole" },
+                                new Error(
+                                    `The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(
+                                        this._allowedRoles
+                                    )}.`
+                                )
+                            );
+                        }
+                    })
+                    .catch((err) => {
+                        this._runtime.logger.sendErrorEvent(
+                            { eventName: "SharedEvent:invalidRole" },
+                            err
+                        );
+                    });
             }
         });
     }
-
 
     /**
      * List of roles allowed to send events through this scope.
@@ -114,7 +137,10 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      * @param eventName Name of event to listen for.
      * @param listener Function to call when the named event is sent or received.
      */
-    public onEvent<TEvent extends ILiveEvent>(eventName: string, listener: LiveEventListener<TEvent>): this {
+    public onEvent<TEvent extends ILiveEvent>(
+        eventName: string,
+        listener: LiveEventListener<TEvent>
+    ): this {
         this.emitter.on(eventName, listener);
         return this;
     }
@@ -125,7 +151,10 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      * @param eventName Name of event to un-register.
      * @param listener Function that was originally passed to `onEvent()`.
      */
-    public offEvent<TEvent extends ILiveEvent>(eventName: string, listener: LiveEventListener<TEvent>): this {
+    public offEvent<TEvent extends ILiveEvent>(
+        eventName: string,
+        listener: LiveEventListener<TEvent>
+    ): this {
         this.emitter.off(eventName, listener);
         return this;
     }
@@ -140,13 +169,16 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      * @returns The full event, including `ILiveEvent.name`,
      * `ILiveEvent.timestamp`, and `ILiveEvent.clientId` fields if known.
      */
-    public sendEvent<TEvent extends ILiveEvent>(eventName: string, evt: Partial<TEvent> = {}): TEvent {
+    public sendEvent<TEvent extends ILiveEvent>(
+        eventName: string,
+        evt: Partial<TEvent> = {}
+    ): TEvent {
         // Clone passed in event and fill out required props.
         const clone: TEvent = {
-            ...evt as TEvent,
+            ...(evt as TEvent),
             clientId: this._runtime.clientId,
             name: eventName,
-            timestamp: LiveEvent.getTimestamp()
+            timestamp: LiveEvent.getTimestamp(),
         };
 
         // Send event

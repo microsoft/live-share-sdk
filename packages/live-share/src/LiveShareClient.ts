@@ -1,4 +1,3 @@
-
 /*!
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the Microsoft Live Share SDK License.
@@ -14,7 +13,7 @@ import {
     AzureConnectionConfig,
     AzureRemoteConnectionConfig,
     AzureContainerServices,
-    ITelemetryBaseLogger
+    ITelemetryBaseLogger,
 } from "@fluidframework/azure-client";
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { LiveEvent } from "./LiveEvent";
@@ -27,9 +26,18 @@ import { IUser } from '@fluidframework/azure-client';
  * Map v0.59 orderer endpoints to new v1.0 service endpoints
  */
 const ordererEndpointMap = new Map<string, string>()
-    .set('https://alfred.westus2.fluidrelay.azure.com', 'https://us.fluidrelay.azure.com')
-    .set('https://alfred.westeurope.fluidrelay.azure.com', 'https://eu.fluidrelay.azure.com')
-    .set('https://alfred.southeastasia.fluidrelay.azure.com', 'https://global.fluidrelay.azure.com');
+    .set(
+        "https://alfred.westus2.fluidrelay.azure.com",
+        "https://us.fluidrelay.azure.com"
+    )
+    .set(
+        "https://alfred.westeurope.fluidrelay.azure.com",
+        "https://eu.fluidrelay.azure.com"
+    )
+    .set(
+        "https://alfred.southeastasia.fluidrelay.azure.com",
+        "https://global.fluidrelay.azure.com"
+    );
 
 /**
  * Options used to configure the `TeamsFluidClient` class.
@@ -38,7 +46,7 @@ export interface ILiveShareClientOptions {
     /**
      * Optional. Configuration to use when connecting to a custom Azure Fluid Relay instance.
      */
-    readonly connection?: AzureConnectionConfig,
+    readonly connection?: AzureConnectionConfig;
 
      /**
       * Optional. A logger instance to receive diagnostic messages.
@@ -70,7 +78,7 @@ export class LiveShareClient {
      * If true the client is configured to use a local test server.
      */
     public get isTesting(): boolean {
-        return this._options.connection?.type == 'local';
+        return this._options.connection?.type == "local";
     }
 
     /**
@@ -90,7 +98,10 @@ export class LiveShareClient {
      * @param onContainerFirstCreated Optional. Callback that's called when the container is first created.
      * @returns The fluid `container` and `services` objects to use along with a `created` flag that if true means the container had to be created.
      */
-    public async joinContainer(fluidContainerSchema: ContainerSchema, onContainerFirstCreated?: (container: IFluidContainer) => void): Promise<{
+    public async joinContainer(
+        fluidContainerSchema: ContainerSchema,
+        onContainerFirstCreated?: (container: IFluidContainer) => void
+    ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
         created: boolean;
@@ -102,7 +113,8 @@ export class LiveShareClient {
             const pTimestampProvider = this.initializeTimestampProvider();
 
             // Initialize FRS connection config
-            let config: AzureConnectionConfig | undefined = this._options.connection;
+            let config: AzureConnectionConfig | undefined =
+                this._options.connection;
             if (!config) {
                 const frsTenantInfo = await this._host.getFluidTenantInfo();
                 
@@ -110,22 +122,26 @@ export class LiveShareClient {
                 let endpoint = frsTenantInfo.serviceEndpoint;
                 if (!endpoint) {
                     if (ordererEndpointMap.has(frsTenantInfo.ordererEndpoint)) {
-                        endpoint = ordererEndpointMap.get(frsTenantInfo.ordererEndpoint);
+                        endpoint = ordererEndpointMap.get(
+                            frsTenantInfo.ordererEndpoint
+                        );
                     } else {
-                        throw new Error(`TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.ordererEndpoint}`)
+                        throw new Error(
+                            `TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.ordererEndpoint}`
+                        );
                     }
                 }
 
                 // Is this a local config?
-                if (frsTenantInfo.tenantId == 'local') {
+                if (frsTenantInfo.tenantId == "local") {
                     config = {
-                        type: 'local',
+                        type: "local",
                         endpoint: endpoint!,
                         tokenProvider: new InsecureTokenProvider("",  { id: "123", name: "Test User" } as IUser)
                     };
                 } else {
                     config = {
-                        type: 'remote',
+                        type: "remote",
                         tenantId: frsTenantInfo.tenantId,
                         endpoint: endpoint!,
                         tokenProvider: new LiveShareTokenProvider(this._host)
@@ -136,35 +152,50 @@ export class LiveShareClient {
             // Create FRS client
             const client = new AzureClient({
                 connection: config,
-                logger: this._options.logger
+                logger: this._options.logger,
             });
 
             // Create container on first access
-            const pContainer = this.getOrCreateContainer(client, fluidContainerSchema, 0, onContainerFirstCreated);
+            const pContainer = this.getOrCreateContainer(
+                client,
+                fluidContainerSchema,
+                0,
+                onContainerFirstCreated
+            );
 
             // Wait in parallel for everything to finish initializing.
-            const result = await Promise.all([pContainer, pRoleVerifier, pTimestampProvider]);
+            const result = await Promise.all([
+                pContainer,
+                pRoleVerifier,
+                pTimestampProvider,
+            ]);
 
             performance.mark(`TeamsSync: container connecting`);
 
             // Wait for containers socket to connect
             let connected = false;
             const { container, services } = result[0];
-            container.on('connected', async () => {
+            container.on("connected", async () => {
                 if (!connected) {
                     connected = true;
-                    performance.measure(`TeamsSync: container connected`, `TeamsSync: container connecting`);
+                    performance.measure(
+                        `TeamsSync: container connected`,
+                        `TeamsSync: container connecting`
+                    );
                 }
 
                 // Register any new clientId's
                 // - registerClientId() will only register a client on first use
                 if (this._roleVerifier) {
-                    const connections = services.audience.getMyself()?.connections ?? [];
+                    const connections =
+                        services.audience.getMyself()?.connections ?? [];
                     for (let i = 0; i < connections.length; i++) {
                         try {
                             const clientId = connections[i]?.id;
                             if (clientId) {
-                                await this._roleVerifier?.registerClientId(clientId);
+                                await this._roleVerifier?.registerClientId(
+                                    clientId
+                                );
                             }
                         } catch (err: any) {
                             console.error(err.toString());
@@ -175,7 +206,10 @@ export class LiveShareClient {
 
             return result[0];
         } finally {
-            performance.measure(`TeamsSync: container joined`, `TeamsSync: join container`);
+            performance.measure(
+                `TeamsSync: container joined`,
+                `TeamsSync: join container`
+            );
         }
     }
 
@@ -210,7 +244,12 @@ export class LiveShareClient {
         }
     }
 
-    private async getOrCreateContainer(client: AzureClient, fluidContainerSchema: ContainerSchema, tries: number, onInitializeContainer?: (container: IFluidContainer) => void): Promise<{
+    private async getOrCreateContainer(
+        client: AzureClient,
+        fluidContainerSchema: ContainerSchema,
+        tries: number,
+        onInitializeContainer?: (container: IFluidContainer) => void
+    ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
         created: boolean;
@@ -220,26 +259,54 @@ export class LiveShareClient {
 
         // Create container on first access
         if (containerInfo.shouldCreate) {
-            return await this.createNewContainer(client, fluidContainerSchema, tries, onInitializeContainer);
+            return await this.createNewContainer(
+                client,
+                fluidContainerSchema,
+                tries,
+                onInitializeContainer
+            );
         } else if (containerInfo.containerId) {
-            return {created: false, ...await client.getContainer(containerInfo.containerId, fluidContainerSchema)};
-        } else if (tries < this.maxContainerLookupTries && containerInfo.retryAfter > 0) {
+            return {
+                created: false,
+                ...(await client.getContainer(
+                    containerInfo.containerId,
+                    fluidContainerSchema
+                )),
+            };
+        } else if (
+            tries < this.maxContainerLookupTries &&
+            containerInfo.retryAfter > 0
+        ) {
             await this.wait(containerInfo.retryAfter);
-            return await this.getOrCreateContainer(client, fluidContainerSchema, tries + 1, onInitializeContainer);
+            return await this.getOrCreateContainer(
+                client,
+                fluidContainerSchema,
+                tries + 1,
+                onInitializeContainer
+            );
         } else {
-            throw new Error(`TeamsFluidClient: timed out attempting to create or get container for current context.`);
+            throw new Error(
+                `TeamsFluidClient: timed out attempting to create or get container for current context.`
+            );
         }
     }
 
-    private async createNewContainer(client: AzureClient, fluidContainerSchema: ContainerSchema, tries: number, onInitializeContainer?: (container: IFluidContainer) => void): Promise<{
+    private async createNewContainer(
+        client: AzureClient,
+        fluidContainerSchema: ContainerSchema,
+        tries: number,
+        onInitializeContainer?: (container: IFluidContainer) => void
+    ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
         created: boolean;
     }> {
         // Create and initialize container
-        const { container, services } = await client.createContainer(fluidContainerSchema);
+        const { container, services } = await client.createContainer(
+            fluidContainerSchema
+        );
         if (onInitializeContainer) {
-            onInitializeContainer(container)
+            onInitializeContainer(container);
         }
 
         // Attach container to service
@@ -252,9 +319,15 @@ export class LiveShareClient {
             container.dispose();
 
             // Get mapped container ID
-            return {created: false, ...await client.getContainer(containerInfo.containerId!, fluidContainerSchema)};
+            return {
+                created: false,
+                ...(await client.getContainer(
+                    containerInfo.containerId!,
+                    fluidContainerSchema
+                )),
+            };
         } else {
-            return {container, services, created: true};
+            return { container, services, created: true };
         }
     }
 

@@ -2,13 +2,21 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the Microsoft Live Share SDK License.
  */
-import { LiveTelemetryLogger, IEvent } from '@microsoft/live-share';
-import EventEmitter from 'events';
-import { ExtendedMediaSessionAction, ExtendedMediaSessionPlaybackState, ExtendedMediaMetadata, CoordinationWaitPoint, ExtendedMediaSessionActionDetails, MediaSessionCoordinatorEvents, MediaSessionCoordinatorSuspension } from './MediaSessionExtensions';
-import { VolumeManager } from './VolumeManager';
-import { LiveMediaSession } from './LiveMediaSession';
-import { IMediaPlayer } from './IMediaPlayer';
-import { TelemetryEvents } from './internals';
+import { LiveTelemetryLogger, IEvent } from "@microsoft/live-share";
+import EventEmitter from "events";
+import {
+    ExtendedMediaSessionAction,
+    ExtendedMediaSessionPlaybackState,
+    ExtendedMediaMetadata,
+    CoordinationWaitPoint,
+    ExtendedMediaSessionActionDetails,
+    MediaSessionCoordinatorEvents,
+    MediaSessionCoordinatorSuspension,
+} from "./MediaSessionExtensions";
+import { VolumeManager } from "./VolumeManager";
+import { LiveMediaSession } from "./LiveMediaSession";
+import { IMediaPlayer } from "./IMediaPlayer";
+import { TelemetryEvents } from "./internals";
 
 /**
  * Event data returned by `MediaPlayerSynchronizer` object.
@@ -31,9 +39,9 @@ export enum MediaPlayerSynchronizerEvents {
     /**
      *
      */
-    coordinatorstatechange = 'coordinatorstatechange',
-    groupaction = 'groupaction',
-    useraction = 'useraction'
+    coordinatorstatechange = "coordinatorstatechange",
+    groupaction = "groupaction",
+    useraction = "useraction",
 }
 
 /**
@@ -46,8 +54,24 @@ export enum MediaPlayerSynchronizerEvents {
  * group in addition to being applied to the local player.
  */
 export class MediaPlayerSynchronizer extends EventEmitter {
-    private static SESSION_ACTIONS: ExtendedMediaSessionAction[] = ['play', 'pause', 'seekto', 'settrack', 'datachange', 'catchup', 'wait'];
-    private static PLAYER_EVENTS: string[] = ['playing', 'pause', 'ratechange', 'timeupdate', 'ended', 'loadedmetadata', 'blocked'];
+    private static SESSION_ACTIONS: ExtendedMediaSessionAction[] = [
+        "play",
+        "pause",
+        "seekto",
+        "settrack",
+        "datachange",
+        "catchup",
+        "wait",
+    ];
+    private static PLAYER_EVENTS: string[] = [
+        "playing",
+        "pause",
+        "ratechange",
+        "timeupdate",
+        "ended",
+        "loadedmetadata",
+        "blocked",
+    ];
 
     private _logger: LiveTelemetryLogger;
     private _player: IMediaPlayer;
@@ -57,8 +81,8 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private _onPlayerEvent: EventListener;
     private _seekSuspension?: MediaSessionCoordinatorSuspension;
     private _viewOnly = false;
-    private _expectedPlaybackState: ExtendedMediaSessionPlaybackState = 'none';
-    private _trackData: object|null = null;
+    private _expectedPlaybackState: ExtendedMediaSessionPlaybackState = "none";
+    private _trackData: object | null = null;
 
     /**
      * Creates a new `MediaElementSynchronizer` instance.
@@ -66,7 +90,11 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @param mediaSession Group MediaSession object being used.
      * @param onEnd Optional. Function to call when synchronizers `end()` method is called.
      */
-    constructor(player: IMediaPlayer, mediaSession: LiveMediaSession, onEnd: () => void) {
+    constructor(
+        player: IMediaPlayer,
+        mediaSession: LiveMediaSession,
+        onEnd: () => void
+    ) {
         super();
         this._player = player;
         this._mediaSession = mediaSession;
@@ -80,13 +108,16 @@ export class MediaPlayerSynchronizer extends EventEmitter {
             let playbackState: ExtendedMediaSessionPlaybackState;
             const src = this._player.currentSrc || this._player.src;
             if (this._player.ended) {
-                playbackState = 'ended';
-            } else if (!src || (this._player.paused && this._player.currentTime < 1.0)) {
-                playbackState = 'none';
+                playbackState = "ended";
+            } else if (
+                !src ||
+                (this._player.paused && this._player.currentTime < 1.0)
+            ) {
+                playbackState = "none";
             } else if (this._player.paused) {
-                playbackState = 'paused';
+                playbackState = "paused";
             } else {
-                playbackState = 'playing';
+                playbackState = "playing";
             }
 
             const state = {
@@ -95,9 +126,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                 positionState: {
                     position: this._player.currentTime,
                     playbackRate: this._player.playbackRate,
-                    duration: this._player.duration
+                    duration: this._player.duration,
                 },
-                trackData: this._trackData
+                trackData: this._trackData,
             };
 
             return state;
@@ -105,118 +136,201 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
         // Listen for player events
         this._onPlayerEvent = (evt: Event) => {
-            if (evt.type != 'timeupdate') {
-                this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PlayerEvent, null, {type: evt.type});
+            if (evt.type != "timeupdate") {
+                this._logger.sendTelemetryEvent(
+                    TelemetryEvents.MediaPlayerSynchronizer.PlayerEvent,
+                    null,
+                    {
+                        type: evt.type,
+                    }
+                );
             }
 
             switch (evt.type) {
-                case 'loadedmetadata':
+                case "loadedmetadata":
+                    // eslint-disable-next-line no-case-declarations
                     const src = this._player.currentSrc || this._player.src;
                     this._trackData = null;
                     break;
-                case 'playing':
+                case "playing":
                     // Handle case for YouTube player where user can pause/play video by clicking on it.
                     // - Videos don't always start at 0.0 seconds.
-                    if (this._expectedPlaybackState != 'playing') {
-                        if (this._mediaSession.coordinator.canPlayPause && this._player.currentTime < 1.0) {
-                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.UserTappedVideoToPlay);
+                    if (this._expectedPlaybackState != "playing") {
+                        if (
+                            this._mediaSession.coordinator.canPlayPause &&
+                            this._player.currentTime < 1.0
+                        ) {
+                            this._logger.sendTelemetryEvent(
+                                TelemetryEvents.MediaPlayerSynchronizer
+                                    .UserTappedVideoToPlay
+                            );
                             this.play();
                         }
                     }
-                    // block play if player state is playing when expected synced state is paused.
+                    // block play if player state is playing when expected synced state is paused and coordinator is not suspended.
                     // needed because cannot tell if its a user initiated event, so disallow play
-                    if (this._expectedPlaybackState === 'paused') {
+                    if (
+                        this._expectedPlaybackState === "paused" &&
+                        !this._mediaSession.coordinator.isSuspended
+                    ) {
                         this._player.pause();
                     }
 
-                    // block play if player state is playing when expected synced state is none.
+                    // block play if player state is playing when expected synced state is none and coordinator is not suspended.
                     // needed because user who is not in control should not be able to start, so disallow play
-                    if (this._expectedPlaybackState === 'none') {
+                    if (
+                        this._expectedPlaybackState === "none" &&
+                        !this._mediaSession.coordinator.isSuspended
+                    ) {
                         this._player.pause();
                     }
                     break;
-                case 'pause':
-                    // block pause if player state is paused when expected synced state is playing
+                case "pause":
+                    // block pause if player state is paused when expected synced state is playing and coordinator is not suspended.
                     // needed because cannot tell if its a user initiated event, so disallow pause
-                    if (this._expectedPlaybackState === 'playing') {
+                    if (
+                        this._expectedPlaybackState === "playing" &&
+                        !this._mediaSession.coordinator.isSuspended
+                    ) {
                         this._player.play();
                     }
                     break;
-                case 'ratechange':
+                case "ratechange":
                     // Block rate changes unless suspended.
-                    if (this._player.playbackRate != 1.0 && !this._mediaSession.coordinator.isSuspended) {
-                        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PlaybackRateChangeBlocked);
+                    if (
+                        this._player.playbackRate != 1.0 &&
+                        !this._mediaSession.coordinator.isSuspended
+                    ) {
+                        this._logger.sendTelemetryEvent(
+                            TelemetryEvents.MediaPlayerSynchronizer
+                                .PlaybackRateChangeBlocked
+                        );
                         this._player.playbackRate = 1.0;
                     }
                     break;
-                case 'blocked':
-                    this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PlaybackRateChangeBlocked);
+                case "blocked":
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.MediaPlayerSynchronizer
+                            .PlaybackRateChangeBlocked
+                    );
                     break;
             }
         };
 
         // Register for coordinator state changes
-        this._mediaSession.coordinator.on(MediaSessionCoordinatorEvents.coordinatorstatechange, evt => this.emit(evt.type, evt));
+        this._mediaSession.coordinator.on(
+            MediaSessionCoordinatorEvents.coordinatorstatechange,
+            (evt) => this.emit(evt.type, evt)
+        );
 
         // Register media session actions
         for (const action of MediaPlayerSynchronizer.SESSION_ACTIONS) {
-            this._mediaSession.setActionHandler(action, async (details: ExtendedMediaSessionActionDetails) => {
-                let error: Error | undefined;
-                try {
-                    switch (details.action) {
-                        case 'play':
-                            this._expectedPlaybackState = 'playing';
-                            if (this._player.paused) {
-                                this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PlayAction);
-                                if (typeof details.seekTime == 'number' && this._player.currentTime < 1.0) {
-                                    this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekingPlayerToStartPosition, null, {position: details.seekTime})
-                                    this._player.currentTime = details.seekTime!;
+            this._mediaSession.setActionHandler(
+                action,
+                async (details: ExtendedMediaSessionActionDetails) => {
+                    let error: Error | undefined;
+                    try {
+                        switch (details.action) {
+                            case "play":
+                                this._expectedPlaybackState = "playing";
+                                if (this._player.paused) {
+                                    this._logger.sendTelemetryEvent(
+                                        TelemetryEvents.MediaPlayerSynchronizer
+                                            .PlayAction
+                                    );
+                                    if (
+                                        typeof details.seekTime == "number" &&
+                                        this._player.currentTime < 1.0
+                                    ) {
+                                        this._logger.sendTelemetryEvent(
+                                            TelemetryEvents
+                                                .MediaPlayerSynchronizer
+                                                .SeekingPlayerToStartPosition,
+                                            null,
+                                            { position: details.seekTime }
+                                        );
+                                        this._player.currentTime =
+                                            details.seekTime!;
+                                    }
+                                    // Reference: https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play#exceptions
+                                    await this._player.play();
                                 }
-                                // Reference: https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play#exceptions
-                                await this._player.play();
-                            }
-                            break;
-                        case 'pause':
-                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PauseAction);
-                            this._expectedPlaybackState = 'paused';
-                            if (typeof details.seekTime == 'number' && this._player.currentTime < 1.0) {
-                                this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekingPlayerToStartPosition, null, {position: details.seekTime})
-                                this._player.currentTime = details.seekTime!;
-                            }
-                            this._player.pause();
-                            break;
-                        case 'seekto':
-                            if (typeof details.seekTime == 'number') {
-                                this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekToAction, null, {position: details.seekTime});
-                                this._player.currentTime = details.seekTime!;
-                            }
-                            break;
-                        case 'settrack':
-                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SetTrackAction);
-                            this._expectedPlaybackState = 'none';
-                            this._player.src = details.metadata!.trackIdentifier;
-                            this._player.load();
-                            break;
-                        case 'datachange':
-                            this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.DataChangeAction);
-                            break;
-                        case 'catchup':
-                            if (typeof details.seekTime == 'number') {
-                                this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.CatchupAction, null, {position: details.seekTime});
-                                this.catchupPlayer(details.seekTime!);
-                            }
-                            break;
+                                break;
+                            case "pause":
+                                this._logger.sendTelemetryEvent(
+                                    TelemetryEvents.MediaPlayerSynchronizer
+                                        .PauseAction
+                                );
+                                this._expectedPlaybackState = "paused";
+                                if (
+                                    typeof details.seekTime == "number" &&
+                                    this._player.currentTime < 1.0
+                                ) {
+                                    this._logger.sendTelemetryEvent(
+                                        TelemetryEvents.MediaPlayerSynchronizer
+                                            .SeekingPlayerToStartPosition,
+                                        null,
+                                        { position: details.seekTime }
+                                    );
+                                    this._player.currentTime =
+                                        details.seekTime!;
+                                }
+                                this._player.pause();
+                                break;
+                            case "seekto":
+                                if (typeof details.seekTime == "number") {
+                                    this._logger.sendTelemetryEvent(
+                                        TelemetryEvents.MediaPlayerSynchronizer
+                                            .SeekToAction,
+                                        null,
+                                        { position: details.seekTime }
+                                    );
+                                    this._player.currentTime =
+                                        details.seekTime!;
+                                }
+                                break;
+                            case "settrack":
+                                this._logger.sendTelemetryEvent(
+                                    TelemetryEvents.MediaPlayerSynchronizer
+                                        .SetTrackAction
+                                );
+                                this._expectedPlaybackState = "none";
+                                this._player.src =
+                                    details.metadata!.trackIdentifier;
+                                this._player.load();
+                                break;
+                            case "datachange":
+                                this._logger.sendTelemetryEvent(
+                                    TelemetryEvents.MediaPlayerSynchronizer
+                                        .DataChangeAction
+                                );
+                                break;
+                            case "catchup":
+                                if (typeof details.seekTime == "number") {
+                                    this._logger.sendTelemetryEvent(
+                                        TelemetryEvents.MediaPlayerSynchronizer
+                                            .CatchupAction,
+                                        null,
+                                        { position: details.seekTime }
+                                    );
+                                    this.catchupPlayer(details.seekTime!);
+                                }
+                                break;
+                        }
+                    } catch (err: any) {
+                        if (err instanceof Error) {
+                            error = err;
+                        } else {
+                            error = new Error(
+                                err?.message ??
+                                    "An unknown error occurred after processing the group session action."
+                            );
+                        }
                     }
-                } catch (err: any) {
-                    if (err instanceof Error) {
-                        error = err;
-                    } else {
-                        error = new Error(err?.message ?? "An unknown error occurred after processing the group session action.");
-                    }
-                }
 
-                this.dispatchGroupAction(details, false, error);
-            });
+                    this.dispatchGroupAction(details, false, error);
+                }
+            );
         }
 
         // Subscribe to player events
@@ -224,7 +338,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
             this._player.addEventListener(event, this._onPlayerEvent);
         }
 
-        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SynchronizationStarted);
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.MediaPlayerSynchronizer.SynchronizationStarted
+        );
     }
 
     /**
@@ -275,7 +391,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @param event Name of the event to add.
      * @param listener Function to call when the event is triggered.
      */
-    public addEventListener(event: MediaPlayerSynchronizerEvents, listener: (evt: IMediaPlayerSynchronizerEvent) => void): this {
+    public addEventListener(
+        event: MediaPlayerSynchronizerEvents,
+        listener: (evt: IMediaPlayerSynchronizerEvent) => void
+    ): this {
         this.on(event, listener);
         return this;
     }
@@ -285,7 +404,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @param event Name of the event to remove.
      * @param listener Function that was registered in call to `addEventListener()`.
      */
-    public removeEventListener(event: MediaPlayerSynchronizerEvents, listener: (evt: IMediaPlayerSynchronizerEvent) => void): this {
+    public removeEventListener(
+        event: MediaPlayerSynchronizerEvents,
+        listener: (evt: IMediaPlayerSynchronizerEvent) => void
+    ): this {
         this.off(event, listener);
         return this;
     }
@@ -303,7 +425,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
                 // Subscribe to player events
                 for (const event of MediaPlayerSynchronizer.PLAYER_EVENTS) {
-                    this._player.removeEventListener(event, this._onPlayerEvent);
+                    this._player.removeEventListener(
+                        event,
+                        this._onPlayerEvent
+                    );
                 }
 
                 // Notify parent
@@ -325,10 +450,14 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      */
     public beginSeek(): void {
         if (this._seekSuspension) {
-            throw new Error(`MediaPlayerSynchronizer: cannot begin seek. A seek is already in progress.`);
+            throw new Error(
+                `MediaPlayerSynchronizer: cannot begin seek. A seek is already in progress.`
+            );
         }
 
-        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.BeginSeekCalled);
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.MediaPlayerSynchronizer.BeginSeekCalled
+        );
         this._seekSuspension = this._mediaSession.coordinator.beginSuspension();
     }
 
@@ -338,7 +467,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      */
     public endSeek(seekTo: number): void {
         if (!this._seekSuspension) {
-            throw new Error(`MediaPlayerSynchronizer: cannot end seek. No seek is in progress.`);
+            throw new Error(
+                `MediaPlayerSynchronizer: cannot end seek. No seek is in progress.`
+            );
         }
 
         // Seek player to new time immediately.
@@ -349,10 +480,16 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         const suspension = this._seekSuspension;
         this._seekSuspension = undefined;
 
-        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.EndSeekCalled, null, {position: seekTo});
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.MediaPlayerSynchronizer.EndSeekCalled,
+            null,
+            {
+                position: seekTo,
+            }
+        );
         suspension.end(seekTo);
 
-        this.dispatchUserAction({action: 'seekto', seekTime: seekTo});
+        this.dispatchUserAction({ action: "seekto", seekTime: seekTo });
     }
 
     /**
@@ -363,11 +500,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * and instead use the synchronizers `play()` method.
      */
     public play(): void {
-        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PlayCalled);
-        this._expectedPlaybackState = 'playing';
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.MediaPlayerSynchronizer.PlayCalled
+        );
+        this._expectedPlaybackState = "playing";
         this._mediaSession.coordinator.play();
 
-        this.dispatchUserAction({action: 'play'});
+        this.dispatchUserAction({ action: "play" });
     }
 
     /**
@@ -378,11 +517,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * and instead use the synchronizers `pause()` method.
      */
     public pause(): void {
-        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.PauseCalled);
-        this._expectedPlaybackState = 'paused';
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.MediaPlayerSynchronizer.PauseCalled
+        );
+        this._expectedPlaybackState = "paused";
         this._mediaSession.coordinator.pause();
 
-        this.dispatchUserAction({action: 'pause'});
+        this.dispatchUserAction({ action: "pause" });
     }
 
     /**
@@ -398,10 +539,14 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         //   location.
         this._player.currentTime = time;
 
-        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SeekToCalled, null, {position: time});
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.MediaPlayerSynchronizer.SeekToCalled,
+            null,
+            { position: time }
+        );
         this._mediaSession.coordinator.seekTo(time);
 
-        this.dispatchUserAction({action: 'seekto', seekTime: time});
+        this.dispatchUserAction({ action: "seekto", seekTime: time });
     }
 
     /**
@@ -411,11 +556,16 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * For proper operation apps should avoid calling `mediaSession.coordinator.setTrack()` directly
      * and instead use the synchronizers `setTrack()` method.
      */
-    public setTrack(track: ExtendedMediaMetadata, waitPoints?: CoordinationWaitPoint[]): void {
-        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SetTrackCalled);
+    public setTrack(
+        track: ExtendedMediaMetadata,
+        waitPoints?: CoordinationWaitPoint[]
+    ): void {
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.MediaPlayerSynchronizer.SetTrackCalled
+        );
         this._mediaSession.coordinator.setTrack(track, waitPoints);
 
-        this.dispatchUserAction({action: 'settrack', metadata: track});
+        this.dispatchUserAction({ action: "settrack", metadata: track });
     }
 
     /**
@@ -425,27 +575,58 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * For proper operation apps should avoid calling `mediaSession.coordinator.setTrackData()` directly
      * and instead use the synchronizers `setTrackData()` method.
      */
-    public setTrackData(data: object|null): void {
-        this._logger.sendTelemetryEvent(TelemetryEvents.MediaPlayerSynchronizer.SetTrackDataCalled);
+    public setTrackData(data: object | null): void {
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.MediaPlayerSynchronizer.SetTrackDataCalled
+        );
         this._trackData = data;
         this._mediaSession.coordinator.setTrackData(data);
 
-        this.dispatchUserAction({action: 'datachange', data: data});
+        this.dispatchUserAction({ action: "datachange", data: data });
     }
 
-    private dispatchGroupAction(details: ExtendedMediaSessionActionDetails, delay = false, error: Error | undefined): void {
+    private dispatchGroupAction(
+        details: ExtendedMediaSessionActionDetails,
+        delay = false,
+        error: Error | undefined
+    ): void {
         if (delay) {
-            setTimeout(() => this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details, playerError: error}), 50);
+            setTimeout(
+                () =>
+                    this.emit(MediaPlayerSynchronizerEvents.groupaction, {
+                        type: MediaPlayerSynchronizerEvents.groupaction,
+                        details: details,
+                        playerError: error,
+                    }),
+                50
+            );
         } else {
-            this.emit(MediaPlayerSynchronizerEvents.groupaction, {type: MediaPlayerSynchronizerEvents.groupaction, details: details, error});
+            this.emit(MediaPlayerSynchronizerEvents.groupaction, {
+                type: MediaPlayerSynchronizerEvents.groupaction,
+                details: details,
+                error,
+            });
         }
     }
 
-    private dispatchUserAction(details: ExtendedMediaSessionActionDetails, delay = false): void {
+    private dispatchUserAction(
+        details: ExtendedMediaSessionActionDetails,
+        delay = false
+    ): void {
         if (delay) {
-            setTimeout(() => this.emit(MediaPlayerSynchronizerEvents.useraction, {type: MediaPlayerSynchronizerEvents.useraction, details: details}), 50);
+            setTimeout(
+                () =>
+                    this.emit(MediaPlayerSynchronizerEvents.useraction, {
+                        type: MediaPlayerSynchronizerEvents.useraction,
+                        details: details,
+                    }),
+                50
+            );
         } else {
-            this.emit(MediaPlayerSynchronizerEvents.useraction, {type: MediaPlayerSynchronizerEvents.useraction, details: details});
+            this.emit(MediaPlayerSynchronizerEvents.useraction, {
+                type: MediaPlayerSynchronizerEvents.useraction,
+                details: details,
+            });
         }
     }
 

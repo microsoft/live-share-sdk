@@ -3,9 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-export * from './consts';
-export * from './GroupCoordinatorState';
-export * from './GroupPlaybackPosition';
-export * from './GroupPlaybackTrack';
-export * from './GroupPlaybackTrackData';
-export * from './GroupTransportState';
+export * from "./consts";
+export * from "./GroupCoordinatorState";
+export * from "./GroupPlaybackPosition";
+export * from "./GroupPlaybackTrack";
+export * from "./GroupPlaybackTrackData";
+export * from "./GroupTransportState";

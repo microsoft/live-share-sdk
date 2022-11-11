@@ -3,10 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveEvent } from './LiveEvent';
-import { ILiveEvent , UserMeetingRole} from './interfaces';
-import { TimeInterval } from './TimeInterval';
-import { cloneValue } from './internals';
+import { LiveEvent } from "./LiveEvent";
+import { ILiveEvent, UserMeetingRole } from "./interfaces";
+import { TimeInterval } from "./TimeInterval";
+import { cloneValue } from "./internals";
 
 /**
  * List of possible presence states.
@@ -15,18 +15,18 @@ export enum PresenceState {
     /**
      * The user is online. Default state while user has at least one client connected.
      */
-    online = 'online',
+    online = "online",
 
     /**
      * The user is away. Applications can set this state based on the users activity.
      */
-    away = 'away',
+    away = "away",
 
     /**
      * The user is offline. Automatically set for users after their client has stopped sending
      * updates for a period of time.
      */
-    offline = 'offline'
+    offline = "offline",
 }
 
 /**
@@ -43,11 +43,17 @@ export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
  */
 export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
+    private readonly _clients: string[] = [];
 
     /**
      * @hidden
      */
-    constructor(private _evt: ILivePresenceEvent<TData>, private _expirationPeriod: TimeInterval, private _isLocalUser: boolean) {
+    constructor(
+        private _evt: ILivePresenceEvent<TData>,
+        private _expirationPeriod: TimeInterval,
+        private _isLocalUser: boolean
+    ) {
+        this.updateClients(this._evt);
         this._lastUpdateTime = LiveEvent.getTimestamp();
     }
 
@@ -79,14 +85,14 @@ export class LivePresenceUser<TData = object> {
     /**
      * Optional data shared by the user.
      */
-    public get data(): TData|undefined {
+    public get data(): TData | undefined {
         return cloneValue(this._evt.data);
     }
 
     /**
      * Returns the user's meeting roles.
      */
-     public getRoles(): Promise<UserMeetingRole[]> {
+    public getRoles(): Promise<UserMeetingRole[]> {
         if (this._isLocalUser) {
             return LiveEvent.registerClientId(this._evt.clientId!);
         } else {
@@ -95,9 +101,18 @@ export class LivePresenceUser<TData = object> {
     }
 
     /**
+     * Returns true if the presence object is from the specified client.
+     * @param clientId The ID of the client to lookup.
+     */
+    public isFromClient(clientId: string): boolean {
+        return this._clients.indexOf(clientId) >= 0;
+    }
+
+    /**
      * @hidden
      */
     public updateReceived(evt: ILivePresenceEvent<TData>): boolean {
+        this.updateClients(evt);
         const current = this._evt;
         if (LiveEvent.isNewer(current, evt)) {
             // Save updated event
@@ -105,7 +120,10 @@ export class LivePresenceUser<TData = object> {
             this._lastUpdateTime = LiveEvent.getTimestamp();
 
             // Has anything changed?
-            if (evt.state != current.state || JSON.stringify(evt.data) != JSON.stringify(current.data)) {
+            if (
+                evt.state != current.state ||
+                JSON.stringify(evt.data) != JSON.stringify(current.data)
+            ) {
                 return true;
             }
         }
@@ -116,6 +134,15 @@ export class LivePresenceUser<TData = object> {
     private hasExpired(): boolean {
         const now = LiveEvent.getTimestamp();
         const elapsed = now - this._lastUpdateTime;
-        return (!this._isLocalUser && elapsed > this._expirationPeriod.milliseconds);
+        return (
+            !this._isLocalUser && elapsed > this._expirationPeriod.milliseconds
+        );
+    }
+
+    private updateClients(evt: ILivePresenceEvent<TData>): void {
+        // The user can be logged into multiple clients so add client to list if missing.
+        if (evt.clientId && this._clients.indexOf(evt.clientId) < 0) {
+            this._clients.push(evt.clientId);
+        }
     }
 }

@@ -3,10 +3,17 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveEvent, IRuntimeSignaler, TimeInterval } from '@microsoft/live-share';
-import { GroupTransportState } from './GroupTransportState';
-import { GroupPlaybackTrackEvents } from './GroupPlaybackTrack';
-import { CoordinationWaitPoint, ExtendedMediaSessionPlaybackState } from '../MediaSessionExtensions';
+import {
+    LiveEvent,
+    IRuntimeSignaler,
+    TimeInterval,
+} from "@microsoft/live-share";
+import { GroupTransportState } from "./GroupTransportState";
+import { GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
+import {
+    CoordinationWaitPoint,
+    ExtendedMediaSessionPlaybackState,
+} from "../MediaSessionExtensions";
 
 /**
  *Per client position
@@ -14,7 +21,7 @@ import { CoordinationWaitPoint, ExtendedMediaSessionPlaybackState } from '../Med
  */
 export interface ICurrentPlaybackPosition {
     playbackState: ExtendedMediaSessionPlaybackState;
-    waitPoint?: CoordinationWaitPoint
+    waitPoint?: CoordinationWaitPoint;
     position: number;
     duration?: number;
     timestamp: number;
@@ -30,25 +37,31 @@ export class GroupPlaybackPosition {
     private _updateInterval: TimeInterval;
     private _positions: Map<string, ICurrentPlaybackPosition>;
 
-
-    constructor(transportState: GroupTransportState, runtime: IRuntimeSignaler, updateInterval: TimeInterval) {
+    constructor(
+        transportState: GroupTransportState,
+        runtime: IRuntimeSignaler,
+        updateInterval: TimeInterval
+    ) {
         this._transportState = transportState;
         this._runtime = runtime;
         this._updateInterval = updateInterval;
         this._positions = new Map();
 
         // Listen for track change
-        this._transportState.track.on(GroupPlaybackTrackEvents.trackChange, _ => {
-            // Reset position tracking and duration
-            this._positions = new Map();
-            this.mediaDuration = undefined;
-        });
+        this._transportState.track.on(
+            GroupPlaybackTrackEvents.trackChange,
+            (_) => {
+                // Reset position tracking and duration
+                this._positions = new Map();
+                this.mediaDuration = undefined;
+            }
+        );
     }
 
     /**
      * Returns the latest position info for the local client.
      */
-    public get localPosition(): ICurrentPlaybackPosition|undefined {
+    public get localPosition(): ICurrentPlaybackPosition | undefined {
         return this._positions.get(this._runtime.clientId!);
     }
 
@@ -57,7 +70,7 @@ export class GroupPlaybackPosition {
      */
     public get totalClients(): number {
         let cnt = 0;
-        this.forEach(_ => cnt++);
+        this.forEach((_) => cnt++);
         return cnt;
     }
 
@@ -69,8 +82,8 @@ export class GroupPlaybackPosition {
         let playing = 0;
         this.forEach((position, projectedPosition) => {
             switch (position.playbackState) {
-                case 'none':
-                case 'ended':
+                case "none":
+                case "ended":
                     // not playing.
                     break;
                 default:
@@ -88,9 +101,16 @@ export class GroupPlaybackPosition {
     public get clientsWaiting(): number {
         let cnt = 0;
         const waitPoint = this.localPosition?.waitPoint;
-        if (waitPoint && (waitPoint.maxClients == undefined || this.totalClients <= waitPoint.maxClients)) {
+        if (
+            waitPoint &&
+            (waitPoint.maxClients == undefined ||
+                this.totalClients <= waitPoint.maxClients)
+        ) {
             this.forEach((position, projectedPosition) => {
-                if (position.playbackState == 'suspended' && position.waitPoint) {
+                if (
+                    position.playbackState == "suspended" &&
+                    position.waitPoint
+                ) {
                     cnt++;
                 } else if (position.position < waitPoint.position) {
                     cnt++;
@@ -108,9 +128,11 @@ export class GroupPlaybackPosition {
      * This is called when calculating the current seekTo position.
      */
     public get maxPosition(): number {
-        if (this._transportState.playbackState == 'playing') {
+        if (this._transportState.playbackState == "playing") {
             const now = LiveEvent.getTimestamp();
-            const projected = this._transportState.startPosition + ((now - this._transportState.timestamp) / 1000);
+            const projected =
+                this._transportState.startPosition +
+                (now - this._transportState.timestamp) / 1000;
             return this.limitProjectedPosition(projected);
         } else {
             return this._transportState.startPosition;
@@ -123,21 +145,25 @@ export class GroupPlaybackPosition {
     public mediaDuration?: number;
 
     public get targetPosition(): number {
-        if (this._transportState.playbackState == 'playing') {
+        if (this._transportState.playbackState == "playing") {
             return this.getMostProgressedPosition();
         } else {
             return this._transportState.startPosition;
         }
     }
 
-
     /**
      * Enumerates every reported playback position.
      * @param callbackFn Function applied to each position,
      */
-     public forEach(callbackFn: (position: ICurrentPlaybackPosition, projectedPosition: number) => void): void {
+    public forEach(
+        callbackFn: (
+            position: ICurrentPlaybackPosition,
+            projectedPosition: number
+        ) => void
+    ): void {
         const now = LiveEvent.getTimestamp();
-        const ignoreBefore = now - (this._updateInterval.milliseconds * 2);
+        const ignoreBefore = now - this._updateInterval.milliseconds * 2;
         const shouldProject = !this._transportState.track.metadata?.liveStream;
         this._positions.forEach((value, key) => {
             const position = this._positions.get(key)!;
@@ -146,7 +172,10 @@ export class GroupPlaybackPosition {
             if (position.timestamp > ignoreBefore) {
                 // Compute projected playback position
                 // - This computation does not take into account future wait points.
-                const projected = position.playbackState == 'playing' && shouldProject ?  position.position + ((now - position.timestamp) / 1000) : position.position;
+                const projected =
+                    position.playbackState == "playing" && shouldProject
+                        ? position.position + (now - position.timestamp) / 1000
+                        : position.position;
                 callbackFn(position, this.limitProjectedPosition(projected));
             }
         });
@@ -179,7 +208,10 @@ export class GroupPlaybackPosition {
         // Compute max progress
         let progress = -1;
         this.forEach((position, projectedPosition) => {
-            if (projectedPosition <= maxPosition && projectedPosition > progress) {
+            if (
+                projectedPosition <= maxPosition &&
+                projectedPosition > progress
+            ) {
                 progress = projectedPosition;
             }
         });
@@ -188,6 +220,8 @@ export class GroupPlaybackPosition {
     }
 
     private limitProjectedPosition(position: number): number {
-        return this.mediaDuration != undefined ? Math.min(position, this.mediaDuration) : position;
+        return this.mediaDuration != undefined
+            ? Math.min(position, this.mediaDuration)
+            : position;
     }
 }

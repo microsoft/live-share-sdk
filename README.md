@@ -16,7 +16,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-(media or canvas) | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | --------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| 1.0.0-preview.1       | 2.0.0-experimental.1 | ~1.2.3 | 1.0.0-preview.1 (optional)  | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
+| 1.0.0-preview.3       | 2.0.0-experimental.1 | ~1.2.3 | 1.0.0-preview.3 (optional)  | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.5.1                | 2.0.0-experimental.1 | ~1.2.3          | ~0.5.1 (optional)           | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)           | ~0.59.0 (optional)           | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 
@@ -99,7 +99,7 @@ npm run build
 Run the sample of of your choice:
 
 ```bash
-cd samples/01.dice-roller
+cd samples/javascript/01.dice-roller
 npm start
 ```
 
@@ -111,10 +111,10 @@ There are several code samples available to use:
 
 | Sample name          | Description                                                                                                                               | Javascript                                 |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| Dice Roller          | Enable all connected clients to roll a dice and view the result.                                                                          | [View](./samples/01.dice-roller/)          |
-| React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](./samples/02.react-video/)          |
-| React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](./samples/21.react-media-template/) |
-| Agile Poker          | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](./samples/22.react-agile-poker/)    |
+| Dice Roller          | Enable all connected clients to roll a dice and view the result.                                                                          | [View](./samples/javascript/01.dice-roller/)          |
+| React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](./samples/javascript/02.react-video/)          |
+| React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](./samples/javascript/21.react-media-template/) |
+| Agile Poker          | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](./samples/javascript/22.react-agile-poker/)    |
 
 ## Reporting Security Issues
 

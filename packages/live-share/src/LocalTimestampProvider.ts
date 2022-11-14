@@ -7,7 +7,7 @@ import { ITimestampProvider } from "./interfaces";
 
 /**
  * Implements a local timestamp provider for testing purposes.
- * 
+ *
  * @remarks
  * This implementation does not derive from `TimestampProvider` class as it doesn't need to be started.
  */

@@ -11,14 +11,14 @@ import { Deferred } from "./Deferred";
 class TestTimestampProvider extends TimestampProvider {
     private _onGetNtpTime: () => Promise<void>;
     public time = new Date();
-    
+
     public constructor(onGetNtpTime?: () => Promise<void>) {
         super();
 
         function defaultHandler() {
             return Promise.resolve();
         }
-        
+
         this._onGetNtpTime = onGetNtpTime ?? defaultHandler;
     }
 
@@ -26,7 +26,7 @@ class TestTimestampProvider extends TimestampProvider {
         await this._onGetNtpTime();
         return {
             ntpTime: this.time.toISOString(),
-            ntpTimeInUTC: this.time.getTime()
+            ntpTimeInUTC: this.time.getTime(),
         };
     }
 }
@@ -56,7 +56,10 @@ describe("TimestampProvider", () => {
             await provider.start();
             const timestamp = provider.getTimestamp();
             const source = provider.time.getTime();
-            assert(timestamp >= source && timestamp <= (source + 5), `Timestamp of ${timestamp} doesn't match source of ${source}`);
+            assert(
+                timestamp >= source && timestamp <= source + 5,
+                `Timestamp of ${timestamp} doesn't match source of ${source}`
+            );
         } finally {
             provider.stop();
         }
@@ -76,10 +79,13 @@ describe("TimestampProvider", () => {
         const provider = new TestTimestampProvider();
         try {
             await provider.start();
-            let previous = 0; 
+            let previous = 0;
             for (let i = 0; i < 5; i++) {
                 const timestamp = provider.getTimestamp();
-                assert(timestamp > previous, `Returned a timestamp of ${timestamp}. Previous was ${previous}`);
+                assert(
+                    timestamp > previous,
+                    `Returned a timestamp of ${timestamp}. Previous was ${previous}`
+                );
                 previous = timestamp;
             }
         } finally {

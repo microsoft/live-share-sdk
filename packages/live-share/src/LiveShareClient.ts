@@ -17,9 +17,13 @@ import {
 } from "@fluidframework/azure-client";
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { LiveEvent } from "./LiveEvent";
-import { ILiveShareHost, ContainerState, ITimestampProvider } from "./interfaces";
+import {
+    ILiveShareHost,
+    ContainerState,
+    ITimestampProvider,
+} from "./interfaces";
 import { TestLiveShareHost } from "./TestLiveShareHost";
-import { HostTimestampProvider } from './HostTimestampProvider';
+import { HostTimestampProvider } from "./HostTimestampProvider";
 import { TimestampProvider } from "./TimestampProvider";
 
 /**
@@ -277,11 +281,14 @@ export class LiveShareClient {
             LiveEvent.setTimestampProvider(this._timestampProvider);
 
             // Start provider if needed
-            if (typeof (this._timestampProvider as TimestampProvider).start == 'function') {
+            if (
+                typeof (this._timestampProvider as TimestampProvider).start ==
+                "function"
+            ) {
                 return (this._timestampProvider as TimestampProvider).start();
             }
         }
-            
+
         return Promise.resolve();
     }
 

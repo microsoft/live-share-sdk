@@ -97,7 +97,7 @@ export abstract class TimestampProvider implements ITimestampProvider {
     }
 
     /**
-     * Returns the derived classes computed NTP time. 
+     * Returns the derived classes computed NTP time.
      */
     protected abstract getNtpTime(): Promise<INtpTimeInfo>;
 
@@ -138,7 +138,7 @@ export abstract class TimestampProvider implements ITimestampProvider {
      * Fetches the current timestamp from central timestamp service and computes the local offset.
      * @returns Computed timestamp offset.
      */
-     private async getSessionTimeOffset(): Promise<IServerTimeOffset> {
+    private async getSessionTimeOffset(): Promise<IServerTimeOffset> {
         // Get time from server and measure request time
         const startCall = performance.now();
         const serverTime = await this.getNtpTime();

@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TimestampProvider } from './TimestampProvider';
+import { TimestampProvider } from "./TimestampProvider";
 import { ILiveShareHost, INtpTimeInfo } from "./interfaces";
 
 /**
@@ -11,12 +11,12 @@ import { ILiveShareHost, INtpTimeInfo } from "./interfaces";
  */
 export class HostTimestampProvider extends TimestampProvider {
     private readonly _host: ILiveShareHost;
-    
+
     /**
      * Creates a new `DefaultTimestampProvider` instance.
      * @param host The current Live Share Host instance.
      */
-     public constructor(host: ILiveShareHost) {
+    public constructor(host: ILiveShareHost) {
         super();
         this._host = host;
     }

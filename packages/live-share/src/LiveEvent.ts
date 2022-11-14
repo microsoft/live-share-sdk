@@ -237,7 +237,7 @@ export class LiveEvent<
 
     /**
      * Assigns a custom timestamp provider.
-     * @provider 
+     * @param provider The timestamp provider to use.
      */
     public static setTimestampProvider(provider: ITimestampProvider): void {
         LiveEvent._timestampProvider = provider;

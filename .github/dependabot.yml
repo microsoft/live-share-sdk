@@ -24,31 +24,37 @@ updates:
       day: "monday"
       time: "09:00"
   - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/01.dice-roller"
+    directory: "/samples/javascript/01.dice-roller"
     schedule:
       interval: "monthly"
       day: "monday"
       time: "09:00"
   - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/02.react-video"
+    directory: "/samples/javascript/02.react-video"
     schedule:
       interval: "monthly"
       day: "monday"
       time: "09:00"
   - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/03.live-canvas-demo"
+    directory: "/samples/javascript/03.live-canvas-demo"
     schedule:
       interval: "monthly"
       day: "monday"
       time: "09:00"
   - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/21.react-media-template"
+    directory: "/samples/javascript/21.react-media-template"
     schedule:
       interval: "monthly"
       day: "monday"
       time: "09:00"
   - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/22.react-agile-poker"
+    directory: "/samples/typescript/21.react-media-template"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/samples/javascript/22.react-agile-poker"
     schedule:
       interval: "monthly"
       day: "monday"

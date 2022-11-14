@@ -3,6 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+export * from "./HostTimestampProvider";
 export * from './interfaces';
 export * from './LiveEvent';
 export * from './LiveEventScope';
@@ -20,3 +21,4 @@ export * from './LocalRoleVerifier';
 export * from './LocalTimestampProvider';
 export * from './TestLiveShareHost';
 export * from './TimeInterval';
+export * from "./TimestampProvider";

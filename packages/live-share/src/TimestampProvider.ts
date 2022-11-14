@@ -3,10 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveShareHost, ITimestampProvider } from "../interfaces";
+import { ILiveShareHost, INtpTimeInfo, ITimestampProvider } from "./interfaces";
 
-const SHARED_CLOCK_IMPROVE_ACCURACY_INTERVAL = 5 * 1000;
-const SHARED_CLOCK_IMPROVE_ACCURACY_ATTEMPTS = 5;
+const IMPROVE_ACCURACY_INTERVAL = 5 * 1000;
+const IMPROVE_ACCURACY_ATTEMPTS = 5;
 
 /**
  * @hidden
@@ -19,31 +19,29 @@ interface IServerTimeOffset {
 }
 
 /**
- * @hidden
+ * Default `ITimestampProvider` implementation.
  *
  */
-export class SharedClock implements ITimestampProvider {
+export abstract class TimestampProvider implements ITimestampProvider {
     private _serverTime?: IServerTimeOffset;
     private _syncTimer?: any;
     private _retries = 0;
     private _lastTimeSent = 0;
 
-    public constructor(private readonly _host: ILiveShareHost) {}
-
     /**
-     * Returns true if the clock has been started.
+     * Returns true if the provider has been started.
      */
-    public isRunning(): boolean {
+    public get isRunning(): boolean {
         return !!this._serverTime;
     }
 
     /**
-     * Returns the current server time.
+     * Returns the current server time as a UTC tick.
      */
     public getTimestamp(): number {
         if (!this._serverTime) {
             throw new Error(
-                `SharedClock: can't call getTimestamp() before calling initialize().`
+                `TimestampProvider: can't call getTimestamp() before calling start().`
             );
         }
 
@@ -57,10 +55,13 @@ export class SharedClock implements ITimestampProvider {
         ));
     }
 
+    /**
+     * Returns the maximum amount of error, in milliseconds.
+     */
     public getMaxTimestampError(): number {
         if (!this._serverTime) {
             throw new Error(
-                `SharedClock: can't call getTimestamp() before calling initialize().`
+                `DefaultTimestampProvider: can't call getMaxTimestampError() before calling initialize().`
             );
         }
 
@@ -68,7 +69,7 @@ export class SharedClock implements ITimestampProvider {
     }
 
     /**
-     * Starts the clock
+     * Starts the provider.
      */
     public async start(): Promise<void> {
         this.stop();
@@ -84,16 +85,21 @@ export class SharedClock implements ITimestampProvider {
     }
 
     /**
-     * Stops the clock if its running.
+     * Stops the provider if its running.
      */
     public stop(): void {
-        this._serverTime = undefined;
-        this._retries = 0;
         if (this._syncTimer) {
             clearTimeout(this._syncTimer);
             this._syncTimer = undefined;
         }
+        this._serverTime = undefined;
+        this._retries = 0;
     }
+
+    /**
+     * Returns the derived classes computed NTP time.
+     */
+    protected abstract getNtpTime(): Promise<INtpTimeInfo>;
 
     /**
      * Called in a loop to improve the accuracy of the clients timestamp offset.
@@ -118,10 +124,10 @@ export class SharedClock implements ITimestampProvider {
         }
 
         // Start sync timer timer
-        if (this._retries <= SHARED_CLOCK_IMPROVE_ACCURACY_ATTEMPTS) {
+        if (this._retries <= IMPROVE_ACCURACY_ATTEMPTS) {
             this._syncTimer = setTimeout(
                 this.improveAccuracy.bind(this),
-                SHARED_CLOCK_IMPROVE_ACCURACY_INTERVAL
+                IMPROVE_ACCURACY_INTERVAL
             );
         } else {
             this._syncTimer = undefined;
@@ -135,7 +141,7 @@ export class SharedClock implements ITimestampProvider {
     private async getSessionTimeOffset(): Promise<IServerTimeOffset> {
         // Get time from server and measure request time
         const startCall = performance.now();
-        const serverTime = await this._host.getNtpTime();
+        const serverTime = await this.getNtpTime();
         const endCall = performance.now();
         const now = new Date().getTime();
 

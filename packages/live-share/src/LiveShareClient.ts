@@ -5,7 +5,6 @@
 
 import {
     LiveShareTokenProvider,
-    SharedClock,
     RoleVerifier,
     DefaultTeamsHost,
 } from "./internals";
@@ -18,8 +17,14 @@ import {
 } from "@fluidframework/azure-client";
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import { LiveEvent } from "./LiveEvent";
-import { ILiveShareHost, ContainerState } from "./interfaces";
+import {
+    ILiveShareHost,
+    ContainerState,
+    ITimestampProvider,
+} from "./interfaces";
 import { TestLiveShareHost } from "./TestLiveShareHost";
+import { HostTimestampProvider } from "./HostTimestampProvider";
+import { TimestampProvider } from "./TimestampProvider";
 
 /**
  * @hidden
@@ -54,6 +59,11 @@ export interface ILiveShareClientOptions {
     readonly logger?: ITelemetryBaseLogger;
 
     /**
+     * Optional. Custom timestamp provider to use.
+     */
+    readonly timestampProvider?: ITimestampProvider;
+
+    /**
      * Optional. Function to lookup the ID of the container to use for local testing.
      *
      * @remarks
@@ -81,7 +91,7 @@ export interface ILiveShareClientOptions {
 export class LiveShareClient {
     private _host?: ILiveShareHost;
     private readonly _options: ILiveShareClientOptions;
-    private _clock?: SharedClock;
+    private _timestampProvider?: ITimestampProvider;
     private _roleVerifier?: RoleVerifier;
 
     /**
@@ -256,18 +266,30 @@ export class LiveShareClient {
      * @hidden
      */
     protected async initializeTimestampProvider(): Promise<void> {
-        if (!this._clock && !this.isTesting) {
-            const host = await this.getHost();
-            this._clock = new SharedClock(host);
+        if (!this._timestampProvider && !this.isTesting) {
+            // Was a custom timestamp provider passed in.
+            if (this._options.timestampProvider) {
+                // Use configured one
+                this._timestampProvider = this._options.timestampProvider;
+            } else {
+                // Create a new host based timestamp provider
+                const host = await this.getHost();
+                this._timestampProvider = new HostTimestampProvider(host);
+            }
 
-            // Register clock as current timestamp provider for events
-            LiveEvent.setTimestampProvider(this._clock);
+            // Register timestamp provider for events
+            LiveEvent.setTimestampProvider(this._timestampProvider);
 
-            // Start the clock
-            return this._clock.start();
-        } else {
-            return Promise.resolve();
+            // Start provider if needed
+            if (
+                typeof (this._timestampProvider as TimestampProvider).start ==
+                "function"
+            ) {
+                return (this._timestampProvider as TimestampProvider).start();
+            }
         }
+
+        return Promise.resolve();
     }
 
     private async getOrCreateContainer(

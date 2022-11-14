@@ -63,9 +63,9 @@ async function start() {
 
 async function joinContainer() {
     // Are we running in teams?
-    const host = !!searchParams.get('inTeams') 
-    ? LiveShareHost.create()
-    : TestLiveShareHost.create();
+    const host = searchParams.get("inTeams")
+        ? LiveShareHost.create()
+        : TestLiveShareHost.create();
 
     // Create client
     const client = new LiveShareClient(host);

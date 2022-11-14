@@ -4,10 +4,7 @@
  */
 
 import * as Teams from "@microsoft/teams-js";
-import {
-    LiveShareClient,
-    TestLiveShareHost,
-} from "@microsoft/live-share";
+import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import {
     InkingManager,
     InkingTool,
@@ -89,7 +86,9 @@ export class StageView extends View {
     private _userInfo: IUserInfo;
 
     private async internalStart() {
-        const host = Utils.runningInTeams() ? Teams.LiveShareHost.create() : TestLiveShareHost.create();
+        const host = Utils.runningInTeams()
+            ? Teams.LiveShareHost.create()
+            : TestLiveShareHost.create();
         const client = new LiveShareClient(host);
 
         this._container = (

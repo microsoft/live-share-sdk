@@ -3,10 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    LiveShareTokenProvider,
-    RoleVerifier
-} from './internals';
+import { LiveShareTokenProvider, RoleVerifier } from "./internals";
 import {
     AzureClient,
     AzureConnectionConfig,
@@ -81,10 +78,10 @@ export class LiveShareClient {
      */
     constructor(host: ILiveShareHost, options?: ILiveShareClientOptions) {
         // Validate host passed in
-        if (!host || typeof host.getFluidTenantInfo != 'function') {
+        if (!host || typeof host.getFluidTenantInfo != "function") {
             throw new Error(`LiveShareClient: host not passed in`);
         }
-        
+
         // Save props
         this._host = host;
         this._options = Object.assign({} as ILiveShareClientOptions, options);
@@ -133,7 +130,7 @@ export class LiveShareClient {
                 this._options.connection;
             if (!config) {
                 const frsTenantInfo = await this._host.getFluidTenantInfo();
-                
+
                 // Compute endpoint
                 let endpoint = frsTenantInfo.serviceEndpoint;
                 if (!endpoint) {
@@ -153,14 +150,17 @@ export class LiveShareClient {
                     config = {
                         type: "local",
                         endpoint: endpoint!,
-                        tokenProvider: new InsecureTokenProvider("",  { id: "123", name: "Test User" } as IUser)
+                        tokenProvider: new InsecureTokenProvider("", {
+                            id: "123",
+                            name: "Test User",
+                        } as IUser),
                     };
                 } else {
                     config = {
                         type: "remote",
                         tenantId: frsTenantInfo.tenantId,
                         endpoint: endpoint!,
-                        tokenProvider: new LiveShareTokenProvider(this._host)
+                        tokenProvider: new LiveShareTokenProvider(this._host),
                     } as AzureRemoteConnectionConfig;
                 }
             }
@@ -341,7 +341,9 @@ export class LiveShareClient {
         const newContainerId = await container.attach();
 
         // Attempt to save container ID mapping
-        const containerInfo = await this._host.setFluidContainerId(newContainerId);
+        const containerInfo = await this._host.setFluidContainerId(
+            newContainerId
+        );
         if (containerInfo.containerState != ContainerState.added) {
             // Delete created container
             container.dispose();

@@ -78,7 +78,7 @@ const SidePanel = () => {
                                                                 );
                                                             }
                                                         },
-                                                        `${window.location.origin}/?inTeams=true&userStoryId=${userStory.id}`
+                                                        `${window.location.origin}/#/?inTeams=true&userStoryId=${userStory.id}`
                                                     );
                                                 } else {
                                                     window.open(

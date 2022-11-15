@@ -80,7 +80,7 @@ const SidePanel = () => {
                         if (error) {
                             console.error(error);
                         }
-                    }, `${window.location.origin}/?inTeams=true`);
+                    }, `${window.location.origin}/#/?inTeams=true`);
                 }
             } else {
                 // When testing locally, open in a new browser tab
@@ -102,7 +102,7 @@ const SidePanel = () => {
             presenceStarted,
             takeControlStarted,
             playlistStarted,
-        ].every((value) => value === true);
+        ].every((value) => value);
     }, [
         notificationStarted,
         presenceStarted,

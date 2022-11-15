@@ -4,7 +4,7 @@
  */
 
 import * as microsoftTeams from "@microsoft/teams-js";
-import React, { FC, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { getFlexColumnStyles } from "../styles/layouts";
 import { mergeClasses, Title2, Subtitle2 } from "@fluentui/react-components";
 
@@ -13,7 +13,7 @@ const TabConfig: FC = () => {
         microsoftTeams.pages.config.registerOnSaveHandler(function (saveEvent) {
             microsoftTeams.pages.config.setConfig({
                 suggestedDisplayName: "Contoso",
-                contentUrl: `${window.location.origin}/sidepanel?inTeams=true`,
+                contentUrl: `${window.location.origin}/#/sidepanel?inTeams=true`,
             });
             saveEvent.notifySuccess();
         });

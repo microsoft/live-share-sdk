@@ -13,7 +13,7 @@ const TabConfig = () => {
         microsoftTeams.pages.config.registerOnSaveHandler(function (saveEvent) {
             microsoftTeams.pages.config.setConfig({
                 suggestedDisplayName: "Contoso",
-                contentUrl: `${window.location.origin}/sidepanel?inTeams=true`,
+                contentUrl: `${window.location.origin}/#/sidepanel?inTeams=true`,
             });
             saveEvent.notifySuccess();
         });

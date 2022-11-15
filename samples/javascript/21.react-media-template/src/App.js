@@ -5,7 +5,7 @@
 
 import { FluentProvider, teamsDarkTheme } from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import MeetingStage from "./pages/MeetingStage";
 import SidePanel from "./pages/SidePanel";

@@ -81,7 +81,7 @@ const SidePanel: FC = () => {
                         if (error) {
                             console.error(error);
                         }
-                    }, `${window.location.origin}/?inTeams=true`);
+                    }, `${window.location.origin}/#/?inTeams=true`);
                 }
             } else {
                 // When testing locally, open in a new browser tab

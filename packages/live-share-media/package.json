@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "fluid-framework": "~1.2.3",
-        "@microsoft/live-share": "1.0.0-preview.4"
+        "@microsoft/live-share": "1.0.0-preview.3"
     },
     "devDependencies": {
         "@types/assert": "^1.5.6",

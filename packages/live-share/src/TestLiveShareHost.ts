@@ -18,7 +18,26 @@ import {
 export class TestLiveShareHost implements ILiveShareHost {
     public static readonly LOCAL_MODE_TEST_TOKEN = `test-token`;
 
-    constructor(
+    /**
+     * Creates an new live share host for local testing.
+     * @param getLocalTestContainerId Optional. Function to customize reading the test container ID. The default implementation reads the ID from the browsers # URL.
+     * @param setLocalTestContainerId Optional. Function to customize saving the test container ID. The default implementation appends the ID to the browsers # URL.
+     * @returns
+     */
+    public static create(
+        getLocalTestContainerId?: () => string | undefined,
+        setLocalTestContainerId?: (containerId: string) => void
+    ): ILiveShareHost {
+        return new TestLiveShareHost(
+            getLocalTestContainerId,
+            setLocalTestContainerId
+        );
+    }
+
+    /**
+     * @hidden
+     */
+    private constructor(
         private _getLocalTestContainerId?: () => string | undefined,
         private _setLocalTestContainerId?: (containerId: string) => void
     ) {}

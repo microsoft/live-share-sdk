@@ -6,6 +6,7 @@
 import {
     ILiveShareClientOptions,
     LiveShareClient,
+    TestLiveShareHost,
 } from "@microsoft/live-share";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
@@ -18,6 +19,7 @@ import {
     AzureConnectionConfig,
     AzureContainerServices,
 } from "@fluidframework/azure-client";
+import { LiveShareHost } from "@microsoft/teams-js";
 
 /**
  * Hook that creates/loads the apps shared objects.
@@ -43,23 +45,6 @@ export function useSharedObjects() {
             ? new URL(`${window.location.href.split("/#/").join("/")}`)
             : new URL(window.location.href);
         const inTeams = !!url.searchParams.get("inTeams");
-
-        let connection: AzureConnectionConfig | undefined;
-        if (!inTeams) {
-            // Configure for local testing (optional).
-            connection = {
-                type: "local",
-                tokenProvider: new InsecureTokenProvider("", { id: "123" }),
-                endpoint: "http://localhost:7070",
-            };
-        }
-
-        // Define any additional client settings (optional).
-        // - connection: A custom Fluid Relay Service connection to use.
-        // - logger: A fluid logger to use.
-        const clientProps: ILiveShareClientOptions = {
-            connection,
-        };
 
         // To reset the stored container-id, uncomment below:
         // localStorage.clear();
@@ -96,9 +81,14 @@ export function useSharedObjects() {
             },
         };
 
+        // Create live share host
+        const host = inTeams
+            ? LiveShareHost.create()
+            : TestLiveShareHost.create();
+
         // Create the client, join container, and set results
         console.log("useSharedObjects: joining container");
-        const client = new LiveShareClient(clientProps);
+        const client = new LiveShareClient(host);
         client
             .joinContainer(schema, onFirstInitialize)
             .then((results) => {

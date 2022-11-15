@@ -4,9 +4,7 @@
  */
 
 export * from "./consts";
-export * from "./DefaultTeamsHost";
 export * from "./LiveShareTokenProvider";
 export * from "./RequestCache";
 export * from "./RoleVerifier";
-export * from "./TeamsClientApi";
 export * from "./utils";

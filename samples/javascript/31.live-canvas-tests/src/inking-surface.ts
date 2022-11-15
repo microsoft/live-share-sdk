@@ -6,6 +6,7 @@
 import {
     ILiveShareClientOptions,
     LiveShareClient,
+    TestLiveShareHost,
 } from "@microsoft/live-share";
 import {
     InkingManager,
@@ -27,15 +28,7 @@ export class InkingSurface {
     private _container!: IFluidContainer;
 
     private async internalStart() {
-        const clientOptions: ILiveShareClientOptions = {
-            connection: {
-                type: "local",
-                tokenProvider: new InsecureTokenProvider("", { id: "123" }),
-                endpoint: "http://localhost:7070",
-            },
-        };
-
-        const client = new LiveShareClient(clientOptions);
+        const client = new LiveShareClient(TestLiveShareHost.create());
 
         this._container = (
             await client.joinContainer(containerSchema)

@@ -7,27 +7,40 @@ import { mergeClasses, Text } from "@fluentui/react-components";
 import { getFlexColumnStyles } from "../styles/layout";
 import nameShape1 from "../assets/name-shape-1.png";
 import nameShape2 from "../assets/name-shape-2.png";
+import avatar1 from "../assets/avatar1.png";
+import avatar2 from "../assets/avatar2.png";
+import avatar3 from "../assets/avatar3.png";
+import avatar4 from "../assets/avatar4.png";
+import avatar5 from "../assets/avatar5.png";
+import avatar6 from "../assets/avatar6.png";
+import avatar7 from "../assets/avatar7.png";
+import avatar8 from "../assets/avatar8.png";
+import avatar9 from "../assets/avatar9.png";
+import avatar10 from "../assets/avatar10.png";
+import avatar11 from "../assets/avatar11.png";
+import avatar12 from "../assets/avatar12.png";
+
 const avatars = [
-    require("../assets/avatar1.png"),
-    require("../assets/avatar2.png"),
-    require("../assets/avatar3.png"),
-    require("../assets/avatar4.png"),
-    require("../assets/avatar5.png"),
-    require("../assets/avatar6.png"),
-    require("../assets/avatar7.png"),
-    require("../assets/avatar8.png"),
-    require("../assets/avatar9.png"),
-    require("../assets/avatar10.png"),
-    require("../assets/avatar11.png"),
-    require("../assets/avatar12.png"),
+    avatar1,
+    avatar2,
+    avatar3,
+    avatar4,
+    avatar5,
+    avatar6,
+    avatar7,
+    avatar8,
+    avatar9,
+    avatar10,
+    avatar11,
+    avatar12,
 ];
 
-export const PlayerAvatar = ({ user, localUserId, index }) => {
+export const PlayerAvatar = ({ user, index }) => {
     const flexColumnStyles = getFlexColumnStyles();
     const imageSrc = (index + 1) % 2 ? nameShape2 : nameShape1;
     const avatarIndex =
         user.data && user.data.avatarIndex >= 0 ? user.data.avatarIndex : 0;
-    const avatarSrc = avatars[avatarIndex].default;
+    const avatarSrc = avatars[avatarIndex];
     return (
         <div
             className={mergeClasses(

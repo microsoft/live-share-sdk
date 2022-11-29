@@ -4,17 +4,17 @@ import {
     fromCssColor,
     InkingManager,
 } from "@microsoft/live-share-canvas";
+import { Image } from "@fluentui/react-components";
 import { FlexRow } from "./flex";
 import { InkingControlButton } from "./InkingControlButton";
-import React from "react";
 // @ts-ignore
-import { ReactComponent as LaserPointerIcon } from "../assets/laser-pointer.svg";
+import LaserPointerIcon from "../assets/laser-pointer.svg";
 // @ts-ignore
-import { ReactComponent as PenIcon } from "../assets/pen.svg";
+import PenIcon from "../assets/pen.svg";
 // @ts-ignore
-import { ReactComponent as HighlighterIcon } from "../assets/highlighter.svg";
+import HighlighterIcon from "../assets/highlighter.svg";
 // @ts-ignore
-import { ReactComponent as EraserIcon } from "../assets/eraser.svg";
+import EraserIcon from "../assets/eraser.svg";
 
 interface InkingControlsProps {
     inkingManager: InkingManager;
@@ -59,7 +59,7 @@ export const InkingControls: FC<InkingControlsProps> = ({
                 selectedTool={selectedTool}
                 onSelectTool={onSelectTool}
             >
-                <LaserPointerIcon />
+                <Image src={LaserPointerIcon} />
             </InkingControlButton>
             <InkingControlButton
                 tool={InkingTool.pen}
@@ -67,7 +67,7 @@ export const InkingControls: FC<InkingControlsProps> = ({
                 selectedTool={selectedTool}
                 onSelectTool={onSelectTool}
             >
-                <PenIcon />
+                <Image src={PenIcon} />
             </InkingControlButton>
             <InkingControlButton
                 tool={InkingTool.highlighter}
@@ -75,7 +75,7 @@ export const InkingControls: FC<InkingControlsProps> = ({
                 selectedTool={selectedTool}
                 onSelectTool={onSelectTool}
             >
-                <HighlighterIcon />
+                <Image src={HighlighterIcon} />
             </InkingControlButton>
             <InkingControlButton
                 tool={InkingTool.eraser}
@@ -83,7 +83,7 @@ export const InkingControls: FC<InkingControlsProps> = ({
                 selectedTool={selectedTool}
                 onSelectTool={onSelectTool}
             >
-                <EraserIcon />
+                <Image src={EraserIcon} />
             </InkingControlButton>
         </FlexRow>
     );

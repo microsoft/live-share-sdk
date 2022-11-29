@@ -15,13 +15,14 @@
     },
     "dependencies": {
         "@fluidframework/test-client-utils": "~1.2.3",
-        "@typescript-eslint/eslint-plugin": "^5.39.0",
-        "@typescript-eslint/parser": "^5.40.0",
         "@microsoft/live-share": "1.0.0-preview.4",
         "@microsoft/teams-js": "^2.5.0",
+        "@typescript-eslint/eslint-plugin": "^5.39.0",
+        "@typescript-eslint/parser": "^5.40.0",
         "fluid-framework": "~1.2.3"
     },
     "devDependencies": {
+        "buffer": "^6.0.3",
         "clean-webpack-plugin": "^3.0.0",
         "concurrently": "^5.3.0",
         "html-webpack-plugin": "^4.3.0",

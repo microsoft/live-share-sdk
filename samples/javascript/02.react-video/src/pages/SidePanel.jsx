@@ -18,7 +18,7 @@ const SidePanel = () => {
     const navigate = useNavigate();
     useEffect(() => {
         if (context) {
-            if (context.page.frameContext === "meetingStage") {
+            if (context.page?.frameContext === "meetingStage") {
                 // User shared the app directly to stage, redirect automatically
                 navigate({
                     pathname: "/",

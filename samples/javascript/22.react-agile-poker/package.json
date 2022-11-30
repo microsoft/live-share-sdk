@@ -38,8 +38,10 @@
   "scripts": {
     "clean": "npx shx rm -rf build",
     "start": "start-server-and-test start:server 7070 start:client",
+    "start-https": "start-server-and-test start:server 7070 start:https",
     "start:client": "vite",
     "start:server": "npx @fluidframework/azure-local-service@latest",
+    "start:https": "vite --config vite.https-config.js",
     "build": "vite build",
     "build:dev": "dotenv -e .env.development build",
     "preview": "vite preview"

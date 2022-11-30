@@ -23,6 +23,8 @@ Upon loading, if there is no `/#{id}` in the URL, it will create one and insert 
 You can copy this URL and paste it into new browser tabs to test Live Share using a local server.\
 To test the side panel & video queue, you can replace your URL with `/sidepanel#{id}`.
 
+**Note:** if testing with HTTPS, such as when using a tunneling service like Ngrok, instead use the command `npm run start-https`.
+
 ### `npm run build`
 
 Builds the app for production to the `build` folder.\

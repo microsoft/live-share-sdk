@@ -2,7 +2,7 @@
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
     "version": "1.0.1",
     "manifestVersion": "1.12",
-    "id": "<<YOUR-MICROSOFT-APP-ID>>",
+    "id": "714a0de2-5071-43ee-ba71-cf7f0f227772",
     "packageName": "com.microsoft.teams.livesharereactmediatemplate",
     "name": {
         "short": "Contoso Media",
@@ -26,7 +26,7 @@
     "accentColor": "#38a2ff",
     "configurableTabs": [
         {
-            "configurationUrl": "https://<<BASE_URI_DOMAIN>>/config?inTeams=true",
+            "configurationUrl": "https://ryanbliss.ngrok.io/config?inTeams=true",
             "canUpdateConfiguration": false,
             "scopes": [
                 "groupchat"

@@ -7,4 +7,10 @@ export default defineConfig({
     resolve: {
         preserveSymlinks: true
     },
+    server: {
+        hmr: {
+            // Needed to make ngrok work with Vite
+            clientPort: 443,
+        },
+    },
 });

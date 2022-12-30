@@ -14,18 +14,18 @@
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
     },
     "dependencies": {
-        "@fluidframework/test-client-utils": "~1.2.3",
         "@fluidframework/azure-client": "~1.0.2",
+        "@fluidframework/test-client-utils": "~1.2.3",
         "fluid-framework": "~1.2.3",
         "uuid": "^8.3.2"
     },
     "devDependencies": {
-        "@fluidframework/test-utils": "~1.2.3",
         "@fluidframework/test-runtime-utils": "~1.2.3",
+        "@fluidframework/test-utils": "~1.2.3",
         "@fluidframework/test-version-utils": "~1.2.3",
         "@types/assert": "^1.5.6",
-        "@types/mocha": "^9.0.0",
-        "@types/node": "^18.11.0",
+        "@types/mocha": "^10.0.1",
+        "@types/node": "^18.11.18",
         "@types/uuid": "8.3.4",
         "mocha": "^9.1.1",
         "nyc": "^15.1.0",

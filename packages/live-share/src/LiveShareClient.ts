@@ -6,9 +6,9 @@
 import { LiveShareTokenProvider, RoleVerifier } from "./internals";
 import {
     AzureClient,
-    AzureConnectionConfig,
-    AzureRemoteConnectionConfig,
     AzureContainerServices,
+    AzureLocalConnectionConfig,
+    AzureRemoteConnectionConfig,
     ITelemetryBaseLogger,
     IUser,
 } from "@fluidframework/azure-client";
@@ -19,7 +19,6 @@ import {
     ContainerState,
     ITimestampProvider,
 } from "./interfaces";
-import { TestLiveShareHost } from "./TestLiveShareHost";
 import { HostTimestampProvider } from "./HostTimestampProvider";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { TimestampProvider } from "./TimestampProvider";
@@ -28,7 +27,7 @@ import { TimestampProvider } from "./TimestampProvider";
  * @hidden
  * Map v0.59 orderer endpoints to new v1.0 service endpoints
  */
-const ordererEndpointMap = new Map<string, string>()
+const serviceEndpointMap = new Map<string | undefined, string>()
     .set(
         "https://alfred.westus2.fluidrelay.azure.com",
         "https://us.fluidrelay.azure.com"
@@ -49,7 +48,9 @@ export interface ILiveShareClientOptions {
     /**
      * Optional. Configuration to use when connecting to a custom Azure Fluid Relay instance.
      */
-    readonly connection?: AzureConnectionConfig;
+    readonly connection?:
+        | AzureRemoteConnectionConfig
+        | AzureLocalConnectionConfig;
 
     /**
      * Optional. A logger instance to receive diagnostic messages.
@@ -126,21 +127,23 @@ export class LiveShareClient {
             const pTimestampProvider = this.initializeTimestampProvider();
 
             // Initialize FRS connection config
-            let config: AzureConnectionConfig | undefined =
-                this._options.connection;
+            let config:
+                | AzureRemoteConnectionConfig
+                | AzureLocalConnectionConfig
+                | undefined = this._options.connection;
             if (!config) {
                 const frsTenantInfo = await this._host.getFluidTenantInfo();
 
                 // Compute endpoint
                 let endpoint = frsTenantInfo.serviceEndpoint;
                 if (!endpoint) {
-                    if (ordererEndpointMap.has(frsTenantInfo.ordererEndpoint)) {
-                        endpoint = ordererEndpointMap.get(
-                            frsTenantInfo.ordererEndpoint
+                    if (serviceEndpointMap.has(frsTenantInfo.serviceEndpoint)) {
+                        endpoint = serviceEndpointMap.get(
+                            frsTenantInfo.serviceEndpoint
                         );
                     } else {
                         throw new Error(
-                            `TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.ordererEndpoint}`
+                            `TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
                         );
                     }
                 }

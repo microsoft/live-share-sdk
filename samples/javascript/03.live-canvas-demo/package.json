@@ -20,7 +20,7 @@
         "fluid-framework": "~1.2.3"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.39.0",
+        "@typescript-eslint/eslint-plugin": "^5.47.1",
         "@typescript-eslint/parser": "^5.40.0",
         "buffer": "^6.0.3",
         "clean-webpack-plugin": "^3.0.0",

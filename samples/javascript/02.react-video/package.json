@@ -7,7 +7,7 @@
   "author": "Microsoft",
   "dependencies": {
     "@fluentui/react-components": "^9.2.0",
-    "@fluentui/react-icons": "^2.0.179",
+    "@fluentui/react-icons": "^2.0.190",
     "@fluentui/react-theme": "^9.0.0",
     "@fluidframework/azure-client": "~1.0.2",
     "@microsoft/live-share": "1.0.0-preview.4",

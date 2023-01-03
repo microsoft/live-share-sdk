@@ -5,10 +5,8 @@ updates:
   # See https://github.com/dependabot/dependabot-core/issues/5226#issuecomment-1179434437
     directory: "/"
     schedule:
-      # temporarily changing to daily in order to test changes.
-      interval: "daily"
-      #interval: "weekly"
-      #day: "monday"
+      interval: "weekly"
+      day: "monday"
     # Ignore the following packages because
     # 1. Semver for these packages is not always followed
     # 1. These packages MUST be updated all at the same time (same PR)

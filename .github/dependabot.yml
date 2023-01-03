@@ -1,61 +1,23 @@
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "npm"
+  # Only specify the root so dependabot will update all manifests once per package
+  # See https://github.com/dependabot/dependabot-core/issues/5226#issuecomment-1179434437
+    directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/packages/live-share"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/packages/live-share-canvas"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/packages/live-share-media"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/javascript/01.dice-roller"
-    schedule:
-      interval: "monthly"
-      day: "monday"
-      time: "09:00"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/javascript/02.react-video"
-    schedule:
-      interval: "monthly"
-      day: "monday"
-      time: "09:00"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/javascript/03.live-canvas-demo"
-    schedule:
-      interval: "monthly"
-      day: "monday"
-      time: "09:00"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/javascript/21.react-media-template"
-    schedule:
-      interval: "monthly"
-      day: "monday"
-      time: "09:00"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/typescript/21.react-media-template"
-    schedule:
-      interval: "monthly"
-      day: "monday"
-      time: "09:00"
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/samples/javascript/22.react-agile-poker"
-    schedule:
-      interval: "monthly"
-      day: "monday"
-      time: "09:00"
+      # temporarily changing to daily in order to test changes.
+      interval: "daily"
+      #interval: "weekly"
+      #day: "monday"
+    # Ignore the following packages because
+    # 1. Semver for these packages is not always followed
+    # 1. These packages MUST be updated all at the same time (same PR)
+    ignore:
+      - "fluid-framework",
+      - "@fluidframework/test-client-utils"
+      - "@fluidframework/test-utils"
+      - "@fluidframework/test-runtime-utils"
+      - "@fluidframework/azure-client",
+      - "@microsoft/teams-js"
+    # Updates both the package-lock and package.json, not just package-lock
+    versioning-strategy: increase

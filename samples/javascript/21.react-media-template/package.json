@@ -38,7 +38,7 @@
         "eslint-plugin-prettier": "^4.2.1",
         "prettier": "^2.5.0",
         "start-server-and-test": "^1.15.2",
-        "vite": "^2.9.9"
+        "vite": "^4.0.4"
     },
     "scripts": {
         "clean": "npx shx rm -rf build",

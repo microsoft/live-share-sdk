@@ -11,7 +11,6 @@ import MeetingStage from "./pages/MeetingStage";
 import SidePanel from "./pages/SidePanel";
 import TabConfig from "./pages/TabConfig";
 import { inTeams } from "./utils/inTeams";
-import React from "react";
 
 export const App = () => {
     const [initialized, setInitialized] = useState(false);

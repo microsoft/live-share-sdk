@@ -13,9 +13,18 @@ In the project directory, you can run:
 
 Installs the latest node packages
 
+### `npm run build`
+
+Builds the app for production to the `dist` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
+
+Note: `npm run build:dev` builds the project in dev mode.
+
 ### `npm run start`
 
-Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 The page will reload when you make changes.\
@@ -24,14 +33,6 @@ You can copy this URL and paste it into new browser tabs to test Live Share usin
 To test the side panel & video queue, you can replace your URL with `/sidepanel#{id}`.
 
 **Note:** if testing with HTTPS, such as when using a tunneling service like Ngrok, instead use the command `npm run start-https`.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
 ### Known issues when testing in browser
 
@@ -43,13 +44,14 @@ Tab configuration page doesn't do anything in browser.
 
 There are two options for testing this sample in Teams. The first is to use ngrok to serve and tunnel the app locally, before zipping the app package.
 
-Alternatively, you can use our ready-to-use [demo app package](../demo-manifests/ContosoMedia.zip). After downloading the zip file, you can skip ahead to the [Test it out](#test-it-out) section.
+Alternatively, you can use our ready-to-use [demo app package](../demo-manifests/ContosoMedia.zip). After downloading the zip file and setting up ngrok, you can skip ahead to the [Test it out](#test-it-out) section.
 
 ### Create a ngrok tunnel to allow Teams to reach your tab app
 
 1. [Download ngrok](https://ngrok.com/download).
 2. Launch ngrok with port 3000.
    `ngrok http 3000 --host-header=localhost`
+3. In a second terminal, run `npm run start:https` (rather than the traditional `npm run start`)
 
 ### Create the app package to sideload into Teams
 

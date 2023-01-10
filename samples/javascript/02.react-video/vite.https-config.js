@@ -5,12 +5,13 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
     plugins: [react()],
     resolve: {
-        preserveSymlinks: true
+        preserveSymlinks: true,
     },
     server: {
         hmr: {
             // Needed to make ngrok work with Vite
             clientPort: 443,
         },
+        port: 3000
     },
 });

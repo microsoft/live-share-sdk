@@ -13,7 +13,7 @@ Installs the latest node packages
 ### `npm run start`
 
 Runs the app in the development mode.\
-Open [http://localhost:8080](http://localhost:8080) to view it in your browser.
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 The page will reload when you make changes.\
 Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.\
@@ -31,8 +31,8 @@ Your app is ready to be deployed!
 ### Create a ngrok tunnel to allow Teams to reach your tab app
 
 1. [Download ngrok](https://ngrok.com/download).
-2. Launch ngrok with port 8080.
-   `ngrok http 8080 --host-header=localhost`
+2. Launch ngrok with port 3000.
+   `ngrok http 3000 --host-header=localhost`
 
 ### Create the app package to sideload into Teams
 

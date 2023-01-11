@@ -10,7 +10,8 @@
         "start:client": "vite",
         "start:https": "vite --config vite.https-config.js",
         "start:server": "npx @fluidframework/azure-local-service@latest",
-        "start": "start-server-and-test start:server 7070 start:client"
+        "start": "start-server-and-test start:server 7070 start:client",
+        "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
         "@fluidframework/test-client-utils": "~1.2.3",
@@ -20,9 +21,9 @@
         "fluid-framework": "~1.2.3"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.39.0",
-        "@typescript-eslint/parser": "^5.40.0",
+        "@typescript-eslint/eslint-plugin": "^5.48.1",
+        "@typescript-eslint/parser": "^5.48.1",
         "buffer": "^6.0.3",
-        "start-server-and-test": "^1.11.6"
+        "start-server-and-test": "^1.15.2"
     }
 }

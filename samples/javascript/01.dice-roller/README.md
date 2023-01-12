@@ -13,20 +13,24 @@ After cloning the repository, install dependencies and start the application
 
 ```bash
 npm install
+npm run build # Production build
 npm start
 ```
+
+`npm runs build:dev` run build the app in dev mode
 
 ## Testing the app in Teams
 
 ### Create a ngrok tunnel to allow Teams to reach your tab app
 
 1. [Download ngrok](https://ngrok.com/download).
-2. Launch ngrok with port 8080.
-   `ngrok http 8080 --host-header=localhost`
+2. Launch ngrok with port 3000.
+   `ngrok http 3000 --host-header=localhost`
+3. In a second terminal, run `npm run start-https` (rather than the traditional `npm run start`)
 
 ### Create the app package to sideload into Teams
 
-1. Open `.\manifest\manifest.json` and update values in it, including your [Application ID](https://learn.microsoft.com/microsoftteams/platform/resources/schema/manifest-schema#id.
+1. Open `.\manifest\manifest.json` and update values in it, including your [Application ID](https://learn.microsoft.com/microsoftteams/platform/resources/schema/manifest-schema#id).
 2. You must replace `https://<<BASE_URI_DOMAIN>>` with the https path to your ngrok tunnel.
 3. It is recommended that you also update the following fields.
     - Set `developer.name` to your name.

@@ -6,7 +6,10 @@ const wetStrokeTestFailedPrefix = "WetStrokeTestFailed: ";
 const dryCanvasTestFailedPrefix = "DryCanvasTestFailed: ";
 
 function isError(logMessage) {
-    return logMessage.startsWith(wetStrokeTestFailedPrefix) || logMessage.startsWith(dryCanvasTestFailedPrefix);
+    return (
+        logMessage.startsWith(wetStrokeTestFailedPrefix) ||
+        logMessage.startsWith(dryCanvasTestFailedPrefix)
+    );
 }
 
 function delay(timeout) {
@@ -37,7 +40,10 @@ describe("Synchronized inking", () => {
 
             if (isError(messageText)) {
                 errorMessages.push(messageText);
-            } else if (messageText.startsWith(allTestsCompletedPrefix) && !allTestsCompleted) {
+            } else if (
+                messageText.startsWith(allTestsCompletedPrefix) &&
+                !allTestsCompleted
+            ) {
                 allTestsCompleted = true;
             }
         });

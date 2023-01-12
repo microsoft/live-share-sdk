@@ -10,29 +10,30 @@ In the project directory, you can run:
 
 Installs the latest node packages
 
+### `npm run build`
+
+Builds the app for production to the `dist` folder.\
+
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
+
 ### `npm run start`
 
 Runs the app in the development mode.\
-Open [http://localhost:8080](http://localhost:8080) to view it in your browser.
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 The page will reload when you make changes.\
 Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.\
 You can copy this URL and paste it into new browser tabs to test Live Share using a local server.\
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
 ## Testing the app in Teams
 
 ### Create a ngrok tunnel to allow Teams to reach your tab app
 
 1. [Download ngrok](https://ngrok.com/download).
-2. Launch ngrok with port 8080.
-   `ngrok http 8080 --host-header=localhost`
+2. Launch ngrok with port 3000.
+   `ngrok http 3000 --host-header=localhost`
+3. In a second terminal, run `npm run start-https` (rather than the traditional `npm run start`)
 
 ### Create the app package to sideload into Teams
 

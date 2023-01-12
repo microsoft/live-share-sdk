@@ -19,6 +19,16 @@ In the project directory, you can run:
 
 Installs the latest node packages
 
+### `npm run build`
+
+Builds the app for production to the `dist` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
+
+`npm runs build:dev` run build the app in dev mode
+
 ### `npm run start`
 
 Runs the app in the development mode.\
@@ -31,19 +41,18 @@ To test the side panel & video queue, you can replace your URL with `/sidepanel#
 
 **Note:** if testing with HTTPS, such as when using a tunneling service like Ngrok, instead use the command `npm run start-https`.
 
-### `npm run build`
+### Known issues when testing in browser
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+When not in Teams, we don't have a way to know the user's userId, so we generate a random one.\
+That means you might not always start out in control of playback, and need to press "Take control".\
+Tab configuration page doesn't do anything in browser.
 
 ### Create a ngrok tunnel to allow Teams to reach your tab app
 
 1. [Download ngrok](https://ngrok.com/download).
 2. Launch ngrok with port 3000.
    `ngrok http 3000 --host-header=localhost`
+3. In a second terminal, run `npm run start-https` (rather than the traditional `npm run start`)
 
 ### Create the app package to sideload into Teams
 

@@ -33,7 +33,7 @@ You can copy this URL and paste it into new browser tabs to test Live Share usin
 1. [Download ngrok](https://ngrok.com/download).
 2. Launch ngrok with port 3000.
    `ngrok http 3000 --host-header=localhost`
-3. In a second terminal, run `npm run start:https` (rather than the traditional `npm run start`)
+3. In a second terminal, run `npm run start-https` (rather than the traditional `npm run start`)
 
 ### Create the app package to sideload into Teams
 

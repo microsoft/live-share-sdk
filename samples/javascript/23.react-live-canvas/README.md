@@ -51,7 +51,7 @@ Tab configuration page doesn't do anything in browser.
 
 1. [Download ngrok](https://ngrok.com/download).
 2. Launch ngrok with port 3000.
-   `ngrok http 3000 --host-header=localhost`
+   `ngrok http 3000 --host-header=localhost` (You will need an ngrok account to use host-header)
 3. In a second terminal, run `npm run start-https` (rather than the traditional `npm run start`)
 
 ### Create the app package to sideload into Teams

@@ -33,8 +33,13 @@ const MeetingStage = () => {
                 // Set the initial video src for the player element
                 videoElement.current.src = initialMediaItem.current.src;
 
-                // Enable debugger
-                window.localStorage.debug = "fluid:*";
+                try {
+                    // Enable debugger
+                    window.localStorage.debug = "fluid:*";
+                } catch (error) {
+                    // Some users or anonymous modes in browsers disable local storage
+                    console.error(error);
+                }
 
                 // Are we in teams?
                 const host = inTeams()

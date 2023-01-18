@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Button } from "@fluentui/react-components";
+import { getRandomAvatar } from "../utils/random-avatar";
 
 const HAS_AUTH_LOCAL_STORAGE_KEY = "poker-user-has-auth";
 
@@ -32,7 +33,7 @@ export const UserAuth = ({ onLogIn }) => {
             // In cases where the getAuthToken API fails, we mark the user as anonymous.
             console.error(error);
             setData({
-                name: "Anonymous",
+                name: getRandomAvatar().name,
             });
         }
     }, [setLoading, setData]);
@@ -47,7 +48,7 @@ export const UserAuth = ({ onLogIn }) => {
             // For users that have disabled local storage user support, we set name to anonymous
             console.error(error);
             setData({
-                name: "Anonymous",
+                name: getRandomAvatar().name,
             });
         }
     }, [login]);

@@ -21,7 +21,7 @@ export const UserAuth = ({ onLogIn }) => {
             const parsedClaim = parseJwt(result);
             if (parsedClaim?.name) {
                 setData({
-                    name: parsedClaim?.name || "Anonymous",
+                    name: parsedClaim.name,
                 });
                 setLoading(false);
                 localStorage.setItem(HAS_AUTH_LOCAL_STORAGE_KEY, "true");

@@ -34,9 +34,6 @@ export function useSharedObjects() {
             : new URL(window.location);
         const inTeams = !!url.searchParams.get("inTeams");
 
-        // To reset the stored container-id, uncomment below:
-        // localStorage.clear();
-
         // Enable debugger
         window.localStorage.debug = "fluid:*";
 

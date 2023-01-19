@@ -46,11 +46,13 @@ export function useSharedObjects() {
             : new URL(window.location.href);
         const inTeams = !!url.searchParams.get("inTeams");
 
-        // To reset the stored container-id, uncomment below:
-        // localStorage.clear();
-
-        // Enable debugger
-        window.localStorage.debug = "fluid:*";
+        try {
+            // Enable debugger
+            window.localStorage.debug = "fluid:*";
+        } catch (error) {
+            // Some users or anonymous modes in browsers disable local storage
+            console.error(error);
+        }
 
         // Define container callback (optional).
         // * This is only called once when the container is first created.

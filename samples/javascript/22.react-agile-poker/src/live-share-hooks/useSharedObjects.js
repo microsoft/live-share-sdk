@@ -35,8 +35,13 @@ export function useSharedObjects() {
             : new URL(window.location);
         const inTeams = !!url.searchParams.get("inTeams");
 
-        // Enable debugger
-        window.localStorage.debug = "fluid:*";
+        try {
+            // Enable debugger
+            window.localStorage.debug = "fluid:*";
+        } catch (error) {
+            // Some users or anonymous modes in browsers disable local storage
+            console.error(error);
+        }
 
         // Define container initializer.
         // * This is only called once when the container is first created.

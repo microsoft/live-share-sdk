@@ -6,37 +6,50 @@
 import { useCallback, useEffect, useState } from "react";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Button } from "@fluentui/react-components";
+import { getRandomAvatar } from "../utils/random-avatar";
+
+const HAS_AUTH_LOCAL_STORAGE_KEY = "poker-user-has-auth";
 
 export const UserAuth = ({ onLogIn }) => {
     const [error, setError] = useState();
     const [data, setData] = useState();
     const [loading, setLoading] = useState(false);
 
-    const login = useCallback(() => {
+    const login = useCallback(async () => {
         setLoading(true);
-        microsoftTeams.authentication.getAuthToken({
-            successCallback: (result) => {
-                const parsedClaim = parseJwt(result);
-                if (parsedClaim?.name) {
-                    setData({
-                        name: parsedClaim?.name || "Anonymous",
-                    });
-                    setLoading(false);
-                    localStorage.setItem("poker-user-has-auth", "true");
-                } else {
-                    setError(`No name found after completing log in.`);
-                }
-            },
-            failureCallback: (error) => {
-                setError(`Error getting user token ${error}`);
-            },
-        });
+        try {
+            const result = await microsoftTeams.authentication.getAuthToken();
+            const parsedClaim = parseJwt(result);
+            if (parsedClaim?.name) {
+                setData({
+                    name: parsedClaim.name,
+                });
+                setLoading(false);
+                localStorage.setItem(HAS_AUTH_LOCAL_STORAGE_KEY, "true");
+            } else {
+                setError(`No name found after completing log in.`);
+            }
+        } catch (error) {
+            // In cases where the getAuthToken API fails, we mark the user as anonymous.
+            console.error(error);
+            setData({
+                name: getRandomAvatar().name,
+            });
+        }
     }, [setLoading, setData]);
 
     useEffect(() => {
-        const hasAuth = localStorage.getItem("poker-user-has-auth") === "true";
-        if (hasAuth) {
-            login();
+        try {
+            const hasAuth = localStorage.getItem(HAS_AUTH_LOCAL_STORAGE_KEY) === "true";
+            if (hasAuth) {
+                login();
+            }
+        } catch (error) {
+            // For users that have disabled local storage user support, we set name to anonymous
+            console.error(error);
+            setData({
+                name: getRandomAvatar().name,
+            });
         }
     }, [login]);
 

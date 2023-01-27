@@ -5,14 +5,19 @@ Live Share React is designed to make building collaborative apps in React simple
 Here is a simple example of how to get started:
 
 ```javascript
-// App.jsx
+// LiveShareApp.jsx
 import { LiveShareContextProvider } from "@microsoft/live-share-react";
+import { LiveShareHost } from "@microsoft/teams-js";
 
-export function App() {
+const host = LiveShareHost.create();
+
+export function LiveShareApp() {
+  // Call app.initialize() from teams-js before rendering LiveShareContextProvider
+
   return (
     <LiveShareContextProvider
       joinOnLoad={true}
-      initializeTeamsSDKIfNeeded={true}
+      host={host}
     >
       <SharedCheckbox />
     </LiveShareContextProvider>
@@ -59,13 +64,13 @@ Fluid Framework and Live Share are powerful frameworks that can greatly simplify
 
 Where traditional Fluid utilizes a developer-defined object schema with a hierarchal structure, this package abstracts that out on your behalf. While you can still tap into more complicated hierarchies with this library, it is designed to behave more like blob storage / NoSQL.
 
-To use Fluid's distributed-data structures (DDS) or Live Share's ephemeral objects, you can simply use the corresponding React hook, providing a unique identifier for that DDS. If no DDS exists when the component is first mounted, we automatically create one for you. Otherwise, we will connect to the existing one.
+To use Fluid's distributed-data structures (DDS) or Live Share's live objects, you can simply use the corresponding React hook, providing a unique identifier for that DDS. If no DDS exists when the component is first mounted, we automatically create one for you. Otherwise, we will connect to the existing one.
 
 Much like React itself, this package is opinionated, and it may not be for everyone. To learn more about using Live Share the traditional way, see our [Live Share README](../live-share/README.md).
 
 ## Types of hooks
 
-Live Share supports all of the ephemeral data structures provided through Live Share, and most of the officially supported DDS's available through Fluid Framework. If you have custom data objects, this package also exposes some underlying APIs for building your own custom React hooks.
+Live Share supports all of the live data structures provided through Live Share, and most of the officially supported DDS's available through Fluid Framework. If you have custom data objects, this package also exposes some underlying APIs for building your own custom React hooks.
 
 Here are the hooks provided by this library:
 
@@ -151,16 +156,16 @@ export function CardList() {
 }
 ```
 
-### useEphemeralPresence
+### useLivePresence
 
-Presence makes it easy to track which users are currently in the session and assign custom data to them. Unlike other hooks, `useEphemeralPresence` has a default ID set for you, but you can override it with your own if you'd like.
+Presence makes it easy to track which users are currently in the session and assign custom data to them. Unlike other hooks, `useLivePresence` has a default ID set for you, but you can override it with your own if you'd like.
 
 ```javascript
-import { useEphemeralPresence } from "@microsoft/live-share-react";
+import { useLivePresence } from "@microsoft/live-share-react";
 import { PresenceState } from "@microsoft/live-share";
 
 export function OnlineUsers() {
-  const { localUser, allUsers, updatePresence } = useEphemeralPresence(
+  const { localUser, allUsers, updatePresence } = useLivePresence(
     "CUSTOM-USER-ID", // optional user id
     { name: "First Last" } // optional custom data object
   );
@@ -191,20 +196,20 @@ export function OnlineUsers() {
 }
 ```
 
-### useEphemeralState
+### useLiveState
 
-Unlike `useSharedState`, `useEphemeralState` is only stateful while one or more users are connected to it. This can make it easy to have state that behaves more closely to a regular React `useState`, when desireable.
+Unlike `useSharedState`, `useLiveState` is only stateful while one or more users are connected to it. This can make it easy to have state that behaves more closely to a regular React `useState`, when desireable.
 
 This component also features role verification, which allows you to choose the Teams meeting roles which are eligible to edit the state, if needed.
 
 ```javascript
-import { useEphemeralState } from "@microsoft/live-share-react";
+import { useLiveState } from "@microsoft/live-share-react";
 import { UserMeetingRole } from "@microsoft/live-share";
 
 const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter ];
 
 export function AppState() {
-  const [state, data, setState] = useEphemeralState("CUSTOM-STATE-ID", ALLOWED_ROLES, ExampleAppState.WAITING);
+  const [state, data, setState] = useLiveState("CUSTOM-STATE-ID", ALLOWED_ROLES, ExampleAppState.WAITING);
 
   if (state === ExampleAppState.WAITING) {
     return (
@@ -237,17 +242,17 @@ export function AppState() {
 };
 ```
 
-### useEphemeralEvent
+### useLiveEvent
 
-If you want to generic JSON between clients that is completely transient, then `useEphemeralEvent` is a great choice. A good example of that is a reactions feature similar to that in Microsoft Teams meetings, since people joining a meeting late don't need to see reactions from earlier in the meeting.
+If you want to generic JSON between clients that is completely transient, then `useLiveEvent` is a great choice. A good example of that is a reactions feature similar to that in Microsoft Teams meetings, since people joining a meeting late don't need to see reactions from earlier in the meeting.
 
 Here is a simple example:
 
 ```javascript
-import { useEphemeralEvent } from "@microsoft/live-share-react";
+import { useLiveEvent } from "@microsoft/live-share-react";
 
 export function Reactions() {
-  const { latestEvent, sendEvent } = useEphemeralEvent("EVENT-ID");
+  const { latestEvent, sendEvent } = useLiveEvent("EVENT-ID");
 
   return (
     <div>
@@ -320,16 +325,16 @@ If you want to dynamically load a custom Fluid object in your app, you can easil
 Here is an example of how to use it in your app:
 
 ```javascript
-// App.jsx
+// LiveShareApp.jsx
 import { LiveShareContextProvider } from "@microsoft/live-share-react";
+import { LiveShareHost } from "@microsoft/teams-js";
 import { SharedTree } from "@fluid-experimental/tree";
 
-export function App() {
+export function LiveShareApp() {
   // Pass in custom `additionalDynamicObjectTypes` prop using custom `IFluidLoadable`
   return (
     <LiveShareContextProvider
       joinOnLoad={true}
-      initializeTeamsSDKIfNeeded={true}
       additionalDynamicObjectTypes={[SharedTree]}
     >
       <ExampleSharedTree uniqueId="MY-TREE-ID" />

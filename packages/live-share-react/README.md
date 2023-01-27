@@ -48,7 +48,7 @@ export function SharedCheckbox() {
 After cloning the [GitHub repository](https://www.github.com/microsoft/live-share-sdk), navigate to the root folder and perform:
 
 ```bash
-npm install --legacy-peer-dep
+npm install
 npm run build
 ```
 

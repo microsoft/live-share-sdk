@@ -5,3 +5,4 @@ export * from "./ExampleSharedState";
 export * from "./ExampleMediaSynchronizer";
 export * from "./ExampleLiveEvent";
 export * from "./TeamsClientLoader";
+export * from "./ExampleLiveCanvas";

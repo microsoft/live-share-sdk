@@ -372,7 +372,7 @@ export class LiveCanvas extends DataObject {
     /**
      * The object's Fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/shared-inking-session`;
+    public static readonly TypeName = `@microsoft/live-share-canvas:LiveCanvas`;
 
     /**
      * The object's Fluid type factory.

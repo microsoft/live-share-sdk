@@ -4,6 +4,7 @@ import {
   LiveState,
   LiveTimer,
 } from "@microsoft/live-share";
+import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
 import {
   ContainerSchema,
@@ -38,12 +39,13 @@ export function getContainerSchema(
 export function getLiveShareContainerSchema(
   additionalDynamicObjectTypes: LoadableObjectClass<any>[] | undefined
 ) {
-  const liveShareDynamicObjects = [
+  const liveShareDynamicObjects: LoadableObjectClass<any>[] = [
     LiveEvent,
     LivePresence,
     LiveState,
-    LiveTimer,
     LiveMediaSession,
+    LiveTimer,
+    LiveCanvas,
   ];
   const _additionalDynamicObjectTypes: LoadableObjectClass<any>[] =
     additionalDynamicObjectTypes ?? [];

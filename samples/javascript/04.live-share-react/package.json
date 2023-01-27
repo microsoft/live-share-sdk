@@ -11,6 +11,7 @@
         "@fluidframework/azure-client": "~1.0.2",
         "@microsoft/live-share": "1.0.0-preview.4",
         "@microsoft/live-share-media": "1.0.0-preview.4",
+        "@microsoft/live-share-canvas": "1.0.0-preview.4",
         "@microsoft/live-share-react": "1.0.0-preview.4",
         "@microsoft/teams-js": "^2.5.0",
         "@testing-library/jest-dom": "^5.16.5",

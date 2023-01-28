@@ -44,11 +44,14 @@ interface IFluidContextProviderProps {
   children?: React.ReactNode;
 }
 
+/**
+ * React Context provider component for using Fluid data objects & joining/creating a Fluid document `AzureClient`.
+ */
 export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
   props
 ) => {
-  const startedRef = React.useRef(false);
-  const clientRef = React.useRef(new AzureClient(props.clientOptions));
+  const startedRef = React.useRef<boolean>(false);
+  const clientRef = React.useRef<AzureClient>(new AzureClient(props.clientOptions));
   const [results, setResults] = React.useState<
     IAzureContainerResults | undefined
   >();
@@ -57,11 +60,13 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
   const stateRegistryCallbacks = useSharedStateRegistry(results);
   const ddsRegistryCallbacks = useDynamicDDSRegistry(results);
 
+  /**
+   * Get the container for a given containerId using AzureClient
+   */
   const getContainer = React.useCallback(
     async (containerId: string): Promise<IAzureContainerResults> => {
       return new Promise(async (resolve, reject) => {
         try {
-          console.log(containerId);
           const results: IAzureContainerResults =
             await clientRef.current.getContainer(
               containerId,
@@ -80,6 +85,9 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
     [props.containerId, props.additionalDynamicObjectTypes, setResults]
   );
 
+  /**
+   * Create container callback to create a new container using AzureClient
+   */
   const createContainer = React.useCallback(
     async (
       onInitializeContainer?: (container: IFluidContainer) => void
@@ -108,8 +116,12 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
     [props.containerId, setResults]
   );
 
+  /**
+   * Joins a container if `props.joinOnLoad` is true and `props.containerId` is known. Creates a new container if `props.createOnLoad` is true
+   * and `props.containerId` is not known.
+   */
   React.useEffect(() => {
-    if (results || startedRef.current) return;
+    if (results?.container?.connectionState !== undefined || startedRef.current) return;
     startedRef.current = true;
     if (props.containerId && props.joinOnLoad) {
       getContainer(props.containerId);
@@ -117,7 +129,7 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
       createContainer();
     }
   }, [
-    results,
+    results?.container?.connectionState,
     props.containerId,
     props.createOnLoad,
     props.joinOnLoad,

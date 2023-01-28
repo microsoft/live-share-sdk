@@ -4,6 +4,7 @@ import {
   LivePresence,
   LivePresenceUser,
 } from "@microsoft/live-share";
+import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import {
   CoordinationWaitPoint,
   ExtendedMediaMetadata,
@@ -135,4 +136,15 @@ export interface IUseMediaSynchronizerResults {
    * Live Share `MediaPlayerSynchronizer` object, should you want to use it directly.
    */
   mediaSynchronizer: MediaPlayerSynchronizer | undefined;
+}
+
+export interface IUseLiveCanvasResults {
+  /**
+   * Inking manager for the canvas, which is synchronized by `liveCanvas`. It is set when loaded and undefined while loading.
+   */
+  inkingManager: InkingManager | undefined;
+  /**
+   * Live Canvas data object which synchronizes inking & cursors in the session. It is set when loaded and undefined while loading.
+   */
+  liveCanvas: LiveCanvas | undefined;
 }

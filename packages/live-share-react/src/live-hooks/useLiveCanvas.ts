@@ -7,13 +7,33 @@ import {
     IUserInfo,
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
-import { RefObject, useEffect, useRef, useState } from "react";
+import React from "react";
 import { useDynamicDDS } from "../shared-hooks";
+import { IUseLiveCanvasResults } from "../types";
 import { isRefObject } from "../utils";
 
+/**
+ * React hook for using a Live Share Canvas `LiveCanvas` and `InkingManager`.
+ * 
+ * @remarks
+ * Use this hook to set up an `LiveCanvas` object, which is used for collaborative inking. It takes several input parameters, including a unique key,
+ * a reference to a canvas element, and various settings for the inking tool, brush, and canvas offset and scale.
+ * 
+ * @param uniqueKey the unique key for the `LiveCanvas`. If one does not yet exist, a new one.
+ * @param canvasElementRef the HTML div element ref or document ID that `InkingManager` will use for canvas-based collaboration.
+ * @param active Optional. Stateful boolean that will activate/de-activate `InkingManager` accordingly.
+ * @param tool Optional. Stateful enum for what tool to use in the `InkingManager`.
+ * @param lineBrush Optional. Stateful lineBrush object for the selected lineBrush options to use in `InkingManager`.
+ * @param offset Optional. Stateful offset point to use in the `InkingManager`. Gets the viewport offset. Defaults to 0,0.
+ * @param scale Optional. Stateful scale number to use in the `InkingManager`. Defaults to 1 and must be greater than 0.
+ * @param referencePoint Optional. Stateful reference point enum to use in the `InkingManger`. Defaults to "center".
+ * @param isCursorShared Optional. Stateful boolean flag for whether cursor should be shared in `LiveCanvas`. Defaults to false.
+ * @param localUserCursor Optional. Stateful `IUserInfo` object for the local user's metadata to display alongside their cursor. Defaults to undefined.
+ * @returns IUseLiveCanvasResults object that contains the `liveCanvas` data object and `inkingManager`.
+ */
 export function useLiveCanvas(
     uniqueKey: string,
-    canvasElementRef: RefObject<HTMLElement | null> | string,
+    canvasElementRef: React.RefObject<HTMLElement | null> | string,
     active?: boolean,
     tool?: InkingTool,
     lineBrush?: IBrush,
@@ -22,20 +42,22 @@ export function useLiveCanvas(
     referencePoint?: CanvasReferencePoint,
     isCursorShared?: boolean,
     localUserCursor?: IUserInfo
-): {
-    inkingManager: InkingManager | undefined;
-    liveCanvas: LiveCanvas | undefined;
-} {
-    const listeningRef = useRef(false);
-    const [inkingManager, setInkingManager] = useState<InkingManager>();
+): IUseLiveCanvasResults {
+    const listeningRef = React.useRef(false);
+    const [inkingManager, setInkingManager] = React.useState<InkingManager>();
 
     const { dds: liveCanvas } = useDynamicDDS<LiveCanvas>(
         `<LiveCanvas>:${uniqueKey}`,
         LiveCanvas
     );
 
-    useEffect(() => {
+    /**
+     * Setup the InkingManager and LiveCanvas
+     */
+    React.useEffect(() => {
+        // if the component is already listening or liveCanvas is not yet initialized, return
         if (listeningRef.current || !liveCanvas) return;
+        // get the canvas element from the ref or document
         let htmlElement: HTMLElement | null;
         if (isRefObject(canvasElementRef)) {
             htmlElement = canvasElementRef.current;
@@ -44,19 +66,22 @@ export function useLiveCanvas(
         }
         if (htmlElement === null) return;
         listeningRef.current = true;
+        // Create the InkingManager and initialize the liveCanvas with it
         const inkingManager = new InkingManager(htmlElement);
         setInkingManager(inkingManager);
         liveCanvas.initialize(inkingManager);
-        console.log("useLiveCanvas initialize");
 
+        // cleanup function to be called when the component is unmount
         return () => {
             listeningRef.current = false;
             liveCanvas.dispose();
-            console.log("useLiveCanvas dispose");
         };
     }, [liveCanvas]);
 
-    useEffect(() => {
+    /**
+     * Activate or deactivate the inkingManager based on the 'active' prop
+     */ 
+    React.useEffect(() => {
         if (inkingManager && active !== undefined) {
             if (active) {
                 inkingManager.activate();
@@ -66,13 +91,19 @@ export function useLiveCanvas(
         }
     }, [active, inkingManager]);
 
-    useEffect(() => {
+    /**
+     * Sets the tool of the inkingManager based on the 'tool' prop
+     */
+    React.useEffect(() => {
         if (inkingManager && tool !== undefined) {
             inkingManager.tool = tool;
         }
     }, [tool, inkingManager]);
 
-    useEffect(() => {
+    /**
+     * Sets the offset of the inkingManager based on the 'offset' prop
+     */
+    React.useEffect(() => {
         if (inkingManager && offset !== undefined) {
             inkingManager.offset = {
                 x: offset.x,
@@ -81,19 +112,28 @@ export function useLiveCanvas(
         }
     }, [offset?.x, offset?.y, inkingManager]);
 
-    useEffect(() => {
+    /**
+     * Sets the scale of the inkingManager based on the 'scale' prop
+     */
+    React.useEffect(() => {
         if (inkingManager && scale !== undefined) {
             inkingManager.scale = scale;
         }
     }, [scale, inkingManager]);
 
-    useEffect(() => {
+    /**
+     * Sets the referencePoint of the inkingManager based on the 'referencePoint' prop
+     */
+    React.useEffect(() => {
         if (inkingManager && referencePoint !== undefined) {
             inkingManager.referencePoint = referencePoint;
         }
     }, [referencePoint, inkingManager]);
 
-    useEffect(() => {
+    /**
+     * Sets the lineBrush of the inkingManager based on the 'lineBrush' prop
+     */
+    React.useEffect(() => {
         if (inkingManager && lineBrush) {
             inkingManager.lineBrush = {
                 color: lineBrush.color,
@@ -112,14 +152,20 @@ export function useLiveCanvas(
         inkingManager,
     ]);
 
-    useEffect(() => {
-        if (liveCanvas && isCursorShared !== undefined) {
+    /**
+     * Sets the isCursorShared of the liveCanvas based on the 'isCursorShared' prop
+     */
+    React.useEffect(() => {
+        if (liveCanvas?.isCursorShared !== undefined && isCursorShared !== undefined) {
             liveCanvas.isCursorShared = isCursorShared;
         }
-    }, [isCursorShared, liveCanvas]);
+    }, [isCursorShared, liveCanvas?.isCursorShared]);
 
-    useEffect(() => {
-        if (liveCanvas && localUserCursor) {
+    /**
+     * Sets the onGetLocalUserInfo method of the liveCanvas based on the 'localUserCursor' prop
+     */
+    React.useEffect(() => {
+        if (liveCanvas?.onGetLocalUserInfo !== undefined && localUserCursor) {
             liveCanvas.onGetLocalUserInfo = (): IUserInfo | undefined => {
                 return {
                     displayName: localUserCursor.displayName,
@@ -127,8 +173,11 @@ export function useLiveCanvas(
                 };
             };
         }
-    }, [localUserCursor?.displayName, localUserCursor?.pictureUri, liveCanvas]);
+    }, [localUserCursor?.displayName, localUserCursor?.pictureUri, liveCanvas?.onGetLocalUserInfo]);
 
+    /**
+     * Return hook response
+     */
     return {
         inkingManager,
         liveCanvas,

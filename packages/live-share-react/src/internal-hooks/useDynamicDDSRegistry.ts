@@ -18,6 +18,13 @@ export interface IDynamicDDSRegistry {
     unregisterDDSSetStateAction: UnregisterDDSSetStateAction;
 }
 
+/**
+ * Hook used internally to keep track of the DDSSetStateActionMap for each unique key. It gets DDS objects for provided keys where they exist and creates
+ * them where they do not, providing the DDS objects to components that use them.
+ * 
+ * @param results IAzureContainerResults response or undefined
+ * @returns IDynamicDDSRegistry object
+ */
 export const useDynamicDDSRegistry = (
     results: IAzureContainerResults | undefined
 ): IDynamicDDSRegistry => {
@@ -141,7 +148,6 @@ export const useDynamicDDSRegistry = (
             local: boolean
         ): void => {
             if (local) return;
-            console.log("dds value changed");
             if (registeredDDSSetStateActionMapRef.current.has(changed.key)) {
                 const actionMap = registeredDDSSetStateActionMapRef.current.get(
                     changed.key
@@ -157,7 +163,6 @@ export const useDynamicDDSRegistry = (
                     .catch((error) => console.error(error));
             }
         };
-        console.log("dds listening for changes");
         dynamicObjectMap.on("valueChanged", valueChangedListener);
         // Set initial values
         dynamicObjectMap.forEach(
@@ -183,7 +188,6 @@ export const useDynamicDDSRegistry = (
             }
         );
         return () => {
-            console.log("dds not listening for changes");
             dynamicObjectMap.off("valueChanged", valueChangedListener);
         };
     }, [results]);

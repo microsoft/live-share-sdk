@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React from "react";
 import { SharedMap } from "fluid-framework";
 import { isEntries, isJSON, isMap } from "../utils";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types";
@@ -50,18 +50,18 @@ export function useSharedMap<TData extends object = object>(
   /**
    * Reference boolean for whether hook has registered "valueChanged" events for `SharedMap`.
    */
-  const listeningRef = useRef(false);
+  const listeningRef = React.useRef(false);
   /**
    * Stateful readonly map (user facing) with most recent values from `SharedMap` and its setter method.
    */
-  const [map, setMap] = useState<ReadonlyMap<string, TData>>(
+  const [map, setMap] = React.useState<ReadonlyMap<string, TData>>(
     getInitialData<TData>(initialData)
   );
   /**
    * Callback method to set the `initialData` into the map when the `SharedMap` is first created.
    * Only should be used as a prop to useDynamicDDS.
    */
-  const onFirstInitialize = useCallback((dds: SharedMap) => {
+  const onFirstInitialize = React.useCallback((dds: SharedMap) => {
     getInitialData(initialData).forEach((value, key) => {
       dds.set(key, value);
     });
@@ -78,7 +78,7 @@ export function useSharedMap<TData extends object = object>(
   /**
    * User facing: set a value to the Fluid `SharedMap`.
    */
-  const setEntry = useCallback(
+  const setEntry = React.useCallback(
     (key: string, value: TData) => {
       if (!sharedMap) {
         console.error(new Error("Cannot call set when sharedMap is undefined"));
@@ -92,7 +92,7 @@ export function useSharedMap<TData extends object = object>(
   /**
    * User facing: delete a value from the Fluid `SharedMap`.
    */
-  const deleteEntry = useCallback(
+  const deleteEntry = React.useCallback(
     (key: string) => {
       if (!sharedMap) {
         console.error(
@@ -106,7 +106,7 @@ export function useSharedMap<TData extends object = object>(
   );
 
   // Setup change listeners, initial values, etc.
-  useEffect(() => {
+  React.useEffect(() => {
     if (listeningRef.current || !sharedMap) return;
     listeningRef.current = true;
 
@@ -114,7 +114,6 @@ export function useSharedMap<TData extends object = object>(
     const onValueChanged = () => {
       setMap(new Map<string, TData>(sharedMap.entries()));
     };
-    console.log("valueChanged on");
     sharedMap.on("valueChanged", onValueChanged);
     // Get initial values from `SharedMap`.
     onValueChanged();
@@ -122,7 +121,6 @@ export function useSharedMap<TData extends object = object>(
     return () => {
       // Cleanup on component unmount.
       listeningRef.current = false;
-      console.log("valueChanged off");
       sharedMap?.off("valueChanged", onValueChanged);
     };
   }, [sharedMap]);

@@ -1,11 +1,11 @@
-import { Dispatch, SetStateAction } from "react";
+import React from "react";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { LoadableObjectClass } from "fluid-framework";
 import { PresenceState } from "@microsoft/live-share";
 
 // React actions
 export type SetSharedStateAction<T> = (state: T) => void;
-export type SetLocalStateAction = Dispatch<SetStateAction<any>>;
+export type SetLocalStateAction = React.Dispatch<React.SetStateAction<any>>;
 
 // Fluid actions
 export type RegisterDDSSetStateAction = <T extends IFluidLoadable>(

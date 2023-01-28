@@ -1,5 +1,5 @@
 import { LiveState, UserMeetingRole } from "@microsoft/live-share";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React from "react";
 import { SetLiveStateAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
 
@@ -11,6 +11,18 @@ interface ILiveStateStatus<
   data?: TData;
 }
 
+/**
+ * React hook for using a Live Share `LiveState`.
+ * 
+ * @remarks
+ * Use this hook if you want to synchronize app state that will reset when all users leave the session.
+ * 
+ * @param uniqueKey the unique key for the `LiveEvent`. If one does not yet exist, a new one will be created, otherwise it will use the existing one.
+ * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state
+ * @param initialState Optional. the initial state value of type TState
+ * @param initialData Optional. the initial data value of type TData
+ * @returns ordered values: first value is the synchronized state value, second is synchronized data value, and third is a setter to change the state/data values.
+ */
 export function useLiveState<
   TState extends string = string,
   TData extends object = object
@@ -24,8 +36,8 @@ export function useLiveState<
   TData | undefined,
   SetLiveStateAction<TState, TData>
 ] {
-  const listeningRef = useRef(false);
-  const [current, setCurrent] = useState<ILiveStateStatus<TState, TData>>({
+  const listeningRef = React.useRef(false);
+  const [current, setCurrent] = React.useState<ILiveStateStatus<TState, TData>>({
     state: initialState,
     data: initialData,
   });
@@ -35,7 +47,10 @@ export function useLiveState<
     LiveState<TData>
   );
 
-  const changeState = useCallback(
+  /**
+   * Change state callback that is user facing
+   */
+  const changeState = React.useCallback(
     (state: TState, value?: TData | undefined) => {
       if (!liveState) {
         console.error(
@@ -51,42 +66,39 @@ export function useLiveState<
         );
         return;
       }
-      console.log("changeState");
       liveState?.changeState(state, value);
     },
     [liveState]
   );
 
-  useEffect(() => {
-    if (listeningRef.current || !liveState) return;
+  /**
+   * Setup change listeners and start `LiveState` if needed
+   */
+  React.useEffect(() => {
+    if (listeningRef.current || liveState?.isInitialized === undefined) return;
     listeningRef.current = true;
 
     const onStateChanged = (state: TState, data: TData | undefined) => {
-      console.log("onStateChanged");
       setCurrent({
         state,
         data,
       });
     };
-    console.log("stateChanged on");
     liveState.on("stateChanged", onStateChanged);
     if (!liveState.isInitialized) {
-      console.log("starting LiveState");
       liveState.initialize(allowedRoles, initialState, initialData);
       if (liveState.state) {
         onStateChanged(liveState.state as TState, liveState.data);
       }
     } else if (liveState.state) {
-      console.log("liveState already started, refreshing tracked state");
       onStateChanged(liveState.state as TState, liveState.data);
     }
 
     return () => {
       listeningRef.current = false;
-      console.log("stateChanged off");
       liveState?.off("stateChanged", onStateChanged);
     };
-  }, [liveState]);
+  }, [liveState?.isInitialized]);
 
   return [current?.state, current?.data, changeState];
 }

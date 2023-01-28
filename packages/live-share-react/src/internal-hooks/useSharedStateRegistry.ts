@@ -1,5 +1,5 @@
 import { IValueChanged, SharedMap } from "fluid-framework";
-import { useCallback, useEffect, useRef } from "react";
+import React from "react";
 import {
   DeleteSharedStateAction,
   IAzureContainerResults,
@@ -16,14 +16,20 @@ export interface ISharedStateRegistryResponse {
   deleteSharedState: DeleteSharedStateAction;
 }
 
+/**
+ * Hook used internally to keep track of the SharedSetStateActionMap for each unique key. It sets state values for provided keys and updates components listening to the values.
+ * 
+ * @param results IAzureContainerResults response or undefined
+ * @returns ISharedStateRegistryResponse object
+ */
 export const useSharedStateRegistry = (
   results: IAzureContainerResults | undefined
 ): ISharedStateRegistryResponse => {
-  const registeredSharedSetStateActionMapRef = useRef<
+  const registeredSharedSetStateActionMapRef = React.useRef<
     Map<string, Map<string, SetLocalStateAction>>
   >(new Map());
 
-  const registerSharedSetStateAction = useCallback(
+  const registerSharedSetStateAction = React.useCallback(
     (
       uniqueKey: string,
       componentId: string,
@@ -52,7 +58,7 @@ export const useSharedStateRegistry = (
     [results]
   );
 
-  const unregisterSharedSetStateAction = useCallback(
+  const unregisterSharedSetStateAction = React.useCallback(
     (uniqueKey: string, componentId: string) => {
       let actionsMap =
         registeredSharedSetStateActionMapRef.current.get(uniqueKey);
@@ -63,7 +69,7 @@ export const useSharedStateRegistry = (
     []
   );
 
-  const updateSharedState: UpdateSharedStateAction = useCallback(
+  const updateSharedState: UpdateSharedStateAction = React.useCallback(
     (uniqueKey: string, value: any) => {
       if (!results) return;
       const { container } = results;
@@ -73,7 +79,7 @@ export const useSharedStateRegistry = (
     [results]
   );
 
-  const disposeSharedState: DeleteSharedStateAction = useCallback(
+  const disposeSharedState: DeleteSharedStateAction = React.useCallback(
     (uniqueKey: string) => {
       if (!results) return;
       const { container } = results;
@@ -82,20 +88,17 @@ export const useSharedStateRegistry = (
       actionsMap?.clear();
       const stateMap = container.initialObjects.stateMap as SharedMap;
       stateMap.delete(uniqueKey);
-      console.log("disposeSharedState");
     },
     [results]
   );
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!results) return;
     const { container } = results;
     const stateMap = container.initialObjects.stateMap as SharedMap;
     const valueChangedListener = (changed: IValueChanged): void => {
-      console.log("value changed");
       if (registeredSharedSetStateActionMapRef.current.has(changed.key)) {
         const value = stateMap.get(changed.key);
-        console.log("value changed and actionMap", value);
         const actionMap = registeredSharedSetStateActionMapRef.current.get(
           changed.key
         );
@@ -104,7 +107,6 @@ export const useSharedStateRegistry = (
         });
       }
     };
-    console.log("listening for changes");
     stateMap.on("valueChanged", valueChangedListener);
     // Set initial values
     stateMap.forEach((value: any, key: string) => {
@@ -114,7 +116,6 @@ export const useSharedStateRegistry = (
       });
     });
     return () => {
-      console.log("not listening for changes");
       stateMap.off("valueChanged", valueChangedListener);
     };
   }, [results]);

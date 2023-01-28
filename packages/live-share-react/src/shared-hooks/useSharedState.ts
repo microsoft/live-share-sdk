@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React from "react";
 import { useFluidObjectsContext } from "../providers";
 import { DisposeSharedStateAction, SetSharedStateAction } from "../types";
 import { v4 as uuid } from "uuid";
@@ -24,11 +24,11 @@ export function useSharedState<S>(
   /**
    * User facing: stateful value and non-user facing setter.
    */
-  const [localState, setLocalState] = useState<S>(initialState);
+  const [localState, setLocalState] = React.useState<S>(initialState);
   /**
    * Unique ID reference for the component.
    */
-  const componentIdRef = useRef(uuid());
+  const componentIdRef = React.useRef(uuid());
   /**
    * Register set state callbacks from FluidContextProvider and update/delete callbacks for initial object's `stateMap`.
    */
@@ -42,9 +42,8 @@ export function useSharedState<S>(
   /**
    * User facing: callback to change the shared state.
    */
-  const setSharedState: SetSharedStateAction<S> = useCallback(
+  const setSharedState: SetSharedStateAction<S> = React.useCallback(
     (updatedState: S) => {
-      console.log("setSharedState");
       setLocalState(updatedState);
       updateSharedState(uniqueKey, updatedState);
     },
@@ -54,8 +53,7 @@ export function useSharedState<S>(
   /**
    * User facing: callback to dispose the shared state from the `stateMap`.
    */
-  const disposeSharedState: DisposeSharedStateAction = useCallback(() => {
-    console.log("setSharedState");
+  const disposeSharedState: DisposeSharedStateAction = React.useCallback(() => {
     deleteSharedState(uniqueKey);
   }, [uniqueKey, deleteSharedState]);
 
@@ -66,15 +64,13 @@ export function useSharedState<S>(
    * @see registerSharedSetStateAction to see how new values from `stateMap` are passed to this hook.
    * @see unregisterSharedSetStateAction to see how this component stops listening to changes in the `stateMap`.
    */
-  useEffect(() => {
-    console.log("sharedStateOn");
+  React.useEffect(() => {
     registerSharedSetStateAction(
       uniqueKey,
       componentIdRef.current,
       setLocalState
     );
     return () => {
-      console.log("sharedStateOff");
       unregisterSharedSetStateAction(uniqueKey, componentIdRef.current);
     };
   }, []);

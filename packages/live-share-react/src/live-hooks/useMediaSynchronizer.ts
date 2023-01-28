@@ -1,5 +1,5 @@
 import { UserMeetingRole } from "@microsoft/live-share";
-import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import React from "react";
 import {
   CoordinationWaitPoint,
   LiveMediaSession,
@@ -12,9 +12,22 @@ import { isExtendedMediaMetadata, isMediaElement, isRefObject } from "../utils";
 import { useDynamicDDS } from "../shared-hooks";
 import { IUseMediaSynchronizerResults } from "../types";
 
+/**
+ * React hook for using a Live Share media `MediaPlayerSynchronizer`.
+ * 
+ * @remarks
+ * Use this hook if you want to synchronize the playback position of a video or audio element during a Live Share session.
+ * 
+ * @param uniqueKey uniqueKey value for the `LiveMediaSession` DDS object used by `MediaPlayerSynchronizer`. 
+ * @param mediaPlayerElementRef React RefObject containing object/element conforming to IMediaPlayer interface or string id for <video> / <audio> element.
+ * @param initialTrack initial track to load. Either ExtendedMediaMetadata, trackId string, or null.
+ * @param allowedRoles Optional. Array of user roles that are eligible to modify group playback state.
+ * @param viewOnly Optional. Flag for whether or not the media synchronizer should be in viewOnly mode.
+ * @returns IUseMediaSynchronizerResults object.
+ */
 export function useMediaSynchronizer(
   uniqueKey: string,
-  mediaPlayerElementRef: RefObject<IMediaPlayer> | string,
+  mediaPlayerElementRef: React.RefObject<IMediaPlayer> | string,
   initialTrack: Partial<ExtendedMediaMetadata> | string | null,
   allowedRoles?: UserMeetingRole[],
   viewOnly?: boolean
@@ -22,17 +35,17 @@ export function useMediaSynchronizer(
   /**
    * Reference boolean for whether hook has registered "listening" events for `LiveEvent`.
    */
-  const listeningRef = useRef(false);
+  const listeningRef = React.useRef(false);
   /**
    * User facing media synchronizer and non-user facing setter
    */
-  const [mediaSynchronizer, setMediaSynchronizer] = useState<
+  const [mediaSynchronizer, setMediaSynchronizer] = React.useState<
     MediaPlayerSynchronizer | undefined
   >();
   /**
    * Suspension object and setter
    */
-  const [suspension, setSuspension] = useState<
+  const [suspension, setSuspension] = React.useState<
     MediaSessionCoordinatorSuspension | undefined
   >();
 
@@ -47,21 +60,21 @@ export function useMediaSynchronizer(
   /**
    * User facing: play callback
    */
-  const play = useCallback((): void => {
+  const play = React.useCallback((): void => {
     mediaSynchronizer?.play();
   }, [mediaSynchronizer]);
 
   /**
    * User facing: pause callback
    */
-  const pause = useCallback((): void => {
+  const pause = React.useCallback((): void => {
     mediaSynchronizer?.pause();
   }, [mediaSynchronizer]);
 
   /**
    * User facing: seek callback
    */
-  const seekTo = useCallback(
+  const seekTo = React.useCallback(
     (time: number): void => {
       mediaSynchronizer?.seekTo(time);
     },
@@ -71,7 +84,7 @@ export function useMediaSynchronizer(
   /**
    * User facing: set track callback
    */
-  const setTrack = useCallback(
+  const setTrack = React.useCallback(
     (track: Partial<ExtendedMediaMetadata> | string | null): void => {
       // TODO: fix force unwrap once synchronizer uses correct types
       if (isExtendedMediaMetadata(track)) {
@@ -88,7 +101,7 @@ export function useMediaSynchronizer(
   /**
    * User facing: create a new suspension and set it locally to state
    */
-  const beginSuspension = useCallback(
+  const beginSuspension = React.useCallback(
     (waitPoint?: CoordinationWaitPoint) => {
       const suspension = mediaSession?.coordinator.beginSuspension(waitPoint);
       setSuspension(suspension);
@@ -99,7 +112,7 @@ export function useMediaSynchronizer(
   /**
    * User facing: if a suspension is active, end it. Called when "Follow presenter" button is clicked.
    */
-  const endSuspension = useCallback(() => {
+  const endSuspension = React.useCallback(() => {
     suspension?.end();
     setSuspension(undefined);
   }, [suspension]);
@@ -107,7 +120,7 @@ export function useMediaSynchronizer(
   /**
    * Setup change listeners and start `LiveMediaSession` if needed
    */
-  useEffect(() => {
+  React.useEffect(() => {
     if (listeningRef.current || !mediaSession || !mediaPlayerElementRef) return;
     // Query the HTML5 media element from the document and set reference
     let mediaPlayer: IMediaPlayer | undefined;
@@ -154,12 +167,10 @@ export function useMediaSynchronizer(
         } as ExtendedMediaMetadata);
       }
     }
-    console.log("mediaSynchronizer on");
     setMediaSynchronizer(synchronizer);
 
     return () => {
       listeningRef.current = false;
-      console.log("mediaSynchronizer off");
       synchronizer.removeAllListeners();
       mediaSession.removeAllListeners();
       synchronizer?.end();
@@ -169,7 +180,7 @@ export function useMediaSynchronizer(
   /**
    * Change view in media synchronizer only if prop changes
    */
-  useEffect(() => {
+  React.useEffect(() => {
     if (
       mediaSynchronizer &&
       viewOnly !== undefined &&

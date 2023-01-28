@@ -3,7 +3,7 @@ import {
   LivePresenceUser,
   PresenceState,
 } from "@microsoft/live-share";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React from "react";
 import { IUseLivePresenceResults } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
 
@@ -34,11 +34,11 @@ export function useLivePresence<TData extends object = object>(
   /**
    * Reference boolean for whether hook has registered "presenceChanged" events for `LivePresence`.
    */
-  const listeningRef = useRef(false);
+  const listeningRef = React.useRef(false);
   /**
    * Stateful all user presence list and its non-user-facing setter method.
    */
-  const [allUsers, setAllUsers] = useState<LivePresenceUser<TData>[]>([]);
+  const [allUsers, setAllUsers] = React.useState<LivePresenceUser<TData>[]>([]);
   /**
    * User facing: dynamically load the LiveEvent DDS for the given unique key.
    */
@@ -49,21 +49,21 @@ export function useLivePresence<TData extends object = object>(
   /**
    * User facing: list of non-local user's presence objects.
    */
-  const otherUsers = useMemo<LivePresenceUser<TData>[]>(() => {
+  const otherUsers = React.useMemo<LivePresenceUser<TData>[]>(() => {
     return [...allUsers.filter((user) => !user.isLocalUser)];
   }, [allUsers]);
 
   /**
    * User facing: local user's presence object.
    */
-  const localUser = useMemo<LivePresenceUser<TData> | undefined>(() => {
+  const localUser = React.useMemo<LivePresenceUser<TData> | undefined>(() => {
     return allUsers.find((user) => user.isLocalUser);
   }, [allUsers]);
 
   /**
    * User facing: callback to update the local user's presence.
    */
-  const updatePresence = useCallback(
+  const updatePresence = React.useCallback(
     (state?: PresenceState | undefined, data?: TData | undefined) => {
       if (!livePresence) {
         console.error(
@@ -83,10 +83,10 @@ export function useLivePresence<TData extends object = object>(
   );
 
   /**
-   * Setup change listeners and start `LiveEvent` if needed
+   * Setup change listeners and start `LivePresence` if needed
    */
-  useEffect(() => {
-    if (listeningRef.current || !livePresence) return;
+  React.useEffect(() => {
+    if (listeningRef.current || livePresence?.isInitialized === undefined) return;
     listeningRef.current = true;
 
     const onPresenceChanged = () => {
@@ -96,23 +96,19 @@ export function useLivePresence<TData extends object = object>(
       });
       setAllUsers(updatedLocalUsers);
     };
-    console.log("presenceChanged on");
     livePresence.on("presenceChanged", onPresenceChanged);
 
     if (!livePresence.isInitialized) {
-      console.log("starting presence");
       livePresence.initialize(userId, initialData, initialPresenceState);
     } else {
-      console.log("presence already started, updating local cache");
       onPresenceChanged();
     }
 
     return () => {
       listeningRef.current = false;
-      console.log("presenceChanged off");
       livePresence?.off("presenceChanged", onPresenceChanged);
     };
-  }, [livePresence]);
+  }, [livePresence?.isInitialized]);
 
   return {
     localUser,

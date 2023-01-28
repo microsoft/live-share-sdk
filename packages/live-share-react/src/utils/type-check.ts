@@ -2,9 +2,9 @@ import {
   ExtendedMediaMetadata,
   IMediaPlayer,
 } from "@microsoft/live-share-media";
-import { RefObject } from "react";
+import React from "react";
 
-export function isRefObject<T>(value: any): value is RefObject<T> {
+export function isRefObject<T>(value: any): value is React.RefObject<T> {
   return value.current === null || !!value.current;
 }
 

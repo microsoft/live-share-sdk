@@ -1,9 +1,17 @@
 import { LoadableObjectClass } from "fluid-framework";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { useEffect, useRef, useState } from "react";
+import React from "react";
 import { v4 as uuid } from "uuid";
 import { useFluidObjectsContext } from "../providers";
 
+/**
+ * Hook to gets or creates a DDS that corresponds to a given uniqueKey string. 
+ * @template T Type of Fluid LoadableObjectClass type to load. Must conform to IFluidLoadable interface.
+ * @param uniqueKey uniqueKey value for the data object
+ * @param loadableObjectClass Fluid LoadableObjectClass<T> to create/load.
+ * @param onFirstInitialize Optional. Callback function for when the DDS is first loaded
+ * @returns the DDS object, which is of type T when loaded and undefined while loading
+ */
 export function useDynamicDDS<T extends IFluidLoadable>(
   uniqueKey: string,
   loadableObjectClass: LoadableObjectClass<T>,
@@ -14,11 +22,11 @@ export function useDynamicDDS<T extends IFluidLoadable>(
   /**
    * Unique ID reference for the component.
    */
-  const componentIdRef = useRef(uuid());
+  const componentIdRef = React.useRef(uuid());
   /**
    * DDS IFluidLoadable
    */
-  const [dds, setDDS] = useState<T>();
+  const [dds, setDDS] = React.useState<T>();
   /**
    * Import container and DDS object register callbacks from FluidContextProvider.
    */
@@ -35,9 +43,8 @@ export function useDynamicDDS<T extends IFluidLoadable>(
    * @see registerDDSSetStateAction to see how DDS handles are attached/created for the DDS.
    * @see unregisterDDSSetStateAction to see how this component stops listening to changes in the DDS handles on unmount.
    */
-  useEffect(() => {
+  React.useEffect(() => {
     if (!container) return;
-    console.log(uniqueKey, "register on");
     // Callback method to set the `initialData` into the map when the DDS is first created.
     const registerDDS = () => {
       registerDDSSetStateAction(
@@ -59,7 +66,6 @@ export function useDynamicDDS<T extends IFluidLoadable>(
     }
     return () => {
       // On unmount, unregister set state action and container connected listener
-      console.log(uniqueKey, "register off");
       unregisterDDSSetStateAction(uniqueKey, componentIdRef.current);
       container.off("connected", registerDDS);
     };

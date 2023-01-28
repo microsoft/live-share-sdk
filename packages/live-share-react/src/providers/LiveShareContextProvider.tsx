@@ -52,6 +52,9 @@ interface ILiveShareContextProviderProps {
   joinOnLoad?: boolean;
 }
 
+/**
+ * React Context provider component for using Live Share data objects & joining a Live Share session using `LiveShareClient`.
+ */
 export const LiveShareContextProvider: React.FC<
   ILiveShareContextProviderProps
 > = (props) => {
@@ -65,6 +68,9 @@ export const LiveShareContextProvider: React.FC<
   const stateRegistryCallbacks = useSharedStateRegistry(results);
   const ddsRegistryCallbacks = useDynamicDDSRegistry(results);
 
+  /**
+   * Join container callback for joining the Live Share session
+   */
   const joinContainer = React.useCallback(
     async (
       onInitializeContainer?: (container: IFluidContainer) => void
@@ -82,8 +88,11 @@ export const LiveShareContextProvider: React.FC<
     ]
   );
 
+  /**
+   * Joins the container on load if `props.joinOnLoad` is true
+   */
   React.useEffect(() => {
-    if (results || startedRef.current) return;
+    if (results?.created !== undefined || startedRef.current) return;
     startedRef.current = true;
     if (props.joinOnLoad) {
       joinContainer().catch((error) => {
@@ -98,7 +107,7 @@ export const LiveShareContextProvider: React.FC<
         }
       });
     }
-  }, [results, props.joinOnLoad, joinContainer]);
+  }, [results?.created, props.joinOnLoad, joinContainer]);
 
   return (
     <LiveShareContext.Provider

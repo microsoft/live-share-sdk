@@ -11,21 +11,21 @@ import { useDynamicDDS } from "./useDynamicDDS";
  * @returns A Map<string, TData> with the entries provided.
  */
 function getInitialData<TData>(
-  initialData: SharedMapInitialData<TData>
+    initialData: SharedMapInitialData<TData>
 ): Map<string, TData> {
-  if (isMap(initialData)) {
-    return initialData;
-  } else if (isEntries(initialData)) {
-    return new Map<string, TData>(initialData);
-  } else if (isJSON(initialData)) {
-    const values: (readonly [string, TData])[] = Object.keys(initialData).map(
-      (key) => {
-        return [key, initialData[key]];
-      }
-    );
-    return new Map<string, TData>(values);
-  }
-  return new Map<string, TData>();
+    if (isMap(initialData)) {
+        return initialData;
+    } else if (isEntries(initialData)) {
+        return new Map<string, TData>(initialData);
+    } else if (isJSON(initialData)) {
+        const values: (readonly [string, TData])[] = Object.keys(
+            initialData
+        ).map((key) => {
+            return [key, initialData[key]];
+        });
+        return new Map<string, TData>(values);
+    }
+    return new Map<string, TData>();
 }
 
 /**
@@ -44,91 +44,93 @@ function getInitialData<TData>(
  * @returns stateful `map` entries, `setEntry` callback, `deleteEntry` callback, and the Fluid `sharedMap`.
  */
 export function useSharedMap<TData extends object = object>(
-  uniqueKey: string,
-  initialData?: SharedMapInitialData<TData>
+    uniqueKey: string,
+    initialData?: SharedMapInitialData<TData>
 ): IUseSharedMapResults<TData> {
-  /**
-   * Reference boolean for whether hook has registered "valueChanged" events for `SharedMap`.
-   */
-  const listeningRef = React.useRef(false);
-  /**
-   * Stateful readonly map (user facing) with most recent values from `SharedMap` and its setter method.
-   */
-  const [map, setMap] = React.useState<ReadonlyMap<string, TData>>(
-    getInitialData<TData>(initialData)
-  );
-  /**
-   * Callback method to set the `initialData` into the map when the `SharedMap` is first created.
-   * Only should be used as a prop to useDynamicDDS.
-   */
-  const onFirstInitialize = React.useCallback((dds: SharedMap) => {
-    getInitialData(initialData).forEach((value, key) => {
-      dds.set(key, value);
-    });
-  }, []);
-  /**
-   * User facing: dynamically load the EphemeralEvent DDS for the given unique key.
-   */
-  const { dds: sharedMap } = useDynamicDDS<SharedMap>(
-    `<SharedMap>:${uniqueKey}`,
-    SharedMap,
-    onFirstInitialize
-  );
+    /**
+     * Reference boolean for whether hook has registered "valueChanged" events for `SharedMap`.
+     */
+    const listeningRef = React.useRef(false);
+    /**
+     * Stateful readonly map (user facing) with most recent values from `SharedMap` and its setter method.
+     */
+    const [map, setMap] = React.useState<ReadonlyMap<string, TData>>(
+        getInitialData<TData>(initialData)
+    );
+    /**
+     * Callback method to set the `initialData` into the map when the `SharedMap` is first created.
+     * Only should be used as a prop to useDynamicDDS.
+     */
+    const onFirstInitialize = React.useCallback((dds: SharedMap) => {
+        getInitialData(initialData).forEach((value, key) => {
+            dds.set(key, value);
+        });
+    }, []);
+    /**
+     * User facing: dynamically load the EphemeralEvent DDS for the given unique key.
+     */
+    const { dds: sharedMap } = useDynamicDDS<SharedMap>(
+        `<SharedMap>:${uniqueKey}`,
+        SharedMap,
+        onFirstInitialize
+    );
 
-  /**
-   * User facing: set a value to the Fluid `SharedMap`.
-   */
-  const setEntry = React.useCallback(
-    (key: string, value: TData) => {
-      if (!sharedMap) {
-        console.error(new Error("Cannot call set when sharedMap is undefined"));
-        return;
-      }
-      sharedMap.set(key, value);
-    },
-    [sharedMap]
-  );
+    /**
+     * User facing: set a value to the Fluid `SharedMap`.
+     */
+    const setEntry = React.useCallback(
+        (key: string, value: TData) => {
+            if (!sharedMap) {
+                console.error(
+                    new Error("Cannot call set when sharedMap is undefined")
+                );
+                return;
+            }
+            sharedMap.set(key, value);
+        },
+        [sharedMap]
+    );
 
-  /**
-   * User facing: delete a value from the Fluid `SharedMap`.
-   */
-  const deleteEntry = React.useCallback(
-    (key: string) => {
-      if (!sharedMap) {
-        console.error(
-          new Error("Cannot call remove when sharedMap is undefined")
-        );
-        return;
-      }
-      sharedMap.delete(key);
-    },
-    [sharedMap]
-  );
+    /**
+     * User facing: delete a value from the Fluid `SharedMap`.
+     */
+    const deleteEntry = React.useCallback(
+        (key: string) => {
+            if (!sharedMap) {
+                console.error(
+                    new Error("Cannot call remove when sharedMap is undefined")
+                );
+                return;
+            }
+            sharedMap.delete(key);
+        },
+        [sharedMap]
+    );
 
-  // Setup change listeners, initial values, etc.
-  React.useEffect(() => {
-    if (listeningRef.current || !sharedMap) return;
-    listeningRef.current = true;
+    // Setup change listeners, initial values, etc.
+    React.useEffect(() => {
+        if (listeningRef.current || !sharedMap) return;
+        listeningRef.current = true;
 
-    // Register valueChanged listener for `SharedMap`.
-    const onValueChanged = () => {
-      setMap(new Map<string, TData>(sharedMap.entries()));
+        // Register valueChanged listener for `SharedMap`.
+        const onValueChanged = () => {
+            setMap(new Map<string, TData>(sharedMap.entries()));
+        };
+        sharedMap.on("valueChanged", onValueChanged);
+        // Get initial values from `SharedMap`.
+        onValueChanged();
+
+        return () => {
+            // Cleanup on component unmount.
+            listeningRef.current = false;
+            sharedMap?.off("valueChanged", onValueChanged);
+        };
+    }, [sharedMap]);
+
+    return {
+        map,
+        setEntry,
+        deleteEntry,
+        sharedMap,
     };
-    sharedMap.on("valueChanged", onValueChanged);
-    // Get initial values from `SharedMap`.
-    onValueChanged();
-
-    return () => {
-      // Cleanup on component unmount.
-      listeningRef.current = false;
-      sharedMap?.off("valueChanged", onValueChanged);
-    };
-  }, [sharedMap]);
-
-  return {
-    map,
-    setEntry,
-    deleteEntry,
-    sharedMap,
-  };
 }

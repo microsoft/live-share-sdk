@@ -21,7 +21,7 @@ export interface IDynamicDDSRegistry {
 /**
  * Hook used internally to keep track of the DDSSetStateActionMap for each unique key. It gets DDS objects for provided keys where they exist and creates
  * them where they do not, providing the DDS objects to components that use them.
- * 
+ *
  * @param results IAzureContainerResults response or undefined
  * @returns IDynamicDDSRegistry object
  */

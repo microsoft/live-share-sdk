@@ -14,11 +14,11 @@ import { isRefObject } from "../utils";
 
 /**
  * React hook for using a Live Share Canvas `LiveCanvas` and `InkingManager`.
- * 
+ *
  * @remarks
  * Use this hook to set up an `LiveCanvas` object, which is used for collaborative inking. It takes several input parameters, including a unique key,
  * a reference to a canvas element, and various settings for the inking tool, brush, and canvas offset and scale.
- * 
+ *
  * @param uniqueKey the unique key for the `LiveCanvas`. If one does not yet exist, a new one.
  * @param canvasElementRef the HTML div element ref or document ID that `InkingManager` will use for canvas-based collaboration.
  * @param active Optional. Stateful boolean that will activate/de-activate `InkingManager` accordingly.
@@ -80,7 +80,7 @@ export function useLiveCanvas(
 
     /**
      * Activate or deactivate the inkingManager based on the 'active' prop
-     */ 
+     */
     React.useEffect(() => {
         if (inkingManager && active !== undefined) {
             if (active) {
@@ -156,7 +156,10 @@ export function useLiveCanvas(
      * Sets the isCursorShared of the liveCanvas based on the 'isCursorShared' prop
      */
     React.useEffect(() => {
-        if (liveCanvas?.isCursorShared !== undefined && isCursorShared !== undefined) {
+        if (
+            liveCanvas?.isCursorShared !== undefined &&
+            isCursorShared !== undefined
+        ) {
             liveCanvas.isCursorShared = isCursorShared;
         }
     }, [isCursorShared, liveCanvas?.isCursorShared]);
@@ -173,7 +176,11 @@ export function useLiveCanvas(
                 };
             };
         }
-    }, [localUserCursor?.displayName, localUserCursor?.pictureUri, liveCanvas?.onGetLocalUserInfo]);
+    }, [
+        localUserCursor?.displayName,
+        localUserCursor?.pictureUri,
+        liveCanvas?.onGetLocalUserInfo,
+    ]);
 
     /**
      * Return hook response

@@ -18,62 +18,63 @@ import { v4 as uuid } from "uuid";
  * @returns a stateful value, the function to update it, and an optional dispose method to delete it from the `SharedMap`.
  */
 export function useSharedState<S>(
-  uniqueKey: string,
-  initialState: S
+    uniqueKey: string,
+    initialState: S
 ): [S, SetSharedStateAction<S>, DisposeSharedStateAction] {
-  /**
-   * User facing: stateful value and non-user facing setter.
-   */
-  const [localState, setLocalState] = React.useState<S>(initialState);
-  /**
-   * Unique ID reference for the component.
-   */
-  const componentIdRef = React.useRef(uuid());
-  /**
-   * Register set state callbacks from FluidContextProvider and update/delete callbacks for initial object's `stateMap`.
-   */
-  const {
-    registerSharedSetStateAction,
-    unregisterSharedSetStateAction,
-    updateSharedState,
-    deleteSharedState,
-  } = useFluidObjectsContext();
+    /**
+     * User facing: stateful value and non-user facing setter.
+     */
+    const [localState, setLocalState] = React.useState<S>(initialState);
+    /**
+     * Unique ID reference for the component.
+     */
+    const componentIdRef = React.useRef(uuid());
+    /**
+     * Register set state callbacks from FluidContextProvider and update/delete callbacks for initial object's `stateMap`.
+     */
+    const {
+        registerSharedSetStateAction,
+        unregisterSharedSetStateAction,
+        updateSharedState,
+        deleteSharedState,
+    } = useFluidObjectsContext();
 
-  /**
-   * User facing: callback to change the shared state.
-   */
-  const setSharedState: SetSharedStateAction<S> = React.useCallback(
-    (updatedState: S) => {
-      setLocalState(updatedState);
-      updateSharedState(uniqueKey, updatedState);
-    },
-    [uniqueKey, setLocalState, updateSharedState]
-  );
-
-  /**
-   * User facing: callback to dispose the shared state from the `stateMap`.
-   */
-  const disposeSharedState: DisposeSharedStateAction = React.useCallback(() => {
-    deleteSharedState(uniqueKey);
-  }, [uniqueKey, deleteSharedState]);
-
-  /**
-   * Once container is available, this effect will register the setter method so that the `S` value
-   * from `stateMap` that matches `uniqueKey` can be passed back to this hook whenever changed.
-   *
-   * @see registerSharedSetStateAction to see how new values from `stateMap` are passed to this hook.
-   * @see unregisterSharedSetStateAction to see how this component stops listening to changes in the `stateMap`.
-   */
-  React.useEffect(() => {
-    registerSharedSetStateAction(
-      uniqueKey,
-      componentIdRef.current,
-      setLocalState
+    /**
+     * User facing: callback to change the shared state.
+     */
+    const setSharedState: SetSharedStateAction<S> = React.useCallback(
+        (updatedState: S) => {
+            setLocalState(updatedState);
+            updateSharedState(uniqueKey, updatedState);
+        },
+        [uniqueKey, setLocalState, updateSharedState]
     );
-    return () => {
-      unregisterSharedSetStateAction(uniqueKey, componentIdRef.current);
-    };
-  }, []);
 
-  return [localState, setSharedState, disposeSharedState];
+    /**
+     * User facing: callback to dispose the shared state from the `stateMap`.
+     */
+    const disposeSharedState: DisposeSharedStateAction =
+        React.useCallback(() => {
+            deleteSharedState(uniqueKey);
+        }, [uniqueKey, deleteSharedState]);
+
+    /**
+     * Once container is available, this effect will register the setter method so that the `S` value
+     * from `stateMap` that matches `uniqueKey` can be passed back to this hook whenever changed.
+     *
+     * @see registerSharedSetStateAction to see how new values from `stateMap` are passed to this hook.
+     * @see unregisterSharedSetStateAction to see how this component stops listening to changes in the `stateMap`.
+     */
+    React.useEffect(() => {
+        registerSharedSetStateAction(
+            uniqueKey,
+            componentIdRef.current,
+            setLocalState
+        );
+        return () => {
+            unregisterSharedSetStateAction(uniqueKey, componentIdRef.current);
+        };
+    }, []);
+
+    return [localState, setSharedState, disposeSharedState];
 }

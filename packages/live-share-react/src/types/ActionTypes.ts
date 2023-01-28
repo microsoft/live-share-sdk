@@ -9,27 +9,27 @@ export type SetLocalStateAction = React.Dispatch<React.SetStateAction<any>>;
 
 // Fluid actions
 export type RegisterDDSSetStateAction = <T extends IFluidLoadable>(
-  uniqueKey: string,
-  componentId: string,
-  objectClass: LoadableObjectClass<T>,
-  setLocalStateAction: SetLocalStateAction,
-  onDidFirstInitialize?: (dds: T) => void
+    uniqueKey: string,
+    componentId: string,
+    objectClass: LoadableObjectClass<T>,
+    setLocalStateAction: SetLocalStateAction,
+    onDidFirstInitialize?: (dds: T) => void
 ) => void;
 
 export type UnregisterDDSSetStateAction = (
-  uniqueKey: string,
-  componentId: string
+    uniqueKey: string,
+    componentId: string
 ) => void;
 
 export type RegisterSharedSetStateAction = (
-  uniqueKey: string,
-  componentId: string,
-  setLocalStateAction: SetLocalStateAction
+    uniqueKey: string,
+    componentId: string,
+    setLocalStateAction: SetLocalStateAction
 ) => void;
 
 export type UnregisterSharedSetStateAction = (
-  uniqueKey: string,
-  componentId: string
+    uniqueKey: string,
+    componentId: string
 ) => void;
 
 export type UpdateSharedStateAction = (uniqueKey: string, value: any) => void;
@@ -40,18 +40,18 @@ export type DisposeSharedStateAction = () => void;
 // Live Share actions
 
 export type SetLiveStateAction<TState, TData> = (
-  state: TState,
-  value?: TData | undefined
+    state: TState,
+    value?: TData | undefined
 ) => void;
 
 export type SendLiveEventAction<TEvent> = (event: TEvent) => void;
 
 export type OnReceivedLiveEventAction<TEvent> = (
-  event: TEvent,
-  local: boolean
+    event: TEvent,
+    local: boolean
 ) => void;
 
 export type OnUpdateLivePresenceAction<TData extends object = object> = (
-  state?: PresenceState | undefined,
-  data?: TData | undefined
+    state?: PresenceState | undefined,
+    data?: TData | undefined
 ) => void;

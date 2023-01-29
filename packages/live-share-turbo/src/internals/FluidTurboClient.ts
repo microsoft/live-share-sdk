@@ -13,6 +13,7 @@ import { IFluidTurboClient } from "../interfaces/IFluidTurboClient";
 import { SharedDataObject } from "../interfaces";
 
 export class FluidTurboClient implements IFluidTurboClient {
+    private _awaitConnectedPromise?: Promise<void>;
     protected _dynamicDDSMap = new Map<string, TurboDataObject<any, any>>();
 
     /**
@@ -40,15 +41,19 @@ export class FluidTurboClient implements IFluidTurboClient {
      */
     public get dynamicObjects(): SharedMap | undefined {
         if (this.results) {
-            return this.results.container.initialObjects.dynamicObjects as SharedMap;
+            return this.results.container.initialObjects
+                .dynamicObjects as SharedMap;
         }
         return undefined;
     }
 
     protected registerDynamicObjectListeners() {
-        const valueChangedListener = async (changed: IValueChanged, local: boolean) => {
+        const valueChangedListener = async (
+            changed: IValueChanged,
+            local: boolean
+        ) => {
             if (local) return;
-            
+
             const key = changed.key;
             const existingValue = this._dynamicDDSMap.get(key);
             try {
@@ -59,7 +64,7 @@ export class FluidTurboClient implements IFluidTurboClient {
             } catch (error: any) {
                 console.error(error);
             }
-        }
+        };
         this.dynamicObjects!.on("valueChanged", valueChangedListener);
     }
 
@@ -77,10 +82,10 @@ export class FluidTurboClient implements IFluidTurboClient {
     >(
         uniqueKey: string,
         objectClass: LoadableObjectClass<T>,
-        constructTurboDataObject: (dds: IFluidLoadable) => TurboDataObject<I, T>,
+        constructTurboDataObject: (dds: IFluidLoadable) => TurboDataObject<I, T>
     ): Promise<{
-        created: boolean,
-        dds: TurboDataObject<I, T>,
+        created: boolean;
+        dds: TurboDataObject<I, T>;
     }> {
         const existingValue = this._dynamicDDSMap.get(uniqueKey);
         if (existingValue !== undefined) {
@@ -108,14 +113,19 @@ export class FluidTurboClient implements IFluidTurboClient {
     protected async loadDDS<T extends IFluidLoadable>(
         key: string
     ): Promise<T | undefined> {
+        if (!this.results?.container) {
+            throw new Error(
+                "FluidTurboClient loadDDS: cannot load DDS without a Fluid container"
+            );
+        }
+        await this.waitUntilConnected();
         const dynamicObjectMap = this.dynamicObjects;
         if (dynamicObjectMap) {
             const handleValue = dynamicObjectMap.get<
                 IFluidHandle<T> & IFluidLoadable
             >(key);
             if (handleValue) {
-                const dds = await handleValue.get();
-                return dds;
+                return await handleValue.get();
             } else {
                 return undefined;
             }
@@ -142,5 +152,35 @@ export class FluidTurboClient implements IFluidTurboClient {
                 "createDDS: should never be called if dynamicObjectsMap is undefined"
             );
         }
+    }
+
+    private async waitUntilConnected(): Promise<void> {
+        if (this._awaitConnectedPromise) {
+            return this._awaitConnectedPromise;
+        }
+        this._awaitConnectedPromise = new Promise((resolve, reject) => {
+            if (!this.results?.container) {
+                reject(
+                    new Error(
+                        "FluidTurboClient awaitConnected: cannot load DDS without a Fluid container"
+                    )
+                );
+                this._awaitConnectedPromise = undefined;
+            } else {
+                const onConnected = () => {
+                    this.results?.container.off("connected", onConnected);
+                    resolve();
+                };
+                // Wait until connected event to ensure we have the latest document
+                // and don't accidentally override a dds handle recently created
+                // by another client
+                if (this.results.container.connectionState === 2) {
+                    resolve();
+                } else {
+                    this.results.container.on("connected", onConnected);
+                }
+            }
+        });
+        return this._awaitConnectedPromise;
     }
 }

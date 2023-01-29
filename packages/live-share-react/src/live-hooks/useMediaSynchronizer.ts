@@ -122,7 +122,7 @@ export function useMediaSynchronizer(
      * Setup change listeners and start `LiveMediaSession` if needed
      */
     React.useEffect(() => {
-        if (listeningRef.current || !mediaSession || !mediaPlayerElementRef)
+        if (listeningRef.current || mediaSession?.isInitialized === undefined || !mediaPlayerElementRef)
             return;
         // Query the HTML5 media element from the document and set reference
         let mediaPlayer: IMediaPlayer | undefined;
@@ -177,20 +177,20 @@ export function useMediaSynchronizer(
             mediaSession.removeAllListeners();
             synchronizer?.end();
         };
-    }, [mediaSession]);
+    }, [mediaSession?.isInitialized]);
 
     /**
      * Change view in media synchronizer only if prop changes
      */
     React.useEffect(() => {
         if (
-            mediaSynchronizer &&
+            mediaSynchronizer?.viewOnly !== undefined &&
             viewOnly !== undefined &&
             mediaSynchronizer.viewOnly !== viewOnly
         ) {
             mediaSynchronizer.viewOnly = !!viewOnly;
         }
-    }, [viewOnly, mediaSynchronizer]);
+    }, [viewOnly, mediaSynchronizer?.viewOnly]);
 
     return {
         suspended: !!suspension,

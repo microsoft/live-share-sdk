@@ -75,6 +75,8 @@ export function useLiveCanvas(
         return () => {
             listeningRef.current = false;
             liveCanvas.dispose();
+            inkingManager.clear();
+            inkingManager.removeAllListeners();
         };
     }, [liveCanvas]);
 

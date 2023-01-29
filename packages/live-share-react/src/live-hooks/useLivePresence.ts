@@ -1,12 +1,11 @@
 import {
-    LivePresence,
     LivePresenceUser,
     PresenceState,
 } from "@microsoft/live-share";
+import { TurboLivePresence } from "@microsoft/live-share-turbo";
 import React from "react";
 import { IUseLivePresenceResults } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
-import { TurboLivePresence } from "../live-share-turbo";
 import { useFluidObjectsContext } from "../providers";
 
 /**
@@ -52,7 +51,7 @@ export function useLivePresence<TData extends object = object>(
      * User facing: dynamically load the TurboLivePresence DDS for the given unique key.
      */
     const { dds: livePresence } = useDynamicDDS<TurboLivePresence<TData>>(getDDS);
-    
+
     /**
      * User facing: list of non-local user's presence objects.
      */

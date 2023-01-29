@@ -1,6 +1,6 @@
 import React from "react";
 import { useFluidObjectsContext } from "../providers";
-import { TurboDataObject } from "../live-share-turbo";
+import { TurboDataObject } from "@microsoft/live-share-turbo";
 
 /**
  * Hook to gets or creates a DDS that corresponds to a given uniqueKey string.

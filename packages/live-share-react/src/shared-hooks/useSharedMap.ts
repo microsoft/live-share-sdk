@@ -2,7 +2,7 @@ import React from "react";
 import { isEntries, isJSON, isMap } from "../utils";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types";
 import { useDynamicDDS } from "./useDynamicDDS";
-import { TurboSharedMap } from "../live-share-turbo";
+import { TurboSharedMap } from "@microsoft/live-share-turbo";
 import { useFluidObjectsContext } from "../providers";
 
 /**

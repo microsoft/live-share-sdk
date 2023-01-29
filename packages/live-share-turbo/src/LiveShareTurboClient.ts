@@ -4,7 +4,7 @@ import {
     ILiveShareClientOptions,
     ILiveShareHost,
 } from "@microsoft/live-share";
-import { getLiveShareContainerSchema } from "../utils";
+import { getLiveShareContainerSchema } from "./utils";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { FluidTurboClient } from "./internals";
 

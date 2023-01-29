@@ -9,7 +9,7 @@ import {
     ISharedStateRegistryResponse,
     useSharedStateRegistry,
 } from "../internal-hooks";
-import { AzureTurboClient, IFluidTurboClient } from "../live-share-turbo";
+import { AzureTurboClient, IFluidTurboClient } from "@microsoft/live-share-turbo";
 
 interface IFluidContext
     extends ISharedStateRegistryResponse {

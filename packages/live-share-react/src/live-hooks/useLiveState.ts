@@ -1,8 +1,8 @@
-import { LiveState, UserMeetingRole } from "@microsoft/live-share";
+import { UserMeetingRole } from "@microsoft/live-share";
 import React from "react";
 import { SetLiveStateAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
-import { TurboLiveState } from "../live-share-turbo";
+import { TurboLiveState } from "@microsoft/live-share-turbo";
 import { useFluidObjectsContext } from "../providers";
 
 interface ILiveStateStatus<

@@ -1,5 +1,5 @@
 import { IFluidContainer, LoadableObjectClass } from "fluid-framework";
-import { getContainerSchema } from "../utils";
+import { getContainerSchema } from "./utils";
 import {
     AzureClient,
     AzureClientProps,

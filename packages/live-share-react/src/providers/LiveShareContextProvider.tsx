@@ -9,7 +9,7 @@ import {
     ILiveShareHost,
 } from "@microsoft/live-share";
 import { FluidContext } from "./FluidContextProvider";
-import { LiveShareTurboClient } from "../live-share-turbo";
+import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 
 interface ILiveShareContext {
     created: boolean | undefined;

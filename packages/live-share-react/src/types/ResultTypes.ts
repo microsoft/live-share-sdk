@@ -1,18 +1,16 @@
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import {
-    LiveEvent,
-    LivePresence,
     LivePresenceUser,
 } from "@microsoft/live-share";
+import { TurboLiveCanvas, TurboLiveEvent, TurboLivePresence, TurboSharedMap } from "@microsoft/live-share-turbo";
 import { InkingManager } from "@microsoft/live-share-canvas";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
     MediaPlayerSynchronizer,
 } from "@microsoft/live-share-media";
-import { IFluidContainer, SharedMap } from "fluid-framework";
+import { IFluidContainer } from "fluid-framework";
 import { IReceiveLiveEvent } from "../interfaces";
-import { TurboLiveCanvas, TurboLiveEvent, TurboLivePresence, TurboSharedMap } from "../live-share-turbo";
 import { OnUpdateLivePresenceAction, SendLiveEventAction } from "./ActionTypes";
 
 export interface IAzureContainerResults {

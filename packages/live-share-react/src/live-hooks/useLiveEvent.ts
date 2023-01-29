@@ -1,8 +1,8 @@
 import {
-    LiveEvent,
     LiveEventEvents,
     UserMeetingRole,
 } from "@microsoft/live-share";
+import { TurboLiveEvent } from "@microsoft/live-share-turbo";
 import React from "react";
 import {
     IUseLiveEventResults,
@@ -11,7 +11,6 @@ import {
 } from "../types";
 import { IReceiveLiveEvent } from "../interfaces";
 import { useDynamicDDS } from "../shared-hooks";
-import { TurboLiveEvent } from "../live-share-turbo";
 import { useFluidObjectsContext } from "../providers";
 
 /**

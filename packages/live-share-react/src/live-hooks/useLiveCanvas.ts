@@ -6,8 +6,8 @@ import {
     IPoint,
     IUserInfo,
 } from "@microsoft/live-share-canvas";
+import { TurboLiveCanvas } from "@microsoft/live-share-turbo";
 import React from "react";
-import { TurboLiveCanvas } from "../live-share-turbo";
 import { useFluidObjectsContext } from "../providers";
 import { useDynamicDDS } from "../shared-hooks";
 import { IUseLiveCanvasResults } from "../types";

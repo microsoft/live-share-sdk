@@ -2,16 +2,14 @@ import { IFluidContainer, LoadableObjectClass } from "fluid-framework";
 import React from "react";
 import { ILiveShareContainerResults } from "../types";
 import {
-    useDynamicDDSRegistry,
     useSharedStateRegistry,
 } from "../internal-hooks";
 import {
     ILiveShareClientOptions,
-    LiveShareClient,
     ILiveShareHost,
 } from "@microsoft/live-share";
 import { FluidContext } from "./FluidContextProvider";
-import { getLiveShareContainerSchema } from "../utils";
+import { LiveShareTurboClient } from "../live-share-turbo";
 
 interface ILiveShareContext {
     created: boolean | undefined;
@@ -60,7 +58,7 @@ export const LiveShareContextProvider: React.FC<
 > = (props) => {
     const startedRef = React.useRef(false);
     const clientRef = React.useRef(
-        new LiveShareClient(props.host, props.clientOptions)
+        new LiveShareTurboClient(props.host, props.clientOptions)
     );
     const [results, setResults] = React.useState<
         ILiveShareContainerResults | undefined
@@ -68,7 +66,6 @@ export const LiveShareContextProvider: React.FC<
     const [joinError, setJoinError] = React.useState<Error | undefined>();
 
     const stateRegistryCallbacks = useSharedStateRegistry(results);
-    const ddsRegistryCallbacks = useDynamicDDSRegistry(results);
 
     /**
      * Join container callback for joining the Live Share session
@@ -78,10 +75,8 @@ export const LiveShareContextProvider: React.FC<
             onInitializeContainer?: (container: IFluidContainer) => void
         ): Promise<ILiveShareContainerResults> => {
             const results: ILiveShareContainerResults =
-                await clientRef.current.joinContainer(
-                    getLiveShareContainerSchema(
-                        props.additionalDynamicObjectTypes
-                    ),
+                await clientRef.current.join(
+                    props.additionalDynamicObjectTypes,
                     onInitializeContainer
                 );
             setResults(results);
@@ -120,6 +115,7 @@ export const LiveShareContextProvider: React.FC<
         >
             <FluidContext.Provider
                 value={{
+                    clientRef,
                     container: results?.container,
                     services: results?.services,
                     joinError,
@@ -134,7 +130,6 @@ export const LiveShareContextProvider: React.FC<
                         );
                     },
                     ...stateRegistryCallbacks,
-                    ...ddsRegistryCallbacks,
                 }}
             >
                 {props.children}

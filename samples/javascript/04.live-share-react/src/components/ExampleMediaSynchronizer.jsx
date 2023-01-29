@@ -48,7 +48,6 @@ export const ExampleMediaSynchronizer = () => {
     }, [mediaSynchronizer]);
 
     const onTogglePlayPause = useCallback(() => {
-        console.log("onClickTogglePlayPause", videoRef.current?.paused);
         if (videoRef.current?.paused) {
             play();
         } else {

@@ -6,6 +6,8 @@ import {
 import React from "react";
 import { IUseLivePresenceResults } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
+import { TurboLivePresence } from "../live-share-turbo";
+import { useFluidObjectsContext } from "../providers";
 
 /**
  * React hook for using a Live Share `LivePresence`.
@@ -41,13 +43,16 @@ export function useLivePresence<TData extends object = object>(
     const [allUsers, setAllUsers] = React.useState<LivePresenceUser<TData>[]>(
         []
     );
+    const { clientRef } = useFluidObjectsContext();
+
+    const getDDS = React.useCallback((): Promise<TurboLivePresence<TData>> => {
+        return TurboLivePresence.create<TData>(clientRef.current, uniqueKey);
+    }, [uniqueKey]);
     /**
-     * User facing: dynamically load the LiveEvent DDS for the given unique key.
+     * User facing: dynamically load the TurboLivePresence DDS for the given unique key.
      */
-    const { dds: livePresence } = useDynamicDDS<LivePresence<TData>>(
-        `<LivePresence>:${uniqueKey}`,
-        LivePresence<TData>
-    );
+    const { dds: livePresence } = useDynamicDDS<TurboLivePresence<TData>>(getDDS);
+    
     /**
      * User facing: list of non-local user's presence objects.
      */

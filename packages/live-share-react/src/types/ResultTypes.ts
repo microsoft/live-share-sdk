@@ -4,7 +4,7 @@ import {
     LivePresence,
     LivePresenceUser,
 } from "@microsoft/live-share";
-import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
+import { InkingManager } from "@microsoft/live-share-canvas";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
@@ -12,6 +12,7 @@ import {
 } from "@microsoft/live-share-media";
 import { IFluidContainer, SharedMap } from "fluid-framework";
 import { IReceiveLiveEvent } from "../interfaces";
+import { TurboLiveCanvas, TurboLiveEvent, TurboLivePresence, TurboSharedMap } from "../live-share-turbo";
 import { OnUpdateLivePresenceAction, SendLiveEventAction } from "./ActionTypes";
 
 export interface IAzureContainerResults {
@@ -46,9 +47,9 @@ export interface IUseSharedMapResults<TData> {
      */
     deleteEntry: (key: string) => void;
     /**
-     * The Fluid `SharedMap` object, should you want to use it directly.
+     * The Fluid `TurboSharedMap` object, should you want to use it directly.
      */
-    sharedMap: SharedMap | undefined;
+    sharedMap: TurboSharedMap | undefined;
 }
 
 export interface IUseLiveEventResults<TEvent extends object = object> {
@@ -67,7 +68,7 @@ export interface IUseLiveEventResults<TEvent extends object = object> {
     /**
      * The `LiveEvent` object, should you want to use it directly.
      */
-    liveEvent: LiveEvent | undefined;
+    liveEvent: TurboLiveEvent | undefined;
 }
 
 export interface IUseLivePresenceResults<TData extends object = object> {
@@ -86,7 +87,7 @@ export interface IUseLivePresenceResults<TData extends object = object> {
     /**
      * Live Share `LivePresence` object, should you want to use it directly.
      */
-    livePresence: LivePresence<TData> | undefined;
+    livePresence: TurboLivePresence<TData> | undefined;
     /**
      * Callback method to update the local user's presence.
      */
@@ -143,5 +144,5 @@ export interface IUseLiveCanvasResults {
     /**
      * Live Canvas data object which synchronizes inking & cursors in the session. It is set when loaded and undefined while loading.
      */
-    liveCanvas: LiveCanvas | undefined;
+    liveCanvas: TurboLiveCanvas | undefined;
 }

@@ -38,7 +38,6 @@ export const ExampleLiveCanvas = () => {
                     <button
                         onClick={() => {
                             setIsCursorShared(!isCursorShared);
-                            console.log(isCursorShared)
                         }}
                     >
                         {"Toggle Cursor"}

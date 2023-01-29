@@ -2,6 +2,8 @@ import { LiveState, UserMeetingRole } from "@microsoft/live-share";
 import React from "react";
 import { SetLiveStateAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
+import { TurboLiveState } from "../live-share-turbo";
+import { useFluidObjectsContext } from "../providers";
 
 interface ILiveStateStatus<
     TState extends string = string,
@@ -40,10 +42,15 @@ export function useLiveState<
         data: initialData,
     });
 
-    const { dds: liveState } = useDynamicDDS<LiveState<TData>>(
-        `<LiveState>:${uniqueKey}`,
-        LiveState<TData>
-    );
+    const { clientRef } = useFluidObjectsContext();
+
+    const getDDS = React.useCallback((): Promise<TurboLiveState<TData>> => {
+        return TurboLiveState.create<TData>(clientRef.current, uniqueKey);
+    }, [uniqueKey]);
+    /**
+     * User facing: dynamically load the TurboLiveState DDS for the given unique key.
+     */
+    const { dds: liveState } = useDynamicDDS<TurboLiveState<TData>>(getDDS);
 
     /**
      * Change state callback that is user facing

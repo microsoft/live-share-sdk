@@ -1,22 +1,19 @@
 import { IFluidContainer, LoadableObjectClass } from "fluid-framework";
 import React from "react";
 import {
-    AzureClient,
     AzureClientProps,
     AzureContainerServices,
 } from "@fluidframework/azure-client";
 import { IAzureContainerResults } from "../types";
 import {
-    IDynamicDDSRegistry,
     ISharedStateRegistryResponse,
-    useDynamicDDSRegistry,
     useSharedStateRegistry,
 } from "../internal-hooks";
-import { getContainerSchema } from "../utils";
+import { AzureTurboClient, IFluidTurboClient } from "../live-share-turbo";
 
 interface IFluidContext
-    extends ISharedStateRegistryResponse,
-        IDynamicDDSRegistry {
+    extends ISharedStateRegistryResponse {
+    clientRef: React.MutableRefObject<IFluidTurboClient>;
     container: IFluidContainer | undefined;
     services: AzureContainerServices | undefined;
     joinError: Error | undefined;
@@ -51,8 +48,8 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
     props
 ) => {
     const startedRef = React.useRef<boolean>(false);
-    const clientRef = React.useRef<AzureClient>(
-        new AzureClient(props.clientOptions)
+    const clientRef = React.useRef<AzureTurboClient>(
+        new AzureTurboClient(props.clientOptions)
     );
     const [results, setResults] = React.useState<
         IAzureContainerResults | undefined
@@ -60,7 +57,6 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
     const [joinError, setJoinError] = React.useState<Error | undefined>();
 
     const stateRegistryCallbacks = useSharedStateRegistry(results);
-    const ddsRegistryCallbacks = useDynamicDDSRegistry(results);
 
     /**
      * Get the container for a given containerId using AzureClient
@@ -72,9 +68,7 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
                     const results: IAzureContainerResults =
                         await clientRef.current.getContainer(
                             containerId,
-                            getContainerSchema(
-                                props.additionalDynamicObjectTypes
-                            )
+                            props.additionalDynamicObjectTypes
                         );
                     setResults(results);
                     resolve(results);
@@ -100,9 +94,7 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
                 try {
                     const results: IAzureContainerResults =
                         await clientRef.current.createContainer(
-                            getContainerSchema(
-                                props.additionalDynamicObjectTypes
-                            )
+                          props.additionalDynamicObjectTypes
                         );
                     if (onInitializeContainer) {
                         onInitializeContainer(results.container);
@@ -150,13 +142,13 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
     return (
         <FluidContext.Provider
             value={{
+                clientRef,
                 container: results?.container,
                 services: results?.services,
                 joinError,
                 createContainer,
                 getContainer,
                 ...stateRegistryCallbacks,
-                ...ddsRegistryCallbacks,
             }}
         >
             {props.children}

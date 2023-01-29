@@ -1,8 +1,9 @@
 import React from "react";
-import { SharedMap } from "fluid-framework";
 import { isEntries, isJSON, isMap } from "../utils";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types";
 import { useDynamicDDS } from "./useDynamicDDS";
+import { TurboSharedMap } from "../live-share-turbo";
+import { useFluidObjectsContext } from "../providers";
 
 /**
  * Helper method for converting different initial data props into a Map<string, TData> to insert into the Fluid SharedMap
@@ -57,23 +58,26 @@ export function useSharedMap<TData extends object = object>(
     const [map, setMap] = React.useState<ReadonlyMap<string, TData>>(
         getInitialData<TData>(initialData)
     );
+    
+    
+    const { clientRef } = useFluidObjectsContext();
+
+    const getDDS = React.useCallback((): Promise<TurboSharedMap> => {
+        /**
+         * Callback method to set the `initialData` into the map when the `SharedMap` is first created.
+         * Only should be used as a prop to useDynamicDDS.
+         */
+        const onFirstInitialize = (dds: TurboSharedMap) => {
+            getInitialData(initialData).forEach((value, key) => {
+                dds.set(key, value);
+            });
+        };
+        return TurboSharedMap.create(clientRef.current, uniqueKey, onFirstInitialize);
+    }, [uniqueKey, initialData]);
     /**
-     * Callback method to set the `initialData` into the map when the `SharedMap` is first created.
-     * Only should be used as a prop to useDynamicDDS.
+     * User facing: dynamically load the TurboLiveMediaSession DDS for the given unique key.
      */
-    const onFirstInitialize = React.useCallback((dds: SharedMap) => {
-        getInitialData(initialData).forEach((value, key) => {
-            dds.set(key, value);
-        });
-    }, []);
-    /**
-     * User facing: dynamically load the EphemeralEvent DDS for the given unique key.
-     */
-    const { dds: sharedMap } = useDynamicDDS<SharedMap>(
-        `<SharedMap>:${uniqueKey}`,
-        SharedMap,
-        onFirstInitialize
-    );
+    const { dds: sharedMap } = useDynamicDDS<TurboSharedMap>(getDDS);
 
     /**
      * User facing: set a value to the Fluid `SharedMap`.

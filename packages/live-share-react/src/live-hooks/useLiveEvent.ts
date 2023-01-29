@@ -11,6 +11,8 @@ import {
 } from "../types";
 import { IReceiveLiveEvent } from "../interfaces";
 import { useDynamicDDS } from "../shared-hooks";
+import { TurboLiveEvent } from "../live-share-turbo";
+import { useFluidObjectsContext } from "../providers";
 
 /**
  * React hook for using a Live Share `LiveEvent`.
@@ -45,13 +47,16 @@ export function useLiveEvent<TEvent extends object = object>(
      * this is always set at the same time as latestEvent, it is effectively a stateful value.
      */
     const allEventsRef = React.useRef<IReceiveLiveEvent<TEvent>[]>([]);
+
+    const { clientRef } = useFluidObjectsContext();
+
+    const getDDS = React.useCallback((): Promise<TurboLiveEvent> => {
+        return TurboLiveEvent.create(clientRef.current, uniqueKey);
+    }, [uniqueKey]);
     /**
-     * User facing: dynamically load the LiveEvent DDS for the given unique key.
+     * User facing: dynamically load the TurboLiveCanvas DDS for the given unique key.
      */
-    const { dds: liveEvent } = useDynamicDDS<LiveEvent>(
-        `<LiveEvent>:${uniqueKey}`,
-        LiveEvent
-    );
+    const { dds: liveEvent } = useDynamicDDS<TurboLiveEvent>(getDDS);
 
     /**
      * User facing: callback to send event through `LiveEvent`

@@ -5,9 +5,10 @@
 
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import {
+    ITimerConfig,
     LivePresenceUser,
 } from "@microsoft/live-share";
-import { TurboLiveCanvas, TurboLiveEvent, TurboLivePresence, TurboSharedMap } from "@microsoft/live-share-turbo";
+import { TurboLiveCanvas, TurboLiveEvent, TurboLivePresence, TurboLiveTimer, TurboSharedMap } from "@microsoft/live-share-turbo";
 import { InkingManager } from "@microsoft/live-share-canvas";
 import {
     CoordinationWaitPoint,
@@ -16,7 +17,7 @@ import {
 } from "@microsoft/live-share-media";
 import { IFluidContainer } from "fluid-framework";
 import { IReceiveLiveEvent } from "../interfaces";
-import { OnUpdateLivePresenceAction, SendLiveEventAction } from "./ActionTypes";
+import { OnPauseTimerAction, OnPlayTimerAction, OnStartTimerAction, OnUpdateLivePresenceAction, SendLiveEventAction } from "./ActionTypes";
 
 export interface IAzureContainerResults {
     /**
@@ -72,6 +73,33 @@ export interface IUseLiveEventResults<TEvent extends object = object> {
      * The `LiveEvent` object, should you want to use it directly.
      */
     liveEvent: TurboLiveEvent | undefined;
+}
+
+export interface IUseLiveTimerResults {
+    /**
+     * The current timer configuration.
+     */
+    timerConfig: ITimerConfig | undefined;
+    /**
+     * The time remaining in milliseconds.
+     */
+    milliRemaining: number | undefined;
+    /**
+     * The `LiveTimer` object, should you want to use it directly.
+     */
+    liveTimer: TurboLiveTimer | undefined;
+    /**
+     * Start timer callback.
+     */
+    start: OnStartTimerAction;
+    /**
+     * Play timer callback.
+     */
+    play: OnPlayTimerAction;
+    /**
+     * Pause timer callback.
+     */
+    pause: OnPauseTimerAction;
 }
 
 export interface IUseLivePresenceResults<TData extends object = object> {

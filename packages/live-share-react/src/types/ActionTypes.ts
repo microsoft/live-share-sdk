@@ -6,7 +6,7 @@
 import React from "react";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { LoadableObjectClass } from "fluid-framework";
-import { PresenceState } from "@microsoft/live-share";
+import { ITimerConfig, PresenceState } from "@microsoft/live-share";
 
 // React actions
 export type SetSharedStateAction<T> = (state: T) => void;
@@ -60,3 +60,17 @@ export type OnUpdateLivePresenceAction<TData extends object = object> = (
     state?: PresenceState | undefined,
     data?: TData | undefined
 ) => void;
+
+export type OnStartTimerAction = (
+    duration: number
+) => void;
+
+export type OnPlayTimerAction = () => void;
+
+export type OnPauseTimerAction = () => void;
+
+export type OnTimerTickAction = (milliRemaining: number) => void;
+export type OnTimerDidStartAction = (timerConfig: ITimerConfig) => void;
+export type OnTimerDidPauseAction = (timerConfig: ITimerConfig) => void;
+export type OnTimerDidPlayAction = (timerConfig: ITimerConfig) => void;
+export type OnTimerDidFinishAction = (timerConfig: ITimerConfig) => void;

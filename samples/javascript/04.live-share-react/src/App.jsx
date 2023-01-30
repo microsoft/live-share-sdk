@@ -13,6 +13,7 @@ import {
     ExampleMediaSynchronizer,
     ExampleLiveEvent,
     ExampleLiveCanvas,
+    ExampleLiveTimer,
 } from "./components";
 import { TeamsClientLoader } from "./components/TeamsClientLoader";
 import { LiveShareHost } from "@microsoft/teams-js";
@@ -50,6 +51,7 @@ export default function App() {
                         }
                         startContent={
                             <>
+                                <ExampleLiveTimer />
                                 <ExampleSharedState />
                                 <ExampleLivePresence />
                                 <ExampleSharedMap />

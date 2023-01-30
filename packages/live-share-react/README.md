@@ -283,6 +283,50 @@ export function Reactions() {
 }
 ```
 
+### useLiveTimer
+
+You can use the `useLiveTimer` hook to build a synchronized countdown timer. A good example of that might be a meditation timer or a countdown for a round in a group activity.
+
+Here is a simple example:
+
+```javascript
+import { useLiveTimer } from "@microsoft/live-share-react";
+
+export function CountdownTimer() {
+  const { milliRemaining, timerConfig, start, pause, play } = useLiveTimer("TIMER-ID");
+
+  return (
+    <div>
+      <button
+        onClick={() => {
+          start(60 * 1000);
+        }}
+      >
+        { timerConfig === undefined ? "Start" : "Reset" }
+      </button>
+      { timerConfig !== undefined && (
+        <button
+          onClick={() => {
+            if (timerConfig.running) {
+              pause();
+            } else {
+              play();
+            }
+          }}
+        >
+          {timerConfig.running ? "Pause" : "Play" }
+        </button>
+      )}
+      { milliRemaining !== undefined && (
+        <p>
+          { `${Math.round(milliRemaining / 1000)} / ${Math.round(timerConfig.duration) / 1000}` }
+        </p>
+      )}
+    </div>
+  );
+}
+```
+
 ### useMediaSynchronizer
 
 If you want to synchronize video content, `@microsoft/live-share-media` is also supported by this package through the `useMediaSynchronizer` hook. Using any `HTMLMediaPlayer` element, or a delegate object matching our `IMediaPlayer` interface, you can easily build watch together capabilities into your app.
@@ -316,6 +360,53 @@ export function VideoPlayer() {
     </div>
   );
 }
+```
+
+### useLiveCanvas
+
+If you want to add turn-key inking & cursors, use the `useLiveCanvas` hook, powered by `@microsoft/live-share-canvas`.
+
+Let's see this in action:
+
+```javascript
+import { useLiveCanvas } from "@microsoft/live-share-react";
+import { InkingTool } from "@microsoft/live-share-canvas";
+import { useRef } from "react";
+
+export const ExampleLiveCanvas = () => {
+    const liveCanvasRef = useRef(null);
+    const { liveCanvas, inkingManager } = useLiveCanvas(
+        "CUSTOM-LIVE-CANVAS",
+        liveCanvasRef,
+    );
+
+    return (
+        <div style={{ position: "absolute"}}>
+            <div
+                ref={liveCanvasRef}
+                style={{ width: "556px", height: "224px" }}
+            />
+            {!!liveCanvas && (
+                <div>
+                    <button
+                        onClick={() => {
+                            inkingManager.tool = InkingTool.pen;
+                        }}
+                    >
+                        {"Pen"}
+                    </button>
+                    <button
+                        onClick={() => {
+                            inkingManager.tool = InkingTool.laserPointer;
+                        }}
+                    >
+                        {"Laser pointer"}
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
 ```
 
 ### Custom Fluid object hooks

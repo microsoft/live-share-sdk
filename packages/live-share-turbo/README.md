@@ -73,6 +73,7 @@ The Fluid data objects that are compatible out of the box are as follows:
 - `TurboLivePresence` from the `@microsoft/live-share` package.
 - `TurboLiveState` from the `@microsoft/live-share` package.
 - `TurboLiveEvent` from the `@microsoft/live-share` package.
+- `TurboLiveTimer` from the `@microsoft/live-share` package.
 - `TurboLiveMediaSession` from the `@microsoft/live-share-media` package.
 - `TurboLiveCanvas` from the `@microsoft/live-share-canvas` package.
 

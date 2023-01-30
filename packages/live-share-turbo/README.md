@@ -1,6 +1,40 @@
 # Microsoft Live Share Turbo
 
-Easily create a collaboration app in Teams with [Fluid Framework](https://fluidframework.com/).
+Easily create a collaboration app in Teams with [Fluid Framework](https://fluidframework.com/). This package is an experimental, alternative approach to building Fluid & Live Share applications that attempts to make it simpler to use dynamic distributed-data structures.
+
+In traditional Fluid applications, you must define your Fluid container schema up front. In this package, you load data objects on the fly by simply providing a unique identifier for your object. If a data object matching that identifier exists, the SDK will use that one; otherwise, a new one will be created on your behalf.
+
+Here is a simple example of how to get started:
+
+```javascript
+import { app, LiveShareHost } from "@microsoft/teams-js";
+import {
+    LiveShareTurboClient,
+    TurboSharedMap,
+} from "@microsoft/live-share-turbo";
+
+// Initialize teams-js (if using Live Share in a Teams application)
+await app.initialize();
+// Initialize the LiveShareTurboClient and join the session
+const host = LiveShareHost.create();
+const client = new LiveShareTurboClient(host);
+await client.join();
+// Setup collaborative objects (e.g., TurboSharedMap) as needed during your application's runtime
+const sharedMap = await TurboSharedMap.create(
+    client,
+    "UNIQUE-KEY",
+    (sharedMap) => {
+        // Use this optional callback to set initial values for the data object
+    }
+);
+sharedMap.on("valueChanged", (changed, local) => {
+    // Update your app to reflect the most recent state
+});
+```
+
+**Note:** In rare circumstances while using this application -- particularly in cases of high latency while using Fluid's `Shared*` objects -- data loss is possible if multiple users attempt to create new data objects for the same key in short periods of time. We use a last-writer wins conflict resolution for these cases, meaning that the object _may_ be reset to its default/empty state several times, usually in rapid succession. There are strategies you can take to minimize this alongside our built-in mitigation strategies. Depending on your scenario, however, this package might not be a good fit for your application. While many Teams Live Share for synchronizing application state work great with this system, we recommend testing thoroughly before committing this package to production.
+
+If you use React, we recommend using the specially optimized [Live Share React package](../live-share-react/README.md).
 
 You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
 
@@ -29,13 +63,28 @@ npm run build
 
 This will use lerna to hoist and build all dependencies.
 
-## How to use this extension
+## Introduction
 
-TODO
+There are two clients that you may use depending on your scenario: `LiveShareTurboClient` for Live Share, and `AzureTurboClient` for Azure Fluid Relay. These are used for connecting to Fluid sessions, and are structured differently than the more traditional `LiveShareClient` and `AzureClient` respectively.
+
+The Fluid data objects that are compatible out of the box are as follows:
+
+- `TurboSharedMap` from the `fluid-framework` package.
+- `TurboLivePresence` from the `@microsoft/live-share` package.
+- `TurboLiveState` from the `@microsoft/live-share` package.
+- `TurboLiveEvent` from the `@microsoft/live-share` package.
+- `TurboLiveMediaSession` from the `@microsoft/live-share-media` package.
+- `TurboLiveCanvas` from the `@microsoft/live-share-canvas` package.
+
+For each of these objects, you can initialize them using `Turbo*.create(client, uniqueKey, onFirstInitialize)`, where `onFirstInitialize` is optional. Each of the `Turbo*` classes conform to the primary interfaces for their `Shared*` or `Turbo*` counterparts, such as `sharedMap.set(key, value)` or `livePresence.initialize()`.
+
+If you want to use a Fluid object that is not included in this list, such as `SharedTree`, then you can make a class that extends `TurboDataObject` and follow the patterns established by the other `Turbo*` classes.
 
 ## Code samples
 
-TODO
+| Sample name       | Description                                                            | Javascript                                            |
+| ----------------- | ---------------------------------------------------------------------- | ----------------------------------------------------= |
+| Dice Roller Turbo | Enable all connected clients to roll several dice and view the result. | [View](../../samples/javascript/05.dice-roller-turbo) |
 
 ## Package Compatibility
 

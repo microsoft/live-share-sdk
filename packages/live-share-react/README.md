@@ -318,50 +318,8 @@ export function VideoPlayer() {
 }
 ```
 
-### useDynamicDDS
+### Custom Fluid object hooks
 
-If you want to dynamically load a custom Fluid object in your app, you can easily do that using `useDynamicDDS`. Each of the hooks mentioned above (with the exception of `useSharedState`) use this under the hood.
+If you want to dynamically load a custom Fluid object in your app, you can easily look at the above hooks & `Turbo*` classes and how they use the `TurboDataObject` class from `@microsoft/live-share-turbo` and the `useDynamicDDS` to create a custom hook. You also must register your Fluid `LoadableObjectClass` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
 
-Here is an example of how to use it in your app:
-
-```javascript
-// LiveShareApp.jsx
-import { LiveShareContextProvider } from "@microsoft/live-share-react";
-import { LiveShareHost } from "@microsoft/teams-js";
-import { SharedTree } from "@fluid-experimental/tree";
-
-export function LiveShareApp() {
-  // Pass in custom `additionalDynamicObjectTypes` prop using custom `IFluidLoadable`
-  return (
-    <LiveShareContextProvider
-      joinOnLoad={true}
-      additionalDynamicObjectTypes={[SharedTree]}
-    >
-      <ExampleSharedTree uniqueId="MY-TREE-ID" />
-    </LiveShareContextProvider>
-  );
-}
-
-// ExampleSharedTree.jsx
-import { useDynamicDDS } from "@microsoft/live-share-react";
-import { SharedTree } from "@fluid-experimental/tree";
-
-export function ExampleSharedTree({ uniqueId }) {
-  const onFirstInitialize () => {
-    // Set initial values for SharedTree, if needed
-  }
-  const { dds: sharedTree } = useDynamicDDS(
-    `<SharedTree>:${uniqueId}`,
-    SharedTree,
-    onFirstInitialize, // optional
-  );
-
-  if (sharedTree === undefined) {
-    return <div>{"Loading..."}</div>;
-  }
-
-  return {
-    /* Your UI here */
-  };
-}
-```
+Implementations may vary for each dynamic object & hook. We will try and update this package periodically with new packages released by Fluid Framework and Live Share, as they are published.

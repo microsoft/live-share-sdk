@@ -14,10 +14,12 @@ import {
     ISharedStateRegistryResponse,
     useSharedStateRegistry,
 } from "../internal-hooks";
-import { AzureTurboClient, IFluidTurboClient } from "@microsoft/live-share-turbo";
+import {
+    AzureTurboClient,
+    IFluidTurboClient,
+} from "@microsoft/live-share-turbo";
 
-interface IFluidContext
-    extends ISharedStateRegistryResponse {
+interface IFluidContext extends ISharedStateRegistryResponse {
     clientRef: React.MutableRefObject<IFluidTurboClient>;
     container: IFluidContainer | undefined;
     services: AzureContainerServices | undefined;
@@ -42,7 +44,6 @@ interface IFluidContextProviderProps {
     containerId?: string;
     createOnLoad?: boolean;
     joinOnLoad?: boolean;
-    additionalDynamicObjectTypes?: LoadableObjectClass<any>[];
     children?: React.ReactNode;
 }
 
@@ -71,10 +72,7 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
             return new Promise(async (resolve, reject) => {
                 try {
                     const results: IAzureContainerResults =
-                        await clientRef.current.getContainer(
-                            containerId,
-                            props.additionalDynamicObjectTypes
-                        );
+                        await clientRef.current.getContainer(containerId);
                     setResults(results);
                     resolve(results);
                 } catch (error: any) {
@@ -85,7 +83,7 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
                 }
             });
         },
-        [props.containerId, props.additionalDynamicObjectTypes, setResults]
+        [props.containerId, setResults]
     );
 
     /**
@@ -98,9 +96,7 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
             return new Promise(async (resolve, reject) => {
                 try {
                     const results: IAzureContainerResults =
-                        await clientRef.current.createContainer(
-                          props.additionalDynamicObjectTypes
-                        );
+                        await clientRef.current.createContainer();
                     if (onInitializeContainer) {
                         onInitializeContainer(results.container);
                     }

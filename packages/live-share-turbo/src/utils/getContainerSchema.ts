@@ -3,20 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    LiveEvent,
-    LivePresence,
-    LiveState,
-    LiveTimer,
-} from "@microsoft/live-share";
-import { LiveCanvas } from "@microsoft/live-share-canvas";
-import { LiveMediaSession } from "@microsoft/live-share-media";
+import { DynamicObjectRegistry } from "@microsoft/live-share";
 import {
     ContainerSchema,
-    LoadableObjectClass,
-    SharedDirectory,
     SharedMap,
-    SharedString,
 } from "fluid-framework";
 
 const schema: ContainerSchema = {
@@ -24,38 +14,12 @@ const schema: ContainerSchema = {
         stateMap: SharedMap,
         dynamicObjects: SharedMap,
     },
-    dynamicObjectTypes: [SharedMap, SharedString, SharedDirectory],
 };
 
-export function getContainerSchema(
-    additionalDynamicObjectTypes: LoadableObjectClass<any>[] | undefined
-): ContainerSchema {
-    const _additionalDynamicObjectTypes: LoadableObjectClass<any>[] =
-        additionalDynamicObjectTypes ?? [];
+export function getContainerSchema(): ContainerSchema {
     return {
         initialObjects: schema.initialObjects,
-        dynamicObjectTypes: [
-            ...schema.dynamicObjectTypes!,
-            ..._additionalDynamicObjectTypes,
-        ],
+        // Get the static registry of LoadableObjectClass types.
+        dynamicObjectTypes: DynamicObjectRegistry.dynamicLoadableObjects,
     };
-}
-
-export function getLiveShareContainerSchema(
-    additionalDynamicObjectTypes: LoadableObjectClass<any>[] | undefined
-) {
-    const liveShareDynamicObjects: LoadableObjectClass<any>[] = [
-        LiveEvent,
-        LivePresence,
-        LiveState,
-        LiveMediaSession,
-        LiveTimer,
-        LiveCanvas,
-    ];
-    const _additionalDynamicObjectTypes: LoadableObjectClass<any>[] =
-        additionalDynamicObjectTypes ?? [];
-    return getContainerSchema([
-        ...liveShareDynamicObjects,
-        ..._additionalDynamicObjectTypes,
-    ]);
 }

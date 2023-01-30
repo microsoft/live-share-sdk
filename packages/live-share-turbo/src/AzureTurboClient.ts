@@ -44,16 +44,13 @@ export class AzureTurboClient extends FluidTurboClient {
 
     /**
      * Creates a new detached container instance in the Azure Fluid Relay.
-     * @param containerSchema - Container schema for the new container.
      * @returns New detached container instance along with associated services.
      */
-    public async createContainer(
-        additionalDynamicObjectTypes?: LoadableObjectClass<any>[]
-    ): Promise<{
+    public async createContainer(): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const schema = getContainerSchema(additionalDynamicObjectTypes);
+        const schema = getContainerSchema();
         this._results = await this._client.createContainer(schema);
         this.registerDynamicObjectListeners();
         return this._results;
@@ -62,17 +59,15 @@ export class AzureTurboClient extends FluidTurboClient {
     /**
      * Accesses the existing container given its unique ID in the Azure Fluid Relay.
      * @param id - Unique ID of the container in Azure Fluid Relay.
-     * @param containerSchema - Container schema used to access data objects in the container.
      * @returns Existing container instance along with associated services.
      */
     public async getContainer(
         id: string,
-        additionalDynamicObjectTypes?: LoadableObjectClass<any>[]
     ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const schema = getContainerSchema(additionalDynamicObjectTypes);
+        const schema = getContainerSchema();
         this._results = await this._client.getContainer(id, schema);
         this.registerDynamicObjectListeners();
         return this._results;

@@ -6,19 +6,14 @@
 import { IFluidContainer, LoadableObjectClass } from "fluid-framework";
 import React from "react";
 import { ILiveShareContainerResults } from "../types";
-import {
-    useSharedStateRegistry,
-} from "../internal-hooks";
-import {
-    ILiveShareClientOptions,
-    ILiveShareHost,
-} from "@microsoft/live-share";
+import { useSharedStateRegistry } from "../internal-hooks";
+import { ILiveShareClientOptions, ILiveShareHost } from "@microsoft/live-share";
 import { FluidContext } from "./FluidContextProvider";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 
 interface ILiveShareContext {
     created: boolean | undefined;
-    joinContainer: (
+    join: (
         onInitializeContainer?: (container: IFluidContainer) => void
     ) => Promise<ILiveShareContainerResults>;
 }
@@ -33,10 +28,6 @@ export const useLiveShareContext = (): ILiveShareContext => {
 };
 
 interface ILiveShareContextProviderProps {
-    /**
-     * Optional. Array of additional dynamic object types to include in the Fluid container schema
-     */
-    additionalDynamicObjectTypes?: LoadableObjectClass<any>[];
     /**
      * Optional. React children node for the React Context Provider
      */
@@ -75,19 +66,16 @@ export const LiveShareContextProvider: React.FC<
     /**
      * Join container callback for joining the Live Share session
      */
-    const joinContainer = React.useCallback(
+    const join = React.useCallback(
         async (
             onInitializeContainer?: (container: IFluidContainer) => void
         ): Promise<ILiveShareContainerResults> => {
             const results: ILiveShareContainerResults =
-                await clientRef.current.join(
-                    props.additionalDynamicObjectTypes,
-                    onInitializeContainer
-                );
+                await clientRef.current.join(onInitializeContainer);
             setResults(results);
             return results;
         },
-        [props.additionalDynamicObjectTypes, setResults]
+        []
     );
 
     /**
@@ -97,7 +85,7 @@ export const LiveShareContextProvider: React.FC<
         if (results?.created !== undefined || startedRef.current) return;
         startedRef.current = true;
         if (props.joinOnLoad) {
-            joinContainer().catch((error) => {
+            join().catch((error) => {
                 if (error instanceof Error) {
                     setJoinError(error);
                 } else {
@@ -109,13 +97,13 @@ export const LiveShareContextProvider: React.FC<
                 }
             });
         }
-    }, [results?.created, props.joinOnLoad, joinContainer]);
+    }, [results?.created, props.joinOnLoad, join]);
 
     return (
         <LiveShareContext.Provider
             value={{
                 created: results?.created,
-                joinContainer,
+                join,
             }}
         >
             <FluidContext.Provider

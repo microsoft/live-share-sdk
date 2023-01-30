@@ -9,7 +9,7 @@ import {
     ILiveShareClientOptions,
     ILiveShareHost,
 } from "@microsoft/live-share";
-import { getLiveShareContainerSchema } from "./utils";
+import { getContainerSchema } from "./utils";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { FluidTurboClient } from "./internals";
 
@@ -76,21 +76,17 @@ export class LiveShareTurboClient extends FluidTurboClient {
      * The first client joining the container will create the container resulting in the
      * `onContainerFirstCreated` callback being called. This callback can be used to set the initial
      * state of of the containers object prior to the container being attached.
-     * @param fluidContainerSchema Fluid objects to create.
      * @param onContainerFirstCreated Optional. Callback that's called when the container is first created.
      * @returns The fluid `container` and `services` objects to use along with a `created` flag that if true means the container had to be created.
      */
     public async join(
-        additionalDynamicObjectTypes?: LoadableObjectClass<any>[],
         onContainerFirstCreated?: (container: IFluidContainer) => void
     ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
         created: boolean;
     }> {
-        const schema = getLiveShareContainerSchema(
-            additionalDynamicObjectTypes
-        );
+        const schema = getContainerSchema();
         this._results = await this._client.joinContainer(
             schema,
             onContainerFirstCreated

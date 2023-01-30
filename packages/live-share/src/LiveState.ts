@@ -12,6 +12,7 @@ import { LiveEventTarget } from "./LiveEventTarget";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /**
  * Events supported by [LiveState` object.
@@ -245,3 +246,8 @@ interface IStateChangeEvent<T> extends ILiveEvent {
     state: string;
     data?: T;
 }
+
+/**
+ * Register `LiveState` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ */
+DynamicObjectRegistry.registerObjectClass(LiveState);

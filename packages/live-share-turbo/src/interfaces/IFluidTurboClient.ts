@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
 import { LoadableObjectClass, SharedMap } from "fluid-framework";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { TurboDataObject } from "../dds-objects/TurboDataObject";

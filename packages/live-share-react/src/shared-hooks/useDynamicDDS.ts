@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
 import React from "react";
 import { useFluidObjectsContext } from "../providers";
 import { TurboDataObject } from "@microsoft/live-share-turbo";

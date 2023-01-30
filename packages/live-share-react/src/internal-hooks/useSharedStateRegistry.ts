@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
 import { IValueChanged, SharedMap } from "fluid-framework";
 import React from "react";
 import {

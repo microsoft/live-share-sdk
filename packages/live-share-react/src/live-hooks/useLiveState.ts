@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
 import { UserMeetingRole } from "@microsoft/live-share";
 import React from "react";
 import { SetLiveStateAction } from "../types";

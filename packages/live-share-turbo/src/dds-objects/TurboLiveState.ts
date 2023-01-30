@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
 import { ILiveStateEvents, LiveState, UserMeetingRole, LiveStateEvents } from "@microsoft/live-share";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { IFluidTurboClient } from "../interfaces";

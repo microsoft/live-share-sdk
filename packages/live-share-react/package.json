@@ -1,6 +1,9 @@
 {
   "name": "@microsoft/live-share-react",
   "version": "1.0.0-preview.4",
+  "description": "Build collaborative React apps using Microsoft's Fluid & Live Share frameworks with ease.",
+  "author": "Microsoft",
+  "license": "SEE LICENSE IN LICENSE",
   "main": "./bin/index.js",
   "types": "./bin/index.d.ts",
   "scripts": {
@@ -30,5 +33,14 @@
   "peerDependencies": {
     "react": "^16.8.0 || ^17 || ^18",
     "react-dom": "^16.8.0 || ^17 || ^18"
+  },
+  "repository": {
+      "directory": "packages/live-share-react",
+      "type": "git",
+      "url": "https://github.com/microsoft/live-share-sdk"
+  },
+  "homepage": "https://aka.ms/teamsliveshare",
+  "bugs": {
+      "url": "https://github.com/microsoft/live-share-sdk/issues"
   }
 }

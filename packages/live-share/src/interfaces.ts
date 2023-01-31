@@ -286,7 +286,7 @@ export interface ILiveShareHost {
 
     /**
      * Queries the hosts role verification service for the roles associated with a given client ID.
-     * @param clientId ID of teh client to lookup.
+     * @param clientId ID of the client to lookup.
      * @returns An array of roles assigned to the queried client ID.
      */
     getClientInfo(clientId: string): Promise<IClientInfo | undefined>;

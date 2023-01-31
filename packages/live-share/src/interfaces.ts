@@ -223,6 +223,12 @@ export interface IFluidTenantInfo {
     storageEndpoint: string;
 }
 
+export interface IClientInfo {
+    userId: string;
+    roles: UserMeetingRole[];
+    userIconUrl?: string; // permissions required?
+}
+
 /**
  * Interface for hosting a Live Share session within a client like Teams.
  */
@@ -283,4 +289,11 @@ export interface ILiveShareHost {
      * @returns An array of roles assigned to the queried client ID.
      */
     getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
+
+    /**
+     * Queries the hosts role verification service for the roles associated with a given client ID.
+     * @param clientId ID of teh client to lookup.
+     * @returns An array of roles assigned to the queried client ID.
+     */
+    getClientInfo(clientId: string): Promise<IClientInfo | undefined>;
 }

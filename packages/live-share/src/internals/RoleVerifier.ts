@@ -9,7 +9,8 @@ import { RequestCache } from "./RequestCache";
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
 // 5 minutes
-const CACHE_LIFETIME = 5 * 60 * 1000;
+// const CACHE_LIFETIME = 5 * 60 * 1000;
+const CACHE_LIFETIME = 1 * 60 * 1000;
 
 /**
  * @hidden
@@ -86,7 +87,9 @@ export class RoleVerifier implements IRoleVerifier {
                 async () => {
                     let rolesResult: UserMeetingRole[] | undefined;
                     try {
-                        rolesResult = await this._host.getClientRoles(clientId);
+                        const info = await this._host.getClientInfo(clientId);
+                        console.log("info", info);
+                        rolesResult = info?.roles;
                     } catch (error) {
                         // Error is thrown when client id is not registered
                         // Assume Client Id is local and to be newly registered.

@@ -95,17 +95,11 @@ export interface ITimestampProvider {
 export interface IRoleVerifier {
     /**
      * Returns the list of roles supported for a client.
+     * Will also registers client of the current user.
      * @param clientId Client ID to lookup.
      * @returns The list of roles for the client.
      */
     getClientRoles(clientId: string): Promise<UserMeetingRole[]>;
-
-    /**
-     * Registers client of the current user.
-     * @param clientId Client ID to map to current user.
-     * @returns The list of roles for the client.
-     */
-    registerClientId(clientId: string): Promise<UserMeetingRole[]>;
 
     /**
      * Verifies that a client has one of the specified roles.

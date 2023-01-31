@@ -212,7 +212,7 @@ export class LiveShareClient {
                         try {
                             const clientId = connections[i]?.id;
                             if (clientId) {
-                                await this._roleVerifier?.registerClientId(
+                                await this._roleVerifier?.getClientRoles(
                                     clientId
                                 );
                             }

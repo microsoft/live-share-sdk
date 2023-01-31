@@ -93,11 +93,7 @@ export class LivePresenceUser<TData = object> {
      * Returns the user's meeting roles.
      */
     public getRoles(): Promise<UserMeetingRole[]> {
-        if (this._isLocalUser) {
-            return LiveEvent.registerClientId(this._evt.clientId!);
-        } else {
-            return LiveEvent.getClientRoles(this._evt.clientId!);
-        }
+        return LiveEvent.getClientRoles(this._evt.clientId!);
     }
 
     /**

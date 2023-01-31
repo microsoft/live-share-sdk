@@ -151,17 +151,6 @@ export class LiveEvent<
     }
 
     /**
-     * Registers client id of the current user.
-     * @param clientId Client ID to map to current user.
-     * @returns The list of roles for the client.
-     */
-    public static registerClientId(
-        clientId: string
-    ): Promise<UserMeetingRole[]> {
-        return LiveEvent._roleVerifier.registerClientId(clientId);
-    }
-
-    /**
      * Verifies that a client has one of the specified roles.
      * @param clientId Client ID to inspect.
      * @param allowedRoles User roles that are allowed.

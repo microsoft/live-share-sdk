@@ -14,10 +14,12 @@ import {
     ExampleLiveEvent,
     ExampleLiveCanvas,
     ExampleLiveTimer,
+    EXAMPLE_SHARED_MAP_KEY,
 } from "./components";
 import { TeamsClientLoader } from "./components/TeamsClientLoader";
 import { LiveShareHost } from "@microsoft/teams-js";
 import { TestLiveShareHost } from "@microsoft/live-share";
+import { SharedMap } from "fluid-framework";
 
 const localConnection = {
     type: "local",
@@ -68,6 +70,13 @@ export default function App() {
             createOnLoad={true}
             joinOnLoad={true}
             containerId={window.location.hash.substring(1)}
+            initialObjects={{
+                /**
+                 * Optionally can defined custom objects and use them within their corresponding hook. See ExampleSharedMap to see
+                 * how this works.
+                 */
+                [EXAMPLE_SHARED_MAP_KEY]: SharedMap,
+            }}
         >
             <ExampleSharedState />
             <ExampleSharedMap />

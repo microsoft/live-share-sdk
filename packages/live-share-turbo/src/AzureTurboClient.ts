@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClass } from "fluid-framework";
+import { IFluidContainer, LoadableObjectClass, LoadableObjectClassRecord } from "fluid-framework";
 import { getContainerSchema } from "./utils";
 import {
     AzureClient,
@@ -44,13 +44,14 @@ export class AzureTurboClient extends FluidTurboClient {
 
     /**
      * Creates a new detached container instance in the Azure Fluid Relay.
+     * @param initialObjects Optional. Fluid ContainerSchema initialObjects.
      * @returns New detached container instance along with associated services.
      */
-    public async createContainer(): Promise<{
+    public async createContainer(initialObjects?: LoadableObjectClassRecord): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const schema = getContainerSchema();
+        const schema = getContainerSchema(initialObjects);
         this._results = await this._client.createContainer(schema);
         this.registerDynamicObjectListeners();
         return this._results;
@@ -59,15 +60,17 @@ export class AzureTurboClient extends FluidTurboClient {
     /**
      * Accesses the existing container given its unique ID in the Azure Fluid Relay.
      * @param id - Unique ID of the container in Azure Fluid Relay.
+     * @param initialObjects Optional. Fluid ContainerSchema initialObjects.
      * @returns Existing container instance along with associated services.
      */
     public async getContainer(
         id: string,
+        initialObjects?: LoadableObjectClassRecord,
     ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const schema = getContainerSchema();
+        const schema = getContainerSchema(initialObjects);
         this._results = await this._client.getContainer(id, schema);
         this.registerDynamicObjectListeners();
         return this._results;

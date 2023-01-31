@@ -120,11 +120,11 @@ export class TurboLiveMediaSession extends TurboDataObject<
 
     public static async create(
         turboClient: IFluidTurboClient,
-        uniqueKey: string,
+        objectKey: string,
         onDidFirstInitialize?: (dds: TurboLiveMediaSession) => void
     ): Promise<TurboLiveMediaSession> {
         const results = await turboClient.getDDS<any, LiveMediaSession>(
-            `<LiveMediaSession>:${uniqueKey}`,
+            objectKey,
             LiveMediaSession,
             (dds: IFluidLoadable): TurboLiveMediaSession => {
                 return new TurboLiveMediaSession(dds as LiveMediaSession);

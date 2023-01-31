@@ -67,14 +67,14 @@ export class TurboLiveState<TData = undefined> extends TurboDataObject<
 
     public static async create<TData = undefined>(
         turboClient: IFluidTurboClient,
-        uniqueKey: string,
+        objectKey: string,
         onDidFirstInitialize?: (dds: TurboLiveState<TData>) => void
     ): Promise<TurboLiveState<TData>> {
         const results = await turboClient.getDDS<
             ILiveStateEvents<TData>,
             LiveState<TData>
         >(
-            `<LiveState>:${uniqueKey}`,
+            objectKey,
             LiveState<TData>,
             (dds: IFluidLoadable): TurboLiveState<TData> => {
                 return new TurboLiveState(dds as LiveState<TData>);

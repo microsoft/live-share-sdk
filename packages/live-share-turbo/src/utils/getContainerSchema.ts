@@ -6,19 +6,23 @@
 import { DynamicObjectRegistry } from "@microsoft/live-share";
 import {
     ContainerSchema,
+    LoadableObjectClassRecord,
     SharedMap,
 } from "fluid-framework";
 
 const schema: ContainerSchema = {
     initialObjects: {
-        stateMap: SharedMap,
-        dynamicObjects: SharedMap,
+        TURBO_STATE_MAP: SharedMap,
+        TURBO_DYNAMIC_OBJECTS: SharedMap,
     },
 };
 
-export function getContainerSchema(): ContainerSchema {
+export function getContainerSchema(initialObjects?: LoadableObjectClassRecord): ContainerSchema {
     return {
-        initialObjects: schema.initialObjects,
+        initialObjects: {
+            ...schema.initialObjects,
+            ...initialObjects,
+        },
         // Get the static registry of LoadableObjectClass types.
         dynamicObjectTypes: DynamicObjectRegistry.dynamicLoadableObjects,
     };

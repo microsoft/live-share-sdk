@@ -55,7 +55,7 @@ export const useSharedStateRegistry = (
                 );
             }
             // Set initial values, if known
-            const stateMap = results?.container.initialObjects.stateMap as
+            const stateMap = results?.container.initialObjects.TURBO_STATE_MAP as
                 | SharedMap
                 | undefined;
             const initialValue = stateMap?.get(uniqueKey);
@@ -81,7 +81,7 @@ export const useSharedStateRegistry = (
         (uniqueKey: string, value: any) => {
             if (!results) return;
             const { container } = results;
-            const stateMap = container.initialObjects.stateMap as SharedMap;
+            const stateMap = container.initialObjects.TURBO_STATE_MAP as SharedMap;
             stateMap.set(uniqueKey, value);
         },
         [results]
@@ -94,7 +94,7 @@ export const useSharedStateRegistry = (
             let actionsMap =
                 registeredSharedSetStateActionMapRef.current.get(uniqueKey);
             actionsMap?.clear();
-            const stateMap = container.initialObjects.stateMap as SharedMap;
+            const stateMap = container.initialObjects.TURBO_STATE_MAP as SharedMap;
             stateMap.delete(uniqueKey);
         },
         [results]
@@ -103,7 +103,7 @@ export const useSharedStateRegistry = (
     React.useEffect(() => {
         if (!results) return;
         const { container } = results;
-        const stateMap = container.initialObjects.stateMap as SharedMap;
+        const stateMap = container.initialObjects.TURBO_STATE_MAP as SharedMap;
         const valueChangedListener = (changed: IValueChanged): void => {
             if (registeredSharedSetStateActionMapRef.current.has(changed.key)) {
                 const value = stateMap.get(changed.key);

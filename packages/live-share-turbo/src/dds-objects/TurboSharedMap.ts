@@ -109,14 +109,14 @@ export class TurboSharedMap extends TurboDataObject<
 
     public static async create(
         turboClient: IFluidTurboClient,
-        uniqueKey: string,
+        objectKey: string,
         onDidFirstInitialize?: (dds: TurboSharedMap) => void
     ): Promise<TurboSharedMap> {
         const results = await turboClient.getDDS<
             ISharedMapEvents,
             SharedMap
         >(
-            `<SharedMap>:${uniqueKey}`,
+            objectKey,
             SharedMap,
             (dds: IFluidLoadable): TurboSharedMap => {
                 return new TurboSharedMap(dds as SharedMap);

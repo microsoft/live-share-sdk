@@ -94,14 +94,14 @@ export class TurboLiveTimer extends TurboDataObject<
 
     public static async create(
         turboClient: IFluidTurboClient,
-        uniqueKey: string,
+        objectKey: string,
         onDidFirstInitialize?: (dds: TurboLiveTimer) => void
     ): Promise<TurboLiveTimer> {
         const results = await turboClient.getDDS<
             ILiveTimerEvents,
             LiveTimer
         >(
-            `<LiveTimer>:${uniqueKey}`,
+            objectKey,
             LiveTimer,
             (dds: IFluidLoadable): TurboLiveTimer => {
                 return new TurboLiveTimer(dds as LiveTimer);

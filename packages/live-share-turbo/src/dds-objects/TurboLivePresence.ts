@@ -163,14 +163,14 @@ export class TurboLivePresence<
 
     public static async create<TData extends object = object>(
         turboClient: IFluidTurboClient,
-        uniqueKey: string,
+        objectKey: string,
         onDidFirstInitialize?: (dds: TurboLivePresence<TData>) => void
     ): Promise<TurboLivePresence<TData>> {
         const results = await turboClient.getDDS<
             ILivePresenceEvents<TData>,
             LivePresence<TData>
         >(
-            `<LivePresence>:${uniqueKey}`,
+            objectKey,
             LivePresence<TData>,
             (dds: IFluidLoadable): TurboLivePresence<TData> => {
                 return new TurboLivePresence<TData>(dds as LivePresence<TData>);

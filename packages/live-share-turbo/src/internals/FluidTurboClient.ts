@@ -36,7 +36,7 @@ export class FluidTurboClient implements IFluidTurboClient {
 
     public get stateMap(): SharedMap | undefined {
         if (this.results) {
-            return this.results.container.initialObjects.stateMap as SharedMap;
+            return this.results.container.initialObjects.TURBO_STATE_MAP as SharedMap;
         }
         return undefined;
     }
@@ -47,7 +47,7 @@ export class FluidTurboClient implements IFluidTurboClient {
     public get dynamicObjects(): SharedMap | undefined {
         if (this.results) {
             return this.results.container.initialObjects
-                .dynamicObjects as SharedMap;
+                .TURBO_DYNAMIC_OBJECTS as SharedMap;
         }
         return undefined;
     }
@@ -76,7 +76,7 @@ export class FluidTurboClient implements IFluidTurboClient {
     /**
      * Callback to load a Fluid DDS for a given key. If the object does not already exist, a new one will be created.
      *
-     * @param uniqueKey unique key for the Fluid DDS you'd like to load
+     * @param objectKey unique key for the Fluid DDS you'd like to load
      * @param objectClass Fluid LoadableObjectClass you'd like to load of type T
      * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created.
      * @returns
@@ -85,13 +85,15 @@ export class FluidTurboClient implements IFluidTurboClient {
         I extends ISharedObjectEvents = ISharedObjectEvents,
         T extends SharedDataObject = DataObject<any>
     >(
-        uniqueKey: string,
+        objectKey: string,
         objectClass: LoadableObjectClass<T>,
         constructTurboDataObject: (dds: IFluidLoadable) => TurboDataObject<I, T>
     ): Promise<{
         created: boolean;
         dds: TurboDataObject<I, T>;
     }> {
+        // The uniqueKey key makes the developer provided uniqueKey never conflict across different DDS objects
+        const uniqueKey = `<${objectClass.name}>:${objectKey}`;
         const existingValue = this._dynamicDDSMap.get(uniqueKey);
         if (existingValue !== undefined) {
             return {
@@ -99,6 +101,17 @@ export class FluidTurboClient implements IFluidTurboClient {
                 dds: existingValue as TurboDataObject<I, T>,
             };
         }
+        // If the objectKey exists in initialObjects, then we return that instead of loading/creating a dynamic one
+        const initialObjectDDS = this.results?.container?.initialObjects[objectKey];
+        if (initialObjectDDS !== undefined) {
+            const initialTurboDDS = constructTurboDataObject(initialObjectDDS);
+            this._dynamicDDSMap.set(uniqueKey, initialTurboDDS);
+            return {
+                created: false,
+                dds: initialTurboDDS,
+            };
+        }
+        
         // Set initial values, if known
         let dds = await this.loadDDS<T>(uniqueKey);
         const needCreate = !dds;

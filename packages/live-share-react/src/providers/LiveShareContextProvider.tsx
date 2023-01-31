@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClass } from "fluid-framework";
+import { IFluidContainer, LoadableObjectClass, LoadableObjectClassRecord } from "fluid-framework";
 import React from "react";
 import { ILiveShareContainerResults } from "../types";
 import { useSharedStateRegistry } from "../internal-hooks";
@@ -14,6 +14,7 @@ import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 interface ILiveShareContext {
     created: boolean | undefined;
     join: (
+        initialObjects?: LoadableObjectClassRecord,
         onInitializeContainer?: (container: IFluidContainer) => void
     ) => Promise<ILiveShareContainerResults>;
 }
@@ -40,6 +41,10 @@ interface ILiveShareContextProviderProps {
      * Host to initialize LiveShareClient with
      */
     host: ILiveShareHost;
+    /**
+     * Optional. Initial Fluid objects to load when the container is first created
+     */
+    initialObjects?: LoadableObjectClassRecord;
     /**
      * Optional. Flag to determine whether to join Fluid container on load
      */
@@ -68,10 +73,12 @@ export const LiveShareContextProvider: React.FC<
      */
     const join = React.useCallback(
         async (
+            initialObjects?: LoadableObjectClassRecord,
             onInitializeContainer?: (container: IFluidContainer) => void
         ): Promise<ILiveShareContainerResults> => {
+            startedRef.current = true;
             const results: ILiveShareContainerResults =
-                await clientRef.current.join(onInitializeContainer);
+                await clientRef.current.join(initialObjects, onInitializeContainer);
             setResults(results);
             return results;
         },
@@ -82,22 +89,19 @@ export const LiveShareContextProvider: React.FC<
      * Joins the container on load if `props.joinOnLoad` is true
      */
     React.useEffect(() => {
-        if (results?.created !== undefined || startedRef.current) return;
-        startedRef.current = true;
-        if (props.joinOnLoad) {
-            join().catch((error) => {
-                if (error instanceof Error) {
-                    setJoinError(error);
-                } else {
-                    setJoinError(
-                        new Error(
-                            "LiveShareContextProvider: An unknown error occurred while joining container."
-                        )
-                    );
-                }
-            });
-        }
-    }, [results?.created, props.joinOnLoad, join]);
+        if (results !== undefined || startedRef.current || !props.joinOnLoad) return;
+        join(props.initialObjects).catch((error) => {
+            if (error instanceof Error) {
+                setJoinError(error);
+            } else {
+                setJoinError(
+                    new Error(
+                        "LiveShareContextProvider: An unknown error occurred while joining container."
+                    )
+                );
+            }
+        });
+    }, [results, props.joinOnLoad, props.initialObjects, join]);
 
     return (
         <LiveShareContext.Provider

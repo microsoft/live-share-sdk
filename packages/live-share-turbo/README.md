@@ -32,8 +32,6 @@ sharedMap.on("valueChanged", (changed, local) => {
 });
 ```
 
-**Note:** In rare circumstances while using this application -- particularly in cases of high latency while using Fluid's `Shared*` objects -- data loss is possible if multiple users attempt to create new data objects for the same key in short periods of time. We use a last-writer wins conflict resolution for these cases, meaning that the object _may_ be reset to its default/empty state several times, usually in rapid succession. There are strategies you can take to minimize this alongside our built-in mitigation strategies. Depending on your scenario, however, this package might not be a good fit for your application. While many Teams Live Share for synchronizing application state work great with this system, we recommend testing thoroughly before committing this package to production.
-
 If you use React, we recommend using the specially optimized [Live Share React package](../live-share-react/README.md).
 
 You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
@@ -80,6 +78,177 @@ The Fluid data objects that are compatible out of the box are as follows:
 For each of these objects, you can initialize them using `Turbo*.create(client, uniqueKey, onFirstInitialize)`, where `onFirstInitialize` is optional. Each of the `Turbo*` classes conform to the primary interfaces for their `Shared*` or `Turbo*` counterparts, such as `sharedMap.set(key, value)` or `livePresence.initialize()`.
 
 If you want to use a Fluid object that is not included in this list, such as `SharedTree`, then you can make a class that extends `TurboDataObject` and follow the patterns established by the other `Turbo*` classes.
+
+### How this package compares against vanilla Fluid / Live Share
+
+Normally with Fluid you must define the DDS objects you want to use up front in the `ContainerSchema`. We've had feedback that this is rigid and makes it harder to add new features over time. What was cool about the React package is that you don't need to do that by abstracting out some of the more powerful but verbose aspects of Fluid.
+
+The following example shows how you might build a synchronized counter using vanilla Fluid Framework:
+
+```javascript
+import { SharedMap } from "fluid-framework";
+import { LiveShareClient } from "@microsoft/live-share";
+import { LiveShareHost } from "@microsoft/teams-js";
+
+// Initialize LiveShareClient
+const host = LiveShareHost.create();
+const client = new LiveShareClient(host);
+// Define your schema and join the container
+const schema = {
+  initialObjects: {
+    countMap: SharedMap,
+  },
+}
+let count = 0;
+async function onFirstInitializeContainer(container) {
+    // Set initial value in sharedMap when container is first initialized
+    container.initialObjects.countMap.set("count", count);
+}
+const { container } = await client.joinContainer(schema, onFirstInitializeContainer);
+const { countMap } = container.initialObjects;
+// Listen for changes to the count and get the initial value
+countMap.on("valueChanged", () => {
+    count = countMap.get("count");
+})
+count = countMap.get("count");
+// Button handler to increment count
+document.getElementById("my-button").onclick = () => {
+    countMap.set("count", count + 1);
+}
+```
+
+This works fine in many situations, but assumes that your `initialObjects` will not change after shipping your app in production. It also assumes that all collaborative objects exist at the time your container is created. Fortunately, Fluid supports something called `dynamicObjectTypes`, which allow you to create new objects on the fly and store references to them within a `SharedMap`, `SharedDirectory`, or `SharedTree`.
+
+Here is a code snippet showing how you might make the above example more scalable using dynamic objects in vanilla Fluid Framework:
+
+```javascript
+import { SharedMap } from "fluid-framework";
+import { LiveShareClient } from "@microsoft/live-share";
+import { LiveShareHost } from "@microsoft/teams-js";
+
+// Initialize LiveShareClient
+const host = LiveShareHost.create();
+const client = new LiveShareClient(host);
+// Define your schema and join the container
+const schema = {
+  initialObjects: {
+    sharedMap: SharedMap
+  },
+  dynamicObjectTypes: [SharedMap]
+}
+async function onFirstInitializeContainer(container) {
+    // Set initial value for dynamic countMap into sharedMap
+    const newCountMap = await container.create(SharedMap);
+    container.initialObjects.sharedMap.set("countMap", newCountMap.handle);
+    // Set initial count value
+    newCountMap.set("count", 0);
+};
+const { container } = await client.joinContainer(schema, onFirstInitializeContainer);
+// Define callback for setting up dynamic countMap
+let countMap;
+let count = 0;
+async function setupCountMap() {
+    if (countMap) {
+        // if we already have a countMap set, we dispose the object
+        countMap.dispose();
+    }
+    const countMapHandle = countMap.get("countMap");
+    if (!countMapHandle) return;
+    countMap = await countMapHandle.get();
+    // Listen for changes to the count
+    countMap.on("valueChanged", () => {
+        count = countMap.get("count");
+    });
+    // Get initial count value
+    count = countMap.get("count");
+}
+// Listen for changes to countMap handle in sharedMap and get initial value
+const { sharedMap } = container.initialObjects;
+sharedMap.on("valueChanged", async (changed) => {
+    if (changed.key === "countMap") {
+        setupCountMap();
+    }
+});
+setupCountMap();
+// Button handler to increment count
+document.getElementById("my-button").onclick = () => {
+    if (countMap) {
+        countMap.set("count", count + 1);
+    }
+}
+```
+
+The above sample shows why Fluid is so powerful, albeit slightly complicated. The ability to have nested DDS objects in your code allows you to build robust collaborative apps that scale over time. Live Share Turbo leverages the power of dynamic objects with less code. It also makes using `initialObjects` optional.
+
+Here is a simple example showing how you could achieve the same behavior as above using Live Share Turbo:
+
+```javascript
+import { LiveShareHost } from "@microsoft/live-share";
+import { LiveShareTurboClient, TurboSharedMap } from "@microsoft/live-share-turbo";
+
+// Join the Fluid session
+const host = LiveShareHost.create();
+const client = LiveShareTurboClient(host);
+await client.join();
+// Get/create a TurboSharedMap instance that corresponds to a given unique identifier
+const countMap = await TurboSharedMap.create(client, "countMap", (initialMap) => {
+    // Callback to setup initial values when the DDS is first created
+    initialMap.set("count", 0);
+});
+// Listen for changes to the count and get the initial value
+let count;
+countMap.on("valueChanged", () => {
+    count = countMap.get("count");
+});
+count = countMap.get("count");
+// Button handler to increment count
+document.getElementById("my-button").onclick = () => {
+    countMap.set("count", count + 1);
+};
+```
+
+### Avoiding data loss
+
+In some circumstances while using this application -- particularly in cases of high latency while using Fluid's `Shared*` objects -- data loss is possible if multiple users attempt to create new data objects for the same key in short periods of time. We use a last-writer wins conflict resolution for these cases, meaning that the object _may_ be reset to its default/empty state several times, usually in rapid succession.
+
+To minimize this risk, you can use the `initialObjects` prop when first creating a Fluid container and use identifiers for objects in a list. This has similar constraints as regular Fluid -- such as migrating schemas after first creating the container -- but is useful in scenarios where up-front data loss is unacceptable. Here is an example of how to do this in your application:
+
+```javascript
+import { LiveShareHost } from "@microsoft/live-share";
+import { LiveShareTurboClient, TurboSharedMap } from "@microsoft/live-share-turbo";
+import { SharedMap } from "fluid-framework";
+import { v4 as uuid } from "uuid";
+
+// Join the Fluid session
+const host = LiveShareHost.create();
+const client = LiveShareTurboClient(host);
+const initialObjects = {
+    taskMap: SharedMap,
+};
+await client.join(initialObjects);
+// Listen for changes to the task boards and get the initial value
+const taskBoardMap = await TurboSharedMap.create(client, "taskBoardMap");
+let taskBoards;
+taskBoardMap.on("valueChanged", () => {
+    // Update UI with available task boards
+    taskBoards = taskBoardMap.entries();
+});
+taskBoards = taskBoardMap.entries();
+
+// Button click handler for creating a new task board
+document.getElementById("create-task-board").onclick = async () => {
+    // Dynamically create a new task list map
+    const id = uuid();
+    const taskListMap = await TurboSharedMap.create(client, `taskListMap-${id}`);
+    // Insert the new task board object into the taskBoardMap
+    taskBoardMap.set(id, {
+        name: "New list"
+    });
+    // TODO: Open the task list UI for the newly taskListMap
+};
+```
+
+**Note**: Depending on your scenario, this package might not be a good fit for your application. While many Teams Live Share for synchronizing application state work great with this system, we recommend testing thoroughly before committing this package to production.
 
 ## Code samples
 

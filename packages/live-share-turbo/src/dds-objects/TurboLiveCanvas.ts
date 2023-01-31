@@ -92,7 +92,8 @@ export class TurboLiveCanvas extends TurboDataObject<
 
     /**
      * initialize the object.
-     * @param allowedRoles Optional. List of roles allowed to send events.
+     * @param inkingManager Inking manager to use for LiveCanvas.
+     * @returns void promise
      */
     public async initialize(inkingManager: InkingManager): Promise<void> {
         await this.dataObject.initialize(inkingManager);
@@ -102,14 +103,14 @@ export class TurboLiveCanvas extends TurboDataObject<
 
     public static async create(
         turboClient: IFluidTurboClient,
-        uniqueKey: string,
+        objectKey: string,
         onDidFirstInitialize?: (dds: TurboLiveCanvas) => void
     ): Promise<TurboLiveCanvas> {
         const results = await turboClient.getDDS<
             any,
             LiveCanvas
         >(
-            `<LiveCanvas>:${uniqueKey}`,
+            objectKey,
             LiveCanvas,
             (dds: IFluidLoadable): TurboLiveCanvas => {
                 return new TurboLiveCanvas(dds as LiveCanvas);

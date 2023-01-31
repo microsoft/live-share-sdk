@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClass } from "fluid-framework";
+import { IFluidContainer, LoadableObjectClass, LoadableObjectClassRecord } from "fluid-framework";
 import {
     LiveShareClient,
     ILiveShareClientOptions,
@@ -76,17 +76,19 @@ export class LiveShareTurboClient extends FluidTurboClient {
      * The first client joining the container will create the container resulting in the
      * `onContainerFirstCreated` callback being called. This callback can be used to set the initial
      * state of of the containers object prior to the container being attached.
+     * @param initialObjects Optional. Fluid ContainerSchema initialObjects.
      * @param onContainerFirstCreated Optional. Callback that's called when the container is first created.
      * @returns The fluid `container` and `services` objects to use along with a `created` flag that if true means the container had to be created.
      */
     public async join(
+        initialObjects?: LoadableObjectClassRecord,
         onContainerFirstCreated?: (container: IFluidContainer) => void
     ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
         created: boolean;
     }> {
-        const schema = getContainerSchema();
+        const schema = getContainerSchema(initialObjects);
         this._results = await this._client.joinContainer(
             schema,
             onContainerFirstCreated

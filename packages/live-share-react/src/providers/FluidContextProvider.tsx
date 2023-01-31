@@ -3,7 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClass } from "fluid-framework";
+import {
+    IFluidContainer,
+    LoadableObjectClass,
+    LoadableObjectClassRecord,
+} from "fluid-framework";
 import React from "react";
 import {
     AzureClientProps,
@@ -24,8 +28,12 @@ interface IFluidContext extends ISharedStateRegistryResponse {
     container: IFluidContainer | undefined;
     services: AzureContainerServices | undefined;
     joinError: Error | undefined;
-    getContainer: (containerId: string) => Promise<IAzureContainerResults>;
+    getContainer: (
+        containerId: string,
+        initialObjects?: LoadableObjectClassRecord
+    ) => Promise<IAzureContainerResults>;
     createContainer: (
+        initialObjects?: LoadableObjectClassRecord,
         onInitializeContainer?: (container: IFluidContainer) => void
     ) => Promise<IAzureContainerResults>;
 }
@@ -40,11 +48,12 @@ export const useFluidObjectsContext = (): IFluidContext => {
 };
 
 interface IFluidContextProviderProps {
+    children?: React.ReactNode;
     clientOptions: AzureClientProps;
     containerId?: string;
     createOnLoad?: boolean;
+    initialObjects?: LoadableObjectClassRecord;
     joinOnLoad?: boolean;
-    children?: React.ReactNode;
 }
 
 /**
@@ -68,11 +77,17 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
      * Get the container for a given containerId using AzureClient
      */
     const getContainer = React.useCallback(
-        async (containerId: string): Promise<IAzureContainerResults> => {
+        async (
+            containerId: string,
+            initialObjects?: LoadableObjectClassRecord
+        ): Promise<IAzureContainerResults> => {
             return new Promise(async (resolve, reject) => {
                 try {
                     const results: IAzureContainerResults =
-                        await clientRef.current.getContainer(containerId);
+                        await clientRef.current.getContainer(
+                            containerId,
+                            initialObjects
+                        );
                     setResults(results);
                     resolve(results);
                 } catch (error: any) {
@@ -91,12 +106,13 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
      */
     const createContainer = React.useCallback(
         async (
+            initialObjects?: LoadableObjectClassRecord,
             onInitializeContainer?: (container: IFluidContainer) => void
         ): Promise<IAzureContainerResults> => {
             return new Promise(async (resolve, reject) => {
                 try {
                     const results: IAzureContainerResults =
-                        await clientRef.current.createContainer();
+                        await clientRef.current.createContainer(initialObjects);
                     if (onInitializeContainer) {
                         onInitializeContainer(results.container);
                     }
@@ -127,15 +143,16 @@ export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
             return;
         startedRef.current = true;
         if (props.containerId && props.joinOnLoad) {
-            getContainer(props.containerId);
+            getContainer(props.containerId, props.initialObjects);
         } else if (!props.containerId && props.createOnLoad) {
-            createContainer();
+            createContainer(props.initialObjects);
         }
     }, [
         results?.container?.connectionState,
         props.containerId,
         props.createOnLoad,
         props.joinOnLoad,
+        props.initialObjects,
         getContainer,
         createContainer,
     ]);

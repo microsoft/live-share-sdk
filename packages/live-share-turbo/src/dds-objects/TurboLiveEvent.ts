@@ -61,14 +61,14 @@ export class TurboLiveEvent<
 
     public static async create<TEvent extends ILiveEvent = ILiveEvent>(
         turboClient: IFluidTurboClient,
-        uniqueKey: string,
+        objectKey: string,
         onDidFirstInitialize?: (dds: TurboLiveEvent<TEvent>) => void
     ): Promise<TurboLiveEvent<TEvent>> {
         const results = await turboClient.getDDS<
             ILiveEventEvents<TEvent>,
             LiveEvent<TEvent>
         >(
-            `<LiveEvent>:${uniqueKey}`,
+            objectKey,
             LiveEvent<TEvent>,
             (dds: IFluidLoadable): TurboLiveEvent<TEvent> => {
                 return new TurboLiveEvent(dds as LiveEvent<TEvent>);

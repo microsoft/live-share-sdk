@@ -3,14 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClass, LoadableObjectClassRecord } from "fluid-framework";
-import { getContainerSchema } from "./utils";
+import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
 import {
     AzureClient,
     AzureClientProps,
     AzureContainerServices,
 } from "@fluidframework/azure-client";
-import { FluidTurboClient } from "./internals";
+import { FluidTurboClient, getContainerSchema } from "./internals";
 
 export class AzureTurboClient extends FluidTurboClient {
     private _client: AzureClient;

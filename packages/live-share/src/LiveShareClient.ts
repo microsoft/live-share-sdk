@@ -22,6 +22,7 @@ import {
 import { HostTimestampProvider } from "./HostTimestampProvider";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { TimestampProvider } from "./TimestampProvider";
+import { ClientManager } from "./internals/ClientManager";
 
 /**
  * @hidden
@@ -70,7 +71,7 @@ export class LiveShareClient {
     private _host: ILiveShareHost;
     private readonly _options: ILiveShareClientOptions;
     private _timestampProvider?: ITimestampProvider;
-    private _roleVerifier?: RoleVerifier;
+    private _clientManager?: ClientManager;
 
     /**
      * Creates a new `TeamsFluidClient` instance.
@@ -205,14 +206,14 @@ export class LiveShareClient {
 
                 // Register any new clientId's
                 // - registerClientId() will only register a client on first use
-                if (this._roleVerifier) {
+                if (this._clientManager) {
                     const connections =
                         services.audience.getMyself()?.connections ?? [];
                     for (let i = 0; i < connections.length; i++) {
                         try {
                             const clientId = connections[i]?.id;
                             if (clientId) {
-                                await this._roleVerifier?.getClientRoles(
+                                await this._clientManager?.registerClientId(
                                     clientId
                                 );
                             }
@@ -236,11 +237,12 @@ export class LiveShareClient {
      * @hidden
      */
     protected async initializeRoleVerifier(): Promise<void> {
-        if (!this._roleVerifier && !this.isTesting) {
-            this._roleVerifier = new RoleVerifier(this._host);
+        // TODO: initialize clientManager elsewhere?
+        if (!this._clientManager && !this.isTesting) {
+            this._clientManager = new ClientManager(this._host);
 
             // Register role verifier as current verifier for events
-            LiveEvent.setRoleVerifier(this._roleVerifier);
+            LiveEvent.setRoleVerifier(new RoleVerifier(this._clientManager));
         }
 
         return Promise.resolve();

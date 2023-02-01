@@ -102,6 +102,13 @@ export interface IRoleVerifier {
     getClientRoles(clientId: string): Promise<UserMeetingRole[]>;
 
     /**
+     * Registers client of the current user.
+     * @param clientId Client ID to map to current user.
+     * @returns The list of roles for the client.
+     */
+    registerClientId(clientId: string): Promise<UserMeetingRole[]>;
+
+    /**
      * Verifies that a client has one of the specified roles.
      * @param clientId Client ID to inspect.
      * @param allowedRoles User roles that are allowed.

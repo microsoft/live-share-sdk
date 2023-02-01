@@ -106,7 +106,7 @@ export class TestLiveShareHost implements ILiveShareHost {
         const info: IClientInfo = {
             userId: clientId, // set userId to clientId since not connected to teams
             roles: this.clientsMeetingRoles,
-            userIconUrl: undefined, // default test url?
+            displayName: undefined, // default test name?
         };
         return Promise.resolve(info);
     }

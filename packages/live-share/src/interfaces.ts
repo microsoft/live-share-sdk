@@ -220,7 +220,7 @@ export interface IFluidTenantInfo {
 export interface IClientInfo {
     userId: string;
     roles: UserMeetingRole[];
-    userIconUrl?: string; // permissions required?
+    displayName?: string;
 }
 
 /**

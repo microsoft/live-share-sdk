@@ -95,7 +95,6 @@ export interface ITimestampProvider {
 export interface IRoleVerifier {
     /**
      * Returns the list of roles supported for a client.
-     * Will also registers client of the current user.
      * @param clientId Client ID to lookup.
      * @returns The list of roles for the client.
      */
@@ -292,9 +291,9 @@ export interface ILiveShareHost {
     getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
 
     /**
-     * Queries the hosts role verification service for the roles associated with a given client ID.
+     * Queries the hosts `IUserInfo` for a given client ID.
      * @param clientId ID of the client to lookup.
-     * @returns An array of roles assigned to the queried client ID.
+     * @returns `IUserInfo` for the queried client ID.
      */
     // TODO: rename to userInfo
     getClientInfo(clientId: string): Promise<IUserInfo | undefined>;

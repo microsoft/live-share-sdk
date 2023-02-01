@@ -104,8 +104,9 @@ export class TestLiveShareHost implements ILiveShareHost {
 
     // TODO: rename to getUserInfo
     public getClientInfo(clientId: string): Promise<IUserInfo> {
+        // TODO: better test implementation
         const info: IUserInfo = {
-            userId: clientId, // set userId to clientId since not connected to teams
+            userId: clientId, // set userId to clientId since not connected to teams?
             roles: this.clientsMeetingRoles,
             displayName: undefined, // default test name?
         };

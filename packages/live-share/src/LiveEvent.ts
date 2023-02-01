@@ -64,8 +64,8 @@ export class LiveEvent<
         new LocalTimestampProvider();
     private static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
 
-    // TODO: should there be a default implementation for testing?
-    // TODO: rename ClientManager
+    // TODO: default implementation for testing?
+    // TODO: rename ClientManager class
     private static _clientManager?: ClientManager;
 
     private _eventTarget?: LiveEventTarget<TEvent>;
@@ -148,9 +148,9 @@ export class LiveEvent<
     }
 
     /**
-     * Returns the list of roles supported for a client.
+     * Returns the `IUserInfo` for a client.
      * @param clientId Client ID to lookup.
-     * @returns The list of roles for the client.
+     * @returns Returns the `IUserInfo` for a client.
      */
     public static getUserInfo(
         clientId: string

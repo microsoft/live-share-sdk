@@ -12,16 +12,15 @@ export class RoleVerifier implements IRoleVerifier {
     public constructor(private readonly _clientManager: ClientManager) {}
 
     public async getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        const clientInfo = await this._clientManager.getUserInfo(clientId);
-        return clientInfo.roles;
+        const userInfo = await this._clientManager.getUserInfo(clientId);
+        return userInfo.roles;
     }
 
     public async registerClientId(
         clientId: string
     ): Promise<UserMeetingRole[]> {
         await this._clientManager.registerClientId(clientId);
-        const clientInfo = await this._clientManager.getUserInfo(clientId);
-        return clientInfo.roles;
+        return await this.getClientRoles(clientId);
     }
 
     public async verifyRolesAllowed(

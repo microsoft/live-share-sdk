@@ -26,7 +26,7 @@ export class ClientManager {
     public async getUserInfo(clientId: string): Promise<IUserInfo> {
         if (!clientId) {
             throw new Error(
-                `RoleVerifier: called getClientRoles() without a clientId`
+                `ClientManager: called getUserInfo() without a clientId`
             );
         }
 
@@ -52,7 +52,7 @@ export class ClientManager {
                 },
                 () => {
                     return new Error(
-                        `RoleVerifier: timed out getting roles for a remote client ID`
+                        `ClientManager: timed out getting user info for a remote client ID`
                     );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE
@@ -71,7 +71,7 @@ export class ClientManager {
                 },
                 () => {
                     return new Error(
-                        `RoleVerifier: timed out registering local client ID`
+                        `ClientManager: timed out registering local client ID`
                     );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE

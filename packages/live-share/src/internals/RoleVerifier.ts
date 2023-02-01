@@ -12,7 +12,7 @@ export class RoleVerifier implements IRoleVerifier {
     public constructor(private readonly _clientManager: ClientManager) {}
 
     public async getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        const clientInfo = await this._clientManager.getClientInfo(clientId);
+        const clientInfo = await this._clientManager.getUserInfo(clientId);
         return clientInfo.roles;
     }
 
@@ -20,7 +20,7 @@ export class RoleVerifier implements IRoleVerifier {
         clientId: string
     ): Promise<UserMeetingRole[]> {
         await this._clientManager.registerClientId(clientId);
-        const clientInfo = await this._clientManager.getClientInfo(clientId);
+        const clientInfo = await this._clientManager.getUserInfo(clientId);
         return clientInfo.roles;
     }
 
@@ -35,7 +35,7 @@ export class RoleVerifier implements IRoleVerifier {
         }
 
         if (Array.isArray(allowedRoles) && allowedRoles.length > 0) {
-            const info = await this._clientManager.getClientInfo(clientId);
+            const info = await this._clientManager.getUserInfo(clientId);
             const roles = info.roles;
             for (let i = 0; i < allowedRoles.length; i++) {
                 const role = allowedRoles[i];

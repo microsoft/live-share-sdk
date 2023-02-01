@@ -237,12 +237,20 @@ export class LiveShareClient {
      * @hidden
      */
     protected async initializeRoleVerifier(): Promise<void> {
-        // TODO: initialize clientManager elsewhere?
         if (!this._clientManager && !this.isTesting) {
-            this._clientManager = new ClientManager(this._host);
+            await this.initializeClientManager();
 
             // Register role verifier as current verifier for events
-            LiveEvent.setRoleVerifier(new RoleVerifier(this._clientManager));
+            LiveEvent.setRoleVerifier(new RoleVerifier(this._clientManager!));
+        }
+
+        return Promise.resolve();
+    }
+
+    private async initializeClientManager(): Promise<void> {
+        if (!this._clientManager && !this.isTesting) {
+            this._clientManager = new ClientManager(this._host);
+            LiveEvent.setClientManager(this._clientManager);
         }
 
         return Promise.resolve();

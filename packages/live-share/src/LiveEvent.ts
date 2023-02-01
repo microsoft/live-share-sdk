@@ -12,10 +12,12 @@ import {
     IRoleVerifier,
     UserMeetingRole,
     IClientTimestamp,
+    IUserInfo,
 } from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { LocalRoleVerifier } from "./LocalRoleVerifier";
+import { ClientManager } from "./internals/ClientManager";
 
 /**
  * Events supported by `LiveEvent` object.
@@ -61,6 +63,9 @@ export class LiveEvent<
     private static _timestampProvider: ITimestampProvider =
         new LocalTimestampProvider();
     private static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
+
+    // TODO: should there be a default implementation for testing?
+    private static _clientManager?: ClientManager;
 
     private _eventTarget?: LiveEventTarget<TEvent>;
 
@@ -139,6 +144,20 @@ export class LiveEvent<
      */
     public static getTimestamp(): number {
         return LiveEvent._timestampProvider.getTimestamp();
+    }
+
+    /**
+     * Returns the list of roles supported for a client.
+     * @param clientId Client ID to lookup.
+     * @returns The list of roles for the client.
+     */
+    public static getUserInfo(
+        clientId: string
+    ): Promise<IUserInfo | undefined> {
+        return (
+            LiveEvent._clientManager?.getUserInfo(clientId) ??
+            Promise.resolve(undefined)
+        );
     }
 
     /**
@@ -249,5 +268,15 @@ export class LiveEvent<
      */
     public static setRoleVerifier(provider: IRoleVerifier): void {
         LiveEvent._roleVerifier = provider;
+    }
+
+    /**
+     * @hidden
+     * Assigns a new ClientManager.
+     *
+     * TODO: should be an interface?
+     */
+    public static setClientManager(provider: ClientManager): void {
+        LiveEvent._clientManager = provider;
     }
 }

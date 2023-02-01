@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IClientInfo, ILiveShareHost } from "../interfaces";
+import { IUserInfo, ILiveShareHost } from "../interfaces";
 import { waitForResult } from "./utils";
 import { RequestCache } from "./RequestCache";
 
@@ -15,12 +15,12 @@ const CACHE_LIFETIME = 10 * 1000;
 export class ClientManager {
     private readonly _registerRequestCache: RequestCache<void> =
         new RequestCache(CACHE_LIFETIME);
-    private readonly _getRequestCache: RequestCache<IClientInfo> =
+    private readonly _getRequestCache: RequestCache<IUserInfo> =
         new RequestCache(CACHE_LIFETIME);
 
     public constructor(private readonly _host: ILiveShareHost) {}
 
-    public async getClientInfo(clientId: string): Promise<IClientInfo> {
+    public async getUserInfo(clientId: string): Promise<IUserInfo> {
         if (!clientId) {
             throw new Error(
                 `RoleVerifier: called getClientRoles() without a clientId`

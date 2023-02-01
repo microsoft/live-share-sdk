@@ -4,9 +4,10 @@
  */
 
 import { LiveEvent } from "./LiveEvent";
-import { ILiveEvent, UserMeetingRole } from "./interfaces";
+import { IUserInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
 import { cloneValue } from "./internals";
+import { IClient } from "@fluidframework/protocol-definitions";
 
 /**
  * List of possible presence states.
@@ -44,6 +45,7 @@ export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
 export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
     private readonly _clients: string[] = [];
+    private _userInfo?: IUserInfo;
 
     /**
      * @hidden
@@ -69,6 +71,10 @@ export class LivePresenceUser<TData = object> {
      */
     public get userId(): string {
         return this._evt.userId;
+    }
+
+    public get userInfo(): IUserInfo | undefined {
+        return this._userInfo;
     }
 
     /**
@@ -139,6 +145,16 @@ export class LivePresenceUser<TData = object> {
         // The user can be logged into multiple clients so add client to list if missing.
         if (evt.clientId && this._clients.indexOf(evt.clientId) < 0) {
             this._clients.push(evt.clientId);
+        }
+
+        if (evt.clientId) {
+            LiveEvent.getUserInfo(evt.clientId)
+                .then((info) => {
+                    this._userInfo = info;
+                })
+                .catch((e) => {
+                    console.warn(e);
+                });
         }
     }
 }

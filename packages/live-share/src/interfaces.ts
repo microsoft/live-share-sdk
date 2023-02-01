@@ -224,7 +224,7 @@ export interface IFluidTenantInfo {
     storageEndpoint: string;
 }
 
-export interface IClientInfo {
+export interface IUserInfo {
     userId: string;
     roles: UserMeetingRole[];
     displayName?: string;
@@ -296,5 +296,6 @@ export interface ILiveShareHost {
      * @param clientId ID of the client to lookup.
      * @returns An array of roles assigned to the queried client ID.
      */
-    getClientInfo(clientId: string): Promise<IClientInfo | undefined>;
+    // TODO: rename to userInfo
+    getClientInfo(clientId: string): Promise<IUserInfo | undefined>;
 }

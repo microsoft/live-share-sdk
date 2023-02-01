@@ -65,6 +65,7 @@ export class LiveEvent<
     private static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
 
     // TODO: should there be a default implementation for testing?
+    // TODO: rename ClientManager
     private static _clientManager?: ClientManager;
 
     private _eventTarget?: LiveEventTarget<TEvent>;

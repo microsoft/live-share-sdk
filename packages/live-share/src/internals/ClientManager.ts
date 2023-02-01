@@ -12,6 +12,9 @@ const CACHE_LIFETIME = 10 * 1000;
 /**
  * @hidden
  */
+
+// TODO: Find a better name for this class
+// responsible for querying with clientId, retrying and preventing duplicateRequests to teams-js
 export class ClientManager {
     private readonly _registerRequestCache: RequestCache<void> =
         new RequestCache(CACHE_LIFETIME);

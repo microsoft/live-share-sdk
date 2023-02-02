@@ -2,16 +2,14 @@
 
 Easily create a collaboration app in Teams with [Fluid Framework](https://fluidframework.com/). This package is an experimental, alternative approach to building Fluid & Live Share applications that attempts to make it simpler to use dynamic distributed-data structures.
 
-In traditional Fluid applications, you must define your Fluid container schema up front. In this package, you load data objects on the fly by simply providing a unique identifier for your object. If a data object matching that identifier exists, the SDK will use that one; otherwise, a new one will be created on your behalf.
+In traditional Fluid applications, you must define your Fluid container schema up front. In this package, you load data objects on the fly by simply providing a unique identifier for your object. If a data object matching that identifier exists, the SDK will use that one; otherwise, a new one will be created on your behalf. Fluid Framework's `TaskManager` object is used to ensure that only one user will create the DDS for each unique identifier.
 
 Here is a simple example of how to get started:
 
 ```javascript
 import { app, LiveShareHost } from "@microsoft/teams-js";
-import {
-    LiveShareTurboClient,
-    TurboSharedMap,
-} from "@microsoft/live-share-turbo";
+import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
+import { SharedMap } from "fluid-framework";
 
 // Initialize teams-js (if using Live Share in a Teams application)
 await app.initialize();
@@ -19,10 +17,10 @@ await app.initialize();
 const host = LiveShareHost.create();
 const client = new LiveShareTurboClient(host);
 await client.join();
-// Setup collaborative objects (e.g., TurboSharedMap) as needed during your application's runtime
-const sharedMap = await TurboSharedMap.create(
-    client,
+// Setup collaborative objects (e.g., SharedMap) as needed during your application's runtime
+const sharedMap = await client.getDDS(
     "UNIQUE-KEY",
+    SharedMap,
     (sharedMap) => {
         // Use this optional callback to set initial values for the data object
     }
@@ -63,25 +61,11 @@ This will use lerna to hoist and build all dependencies.
 
 ## Introduction
 
-There are two clients that you may use depending on your scenario: `LiveShareTurboClient` for Live Share, and `AzureTurboClient` for Azure Fluid Relay. These are used for connecting to Fluid sessions, and are structured differently than the more traditional `LiveShareClient` and `AzureClient` respectively.
-
-The Fluid data objects that are compatible out of the box are as follows:
-
-- `TurboSharedMap` from the `fluid-framework` package.
-- `TurboLivePresence` from the `@microsoft/live-share` package.
-- `TurboLiveState` from the `@microsoft/live-share` package.
-- `TurboLiveEvent` from the `@microsoft/live-share` package.
-- `TurboLiveTimer` from the `@microsoft/live-share` package.
-- `TurboLiveMediaSession` from the `@microsoft/live-share-media` package.
-- `TurboLiveCanvas` from the `@microsoft/live-share-canvas` package.
-
-For each of these objects, you can initialize them using `Turbo*.create(client, uniqueKey, onFirstInitialize)`, where `onFirstInitialize` is optional. Each of the `Turbo*` classes conform to the primary interfaces for their `Shared*` or `Turbo*` counterparts, such as `sharedMap.set(key, value)` or `livePresence.initialize()`.
-
-If you want to use a Fluid object that is not included in this list, such as `SharedTree`, then you can make a class that extends `TurboDataObject` and follow the patterns established by the other `Turbo*` classes.
+There are two clients that you may use depending on your scenario: `LiveShareTurboClient` for Live Share, and `AzureTurboClient` for Azure Fluid Relay. These are used for connecting to Fluid sessions, and are structured differently than the more traditional `LiveShareClient` and `AzureClient` respectively. These clients expose a `.getDDS` function, which under the hood uses `TurboObjectManager` to dynamically get or create a given DDS. It also exposes a default `SharedMap` called `stateMap`, which you can use in your application to track basic app state.
 
 ### How this package compares against vanilla Fluid / Live Share
 
-Normally with Fluid you must define the DDS objects you want to use up front in the `ContainerSchema`. We've had feedback that this is rigid and makes it harder to add new features over time. What was cool about the React package is that you don't need to do that by abstracting out some of the more powerful but verbose aspects of Fluid.
+Normally with Fluid you must define the DDS objects you want to use up front in the `ContainerSchema`. We've had feedback that this is rigid and makes it harder to add new features over time. What was cool about the React package is that you don't need to do that (though you can) by abstracting out some of the more powerful but verbose aspects of Fluid.
 
 The following example shows how you might build a synchronized counter using vanilla Fluid Framework:
 
@@ -184,14 +168,15 @@ Here is a simple example showing how you could achieve the same behavior as abov
 
 ```javascript
 import { LiveShareHost } from "@microsoft/live-share";
-import { LiveShareTurboClient, TurboSharedMap } from "@microsoft/live-share-turbo";
+import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
+import { SharedMap } from "fluid-framework";
 
 // Join the Fluid session
 const host = LiveShareHost.create();
 const client = LiveShareTurboClient(host);
 await client.join();
 // Get/create a TurboSharedMap instance that corresponds to a given unique identifier
-const countMap = await TurboSharedMap.create(client, "countMap", (initialMap) => {
+const countMap = await client.getDDS("countMap", SharedMap, (initialMap) => {
     // Callback to setup initial values when the DDS is first created
     initialMap.set("count", 0);
 });
@@ -209,13 +194,13 @@ document.getElementById("my-button").onclick = () => {
 
 ### Avoiding data loss
 
-In some circumstances while using this application -- particularly in cases of high latency while using Fluid's `Shared*` objects -- data loss is possible if multiple users attempt to create new data objects for the same key in short periods of time. We use a last-writer wins conflict resolution for these cases, meaning that the object _may_ be reset to its default/empty state several times, usually in rapid succession.
+In some circumstances while using this application -- particularly in cases of high latency while using Fluid's `Shared*` objects -- data loss is possible if multiple users attempt to create new data objects for the same key in short periods of time. This is mitigated by using `TaskManager` to ensure that only one user is responsible for creating each DDS, but this will require more testing before we can have 100% confidence that data loss is not possible.
 
 To minimize this risk, you can use the `initialObjects` prop when first creating a Fluid container and use identifiers for objects in a list. This has similar constraints as regular Fluid -- such as migrating schemas after first creating the container -- but is useful in scenarios where up-front data loss is unacceptable. Here is an example of how to do this in your application:
 
 ```javascript
 import { LiveShareHost } from "@microsoft/teams-js";
-import { LiveShareTurboClient, TurboSharedMap } from "@microsoft/live-share-turbo";
+import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 import { SharedMap } from "fluid-framework";
 import { v4 as uuid } from "uuid";
 
@@ -227,7 +212,7 @@ const initialObjects = {
 };
 await client.join(initialObjects);
 // Listen for changes to the task boards and get the initial value
-const taskBoardMap = await TurboSharedMap.create(client, "taskBoardMap");
+const taskBoardMap = await client.getDDS("taskBoardMap", SharedMap);
 let taskBoards;
 taskBoardMap.on("valueChanged", () => {
     // Update UI with available task boards
@@ -239,7 +224,7 @@ taskBoards = taskBoardMap.entries();
 document.getElementById("create-task-board").onclick = async () => {
     // Dynamically create a new task list map
     const id = uuid();
-    const taskListMap = await TurboSharedMap.create(client, `taskListMap-${id}`);
+    const taskListMap = await client.getDDS(`taskListMap-${id}`, SharedMap);
     // Insert the new task board object into the taskBoardMap
     taskBoardMap.set(id, {
         name: "New list"

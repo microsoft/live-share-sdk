@@ -411,6 +411,6 @@ export const ExampleLiveCanvas = () => {
 
 ### Custom Fluid object hooks
 
-If you want to dynamically load a custom Fluid object in your app, you can easily look at the above hooks & `Turbo*` classes and how they use the `TurboDataObject` class from `@microsoft/live-share-turbo` and the `useDynamicDDS` to create a custom hook. You also must register your Fluid `LoadableObjectClass` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
+If you want to dynamically load a custom Fluid object in your app, use the `useDynamicDDS` to create a custom hook. You also must register your Fluid `LoadableObjectClass` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
 
 Implementations may vary for each dynamic object & hook. We will try and update this package periodically with new packages released by Fluid Framework and Live Share, as they are published.

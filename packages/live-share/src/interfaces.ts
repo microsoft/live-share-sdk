@@ -295,6 +295,5 @@ export interface ILiveShareHost {
      * @param clientId ID of the client to lookup.
      * @returns `IUserInfo` for the queried client ID.
      */
-    // TODO: rename to userInfo
-    getClientInfo(clientId: string): Promise<IUserInfo | undefined>;
+    getUserInfo(clientId: string): Promise<IUserInfo | undefined>;
 }

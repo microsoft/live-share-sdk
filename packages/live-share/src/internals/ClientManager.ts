@@ -34,7 +34,7 @@ export class ClientManager {
             return waitForResult(
                 async () => {
                     try {
-                        return await this._host.getClientInfo(clientId);
+                        return await this._host.getUserInfo(clientId);
                     } catch (error) {
                         // Error is thrown when client id is not registered
                         // Assume Client Id is local and to be newly registered.
@@ -44,7 +44,7 @@ export class ClientManager {
                             "getClientRolesError: " + JSON.stringify(error)
                         );
                         await this.registerClientId(clientId);
-                        return await this._host.getClientInfo(clientId);
+                        return await this._host.getUserInfo(clientId);
                     }
                 },
                 (result) => {

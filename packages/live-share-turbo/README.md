@@ -214,7 +214,7 @@ In some circumstances while using this application -- particularly in cases of h
 To minimize this risk, you can use the `initialObjects` prop when first creating a Fluid container and use identifiers for objects in a list. This has similar constraints as regular Fluid -- such as migrating schemas after first creating the container -- but is useful in scenarios where up-front data loss is unacceptable. Here is an example of how to do this in your application:
 
 ```javascript
-import { LiveShareHost } from "@microsoft/live-share";
+import { LiveShareHost } from "@microsoft/teams-js";
 import { LiveShareTurboClient, TurboSharedMap } from "@microsoft/live-share-turbo";
 import { SharedMap } from "fluid-framework";
 import { v4 as uuid } from "uuid";
@@ -223,7 +223,7 @@ import { v4 as uuid } from "uuid";
 const host = LiveShareHost.create();
 const client = LiveShareTurboClient(host);
 const initialObjects = {
-    taskMap: SharedMap,
+    taskBoardMap: SharedMap,
 };
 await client.join(initialObjects);
 // Listen for changes to the task boards and get the initial value
@@ -253,7 +253,7 @@ document.getElementById("create-task-board").onclick = async () => {
 ## Code samples
 
 | Sample name       | Description                                                            | Javascript                                            |
-| ----------------- | ---------------------------------------------------------------------- | ----------------------------------------------------= |
+| ----------------- | ---------------------------------------------------------------------- | ----------------------------------------------------- |
 | Dice Roller Turbo | Enable all connected clients to roll several dice and view the result. | [View](../../samples/javascript/05.dice-roller-turbo) |
 
 ## Package Compatibility

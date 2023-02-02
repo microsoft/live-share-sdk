@@ -7,17 +7,25 @@ import { AzureContainerServices } from "@fluidframework/azure-client";
 import {
     ITimerConfig,
     LivePresenceUser,
+    LiveEvent,
+    LivePresence,
+    LiveTimer,
 } from "@microsoft/live-share";
-import { TurboLiveCanvas, TurboLiveEvent, TurboLivePresence, TurboLiveTimer, TurboSharedMap } from "@microsoft/live-share-turbo";
-import { InkingManager } from "@microsoft/live-share-canvas";
+import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
     MediaPlayerSynchronizer,
 } from "@microsoft/live-share-media";
-import { IFluidContainer } from "fluid-framework";
+import { IFluidContainer, SharedMap } from "fluid-framework";
 import { IReceiveLiveEvent } from "../interfaces";
-import { OnPauseTimerAction, OnPlayTimerAction, OnStartTimerAction, OnUpdateLivePresenceAction, SendLiveEventAction } from "./ActionTypes";
+import {
+    OnPauseTimerAction,
+    OnPlayTimerAction,
+    OnStartTimerAction,
+    OnUpdateLivePresenceAction,
+    SendLiveEventAction,
+} from "./ActionTypes";
 
 export interface IAzureContainerResults {
     /**
@@ -51,9 +59,9 @@ export interface IUseSharedMapResults<TData> {
      */
     deleteEntry: (key: string) => void;
     /**
-     * The Fluid `TurboSharedMap` object, should you want to use it directly.
+     * The Fluid `SharedMap` object, should you want to use it directly.
      */
-    sharedMap: TurboSharedMap | undefined;
+    sharedMap: SharedMap | undefined;
 }
 
 export interface IUseLiveEventResults<TEvent extends object = object> {
@@ -72,7 +80,7 @@ export interface IUseLiveEventResults<TEvent extends object = object> {
     /**
      * The `LiveEvent` object, should you want to use it directly.
      */
-    liveEvent: TurboLiveEvent | undefined;
+    liveEvent: LiveEvent | undefined;
 }
 
 export interface IUseLiveTimerResults {
@@ -87,7 +95,7 @@ export interface IUseLiveTimerResults {
     /**
      * The `LiveTimer` object, should you want to use it directly.
      */
-    liveTimer: TurboLiveTimer | undefined;
+    liveTimer: LiveTimer | undefined;
     /**
      * Start timer callback.
      */
@@ -118,7 +126,7 @@ export interface IUseLivePresenceResults<TData extends object = object> {
     /**
      * Live Share `LivePresence` object, should you want to use it directly.
      */
-    livePresence: TurboLivePresence<TData> | undefined;
+    livePresence: LivePresence<TData> | undefined;
     /**
      * Callback method to update the local user's presence.
      */
@@ -175,5 +183,5 @@ export interface IUseLiveCanvasResults {
     /**
      * Live Canvas data object which synchronizes inking & cursors in the session. It is set when loaded and undefined while loading.
      */
-    liveCanvas: TurboLiveCanvas | undefined;
+    liveCanvas: LiveCanvas | undefined;
 }

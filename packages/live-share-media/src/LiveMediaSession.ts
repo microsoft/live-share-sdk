@@ -302,4 +302,4 @@ export class LiveMediaSession extends DataObject {
 /**
  * Register `LiveMediaSession` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
-DynamicObjectRegistry.registerObjectClass(LiveMediaSession);
+DynamicObjectRegistry.registerObjectClass(LiveMediaSession, LiveMediaSession.TypeName);

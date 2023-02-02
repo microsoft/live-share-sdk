@@ -407,4 +407,4 @@ export class LiveTimer extends DataObject<{
 /**
  * Register `LiveTimer` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
-DynamicObjectRegistry.registerObjectClass(LiveTimer);
+DynamicObjectRegistry.registerObjectClass(LiveTimer, LiveTimer.TypeName);

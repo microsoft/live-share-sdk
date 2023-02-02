@@ -7,8 +7,8 @@ import {
     ITimerConfig,
     LiveTimerEvents,
     UserMeetingRole,
+    LiveTimer,
 } from "@microsoft/live-share";
-import { TurboLiveTimer } from "@microsoft/live-share-turbo";
 import React from "react";
 import {
     IUseLiveTimerResults,
@@ -49,13 +49,13 @@ export function useLiveTimer(
 
     const { clientRef } = useFluidObjectsContext();
 
-    const getDDS = React.useCallback((): Promise<TurboLiveTimer> => {
-        return TurboLiveTimer.create(clientRef.current, uniqueKey);
+    const getDDS = React.useCallback((): Promise<LiveTimer> => {
+        return clientRef.current.getDDS(uniqueKey, LiveTimer);
     }, [uniqueKey]);
     /**
-     * User facing: dynamically load the TurboLiveTimer DDS for the given unique key.
+     * User facing: dynamically load the LiveTimer DDS for the given unique key.
      */
-    const { dds: liveTimer } = useDynamicDDS<TurboLiveTimer>(getDDS);
+    const { dds: liveTimer } = useDynamicDDS<LiveTimer>(getDDS);
 
     /**
      * User facing: callback to send event through `LiveTimer`

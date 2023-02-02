@@ -6,8 +6,8 @@
 import {
     LiveEventEvents,
     UserMeetingRole,
+    LiveEvent,
 } from "@microsoft/live-share";
-import { TurboLiveEvent } from "@microsoft/live-share-turbo";
 import React from "react";
 import {
     IUseLiveEventResults,
@@ -54,13 +54,13 @@ export function useLiveEvent<TEvent extends object = object>(
 
     const { clientRef } = useFluidObjectsContext();
 
-    const getDDS = React.useCallback((): Promise<TurboLiveEvent> => {
-        return TurboLiveEvent.create(clientRef.current, uniqueKey);
+    const getDDS = React.useCallback((): Promise<LiveEvent> => {
+        return clientRef.current.getDDS(uniqueKey, LiveEvent);
     }, [uniqueKey]);
     /**
      * User facing: dynamically load the TurboLiveCanvas DDS for the given unique key.
      */
-    const { dds: liveEvent } = useDynamicDDS<TurboLiveEvent>(getDDS);
+    const { dds: liveEvent } = useDynamicDDS<LiveEvent>(getDDS);
 
     /**
      * User facing: callback to send event through `LiveEvent`

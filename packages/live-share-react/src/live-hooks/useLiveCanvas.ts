@@ -10,8 +10,8 @@ import {
     InkingTool,
     IPoint,
     IUserInfo,
+    LiveCanvas,
 } from "@microsoft/live-share-canvas";
-import { TurboLiveCanvas } from "@microsoft/live-share-turbo";
 import React from "react";
 import { useFluidObjectsContext } from "../providers";
 import { useDynamicDDS } from "../shared-hooks";
@@ -54,13 +54,13 @@ export function useLiveCanvas(
 
     const { clientRef } = useFluidObjectsContext();
 
-    const getDDS = React.useCallback((): Promise<TurboLiveCanvas> => {
-        return TurboLiveCanvas.create(clientRef.current, uniqueKey);
+    const getDDS = React.useCallback((): Promise<LiveCanvas> => {
+        return clientRef.current.getDDS(uniqueKey, LiveCanvas);
     }, [uniqueKey]);
     /**
      * User facing: dynamically load the TurboLiveCanvas DDS for the given unique key.
      */
-    const { dds: liveCanvas } = useDynamicDDS<TurboLiveCanvas>(getDDS);
+    const { dds: liveCanvas } = useDynamicDDS<LiveCanvas>(getDDS);
 
     /**
      * Setup the InkingManager and LiveCanvas

@@ -92,7 +92,6 @@ export class LiveShareTurboClient extends FluidTurboClient {
             schema,
             onContainerFirstCreated
         );
-        this.registerDynamicObjectListeners();
         return this._results;
     }
 }

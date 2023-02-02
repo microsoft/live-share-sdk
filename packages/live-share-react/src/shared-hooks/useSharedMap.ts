@@ -7,8 +7,8 @@ import React from "react";
 import { isEntries, isJSON, isMap } from "../utils";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types";
 import { useDynamicDDS } from "./useDynamicDDS";
-import { TurboSharedMap } from "@microsoft/live-share-turbo";
 import { useFluidObjectsContext } from "../providers";
+import { SharedMap } from "fluid-framework";
 
 /**
  * Helper method for converting different initial data props into a Map<string, TData> to insert into the Fluid SharedMap
@@ -63,26 +63,29 @@ export function useSharedMap<TData extends object = object>(
     const [map, setMap] = React.useState<ReadonlyMap<string, TData>>(
         getInitialData<TData>(initialData)
     );
-    
-    
+
     const { clientRef } = useFluidObjectsContext();
 
-    const getDDS = React.useCallback((): Promise<TurboSharedMap> => {
+    const getDDS = React.useCallback((): Promise<SharedMap> => {
         /**
          * Callback method to set the `initialData` into the map when the `SharedMap` is first created.
          * Only should be used as a prop to useDynamicDDS.
          */
-        const onFirstInitialize = (dds: TurboSharedMap) => {
+        const onFirstInitialize = (dds: SharedMap) => {
             getInitialData(initialData).forEach((value, key) => {
                 dds.set(key, value);
             });
         };
-        return TurboSharedMap.create(clientRef.current, uniqueKey, onFirstInitialize);
+        return clientRef.current.getDDS(
+            uniqueKey,
+            SharedMap,
+            onFirstInitialize
+        );
     }, [uniqueKey, initialData]);
     /**
      * User facing: dynamically load the TurboLiveMediaSession DDS for the given unique key.
      */
-    const { dds: sharedMap } = useDynamicDDS<TurboSharedMap>(getDDS);
+    const { dds: sharedMap } = useDynamicDDS<SharedMap>(getDDS);
 
     /**
      * User facing: set a value to the Fluid `SharedMap`.

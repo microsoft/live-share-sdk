@@ -9,6 +9,7 @@ import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
     IMediaPlayer,
+    LiveMediaSession,
     MediaPlayerSynchronizer,
     MediaSessionCoordinatorSuspension,
 } from "@microsoft/live-share-media";
@@ -16,7 +17,6 @@ import { isExtendedMediaMetadata, isMediaElement, isRefObject } from "../utils";
 import { useDynamicDDS } from "../shared-hooks";
 import { IUseMediaSynchronizerResults } from "../types";
 import { useFluidObjectsContext } from "../providers";
-import { TurboLiveMediaSession } from "@microsoft/live-share-turbo";
 
 /**
  * React hook for using a Live Share media `MediaPlayerSynchronizer`.
@@ -57,13 +57,13 @@ export function useMediaSynchronizer(
 
     const { clientRef } = useFluidObjectsContext();
 
-    const getDDS = React.useCallback((): Promise<TurboLiveMediaSession> => {
-        return TurboLiveMediaSession.create(clientRef.current, uniqueKey);
+    const getDDS = React.useCallback((): Promise<LiveMediaSession> => {
+        return clientRef.current.getDDS(uniqueKey, LiveMediaSession);
     }, [uniqueKey]);
     /**
-     * User facing: dynamically load the TurboLiveMediaSession DDS for the given unique key.
+     * User facing: dynamically load the LiveMediaSession DDS for the given unique key.
      */
-    const { dds: mediaSession } = useDynamicDDS<TurboLiveMediaSession>(getDDS);
+    const { dds: mediaSession } = useDynamicDDS<LiveMediaSession>(getDDS);
 
     /**
      * User facing: play callback

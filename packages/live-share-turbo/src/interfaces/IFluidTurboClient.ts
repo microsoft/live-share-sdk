@@ -4,25 +4,15 @@
  */
 
 import { LoadableObjectClass, SharedMap } from "fluid-framework";
-import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { TurboDataObject } from "../dds-objects/TurboDataObject";
-import { DataObject } from "@fluidframework/aqueduct";
-import { ISharedObjectEvents } from "@fluidframework/shared-object-base";
-import { SharedDataObject } from "../internals/types";
+import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 
 export interface IFluidTurboClient {
     get stateMap(): SharedMap | undefined;
-    get dynamicObjects(): SharedMap | undefined;
     getDDS<
-        I extends ISharedObjectEvents = ISharedObjectEvents,
-        T extends SharedDataObject = DataObject<any>
+        T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
     >(
-        uniqueKey: string,
+        objectKey: string,
         objectClass: LoadableObjectClass<T>,
-        constructTurboDataObject: (dds: IFluidLoadable) => TurboDataObject<I, T>,
         onDidFirstInitialize?: (dds: T) => void
-    ): Promise<{
-        created: boolean,
-        dds: TurboDataObject<I, T>,
-    }>;
+    ): Promise<T>;
 }

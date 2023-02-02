@@ -52,7 +52,7 @@ export class AzureTurboClient extends FluidTurboClient {
     }> {
         const schema = getContainerSchema(initialObjects);
         this._results = await this._client.createContainer(schema);
-        this.registerDynamicObjectListeners();
+        // this.registerDynamicObjectListeners();
         return this._results;
     }
 
@@ -71,7 +71,7 @@ export class AzureTurboClient extends FluidTurboClient {
     }> {
         const schema = getContainerSchema(initialObjects);
         this._results = await this._client.getContainer(id, schema);
-        this.registerDynamicObjectListeners();
+        // this.registerDynamicObjectListeners();
         return this._results;
     }
 }

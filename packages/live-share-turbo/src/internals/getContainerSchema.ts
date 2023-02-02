@@ -9,11 +9,12 @@ import {
     LoadableObjectClassRecord,
     SharedMap,
 } from "fluid-framework";
+import { TurboObjectManager } from "../dds-objects";
 
 const schema: ContainerSchema = {
     initialObjects: {
         TURBO_STATE_MAP: SharedMap,
-        TURBO_DYNAMIC_OBJECTS: SharedMap,
+        TURBO_DYNAMIC_OBJECTS: TurboObjectManager,
     },
 };
 
@@ -24,6 +25,6 @@ export function getContainerSchema(initialObjects?: LoadableObjectClassRecord): 
             ...initialObjects,
         },
         // Get the static registry of LoadableObjectClass types.
-        dynamicObjectTypes: DynamicObjectRegistry.dynamicLoadableObjects,
+        dynamicObjectTypes: [...DynamicObjectRegistry.dynamicLoadableObjects.values()],
     };
 }

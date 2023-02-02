@@ -5,21 +5,16 @@
 
 import {
     IFluidContainer,
-    IValueChanged,
     LoadableObjectClass,
     SharedMap,
 } from "fluid-framework";
 import { AzureContainerServices } from "@fluidframework/azure-client";
-import { IFluidHandle, IFluidLoadable } from "@fluidframework/core-interfaces";
-import { TurboDataObject } from "../dds-objects/TurboDataObject";
-import { DataObject } from "@fluidframework/aqueduct";
-import { ISharedObjectEvents } from "@fluidframework/shared-object-base";
+import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 import { IFluidTurboClient } from "../interfaces/IFluidTurboClient";
-import { SharedDataObject } from "../interfaces";
+import { TurboObjectManager } from "../dds-objects";
 
 export class FluidTurboClient implements IFluidTurboClient {
     private _awaitConnectedPromise?: Promise<void>;
-    protected _dynamicDDSMap = new Map<string, TurboDataObject<any, any>>();
 
     /**
      * Get the Fluid join container results
@@ -41,36 +36,12 @@ export class FluidTurboClient implements IFluidTurboClient {
         return undefined;
     }
 
-    /**
-     * @hidden
-     */
-    public get dynamicObjects(): SharedMap | undefined {
+    private get dynamicObjects(): TurboObjectManager | undefined {
         if (this.results) {
             return this.results.container.initialObjects
-                .TURBO_DYNAMIC_OBJECTS as SharedMap;
+                .TURBO_DYNAMIC_OBJECTS as TurboObjectManager;
         }
         return undefined;
-    }
-
-    protected registerDynamicObjectListeners() {
-        const valueChangedListener = async (
-            changed: IValueChanged,
-            local: boolean
-        ) => {
-            if (local) return;
-
-            const key = changed.key;
-            const existingValue = this._dynamicDDSMap.get(key);
-            try {
-                const dds = await this.loadDDS(key);
-                if (existingValue && dds) {
-                    existingValue.dataObject = dds;
-                }
-            } catch (error: any) {
-                console.error(error);
-            }
-        };
-        this.dynamicObjects!.on("valueChanged", valueChangedListener);
     }
 
     /**
@@ -82,94 +53,27 @@ export class FluidTurboClient implements IFluidTurboClient {
      * @returns
      */
     public async getDDS<
-        I extends ISharedObjectEvents = ISharedObjectEvents,
-        T extends SharedDataObject = DataObject<any>
+        T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
     >(
         objectKey: string,
         objectClass: LoadableObjectClass<T>,
-        constructTurboDataObject: (dds: IFluidLoadable) => TurboDataObject<I, T>
-    ): Promise<{
-        created: boolean;
-        dds: TurboDataObject<I, T>;
-    }> {
+        onDidFirstInitialize?: (dds: T) => void
+    ): Promise<T> {
         // The uniqueKey key makes the developer provided uniqueKey never conflict across different DDS objects
-        const uniqueKey = `<${objectClass.name}>:${objectKey}`;
-        const existingValue = this._dynamicDDSMap.get(uniqueKey);
-        if (existingValue !== undefined) {
-            return {
-                created: false,
-                dds: existingValue as TurboDataObject<I, T>,
-            };
-        }
-        // If the objectKey exists in initialObjects, then we return that instead of loading/creating a dynamic one
-        const initialObjectDDS = this.results?.container?.initialObjects[objectKey];
-        if (initialObjectDDS !== undefined) {
-            const initialTurboDDS = constructTurboDataObject(initialObjectDDS);
-            this._dynamicDDSMap.set(uniqueKey, initialTurboDDS);
-            return {
-                created: false,
-                dds: initialTurboDDS,
-            };
-        }
-        
-        // Set initial values, if known
-        let dds = await this.loadDDS<T>(uniqueKey);
-        const needCreate = !dds;
-        if (needCreate) {
-            // Create a new DDS of type T
-            dds = await this.createDDS<T>(uniqueKey, objectClass);
-        }
-        const turboObject = constructTurboDataObject(dds!);
-        this._dynamicDDSMap.set(uniqueKey, turboObject);
-        return {
-            dds: turboObject,
-            created: needCreate,
-        };
-    }
-
-    // Get the DDS from dynamicObjects for a given key, if known
-    protected async loadDDS<T extends IFluidLoadable>(
-        key: string
-    ): Promise<T | undefined> {
-        if (!this.results?.container) {
-            throw new Error(
-                "FluidTurboClient loadDDS: cannot load DDS without a Fluid container"
-            );
+        if (!this.results || !this.dynamicObjects) {
+            throw new Error("FluidTurboClient: getDDS must have valid dynamicObjects TurboObjectManager");
         }
         await this.waitUntilConnected();
-        const dynamicObjectMap = this.dynamicObjects;
-        if (dynamicObjectMap) {
-            const handleValue = dynamicObjectMap.get<
-                IFluidHandle<T> & IFluidLoadable
-            >(key);
-            if (handleValue) {
-                return await handleValue.get();
-            } else {
-                return undefined;
-            }
-        } else {
-            throw new Error(
-                "getDDS should never be called if dynamicObjects is undefined"
-            );
+        const initialDDS = this.results.container.initialObjects[objectKey] as T | undefined;
+        if (initialDDS !== undefined) {
+            return initialDDS;
         }
-    }
-
-    // Create a new DDS of type T in dynamicObjects
-    protected async createDDS<T extends IFluidLoadable>(
-        key: string,
-        objectClass: LoadableObjectClass<T>
-    ): Promise<T> {
-        const dynamicObjectMap = this.dynamicObjects;
-        if (dynamicObjectMap) {
-            // Create a new DDS and set the handle to the DDS
-            const dds = await this.results!.container.create<T>(objectClass);
-            dynamicObjectMap.set(key, dds.handle);
-            return dds;
-        } else {
-            throw new Error(
-                "createDDS: should never be called if dynamicObjectsMap is undefined"
-            );
+        const uniqueKey = `<${objectClass.name}>:${objectKey}`;
+        const response = await this.dynamicObjects.getDDS<T>(uniqueKey, objectClass, this.results.container);
+        if (response.created) {
+            onDidFirstInitialize?.(response.dds);
         }
+        return response.dds;
     }
 
     private async waitUntilConnected(): Promise<void> {

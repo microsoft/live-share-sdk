@@ -4,7 +4,8 @@
  */
 
 import { TestLiveShareHost } from "@microsoft/live-share";
-import { LiveShareTurboClient, TurboSharedMap, } from "@microsoft/live-share-turbo";
+import { LiveShareTurboClient, } from "@microsoft/live-share-turbo";
+import { SharedMap } from "fluid-framework";
 import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
 const searchParams = new URL(window.location).searchParams;
@@ -99,7 +100,7 @@ async function renderDiceElement(client, wrapper, diceIndex) {
         // Set initial state of the rolled dice to 1.
         dds.set(diceValueKey, 1);
     }
-    const diceMap = await TurboSharedMap.create(client, dynamicMapKey, onDidFirstInitialize);
+    const diceMap = await client.getDDS(dynamicMapKey, SharedMap, onDidFirstInitialize);
     // Insert dice roller UI into wrapper element
     const diceTemplate = document.createElement("template");
     const diceContainerId = `dice-container-${diceIndex}`;

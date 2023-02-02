@@ -28,8 +28,8 @@ export class DynamicObjectRegistry {
     /**
      * Get all registered dynamic loadable objects
      */
-    public static get dynamicLoadableObjects(): LoadableObjectClass<any>[] {
-        return ((window as any)[GLOBAL_WINDOW_KEY] || []) as LoadableObjectClass<any>[];
+    public static get dynamicLoadableObjects(): Map<string, LoadableObjectClass<any>> {
+        return ((window as any)[GLOBAL_WINDOW_KEY] || new Map<string, LoadableObjectClass<any>>) as Map<string, LoadableObjectClass<any>>;
     }
 
     /**
@@ -41,17 +41,15 @@ export class DynamicObjectRegistry {
      * @param loadableObjectClass the Fluid loadable object class to register
      */
     public static registerObjectClass(
-        loadableObjectClass: LoadableObjectClass<any>
+        loadableObjectClass: LoadableObjectClass<any>,
+        typeName: string,
     ) {
         if (
-            this.dynamicLoadableObjects.find(
-                (checkLoadable) =>
-                    checkLoadable.name === loadableObjectClass.name
-            )
+            this.dynamicLoadableObjects.has(typeName)
         )
             return;
         const loadableObjects = this.dynamicLoadableObjects;
-        loadableObjects.push(loadableObjectClass);
+        loadableObjects.set(typeName, loadableObjectClass);
         (window as any)[GLOBAL_WINDOW_KEY] = loadableObjects;
     }
 }
@@ -60,6 +58,6 @@ export class DynamicObjectRegistry {
  * Register default Fluid packages. If we can someday contribute Fluid code to make this happen centrally within Fluid, we can remove this in
  * the future.
  */
-DynamicObjectRegistry.registerObjectClass(SharedMap);
-DynamicObjectRegistry.registerObjectClass(SharedString);
-DynamicObjectRegistry.registerObjectClass(SharedDirectory);
+DynamicObjectRegistry.registerObjectClass(SharedMap, "SharedMap");
+DynamicObjectRegistry.registerObjectClass(SharedString, "SharedString");
+DynamicObjectRegistry.registerObjectClass(SharedDirectory, "SharedDirectory");

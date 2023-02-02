@@ -893,4 +893,4 @@ export class LiveCanvas extends DataObject {
 /**
  * Register `LiveCanvas` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
-DynamicObjectRegistry.registerObjectClass(LiveCanvas);
+DynamicObjectRegistry.registerObjectClass(LiveCanvas, LiveCanvas.TypeName);

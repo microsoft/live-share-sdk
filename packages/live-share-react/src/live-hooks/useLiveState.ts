@@ -3,11 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { UserMeetingRole } from "@microsoft/live-share";
+import { LiveState, UserMeetingRole } from "@microsoft/live-share";
 import React from "react";
 import { SetLiveStateAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
-import { TurboLiveState } from "@microsoft/live-share-turbo";
 import { useFluidObjectsContext } from "../providers";
 
 interface ILiveStateStatus<
@@ -49,13 +48,13 @@ export function useLiveState<
 
     const { clientRef } = useFluidObjectsContext();
 
-    const getDDS = React.useCallback((): Promise<TurboLiveState<TData>> => {
-        return TurboLiveState.create<TData>(clientRef.current, uniqueKey);
+    const getDDS = React.useCallback((): Promise<LiveState<TData>> => {
+        return clientRef.current.getDDS<LiveState<TData>>(uniqueKey, LiveState<TData>);
     }, [uniqueKey]);
     /**
-     * User facing: dynamically load the TurboLiveState DDS for the given unique key.
+     * User facing: dynamically load the LiveState DDS for the given unique key.
      */
-    const { dds: liveState } = useDynamicDDS<TurboLiveState<TData>>(getDDS);
+    const { dds: liveState } = useDynamicDDS<LiveState<TData>>(getDDS);
 
     /**
      * Change state callback that is user facing

@@ -91,6 +91,7 @@ export const LiveShareContextProvider: React.FC<
     React.useEffect(() => {
         if (results !== undefined || startedRef.current || !props.joinOnLoad) return;
         join(props.initialObjects).catch((error) => {
+            console.log(error);
             if (error instanceof Error) {
                 setJoinError(error);
             } else {

@@ -250,4 +250,4 @@ interface IStateChangeEvent<T> extends ILiveEvent {
 /**
  * Register `LiveState` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
-DynamicObjectRegistry.registerObjectClass(LiveState);
+DynamicObjectRegistry.registerObjectClass(LiveState, LiveState.TypeName);

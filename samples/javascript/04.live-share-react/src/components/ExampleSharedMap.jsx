@@ -1,11 +1,10 @@
-import { useLiveShareContext, useSharedMap } from "@microsoft/live-share-react";
+import { useSharedMap } from "@microsoft/live-share-react";
 import { v4 as uuid } from "uuid";
 import { SharedCounterCard } from "./internals";
 
 export const EXAMPLE_SHARED_MAP_KEY = "CUSTOM-CARDS-MAP";
 
 export const ExampleSharedMap = () => {
-    // 
     const { map, setEntry, deleteEntry } = useSharedMap(EXAMPLE_SHARED_MAP_KEY);
 
     return (

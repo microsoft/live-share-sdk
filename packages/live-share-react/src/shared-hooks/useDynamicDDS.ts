@@ -4,8 +4,8 @@
  */
 
 import React from "react";
+import { FluidObject } from "@fluidframework/core-interfaces";
 import { useFluidObjectsContext } from "../providers";
-import { TurboDataObject } from "@microsoft/live-share-turbo";
 
 /**
  * Hook to gets or creates a DDS that corresponds to a given uniqueKey string.
@@ -15,7 +15,7 @@ import { TurboDataObject } from "@microsoft/live-share-turbo";
  * @param onFirstInitialize Optional. Callback function for when the DDS is first loaded
  * @returns the DDS object, which is of type T when loaded and undefined while loading
  */
-export function useDynamicDDS<T extends TurboDataObject = TurboDataObject<any>>(
+export function useDynamicDDS<T extends FluidObject = FluidObject<any>>(
     getDDS: () => Promise<T>,
 ): {
     dds: T | undefined;
@@ -38,7 +38,7 @@ export function useDynamicDDS<T extends TurboDataObject = TurboDataObject<any>>(
      * mounts, `live-share-turbo` ensures it will ultimately self correct using last-writer wins.
      */
     React.useEffect(() => {
-        if (container?.connectionState === undefined) return;
+        if (container === undefined) return;
         let mounted = true;
         // Callback method to set the `initialData` into the map when the DDS is first created.
         const onGetDDS = async () => {
@@ -55,7 +55,7 @@ export function useDynamicDDS<T extends TurboDataObject = TurboDataObject<any>>(
         return () => {
             mounted = false;
         };
-    }, [container?.connectionState, getDDS]);
+    }, [container, getDDS]);
 
     return {
         dds,

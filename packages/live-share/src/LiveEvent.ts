@@ -256,4 +256,4 @@ export class LiveEvent<
 /**
  * Register `LiveEvent` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
-DynamicObjectRegistry.registerObjectClass(LiveEvent);
+DynamicObjectRegistry.registerObjectClass(LiveEvent, LiveEvent.TypeName);

@@ -5,7 +5,6 @@
 
 import {
     IFluidContainer,
-    LoadableObjectClass,
     LoadableObjectClassRecord,
 } from "fluid-framework";
 import React from "react";

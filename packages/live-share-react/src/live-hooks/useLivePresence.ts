@@ -11,7 +11,6 @@ import {
 import React from "react";
 import { IUseLivePresenceResults } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
-import { useFluidObjectsContext } from "../providers";
 
 /**
  * React hook for using a Live Share `LivePresence`.
@@ -47,15 +46,10 @@ export function useLivePresence<TData extends object = object>(
     const [allUsers, setAllUsers] = React.useState<LivePresenceUser<TData>[]>(
         []
     );
-    const { clientRef } = useFluidObjectsContext();
-
-    const getDDS = React.useCallback((): Promise<LivePresence<TData>> => {
-        return clientRef.current.getDDS(uniqueKey, LivePresence<TData>);
-    }, [uniqueKey]);
     /**
-     * User facing: dynamically load the LivePresence DDS for the given unique key.
+     * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: livePresence } = useDynamicDDS<LivePresence<TData>>(getDDS);
+    const { dds: livePresence } = useDynamicDDS<LivePresence<TData>>(uniqueKey, LivePresence<TData>);
 
     /**
      * User facing: list of non-local user's presence objects.

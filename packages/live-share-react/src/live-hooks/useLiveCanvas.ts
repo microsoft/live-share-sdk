@@ -13,7 +13,6 @@ import {
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
 import React from "react";
-import { useFluidObjectsContext } from "../providers";
 import { useDynamicDDS } from "../shared-hooks";
 import { IUseLiveCanvasResults } from "../types";
 import { isRefObject } from "../utils";
@@ -52,15 +51,10 @@ export function useLiveCanvas(
     const listeningRef = React.useRef(false);
     const [inkingManager, setInkingManager] = React.useState<InkingManager>();
 
-    const { clientRef } = useFluidObjectsContext();
-
-    const getDDS = React.useCallback((): Promise<LiveCanvas> => {
-        return clientRef.current.getDDS(uniqueKey, LiveCanvas);
-    }, [uniqueKey]);
     /**
-     * User facing: dynamically load the TurboLiveCanvas DDS for the given unique key.
+     * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveCanvas } = useDynamicDDS<LiveCanvas>(getDDS);
+    const { dds: liveCanvas } = useDynamicDDS<LiveCanvas>(uniqueKey, LiveCanvas);
 
     /**
      * Setup the InkingManager and LiveCanvas

@@ -15,9 +15,21 @@ import {
 } from "../types";
 
 export interface ISharedStateRegistryResponse {
+    /**
+     * Register a set state action callback
+     */
     registerSharedSetStateAction: RegisterSharedSetStateAction;
+    /**
+     * Unregister a set state action callback
+     */
     unregisterSharedSetStateAction: UnregisterSharedSetStateAction;
+    /**
+     * Setter callback to update the shared state
+     */
     updateSharedState: UpdateSharedStateAction;
+    /**
+     * Delete a shared state value
+     */
     deleteSharedState: DeleteSharedStateAction;
 }
 
@@ -34,6 +46,9 @@ export const useSharedStateRegistry = (
         Map<string, Map<string, SetLocalStateAction>>
     >(new Map());
 
+    /**
+     * @see ISharedStateRegistryResponse.registerSharedSetStateAction
+     */
     const registerSharedSetStateAction = React.useCallback(
         (
             uniqueKey: string,
@@ -66,6 +81,9 @@ export const useSharedStateRegistry = (
         [results]
     );
 
+    /**
+     * @see ISharedStateRegistryResponse.unregisterSharedSetStateAction
+     */
     const unregisterSharedSetStateAction = React.useCallback(
         (uniqueKey: string, componentId: string) => {
             let actionsMap =
@@ -77,6 +95,9 @@ export const useSharedStateRegistry = (
         []
     );
 
+    /**
+     * @see ISharedStateRegistryResponse.updateSharedState
+     */
     const updateSharedState: UpdateSharedStateAction = React.useCallback(
         (uniqueKey: string, value: any) => {
             if (!results) return;
@@ -87,7 +108,10 @@ export const useSharedStateRegistry = (
         [results]
     );
 
-    const disposeSharedState: DeleteSharedStateAction = React.useCallback(
+    /**
+     * @see ISharedStateRegistryResponse.deleteSharedState
+     */
+    const deleteSharedState: DeleteSharedStateAction = React.useCallback(
         (uniqueKey: string) => {
             if (!results) return;
             const { container } = results;
@@ -134,6 +158,6 @@ export const useSharedStateRegistry = (
         registerSharedSetStateAction,
         unregisterSharedSetStateAction,
         updateSharedState,
-        deleteSharedState: disposeSharedState,
+        deleteSharedState,
     };
 };

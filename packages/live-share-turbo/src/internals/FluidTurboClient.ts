@@ -29,6 +29,9 @@ export class FluidTurboClient implements IFluidTurboClient {
         throw new Error("Not implemented exception");
     }
 
+    /**
+     * @see IFluidTurboClient.stateMap
+     */
     public get stateMap(): SharedMap | undefined {
         if (this.results) {
             return this.results.container.initialObjects.TURBO_STATE_MAP as SharedMap;
@@ -45,12 +48,7 @@ export class FluidTurboClient implements IFluidTurboClient {
     }
 
     /**
-     * Callback to load a Fluid DDS for a given key. If the object does not already exist, a new one will be created.
-     *
-     * @param objectKey unique key for the Fluid DDS you'd like to load
-     * @param objectClass Fluid LoadableObjectClass you'd like to load of type T
-     * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created.
-     * @returns
+     * @see IFluidTurboClient.getDDS
      */
     public async getDDS<
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable

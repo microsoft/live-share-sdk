@@ -411,6 +411,24 @@ export const ExampleLiveCanvas = () => {
 
 ### Custom Fluid object hooks
 
-If you want to dynamically load a custom Fluid object in your app, use the `useDynamicDDS` to create a custom hook. You also must register your Fluid `LoadableObjectClass` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
+If you want to dynamically load a custom Fluid object in your app, use the `useDynamicDDS` to create a custom hook. This is the same hook that Live Share React uses internally within our custom hooks, such as `useLiveEvent`. You also must register your Fluid `LoadableObjectClass` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
 
 Implementations may vary for each dynamic object & hook. We will try and update this package periodically with new packages released by Fluid Framework and Live Share, as they are published.
+
+Example:
+
+```javascript
+import { useDynamicDDS } from "@microsoft/live-share-react";
+import { SharedTree } from "@fluid-experimental/shared-tree";
+import { useCallback } from "react";
+
+export const useSharedTree = (uniqueKey) => {
+    const onFirstInitialize = useCallback((dds) => {
+        // Set initial values for the newly created SharedTree dds here
+    }. []);
+    const { dds: sharedTree } = useDynamicDDS(uniqueKey, SharedTree, onFirstInitialize);
+    return {
+        sharedTree,
+    };
+}
+```

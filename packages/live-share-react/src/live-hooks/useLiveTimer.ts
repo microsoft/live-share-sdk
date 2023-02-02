@@ -22,7 +22,6 @@ import {
     OnTimerTickAction,
 } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
-import { useFluidObjectsContext } from "../providers";
 
 export function useLiveTimer(
     uniqueKey: string,
@@ -46,16 +45,10 @@ export function useLiveTimer(
      * User facing: Stateful time remaining.
      */
     const [milliRemaining, setMilliRemaining] = React.useState<number>();
-
-    const { clientRef } = useFluidObjectsContext();
-
-    const getDDS = React.useCallback((): Promise<LiveTimer> => {
-        return clientRef.current.getDDS(uniqueKey, LiveTimer);
-    }, [uniqueKey]);
     /**
-     * User facing: dynamically load the LiveTimer DDS for the given unique key.
+     * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveTimer } = useDynamicDDS<LiveTimer>(getDDS);
+    const { dds: liveTimer } = useDynamicDDS<LiveTimer>(uniqueKey, LiveTimer);
 
     /**
      * User facing: callback to send event through `LiveTimer`

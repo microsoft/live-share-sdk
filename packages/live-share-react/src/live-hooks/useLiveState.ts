@@ -7,7 +7,6 @@ import { LiveState, UserMeetingRole } from "@microsoft/live-share";
 import React from "react";
 import { SetLiveStateAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
-import { useFluidObjectsContext } from "../providers";
 
 interface ILiveStateStatus<
     TState extends string = string,
@@ -45,16 +44,10 @@ export function useLiveState<
         state: initialState,
         data: initialData,
     });
-
-    const { clientRef } = useFluidObjectsContext();
-
-    const getDDS = React.useCallback((): Promise<LiveState<TData>> => {
-        return clientRef.current.getDDS<LiveState<TData>>(uniqueKey, LiveState<TData>);
-    }, [uniqueKey]);
     /**
-     * User facing: dynamically load the LiveState DDS for the given unique key.
+     * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveState } = useDynamicDDS<LiveState<TData>>(getDDS);
+    const { dds: liveState } = useDynamicDDS<LiveState<TData>>(uniqueKey, LiveState<TData>);
 
     /**
      * Change state callback that is user facing

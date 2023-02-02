@@ -7,7 +7,6 @@ import React from "react";
 import { isEntries, isJSON, isMap } from "../utils";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types";
 import { useDynamicDDS } from "./useDynamicDDS";
-import { useFluidObjectsContext } from "../providers";
 import { SharedMap } from "fluid-framework";
 
 /**
@@ -64,28 +63,19 @@ export function useSharedMap<TData extends object = object>(
         getInitialData<TData>(initialData)
     );
 
-    const { clientRef } = useFluidObjectsContext();
-
-    const getDDS = React.useCallback((): Promise<SharedMap> => {
+    const onFirstInitialize = React.useCallback((newDDS: SharedMap): void => {
         /**
          * Callback method to set the `initialData` into the map when the `SharedMap` is first created.
          * Only should be used as a prop to useDynamicDDS.
          */
-        const onFirstInitialize = (dds: SharedMap) => {
-            getInitialData(initialData).forEach((value, key) => {
-                dds.set(key, value);
-            });
-        };
-        return clientRef.current.getDDS(
-            uniqueKey,
-            SharedMap,
-            onFirstInitialize
-        );
-    }, [uniqueKey, initialData]);
+        getInitialData(initialData).forEach((value, key) => {
+            newDDS.set(key, value);
+        });
+    }, [initialData]);
     /**
-     * User facing: dynamically load the TurboLiveMediaSession DDS for the given unique key.
+     * User facing: dynamically load the SharedMap DDS for the given unique key.
      */
-    const { dds: sharedMap } = useDynamicDDS<SharedMap>(getDDS);
+    const { dds: sharedMap } = useDynamicDDS<SharedMap>(uniqueKey, SharedMap, onFirstInitialize);
 
     /**
      * User facing: set a value to the Fluid `SharedMap`.

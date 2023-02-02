@@ -16,7 +16,6 @@ import {
 import { isExtendedMediaMetadata, isMediaElement, isRefObject } from "../utils";
 import { useDynamicDDS } from "../shared-hooks";
 import { IUseMediaSynchronizerResults } from "../types";
-import { useFluidObjectsContext } from "../providers";
 
 /**
  * React hook for using a Live Share media `MediaPlayerSynchronizer`.
@@ -54,16 +53,10 @@ export function useMediaSynchronizer(
     const [suspension, setSuspension] = React.useState<
         MediaSessionCoordinatorSuspension | undefined
     >();
-
-    const { clientRef } = useFluidObjectsContext();
-
-    const getDDS = React.useCallback((): Promise<LiveMediaSession> => {
-        return clientRef.current.getDDS(uniqueKey, LiveMediaSession);
-    }, [uniqueKey]);
     /**
      * User facing: dynamically load the LiveMediaSession DDS for the given unique key.
      */
-    const { dds: mediaSession } = useDynamicDDS<LiveMediaSession>(getDDS);
+    const { dds: mediaSession } = useDynamicDDS<LiveMediaSession>(uniqueKey, LiveMediaSession);
 
     /**
      * User facing: play callback

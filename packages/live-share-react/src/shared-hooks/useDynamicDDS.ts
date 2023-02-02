@@ -3,9 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import React from "react";
-import { FluidObject } from "@fluidframework/core-interfaces";
+import React, { useState } from "react";
+import { FluidObject, IFluidLoadable } from "@fluidframework/core-interfaces";
 import { useFluidObjectsContext } from "../providers";
+import { LoadableObjectClass } from "fluid-framework";
 
 /**
  * Hook to gets or creates a DDS that corresponds to a given uniqueKey string.
@@ -15,20 +16,20 @@ import { useFluidObjectsContext } from "../providers";
  * @param onFirstInitialize Optional. Callback function for when the DDS is first loaded
  * @returns the DDS object, which is of type T when loaded and undefined while loading
  */
-export function useDynamicDDS<T extends FluidObject = FluidObject<any>>(
-    getDDS: () => Promise<T>,
+export function useDynamicDDS<T extends IFluidLoadable = FluidObject<any> & IFluidLoadable>(
+    uniqueKey: string,
+    loadableObjectClass: LoadableObjectClass<T>,
+    onFirstInitialize?: (dds: T) => void,
 ): {
     dds: T | undefined;
 } {
-    /**
-     * DDS IFluidLoadable
-     */
-    const [dds, setDDS] = React.useState<T>();
+    const [dds, setDDS] = useState<T>();
     /**
      * Import container and DDS object register callbacks from FluidContextProvider.
      */
     const {
         container,
+        clientRef,
     } = useFluidObjectsContext();
 
     /**
@@ -43,7 +44,7 @@ export function useDynamicDDS<T extends FluidObject = FluidObject<any>>(
         // Callback method to set the `initialData` into the map when the DDS is first created.
         const onGetDDS = async () => {
             try {
-                const dds = await getDDS();
+                const dds = await clientRef.current.getDDS<T>(uniqueKey, loadableObjectClass, onFirstInitialize);
                 if (mounted) {
                     setDDS(dds);
                 }
@@ -55,7 +56,7 @@ export function useDynamicDDS<T extends FluidObject = FluidObject<any>>(
         return () => {
             mounted = false;
         };
-    }, [container, getDDS]);
+    }, [container, uniqueKey, onFirstInitialize]);
 
     return {
         dds,

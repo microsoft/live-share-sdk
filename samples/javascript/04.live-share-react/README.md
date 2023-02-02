@@ -1,9 +1,6 @@
-# React Media Template Sample
+# Live Share React sample
 
-This repository contains a simple app that enables all connected clients to watch videos together, build a shared playlist, transfer who is in control, and annotate over the video.\
-You can use this sample as a template to build a robust media synchronization feature into your app, or use it as an example.\
-Each `SharedObject` in our schema (as defined in the `/src/live-share-hooks/useSharedObjects.js` file) has a correlating hook in the live-share-hooks folder.\
-We have found this structure to be very useful in composing advanced applications with Live Share using Functional React components, but you can compose this differently for your app.
+This sample shows how to use the [Live Share React](../../../packages/live-share-react) package in your application.
 
 ## Testing Locally in Browser
 

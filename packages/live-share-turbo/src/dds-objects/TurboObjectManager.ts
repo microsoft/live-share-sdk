@@ -82,6 +82,7 @@ export class TurboObjectManager extends DataObject {
         this._dynamicObjectsMap?.on("valueChanged", async (changed, local) => {
             const pending = this._pendingGetDDSMap.get(changed.key);
             if (pending) {
+				// The user is waiting for a DDS value for this key, so we attempt to resolve their request
                 try {
                     const dds = await this.internalGetDDS(changed.key);
                     if (dds) {
@@ -99,11 +100,13 @@ export class TurboObjectManager extends DataObject {
                 } catch (error) {
                     pending.deferred.reject(error);
                 } finally {
+					// Stop tracking the pending request
                     this._pendingGetDDSMap.delete(changed.key);
                 }
             }
         });
-        this.listenForTaskChanges();
+		// Listen for task assignments
+        this.listenForTaskAssignments();
     }
 
     private get taskManager() {
@@ -124,6 +127,15 @@ export class TurboObjectManager extends DataObject {
         this._container = value;
     }
 
+	/**
+	 * Dynamically loads a Fluid object. If one does not exist, a new one will be created.
+	 * 
+	 * @template T Type of Fluid object to load.
+	 * @param key unique key for the dynamic object
+	 * @param loadableClass the Fluid LoadableObjectClass
+	 * @param container Fluid container to load the DDS into
+	 * @returns the DDS and whether or not it was created locally
+	 */
     public async getDDS<
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
     >(
@@ -137,6 +149,7 @@ export class TurboObjectManager extends DataObject {
         if (!this.container) {
             this.container = container;
         }
+		// Check if the DDS already exists. If it does, return that.
         const dds = await this.internalGetDDS<T>(key);
         if (dds) {
             return {
@@ -144,6 +157,7 @@ export class TurboObjectManager extends DataObject {
                 created: false,
             };
         } else {
+			// Track a deferred promise for getting the DDS
             const deferred = new Deferred<{
                 dds: T;
                 created: boolean;
@@ -153,6 +167,7 @@ export class TurboObjectManager extends DataObject {
                 loadableClass,
             });
             try {
+				// Join the TaskManager queue to create the DDS
                 // TODO: In @fluidframework/task-manager v2, there is a taskManager.subscribeToTask() function so that this doesn't fail on disconnects
                 this.taskManager.lockTask(key);
             } catch (error) {
@@ -162,6 +177,12 @@ export class TurboObjectManager extends DataObject {
         }
     }
 
+	/**
+	 * Get the DDS for a given unique identifier if it exists.
+	 * 
+	 * @param key unique identifier
+	 * @returns existing DDS in the _dynamicObjectsMap or undefined if it does not exist
+	 */
     private async internalGetDDS<
         T extends FluidObject<any> = FluidObject<any> & IFluidLoadable
     >(key: string): Promise<T | undefined> {
@@ -174,10 +195,18 @@ export class TurboObjectManager extends DataObject {
         }
     }
 
-    private async listenForTaskChanges() {
+	/**
+	 * Listen for assignments to tasks.
+	 * @remarks
+	 * `taskId` should correspond with the unique key of a dynamic object so that users will not receive task assignments for objects they are not attempting to
+	 *  access.
+	 */
+    private async listenForTaskAssignments() {
         this.taskManager.on("assigned", async (taskId: string) => {
             const pending = this._pendingGetDDSMap.get(taskId);
             if (pending) {
+				// The local user is waiting for a DDS response. Normally we would create a new one here, but as an extra layer of safety we double check
+				// to see if there is already one set for the given key.
                 try {
                     const checkForInternalDDS = await this.internalGetDDS(
                         taskId
@@ -191,15 +220,17 @@ export class TurboObjectManager extends DataObject {
                         return;
                     }
                 } catch {}
-                // TODO: .create isn't available for DataObject classes...what is the equivalent?
+				// Create a new DDS and store a reference to the handle in dynamicObjectsMap
                 try {
                     const newDDS = await this.container!.create(
                         pending.loadableClass
                     );
                     this.dynamicObjectsMap.set(taskId, newDDS.handle);
                 } catch (error) {
+					// Reject the pending promise
                     pending.deferred.reject(error);
                     this._pendingGetDDSMap.delete(taskId);
+					// TODO: if this user is the last user in the queue and it still failed, perhaps we need to add some additional safety
                 }
             }
             // TODO: In @fluidframework/task-manager v2, there is a taskManager.complete() function that ejects everyone from queue. Once available, we should

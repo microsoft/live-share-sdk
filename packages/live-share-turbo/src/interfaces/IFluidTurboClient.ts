@@ -14,6 +14,7 @@ export interface IFluidTurboClient {
     /**
      * Callback to load a Fluid DDS for a given key. If the object does not already exist, a new one will be created.
      *
+     * @template T Type of Fluid object to load.
      * @param objectKey unique key for the Fluid DDS you'd like to load
      * @param objectClass Fluid LoadableObjectClass you'd like to load of type T
      * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created.

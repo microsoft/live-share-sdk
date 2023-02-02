@@ -13,28 +13,32 @@ import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 import { IFluidTurboClient } from "../interfaces/IFluidTurboClient";
 import { TurboObjectManager } from "../dds-objects";
 
-export class FluidTurboClient implements IFluidTurboClient {
+/**
+ * Base class for building Fluid Turbo clients.
+ * @remarks
+ * Unlike other Fluid clients, the turbo client wraps functionality regularly exposed through an `IFluidContainer`. This is due to the more opinionated
+ * nature of this package than vanilla Fluid Framework, where developers do not define a full `ContainerSchema` themselves and objects are loaded dynamically.
+ */
+export abstract class FluidTurboClient implements IFluidTurboClient {
     private _awaitConnectedPromise?: Promise<void>;
 
     /**
      * Get the Fluid join container results
      */
-    public get results():
+    public abstract get results():
         | {
               container: IFluidContainer;
               services: AzureContainerServices;
           }
-        | undefined {
-        // Implemented by LiveShareTurboClient and AzureTurboClient
-        throw new Error("Not implemented exception");
-    }
+        | undefined;
 
     /**
      * @see IFluidTurboClient.stateMap
      */
     public get stateMap(): SharedMap | undefined {
         if (this.results) {
-            return this.results.container.initialObjects.TURBO_STATE_MAP as SharedMap;
+            return this.results.container.initialObjects
+                .TURBO_STATE_MAP as SharedMap;
         }
         return undefined;
     }
@@ -59,15 +63,23 @@ export class FluidTurboClient implements IFluidTurboClient {
     ): Promise<T> {
         // The uniqueKey key makes the developer provided uniqueKey never conflict across different DDS objects
         if (!this.results || !this.dynamicObjects) {
-            throw new Error("FluidTurboClient: getDDS must have valid dynamicObjects TurboObjectManager");
+            throw new Error(
+                "FluidTurboClient: getDDS must have valid dynamicObjects TurboObjectManager"
+            );
         }
         await this.waitUntilConnected();
-        const initialDDS = this.results.container.initialObjects[objectKey] as T | undefined;
+        const initialDDS = this.results.container.initialObjects[objectKey] as
+            | T
+            | undefined;
         if (initialDDS !== undefined) {
             return initialDDS;
         }
         const uniqueKey = `<${objectClass.name}>:${objectKey}`;
-        const response = await this.dynamicObjects.getDDS<T>(uniqueKey, objectClass, this.results.container);
+        const response = await this.dynamicObjects.getDDS<T>(
+            uniqueKey,
+            objectClass,
+            this.results.container
+        );
         if (response.created) {
             onDidFirstInitialize?.(response.dds);
         }

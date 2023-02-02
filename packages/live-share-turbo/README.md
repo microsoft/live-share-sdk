@@ -1,18 +1,16 @@
 # Microsoft Live Share Turbo
 
-Easily create a collaboration app in Teams with [Fluid Framework](https://fluidframework.com/). This package is an experimental, alternative approach to building Fluid & Live Share applications that attempts to make it simpler to use dynamic distributed-data structures.
+Easily create collaborative apps, powered by [Fluid Framework](https://fluidframework.com/). This package is an experimental, alternative approach to building Fluid & Live Share applications that attempts to make it simpler to use dynamic distributed-data structures. One of the main benefits of Fluid is the efficient, hierarchal, and ultra-fast remote synchronized application state. Vanilla Fluid is highly customizable, allowing you to nest references to DDS objects within other ones. This is powerful but can be cumbersome to work with. By taking a more opinionated stance, Live Share Turbo makes it easy to leverage dynamic objects more easily than ever before.
 
 In traditional Fluid applications, you must define your Fluid container schema up front. In this package, you load data objects on the fly by simply providing a unique identifier for your object. If a data object matching that identifier exists, the SDK will use that one; otherwise, a new one will be created on your behalf. Fluid Framework's `TaskManager` object is used to ensure that only one user will create the DDS for each unique identifier.
 
 Here is a simple example of how to get started:
 
 ```javascript
-import { app, LiveShareHost } from "@microsoft/teams-js";
+import { LiveShareHost } from "@microsoft/teams-js";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 import { SharedMap } from "fluid-framework";
 
-// Initialize teams-js (if using Live Share in a Teams application)
-await app.initialize();
 // Initialize the LiveShareTurboClient and join the session
 const host = LiveShareHost.create();
 const client = new LiveShareTurboClient(host);
@@ -23,9 +21,11 @@ const sharedMap = await client.getDDS(
     SharedMap,
     (sharedMap) => {
         // Use this optional callback to set initial values for the data object
+        sharedMap.set("foo", "bar");
     }
 );
 sharedMap.on("valueChanged", (changed, local) => {
+    const value = sharedMap.get(changed.key);
     // Update your app to reflect the most recent state
 });
 ```
@@ -65,7 +65,7 @@ There are two clients that you may use depending on your scenario: `LiveShareTur
 
 ### How this package compares against vanilla Fluid / Live Share
 
-Normally with Fluid you must define the DDS objects you want to use up front in the `ContainerSchema`. We've had feedback that this is rigid and makes it harder to add new features over time. What was cool about the React package is that you don't need to do that (though you can) by abstracting out some of the more powerful but verbose aspects of Fluid.
+Normally with Fluid you must define the DDS objects you want to use up front in the `ContainerSchema`. This can feel rigid and makes it harder to add new features over time. With Live Share Turbo, you don't need to do that -- though you can -- because it abstracts out some of the more powerful but verbose aspects of Fluid.
 
 The following example shows how you might build a synchronized counter using vanilla Fluid Framework:
 
@@ -233,7 +233,25 @@ document.getElementById("create-task-board").onclick = async () => {
 };
 ```
 
-**Note**: Depending on your scenario, this package might not be a good fit for your application. While many Teams Live Share for synchronizing application state work great with this system, we recommend testing thoroughly before committing this package to production.
+**Note**: Depending on your scenario, this package might not be a good fit for your application. While many apps work great with this system, we recommend testing thoroughly before committing this package to production.
+
+### Accessing the Fluid container
+
+If you want to access the Fluid container or audience used by `LiveShareTurboClient` or `AzureTurboClient`, such as to create a Fluid object the "traditional" Fluid way, you can easily access it through the following API:
+
+```javascript
+import { LiveShareHost } from "@microsoft/teams-js";
+import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
+
+const host = LiveShareHost.create();
+const client = LiveShareTurboClient(host);
+// Option 1: get from join
+const { container, audience } = await client.join();
+// Option 2: use client results
+if (client.results) {
+    const { container, audience } = client.results;
+}
+```
 
 ## Code samples
 

@@ -18,6 +18,12 @@ const schema: ContainerSchema = {
     },
 };
 
+/**
+ * Get the container schema to use within a `FluidTurboClient` container.
+ * 
+ * @param initialObjects Optional. Initial objects to add to the schema
+ * @returns a `ContainerSchema` record to use in a Fluid container
+ */
 export function getContainerSchema(initialObjects?: LoadableObjectClassRecord): ContainerSchema {
     return {
         initialObjects: {

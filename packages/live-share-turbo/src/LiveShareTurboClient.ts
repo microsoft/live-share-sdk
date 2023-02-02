@@ -12,6 +12,10 @@ import {
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { FluidTurboClient, getContainerSchema } from "./internals";
 
+/**
+ * The `FluidTurboClient` implementation for the `LiveShareClient`.
+ * @see FluidTurboClient
+ */
 export class LiveShareTurboClient extends FluidTurboClient {
     private _client: LiveShareClient;
     private _results:

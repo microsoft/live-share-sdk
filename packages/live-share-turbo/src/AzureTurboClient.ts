@@ -11,6 +11,10 @@ import {
 } from "@fluidframework/azure-client";
 import { FluidTurboClient, getContainerSchema } from "./internals";
 
+/**
+ * The `FluidTurboClient` implementation for the `AzureClient`.
+ * @see FluidTurboClient
+ */
 export class AzureTurboClient extends FluidTurboClient {
     private _client: AzureClient;
     private _results:

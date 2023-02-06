@@ -16,6 +16,10 @@ export class MockRoleVerifier implements IRoleVerifier {
     public called = false;
     public clientId: string;
 
+    public registerClientId(clientId: string): Promise<UserMeetingRole[]> {
+        throw new Error("mocked Method not implemented.");
+    }
+
     public getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
         this.called = true;
         this.clientId = clientId;

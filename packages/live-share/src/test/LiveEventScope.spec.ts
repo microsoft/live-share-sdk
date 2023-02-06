@@ -12,6 +12,7 @@ import { MockRoleVerifier } from "./MockRoleVerifier";
 import { MockTimestampProvider } from "./MockTimestampProvider";
 import { LocalRoleVerifier } from "../LocalRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
+import { LiveShareClient } from "../LiveShareClient";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
@@ -83,7 +84,7 @@ describe("LiveEventScope", () => {
 
     it("Should verify senders role", (done) => {
         const verifier = new MockRoleVerifier([UserMeetingRole.organizer]);
-        LiveEvent.setRoleVerifier(verifier);
+        LiveShareClient.setRoleVerifier(verifier);
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
@@ -103,14 +104,14 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            LiveEvent.setRoleVerifier(new LocalRoleVerifier());
+            LiveShareClient.setRoleVerifier(new LocalRoleVerifier());
             done();
         }, 10);
     });
 
     it("Should block invalid senders", (done) => {
         const verifier = new MockRoleVerifier([]);
-        LiveEvent.setRoleVerifier(verifier);
+        LiveShareClient.setRoleVerifier(verifier);
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
@@ -136,7 +137,7 @@ describe("LiveEventScope", () => {
 
     it("Should support event scopes with multiple roles", (done) => {
         const verifier = new MockRoleVerifier([UserMeetingRole.presenter]);
-        LiveEvent.setRoleVerifier(verifier);
+        LiveShareClient.setRoleVerifier(verifier);
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
@@ -158,7 +159,7 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            LiveEvent.setRoleVerifier(new LocalRoleVerifier());
+            LiveShareClient.setRoleVerifier(new LocalRoleVerifier());
             done();
         }, 10);
     });
@@ -168,7 +169,7 @@ describe("LiveEventScope", () => {
             UserMeetingRole.organizer,
             UserMeetingRole.presenter,
         ]);
-        LiveEvent.setRoleVerifier(verifier);
+        LiveShareClient.setRoleVerifier(verifier);
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
@@ -188,14 +189,14 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            LiveEvent.setRoleVerifier(new LocalRoleVerifier());
+            LiveShareClient.setRoleVerifier(new LocalRoleVerifier());
             done();
         }, 10);
     });
 
     it("Should support custom timestamp providers", (done) => {
         const provider = new MockTimestampProvider();
-        LiveEvent.setTimestampProvider(provider);
+        LiveShareClient.setTimestampProvider(provider);
 
         let triggered = 0;
         const now = new Date().getTime();
@@ -218,7 +219,7 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(provider.called, `provider not called`);
             assert(triggered == 2, `triggered == ${triggered}`);
-            LiveEvent.setTimestampProvider(new LocalTimestampProvider());
+            LiveShareClient.setTimestampProvider(new LocalTimestampProvider());
             done();
         }, 10);
     });

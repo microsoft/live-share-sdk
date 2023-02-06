@@ -12,6 +12,7 @@ import { LiveEventTarget } from "./LiveEventTarget";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import { LiveShareClient } from "./LiveShareClient";
 
 /**
  * Events supported by [LiveState` object.
@@ -205,7 +206,7 @@ export class LiveState<TData = undefined> extends DataObject<{
         evt: IStateChangeEvent<TData>,
         sender: string
     ): void {
-        LiveEvent.verifyRolesAllowed(sender, this._allowedRoles)
+        LiveShareClient.verifyRolesAllowed(sender, this._allowedRoles)
             .then((allowed) => {
                 // Ensure that state is allowed, newer, and not the initial state.
                 if (

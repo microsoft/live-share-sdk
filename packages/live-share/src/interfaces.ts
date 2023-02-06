@@ -223,7 +223,7 @@ export interface IFluidTenantInfo {
     storageEndpoint: string;
 }
 
-export interface IUserInfo {
+export interface IClientUserInfo {
     userId: string;
     roles: UserMeetingRole[];
     displayName?: string;
@@ -281,19 +281,14 @@ export interface ILiveShareHost {
      * @param clientId Unique ID assigned to the local Fluid client.
      * @returns An array of meeting roles assigned to the local user.
      */
+    // TODO: maybe change return type to Promise<void>
     registerClientId(clientId: string): Promise<UserMeetingRole[]>;
-
-    /**
-     * Queries the hosts role verification service for the roles associated with a given client ID.
-     * @param clientId ID of teh client to lookup.
-     * @returns An array of roles assigned to the queried client ID.
-     */
-    getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
 
     /**
      * Queries the hosts `IUserInfo` for a given client ID.
      * @param clientId ID of the client to lookup.
      * @returns `IUserInfo` for the queried client ID.
      */
-    getUserInfo(clientId: string): Promise<IUserInfo | undefined>;
+    // TODO: make tmp returned undefined instead of throwing the error from the 404 if client not registered
+    getUserInfo(clientId: string): Promise<IClientUserInfo | undefined>;
 }

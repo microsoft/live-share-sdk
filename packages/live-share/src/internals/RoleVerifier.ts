@@ -3,24 +3,22 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IRoleVerifier, UserMeetingRole } from "../interfaces";
-import { ClientManager } from "./ClientManager";
+import { ILiveShareHost, IRoleVerifier, UserMeetingRole } from "../interfaces";
 /**
  * @hidden
  */
 export class RoleVerifier implements IRoleVerifier {
-    public constructor(private readonly _clientManager: ClientManager) {}
+    public constructor(private readonly _host: ILiveShareHost) {}
 
     public async getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        const userInfo = await this._clientManager.getUserInfo(clientId);
-        return userInfo.roles;
+        const userInfo = await this._host.getUserInfo(clientId);
+        return userInfo?.roles ?? [];
     }
 
     public async registerClientId(
         clientId: string
     ): Promise<UserMeetingRole[]> {
-        await this._clientManager.registerClientId(clientId);
-        return await this.getClientRoles(clientId);
+        return await this._host.registerClientId(clientId);
     }
 
     public async verifyRolesAllowed(
@@ -34,8 +32,8 @@ export class RoleVerifier implements IRoleVerifier {
         }
 
         if (Array.isArray(allowedRoles) && allowedRoles.length > 0) {
-            const info = await this._clientManager.getUserInfo(clientId);
-            const roles = info.roles;
+            const info = await this._host.getUserInfo(clientId);
+            const roles = info?.roles ?? [];
             for (let i = 0; i < allowedRoles.length; i++) {
                 const role = allowedRoles[i];
                 if (roles.indexOf(role) >= 0) {

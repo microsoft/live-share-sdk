@@ -10,7 +10,7 @@ import {
     INtpTimeInfo,
     ContainerState,
     UserMeetingRole,
-    IUserInfo,
+    IClientUserInfo,
 } from "./interfaces";
 
 /**
@@ -98,13 +98,9 @@ export class TestLiveShareHost implements ILiveShareHost {
         return Promise.resolve(this.clientsMeetingRoles);
     }
 
-    public getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        return Promise.resolve(this.clientsMeetingRoles);
-    }
-
-    public getUserInfo(clientId: string): Promise<IUserInfo> {
+    public getUserInfo(clientId: string): Promise<IClientUserInfo> {
         // TODO: better test implementation
-        const info: IUserInfo = {
+        const info: IClientUserInfo = {
             userId: clientId, // set userId to clientId since not connected to teams?
             roles: this.clientsMeetingRoles,
             displayName: undefined, // default test name?

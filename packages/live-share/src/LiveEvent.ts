@@ -5,19 +5,9 @@
 
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
-import { LocalTimestampProvider } from "./LocalTimestampProvider";
-import {
-    ILiveEvent,
-    ITimestampProvider,
-    IRoleVerifier,
-    UserMeetingRole,
-    IClientTimestamp,
-    IUserInfo,
-} from "./interfaces";
+import { ILiveEvent, UserMeetingRole, IClientTimestamp } from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
-import { LocalRoleVerifier } from "./LocalRoleVerifier";
-import { ClientManager } from "./internals/ClientManager";
 
 /**
  * Events supported by `LiveEvent` object.
@@ -60,14 +50,6 @@ export class LiveEvent<
 > extends DataObject<{
     Events: ILiveEventEvents<TEvent>;
 }> {
-    private static _timestampProvider: ITimestampProvider =
-        new LocalTimestampProvider();
-    private static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
-
-    // TODO: default implementation for testing?
-    // TODO: rename ClientManager class
-    private static _clientManager?: ClientManager;
-
     private _eventTarget?: LiveEventTarget<TEvent>;
 
     /**
@@ -141,63 +123,6 @@ export class LiveEvent<
     }
 
     /**
-     * Returns the current timestamp as the number of milliseconds sine the Unix Epoch.
-     */
-    public static getTimestamp(): number {
-        return LiveEvent._timestampProvider.getTimestamp();
-    }
-
-    /**
-     * Returns the `IUserInfo` for a client.
-     * @param clientId Client ID to lookup.
-     * @returns Returns the `IUserInfo` for a client.
-     */
-    public static getUserInfo(
-        clientId: string
-    ): Promise<IUserInfo | undefined> {
-        return (
-            LiveEvent._clientManager?.getUserInfo(clientId) ??
-            Promise.resolve(undefined)
-        );
-    }
-
-    /**
-     * Returns the list of roles supported for a client.
-     * @param clientId Client ID to lookup.
-     * @returns The list of roles for the client.
-     */
-    public static getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        return LiveEvent._roleVerifier.getClientRoles(clientId);
-    }
-
-    /**
-     * Registers client id of the current user.
-     * @param clientId Client ID to map to current user.
-     * @returns The list of roles for the client.
-     */
-    public static registerClientId(
-        clientId: string
-    ): Promise<UserMeetingRole[]> {
-        return LiveEvent._roleVerifier.registerClientId(clientId);
-    }
-
-    /**
-     * Verifies that a client has one of the specified roles.
-     * @param clientId Client ID to inspect.
-     * @param allowedRoles User roles that are allowed.
-     * @returns True if the client has one of the specified roles.
-     */
-    public static verifyRolesAllowed(
-        clientId: string,
-        allowedRoles: UserMeetingRole[]
-    ): Promise<boolean> {
-        return LiveEvent._roleVerifier.verifyRolesAllowed(
-            clientId,
-            allowedRoles
-        );
-    }
-
-    /**
      * Returns true if a received event is newer then the current event.
      *
      * #### remarks
@@ -253,31 +178,5 @@ export class LiveEvent<
         }
 
         return true;
-    }
-
-    /**
-     * Assigns a custom timestamp provider.
-     * @param provider The timestamp provider to use.
-     */
-    public static setTimestampProvider(provider: ITimestampProvider): void {
-        LiveEvent._timestampProvider = provider;
-    }
-
-    /**
-     * @hidden
-     * Assigns a new role verifier.
-     */
-    public static setRoleVerifier(provider: IRoleVerifier): void {
-        LiveEvent._roleVerifier = provider;
-    }
-
-    /**
-     * @hidden
-     * Assigns a new ClientManager.
-     *
-     * TODO: should be an interface?
-     */
-    public static setClientManager(provider: ClientManager): void {
-        LiveEvent._clientManager = provider;
     }
 }

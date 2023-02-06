@@ -9,8 +9,8 @@ import {
     ITelemetryPerformanceEvent,
     ITelemetryProperties,
 } from "@fluidframework/common-definitions";
-import { LiveEvent } from "./LiveEvent";
 import { IRuntimeSignaler } from "./LiveEventScope";
+import { LiveShareClient } from "./LiveShareClient";
 
 /**
  * Properties included on all events sent by `LiveTelemetryLogger`.
@@ -120,7 +120,7 @@ export class LiveTelemetryLogger {
         eventName: string,
         additionalProperties?: Partial<ILiveTelemetryProperties>
     ): T {
-        const now = LiveEvent.getTimestamp();
+        const now = LiveShareClient.getTimestamp();
         return {
             eventName: eventName,
             clientId: this._runtime.clientId,

@@ -17,7 +17,7 @@ import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { cloneValue, TelemetryEvents } from "./internals";
 import { TimeInterval } from "./TimeInterval";
 import { v4 } from "uuid";
-import { LiveEvent } from "./LiveEvent";
+import { LiveShareClient } from "./LiveShareClient";
 
 /**
  * Events supported by `LivePresence` object.
@@ -152,7 +152,7 @@ export class LivePresence<TData extends object = object> extends DataObject<{
 
         // Assign user ID
         // - If we don't set the timestamp the local user object will report as "offline".
-        this._currentPresence.timestamp = LiveEvent.getTimestamp();
+        this._currentPresence.timestamp = LiveShareClient.getTimestamp();
         this._currentPresence.userId = userId || v4();
         this._currentPresence.data = data;
         this._currentPresence.state = state;
@@ -188,7 +188,8 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                 //   clients. That's because the LiveEvent.isNewer() check will fail.  Updating
                 //   the timestamp of the outgoing update is the best way to show proof that the client
                 //   is still alive.
-                this._currentPresence.timestamp = LiveEvent.getTimestamp();
+                this._currentPresence.timestamp =
+                    LiveShareClient.getTimestamp();
 
                 // Return current presence
                 return this._currentPresence;

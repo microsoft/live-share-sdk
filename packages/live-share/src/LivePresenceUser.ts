@@ -4,10 +4,11 @@
  */
 
 import { LiveEvent } from "./LiveEvent";
-import { IUserInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
+import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
 import { cloneValue } from "./internals";
 import { IClient } from "@fluidframework/protocol-definitions";
+import { LiveShareClient } from "./LiveShareClient";
 
 /**
  * List of possible presence states.
@@ -45,7 +46,9 @@ export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
 export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
     private readonly _clients: string[] = [];
-    private _userInfo?: IUserInfo;
+    private _hostUserId?: string;
+    private _displayName?: string;
+    private _roles?: UserMeetingRole[];
 
     /**
      * @hidden
@@ -56,7 +59,7 @@ export class LivePresenceUser<TData = object> {
         private _isLocalUser: boolean
     ) {
         this.updateClients(this._evt);
-        this._lastUpdateTime = LiveEvent.getTimestamp();
+        this._lastUpdateTime = LiveShareClient.getTimestamp();
     }
 
     /**
@@ -73,8 +76,15 @@ export class LivePresenceUser<TData = object> {
         return this._evt.userId;
     }
 
-    public get userInfo(): IUserInfo | undefined {
-        return this._userInfo;
+    /**
+     * ID of the user.
+     */
+    public get hostUserId(): string | undefined {
+        return this._hostUserId;
+    }
+
+    public get displayName(): string | undefined {
+        return this._displayName;
     }
 
     /**
@@ -99,7 +109,7 @@ export class LivePresenceUser<TData = object> {
      * Returns the user's meeting roles.
      */
     public getRoles(): Promise<UserMeetingRole[]> {
-        return LiveEvent.getClientRoles(this._evt.clientId!);
+        return Promise.resolve(this._roles ?? []);
     }
 
     /**
@@ -119,7 +129,7 @@ export class LivePresenceUser<TData = object> {
         if (LiveEvent.isNewer(current, evt)) {
             // Save updated event
             this._evt = evt;
-            this._lastUpdateTime = LiveEvent.getTimestamp();
+            this._lastUpdateTime = LiveShareClient.getTimestamp();
 
             // Has anything changed?
             if (
@@ -134,7 +144,7 @@ export class LivePresenceUser<TData = object> {
     }
 
     private hasExpired(): boolean {
-        const now = LiveEvent.getTimestamp();
+        const now = LiveShareClient.getTimestamp();
         const elapsed = now - this._lastUpdateTime;
         return (
             !this._isLocalUser && elapsed > this._expirationPeriod.milliseconds
@@ -148,9 +158,11 @@ export class LivePresenceUser<TData = object> {
         }
 
         if (evt.clientId) {
-            LiveEvent.getUserInfo(evt.clientId)
+            LiveShareClient.getUserInfo(evt.clientId)
                 .then((info) => {
-                    this._userInfo = info;
+                    this._hostUserId = info?.userId;
+                    this._roles = info?.roles;
+                    this._displayName = info?.displayName;
                 })
                 .catch((e) => {
                     console.warn(e);

@@ -11,7 +11,7 @@ import {
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
-import { LiveEvent } from "./LiveEvent";
+import { LiveShareClient } from "./LiveShareClient";
 
 /**
  * Live event callback.
@@ -84,7 +84,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             // identifiable sender clientId.  The listener is responsible for deciding how
             // it wants to handle local/remote signals
             if (this._runtime.connected && clientId !== null) {
-                LiveEvent.verifyRolesAllowed(clientId, this._allowedRoles)
+                LiveShareClient.verifyRolesAllowed(clientId, this._allowedRoles)
                     .then((value) => {
                         if (value) {
                             this.emitter.emit(
@@ -178,7 +178,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             ...(evt as TEvent),
             clientId: this._runtime.clientId,
             name: eventName,
-            timestamp: LiveEvent.getTimestamp(),
+            timestamp: LiveShareClient.getTimestamp(),
         };
 
         // Send event

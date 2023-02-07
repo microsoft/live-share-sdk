@@ -29,7 +29,7 @@ import { HostTimestampProvider } from "./HostTimestampProvider";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { TimestampProvider } from "./TimestampProvider";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
-import { LocalRoleVerifier } from "./LocalRoleVerifier";
+import { TestLiveShareHost } from "./TestLiveShareHost";
 
 /**
  * @hidden
@@ -75,11 +75,16 @@ export interface ILiveShareClientOptions {
  * Client used to connect to fluid containers within a Microsoft Teams context.
  */
 export class LiveShareClient {
-    private static _host: ILiveShareHost;
+    private static _host: ILiveShareHost = TestLiveShareHost.create(
+        undefined,
+        undefined
+    );
     private readonly _options: ILiveShareClientOptions;
     private static _timestampProvider: ITimestampProvider =
         new LocalTimestampProvider();
-    protected static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
+    private static _roleVerifier: IRoleVerifier = new RoleVerifier(
+        LiveShareClient._host
+    );
 
     /**
      * Creates a new `TeamsFluidClient` instance.
@@ -94,6 +99,7 @@ export class LiveShareClient {
 
         // Save props
         LiveShareClient._host = new LiveShareHostDecorator(host);
+        LiveShareClient._roleVerifier = new RoleVerifier(LiveShareClient._host);
         this._options = Object.assign({} as ILiveShareClientOptions, options);
     }
 
@@ -408,10 +414,7 @@ export class LiveShareClient {
     public static getUserInfo(
         clientId: string
     ): Promise<IClientUserInfo | undefined> {
-        return (
-            LiveShareClient._host?.getUserInfo(clientId) ??
-            Promise.resolve(undefined)
-        );
+        return LiveShareClient._host.getUserInfo(clientId);
     }
 
     /**

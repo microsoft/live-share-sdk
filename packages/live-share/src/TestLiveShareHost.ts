@@ -19,6 +19,8 @@ import {
 export class TestLiveShareHost implements ILiveShareHost {
     public static readonly LOCAL_MODE_TEST_TOKEN = `test-token`;
 
+    private roleCache: Map<string, UserMeetingRole[]> = new Map();
+
     /**
      * Creates an new live share host for local testing.
      * @param getLocalTestContainerId Optional. Function to customize reading the test container ID. The default implementation reads the ID from the browsers # URL.
@@ -41,9 +43,11 @@ export class TestLiveShareHost implements ILiveShareHost {
     private constructor(
         private _getLocalTestContainerId?: () => string | undefined,
         private _setLocalTestContainerId?: (containerId: string) => void
-    ) {}
+    ) {
+        TestLiveShareHost.ensureWarned();
+    }
 
-    public clientsMeetingRoles: UserMeetingRole[] = [
+    public defaultRoles: UserMeetingRole[] = [
         UserMeetingRole.organizer,
         UserMeetingRole.presenter,
         UserMeetingRole.attendee,
@@ -95,17 +99,40 @@ export class TestLiveShareHost implements ILiveShareHost {
     }
 
     public registerClientId(clientId: string): Promise<UserMeetingRole[]> {
-        return Promise.resolve(this.clientsMeetingRoles);
+        this.addClient(clientId, this.defaultRoles);
+        return Promise.resolve(this.defaultRoles);
     }
 
-    public getUserInfo(clientId: string): Promise<IClientUserInfo> {
-        // TODO: better test implementation
+    // not part of LiveShareHost interface, but can be used to override roles for testing
+    public addClient(clientId: string, roles: UserMeetingRole[]): this {
+        this.roleCache.set(clientId, roles);
+        return this;
+    }
+
+    public async getUserInfo(clientId: string): Promise<IClientUserInfo> {
         const info: IClientUserInfo = {
-            userId: clientId, // set userId to clientId since not connected to teams?
-            roles: this.clientsMeetingRoles,
-            displayName: undefined, // default test name?
+            userId: clientId, // set userId to clientId since not connected to teams
+            roles: await this.getClientRoles(clientId),
+            displayName: clientId.substring(0, 4),
         };
         return Promise.resolve(info);
+    }
+
+    private getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
+        if (!clientId) {
+            throw new Error(
+                `TestLiveShareHost: called getClientRoles() without a clientId`
+            );
+        }
+
+        let roles: UserMeetingRole[];
+        if (this.roleCache.has(clientId)) {
+            roles = this.roleCache.get(clientId)!;
+        } else {
+            roles = this.defaultRoles;
+        }
+
+        return Promise.resolve(roles);
     }
 
     private getLocalTestContainerId(): string | undefined {
@@ -123,6 +150,17 @@ export class TestLiveShareHost implements ILiveShareHost {
             this._setLocalTestContainerId(containerId);
         } else {
             window.location.hash = containerId;
+        }
+    }
+
+    private static _warned: boolean = false;
+
+    private static ensureWarned(): void {
+        if (!TestLiveShareHost._warned) {
+            console.warn(
+                `TestLiveShareHost is being used. This should only be used for local testing purposes.`
+            );
+            TestLiveShareHost._warned = true;
         }
     }
 }

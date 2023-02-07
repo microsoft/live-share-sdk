@@ -4,6 +4,9 @@
  */
 
 import { IRoleVerifier, UserMeetingRole } from "../interfaces";
+import { RoleVerifier } from "../internals";
+import { LiveShareClient } from "../LiveShareClient";
+import { TestLiveShareHost } from "../TestLiveShareHost";
 
 export class MockRoleVerifier implements IRoleVerifier {
     private _sendersRoles: UserMeetingRole[];
@@ -15,16 +18,6 @@ export class MockRoleVerifier implements IRoleVerifier {
     public blocked = false;
     public called = false;
     public clientId: string;
-
-    public registerClientId(clientId: string): Promise<UserMeetingRole[]> {
-        throw new Error("mocked Method not implemented.");
-    }
-
-    public getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        this.called = true;
-        this.clientId = clientId;
-        return Promise.resolve(this._sendersRoles);
-    }
 
     public verifyRolesAllowed(
         clientId: string,
@@ -41,5 +34,11 @@ export class MockRoleVerifier implements IRoleVerifier {
 
         this.blocked = true;
         return Promise.resolve(false);
+    }
+
+    public static restoreDefaultVerifier() {
+        LiveShareClient.setRoleVerifier(
+            new RoleVerifier(TestLiveShareHost.create(undefined, undefined))
+        );
     }
 }

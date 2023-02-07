@@ -4,13 +4,11 @@
  */
 
 import { strict as assert } from "assert";
-import { LiveEvent } from "../LiveEvent";
 import { LiveEventScope } from "../LiveEventScope";
 import { UserMeetingRole } from "../interfaces";
 import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
 import { MockRoleVerifier } from "./MockRoleVerifier";
 import { MockTimestampProvider } from "./MockTimestampProvider";
-import { LocalRoleVerifier } from "../LocalRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { LiveShareClient } from "../LiveShareClient";
 
@@ -104,7 +102,7 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            LiveShareClient.setRoleVerifier(new LocalRoleVerifier());
+            MockRoleVerifier.restoreDefaultVerifier();
             done();
         }, 10);
     });
@@ -159,7 +157,7 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            LiveShareClient.setRoleVerifier(new LocalRoleVerifier());
+            MockRoleVerifier.restoreDefaultVerifier();
             done();
         }, 10);
     });
@@ -189,7 +187,7 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            LiveShareClient.setRoleVerifier(new LocalRoleVerifier());
+            MockRoleVerifier.restoreDefaultVerifier();
             done();
         }, 10);
     });

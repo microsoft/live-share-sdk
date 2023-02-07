@@ -10,17 +10,6 @@ import { ILiveShareHost, IRoleVerifier, UserMeetingRole } from "../interfaces";
 export class RoleVerifier implements IRoleVerifier {
     public constructor(private readonly _host: ILiveShareHost) {}
 
-    public async getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        const userInfo = await this._host.getUserInfo(clientId);
-        return userInfo?.roles ?? [];
-    }
-
-    public async registerClientId(
-        clientId: string
-    ): Promise<UserMeetingRole[]> {
-        return await this._host.registerClientId(clientId);
-    }
-
     public async verifyRolesAllowed(
         clientId: string,
         allowedRoles: UserMeetingRole[]

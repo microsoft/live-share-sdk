@@ -11,7 +11,6 @@ import { LiveEvent } from "../LiveEvent";
 import { Deferred } from "./Deferred";
 import { MockTimestampProvider } from "./MockTimestampProvider";
 import { MockRoleVerifier } from "./MockRoleVerifier";
-import { LocalRoleVerifier } from "../LocalRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
 import { LiveShareClient } from "../LiveShareClient";
@@ -122,34 +121,12 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         LiveShareClient.setTimestampProvider(new LocalTimestampProvider());
     });
 
-    // TODO: fix
-    // it("Should getClientRoles() using local role verifier", async () => {
-    //     const userInfo = await LiveShareClient.getUserInfo("test");
-    //     assert(Array.isArray(userInfo?.roles), `Return value not an array`);
-    //     assert((userInfo?.roles?.length ?? 0) > 0, `no roles returned`);
-    // });
-
     it("Should verifyRolesAllowed() using local role verifier", async () => {
         const allowed = await LiveShareClient.verifyRolesAllowed("test", [
             UserMeetingRole.presenter,
         ]);
         assert(allowed, `Role should be allowed`);
     });
-
-    // TODO: fix
-    // it("Should getClientRoles() using custom role verifier", async () => {
-    //     const mock = new MockRoleVerifier([UserMeetingRole.presenter]);
-    //     LiveShareClient.setRoleVerifier(mock);
-
-    //     const userInfo = await LiveShareClient.getUserInfo("test");
-    //     assert(Array.isArray(userInfo?.roles), `Return value not an array`);
-    //     assert((userInfo?.roles?.length ?? 0) == 1, `no roles returned`);
-    //     assert(mock.called, `mock not called`);
-    //     assert(mock.clientId == "test", `Invalid clientId of ${mock.clientId}`);
-
-    //     // Restore local verifier
-    //     LiveShareClient.setRoleVerifier(new LocalRoleVerifier());
-    // });
 
     it("Should verifyRolesAllowed() using custom role verifier", async () => {
         const mock = new MockRoleVerifier([UserMeetingRole.presenter]);
@@ -162,8 +139,8 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         assert(mock.called, `mock not called`);
         assert(mock.clientId == "test", `Invalid clientId of ${mock.clientId}`);
 
-        // Restore local verifier
-        LiveShareClient.setRoleVerifier(new LocalRoleVerifier());
+        // Restore normal verifier
+        MockRoleVerifier.restoreDefaultVerifier();
     });
 
     it("Should allow newer received events", () => {

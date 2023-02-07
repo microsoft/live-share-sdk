@@ -17,7 +17,6 @@ export * from "./LiveShareClient";
 export * from "./LiveState";
 export * from "./LiveTelemetryLogger";
 export * from "./LiveTimer";
-export * from "./LocalRoleVerifier";
 export * from "./LocalTimestampProvider";
 export * from "./TestLiveShareHost";
 export * from "./TimeInterval";

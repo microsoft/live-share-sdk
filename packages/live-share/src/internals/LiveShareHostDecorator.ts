@@ -18,10 +18,12 @@ const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
 const CACHE_LIFETIME = 10 * 1000;
 
 /**
- * Live Share Host decorator used for request caching.
+ * Live Share Host decorator used to reduce rapid duplicate requests.
  */
 export class LiveShareHostDecorator implements ILiveShareHost {
     private readonly _registerRequestCache: RequestCache<void> =
+        new RequestCache(CACHE_LIFETIME);
+    private readonly _userInfoRequestCache: RequestCache<IClientUserInfo> =
         new RequestCache(CACHE_LIFETIME);
 
     /**
@@ -59,33 +61,34 @@ export class LiveShareHostDecorator implements ILiveShareHost {
                 `ClientManager: called getUserInfo() without a clientId`
             );
         }
-
-        return waitForResult(
-            async () => {
-                try {
-                    return await this._host.getUserInfo(clientId);
-                } catch (error) {
-                    // Error is thrown when client id is not registered
-                    // Assume Client Id is local and to be newly registered.
-                    // Our service is first writer wins, so we will not overwrite
-                    // if previous states exist.
-                    console.warn(
-                        "getClientRolesError: " + JSON.stringify(error)
+        return this._userInfoRequestCache.cacheRequest(clientId, () => {
+            return waitForResult(
+                async () => {
+                    try {
+                        return await this._host.getUserInfo(clientId);
+                    } catch (error) {
+                        // Error is thrown when client id is not registered
+                        // Assume Client Id is local and to be newly registered.
+                        // Our service is first writer wins, so we will not overwrite
+                        // if previous states exist.
+                        console.warn(
+                            "getClientRolesError: " + JSON.stringify(error)
+                        );
+                        await this.registerClientId(clientId);
+                        return await this._host.getUserInfo(clientId);
+                    }
+                },
+                (result) => {
+                    return result?.userId != undefined;
+                },
+                () => {
+                    return new Error(
+                        `ClientManager: timed out getting user info for a remote client ID`
                     );
-                    await this.registerClientId(clientId);
-                    return await this._host.getUserInfo(clientId);
-                }
-            },
-            (result) => {
-                return result?.userId != undefined;
-            },
-            () => {
-                return new Error(
-                    `ClientManager: timed out getting user info for a remote client ID`
-                );
-            },
-            EXPONENTIAL_BACKOFF_SCHEDULE
-        );
+                },
+                EXPONENTIAL_BACKOFF_SCHEDULE
+            );
+        });
     }
 
     public async registerClientId(
@@ -97,7 +100,7 @@ export class LiveShareHostDecorator implements ILiveShareHost {
                     async () => {
                         await this._host.registerClientId(clientId);
                     },
-                    (result) => {
+                    (_) => {
                         // we only care that it was successful
                         return true;
                     },

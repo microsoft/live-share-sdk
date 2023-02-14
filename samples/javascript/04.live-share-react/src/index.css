@@ -42,8 +42,7 @@ h2 {
   line-height: 1.1;
 }
 h3 {
-  font-size: 1em;
-  line-height: 1.1;
+  font-size: 16px;
 }
 h4 {
   font-size: 0.8em;
@@ -106,4 +105,12 @@ button:focus-visible {
 }
 .flex.wrap {
   flex-wrap: wrap;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.margin-bottom {
+  margin-bottom: 12px;
 }

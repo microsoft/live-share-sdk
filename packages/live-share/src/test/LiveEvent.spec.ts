@@ -83,7 +83,7 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         await object1.initialize();
         try {
             // Ensure started
-            assert(object1.isStarted, `not started`);
+            assert(object1.isInitialized, `not started`);
 
             // Try second call to initialize.
             await object1.initialize();

@@ -25,11 +25,15 @@ const GLOBAL_WINDOW_KEY = "@microsoft/live-share:DYNAMIC-LOADABLE-OBJECTS";
  * aware of what every DDS is.
  */
 export class DynamicObjectRegistry {
+    private static _dynamicLoadableObjects: Map<string, LoadableObjectClass<any>> = new Map<string, LoadableObjectClass<any>>();
     /**
      * Get all registered dynamic loadable objects
      */
     public static get dynamicLoadableObjects(): Map<string, LoadableObjectClass<any>> {
-        return ((window as any)[GLOBAL_WINDOW_KEY] || new Map<string, LoadableObjectClass<any>>) as Map<string, LoadableObjectClass<any>>;
+        if (typeof window === "undefined") {
+            return this._dynamicLoadableObjects;
+        }
+        return ((window as any)[GLOBAL_WINDOW_KEY] || this._dynamicLoadableObjects) as Map<string, LoadableObjectClass<any>>;
     }
 
     /**
@@ -44,13 +48,15 @@ export class DynamicObjectRegistry {
         loadableObjectClass: LoadableObjectClass<any>,
         typeName: string,
     ) {
+        const loadableObjects = this.dynamicLoadableObjects;
         if (
-            this.dynamicLoadableObjects.has(typeName)
+            loadableObjects.has(typeName)
         )
             return;
-        const loadableObjects = this.dynamicLoadableObjects;
         loadableObjects.set(typeName, loadableObjectClass);
-        (window as any)[GLOBAL_WINDOW_KEY] = loadableObjects;
+        if (typeof window !== "undefined") {
+            (window as any)[GLOBAL_WINDOW_KEY] = loadableObjects;
+        }
     }
 }
 

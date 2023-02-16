@@ -5,9 +5,9 @@
     "author": "Microsoft",
     "license": "MIT",
     "dependencies": {
-        "@fluentui/react-components": "^9.9.1",
+        "@fluentui/react-components": "^9.15.5",
         "@fluentui/react-icons": "^2.0.194",
-        "@fluentui/react-theme": "^9.0.0",
+        "@fluentui/react-theme": "^9.1.5",
         "@fluidframework/azure-client": "~1.2.0-111554",
         "@microsoft/live-share": "1.0.0-preview.4",
         "@microsoft/teams-js": "^2.5.0",

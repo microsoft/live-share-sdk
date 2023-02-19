@@ -1,7 +1,6 @@
 import { FC, useCallback, useEffect } from "react";
 import { Lightbulb20Regular } from "@fluentui/react-icons";
 import { FlexRow } from "./flex";
-import { Button } from "@fluentui/react-components";
 import { getInitialPromptMessageText, getOpenAISummary, useDebounce } from "@/utils";
 import { IdeaConversationInitialIdea } from "@/types/IdeaConversation";
 import { RecommendedIdeasPrompt } from "@/constants/RecommendedIdeasPrompt";
@@ -42,7 +41,12 @@ export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
             "/nSIMILAR IDEAS:";
         try {
             const responseText = await getOpenAISummary(
-                recommendedIdeasPromptText
+                recommendedIdeasPromptText,
+                "text-davinci-003",
+                {
+                    frequency_penalty: 0.8,
+                    presence_penalty: 0.8,
+                },
             );
             const trimmedResponseText = responseText.trimStart();
             const recommendedIdeas = trimmedResponseText

@@ -132,7 +132,9 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
                 inputText
             );
             try {
-                const responseText = await getOpenAISummary(recommendedTagsText);
+                const responseText = await getOpenAISummary(recommendedTagsText, "text-davinci-003", {
+                    temperature: 0.0,
+                });
                 const trimmedResponseText = responseText.trimStart();
                 const newTags = trimmedResponseText
                     .split(", ")

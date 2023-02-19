@@ -118,7 +118,11 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
         );
         try {
             const responseText = await getOpenAISummary(
-                initialPromptMessageText
+                initialPromptMessageText,
+                "text-davinci-003",
+                {
+                    temperature: 0.0,
+                },
             );
             onDidGetResponse(conversationId, responseText);
         } catch (e: any) {
@@ -151,7 +155,10 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
             try {
                 const responseText = await getOpenAISummary(
                     fullGeneratePrompt,
-                    "text-curie-001"
+                    "text-curie-001",
+                    {
+                        temperature: 0.0,
+                    },
                 );
                 const trimmedResponseText = responseText.trimStart();
                 const newTags = trimmedResponseText

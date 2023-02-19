@@ -10,6 +10,13 @@
 export const getOpenAISummary = async (
     prompt: string,
     model: "text-davinci-003" | "text-curie-001" = "text-davinci-003",
+    options?: {
+        temperature?: number,
+        top_p?: number,
+        frequency_penalty?: number,
+        presence_penalty?: number,
+        stop?: string[],
+    },
 ): Promise<string> => {
     try {
         const response = await fetch("/api/openai/summary", {
@@ -17,6 +24,7 @@ export const getOpenAISummary = async (
             body: JSON.stringify({
                 prompt,
                 model,
+                ...options,
             }),
             headers: new Headers({
                 "Content-Type": "application/json",

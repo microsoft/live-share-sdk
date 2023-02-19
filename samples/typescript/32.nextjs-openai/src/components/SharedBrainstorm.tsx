@@ -1,3 +1,4 @@
+import { OrderedListPrompt } from "@/constants/OrderedListPrompt";
 import { TagsPrompt } from "@/constants/TagsPrompt";
 import { Idea } from "@/types/Idea";
 import { IdeaConversationInitialIdea } from "@/types/IdeaConversation";
@@ -17,6 +18,7 @@ import { v4 as uuid } from "uuid";
 import { FlexColumn, FlexRow } from "./flex";
 import { ScrollView } from "./ScrollView";
 import { SharedIdeaList } from "./SharedIdeaList";
+import { SharedIdeaRecommendations } from "./SharedIdeaRecommendations";
 
 interface ISharedBrainstormProps {
     ideaBoardId: string;
@@ -43,7 +45,7 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
         onDidStartNewConversation,
         onDidGetResponse,
     } = props;
-    const [promptValue, setPromptValue] = useSharedState(
+    const [promptText, setPromptText] = useSharedState(
         `${ideaBoardId}-prompt`,
         ""
     );
@@ -60,7 +62,7 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
         `${ideaBoardId}-task-manager`,
         "ai-summarizer"
     );
-    const [tags, setTags] = useSharedState<string[]>(`${ideaBoardId}-tags`, []);
+    const [ideaTags, setIdeaTags] = useSharedState<string[]>(`${ideaBoardId}-tags`, []);
     const searchQuickTagsRef = useRef<Map<string, string[]>>(
         new Map<string, string[]>()
     );
@@ -81,16 +83,11 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
     const onChangePrompt: TextareaProps["onChange"] = (ev, data) => {
         const characterCap = 3000 * 4;
         if (data.value.length <= characterCap) {
-            setPromptValue(data.value);
+            setPromptText(data.value);
         }
     };
 
-    const onGenerateSummary = async () => {
-        if (typeof promptValue !== "string") {
-            console.error(new Error("Invalid prompt value"));
-            return;
-        }
-        const conversationId = uuid();
+    const getSortedIdeas = useCallback((): IdeaConversationInitialIdea[] => {
         const sortedIdeas: IdeaConversationInitialIdea[] = [
             ...ideaTextMapRef.current.entries(),
         ]
@@ -103,10 +100,20 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
                 tags: ideaTagsMapRef.current.get(id) || [],
                 votes: ideaVotesMap.get(id) || 0,
             }));
-        onDidStartNewConversation(conversationId, promptValue, sortedIdeas);
+        return sortedIdeas;
+    }, [ideaVotesMap]);
+
+    const onGenerateSummary = async () => {
+        if (typeof promptText !== "string") {
+            console.error(new Error("Invalid prompt value"));
+            return;
+        }
+        const conversationId = uuid();
+        const sortedIdeas = getSortedIdeas();
+        onDidStartNewConversation(conversationId, promptText, sortedIdeas);
         setLoadingState("loading");
-        const initialPromptMessageText = getInitialPromptMessageText(
-            promptValue,
+        const initialPromptMessageText = OrderedListPrompt + "\n" + getInitialPromptMessageText(
+            promptText,
             sortedIdeas
         );
         try {
@@ -123,19 +130,24 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
         setLoadingState("not-loading");
     };
 
-    const onAddIdea = async () => {
+    const onAddIdea = useCallback(async (initialText?: string) => {
+        if (!localUser?.userId || !localUser?.data?.name) return;
         const newIdea: Idea = {
             createdAt: new Date().toISOString(),
             createdById: localUser!.userId,
             fallbackName: localUser!.data!.name!,
+            initialText,
         };
         setIdeaEntry(uuid(), newIdea);
+    }, [localUser?.userId, localUser?.data?.name, setIdeaEntry]);
+    const onClickAddIdea = async () => {
+        onAddIdea();
     };
 
     const onSearchTags = useCallback(async () => {
-        if (promptValue.length > 1 && lockedTask) {
+        if (promptText.length > 1 && lockedTask) {
             console.log("searching tags");
-            const fullGeneratePrompt = `${TagsPrompt}\nHUMAN: ${promptValue}\nTAGS:`;
+            const fullGeneratePrompt = `${TagsPrompt}\nHUMAN: ${promptText}\nTAGS:`;
             try {
                 const responseText = await getOpenAISummary(
                     fullGeneratePrompt,
@@ -146,18 +158,18 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
                     .split(", ")
                     .map((t) => t.trim())
                     .filter((t) => !!t);
-                setTags(newTags);
+                setIdeaTags(newTags);
             } catch (e: any) {
                 console.error(e);
             }
         }
-    }, [lockedTask, promptValue]);
+    }, [lockedTask, promptText]);
 
     const debounceSearchTags = useDebounce<void>(onSearchTags, 2500);
 
     useEffect(() => {
         debounceSearchTags();
-    }, [lockedTask, promptValue]);
+    }, [lockedTask, promptText]);
 
     return (
         <>
@@ -182,7 +194,7 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
                 >
                     <>
                         <Textarea
-                            value={promptValue}
+                            value={promptText}
                             placeholder="Enter a prompt here..."
                             size="large"
                             resize="vertical"
@@ -193,14 +205,21 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
                             ideaTextMapRef={ideaTextMapRef}
                             lockedTask={lockedTask}
                             localUserId={localUser.userId}
-                            ideaTags={tags}
+                            ideaTags={ideaTags}
                             searchQuickTagsRef={searchQuickTagsRef}
                             deleteIdeaEntry={deleteIdeaEntry}
                             setIdeaVotesMap={setIdeaVotesMap}
                             ideasMap={ideasMap}
                             ideaVotesMap={ideaVotesMap}
                         />
-                        <Button onClick={onAddIdea}>{"Add idea"}</Button>
+                        <SharedIdeaRecommendations
+                            ideaBoardId={ideaBoardId}
+                            lockedTask={lockedTask}
+                            promptText={promptText}
+                            onAddIdea={onAddIdea}
+                            getSortedIdeas={getSortedIdeas}
+                        />
+                        <Button onClick={onClickAddIdea}>{"Add idea"}</Button>
                     </>
                 </FlexColumn>
             </ScrollView>
@@ -220,7 +239,7 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
                     appearance="primary"
                     icon={<ArrowClockwise20Regular />}
                     onClick={onGenerateSummary}
-                    disabled={isLoading || !promptValue}
+                    disabled={isLoading || !promptText}
                 >
                     {"Generate response"}
                 </Button>

@@ -30,7 +30,6 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
     } = props;
 
     const onDelete = useCallback((key: string) => {
-        ideaTextMapRef.current.delete(key);
         deleteIdeaEntry(key);
     }, [deleteIdeaEntry]);
 
@@ -56,6 +55,7 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
                             userId={localUserId}
                             userName={value.fallbackName}
                             ideaTags={ideaTags}
+                            initialText={value.initialText || ""}
                             searchQuickTagsRef={searchQuickTagsRef}
                             deleteIdea={onDelete}
                             updateVoteCount={onUpdateVoteCount}

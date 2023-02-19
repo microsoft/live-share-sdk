@@ -36,6 +36,7 @@ interface ISharedIdeaCardProps {
     ideaTextMapRef: MutableRefObject<Map<string, string>>;
     lockedTask: boolean;
     ideaTags: string[];
+    initialText: string;
     updateVoteCount: (uniqueKey: string, voteCount: number) => void;
     userId: string;
     userName: string;
@@ -50,6 +51,7 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         ideaTextMapRef,
         lockedTask,
         ideaTags,
+        initialText,
         updateVoteCount,
         userId,
         userName,
@@ -57,7 +59,7 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
     } = props;
     const [text, setText, disposeText] = useSharedState<string>(
         `${ideaId}-text`,
-        ""
+        initialText,
     );
     const {
         map: votesMap,
@@ -102,6 +104,7 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         disposeQuickRecommendedTags();
         searchQuickTagsRef.current.delete(text);
         ideaTagsMapRef.current.delete(ideaId);
+        ideaTextMapRef.current.delete(ideaId);
         deleteIdea(ideaId);
     };
 

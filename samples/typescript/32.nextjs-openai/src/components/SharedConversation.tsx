@@ -2,68 +2,69 @@ import { ConversationMessage } from "@/types/ConversationMessage";
 import {
     Body1,
     Button,
-    Spinner,
     Textarea,
-    TextareaProps,
+    TextareaOnChangeData,
 } from "@fluentui/react-components";
 import { Send20Regular } from "@fluentui/react-icons";
 import { tokens } from "@fluentui/react-theme";
 import { LivePresenceUser } from "@microsoft/live-share";
 import { useSharedMap, useSharedState } from "@microsoft/live-share-react";
 import { v4 as uuid } from "uuid";
-import { FC } from "react";
+import { FC, useCallback } from "react";
 import { FlexColumn, FlexItem, FlexRow } from "./flex";
 import { ScrollView } from "./ScrollView";
 import { SentMessage } from "./SentMessage";
 import { ConversationPrompt } from "@/constants/ConversationPrompt";
-import { OpenAICharacterBudget } from "@/constants/TokenBudget";
 import { getShortenedOpenAIMessage } from "@/utils/getShortenedOpenAIMessage";
 import { AlwaysScrollToBottom } from "./AlwaysScrollToBottom";
+import { OpenAICharacterBudget } from "@/constants/TokenBudget";
+import { IdeaConversation } from "@/types/IdeaConversation";
 
 interface ISharedConversationProps {
     conversationId?: string;
-    responseText?: string;
+    conversation?: IdeaConversation;
     leftOpen: boolean;
     rightOpen: boolean;
-    isLoading: boolean;
     localUser: LivePresenceUser<{ name: string }>;
 }
 
 export const SharedConversation: FC<ISharedConversationProps> = (props) => {
-    const {
-        conversationId,
-        responseText,
-        leftOpen,
-        rightOpen,
-        isLoading,
-        localUser,
-    } = props;
+    const { conversationId, conversation, leftOpen, rightOpen, localUser } =
+        props;
     const [message, setMessage] = useSharedState<string>(
         `${props.conversationId}-message-body`,
         ""
     );
-    const [waitingForResponse, setLoading] = useSharedState<boolean>(
+    const [waitingForResponse, setWaitingForResponse] = useSharedState<boolean>(
         `${props.conversationId}-loading`,
         false
     );
     const { map: messageMap, setEntry: setMessageMapEntry } =
         useSharedMap<ConversationMessage>(`${props.conversationId}-messages`);
 
-    const isResponseSelected = !!conversationId && !!responseText;
+    const isResponseSelected = !!conversationId && !!conversation;
 
-    const onChangePrompt: TextareaProps["onChange"] = (ev, data) => {
-        const characterCap = 3000 * 4;
-        if (data.value.length <= characterCap) {
-            setMessage(data.value);
-        }
-    };
+    const onChangePrompt = useCallback(
+        (ev: any, data: TextareaOnChangeData) => {
+            if (data.value.length <= OpenAICharacterBudget) {
+                setMessage(data.value);
+            }
+        },
+        [setMessage]
+    );
 
-    const onSendMessage = async () => {
-        if (waitingForResponse || !localUser.data) return;
+    const onSendMessage = useCallback(async () => {
+        if (
+            waitingForResponse ||
+            !localUser.data ||
+            !conversation ||
+            !conversation.initialResponseText
+        )
+            return;
         if (typeof message !== "string") {
             return;
         }
-        setLoading(true);
+        setWaitingForResponse(true);
         const newMessage: ConversationMessage = {
             isGPT: false,
             senderName: localUser.data.name,
@@ -71,22 +72,39 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
             sentAt: new Date().toISOString(),
         };
         setMessageMapEntry(uuid(), newMessage);
+        setMessage("");
         const prefix = `${ConversationPrompt}\n\n`;
+        const initialPromptMessageText =
+            `[PREMISE START]:\n${conversation.initialPromptText}\n[PREMISE END]` +
+            conversation.initialIdeas
+                .map((idea, index) => {
+                    // let tagText = ideaTagsMapRef.current.get(id)?.join(", ") || "";
+                    let tagText = "";
+                    if (idea.tags) {
+                        tagText = `<${idea.tags.join(", ")}> `;
+                    }
+                    return `${index + 1}. {{${idea.votes}}} HUMAN: ${tagText}${
+                        idea.text
+                    }`;
+                })
+                .join("\n") +
+            "\n[LIST END]\n";
         const messageHistoryText =
-            `AI: ${responseText}\n` +
+            `HUMAN:\n${initialPromptMessageText}\n` +
+            `AI: ${conversation.initialPromptText}\n` +
             [...messageMap.values()]
                 .map(
-                    (message) =>
-                        `${message.isGPT ? "AI" : "HUMAN"}: ${message.message}`
+                    (conversationMessage) =>
+                        `${conversationMessage.isGPT ? "AI" : "HUMAN"}: ${
+                            conversationMessage.message
+                        }`
                 )
                 .join("\n") +
-            `\nHUMAN: ${message}\n`;
+            `\nHUMAN: ${newMessage.message}\n`;
         const shortenedHistoryText = getShortenedOpenAIMessage(
             prefix,
             messageHistoryText
         );
-        console.log(shortenedHistoryText);
-        setMessage("");
         const response = await fetch("/api/openai/summary", {
             method: "POST",
             body: JSON.stringify({
@@ -109,7 +127,11 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
             responseMessage = {
                 isGPT: true,
                 senderName: "ChatGPT",
-                message: responseText.split("AI: ").join("").split("AI:\n").join(""),
+                message: responseText
+                    .split("AI: ")
+                    .join("")
+                    .split("AI:\n")
+                    .join(""),
                 sentAt: new Date().toISOString(),
             };
         } catch (e: any) {
@@ -124,8 +146,29 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
             };
         }
         setMessageMapEntry(uuid(), responseMessage);
-        setLoading(false);
-    };
+        setWaitingForResponse(false);
+    }, [
+        message,
+        messageMap,
+        conversation,
+        localUser,
+        waitingForResponse,
+        setMessage,
+        setWaitingForResponse,
+        setMessageMapEntry,
+    ]);
+
+    const humanReadablePrompt = conversation
+        ? `${conversation.initialPromptText}\n` +
+          conversation.initialIdeas
+              .map((idea, index) => {
+                  const tagsText =
+                      idea.tags.length > 0 ? ` #${idea.tags.join(" ")}` : "";
+                  const votesText = idea.votes > 0 ? ` ❤️${idea.votes}` : "";
+                  return `  ${index + 1}. ${idea.text}${tagsText}${votesText}`;
+              })
+              .join("\n")
+        : undefined;
 
     return (
         <>
@@ -151,21 +194,28 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
                     }}
                 >
                     <>
-                        {!isLoading && !isResponseSelected && (
+                        {!isResponseSelected && (
                             <Body1 style={{ whiteSpace: "pre-wrap" }}>
                                 {"Waiting for response..."}
                             </Body1>
                         )}
-                        {isLoading && (
-                            <FlexRow vAlignCenter hAlignCenter fill>
-                                <Spinner />
-                            </FlexRow>
+                        {humanReadablePrompt && (
+                            <>
+                                <SentMessage
+                                    isGPT={false}
+                                    message={humanReadablePrompt}
+                                    senderName={"Initial Prompt"}
+                                />
+                            </>
                         )}
-                        {!isLoading && isResponseSelected && (
+                        {isResponseSelected && (
                             <>
                                 <SentMessage
                                     isGPT
-                                    message={responseText}
+                                    message={
+                                        conversation.initialResponseText ??
+                                        "..."
+                                    }
                                     senderName={"ChatGPT"}
                                 />
                                 {[...messageMap.entries()].map(
@@ -185,7 +235,9 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
                                         senderName={"ChatGPT"}
                                     />
                                 )}
-                                <AlwaysScrollToBottom messagesLength={messageMap.size}/>
+                                <AlwaysScrollToBottom
+                                    messagesLength={messageMap.size}
+                                />
                             </>
                         )}
                     </>
@@ -207,7 +259,11 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
                 <FlexItem grow>
                     <FlexColumn>
                         <Textarea
-                            disabled={waitingForResponse}
+                            disabled={
+                                waitingForResponse ||
+                                !isResponseSelected ||
+                                !conversation?.initialResponseText
+                            }
                             value={message}
                             placeholder="Enter a message..."
                             onChange={onChangePrompt}
@@ -217,7 +273,11 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
                 <Button
                     appearance="subtle"
                     icon={<Send20Regular />}
-                    disabled={waitingForResponse || message.length === 0}
+                    disabled={
+                        waitingForResponse ||
+                        message.length === 0 ||
+                        !isResponseSelected
+                    }
                     onClick={onSendMessage}
                 />
             </FlexRow>

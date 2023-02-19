@@ -1,6 +1,7 @@
 import { OrderedListPrompt } from "@/constants/OrderedListPrompt";
 import { TagsPrompt } from "@/constants/TagsPrompt";
 import { Idea } from "@/types/Idea";
+import { IdeaConversationInitialIdea } from "@/types/IdeaConversation";
 import { useDebounce } from "@/utils/debounce";
 import { Button, Textarea, TextareaProps } from "@fluentui/react-components";
 import { ArrowClockwise20Regular } from "@fluentui/react-icons";
@@ -10,6 +11,7 @@ import {
     useTaskManager,
     useSharedMap,
     useSharedState,
+    useLiveState,
 } from "@microsoft/live-share-react";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
@@ -21,11 +23,10 @@ interface ISharedIdeaListProps {
     ideaBoardId: string;
     leftOpen: boolean;
     rightOpen: boolean;
-    isLoading: boolean;
     localUser: LivePresenceUser<{ name: string }>;
     otherUsers: LivePresenceUser<{ name: string }>[];
-    setLoadingState: SetLiveStateAction<string, object>;
-    onDidGetResponse: (responseText: string) => void;
+    onDidStartNewConversation: (conversationId: string, initialPromptText: string, initialIdeas: IdeaConversationInitialIdea[]) => void;
+    onDidGetResponse: (conversationId: string, initialResponseText: string) => void;
 }
 
 export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
@@ -33,10 +34,9 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
         ideaBoardId,
         leftOpen,
         rightOpen,
-        isLoading,
         localUser,
         otherUsers,
-        setLoadingState,
+        onDidStartNewConversation,
         onDidGetResponse,
     } = props;
     const [promptValue, setPromptValue] = useSharedState(
@@ -57,6 +57,14 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
         "ai-summarizer"
     );
     const [tags, setTags] = useSharedState<string[]>(`${ideaBoardId}-tags`, []);
+    const searchQuickTagsRef = useRef<Map<string, string[]>>(new Map<string, string[]>());
+
+    const [loadingState, loadingData, setLoadingState] = useLiveState<string>(
+        `${ideaBoardId}-loading`,
+        undefined,
+        "waiting"
+    );
+    const isLoading = loadingState === "loading";
 
     const {
         map: ideasMap,
@@ -73,25 +81,32 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
 
     const onGenerateSummary = async () => {
         if (typeof promptValue !== "string") {
-            onDidGetResponse("Invalid prompt");
+            console.error(new Error("Invalid prompt value"));
             return;
         }
+        const conversationId = uuid();
+        const sortedIdeas: IdeaConversationInitialIdea[] = [...ideaTextMapRef.current.entries()]
+            .sort(([aId], [bId]) =>
+                ideaVotesMap.get(aId)! > ideaVotesMap.get(bId)! ? -1 : 1
+            )
+            .map(([id, text]) => ({
+                id,
+                text,
+                tags: ideaTagsMapRef.current.get(id) || [],
+                votes: ideaVotesMap.get(id) || 0,
+            }));
+        onDidStartNewConversation(conversationId, promptValue, sortedIdeas);
         setLoadingState("loading");
         const fullGeneratePrompt =
             `${OrderedListPrompt}\[PREMISE START]:\n${promptValue}\n[PREMISE END]` +
-            [...ideaTextMapRef.current.entries()]
-                .sort(([aId], [bId]) =>
-                    ideaVotesMap.get(aId)! > ideaVotesMap.get(bId)! ? -1 : 1
-                )
-                .map(
-                    ([id, text], index) => {
-                        let tagText = ideaTagsMapRef.current.get(id)?.join(", ") || "";
-                        if (tagText) {
-                            tagText = `<${tagText}>`;
+            sortedIdeas
+                .map((idea, index) => {
+                        // let tagText = ideaTagsMapRef.current.get(id)?.join(", ") || "";
+                        let tagText = "";
+                        if (idea.tags) {
+                            tagText = `<${idea.tags.join(", ")}> `;
                         }
-                        return `${index + 1}. {{${ideaVotesMap.get(
-                            id
-                        )}} HUMAN: ${tagText}${text}`
+                        return `${index + 1}. {{${idea.votes}}} HUMAN: ${tagText}${idea.text}`
                     }
                 )
                 .join("\n") +
@@ -114,9 +129,9 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
             if (typeof responseText !== "string") {
                 throw new Error("Invalid response");
             }
-            onDidGetResponse(responseText);
+            onDidGetResponse(conversationId, responseText);
         } catch (e: any) {
-            onDidGetResponse(e.message || "Error generating summary");
+            onDidGetResponse(conversationId, e.message || "I'm sorry, something went wrong.");
         }
         setLoadingState("not-loading");
     };
@@ -128,7 +143,6 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
             fallbackName: localUser!.data!.name!,
         };
         setIdeaEntry(uuid(), newIdea);
-        console.log("Added idea", newIdea);
     };
 
     const onSearchTags = useCallback(async () => {
@@ -219,9 +233,13 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
                                     <SharedIdeaCard
                                         key={key}
                                         ideaId={key}
+                                        ideaTagsMapRef={ideaTagsMapRef}
+                                        ideaTextMapRef={ideaTextMapRef}
+                                        lockedTask={lockedTask}
                                         userId={localUser.userId}
                                         userName={userName}
                                         recommendedTags={tags}
+                                        searchQuickTagsRef={searchQuickTagsRef}
                                         updateIdeaText={(
                                             uniqueKey,
                                             ideaText

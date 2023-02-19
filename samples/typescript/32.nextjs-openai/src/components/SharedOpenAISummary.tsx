@@ -5,18 +5,19 @@ import {
 } from "@fluentui/react-icons";
 import {
     useLivePresence,
-    useLiveState,
     useSharedMap,
     useSharedState,
 } from "@microsoft/live-share-react";
 import { FC } from "react";
 import { FlexRow } from "./flex";
 import { type app } from "@microsoft/teams-js";
-import { v4 as uuid } from "uuid";
 import { getRandomUserName } from "@/utils/getRandomUserName";
 import { SharedConversation } from "./SharedConversation";
 import { SharedIdeaList } from "./SharedIdeaList";
-import { IdeaConversation } from "@/types/IdeaConversation";
+import {
+    IdeaConversation,
+    IdeaConversationInitialIdea,
+} from "@/types/IdeaConversation";
 
 interface ISharedOpenAISummaryProps {
     context: app.Context;
@@ -27,13 +28,11 @@ interface ISharedOpenAISummaryProps {
 
 export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
     const { context, leftOpen, rightOpen, uniqueKey } = props;
-    const { map: ideaConversationMap, setEntry: setIdeaConversationEntry } =
-        useSharedMap<IdeaConversation>(uniqueKey);
-    const [loadingState, loadingData, setLoadingState] = useLiveState<string>(
-        `${props.uniqueKey}-loading`,
-        undefined,
-        "waiting"
-    );
+    const {
+        map: ideaConversationMap,
+        setEntry: setIdeaConversationEntry,
+        sharedMap: ideaConversationSharedMap,
+    } = useSharedMap<IdeaConversation>(uniqueKey);
     const [selectedConversationIndex, setSelectedConversationIndex] =
         useSharedState<number>(
             `${props.uniqueKey}-selectedConversationIndex`,
@@ -43,11 +42,38 @@ export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
         name: context.user!.userPrincipalName || getRandomUserName(),
     });
 
-    const onDidGetResponse = (responseText: string) => {
-        setIdeaConversationEntry(`${uniqueKey}-${uuid()}`, {
+    const onDidStartNewConversation = (
+        conversationId: string,
+        initialPromptText: string,
+        initialIdeas: IdeaConversationInitialIdea[]
+    ) => {
+        setIdeaConversationEntry(`${uniqueKey}-${conversationId}`, {
             createdAt: new Date().toISOString(),
-            initialResponseText: responseText,
+            initialPromptText,
+            initialIdeas,
         });
+    };
+
+    const onDidGetResponse = (
+        conversationId: string,
+        initialResponseText: string
+    ) => {
+        const existingEntry = ideaConversationSharedMap?.get(
+            `${uniqueKey}-${conversationId}`
+        );
+        if (existingEntry) {
+            existingEntry.initialResponseText = initialResponseText;
+            setIdeaConversationEntry(`${uniqueKey}-${conversationId}`, {
+                ...existingEntry,
+                initialResponseText,
+            });
+        } else {
+            console.error(
+                new Error(
+                    "SharedOpenAISummary.onDidGetResponse: Could not find existing entry"
+                )
+            );
+        }
     };
 
     if (!localUser) {
@@ -58,7 +84,6 @@ export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
         );
     }
 
-    const isLoading = loadingState === "loading";
     const sortedConversations = [...ideaConversationMap.entries()].sort(
         ([aId, aCI], [bId, bCI]) =>
             new Date(aCI.createdAt) > new Date(bCI.createdAt) ? -1 : 1
@@ -74,11 +99,10 @@ export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
                 ideaBoardId={uniqueKey}
                 leftOpen={leftOpen}
                 rightOpen={rightOpen}
-                isLoading={isLoading}
                 localUser={localUser}
                 otherUsers={otherUsers}
-                setLoadingState={setLoadingState}
                 onDidGetResponse={onDidGetResponse}
+                onDidStartNewConversation={onDidStartNewConversation}
             />
             <FlexRow
                 vAlignCenter
@@ -99,10 +123,14 @@ export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
                     icon={<ChevronLeft16Regular />}
                     appearance="subtle"
                     disabled={
-                        selectedConversationIndex === sortedConversations.length - 1
+                        selectedConversationIndex ===
+                        sortedConversations.length - 1
                     }
                     onClick={() => {
-                        if (selectedConversationIndex < sortedConversations.length - 1) {
+                        if (
+                            selectedConversationIndex <
+                            sortedConversations.length - 1
+                        ) {
                             setSelectedConversationIndex(
                                 selectedConversationIndex + 1
                             );
@@ -117,9 +145,7 @@ export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
                 <Button
                     icon={<ChevronRight16Regular />}
                     appearance="subtle"
-                    disabled={
-                        selectedConversationIndex === 0
-                    }
+                    disabled={selectedConversationIndex === 0}
                     onClick={() => {
                         if (selectedConversationIndex > 0) {
                             setSelectedConversationIndex(
@@ -131,12 +157,9 @@ export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
             </FlexRow>
             <SharedConversation
                 conversationId={mostRecentConversation?.[0]}
-                responseText={
-                    mostRecentConversation?.[1].initialResponseText
-                }
+                conversation={mostRecentConversation?.[1]}
                 leftOpen={leftOpen}
                 rightOpen={rightOpen}
-                isLoading={isLoading}
                 localUser={localUser}
             />
         </>

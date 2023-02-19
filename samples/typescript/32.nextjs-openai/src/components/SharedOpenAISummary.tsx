@@ -13,7 +13,7 @@ import { FlexRow } from "./flex";
 import { type app } from "@microsoft/teams-js";
 import { getRandomUserName } from "@/utils/getRandomUserName";
 import { SharedConversation } from "./SharedConversation";
-import { SharedIdeaList } from "./SharedIdeaList";
+import { SharedBrainstorm } from "./SharedBrainstorm";
 import {
     IdeaConversation,
     IdeaConversationInitialIdea,
@@ -38,7 +38,7 @@ export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
             `${props.uniqueKey}-selectedConversationIndex`,
             0
         );
-    const { localUser, otherUsers } = useLivePresence(context.user!.id, {
+    const { localUser } = useLivePresence(context.user!.id, {
         name: context.user!.userPrincipalName || getRandomUserName(),
     });
 
@@ -95,12 +95,11 @@ export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
 
     return (
         <>
-            <SharedIdeaList
+            <SharedBrainstorm
                 ideaBoardId={uniqueKey}
                 leftOpen={leftOpen}
                 rightOpen={rightOpen}
                 localUser={localUser}
-                otherUsers={otherUsers}
                 onDidGetResponse={onDidGetResponse}
                 onDidStartNewConversation={onDidStartNewConversation}
             />

@@ -10,15 +10,20 @@ import { tokens } from "@fluentui/react-theme";
 import { LivePresenceUser } from "@microsoft/live-share";
 import { useSharedMap, useSharedState } from "@microsoft/live-share-react";
 import { v4 as uuid } from "uuid";
-import { FC, useCallback } from "react";
+import { FC, memo, useCallback } from "react";
 import { FlexColumn, FlexItem, FlexRow } from "./flex";
 import { ScrollView } from "./ScrollView";
 import { SentMessage } from "./SentMessage";
 import { ConversationPrompt } from "@/constants/ConversationPrompt";
-import { getShortenedOpenAIMessage } from "@/utils/getShortenedOpenAIMessage";
 import { AlwaysScrollToBottom } from "./AlwaysScrollToBottom";
 import { OpenAICharacterBudget } from "@/constants/TokenBudget";
 import { IdeaConversation } from "@/types/IdeaConversation";
+import {
+    getInitialPromptMessageText,
+    getMessageHistoryText,
+    getOpenAISummary,
+    getShortenedOpenAIMessage,
+} from "@/utils";
 
 interface ISharedConversationProps {
     conversationId?: string;
@@ -28,7 +33,7 @@ interface ISharedConversationProps {
     localUser: LivePresenceUser<{ name: string }>;
 }
 
-export const SharedConversation: FC<ISharedConversationProps> = (props) => {
+export const SharedConversation: FC<ISharedConversationProps> = memo((props) => {
     const { conversationId, conversation, leftOpen, rightOpen, localUser } =
         props;
     const [message, setMessage] = useSharedState<string>(
@@ -58,12 +63,10 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
             waitingForResponse ||
             !localUser.data ||
             !conversation ||
-            !conversation.initialResponseText
+            !conversation.initialResponseText ||
+            typeof message !== "string"
         )
             return;
-        if (typeof message !== "string") {
-            return;
-        }
         setWaitingForResponse(true);
         const newMessage: ConversationMessage = {
             isGPT: false,
@@ -74,56 +77,17 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
         setMessageMapEntry(uuid(), newMessage);
         setMessage("");
         const prefix = `${ConversationPrompt}\n\n`;
-        const initialPromptMessageText =
-            `[PREMISE START]:\n${conversation.initialPromptText}\n[PREMISE END]` +
-            conversation.initialIdeas
-                .map((idea, index) => {
-                    // let tagText = ideaTagsMapRef.current.get(id)?.join(", ") || "";
-                    let tagText = "";
-                    if (idea.tags) {
-                        tagText = `<${idea.tags.join(", ")}> `;
-                    }
-                    return `${index + 1}. {{${idea.votes}}} HUMAN: ${tagText}${
-                        idea.text
-                    }`;
-                })
-                .join("\n") +
-            "\n[LIST END]\n";
-        const messageHistoryText =
-            `HUMAN:\n${initialPromptMessageText}\n` +
-            `AI: ${conversation.initialPromptText}\n` +
-            [...messageMap.values()]
-                .map(
-                    (conversationMessage) =>
-                        `${conversationMessage.isGPT ? "AI" : "HUMAN"}: ${
-                            conversationMessage.message
-                        }`
-                )
-                .join("\n") +
-            `\nHUMAN: ${newMessage.message}\n`;
+        const messageHistoryText = getMessageHistoryText(conversation, [
+            ...messageMap.values(),
+            newMessage,
+        ]);
         const shortenedHistoryText = getShortenedOpenAIMessage(
             prefix,
             messageHistoryText
         );
-        const response = await fetch("/api/openai/summary", {
-            method: "POST",
-            body: JSON.stringify({
-                prompt: shortenedHistoryText,
-            }),
-            headers: new Headers({
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            }),
-        });
         let responseMessage: ConversationMessage;
         try {
-            const { responseText, error } = await response.json();
-            if (error && typeof error === "string") {
-                throw new Error(error);
-            }
-            if (typeof responseText !== "string") {
-                throw new Error("Invalid response");
-            }
+            const responseText = await getOpenAISummary(shortenedHistoryText);
             responseMessage = {
                 isGPT: true,
                 senderName: "ChatGPT",
@@ -159,15 +123,11 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
     ]);
 
     const humanReadablePrompt = conversation
-        ? `${conversation.initialPromptText}\n` +
-          conversation.initialIdeas
-              .map((idea, index) => {
-                  const tagsText =
-                      idea.tags.length > 0 ? ` #${idea.tags.join(" ")}` : "";
-                  const votesText = idea.votes > 0 ? ` ❤️${idea.votes}` : "";
-                  return `  ${index + 1}. ${idea.text}${tagsText}${votesText}`;
-              })
-              .join("\n")
+        ? getInitialPromptMessageText(
+              conversation.initialPromptText,
+              conversation.initialIdeas,
+              false
+          )
         : undefined;
 
     return (
@@ -283,4 +243,4 @@ export const SharedConversation: FC<ISharedConversationProps> = (props) => {
             </FlexRow>
         </>
     );
-};
+});

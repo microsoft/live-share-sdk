@@ -1,4 +1,5 @@
 import { TagClassifierPrompt } from "@/constants/TagClassifierPrompt";
+import { getOpenAISummary, getRecommendedTagsText } from "@/utils";
 import { useDebounce } from "@/utils/debounce";
 import {
     Caption1,
@@ -34,9 +35,7 @@ interface ISharedIdeaCardProps {
     ideaTagsMapRef: MutableRefObject<Map<string, string[]>>;
     ideaTextMapRef: MutableRefObject<Map<string, string>>;
     lockedTask: boolean;
-    recommendedTags: string[];
-    updateIdeaText: (uniqueKey: string, ideaText: string) => void;
-    updateTags: (uniqueKey: string, tags: string[]) => void;
+    ideaTags: string[];
     updateVoteCount: (uniqueKey: string, voteCount: number) => void;
     userId: string;
     userName: string;
@@ -50,10 +49,8 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         ideaTagsMapRef,
         ideaTextMapRef,
         lockedTask,
-        recommendedTags,
-        updateIdeaText,
+        ideaTags,
         updateVoteCount,
-        updateTags,
         userId,
         userName,
         searchQuickTagsRef,
@@ -72,7 +69,11 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         setEntry: setTagsEntry,
         deleteEntry: deleteTagsEntry,
     } = useSharedMap(`${ideaId}-tags`);
-    const [quickRecommendTags, setQuickRecommendTags, disposeQuickRecommendedTags] = useSharedState<string[]>(`${ideaId}-quick-tags`, []);
+    const [
+        quickRecommendTags,
+        setQuickRecommendTags,
+        disposeQuickRecommendedTags,
+    ] = useSharedState<string[]>(`${ideaId}-quick-tags`, []);
 
     const onChangeText: InputProps["onChange"] = (ev, data) => {
         const characterCap = 3000 * 4;
@@ -108,7 +109,11 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         if (text.length > 0 && lockedTask) {
             const existingQuickTags = searchQuickTagsRef.current.get(text);
             if (existingQuickTags !== undefined) {
-                if (quickRecommendTags.every((tag) => existingQuickTags.includes(tag))) {
+                if (
+                    quickRecommendTags.every((tag) =>
+                        existingQuickTags.includes(tag)
+                    )
+                ) {
                     return;
                 }
                 setQuickRecommendTags(existingQuickTags);
@@ -116,39 +121,27 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
             }
             console.log("searching quick recommend tags");
             const inputText = text;
-            const existingValuesClassifierText = [...ideaTagsMapRef.current.entries()]
-                .filter(([key]) => key !== ideaId)
-                .map(([key, value]) => `\n###\nTAGS: ${recommendedTags.join(", ")}\nINPUT: ${ideaTextMapRef.current.get(key)}\nRESPONSE TAGS: ${value.join(", ")}\n###\n`)
-            const fullGeneratePrompt =
-                `${TagClassifierPrompt}${existingValuesClassifierText}\nTAGS: ${recommendedTags.join(", ")}\nINPUT: ${inputText}\nRESPONSE TAGS:`;
-            const response = await fetch("/api/openai/summary", {
-                method: "POST",
-                body: JSON.stringify({
-                    prompt: fullGeneratePrompt,
-                }),
-                headers: new Headers({
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                }),
-            });
+            const recommendedTagsText = getRecommendedTagsText(
+                ideaId,
+                ideaTagsMapRef,
+                ideaTextMapRef,
+                ideaTags,
+                inputText
+            );
             try {
-                const { responseText, error } = await response.json();
-                if (error && typeof error === "string") {
-                    throw new Error(error);
-                }
-                
-                if (typeof responseText !== "string") {
-                    throw new Error("Invalid response: not string");
-                }
+                const responseText = await getOpenAISummary(recommendedTagsText);
                 const trimmedResponseText = responseText.trimStart();
-                const newTags = trimmedResponseText.split(", ").map(t => t.trim()).filter((t) => !!t);
+                const newTags = trimmedResponseText
+                    .split(", ")
+                    .map((t) => t.trim())
+                    .filter((t) => !!t);
                 setQuickRecommendTags(newTags);
                 searchQuickTagsRef.current.set(inputText, newTags);
             } catch (e: any) {
                 console.error(e);
             }
         }
-    }, [lockedTask, text, recommendedTags]);
+    }, [lockedTask, text, ideaTags]);
 
     const debounceSearchTags = useDebounce<void>(onSearchTags, 2500);
 
@@ -157,16 +150,16 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
     }, [debounceSearchTags]);
 
     useEffect(() => {
-        updateIdeaText(ideaId, text);
-    }, [text]);
+        ideaTextMapRef.current.set(ideaId, text);
+    }, [ideaId, text]);
 
     useEffect(() => {
         updateVoteCount(ideaId, votesMap.size);
     }, [votesMap.size]);
 
     useEffect(() => {
-        updateTags(ideaId, [...tagsMap.keys()]);
-    }, [tagsMap.size]);
+        ideaTagsMapRef.current.set(ideaId, [...tagsMap.keys()]);
+    }, [ideaId, tagsMap.size]);
 
     const localUserHasLiked = votesMap.has(userId);
 
@@ -189,7 +182,7 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
                         </MenuTrigger>
                         <MenuPopover>
                             <MenuList hasIcons>
-                                {recommendedTags.map((tag) => (
+                                {ideaTags.map((tag) => (
                                     <MenuItem
                                         key={tag}
                                         icon={
@@ -214,14 +207,21 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
                     {[...tagsMap.keys()].map((tag) => (
                         <Caption1 key={tag}>{`#${tag}`}</Caption1>
                     ))}
-                    {quickRecommendTags.filter((tag) => !tagsMap.has(tag)).map((tag) => (
-                        <FlexRow vAlignCenter key={tag}>
-                            <Button appearance="subtle" icon={<Checkmark16Regular />} size="small" onClick={() => {
-                                setTagsEntry(tag, {});
-                            }} />
-                            <Caption1Stronger>{`#${tag}`}</Caption1Stronger>
-                        </FlexRow>
-                    ))}
+                    {quickRecommendTags
+                        .filter((tag) => !tagsMap.has(tag))
+                        .map((tag) => (
+                            <FlexRow vAlignCenter key={tag}>
+                                <Button
+                                    appearance="subtle"
+                                    icon={<Checkmark16Regular />}
+                                    size="small"
+                                    onClick={() => {
+                                        setTagsEntry(tag, {});
+                                    }}
+                                />
+                                <Caption1Stronger>{`#${tag}`}</Caption1Stronger>
+                            </FlexRow>
+                        ))}
                 </FlexRow>
                 <Input
                     value={text}

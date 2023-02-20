@@ -12,6 +12,7 @@ const ALLOWED_MEETING_ROLES = [
     UserMeetingRole.organizer,
     UserMeetingRole.presenter,
 ];
+const DEFAULT_PROMPT_VALUE = "";
 const AUTO_COMPLETIONS_ENABLED = true;
 const DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS = 2500;
 const LOCK_PROMPT = true;
@@ -44,6 +45,7 @@ export const useQuickTags = (
             `${ideaId}-ai-quick-tags`,
             onGetCompletion,
             ALLOWED_MEETING_ROLES,
+            DEFAULT_PROMPT_VALUE,
             AUTO_COMPLETIONS_ENABLED,
             DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS,
             LOCK_PROMPT,

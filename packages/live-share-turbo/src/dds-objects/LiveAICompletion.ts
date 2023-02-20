@@ -4,8 +4,6 @@ import { TaskManager } from "@fluid-experimental/task-manager";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import { Deferred, assert } from "@fluidframework/common-utils";
 import { IEvent } from "@fluidframework/common-definitions";
-import { createDataStoreFactory } from "@fluidframework/runtime-utils";
-import { NamedFluidDataStoreRegistryEntries } from "@fluidframework/runtime-definitions";
 import { v4 as uuid } from "uuid";
 import { debounce } from "../internals";
 
@@ -109,26 +107,6 @@ export interface ILiveAICompletionEvents extends IEvent {
         listener: () => void
     ): any;
 }
-
-createDataStoreFactory(LiveState.TypeName, LiveState.factory)
-// class Blah implements Iterable<NamedFluidDataStoreRegistryEntries> {
-//     [LiveState.factory.type] = LiveState.factory;
-//     [Symbol.iterator](): Iterator<NamedFluidDataStoreRegistryEntries, any, undefined> {
-//         return this[Symbol].
-//     };
-// }
-
-// const registryEntries: NamedFluidDataStoreRegistryEntries = {
-//     [LiveState.factory.type]: LiveState.factory,
-//     [Symbol.iterator](): Iterator<NamedFluidDataStoreRegistryEntries, any, undefined> {
-//         return new NodeIterator
-//     },
-
-// };
-
-// const registryEntries: NamedFluidDataStoreRegistryEntries = [
-//   [liveStateFactory.type, liveStateFactory],
-// ];
 
 /**
  * Fluid DataObject used in `FluidTurboClient` for the purposes of dynamically loading DDSes.
@@ -288,6 +266,7 @@ export class LiveAICompletion extends DataObject<{
     public async initialize(
         onGetCompletion: (promptValue: string) => Promise<string>,
         allowedRoles?: UserMeetingRole[],
+        promptValue?: string,
     ): Promise<void> {
         if (this._initializing) {
             throw new Error(`LiveAICompletion already initializing.`);
@@ -307,7 +286,7 @@ export class LiveAICompletion extends DataObject<{
         // Listen for state changes
         this.listenForLiveStateChanges();
         // Initialize the prompt state
-        await this.promptLiveState.initialize(allowedRoles);
+        await this.promptLiveState.initialize(allowedRoles, promptValue);
         // Initialize the completion state
         await this.completionLiveState.initialize(allowedRoles);
         // Lock the completion task if we have the necessary roles

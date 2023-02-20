@@ -27,9 +27,7 @@ import {
     Checkmark16Regular,
     Add16Regular,
 } from "@fluentui/react-icons";
-import { UserMeetingRole } from "@microsoft/live-share";
 import {
-    useLiveAICompletion,
     useSharedMap,
     useSharedState,
 } from "@microsoft/live-share-react";
@@ -111,8 +109,6 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         ideaTagsMapRef.current.delete(ideaId);
         ideaTextMapRef.current.delete(ideaId);
     };
-
-    
 
     useEffect(() => {
         ideaTextMapRef.current.set(ideaId, text);

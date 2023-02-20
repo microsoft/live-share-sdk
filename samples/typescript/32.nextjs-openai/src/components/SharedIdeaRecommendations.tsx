@@ -1,12 +1,8 @@
 import { FC, useEffect } from "react";
 import { Lightbulb20Regular } from "@fluentui/react-icons";
 import { FlexRow } from "./flex";
-import {
-    getInitialPromptMessageText,
-} from "@/utils";
-import {
-    useGetCompletion,
-} from "@/hooks";
+import { getInitialPromptMessageText } from "@/utils";
+import { useGetCompletion } from "@/hooks";
 import { IdeaConversationInitialIdea } from "@/types/IdeaConversation";
 import { RecommendedIdeasPrompt } from "@/constants/RecommendedIdeasPrompt";
 import {
@@ -28,6 +24,7 @@ const ALLOWED_MEETING_ROLES = [
     UserMeetingRole.organizer,
     UserMeetingRole.presenter,
 ];
+const DEFAULT_PROMPT_VALUE = "";
 const AUTO_COMPLETIONS_ENABLED = true;
 const DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS = 2500;
 const LOCK_PROMPT = true;
@@ -42,26 +39,31 @@ const OPEN_AI_COMPLETION_OPTIONS = {
 export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
     props
 ) => {
-    const { ideaBoardId, promptText, onAddIdea, getSortedIdeas } =
-        props;
+    const { ideaBoardId, promptText, onAddIdea, getSortedIdeas } = props;
     const [recommendedIdeas, setRecommendedIdeas] = useSharedState<string[]>(
         `${ideaBoardId}-recommended-ideas`,
         []
     );
-    const onGetCompletion = useGetCompletion(OPEN_AI_MODEL_TYPE, OPEN_AI_COMPLETION_OPTIONS);
-
-    const { liveAICompletion, completionValue, changePrompt } = useLiveAICompletion(
-        `${ideaBoardId}-ai-recommended-ideas`,
-        onGetCompletion,
-        ALLOWED_MEETING_ROLES,
-        AUTO_COMPLETIONS_ENABLED,
-        DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS,
-        LOCK_PROMPT,
-        LOCK_COMPLETION,
+    const onGetCompletion = useGetCompletion(
+        OPEN_AI_MODEL_TYPE,
+        OPEN_AI_COMPLETION_OPTIONS
     );
 
+    const { liveAICompletion, completionValue, changePrompt } =
+        useLiveAICompletion(
+            `${ideaBoardId}-ai-recommended-ideas`,
+            onGetCompletion,
+            ALLOWED_MEETING_ROLES,
+            DEFAULT_PROMPT_VALUE,
+            AUTO_COMPLETIONS_ENABLED,
+            DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS,
+            LOCK_PROMPT,
+            LOCK_COMPLETION
+        );
+
     useEffect(() => {
-        if (promptText.length < 3 || !liveAICompletion?.haveCompletionLock) return;
+        if (promptText.length < 3 || !liveAICompletion?.haveCompletionLock)
+            return;
         const sortedIdeas = getSortedIdeas();
         const recommendedIdeasPromptText =
             RecommendedIdeasPrompt +
@@ -78,9 +80,7 @@ export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
                 .split(", ")
                 .map((t) => t.trim())
                 .filter((t) => !!t);
-            setRecommendedIdeas(
-                ideas.slice(0, Math.min(3, ideas.length))
-            );
+            setRecommendedIdeas(ideas.slice(0, Math.min(3, ideas.length)));
         }
     }, [completionValue, setRecommendedIdeas]);
 

@@ -23,6 +23,7 @@ import { IUseLiveAICompletionResults } from "../types";
  * @param onGetCompletion React useCallback function that returns a Promise<string> for the latest `promptValue`. Function is intended to
  * communicate with a backend API that uses OpenAI's Completion API.
  * @param allowedRoles Optional. The meeting roles eligible to send events through this object.
+ * @param defaultPromptValue Optional. Text that sets the default prompt value. Default value is an empty string.
  * @param autoCompletions Optional. Stateful boolean that when true, will automatically send completions when the `promptValue` changes. Default value is
  * false.
  * @param debounceDelayMilliseconds Optional. Stateful number that changes the debounce interval when `autoCompletions` is true. Default value is 2500.
@@ -37,6 +38,7 @@ export const useLiveAICompletion = (
     uniqueKey: string,
     onGetCompletion: (promptValue: string) => Promise<string>,
     allowedRoles?: UserMeetingRole[],
+    defaultPromptValue?: string,
     autoCompletions?: boolean,
     debounceDelayMilliseconds?: number,
     lockPrompt?: boolean,
@@ -152,7 +154,7 @@ export const useLiveAICompletion = (
         liveAICompletion.on(LiveAICompletionEvents.lockLost, onLockLost);
         if (!liveAICompletion.isInitialized) {
             // Initialize the LiveAICompletion instance
-            liveAICompletion.initialize(onGetCompletion, allowedRoles);
+            liveAICompletion.initialize(onGetCompletion, allowedRoles, defaultPromptValue);
         }
 
         return () => {

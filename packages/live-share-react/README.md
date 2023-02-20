@@ -411,6 +411,67 @@ export const ExampleLiveCanvas = () => {
 };
 ```
 
+### useLiveAICompletion
+
+If you want to build collaborative features powered by AI, you can use our experimental `useLiveAICompletion` hook, which uses the Live Share Turbo `LiveAICompletion` DDS. By providing a delegate to an OpenAI Completion API to our DDS, `LiveAICompletion` ensures that only one user is requesting AI completions at a time. Both the input and output are synchronized for everyone in the session. This can lower the cost of collaborative AI significantly.
+
+Here is an example of this in action:
+
+```javascript
+import { useLiveAICompletion } from "@microsoft/live-share-react";
+import { onGetCompletion } from "./utils"; // faking it here, but same as other example
+
+// Fetch a completion string from your server for a prompt string. Interface is (prompt: string) => Promise<string>.
+async function onGetCompletion(prompt) {
+    const response = await fetch("/api/openai/completion", {
+        method: "POST",
+        body: JSON.stringify({
+            prompt,
+        }),
+        headers: new Headers({
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        }),
+    });
+    const { responseText } = await response.json();
+    return responseText;
+}
+
+const allowedUserRoles = ["Organizer", "Presenter"]; // roles allowed to edit synchronized prompt/completion
+const defaultPrompt = `You are a helpful, friendly, and polite chat bot.`;
+const automaticCompletions = true; // optional. when true, completions automatically send when the prompt is changed (debounced)
+
+export function ChatGPT() {
+  const {
+    promptValue,
+    completionValue,
+    changePrompt,
+  } = useLiveAPICompletion(
+    onGetCompletion,
+    allowedUserRoles, // optional
+    defaultPrompt, // optional
+    automaticCompletions, // optional
+  );
+  const fullText = promptValue + (completionValue ?? "");
+  return (
+    <>
+      <p>{fullText}</p>
+      <input
+          onChange={(ev, data) => {
+              const messsage = data.value;
+              const newText = fullText + "\nHUMAN: " + message + "\nAI:";
+              changePrompt(newText);
+          }}
+      />
+    </>
+  );
+}
+```
+
+You can use `LiveAICompletion` in parallel with other data structures. For example, if you want to enable multiple users editing the same text simultaneously, you might consider using `SharedString`. To do this, you might listen for changes to the text in the `SharedString` and then call the `changePrompt()` method using the latest `sharedString.getText()` value. If you have more structured data (e.g., within a `SharedMap`), you can do something similar. If you do either of these approaches, you may look into using the `lockPrompt` flag within `LiveAICompletion`, which ensures only one person directly changes the prompt at a time.
+
+For examples of how to use that approach in your app, please look at our [Next.js OpenAI sample](../../samples/typescript/32.nextjs-openai).
+
 ### Custom Fluid object hooks
 
 If you want to dynamically load a custom Fluid object in your app, use the `useDynamicDDS` to create a custom hook. This is the same hook that Live Share React uses internally within our custom hooks, such as `useLiveEvent`. If you made a custom data object or are using one of Fluid's experimental data structures, you also must register your Fluid `LoadableObjectClass` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
@@ -439,3 +500,33 @@ export const useSharedTree = (uniqueKey) => {
     };
 }
 ```
+
+## Code samples
+
+| Sample name       | Description                                                             | Javascript                                            |
+| ----------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
+| Live Share React  | Simple example with each of our custom Live Share React hooks.          | [View](../../samples/javascript/05.dice-roller-turbo) |
+| NextJS + OpenAI   | Collaborative idea brainstorming & chat, powered by `LiveAICompletion`. | [View](../../samples/typescript/32.nextjs-openai)     |
+
+## Package Compatibility
+
+TODO
+
+## Contributing
+
+There are several ways you can [contribute](../../CONTRIBUTING.md) to this project:
+
+- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+- Review the source code changes.
+- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+- [Contribute bug fixes](../../CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.
+
+## Reporting Security Issues
+
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+Licensed under a special [Microsoft](../../LICENSE) License.

@@ -39,7 +39,7 @@ export class TurboObjectManager extends DataObject {
     /**
      * The objects fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/live-share-turbo:TurboObjectManager`;
+    public static readonly TypeName = `@microsoft/live-share:TurboObjectManager`;
 
     /**
      * The objects fluid type factory.
@@ -166,13 +166,7 @@ export class TurboObjectManager extends DataObject {
                 deferred,
                 loadableClass,
             });
-            try {
-				// Join the TaskManager queue to create the DDS
-                // TODO: In @fluidframework/task-manager v2, there is a taskManager.subscribeToTask() function so that this doesn't fail on disconnects
-                this.taskManager.lockTask(key);
-            } catch (error) {
-                console.error(error);
-            }
+            this.lockTaskWithSafeDisconnect(key);
             return deferred.promise;
         }
     }
@@ -239,6 +233,32 @@ export class TurboObjectManager extends DataObject {
             setTimeout(() => {
                 this.taskManager.abandon(taskId);
             }, 1000);
+        });
+    }
+
+    private async lockTaskWithSafeDisconnect(taskId: string) {
+        await this.waitUntilConnected();
+        try {
+            // Join the TaskManager queue to create the DDS
+            // TODO: In @fluidframework/task-manager v2, there is a taskManager.subscribeToTask() function so that this doesn't fail on disconnects
+            await this.taskManager.lockTask(taskId);
+        } catch {
+            this.lockTaskWithSafeDisconnect(taskId);
+        }
+    }
+
+    private waitUntilConnected(): Promise<string> {
+        return new Promise((resolve) => {
+            const onConnected = (clientId: string) => {
+                this.runtime.off("connected", onConnected);
+                resolve(clientId);
+            };
+
+            if (this.runtime.connected) {
+                resolve(this.runtime.clientId as string);
+            } else {
+                this.runtime.on("connected", onConnected);
+            }
         });
     }
 }

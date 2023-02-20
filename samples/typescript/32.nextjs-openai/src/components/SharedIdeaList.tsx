@@ -6,7 +6,6 @@ interface ISharedIdeaListProps {
     ideasMap: ReadonlyMap<string, Idea>;
     ideaVotesMap: Map<string, number>;
     localUserId: string;
-    lockedTask: boolean;
     ideaTags: string[];
     ideaTagsMapRef: MutableRefObject<Map<string, string[]>>;
     ideaTextMapRef: MutableRefObject<Map<string, string>>;
@@ -20,7 +19,6 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
         ideasMap,
         ideaVotesMap,
         localUserId,
-        lockedTask,
         ideaTags,
         ideaTagsMapRef,
         ideaTextMapRef,
@@ -28,10 +26,6 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
         deleteIdeaEntry,
         setIdeaVotesMap,
     } = props;
-
-    const onDelete = useCallback((key: string) => {
-        deleteIdeaEntry(key);
-    }, [deleteIdeaEntry]);
 
     const onUpdateVoteCount = useCallback((key: string, voteCount: number) => {
         ideaVotesMap.set(key, voteCount);
@@ -51,13 +45,12 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
                             ideaId={key}
                             ideaTagsMapRef={ideaTagsMapRef}
                             ideaTextMapRef={ideaTextMapRef}
-                            lockedTask={lockedTask}
                             userId={localUserId}
                             userName={value.fallbackName}
                             ideaTags={ideaTags}
                             initialText={value.initialText || ""}
                             searchQuickTagsRef={searchQuickTagsRef}
-                            deleteIdea={onDelete}
+                            deleteIdea={deleteIdeaEntry}
                             updateVoteCount={onUpdateVoteCount}
                         />
                     );

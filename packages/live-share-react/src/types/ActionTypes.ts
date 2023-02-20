@@ -74,3 +74,9 @@ export type OnTimerDidStartAction = (timerConfig: ITimerConfig) => void;
 export type OnTimerDidPauseAction = (timerConfig: ITimerConfig) => void;
 export type OnTimerDidPlayAction = (timerConfig: ITimerConfig) => void;
 export type OnTimerDidFinishAction = (timerConfig: ITimerConfig) => void;
+
+export type OnAIChangePromptAction = (promptValue: string) => void;
+export type OnAIChangeCompletionAction = () => Promise<{
+    completionValue: string;
+    referenceId: string;
+}>;

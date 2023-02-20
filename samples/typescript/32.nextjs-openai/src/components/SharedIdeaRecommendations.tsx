@@ -1,79 +1,104 @@
-import { FC, useCallback, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { Lightbulb20Regular } from "@fluentui/react-icons";
 import { FlexRow } from "./flex";
-import { getInitialPromptMessageText, getOpenAISummary, useDebounce } from "@/utils";
+import {
+    getInitialPromptMessageText,
+} from "@/utils";
+import {
+    useGetCompletion,
+} from "@/hooks";
 import { IdeaConversationInitialIdea } from "@/types/IdeaConversation";
 import { RecommendedIdeasPrompt } from "@/constants/RecommendedIdeasPrompt";
-import { useSharedState } from "@microsoft/live-share-react";
+import {
+    useLiveAICompletion,
+    useSharedState,
+} from "@microsoft/live-share-react";
 import { RecommendedIdeaButton } from "./RecommendedIdeaButton";
+import { UserMeetingRole } from "@microsoft/live-share";
+import { OpenAIModelType } from "@/types";
 
 interface IIdeaRecommendationsProps {
     ideaBoardId: string;
-    lockedTask: boolean;
     promptText: string;
     onAddIdea: (initialText?: string) => void;
     getSortedIdeas: () => IdeaConversationInitialIdea[];
 }
 
+const ALLOWED_MEETING_ROLES = [
+    UserMeetingRole.organizer,
+    UserMeetingRole.presenter,
+];
+const AUTO_COMPLETIONS_ENABLED = true;
+const DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS = 2500;
+const LOCK_PROMPT = true;
+const LOCK_COMPLETION = true;
+const OPEN_AI_MODEL_TYPE = OpenAIModelType.davinci003;
+const OPEN_AI_COMPLETION_OPTIONS = {
+    temperature: 0.0,
+    frequency_penalty: 1,
+    presence_penalty: 1,
+};
+
 export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
     props
 ) => {
-    const { ideaBoardId, lockedTask, promptText, onAddIdea, getSortedIdeas } =
+    const { ideaBoardId, promptText, onAddIdea, getSortedIdeas } =
         props;
     const [recommendedIdeas, setRecommendedIdeas] = useSharedState<string[]>(
         `${ideaBoardId}-recommended-ideas`,
         []
     );
+    const onGetCompletion = useGetCompletion(OPEN_AI_MODEL_TYPE, OPEN_AI_COMPLETION_OPTIONS);
 
-    const onAddRecommendedIdea = useCallback((ideaText: string) => {
-        onAddIdea(ideaText);
-    }, [onAddIdea]);
+    const { liveAICompletion, completionValue, changePrompt } = useLiveAICompletion(
+        `${ideaBoardId}-ai-recommended-ideas`,
+        onGetCompletion,
+        ALLOWED_MEETING_ROLES,
+        AUTO_COMPLETIONS_ENABLED,
+        DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS,
+        LOCK_PROMPT,
+        LOCK_COMPLETION,
+    );
 
-    const onGenerateRecommendedIdeas = useCallback(async () => {
-        if (!lockedTask || promptText.length < 3) {
-            return;
+    useEffect(() => {
+        if (typeof completionValue === "string") {
+            const trimmedResponseText = completionValue.trimStart();
+            const ideas = trimmedResponseText
+                .split(", ")
+                .map((t) => t.trim())
+                .filter((t) => !!t);
+            setRecommendedIdeas(
+                ideas.slice(0, Math.min(3, ideas.length))
+            );
         }
+    }, [completionValue, setRecommendedIdeas]);
+
+    useEffect(() => {
+        if (promptText.length < 3 || !liveAICompletion?.haveCompletionLock) return;
         const sortedIdeas = getSortedIdeas();
         const recommendedIdeasPromptText =
             RecommendedIdeasPrompt +
             "/n" +
             getInitialPromptMessageText(promptText, sortedIdeas) +
             "/nSIMILAR IDEAS:";
-        try {
-            const responseText = await getOpenAISummary(
-                recommendedIdeasPromptText,
-                "text-davinci-003",
-                {
-                    frequency_penalty: 0.8,
-                    presence_penalty: 0.8,
-                },
-            );
-            const trimmedResponseText = responseText.trimStart();
-            const recommendedIdeas = trimmedResponseText
-                .split(", ")
-                .map((t) => t.trim())
-                .filter((t) => !!t);
-            setRecommendedIdeas(recommendedIdeas.slice(0, Math.min(3, recommendedIdeas.length)));
-        } catch (error: any) {
-            console.error(error);
-        }
-    }, [lockedTask, promptText, getSortedIdeas, setRecommendedIdeas]);
-
-    const debounceRecommendIdeas = useDebounce<void>(onGenerateRecommendedIdeas, 2500);
-    useEffect(() => {
-        debounceRecommendIdeas();
-    }, [debounceRecommendIdeas]);
+        changePrompt(recommendedIdeasPromptText);
+    }, [promptText, getSortedIdeas, changePrompt, liveAICompletion]);
 
     return (
-        <FlexRow vAlignCenter wrap marginSpacer style={{
-            paddingBottom: "8px",
-        }}>
+        <FlexRow
+            vAlignCenter
+            wrap
+            marginSpacer
+            style={{
+                paddingBottom: "8px",
+            }}
+        >
             <Lightbulb20Regular />
             {recommendedIdeas.map((ideaText, index) => (
                 <RecommendedIdeaButton
                     key={`rec-idea-${index}`}
                     ideaText={ideaText}
-                    onAddRecommendedIdea={onAddRecommendedIdea}
+                    onAddRecommendedIdea={onAddIdea}
                 />
             ))}
         </FlexRow>

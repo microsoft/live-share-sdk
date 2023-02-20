@@ -1,3 +1,4 @@
+import { OpenAICompletionOptions, OpenAIModelType } from "@/types";
 
 /**
  * 
@@ -9,14 +10,8 @@
  */
 export const getOpenAISummary = async (
     prompt: string,
-    model: "text-davinci-003" | "text-curie-001" = "text-davinci-003",
-    options?: {
-        temperature?: number,
-        top_p?: number,
-        frequency_penalty?: number,
-        presence_penalty?: number,
-        stop?: string[],
-    },
+    model: OpenAIModelType = OpenAIModelType.davinci003,
+    options?: OpenAICompletionOptions,
 ): Promise<string> => {
     try {
         const response = await fetch("/api/openai/summary", {

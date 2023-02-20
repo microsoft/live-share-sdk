@@ -1,19 +1,14 @@
-import { OrderedListPrompt } from "@/constants/OrderedListPrompt";
-import { TagsPrompt } from "@/constants/TagsPrompt";
+import { useGenerateSummary, useIdeaTags } from "@/hooks";
 import { Idea } from "@/types/Idea";
 import { IdeaConversationInitialIdea } from "@/types/IdeaConversation";
-import { getInitialPromptMessageText, getOpenAISummary } from "@/utils";
-import { useDebounce } from "@/utils/debounce";
 import { Button, Textarea, TextareaProps } from "@fluentui/react-components";
 import { ArrowClockwise20Regular } from "@fluentui/react-icons";
 import { LivePresenceUser } from "@microsoft/live-share";
 import {
-    useTaskManager,
     useSharedMap,
     useSharedState,
-    useLiveState,
 } from "@microsoft/live-share-react";
-import { FC, memo, useCallback, useEffect, useRef, useState } from "react";
+import { FC, memo, useCallback, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { FlexColumn, FlexRow } from "./flex";
 import { ScrollView } from "./ScrollView";
@@ -58,34 +53,10 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
     const ideaTagsMapRef = useRef<Map<string, string[]>>(
         new Map<string, string[]>()
     );
-    const { lockedTask } = useTaskManager(
-        `${ideaBoardId}-task-manager`,
-        "ai-summarizer"
-    );
-    const [ideaTags, setIdeaTags] = useSharedState<string[]>(`${ideaBoardId}-tags`, []);
+    const { ideaTags } = useIdeaTags(ideaBoardId, promptText);
     const searchQuickTagsRef = useRef<Map<string, string[]>>(
         new Map<string, string[]>()
     );
-
-    const [loadingState, loadingData, setLoadingState] = useLiveState<string>(
-        `${ideaBoardId}-loading`,
-        undefined,
-        "waiting"
-    );
-    const isLoading = loadingState === "loading";
-
-    const {
-        map: ideasMap,
-        setEntry: setIdeaEntry,
-        deleteEntry: deleteIdeaEntry,
-    } = useSharedMap<Idea>(`${ideaBoardId}-ideas`);
-
-    const onChangePrompt: TextareaProps["onChange"] = (ev, data) => {
-        const characterCap = 3000 * 4;
-        if (data.value.length <= characterCap) {
-            setPromptText(data.value);
-        }
-    };
 
     const getSortedIdeas = useCallback((): IdeaConversationInitialIdea[] => {
         const sortedIdeas: IdeaConversationInitialIdea[] = [
@@ -103,35 +74,22 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
         return sortedIdeas;
     }, [ideaVotesMap]);
 
-    const onGenerateSummary = async () => {
-        if (typeof promptText !== "string") {
-            console.error(new Error("Invalid prompt value"));
-            return;
+    const {
+        isLoading,
+        onGenerateSummary,
+    } = useGenerateSummary(ideaBoardId, promptText, getSortedIdeas, onDidStartNewConversation, onDidGetResponse);
+
+    const {
+        map: ideasMap,
+        setEntry: setIdeaEntry,
+        deleteEntry: deleteIdeaEntry,
+    } = useSharedMap<Idea>(`${ideaBoardId}-ideas`);
+
+    const onChangePrompt: TextareaProps["onChange"] = (ev, data) => {
+        const characterCap = 3000 * 4;
+        if (data.value.length <= characterCap) {
+            setPromptText(data.value);
         }
-        const conversationId = uuid();
-        const sortedIdeas = getSortedIdeas();
-        onDidStartNewConversation(conversationId, promptText, sortedIdeas);
-        setLoadingState("loading");
-        const initialPromptMessageText = OrderedListPrompt + "\n" + getInitialPromptMessageText(
-            promptText,
-            sortedIdeas
-        );
-        try {
-            const responseText = await getOpenAISummary(
-                initialPromptMessageText,
-                "text-davinci-003",
-                {
-                    temperature: 0.0,
-                },
-            );
-            onDidGetResponse(conversationId, responseText);
-        } catch (e: any) {
-            onDidGetResponse(
-                conversationId,
-                e.message || "I'm sorry, something went wrong."
-            );
-        }
-        setLoadingState("not-loading");
     };
 
     const onAddIdea = useCallback(async (initialText?: string) => {
@@ -147,36 +105,6 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
     const onClickAddIdea = async () => {
         onAddIdea();
     };
-
-    const onSearchTags = useCallback(async () => {
-        if (promptText.length > 1 && lockedTask) {
-            console.log("searching tags");
-            const fullGeneratePrompt = `${TagsPrompt}\nHUMAN: ${promptText}\nTAGS:`;
-            try {
-                const responseText = await getOpenAISummary(
-                    fullGeneratePrompt,
-                    "text-curie-001",
-                    {
-                        temperature: 0.0,
-                    },
-                );
-                const trimmedResponseText = responseText.trimStart();
-                const newTags = trimmedResponseText
-                    .split(", ")
-                    .map((t) => t.trim())
-                    .filter((t) => !!t);
-                setIdeaTags(newTags);
-            } catch (e: any) {
-                console.error(e);
-            }
-        }
-    }, [lockedTask, promptText]);
-
-    const debounceSearchTags = useDebounce<void>(onSearchTags, 2500);
-
-    useEffect(() => {
-        debounceSearchTags();
-    }, [lockedTask, promptText]);
 
     return (
         <>
@@ -210,7 +138,6 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
                         <SharedIdeaList
                             ideaTagsMapRef={ideaTagsMapRef}
                             ideaTextMapRef={ideaTextMapRef}
-                            lockedTask={lockedTask}
                             localUserId={localUser.userId}
                             ideaTags={ideaTags}
                             searchQuickTagsRef={searchQuickTagsRef}
@@ -221,7 +148,6 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
                         />
                         <SharedIdeaRecommendations
                             ideaBoardId={ideaBoardId}
-                            lockedTask={lockedTask}
                             promptText={promptText}
                             onAddIdea={onAddIdea}
                             getSortedIdeas={getSortedIdeas}

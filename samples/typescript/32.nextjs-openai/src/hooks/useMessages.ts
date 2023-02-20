@@ -6,7 +6,7 @@ import {
 } from "@/types";
 import { LivePresenceUser, UserMeetingRole } from "@microsoft/live-share";
 import {
-    useLiveAICompletion,
+    useLiveCoPilot,
     useLiveState,
     useSharedMap,
     useSharedState,
@@ -47,7 +47,7 @@ export const useMessages = (
     const [waitingState, , setWaitingState] = useLiveState<
         "waiting" | "not-waiting"
     >(`${conversationId}-waiting-state`);
-    const { changePrompt, sendCompletion } = useLiveAICompletion(
+    const { changePrompt, sendCompletion } = useLiveCoPilot(
         `${conversationId}-ai-messages`,
         onGetCompletion,
         ALLOWED_MEETING_ROLES

@@ -17,7 +17,7 @@ import {
     ExtendedMediaMetadata,
     MediaPlayerSynchronizer,
 } from "@microsoft/live-share-media";
-import { LiveAICompletion } from "@microsoft/live-share-turbo";
+import { LiveCoPilot } from "@microsoft/live-share-turbo";
 import { IFluidContainer, SharedMap } from "fluid-framework";
 import { IReceiveLiveEvent } from "../interfaces";
 import {
@@ -189,7 +189,7 @@ export interface IUseLiveCanvasResults {
     liveCanvas: LiveCanvas | undefined;
 }
 
-export interface IUseLiveAICompletionResults {
+export interface IUseLiveCoPilotResults {
     /**
      * Stateful prompt value that will be used to generate completions.
      */
@@ -211,7 +211,7 @@ export interface IUseLiveAICompletionResults {
      */
     sendCompletion: OnAIChangeCompletionAction;
     /**
-     * The `LiveAICompletion` object, should you want to use it directly.
+     * The `LiveCoPilot` object, should you want to use it directly.
      */
-    liveAICompletion: LiveAICompletion | undefined;
+    liveCoPilot: LiveCoPilot | undefined;
 }

@@ -411,14 +411,14 @@ export const ExampleLiveCanvas = () => {
 };
 ```
 
-### useLiveAICompletion
+### useLiveCoPilot
 
-If you want to build collaborative features powered by AI, you can use our experimental `useLiveAICompletion` hook, which uses the Live Share Turbo `LiveAICompletion` DDS. By providing a delegate to an OpenAI Completion API to our DDS, `LiveAICompletion` ensures that only one user is requesting AI completions at a time. Both the input and output are synchronized for everyone in the session. This can lower the cost of collaborative AI significantly.
+If you want to build collaborative features powered by AI, you can use our experimental `useLiveCoPilot` hook, which uses the Live Share Turbo `LiveCoPilot` DDS. By providing a delegate to an OpenAI Completion API to our DDS, `LiveCoPilot` ensures that only one user is requesting AI completions at a time. Both the input and output are synchronized for everyone in the session. This can lower the cost of collaborative AI significantly.
 
 Here is an example of this in action:
 
 ```javascript
-import { useLiveAICompletion } from "@microsoft/live-share-react";
+import { useLiveCoPilot } from "@microsoft/live-share-react";
 import { onGetCompletion } from "./utils"; // faking it here, but same as other example
 
 // Fetch a completion string from your server for a prompt string. Interface is (prompt: string) => Promise<string>.
@@ -468,7 +468,7 @@ export function ChatGPT() {
 }
 ```
 
-You can use `LiveAICompletion` in parallel with other data structures. For example, if you want to enable multiple users editing the same text simultaneously, you might consider using `SharedString`. To do this, you might listen for changes to the text in the `SharedString` and then call the `changePrompt()` method using the latest `sharedString.getText()` value. If you have more structured data (e.g., within a `SharedMap`), you can do something similar. If you do either of these approaches, you may look into using the `lockPrompt` flag within `LiveAICompletion`, which ensures only one person directly changes the prompt at a time.
+You can use `LiveCoPilot` in parallel with other data structures. For example, if you want to enable multiple users editing the same text simultaneously, you might consider using `SharedString`. To do this, you might listen for changes to the text in the `SharedString` and then call the `changePrompt()` method using the latest `sharedString.getText()` value. If you have more structured data (e.g., within a `SharedMap`), you can do something similar. If you do either of these approaches, you may look into using the `lockPrompt` flag within `LiveCoPilot`, which ensures only one person directly changes the prompt at a time.
 
 For examples of how to use that approach in your app, please look at our [Next.js OpenAI sample](../../samples/typescript/32.nextjs-openai).
 
@@ -506,7 +506,7 @@ export const useSharedTree = (uniqueKey) => {
 | Sample name       | Description                                                             | Javascript                                            |
 | ----------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
 | Live Share React  | Simple example with each of our custom Live Share React hooks.          | [View](../../samples/javascript/05.dice-roller-turbo) |
-| NextJS + OpenAI   | Collaborative idea brainstorming & chat, powered by `LiveAICompletion`. | [View](../../samples/typescript/32.nextjs-openai)     |
+| NextJS + OpenAI   | Collaborative idea brainstorming & chat, powered by `LiveCoPilot`. | [View](../../samples/typescript/32.nextjs-openai)     |
 
 ## Package Compatibility
 

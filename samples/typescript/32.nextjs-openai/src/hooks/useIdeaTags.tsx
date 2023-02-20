@@ -1,7 +1,7 @@
 import { TagsPrompt } from "@/constants/TagsPrompt";
 import { OpenAICompletionOptions, OpenAIModelType } from "@/types";
 import { UserMeetingRole } from "@microsoft/live-share";
-import { useLiveAICompletion, useSharedState } from "@microsoft/live-share-react";
+import { useLiveCoPilot, useSharedState } from "@microsoft/live-share-react";
 import { useEffect } from "react";
 import { useGetCompletion } from "./useGetCompletion";
 
@@ -27,10 +27,10 @@ export const useIdeaTags = (ideaBoardId: string, promptText: string) => {
         OPEN_AI_OPTIONS
     );
     const {
-        liveAICompletion,
+        liveCoPilot,
         completionValue,
         changePrompt,
-    } = useLiveAICompletion(
+    } = useLiveCoPilot(
         `${ideaBoardId}-tags`,
         onGetCompletion,
         ALLOWED_MEETING_ROLES,
@@ -41,12 +41,12 @@ export const useIdeaTags = (ideaBoardId: string, promptText: string) => {
         LOCK_COMPLETION
     );
 
-    // Update `useLiveAICompletion` prompt when `promptText` changes
+    // Update `useLiveCoPilot` prompt when `promptText` changes
     useEffect(() => {
-        if (promptText.length < 1 || !liveAICompletion?.haveCompletionLock) return;
+        if (promptText.length < 1 || !liveCoPilot?.haveCompletionLock) return;
         const fullGeneratePrompt = `${TagsPrompt}\nHUMAN: ${promptText}\nTAGS:`;
         changePrompt(fullGeneratePrompt);
-    }, [promptText, changePrompt, liveAICompletion]);
+    }, [promptText, changePrompt, liveCoPilot]);
 
     useEffect(() => {
         if (typeof completionValue === "string") {

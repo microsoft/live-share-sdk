@@ -26,9 +26,9 @@ interface IInternalCompletionChangeData {
 }
 
 /**
- * Events supported by `LiveAICompletion` object.
+ * Events supported by `LiveCoPilot` object.
  */
-export enum LiveAICompletionEvents {
+export enum LiveCoPilotEvents {
     /**
      * The prompt value has changed.
      */
@@ -49,11 +49,11 @@ export enum LiveAICompletionEvents {
 }
 
 /**
- * Event typings for `LiveAICompletion` class.
+ * Event typings for `LiveCoPilot` class.
  */
-export interface ILiveAICompletionEvents extends IEvent {
+export interface ILiveCoPilotEvents extends IEvent {
     /**
-     * An `LiveAICompletion` prompt value has changed.
+     * An `LiveCoPilot` prompt value has changed.
      * @param event Name of event.
      * @param listener Function called when event is triggered.
      * @param listener.promptValue The new prompt value.
@@ -62,7 +62,7 @@ export interface ILiveAICompletionEvents extends IEvent {
      * @param listener.referenceId The reference id of the prompt change, which can be used to correlate the prompt change with the completion changes.
      */
     (
-        event: LiveAICompletionEvents.promptChanged,
+        event: LiveCoPilotEvents.promptChanged,
         listener: (
             promptValue: string,
             local: boolean,
@@ -71,7 +71,7 @@ export interface ILiveAICompletionEvents extends IEvent {
         ) => void
     ): any;
     /**
-     * An `LiveAICompletion` completion value has changed.
+     * An `LiveCoPilot` completion value has changed.
      * @remarks
      * This event will only emit if the prompt change took place for the current prompt.
      * 
@@ -83,7 +83,7 @@ export interface ILiveAICompletionEvents extends IEvent {
      * @param listener.referenceId The reference id of the prompt change, which can be used to correlate the prompt change with the completion changes.
      */
     (
-        event: LiveAICompletionEvents.completionChanged,
+        event: LiveCoPilotEvents.completionChanged,
         listener: (
             completionValue: string,
             local: boolean,
@@ -98,7 +98,7 @@ export interface ILiveAICompletionEvents extends IEvent {
      * @param listener Function called when event is triggered.
      */
     (
-        event: LiveAICompletionEvents.lockGranted,
+        event: LiveCoPilotEvents.lockGranted,
         listener: () => void
     ): any;
     /**
@@ -108,7 +108,7 @@ export interface ILiveAICompletionEvents extends IEvent {
      * @param listener Function called when event is triggered.
      */
     (
-        event: LiveAICompletionEvents.lockLost,
+        event: LiveCoPilotEvents.lockLost,
         listener: () => void
     ): any;
 }
@@ -119,8 +119,8 @@ export interface ILiveAICompletionEvents extends IEvent {
  * If a DDS does not yet exist for a given key, a new one is created. Fluid `TaskManager` is used to ensure that only one person is responsible for
  * creating the DDS to prevent data loss. Note that a user must have an active websocket connection to create data objects under this method.
  */
-export class LiveAICompletion extends DataObject<{
-    Events: ILiveAICompletionEvents;
+export class LiveCoPilot extends DataObject<{
+    Events: ILiveCoPilotEvents;
 }> {
     private _taskManager: TaskManager | undefined;
     private _promptLiveState: LiveState<IInternalPromptChangeData> | undefined;
@@ -141,14 +141,14 @@ export class LiveAICompletion extends DataObject<{
     /**
      * The objects fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/live-share:LiveAICompletion`;
+    public static readonly TypeName = `@microsoft/live-share:LiveCoPilot`;
 
     /**
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveAICompletion.TypeName,
-        LiveAICompletion,
+        LiveCoPilot.TypeName,
+        LiveCoPilot,
         [TaskManager.getFactory()],
         {},
         new Map([LiveState.factory.registryEntry]),
@@ -274,10 +274,10 @@ export class LiveAICompletion extends DataObject<{
         promptValue?: string,
     ): Promise<void> {
         if (this._initializing) {
-            throw new Error(`LiveAICompletion already initializing.`);
+            throw new Error(`LiveCoPilot already initializing.`);
         }
         if (this.isInitialized) {
-            throw new Error(`LiveAICompletion already initialized.`);
+            throw new Error(`LiveCoPilot already initialized.`);
         }
         this._initializing = true;
 
@@ -310,10 +310,10 @@ export class LiveAICompletion extends DataObject<{
      */
     public changePrompt(promptValue: string): void {
         if (!this.isInitialized) {
-            throw new Error(`LiveAICompletion not initialized. Call .initialize() first.`);
+            throw new Error(`LiveCoPilot not initialized. Call .initialize() first.`);
         }
         if (this.lockPrompt && !this.haveCompletionLock) {
-            throw new Error(`LiveAICompletion prompt is locked.`);
+            throw new Error(`LiveCoPilot prompt is locked.`);
         }
         if (this.promptLiveState.data?.promptValue === promptValue) {
             return;
@@ -335,16 +335,16 @@ export class LiveAICompletion extends DataObject<{
         referenceId: string;
     }> {
         if (!this.isInitialized) {
-            throw new Error(`LiveAICompletion.sendCompletion: not initialized. Call .initialize() first.`);
+            throw new Error(`LiveCoPilot.sendCompletion: not initialized. Call .initialize() first.`);
         }
         if (this.lockCompletion && !this.haveCompletionLock) {
-            throw new Error(`LiveAICompletion.sendCompletion: this client does not have the completion lock.`);
+            throw new Error(`LiveCoPilot.sendCompletion: this client does not have the completion lock.`);
         }
         const [, abandonDebounce] = this._debounceSendCompletion;
         abandonDebounce();
         const { referenceId, promptValue, completionValue } = await this.getSendCompletionInfo();
         if (this.lockCompletion && !this.haveCompletionLock) {
-            throw new Error(`LiveAICompletion.sendCompletion: the client lost completion lock after receiving the completionValue.`);
+            throw new Error(`LiveCoPilot.sendCompletion: the client lost completion lock after receiving the completionValue.`);
         }
         this.completionLiveState.changeState(referenceId, {
             promptValue,
@@ -419,13 +419,13 @@ export class LiveAICompletion extends DataObject<{
         this.taskManager.on("assigned", async (taskId: string) => {
             if (taskId === completionTaskKey) {
                 this.handleDebouncePermissionsChange();
-                this.emit(LiveAICompletionEvents.lockGranted);
+                this.emit(LiveCoPilotEvents.lockGranted);
             }
         });
         this.taskManager.on("lost", async (taskId: string) => {
             if (taskId === completionTaskKey) {
                 this.handleDebouncePermissionsChange();
-                this.emit(LiveAICompletionEvents.lockLost);
+                this.emit(LiveCoPilotEvents.lockLost);
             }
         });
     }
@@ -463,7 +463,7 @@ export class LiveAICompletion extends DataObject<{
                 }
             }
             // Emit the promptChanged event
-            this.emit(LiveAICompletionEvents.promptChanged, change.promptValue, local, completionPromise, referenceId);
+            this.emit(LiveCoPilotEvents.promptChanged, change.promptValue, local, completionPromise, referenceId);
         });
         // Listen for completion changes
         this.completionLiveState.on(LiveStateEvents.stateChanged, async (referenceId: string, change: IInternalCompletionChangeData | undefined, local: boolean) => {
@@ -476,7 +476,7 @@ export class LiveAICompletion extends DataObject<{
             }
             if (this.promptLiveState.state === referenceId) {
                 // Emit the completionChanged event
-                this.emit(LiveAICompletionEvents.completionChanged, change.completionValue, local, change.promptValue, referenceId);
+                this.emit(LiveCoPilotEvents.completionChanged, change.completionValue, local, change.promptValue, referenceId);
             }
         });
     }
@@ -496,10 +496,10 @@ export class LiveAICompletion extends DataObject<{
         const referenceId = this.promptLiveState.state;
         const promptValue = this.promptLiveState.data?.promptValue;
         if (!referenceId) {
-            throw new Error(`LiveAICompletion.sendCompletion: prompt not set.`);
+            throw new Error(`LiveCoPilot.sendCompletion: prompt not set.`);
         }
         if (typeof promptValue !== "string") {
-            throw new Error(`LiveAICompletion.sendCompletion: promptValue is not a valid string.`);
+            throw new Error(`LiveCoPilot.sendCompletion: promptValue is not a valid string.`);
         }
         const completionValue = await this.onGetCompletion(promptValue);
         return {
@@ -560,5 +560,5 @@ export class LiveAICompletion extends DataObject<{
     }
 }
 
-// Register LiveAICompletion as a dynamic object
-DynamicObjectRegistry.registerObjectClass(LiveAICompletion, LiveAICompletion.TypeName);
+// Register LiveCoPilot as a dynamic object
+DynamicObjectRegistry.registerObjectClass(LiveCoPilot, LiveCoPilot.TypeName);

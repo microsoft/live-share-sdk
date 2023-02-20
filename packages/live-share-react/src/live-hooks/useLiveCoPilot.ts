@@ -5,21 +5,21 @@
 
 import { UserMeetingRole } from "@microsoft/live-share";
 import {
-    LiveAICompletion,
-    LiveAICompletionEvents,
+    LiveCoPilot,
+    LiveCoPilotEvents,
 } from "@microsoft/live-share-turbo";
 import React from "react";
 import { useDynamicDDS } from "../shared-hooks";
-import { IUseLiveAICompletionResults } from "../types";
+import { IUseLiveCoPilotResults } from "../types";
 
 
 /**
- * React hook for using a Live Share Turbo `LiveAICompletion`. Intended for use with OpenAI's Completion API.
+ * React hook for using a Live Share Turbo `LiveCoPilot`. Intended for use with OpenAI's Completion API.
  *
  * @remarks
- * Use this hook to set up an `LiveAICompletion` object, which is used for using AI completions collaboratively at minimal cost.
+ * Use this hook to set up an `LiveCoPilot` object, which is used for using AI completions collaboratively at minimal cost.
  *
- * @param uniqueKey the unique key for the `LiveAICompletion`. If one does not yet exist, a new one.
+ * @param uniqueKey the unique key for the `LiveCoPilot`. If one does not yet exist, a new one.
  * @param onGetCompletion React useCallback function that returns a Promise<string> for the latest `promptValue`. Function is intended to
  * communicate with a backend API that uses OpenAI's Completion API.
  * @param allowedRoles Optional. The meeting roles eligible to send events through this object.
@@ -32,9 +32,9 @@ import { IUseLiveAICompletionResults } from "../types";
  * @param lockCompletion Optional. Stateful boolean that when true, will restrict manual completion changes to only the user with `haveCompletionLock`
  * set to true. This does not impact the `autoCompletions` setting, because `autoCompletions` already has this behavior. Default value is false.
  * 
- * @returns IUseLiveAICompletionResults object that contains stateful responses and callback methods from `LiveAICompletion`.
+ * @returns IUseLiveCoPilotResults object that contains stateful responses and callback methods from `LiveCoPilot`.
  */
-export const useLiveAICompletion = (
+export const useLiveCoPilot = (
     uniqueKey: string,
     onGetCompletion: (promptValue: string) => Promise<string>,
     allowedRoles?: UserMeetingRole[],
@@ -43,38 +43,38 @@ export const useLiveAICompletion = (
     debounceDelayMilliseconds?: number,
     lockPrompt?: boolean,
     lockCompletion?: boolean
-): IUseLiveAICompletionResults => {
+): IUseLiveCoPilotResults => {
     /**
-     * Reference boolean for whether hook has registered "listening" events for `LiveAICompletion`.
+     * Reference boolean for whether hook has registered "listening" events for `LiveCoPilot`.
      */
     const listeningRef = React.useRef(false);
     /**
-     * @see IUseLiveAICompletionResults["promptValue"]
+     * @see IUseLiveCoPilotResults["promptValue"]
      */
     const [promptValue, setPromptValue] = React.useState<string>("");
     /**
-     * @see IUseLiveAICompletionResults["completionValue"]
+     * @see IUseLiveCoPilotResults["completionValue"]
      */
     const [completionValue, setCompletionValue] = React.useState<string>();
     /**
-     * @see IUseLiveAICompletionResults["haveCompletionLock"]
+     * @see IUseLiveCoPilotResults["haveCompletionLock"]
      */
     const [haveCompletionLock, setHaveCompletionLock] =
         React.useState<boolean>(false);
     /**
      * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveAICompletion } = useDynamicDDS<LiveAICompletion>(
+    const { dds: liveCoPilot } = useDynamicDDS<LiveCoPilot>(
         uniqueKey,
-        LiveAICompletion
+        LiveCoPilot
     );
 
     /**
-     * @see IUseLiveAICompletionResults["changePrompt"]
+     * @see IUseLiveCoPilotResults["changePrompt"]
      */
     const changePrompt = React.useCallback(
         (value: string) => {
-            if (liveAICompletion === undefined) {
+            if (liveCoPilot === undefined) {
                 console.error(
                     new Error(
                         "Cannot call emitEvent when liveEvent is undefined"
@@ -82,7 +82,7 @@ export const useLiveAICompletion = (
                 );
                 return;
             }
-            if (!liveAICompletion.isInitialized) {
+            if (!liveCoPilot.isInitialized) {
                 console.error(
                     new Error(
                         "Cannot call emitEvent while liveEvent is not started"
@@ -90,36 +90,36 @@ export const useLiveAICompletion = (
                 );
                 return;
             }
-            return liveAICompletion.changePrompt(value);
+            return liveCoPilot.changePrompt(value);
         },
-        [liveAICompletion]
+        [liveCoPilot]
     );
 
     /**
-     * @see IUseLiveAICompletionResults["changePrompt"]
+     * @see IUseLiveCoPilotResults["changePrompt"]
      */
     const sendCompletion = React.useCallback(async (): Promise<{
         completionValue: string;
         referenceId: string;
     }> => {
-        if (liveAICompletion === undefined) {
-            throw new Error("Cannot call sendCompletion while `liveAICompletion` is undefined");
+        if (liveCoPilot === undefined) {
+            throw new Error("Cannot call sendCompletion while `liveCoPilot` is undefined");
         }
-        if (!liveAICompletion.isInitialized) {
+        if (!liveCoPilot.isInitialized) {
             throw new Error(
-                "Cannot call sendCompletion while `liveAICompletion` is not initialized"
+                "Cannot call sendCompletion while `liveCoPilot` is not initialized"
             );
         }
-        return liveAICompletion.sendCompletion();
-    }, [liveAICompletion]);
+        return liveCoPilot.sendCompletion();
+    }, [liveCoPilot]);
 
     /**
-     * Sets up the `LiveAICompletion` instance.
+     * Sets up the `LiveCoPilot` instance.
      */
     React.useEffect(() => {
         if (
             listeningRef.current ||
-            liveAICompletion?.isInitialized === undefined
+            liveCoPilot?.isInitialized === undefined
         )
             return;
         listeningRef.current = true;
@@ -130,7 +130,7 @@ export const useLiveAICompletion = (
             completionValuePromise: Promise<string>
         ) => {
             setPromptValue(promptValue);
-            if (!liveAICompletion.haveValidCompletionValue) {
+            if (!liveCoPilot.haveValidCompletionValue) {
                 setCompletionValue(undefined);
             }
             try {
@@ -146,101 +146,101 @@ export const useLiveAICompletion = (
         const onLockLost = () => {
             setHaveCompletionLock(true);
         };
-        liveAICompletion.on(
-            LiveAICompletionEvents.promptChanged,
+        liveCoPilot.on(
+            LiveCoPilotEvents.promptChanged,
             onPromptChanged
         );
-        liveAICompletion.on(LiveAICompletionEvents.lockGranted, onLockGranted);
-        liveAICompletion.on(LiveAICompletionEvents.lockLost, onLockLost);
-        if (!liveAICompletion.isInitialized) {
-            // Initialize the LiveAICompletion instance
-            liveAICompletion.initialize(onGetCompletion, allowedRoles, defaultPromptValue);
+        liveCoPilot.on(LiveCoPilotEvents.lockGranted, onLockGranted);
+        liveCoPilot.on(LiveCoPilotEvents.lockLost, onLockLost);
+        if (!liveCoPilot.isInitialized) {
+            // Initialize the LiveCoPilot instance
+            liveCoPilot.initialize(onGetCompletion, allowedRoles, defaultPromptValue);
         }
 
         return () => {
             // on unmount, remove event listeners
             listeningRef.current = false;
-            liveAICompletion?.off(
-                LiveAICompletionEvents.promptChanged,
+            liveCoPilot?.off(
+                LiveCoPilotEvents.promptChanged,
                 onPromptChanged
             );
-            liveAICompletion?.off(
-                LiveAICompletionEvents.lockGranted,
+            liveCoPilot?.off(
+                LiveCoPilotEvents.lockGranted,
                 onLockGranted
             );
-            liveAICompletion?.off(LiveAICompletionEvents.lockLost, onLockLost);
+            liveCoPilot?.off(LiveCoPilotEvents.lockLost, onLockLost);
         };
-    }, [liveAICompletion]);
+    }, [liveCoPilot]);
 
     /**
-     * Sets the onGetCompletion of the `liveAICompletion` based on the 'onGetCompletion' prop
+     * Sets the onGetCompletion of the `liveCoPilot` based on the 'onGetCompletion' prop
      */
     React.useEffect(() => {
         if (
-            liveAICompletion?.isInitialized === true &&
+            liveCoPilot?.isInitialized === true &&
             onGetCompletion !== undefined
         ) {
-            liveAICompletion.onGetCompletion = onGetCompletion;
+            liveCoPilot.onGetCompletion = onGetCompletion;
         }
-    }, [liveAICompletion?.isInitialized, onGetCompletion]);
+    }, [liveCoPilot?.isInitialized, onGetCompletion]);
 
     /**
-     * Sets the autoCompletions of the `liveAICompletion` based on the 'autoCompletions' prop
+     * Sets the autoCompletions of the `liveCoPilot` based on the 'autoCompletions' prop
      */
     React.useEffect(() => {
         if (
-            liveAICompletion !== undefined &&
+            liveCoPilot !== undefined &&
             autoCompletions !== undefined &&
-            liveAICompletion.autoCompletions !== autoCompletions
+            liveCoPilot.autoCompletions !== autoCompletions
         ) {
-            liveAICompletion.autoCompletions = autoCompletions;
+            liveCoPilot.autoCompletions = autoCompletions;
         }
-    }, [liveAICompletion?.autoCompletions, autoCompletions]);
+    }, [liveCoPilot?.autoCompletions, autoCompletions]);
 
     /**
-     * Sets the debounceDelayMilliseconds of the `liveAICompletion` based on the 'debounceDelayMilliseconds' prop
+     * Sets the debounceDelayMilliseconds of the `liveCoPilot` based on the 'debounceDelayMilliseconds' prop
      */
     React.useEffect(() => {
         if (
-            liveAICompletion !== undefined &&
+            liveCoPilot !== undefined &&
             debounceDelayMilliseconds !== undefined &&
-            liveAICompletion.debounceDelayMilliseconds !== debounceDelayMilliseconds
+            liveCoPilot.debounceDelayMilliseconds !== debounceDelayMilliseconds
         ) {
-            liveAICompletion.debounceDelayMilliseconds = debounceDelayMilliseconds;
+            liveCoPilot.debounceDelayMilliseconds = debounceDelayMilliseconds;
         }
-    }, [liveAICompletion, debounceDelayMilliseconds]);
+    }, [liveCoPilot, debounceDelayMilliseconds]);
 
     /**
-     * Sets the lockPrompt of the `liveAICompletion` based on the 'lockPrompt' prop
+     * Sets the lockPrompt of the `liveCoPilot` based on the 'lockPrompt' prop
      */
     React.useEffect(() => {
         if (
-            liveAICompletion !== undefined &&
+            liveCoPilot !== undefined &&
             lockPrompt !== undefined &&
-            liveAICompletion.lockPrompt !== lockPrompt
+            liveCoPilot.lockPrompt !== lockPrompt
         ) {
-            liveAICompletion.lockPrompt = lockPrompt;
+            liveCoPilot.lockPrompt = lockPrompt;
         }
-    }, [liveAICompletion?.lockPrompt, lockPrompt]);
+    }, [liveCoPilot?.lockPrompt, lockPrompt]);
 
     /**
-     * Sets the lockCompletion of the `liveAICompletion` based on the 'lockCompletion' prop
+     * Sets the lockCompletion of the `liveCoPilot` based on the 'lockCompletion' prop
      */
     React.useEffect(() => {
         if (
-            liveAICompletion !== undefined &&
+            liveCoPilot !== undefined &&
             lockCompletion !== undefined &&
-            liveAICompletion.lockCompletion !== lockCompletion
+            liveCoPilot.lockCompletion !== lockCompletion
         ) {
-            liveAICompletion.lockCompletion = lockCompletion;
+            liveCoPilot.lockCompletion = lockCompletion;
         }
-    }, [liveAICompletion?.lockCompletion, lockCompletion]);
+    }, [liveCoPilot?.lockCompletion, lockCompletion]);
 
     return {
         changePrompt,
         completionValue,
         haveCompletionLock,
-        liveAICompletion,
+        liveCoPilot,
         promptValue,
         sendCompletion,
     };

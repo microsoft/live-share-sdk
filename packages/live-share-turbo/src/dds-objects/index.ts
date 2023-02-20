@@ -1,2 +1,2 @@
 export * from "./TurboObjectManager";
-export * from "./LiveAICompletion";
+export * from "./LiveCoPilot";

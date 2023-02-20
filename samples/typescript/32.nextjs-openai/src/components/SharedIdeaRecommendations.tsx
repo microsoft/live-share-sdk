@@ -6,7 +6,7 @@ import { useGetCompletion } from "@/hooks";
 import { IdeaConversationInitialIdea } from "@/types/IdeaConversation";
 import { RecommendedIdeasPrompt } from "@/constants/RecommendedIdeasPrompt";
 import {
-    useLiveAICompletion,
+    useLiveCoPilot,
     useSharedState,
 } from "@microsoft/live-share-react";
 import { RecommendedIdeaButton } from "./RecommendedIdeaButton";
@@ -49,8 +49,8 @@ export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
         OPEN_AI_COMPLETION_OPTIONS
     );
 
-    const { liveAICompletion, completionValue, changePrompt } =
-        useLiveAICompletion(
+    const { liveCoPilot, completionValue, changePrompt } =
+        useLiveCoPilot(
             `${ideaBoardId}-ai-recommended-ideas`,
             onGetCompletion,
             ALLOWED_MEETING_ROLES,
@@ -62,7 +62,7 @@ export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
         );
 
     useEffect(() => {
-        if (promptText.length < 3 || !liveAICompletion?.haveCompletionLock)
+        if (promptText.length < 3 || !liveCoPilot?.haveCompletionLock)
             return;
         const sortedIdeas = getSortedIdeas();
         const recommendedIdeasPromptText =
@@ -71,7 +71,7 @@ export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
             getInitialPromptMessageText(promptText, sortedIdeas) +
             "/nSIMILAR IDEAS:";
         changePrompt(recommendedIdeasPromptText);
-    }, [promptText, getSortedIdeas, changePrompt, liveAICompletion]);
+    }, [promptText, getSortedIdeas, changePrompt, liveCoPilot]);
 
     useEffect(() => {
         if (typeof completionValue === "string") {

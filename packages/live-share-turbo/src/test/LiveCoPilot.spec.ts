@@ -7,10 +7,10 @@ import { strict as assert } from "assert";
 import { IFluidContainer } from "fluid-framework";
 import { TestLiveShareHost } from "@microsoft/live-share";
 import { LiveShareTurboClient } from "../LiveShareTurboClient";
-import { LiveAICompletion } from "../dds-objects";
+import { LiveCoPilot } from "../dds-objects";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 
-describe("LiveAICompletion", () => {
+describe("LiveCoPilot", () => {
     (window.performance as any).mark = () => {
         return {};
     };
@@ -29,7 +29,7 @@ describe("LiveAICompletion", () => {
     const client1 = new LiveShareTurboClient(host);
     const client2 = new LiveShareTurboClient(host);
 
-    const testLiveAICompletionKey = "TEST-LIVE-EVENT-KEY";
+    const testLiveCoPilotKey = "TEST-LIVE-EVENT-KEY";
     let results1: {
         container: IFluidContainer;
         services: AzureContainerServices;
@@ -49,10 +49,10 @@ describe("LiveAICompletion", () => {
 
     it("Should create dds from one client and join from another, correctly handle initial objects", async () => {
         let object1Created = false;
-        const promise1 = client1.getDDS<LiveAICompletion>(
-            testLiveAICompletionKey,
-            LiveAICompletion,
-            (dds: LiveAICompletion) => {
+        const promise1 = client1.getDDS<LiveCoPilot>(
+            testLiveCoPilotKey,
+            LiveCoPilot,
+            (dds: LiveCoPilot) => {
                 object1Created = true;
                 assert(
                     dds !== undefined,
@@ -61,10 +61,10 @@ describe("LiveAICompletion", () => {
             }
         );
         let object2Created = false;
-        const promise2 = client2.getDDS<LiveAICompletion>(
-            testLiveAICompletionKey,
-            LiveAICompletion,
-            (dds: LiveAICompletion) => {
+        const promise2 = client2.getDDS<LiveCoPilot>(
+            testLiveCoPilotKey,
+            LiveCoPilot,
+            (dds: LiveCoPilot) => {
                 object2Created = true;
                 assert(
                     dds !== undefined,
@@ -87,6 +87,6 @@ describe("LiveAICompletion", () => {
             "Incorrect number of dds created"
         );
 
-        // TODO: validate that LiveAICompletion is working properly
+        // TODO: validate that LiveCoPilot is working properly
     });
 });

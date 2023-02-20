@@ -6,7 +6,7 @@ import {
 } from "@/types";
 import { UserMeetingRole } from "@microsoft/live-share";
 import {
-    useLiveAICompletion,
+    useLiveCoPilot,
     useLiveState,
     useSharedState,
 } from "@microsoft/live-share-react";
@@ -45,7 +45,7 @@ export const useGenerateSummary = (
     );
     const [loadingState, , setLoadingState] = useLiveState<"loading" | "not-loading">(`${ideaBoardId}-loading`);
     const { changePrompt, sendCompletion } =
-        useLiveAICompletion(
+        useLiveCoPilot(
             `${ideaBoardId}-ai-summary`,
             onGetCompletion,
             ALLOWED_MEETING_ROLES

@@ -2,7 +2,7 @@ import { OpenAICompletionOptions, OpenAIModelType } from "@/types";
 import { getRecommendedTagsText } from "@/utils";
 import { UserMeetingRole } from "@microsoft/live-share";
 import {
-    useLiveAICompletion,
+    useLiveCoPilot,
     useSharedState,
 } from "@microsoft/live-share-react";
 import { MutableRefObject, useEffect } from "react";
@@ -40,8 +40,8 @@ export const useQuickTags = (
         OPEN_AI_MODEL_TYPE,
         OPEN_AI_OPTIONS
     );
-    const { liveAICompletion, completionValue, changePrompt } =
-        useLiveAICompletion(
+    const { liveCoPilot, completionValue, changePrompt } =
+        useLiveCoPilot(
             `${ideaId}-ai-quick-tags`,
             onGetCompletion,
             ALLOWED_MEETING_ROLES,
@@ -53,7 +53,7 @@ export const useQuickTags = (
         );
 
     useEffect(() => {
-        if (!text || !liveAICompletion?.haveCompletionLock) return;
+        if (!text || !liveCoPilot?.haveCompletionLock) return;
         const existingQuickTags = searchQuickTagsRef.current.get(text);
         if (existingQuickTags !== undefined) {
             if (
@@ -74,7 +74,7 @@ export const useQuickTags = (
             text
         );
         changePrompt(recommendedTagsText);
-    }, [text, setQuickRecommendTags, changePrompt, liveAICompletion]);
+    }, [text, setQuickRecommendTags, changePrompt, liveCoPilot]);
 
     useEffect(() => {
         if (typeof completionValue === "string") {

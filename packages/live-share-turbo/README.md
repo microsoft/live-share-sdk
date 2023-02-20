@@ -255,15 +255,15 @@ if (client.results) {
 }
 ```
 
-## LiveAICompletion
+## LiveCoPilot
 
-If you want to build collaborative features powered by AI, you can use our experimental `LiveAICompletion` DDS. By providing a delegate to an OpenAI Completion API to our DDS, `LiveAICompletion` ensures that only one user is requesting AI completions at a time. Both the input and output are synchronized for everyone in the session. This can lower the cost of collaborative AI significantly.
+If you want to build collaborative features powered by AI, you can use our experimental `LiveCoPilot` DDS. By providing a delegate to an OpenAI Completion API to our DDS, `LiveCoPilot` ensures that only one user is requesting AI completions at a time. Both the input and output are synchronized for everyone in the session. This can lower the cost of collaborative AI significantly.
 
 Here is an example of this in action:
 
 ```javascript
 import { LiveShareHost } from "@microsoft/teams-js";
-import { LiveShareTurboClient, LiveAICompletion } from "@microsoft/live-share-turbo";
+import { LiveShareTurboClient, LiveCoPilot } from "@microsoft/live-share-turbo";
 
 // Fetch a completion string from your server for a prompt string. Interface is (prompt: string) => Promise<string>.
 async function onGetCompletion(prompt) {
@@ -286,39 +286,39 @@ const host = LiveShareHost.create();
 const client = new LiveShareTurboClient(host);
 await client.join();
 // Setup collaborative objects (e.g., SharedMap) as needed during your application's runtime
-const liveAICompletion = await client.getDDS(
+const liveCoPilot = await client.getDDS(
     "UNIQUE-KEY",
-    LiveAICompletion,
+    LiveCoPilot,
 );
 // Optionally define an initial value for your prompt, though you can also do this on your server.
 let promptText = `You are a helpful, friendly, and polite chat bot.`;
-liveAICompletion.on("promptChanged", (newPrompt, local) => {
+liveCoPilot.on("promptChanged", (newPrompt, local) => {
     // Update local prompt text with new value
     promptText = newPrompt;
 });
-liveAICompletion.on("completionChanged", (newCompletion, local) => {
+liveCoPilot.on("completionChanged", (newCompletion, local) => {
     // Update local prompt text with new changes to carry on conversation
     promptText += newCompletion;
 });
-// Initialize liveAICompletion to begin receiving/sending prompt / completion updates
+// Initialize liveCoPilot to begin receiving/sending prompt / completion updates
 const allowedUserRoles = ["Organizer", "Presenter"]; // roles allowed to edit synchronized prompt/completion
 const automaticCompletions = true; // optional. when true, completions automatically send when the prompt is changed (debounced)
-await liveAICompletion.initialize(onGetCompletion, allowedUserRoles, promptText, automaticCompletions);
+await liveCoPilot.initialize(onGetCompletion, allowedUserRoles, promptText, automaticCompletions);
 
 function sendMessage(message, userName) {
     // Change the prompt text
-    liveAICompletion.changePrompt(promptText + `\n${userName}: ` + message + `\nAI:`);
+    liveCoPilot.changePrompt(promptText + `\n${userName}: ` + message + `\nAI:`);
 }
 ```
 
-You can use `LiveAICompletion` in parallel with other data structures. For example, if you want to enable multiple users editing the same text simultaneously, you might consider using `SharedString`. To do this, you might listen for changes to the text in the `SharedString` and then call the `changePrompt()` method using the latest `sharedString.getText()` value. If you have more structured data (e.g., within a `SharedMap`), you can do something similar. If you do either of these approaches, you may look into using the `lockPrompt` flag within `LiveAICompletion`, which ensures only one person directly changes the prompt at a time.
+You can use `LiveCoPilot` in parallel with other data structures. For example, if you want to enable multiple users editing the same text simultaneously, you might consider using `SharedString`. To do this, you might listen for changes to the text in the `SharedString` and then call the `changePrompt()` method using the latest `sharedString.getText()` value. If you have more structured data (e.g., within a `SharedMap`), you can do something similar. If you do either of these approaches, you may look into using the `lockPrompt` flag within `LiveCoPilot`, which ensures only one person directly changes the prompt at a time.
 
 ## Code samples
 
 | Sample name       | Description                                                             | Javascript                                            |
 | ----------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
 | Dice Roller Turbo | Enable all connected clients to roll several dice and view the result.  | [View](../../samples/javascript/05.dice-roller-turbo) |
-| NextJS + OpenAI   | Collaborative idea brainstorming & chat, powered by `LiveAICompletion`. | [View](../../samples/typescript/32.nextjs-openai)     |
+| NextJS + OpenAI   | Collaborative idea brainstorming & chat, powered by `LiveCoPilot`. | [View](../../samples/typescript/32.nextjs-openai)     |
 
 ## Package Compatibility
 

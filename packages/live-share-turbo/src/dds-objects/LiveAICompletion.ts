@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { DynamicObjectRegistry, LiveEvent, LiveState, LiveStateEvents, UserMeetingRole } from "@microsoft/live-share";
 import { TaskManager } from "@fluid-experimental/task-manager";

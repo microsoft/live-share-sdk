@@ -1,8 +1,10 @@
 # Microsoft Live Share Turbo
 
+**DISCLAIMER:** This package is in preview and experimental. We are not yet committed to maintaining this package and may make breaking changes at any time. We may decide to move some or all of these features into the main `live-share` package at a future date.
+
 Easily create collaborative apps, powered by [Fluid Framework](https://fluidframework.com/). This package is an experimental, alternative approach to building Fluid & Live Share applications that attempts to make it simpler to use dynamic distributed-data structures. One of the main benefits of Fluid is the efficient, hierarchal, and ultra-fast remote synchronized application state. Vanilla Fluid is highly customizable, allowing you to nest references to DDS objects within other ones. This is powerful but can be cumbersome to work with. By taking a more opinionated stance, Live Share Turbo makes it easy to leverage dynamic objects more easily than ever before.
 
-In traditional Fluid applications, you must define your Fluid container schema up front. In this package, you load data objects on the fly by simply providing a unique identifier for your object. If a data object matching that identifier exists, the SDK will use that one; otherwise, a new one will be created on your behalf. Fluid Framework's `TaskManager` object is used to ensure that only one user will create the DDS for each unique identifier.
+In traditional Fluid applications, you must define your Fluid container schema up front. In this package, you load data objects on the fly by simply providing a unique identifier for your object. If a data object matching that identifier exists already exists, the SDK will use that one; otherwise, a new one will be created on your behalf. Fluid Framework's `TaskManager` object is used to ensure that only one user will create the DDS for each unique identifier.
 
 Here is a simple example of how to get started:
 

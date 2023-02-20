@@ -6,7 +6,7 @@ import {
 } from "@fluentui/react-components";
 import { PanelLeft20Filled, PanelRight20Filled } from "@fluentui/react-icons";
 import { useRouter } from "next/router";
-import { LiveShareContextProvider } from "@microsoft/live-share-react";
+import { LiveShareProvider } from "@microsoft/live-share-react";
 import { NextPage } from "next";
 import { useState, useRef, useEffect } from "react";
 import { ILiveShareHost, TestLiveShareHost } from "@microsoft/live-share";
@@ -60,7 +60,7 @@ const Home: NextPage = () => {
             </FlexRow>
         );
     return (
-        <LiveShareContextProvider host={liveShareHost} joinOnLoad>
+        <LiveShareProvider host={liveShareHost} joinOnLoad>
             <FlexColumn
                 style={{
                     position: "absolute",
@@ -114,7 +114,7 @@ const Home: NextPage = () => {
                     />
                 </FlexItem>
             </FlexColumn>
-        </LiveShareContextProvider>
+        </LiveShareProvider>
     );
 };
 

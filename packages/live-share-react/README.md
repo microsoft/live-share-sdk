@@ -6,21 +6,21 @@ Here is a simple example of how to get started:
 
 ```javascript
 // LiveShareApp.jsx
-import { LiveShareContextProvider } from "@microsoft/live-share-react";
+import { LiveShareProvider } from "@microsoft/live-share-react";
 import { LiveShareHost } from "@microsoft/teams-js";
 
 const host = LiveShareHost.create();
 
 export function LiveShareApp() {
-  // Call app.initialize() from teams-js before rendering LiveShareContextProvider
+  // Call app.initialize() from teams-js before rendering LiveShareProvider
 
   return (
-    <LiveShareContextProvider
+    <LiveShareProvider
       joinOnLoad={true}
       host={host}
     >
       <SharedCheckbox />
-    </LiveShareContextProvider>
+    </LiveShareProvider>
   );
 }
 

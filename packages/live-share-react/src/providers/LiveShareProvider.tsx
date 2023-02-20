@@ -3,12 +3,12 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClass, LoadableObjectClassRecord } from "fluid-framework";
+import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
 import React from "react";
 import { ILiveShareContainerResults } from "../types";
 import { useSharedStateRegistry } from "../internal-hooks";
 import { ILiveShareClientOptions, ILiveShareHost } from "@microsoft/live-share";
-import { FluidContext } from "./FluidContextProvider";
+import { FluidContext } from "./AzureProvider";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 
 interface ILiveShareContext {
@@ -28,7 +28,7 @@ export const useLiveShareContext = (): ILiveShareContext => {
     return context;
 };
 
-interface ILiveShareContextProviderProps {
+interface ILiveShareProviderProps {
     /**
      * Optional. React children node for the React Context Provider
      */
@@ -54,8 +54,8 @@ interface ILiveShareContextProviderProps {
 /**
  * React Context provider component for using Live Share data objects & joining a Live Share session using `LiveShareClient`.
  */
-export const LiveShareContextProvider: React.FC<
-    ILiveShareContextProviderProps
+export const LiveShareProvider: React.FC<
+    ILiveShareProviderProps
 > = (props) => {
     const startedRef = React.useRef(false);
     const clientRef = React.useRef(
@@ -97,7 +97,7 @@ export const LiveShareContextProvider: React.FC<
             } else {
                 setJoinError(
                     new Error(
-                        "LiveShareContextProvider: An unknown error occurred while joining container."
+                        "LiveShareProvider: An unknown error occurred while joining container."
                     )
                 );
             }
@@ -119,12 +119,12 @@ export const LiveShareContextProvider: React.FC<
                     joinError,
                     getContainer: async () => {
                         throw new Error(
-                            "Cannot join new container through getContainer in LiveShareContextProvider"
+                            "Cannot join new container through getContainer in LiveShareProvider"
                         );
                     },
                     createContainer: async () => {
                         throw new Error(
-                            "Cannot create new container through createContainer in LiveShareContextProvider"
+                            "Cannot create new container through createContainer in LiveShareProvider"
                         );
                     },
                     ...stateRegistryCallbacks,

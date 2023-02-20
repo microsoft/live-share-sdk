@@ -46,7 +46,7 @@ export const useFluidObjectsContext = (): IFluidContext => {
     return context;
 };
 
-interface IFluidContextProviderProps {
+interface IAzureProviderProps {
     children?: React.ReactNode;
     clientOptions: AzureClientProps;
     containerId?: string;
@@ -58,7 +58,7 @@ interface IFluidContextProviderProps {
 /**
  * React Context provider component for using Fluid data objects & joining/creating a Fluid document `AzureClient`.
  */
-export const FluidContextProvider: React.FC<IFluidContextProviderProps> = (
+export const AzureProvider: React.FC<IAzureProviderProps> = (
     props
 ) => {
     const startedRef = React.useRef<boolean>(false);

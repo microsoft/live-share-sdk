@@ -1,2 +1,2 @@
-export * from "./FluidContextProvider";
-export * from "./LiveShareContextProvider";
+export * from "./AzureProvider";
+export * from "./LiveShareProvider";

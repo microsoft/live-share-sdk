@@ -25,7 +25,7 @@ export function useDynamicDDS<T extends IFluidLoadable = FluidObject<any> & IFlu
 } {
     const [dds, setDDS] = useState<T>();
     /**
-     * Import container and DDS object register callbacks from FluidContextProvider.
+     * Import container and DDS object register callbacks from AzureProvider.
      */
     const {
         container,

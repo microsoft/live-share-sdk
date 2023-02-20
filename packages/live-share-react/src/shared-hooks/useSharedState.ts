@@ -12,7 +12,7 @@ import { v4 as uuid } from "uuid";
  * Inspired by React's `useState` hook, `useSharedState` makes it easy to synchronize state in your app.
  *
  * @remarks
- * Values set through this state is automatically attached to a `SharedMap` that the `FluidContextProvider`
+ * Values set through this state is automatically attached to a `SharedMap` that the `AzureProvider`
  * creates. If you are synchronizing complex data structures that multiple users will be setting simultaneously,
  * consider using an optimized hook for your data structure (e.g., `useSharedMap`, `useSharedString`, etc.).
  *
@@ -35,7 +35,7 @@ export function useSharedState<S>(
      */
     const componentIdRef = React.useRef(uuid());
     /**
-     * Register set state callbacks from FluidContextProvider and update/delete callbacks for initial object's `stateMap`.
+     * Register set state callbacks from AzureProvider and update/delete callbacks for initial object's `stateMap`.
      */
     const {
         registerSharedSetStateAction,

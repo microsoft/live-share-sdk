@@ -1,7 +1,7 @@
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import {
-    FluidContextProvider,
-    LiveShareContextProvider,
+    AzureProvider,
+    LiveShareProvider,
 } from "@microsoft/live-share-react";
 import { inTeams } from "./utils/inTeams";
 import { useRef } from "react";
@@ -39,7 +39,7 @@ export default function App() {
     if (shouldUseLiveShare.current) {
         return (
             <TeamsClientLoader>
-                <LiveShareContextProvider
+                <LiveShareProvider
                     joinOnLoad={true}
                     host={host}
                 >
@@ -60,12 +60,12 @@ export default function App() {
                             </>
                         }
                     />
-                </LiveShareContextProvider>
+                </LiveShareProvider>
             </TeamsClientLoader>
         );
     }
     return (
-        <FluidContextProvider
+        <AzureProvider
             clientOptions={azureClientOptions}
             createOnLoad={true}
             joinOnLoad={true}
@@ -80,6 +80,6 @@ export default function App() {
         >
             <ExampleSharedState />
             <ExampleSharedMap />
-        </FluidContextProvider>
+        </AzureProvider>
     );
 }

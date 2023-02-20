@@ -1,5 +1,5 @@
 import { TagClassifierPrompt } from "@/constants/TagClassifierPrompt";
-import { useGetCompletion } from "@/hooks";
+import { useGetCompletion, useQuickTags } from "@/hooks";
 import { OpenAICompletionOptions, OpenAIModelType } from "@/types";
 import { getOpenAISummary, getRecommendedTagsText } from "@/utils";
 import { useDebounce } from "@/utils/debounce";
@@ -49,19 +49,6 @@ interface ISharedIdeaCardProps {
     searchQuickTagsRef: MutableRefObject<Map<string, string[]>>;
 }
 
-const ALLOWED_MEETING_ROLES = [
-    UserMeetingRole.organizer,
-    UserMeetingRole.presenter,
-];
-const AUTO_COMPLETIONS_ENABLED = true;
-const DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS = 2500;
-const LOCK_PROMPT = true;
-const LOCK_COMPLETION = true;
-const OPEN_AI_MODEL_TYPE = OpenAIModelType.davinci003;
-const OPEN_AI_OPTIONS: OpenAICompletionOptions = {
-    temperature: 0.0,
-};
-
 export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
     const {
         deleteIdea,
@@ -75,6 +62,11 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         userName,
         searchQuickTagsRef,
     } = props;
+    const {
+        map: tagsMap,
+        setEntry: setTagsEntry,
+        deleteEntry: deleteTagsEntry,
+    } = useSharedMap(`${ideaId}-tags`);
     const [text, setText, disposeText] = useSharedState<string>(
         `${ideaId}-text`,
         initialText
@@ -85,33 +77,9 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         deleteEntry: deleteVoteEntry,
     } = useSharedMap(`${ideaId}-votes`);
     const {
-        map: tagsMap,
-        setEntry: setTagsEntry,
-        deleteEntry: deleteTagsEntry,
-    } = useSharedMap(`${ideaId}-tags`);
-    const [
         quickRecommendTags,
-        setQuickRecommendTags,
         disposeQuickRecommendedTags,
-    ] = useSharedState<string[]>(`${ideaId}-quick-tags`, []);
-
-    const onGetCompletion = useGetCompletion(
-        OPEN_AI_MODEL_TYPE,
-        OPEN_AI_OPTIONS
-    );
-    const {
-        liveAICompletion,
-        completionValue,
-        changePrompt,
-    } = useLiveAICompletion(
-        `${ideaId}-ai-quick-tags`,
-        onGetCompletion,
-        ALLOWED_MEETING_ROLES,
-        AUTO_COMPLETIONS_ENABLED,
-        DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS,
-        LOCK_PROMPT,
-        LOCK_COMPLETION
-    );
+    } = useQuickTags(ideaId, text, searchQuickTagsRef, ideaTagsMapRef, ideaTextMapRef, ideaTags);
 
     const onChangeText: InputProps["onChange"] = (ev, data) => {
         const characterCap = 3000 * 4;
@@ -144,41 +112,7 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         ideaTextMapRef.current.delete(ideaId);
     };
 
-    useEffect(() => {
-        if (!text || !liveAICompletion?.haveCompletionLock) return;
-        const existingQuickTags = searchQuickTagsRef.current.get(text);
-        if (existingQuickTags !== undefined) {
-            if (
-                quickRecommendTags.every((tag) =>
-                    existingQuickTags.includes(tag)
-                )
-            ) {
-                return;
-            }
-            setQuickRecommendTags(existingQuickTags);
-            return;
-        }
-        const recommendedTagsText = getRecommendedTagsText(
-            ideaId,
-            ideaTagsMapRef,
-            ideaTextMapRef,
-            ideaTags,
-            text
-        );
-        changePrompt(recommendedTagsText);
-    }, [text, setQuickRecommendTags, changePrompt, liveAICompletion]);
-
-    useEffect(() => {
-        if (typeof completionValue === "string") {
-            const trimmedResponseText = completionValue.trimStart();
-            const newTags = trimmedResponseText
-                .split(", ")
-                .map((t) => t.trim())
-                .filter((t) => !!t);
-            setQuickRecommendTags(newTags);
-            searchQuickTagsRef.current.set(text, newTags);
-        }
-    }, [completionValue]);
+    
 
     useEffect(() => {
         ideaTextMapRef.current.set(ideaId, text);

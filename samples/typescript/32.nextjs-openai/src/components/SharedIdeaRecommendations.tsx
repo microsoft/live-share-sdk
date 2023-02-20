@@ -61,6 +61,17 @@ export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
     );
 
     useEffect(() => {
+        if (promptText.length < 3 || !liveAICompletion?.haveCompletionLock) return;
+        const sortedIdeas = getSortedIdeas();
+        const recommendedIdeasPromptText =
+            RecommendedIdeasPrompt +
+            "/n" +
+            getInitialPromptMessageText(promptText, sortedIdeas) +
+            "/nSIMILAR IDEAS:";
+        changePrompt(recommendedIdeasPromptText);
+    }, [promptText, getSortedIdeas, changePrompt, liveAICompletion]);
+
+    useEffect(() => {
         if (typeof completionValue === "string") {
             const trimmedResponseText = completionValue.trimStart();
             const ideas = trimmedResponseText
@@ -72,17 +83,6 @@ export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
             );
         }
     }, [completionValue, setRecommendedIdeas]);
-
-    useEffect(() => {
-        if (promptText.length < 3 || !liveAICompletion?.haveCompletionLock) return;
-        const sortedIdeas = getSortedIdeas();
-        const recommendedIdeasPromptText =
-            RecommendedIdeasPrompt +
-            "/n" +
-            getInitialPromptMessageText(promptText, sortedIdeas) +
-            "/nSIMILAR IDEAS:";
-        changePrompt(recommendedIdeasPromptText);
-    }, [promptText, getSortedIdeas, changePrompt, liveAICompletion]);
 
     return (
         <FlexRow

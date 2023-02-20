@@ -185,7 +185,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         assert(finishedCounter === 1, `${finishedCounter}`);
     });
 
-    it("finish callback called within 35ms of ending", async () => {
+    it("finish callback called within 31ms of ending", async () => {
         const now = new Date().getTime();
         const object1done = new Deferred();
         object1.on("finished", (config) => {

@@ -31,7 +31,7 @@ const LOCK_PROMPT = true;
 const LOCK_COMPLETION = true;
 const OPEN_AI_MODEL_TYPE = OpenAIModelType.davinci003;
 const OPEN_AI_COMPLETION_OPTIONS = {
-    temperature: 0.0,
+    temperature: 0.5,
     frequency_penalty: 1,
     presence_penalty: 1,
 };

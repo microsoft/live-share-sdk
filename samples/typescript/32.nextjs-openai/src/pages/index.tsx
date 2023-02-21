@@ -25,19 +25,22 @@ const Home: NextPage = () => {
     const [leftOpen, setLeftOpen] = useState<boolean>(true);
     const [rightOpen, setRightOpen] = useState<boolean>(true);
 
-    const { query } = useRouter();
+    const { query, isReady } = useRouter();
     const loadingRef = useRef<boolean>(false);
 
     useEffect(() => {
+        if (!isReady) return;
         let mounted = true;
         const loader = async () => {
             if (mounted && !loadingRef.current) {
                 loadingRef.current = true;
-                if (query.inTeams) {
+                if (query.inTeams === "true") {
                     const { LiveShareHost, app } = await import(
                         "@microsoft/teams-js"
                     );
                     await app.initialize();
+                    app.notifyAppLoaded();
+                    app.notifySuccess();
                     const context = await app.getContext();
                     setContext(context);
                     setLiveShareHost(LiveShareHost.create());
@@ -51,7 +54,7 @@ const Home: NextPage = () => {
         return () => {
             mounted = false;
         };
-    }, [query.inTeams]);
+    }, [query.inTeams, isReady]);
 
     if (!liveShareHost || !context)
         return (

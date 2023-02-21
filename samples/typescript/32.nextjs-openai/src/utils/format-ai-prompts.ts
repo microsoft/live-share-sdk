@@ -79,6 +79,16 @@ export const getMessageHistoryText = (
     );
 };
 
+/**
+ * Get a formatted message text for the AI to parse and generate a response
+ * 
+ * @param ideaId ID of the idea to get the recommended tags for
+ * @param ideaTagsMapRef Existing tags map, string <-> string[]
+ * @param ideaTextMapRef Existing idea text map, string <-> string
+ * @param ideaTags existing idea tags to include in the prompt
+ * @param ideaText text of idea that the tags are being recommended for
+ * @returns the recommended tags that is readable by OpenAI
+ */
 export const getRecommendedTagsText = (
     ideaId: string,
     ideaTagsMapRef: MutableRefObject<Map<string, string[]>>,
@@ -86,14 +96,19 @@ export const getRecommendedTagsText = (
     ideaTags: string[],
     ideaText: string
 ) => {
+    // Format the tags for the idea text
     const ideaTagsText = `\nTAGS: ${ideaTags.join(", ")}\n`;
+    // Get the existing classifier results
     const existingValuesClassifierText = [...ideaTagsMapRef.current.entries()]
+        // Filter out the current idea
         .filter(([key]) => key !== ideaId)
+        // Map the entries to the format needed for the classifier
         .map(
             ([key, value]) =>
                 `\n###${ideaTagsText}INPUT: ${ideaTextMapRef.current.get(
                     key
                 )}\nRESPONSE TAGS: ${value.join(", ")}\n###\n`
         );
+    // Return the recommended tags that is readable by OpenAI
     return `${TagClassifierPrompt}${existingValuesClassifierText}${ideaTagsText}INPUT: ${ideaText}\nRESPONSE TAGS:`;
 };

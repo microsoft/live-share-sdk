@@ -6,7 +6,7 @@ import { OpenAICompletionOptions, OpenAIModelType } from "@/types";
  * 
  * @param prompt text to summarize / get response for
  * @param model OpenAI model to use
- * @returns 
+ * @returns OpenAI response text
  */
 export const getOpenAISummary = async (
     prompt: string,

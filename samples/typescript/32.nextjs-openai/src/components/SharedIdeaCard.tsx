@@ -1,8 +1,4 @@
-import { TagClassifierPrompt } from "@/constants/TagClassifierPrompt";
-import { useGetCompletion, useQuickTags } from "@/hooks";
-import { OpenAICompletionOptions, OpenAIModelType } from "@/types";
-import { getOpenAISummary, getRecommendedTagsText } from "@/utils";
-import { useDebounce } from "@/utils/debounce";
+import { useQuickTags } from "@/hooks";
 import {
     Caption1,
     Button,

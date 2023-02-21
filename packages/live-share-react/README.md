@@ -439,7 +439,6 @@ async function onGetCompletion(prompt) {
 
 const allowedUserRoles = ["Organizer", "Presenter"]; // roles allowed to edit synchronized prompt/completion
 const defaultPrompt = `You are a helpful, friendly, and polite chat bot.`;
-const automaticCompletions = true; // optional. when true, completions automatically send when the prompt is changed (debounced)
 
 export function ChatGPT() {
   const {
@@ -450,7 +449,6 @@ export function ChatGPT() {
     onGetCompletion,
     allowedUserRoles, // optional
     defaultPrompt, // optional
-    automaticCompletions, // optional
   );
   const fullText = promptValue + (completionValue ?? "");
   return (
@@ -458,7 +456,7 @@ export function ChatGPT() {
       <p>{fullText}</p>
       <input
           onChange={(ev, data) => {
-              const messsage = data.value;
+              const message = data.value;
               const newText = fullText + "\nHUMAN: " + message + "\nAI:";
               changePrompt(newText);
           }}

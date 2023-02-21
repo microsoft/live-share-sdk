@@ -131,7 +131,7 @@ export class LiveCoPilot extends DataObject<{
     private _lockPrompt: boolean = false;
     private _lockCompletion: boolean = false;
     private _debounceDelayMilliseconds: number = 2500;
-    private _autoCompletions: boolean = false;
+    private _autoCompletions: boolean = true;
     private _allowedRoles?: UserMeetingRole[];
     private _onGetCompletion?: (text: string) => Promise<string>;
     private _currentReferenceId: string = "";

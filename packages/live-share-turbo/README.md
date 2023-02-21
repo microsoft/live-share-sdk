@@ -302,8 +302,7 @@ liveCoPilot.on("completionChanged", (newCompletion, local) => {
 });
 // Initialize liveCoPilot to begin receiving/sending prompt / completion updates
 const allowedUserRoles = ["Organizer", "Presenter"]; // roles allowed to edit synchronized prompt/completion
-const automaticCompletions = true; // optional. when true, completions automatically send when the prompt is changed (debounced)
-await liveCoPilot.initialize(onGetCompletion, allowedUserRoles, promptText, automaticCompletions);
+await liveCoPilot.initialize(onGetCompletion, allowedUserRoles, promptText);
 
 function sendMessage(message, userName) {
     // Change the prompt text

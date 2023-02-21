@@ -24,6 +24,7 @@ const OPEN_AI_MODEL_TYPE = OpenAIModelType.davinci003;
 const OPEN_AI_OPTIONS: OpenAICompletionOptions = {
     temperature: 1.0,
 };
+const OPEN_AI_AUTO_COMPLETIONS_ENABLED = false;
 
 export const useGenerateSummary = (
     ideaBoardId: string,
@@ -48,7 +49,9 @@ export const useGenerateSummary = (
         useLiveCoPilot(
             `${ideaBoardId}-ai-summary`,
             onGetCompletion,
-            ALLOWED_MEETING_ROLES
+            ALLOWED_MEETING_ROLES,
+            undefined,
+            OPEN_AI_AUTO_COMPLETIONS_ENABLED,
         );
 
     const onGenerateSummary = useCallback(async () => {

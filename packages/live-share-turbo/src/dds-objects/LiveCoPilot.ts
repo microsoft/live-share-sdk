@@ -14,104 +14,18 @@ import {
 import { TaskManager } from "@fluid-experimental/task-manager";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import { Deferred, assert } from "@fluidframework/common-utils";
-import { IEvent } from "@fluidframework/common-definitions";
 import { v4 as uuid } from "uuid";
+import {
+    IInternalPromptChangeData,
+    IInternalCompletionChangeData,
+} from "./internals";
 import { debounce } from "../internals";
+import { ILiveCoPilotEvents, LiveCoPilotEvents } from "../interfaces";
 
 const taskManagerKey = "<<taskManagerKey>>";
 const promptStateKey = "<<promptStateKey>>";
 const completionStateKey = "<<completionStateKey>>";
 const completionTaskKey = "<<completionTaskKey>>";
-
-interface IInternalPromptChangeData {
-    promptValue: string;
-}
-interface IInternalCompletionChangeData {
-    completionValue: string;
-    promptValue: string;
-}
-
-/**
- * Events supported by `LiveCoPilot` object.
- */
-export enum LiveCoPilotEvents {
-    /**
-     * The prompt value has changed.
-     */
-    promptChanged = "promptChanged",
-    /**
-     * The completion value has changed.
-     * @remarks this event will only emit if the prompt change took place for the current prompt.
-     */
-    completionChanged = "completionChanged",
-    /**
-     * Lock granted.
-     */
-    lockGranted = "lockGranted",
-    /**
-     * Lock lost.
-     */
-    lockLost = "lockLost",
-}
-
-/**
- * Event typings for `LiveCoPilot` class.
- */
-export interface ILiveCoPilotEvents extends IEvent {
-    /**
-     * An `LiveCoPilot` prompt value has changed.
-     * @param event Name of event.
-     * @param listener Function called when event is triggered.
-     * @param listener.promptValue The new prompt value.
-     * @param listener.local If true, a local prompt change occurred.
-     * @param listener.completionValuePromise Promise for pending completion for the prompt. Will reject if the prompt changes.
-     * @param listener.referenceId The reference id of the prompt change, which can be used to correlate the prompt change with the completion changes.
-     */
-    (
-        event: LiveCoPilotEvents.promptChanged,
-        listener: (
-            promptValue: string,
-            local: boolean,
-            completionValuePromise: Promise<string>,
-            referenceId: string
-        ) => void
-    ): any;
-    /**
-     * An `LiveCoPilot` completion value has changed.
-     * @remarks
-     * This event will only emit if the prompt change took place for the current prompt.
-     *
-     * @param event Name of event.
-     * @param listener Function called when event is triggered.
-     * @param listener.completionValue The new prompt value.
-     * @param listener.local If true, a local prompt change occurred.
-     * @param listener.promptValue The value of the prompt used to generate the completion.
-     * @param listener.referenceId The reference id of the prompt change, which can be used to correlate the prompt change with the completion changes.
-     */
-    (
-        event: LiveCoPilotEvents.completionChanged,
-        listener: (
-            completionValue: string,
-            local: boolean,
-            promptValue: string,
-            referenceId: string
-        ) => void
-    ): any;
-    /**
-     * The local user has been granted permission to change completion values.
-     *
-     * @param event Name of event.
-     * @param listener Function called when event is triggered.
-     */
-    (event: LiveCoPilotEvents.lockGranted, listener: () => void): any;
-    /**
-     * The local user has lost permission to change completion values.
-     *
-     * @param event Name of event.
-     * @param listener Function called when event is triggered.
-     */
-    (event: LiveCoPilotEvents.lockLost, listener: () => void): any;
-}
 
 /**
  * Fluid DataObject used in `FluidTurboClient` for the purposes of dynamically loading DDSes.
@@ -409,7 +323,7 @@ export class LiveCoPilot extends DataObject<{
         return this._promptLiveState;
     }
 
-     /**
+    /**
      * Convenience getter to get the `_completionLiveState` without having to check for undefined, since this will
      * never be undefined after `initializingFirstTime`.
      */
@@ -612,7 +526,7 @@ export class LiveCoPilot extends DataObject<{
      * This method uses the user's provided `onGetCompletion` function to get the completion value. This helper function allows
      * us to handle different permission types for `autoCompletes` and `lockCompletion`, since the permissions can change between
      * when we first run validation and when `onGetCompletion` is resolved.
-     * 
+     *
      * @returns the send completion info
      */
     private async getSendCompletionInfo(): Promise<{

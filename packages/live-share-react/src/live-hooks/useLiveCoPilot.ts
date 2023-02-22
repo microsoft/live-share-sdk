@@ -25,7 +25,7 @@ import { IUseLiveCoPilotResults } from "../types";
  * @param allowedRoles Optional. The meeting roles eligible to send events through this object.
  * @param defaultPromptValue Optional. Text that sets the default prompt value. Default value is an empty string.
  * @param autoCompletions Optional. Stateful boolean that when true, will automatically send completions when the `promptValue` changes. Default value is true.
- * @param debounceDelayMilliseconds Optional. Stateful number that changes the debounce interval when `autoCompletions` is true. Default value is 2500.
+ * @param debounceDelayMilliseconds Optional. Stateful number that changes the debounce interval when `autoCompletions` is true. Default value is 1000.
  * @param lockPrompt Optional. Stateful boolean that when true, will restrict prompt changes to only the user with `haveCompletionLock` set to true. Default
  * value is false.
  * @param lockCompletion Optional. Stateful boolean that when true, will restrict manual completion changes to only the user with `haveCompletionLock`

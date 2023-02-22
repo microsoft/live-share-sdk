@@ -44,7 +44,7 @@ export class LiveCoPilot extends DataObject<{
     private _initializing: boolean = false;
     private _lockPrompt: boolean = false;
     private _lockCompletion: boolean = false;
-    private _debounceDelayMilliseconds: number = 2500;
+    private _debounceDelayMilliseconds: number = 1000;
     private _autoCompletions: boolean = true;
     private _allowedRoles?: UserMeetingRole[];
     private _onGetCompletion?: (text: string) => Promise<string>;
@@ -116,6 +116,16 @@ export class LiveCoPilot extends DataObject<{
     }
 
     /**
+     * Time in milliseconds to debounce prompt changes. `autoCompletions` must be true for this to take effect.
+     */
+    public get debounceDelayMilliseconds(): number {
+        return this._debounceDelayMilliseconds;
+    }
+    public set debounceDelayMilliseconds(value: number) {
+        this._debounceDelayMilliseconds = value;
+    }
+
+    /**
      * Boolean that indicates whether the selected prompt value meets the validation requirements for sending a completion
      * @remarks
      * If this is false, a user must call the `changePrompt` method to set the prompt value.
@@ -162,16 +172,6 @@ export class LiveCoPilot extends DataObject<{
             return this.completionLiveState.data?.completionValue;
         }
         return undefined;
-    }
-
-    /**
-     * Time in milliseconds to debounce prompt changes. `autoCompletions` must be true for this to take effect.
-     */
-    public get debounceDelayMilliseconds(): number {
-        return this._debounceDelayMilliseconds;
-    }
-    public set debounceDelayMilliseconds(value: number) {
-        this._debounceDelayMilliseconds = value;
     }
 
     /**
@@ -579,9 +579,10 @@ export class LiveCoPilot extends DataObject<{
     private handleDebouncePermissionsChange(): void {
         const [debounceSend, abandonDebounceSend] =
             this._debounceSendCompletion;
+            
         if (!this.autoCompletions || !this.haveCompletionLock) {
             abandonDebounceSend();
-        } else if (this.haveValidPromptValue && !this.haveValidPromptValue) {
+        } else if (this.haveCompletionLock && this.haveValidPromptValue) {
             debounceSend();
         }
     }

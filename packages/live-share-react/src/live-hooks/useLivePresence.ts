@@ -37,10 +37,6 @@ export function useLivePresence<TData extends object = object>(
     uniqueKey: string = ":<dds-default>"
 ): IUseLivePresenceResults<TData> {
     /**
-     * Reference boolean for whether hook has registered "presenceChanged" events for `LivePresence`.
-     */
-    const listeningRef = React.useRef(false);
-    /**
      * Stateful all user presence list and its non-user-facing setter method.
      */
     const [allUsers, setAllUsers] = React.useState<LivePresenceUser<TData>[]>(
@@ -95,9 +91,8 @@ export function useLivePresence<TData extends object = object>(
      * Setup change listeners and start `LivePresence` if needed
      */
     React.useEffect(() => {
-        if (listeningRef.current || livePresence?.isInitialized === undefined)
+        if (livePresence === undefined)
             return;
-        listeningRef.current = true;
 
         const onPresenceChanged = () => {
             const updatedLocalUsers: LivePresenceUser<TData>[] = [];
@@ -115,10 +110,9 @@ export function useLivePresence<TData extends object = object>(
         }
 
         return () => {
-            listeningRef.current = false;
             livePresence?.off("presenceChanged", onPresenceChanged);
         };
-    }, [livePresence?.isInitialized]);
+    }, [livePresence]);
 
     return {
         localUser,

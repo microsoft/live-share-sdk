@@ -38,10 +38,6 @@ export function useMediaSynchronizer(
     viewOnly?: boolean
 ): IUseMediaSynchronizerResults {
     /**
-     * Reference boolean for whether hook has registered "listening" events for `LiveEvent`.
-     */
-    const listeningRef = React.useRef(false);
-    /**
      * User facing media synchronizer and non-user facing setter
      */
     const [mediaSynchronizer, setMediaSynchronizer] = React.useState<
@@ -123,7 +119,7 @@ export function useMediaSynchronizer(
      * Setup change listeners and start `LiveMediaSession` if needed
      */
     React.useEffect(() => {
-        if (listeningRef.current || mediaSession?.isInitialized === undefined || !mediaPlayerElementRef)
+        if (mediaSession === undefined || !mediaPlayerElementRef)
             return;
         // Query the HTML5 media element from the document and set reference
         let mediaPlayer: IMediaPlayer | undefined;
@@ -147,7 +143,6 @@ export function useMediaSynchronizer(
         }
         // Begin synchronizing a MediaSynchronizer for the player
         const synchronizer = mediaSession.synchronize(mediaPlayer);
-        listeningRef.current = true;
         if (viewOnly !== undefined) {
             // Set synchronizer to view only mode provided by developer
             synchronizer.viewOnly = viewOnly;
@@ -173,12 +168,11 @@ export function useMediaSynchronizer(
         setMediaSynchronizer(synchronizer);
 
         return () => {
-            listeningRef.current = false;
             synchronizer.removeAllListeners();
             mediaSession.removeAllListeners();
             synchronizer?.end();
         };
-    }, [mediaSession?.isInitialized]);
+    }, [mediaSession]);
 
     /**
      * Change view in media synchronizer only if prop changes

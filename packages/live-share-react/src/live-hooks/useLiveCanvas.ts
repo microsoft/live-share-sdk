@@ -48,7 +48,9 @@ export function useLiveCanvas(
     isCursorShared?: boolean,
     localUserCursor?: IUserInfo
 ): IUseLiveCanvasResults {
-    const listeningRef = React.useRef(false);
+    /**
+     * User facing: inking manager instance
+     */
     const [inkingManager, setInkingManager] = React.useState<InkingManager>();
 
     /**
@@ -61,7 +63,7 @@ export function useLiveCanvas(
      */
     React.useEffect(() => {
         // if the component is already listening or liveCanvas is not yet initialized, return
-        if (listeningRef.current || !liveCanvas) return;
+        if (!liveCanvas) return;
         // get the canvas element from the ref or document
         let htmlElement: HTMLElement | null;
         if (isRefObject(canvasElementRef)) {
@@ -70,7 +72,6 @@ export function useLiveCanvas(
             htmlElement = document.getElementById(canvasElementRef);
         }
         if (htmlElement === null) return;
-        listeningRef.current = true;
         // Create the InkingManager and initialize the liveCanvas with it
         const inkingManager = new InkingManager(htmlElement);
         setInkingManager(inkingManager);
@@ -78,12 +79,10 @@ export function useLiveCanvas(
 
         // cleanup function to be called when the component is unmount
         return () => {
-            listeningRef.current = false;
             liveCanvas.dispose();
-            inkingManager.clear();
             inkingManager.removeAllListeners();
         };
-    }, [liveCanvas, uniqueKey]);
+    }, [liveCanvas]);
 
     /**
      * Activate or deactivate the inkingManager based on the 'active' prop

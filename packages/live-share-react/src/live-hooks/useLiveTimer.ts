@@ -34,10 +34,6 @@ export function useLiveTimer(
     onFinish?: OnTimerDidFinishAction,
 ): IUseLiveTimerResults {
     /**
-     * Reference boolean for whether hook has registered "listening" events for `LiveTimer`.
-     */
-    const listeningRef = React.useRef(false);
-    /**
      * User facing: Stateful timer config.
      */
     const [timerConfig, setTimerConfig] = React.useState<ITimerConfig>();
@@ -116,9 +112,8 @@ export function useLiveTimer(
      * Setup change listeners and start `LiveTimer` if needed
      */
     React.useEffect(() => {
-        if (listeningRef.current || liveTimer?.isInitialized === undefined)
+        if (liveTimer === undefined)
             return;
-        listeningRef.current = true;
         // Register event listeners
         const onTimerConfigChange = (config: ITimerConfig) => {
             setTimerConfig(config);
@@ -157,14 +152,13 @@ export function useLiveTimer(
 
         return () => {
             // on unmount, remove event listeners
-            listeningRef.current = false;
             liveTimer?.off(LiveTimerEvents.started, onDidStart);
             liveTimer?.off(LiveTimerEvents.finished, onDidFinish);
             liveTimer?.off(LiveTimerEvents.played, onDidPlay);
             liveTimer?.off(LiveTimerEvents.paused, onDidPause);
             liveTimer?.off(LiveTimerEvents.onTick, onDidTick);
         };
-    }, [liveTimer?.isInitialized, onTick, onStart, onFinish, onPlay, onPause]);
+    }, [liveTimer, onTick, onStart, onFinish, onPlay, onPause]);
 
     /**
      * Change tick rate if changes in props

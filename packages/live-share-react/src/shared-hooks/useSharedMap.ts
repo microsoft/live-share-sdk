@@ -53,10 +53,6 @@ export function useSharedMap<TData extends object = object>(
     initialData?: SharedMapInitialData<TData>
 ): IUseSharedMapResults<TData> {
     /**
-     * Reference boolean for whether hook has registered "valueChanged" events for `SharedMap`.
-     */
-    const listeningRef = React.useRef(false);
-    /**
      * Stateful readonly map (user facing) with most recent values from `SharedMap` and its setter method.
      */
     const [map, setMap] = React.useState<ReadonlyMap<string, TData>>(
@@ -111,8 +107,7 @@ export function useSharedMap<TData extends object = object>(
 
     // Setup change listeners, initial values, etc.
     React.useEffect(() => {
-        if (listeningRef.current || !sharedMap) return;
-        listeningRef.current = true;
+        if (!sharedMap) return;
 
         // Register valueChanged listener for `SharedMap`.
         const onValueChanged = () => {
@@ -124,7 +119,6 @@ export function useSharedMap<TData extends object = object>(
 
         return () => {
             // Cleanup on component unmount.
-            listeningRef.current = false;
             sharedMap?.off("valueChanged", onValueChanged);
         };
     }, [sharedMap]);

@@ -37,7 +37,6 @@ export function useLiveState<
     initialState?: TState,
     initialData?: TData
 ): [TState | undefined, TData | undefined, SetLiveStateAction<TState, TData>] {
-    const listeningRef = React.useRef(false);
     const [current, setCurrent] = React.useState<
         ILiveStateStatus<TState, TData>
     >({
@@ -79,9 +78,8 @@ export function useLiveState<
      * Setup change listeners and start `LiveState` if needed
      */
     React.useEffect(() => {
-        if (listeningRef.current || liveState?.isInitialized === undefined)
+        if (liveState?.isInitialized === undefined)
             return;
-        listeningRef.current = true;
 
         const onStateChanged = (state: TState, data: TData | undefined) => {
             setCurrent({
@@ -100,7 +98,6 @@ export function useLiveState<
         }
 
         return () => {
-            listeningRef.current = false;
             liveState?.off("stateChanged", onStateChanged);
         };
     }, [liveState?.isInitialized]);

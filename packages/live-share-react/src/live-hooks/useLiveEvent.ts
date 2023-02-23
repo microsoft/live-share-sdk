@@ -37,10 +37,6 @@ export function useLiveEvent<TEvent extends object = object>(
     onReceivedEvent?: OnReceivedLiveEventAction<TEvent>
 ): IUseLiveEventResults<TEvent> {
     /**
-     * Reference boolean for whether hook has registered "listening" events for `LiveEvent`.
-     */
-    const listeningRef = React.useRef(false);
-    /**
      * Stateful latest event (user facing) and its non-user-facing setter method.
      */
     const [latestEvent, setLatestReceived] =
@@ -85,9 +81,8 @@ export function useLiveEvent<TEvent extends object = object>(
      * Setup change listeners and start `LiveEvent` if needed
      */
     React.useEffect(() => {
-        if (listeningRef.current || liveEvent?.isInitialized === undefined)
+        if (liveEvent?.isInitialized === undefined)
             return;
-        listeningRef.current = true;
         // Register event listener
         const onEventReceived = (event: any, local: boolean) => {
             // If developer passed the optional onReceivedEvent callback, we
@@ -109,7 +104,6 @@ export function useLiveEvent<TEvent extends object = object>(
 
         return () => {
             // on unmount, remove event listeners
-            listeningRef.current = false;
             liveEvent?.off(LiveEventEvents.received, onEventReceived);
         };
     }, [liveEvent?.isInitialized]);

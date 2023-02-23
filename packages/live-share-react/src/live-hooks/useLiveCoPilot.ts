@@ -4,14 +4,10 @@
  */
 
 import { UserMeetingRole } from "@microsoft/live-share";
-import {
-    LiveCoPilot,
-    LiveCoPilotEvents,
-} from "@microsoft/live-share-turbo";
+import { LiveCoPilot, LiveCoPilotEvents } from "@microsoft/live-share-turbo";
 import React from "react";
 import { useDynamicDDS } from "../shared-hooks";
 import { IUseLiveCoPilotResults } from "../types";
-
 
 /**
  * React hook for using a Live Share Turbo `LiveCoPilot`. Intended for use with OpenAI's Completion API.
@@ -30,7 +26,7 @@ import { IUseLiveCoPilotResults } from "../types";
  * value is false.
  * @param lockCompletion Optional. Stateful boolean that when true, will restrict manual completion changes to only the user with `haveCompletionLock`
  * set to true. This does not impact the `autoCompletions` setting, because `autoCompletions` already has this behavior. Default value is false.
- * 
+ *
  * @returns IUseLiveCoPilotResults object that contains stateful responses and callback methods from `LiveCoPilot`.
  */
 export const useLiveCoPilot = (
@@ -43,10 +39,6 @@ export const useLiveCoPilot = (
     lockPrompt?: boolean,
     lockCompletion?: boolean
 ): IUseLiveCoPilotResults => {
-    /**
-     * Reference boolean for whether hook has registered "listening" events for `LiveCoPilot`.
-     */
-    const listeningRef = React.useRef(false);
     /**
      * @see IUseLiveCoPilotResults["promptValue"]
      */
@@ -102,7 +94,9 @@ export const useLiveCoPilot = (
         referenceId: string;
     }> => {
         if (liveCoPilot === undefined) {
-            throw new Error("Cannot call sendCompletion while `liveCoPilot` is undefined");
+            throw new Error(
+                "Cannot call sendCompletion while `liveCoPilot` is undefined"
+            );
         }
         if (!liveCoPilot.isInitialized) {
             throw new Error(
@@ -116,12 +110,7 @@ export const useLiveCoPilot = (
      * Sets up the `LiveCoPilot` instance.
      */
     React.useEffect(() => {
-        if (
-            listeningRef.current ||
-            liveCoPilot?.isInitialized === undefined
-        )
-            return;
-        listeningRef.current = true;
+        if (liveCoPilot === undefined) return;
         // Register event listeners
         const onPromptChanged = async (
             promptValue: string,
@@ -145,28 +134,22 @@ export const useLiveCoPilot = (
         const onLockLost = () => {
             setHaveCompletionLock(true);
         };
-        liveCoPilot.on(
-            LiveCoPilotEvents.promptChanged,
-            onPromptChanged
-        );
+        liveCoPilot.on(LiveCoPilotEvents.promptChanged, onPromptChanged);
         liveCoPilot.on(LiveCoPilotEvents.lockGranted, onLockGranted);
         liveCoPilot.on(LiveCoPilotEvents.lockLost, onLockLost);
         if (!liveCoPilot.isInitialized) {
             // Initialize the LiveCoPilot instance
-            liveCoPilot.initialize(onGetCompletion, allowedRoles, defaultPromptValue);
+            liveCoPilot.initialize(
+                onGetCompletion,
+                allowedRoles,
+                defaultPromptValue
+            );
         }
 
         return () => {
             // on unmount, remove event listeners
-            listeningRef.current = false;
-            liveCoPilot?.off(
-                LiveCoPilotEvents.promptChanged,
-                onPromptChanged
-            );
-            liveCoPilot?.off(
-                LiveCoPilotEvents.lockGranted,
-                onLockGranted
-            );
+            liveCoPilot?.off(LiveCoPilotEvents.promptChanged, onPromptChanged);
+            liveCoPilot?.off(LiveCoPilotEvents.lockGranted, onLockGranted);
             liveCoPilot?.off(LiveCoPilotEvents.lockLost, onLockLost);
         };
     }, [liveCoPilot]);

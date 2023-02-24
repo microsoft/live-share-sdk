@@ -6,6 +6,9 @@ interface IScrollViewProps {
     children: ReactNode;
 }
 
+/**
+ * Render child `ReactNode` in a scrollable view.
+ */
 export const ScrollView: FC<IScrollViewProps> = (props) => {
     const { style, children } = props;
     return (

@@ -26,6 +26,9 @@ interface ISharedOpenAISummaryProps {
     uniqueKey: string;
 }
 
+/**
+ * Component that renders both the SharedBrainstorm and SharedConversation components.
+ */
 export const SharedOpenAISummary: FC<ISharedOpenAISummaryProps> = (props) => {
     const { context, leftOpen, rightOpen, uniqueKey } = props;
     const {

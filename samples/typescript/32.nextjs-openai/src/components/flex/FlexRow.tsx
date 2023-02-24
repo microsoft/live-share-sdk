@@ -2,6 +2,9 @@ import { mergeClasses } from "@fluentui/react-components";
 import { CSSProperties, FC, ReactNode } from "react";
 import { getFlexRowStyles } from "./FlexStyles";
 
+/**
+ * Component that renders children `ReactNode` in a flex row.
+ */
 export const FlexRow: FC<{
     children: ReactNode;
     fill?: boolean;

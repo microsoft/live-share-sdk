@@ -2,6 +2,9 @@ import { mergeClasses } from "@fluentui/react-components";
 import { CSSProperties, FC, ReactNode } from "react";
 import { getFlexColumnStyles } from "./FlexStyles";
 
+/**
+ * Component that renders children `ReactNode` in a flex column.
+ */
 export const FlexColumn: FC<{
     children: ReactNode;
     fill?: boolean;

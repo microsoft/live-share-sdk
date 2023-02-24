@@ -40,6 +40,9 @@ interface ISharedIdeaCardProps {
     searchQuickTagsRef: MutableRefObject<Map<string, string[]>>;
 }
 
+/**
+ * Card that displays the shared text for an idea, who created it, its tags, and recommended tags.
+ */
 export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
     const {
         deleteIdea,

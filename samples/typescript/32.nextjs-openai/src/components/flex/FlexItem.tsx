@@ -2,6 +2,9 @@ import { mergeClasses } from "@fluentui/react-components";
 import { CSSProperties, FC, ReactNode } from "react";
 import { getFlexItemStyles } from "./FlexStyles";
 
+/**
+ * Component that renders children `ReactNode` in a flex item.
+ */
 export const FlexItem: FC<{
     children: ReactNode;
     grow?: boolean;

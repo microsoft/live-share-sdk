@@ -14,6 +14,9 @@ interface ISharedIdeaListProps {
     setIdeaVotesMap: (value: SetStateAction<Map<string, number>>) => void;
 }
 
+/**
+ * List of `SharedIdeaCard`.
+ */
 export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
     const {
         ideasMap,

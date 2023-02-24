@@ -28,6 +28,9 @@ interface ISharedBrainstormProps {
     ) => void;
 }
 
+/**
+ * Panel for brainstorming ideas for a given prompt.
+ */
 export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
     const {
         ideaBoardId,

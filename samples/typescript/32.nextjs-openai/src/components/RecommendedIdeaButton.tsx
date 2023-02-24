@@ -6,6 +6,9 @@ interface IRecommendedIdeaButtonProps {
     onAddRecommendedIdea: (ideaText: string) => void;
 }
 
+/**
+ * Component that renders a button for a recommended idea. Clicking the button will call `onAddRecommendedIdea` with the idea text.
+ */
 export const RecommendedIdeaButton: FC<IRecommendedIdeaButtonProps> = (
     props
 ) => {

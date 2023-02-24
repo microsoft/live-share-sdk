@@ -25,6 +25,9 @@ interface ISharedConversationProps {
     localUser: LivePresenceUser<{ name: string }>;
 }
 
+/**
+ * Panel for communicating with the GPT bot.
+ */
 export const SharedConversation: FC<ISharedConversationProps> = memo(
     (props) => {
         const { conversationId, conversation, leftOpen, rightOpen, localUser } =

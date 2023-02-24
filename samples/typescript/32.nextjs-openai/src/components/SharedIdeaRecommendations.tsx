@@ -33,6 +33,9 @@ const OPEN_AI_COMPLETION_OPTIONS = {
     presence_penalty: 1,
 };
 
+/**
+ * Renders a list of recommended ideas based on the current prompt text and other ideas in the board.
+ */
 export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
     props
 ) => {

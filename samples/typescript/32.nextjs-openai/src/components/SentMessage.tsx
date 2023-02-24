@@ -8,6 +8,9 @@ interface ISentMessageProps {
     message: string;
 }
 
+/**
+ * Message text sent by a user or bot
+ */
 export const SentMessage: FC<ISentMessageProps> = (props) => {
     const { senderName, message } = props;
     return (

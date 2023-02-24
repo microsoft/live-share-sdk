@@ -5,10 +5,7 @@ import { getInitialPromptMessageText } from "@/utils";
 import { useGetCompletion } from "@/hooks";
 import { IdeaConversationInitialIdea } from "@/types/IdeaConversation";
 import { RecommendedIdeasPrompt } from "@/constants/RecommendedIdeasPrompt";
-import {
-    useLiveCoPilot,
-    useSharedState,
-} from "@microsoft/live-share-react";
+import { useLiveCoPilot, useSharedState } from "@microsoft/live-share-react";
 import { RecommendedIdeaButton } from "./RecommendedIdeaButton";
 import { UserMeetingRole } from "@microsoft/live-share";
 import { OpenAIModelType } from "@/types";
@@ -49,21 +46,19 @@ export const SharedIdeaRecommendations: FC<IIdeaRecommendationsProps> = (
         OPEN_AI_COMPLETION_OPTIONS
     );
 
-    const { liveCoPilot, completionValue, changePrompt } =
-        useLiveCoPilot(
-            `${ideaBoardId}-ai-recommended-ideas`,
-            onGetCompletion,
-            ALLOWED_MEETING_ROLES,
-            DEFAULT_PROMPT_VALUE,
-            AUTO_COMPLETIONS_ENABLED,
-            DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS,
-            LOCK_PROMPT,
-            LOCK_COMPLETION
-        );
+    const { liveCoPilot, completionValue, changePrompt } = useLiveCoPilot(
+        `${ideaBoardId}-ai-recommended-ideas`,
+        onGetCompletion,
+        ALLOWED_MEETING_ROLES,
+        DEFAULT_PROMPT_VALUE,
+        AUTO_COMPLETIONS_ENABLED,
+        DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS,
+        LOCK_PROMPT,
+        LOCK_COMPLETION
+    );
 
     useEffect(() => {
-        if (promptText.length < 3 || !liveCoPilot?.haveCompletionLock)
-            return;
+        if (promptText.length < 3 || !liveCoPilot?.haveCompletionLock) return;
         const sortedIdeas = getSortedIdeas();
         const recommendedIdeasPromptText =
             RecommendedIdeasPrompt +

@@ -38,21 +38,22 @@ export const useGenerateSummary = (
     onDidGetResponse: (
         conversationId: string,
         initialResponseText: string
-    ) => void,
+    ) => void
 ) => {
     const onGetCompletion = useGetCompletion(
         OPEN_AI_MODEL_TYPE,
         OPEN_AI_OPTIONS
     );
-    const [loadingState, , setLoadingState] = useLiveState<"loading" | "not-loading">(`${ideaBoardId}-loading`);
-    const { changePrompt, sendCompletion } =
-        useLiveCoPilot(
-            `${ideaBoardId}-ai-summary`,
-            onGetCompletion,
-            ALLOWED_MEETING_ROLES,
-            undefined,
-            OPEN_AI_AUTO_COMPLETIONS_ENABLED,
-        );
+    const [loadingState, , setLoadingState] = useLiveState<
+        "loading" | "not-loading"
+    >(`${ideaBoardId}-loading`);
+    const { changePrompt, sendCompletion } = useLiveCoPilot(
+        `${ideaBoardId}-ai-summary`,
+        onGetCompletion,
+        ALLOWED_MEETING_ROLES,
+        undefined,
+        OPEN_AI_AUTO_COMPLETIONS_ENABLED
+    );
 
     const onGenerateSummary = useCallback(async () => {
         if (typeof promptText !== "string") {
@@ -69,7 +70,7 @@ export const useGenerateSummary = (
             getInitialPromptMessageText(promptText, sortedIdeas);
         changePrompt(initialPromptMessageText);
         try {
-            const { completionValue } = await sendCompletion()
+            const { completionValue } = await sendCompletion();
             onDidGetResponse(conversationId, completionValue);
         } catch (error: any) {
             onDidGetResponse(
@@ -78,7 +79,15 @@ export const useGenerateSummary = (
             );
         }
         setLoadingState("not-loading");
-    }, [changePrompt, getSortedIdeas, onDidGetResponse, onDidStartNewConversation, promptText, sendCompletion, setLoadingState]);
+    }, [
+        changePrompt,
+        getSortedIdeas,
+        onDidGetResponse,
+        onDidStartNewConversation,
+        promptText,
+        sendCompletion,
+        setLoadingState,
+    ]);
 
     return {
         isLoading: loadingState === "loading" || !promptText,

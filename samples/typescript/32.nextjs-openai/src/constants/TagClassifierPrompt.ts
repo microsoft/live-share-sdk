@@ -37,4 +37,4 @@ TAGS: sad, happy, angry, excited
 INPUT: I am sad
 RESPONSE TAGS: sad
 ###
-`
+`;

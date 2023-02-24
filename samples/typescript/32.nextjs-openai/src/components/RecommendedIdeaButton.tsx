@@ -13,10 +13,9 @@ export const RecommendedIdeaButton: FC<IRecommendedIdeaButtonProps> = (
     const [haveClicked, setHaveClicked] = useState(false);
 
     useEffect(() => {
-        if (haveClicked) {
-            setHaveClicked(false);
-        }
-    }, [ideaText]);
+        if (!haveClicked) return;
+        setHaveClicked(false);
+    }, [ideaText, haveClicked]);
 
     return (
         <Button

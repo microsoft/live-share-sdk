@@ -14,10 +14,7 @@ import {
 import { useCallback } from "react";
 import { useGetCompletion } from "./useGetCompletion";
 import { v4 as uuid } from "uuid";
-import {
-    getMessageHistoryText,
-    getShortenedOpenAIMessage,
-} from "@/utils";
+import { getMessageHistoryText, getShortenedOpenAIMessage } from "@/utils";
 import { ConversationPrompt } from "@/constants/ConversationPrompt";
 
 const ALLOWED_MEETING_ROLES = [
@@ -33,7 +30,7 @@ const OPEN_AI_AUTO_COMPLETIONS_ENABLED = false;
 export const useMessages = (
     conversationId: string | undefined,
     conversation: IdeaConversation | undefined,
-    localUser: LivePresenceUser<{ name: string }>,
+    localUser: LivePresenceUser<{ name: string }>
 ) => {
     const [message, setMessage] = useSharedState<string>(
         `${conversationId}-message-body`,
@@ -53,7 +50,7 @@ export const useMessages = (
         onGetCompletion,
         ALLOWED_MEETING_ROLES,
         undefined,
-        OPEN_AI_AUTO_COMPLETIONS_ENABLED,
+        OPEN_AI_AUTO_COMPLETIONS_ENABLED
     );
 
     const onSendMessage = useCallback(async () => {

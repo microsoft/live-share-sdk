@@ -81,7 +81,7 @@ export const getMessageHistoryText = (
 
 /**
  * Get a formatted message text for the AI to parse and generate a response
- * 
+ *
  * @param ideaId ID of the idea to get the recommended tags for
  * @param ideaTagsMapRef Existing tags map, string <-> string[]
  * @param ideaTextMapRef Existing idea text map, string <-> string

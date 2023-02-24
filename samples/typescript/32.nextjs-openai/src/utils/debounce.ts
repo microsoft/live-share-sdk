@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 
 /**
  * Debounce a function to prevent it from being called too often
- * 
+ *
  * @param fn function to debounce
  * @param ms delay in milliseconds
  * @returns tuple with debounced function and teardown function to cancel the timeout
@@ -31,7 +31,7 @@ export function debounce<R = void>(
 
 /**
  * React hook for debouncing a function
- * 
+ *
  * @param fn function to debounce
  * @param ms delay in milliseconds
  * @returns debounced function wrapped in React useCallback

@@ -16,9 +16,7 @@ export const SentMessage: FC<ISentMessageProps> = (props) => {
                 <Avatar name={senderName} color="colorful" size={20} />
                 <Caption1>{senderName}</Caption1>
             </FlexRow>
-            <Body1 style={{ whiteSpace: "pre-wrap" }}>
-                { message.trim() }
-            </Body1>
+            <Body1 style={{ whiteSpace: "pre-wrap" }}>{message.trim()}</Body1>
         </FlexColumn>
-    )
-}
+    );
+};

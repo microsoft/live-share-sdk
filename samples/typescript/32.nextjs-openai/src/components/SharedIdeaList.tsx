@@ -11,7 +11,7 @@ interface ISharedIdeaListProps {
     ideaTextMapRef: MutableRefObject<Map<string, string>>;
     searchQuickTagsRef: MutableRefObject<Map<string, string[]>>;
     deleteIdeaEntry: (key: string) => void;
-    setIdeaVotesMap:  (value: SetStateAction<Map<string, number>>) => void;
+    setIdeaVotesMap: (value: SetStateAction<Map<string, number>>) => void;
 }
 
 export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
@@ -27,10 +27,13 @@ export const SharedIdeaList: FC<ISharedIdeaListProps> = (props) => {
         setIdeaVotesMap,
     } = props;
 
-    const onUpdateVoteCount = useCallback((key: string, voteCount: number) => {
-        ideaVotesMap.set(key, voteCount);
-        setIdeaVotesMap(new Map(ideaVotesMap));
-    }, [ideaVotesMap]);
+    const onUpdateVoteCount = useCallback(
+        (key: string, voteCount: number) => {
+            ideaVotesMap.set(key, voteCount);
+            setIdeaVotesMap(new Map(ideaVotesMap));
+        },
+        [ideaVotesMap]
+    );
 
     return (
         <>

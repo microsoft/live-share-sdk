@@ -4,10 +4,7 @@ import { IdeaConversationInitialIdea } from "@/types/IdeaConversation";
 import { Button, Textarea, TextareaProps } from "@fluentui/react-components";
 import { ArrowClockwise20Regular } from "@fluentui/react-icons";
 import { LivePresenceUser } from "@microsoft/live-share";
-import {
-    useSharedMap,
-    useSharedState,
-} from "@microsoft/live-share-react";
+import { useSharedMap, useSharedState } from "@microsoft/live-share-react";
 import { FC, memo, useCallback, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { FlexColumn, FlexRow } from "./flex";
@@ -74,10 +71,13 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
         return sortedIdeas;
     }, [ideaVotesMap]);
 
-    const {
-        isLoading,
-        onGenerateSummary,
-    } = useGenerateSummary(ideaBoardId, promptText, getSortedIdeas, onDidStartNewConversation, onDidGetResponse);
+    const { isLoading, onGenerateSummary } = useGenerateSummary(
+        ideaBoardId,
+        promptText,
+        getSortedIdeas,
+        onDidStartNewConversation,
+        onDidGetResponse
+    );
 
     const {
         map: ideasMap,
@@ -92,16 +92,19 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
         }
     };
 
-    const onAddIdea = useCallback(async (initialText?: string) => {
-        if (!localUser?.userId || !localUser?.data?.name) return;
-        const newIdea: Idea = {
-            createdAt: new Date().toISOString(),
-            createdById: localUser!.userId,
-            fallbackName: localUser!.data!.name!,
-            initialText,
-        };
-        setIdeaEntry(uuid(), newIdea);
-    }, [localUser?.userId, localUser?.data?.name, setIdeaEntry]);
+    const onAddIdea = useCallback(
+        async (initialText?: string) => {
+            if (!localUser?.userId || !localUser?.data?.name) return;
+            const newIdea: Idea = {
+                createdAt: new Date().toISOString(),
+                createdById: localUser!.userId,
+                fallbackName: localUser!.data!.name!,
+                initialText,
+            };
+            setIdeaEntry(uuid(), newIdea);
+        },
+        [localUser?.userId, localUser?.data?.name, setIdeaEntry]
+    );
     const onClickAddIdea = async () => {
         onAddIdea();
     };
@@ -180,3 +183,4 @@ export const SharedBrainstorm: FC<ISharedBrainstormProps> = memo((props) => {
         </>
     );
 });
+SharedBrainstorm.displayName = "SharedBrainstorm";

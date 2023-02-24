@@ -9,13 +9,8 @@ interface IScrollViewProps {
 export const ScrollView: FC<IScrollViewProps> = (props) => {
     const { style, children } = props;
     return (
-        <FlexColumn
-            scroll
-            style={style}
-        >
-            <FlexItem noShrink>
-                {children}
-            </FlexItem>
+        <FlexColumn scroll style={style}>
+            <FlexItem noShrink>{children}</FlexItem>
         </FlexColumn>
     );
 };

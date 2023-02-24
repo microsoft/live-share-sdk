@@ -20,17 +20,16 @@ const OPEN_AI_OPTIONS: OpenAICompletionOptions = {
 };
 
 export const useIdeaTags = (ideaBoardId: string, promptText: string) => {
-    const [ideaTags, setIdeaTags] = useSharedState<string[]>(`${ideaBoardId}-tags`, []);
+    const [ideaTags, setIdeaTags] = useSharedState<string[]>(
+        `${ideaBoardId}-tags`,
+        []
+    );
 
     const onGetCompletion = useGetCompletion(
         OPEN_AI_MODEL_TYPE,
         OPEN_AI_OPTIONS
     );
-    const {
-        liveCoPilot,
-        completionValue,
-        changePrompt,
-    } = useLiveCoPilot(
+    const { liveCoPilot, completionValue, changePrompt } = useLiveCoPilot(
         `${ideaBoardId}-tags`,
         onGetCompletion,
         ALLOWED_MEETING_ROLES,
@@ -62,4 +61,4 @@ export const useIdeaTags = (ideaBoardId: string, promptText: string) => {
     return {
         ideaTags,
     };
-}
+};

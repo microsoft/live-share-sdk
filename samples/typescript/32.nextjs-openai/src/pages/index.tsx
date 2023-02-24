@@ -87,18 +87,24 @@ const Home: NextPage = () => {
                     >
                         <Body1Strong>{"Brainstorm CoPilot"}</Body1Strong>
                         <FlexRow>
-                            <Button appearance="subtle"
+                            <Button
+                                appearance="subtle"
                                 style={{
-                                  color: leftOpen ? tokens.colorBrandForeground1 : tokens.colorNeutralForeground1,
+                                    color: leftOpen
+                                        ? tokens.colorBrandForeground1
+                                        : tokens.colorNeutralForeground1,
                                 }}
                                 icon={<PanelLeft20Filled />}
                                 onClick={() => {
                                     setLeftOpen(!leftOpen);
                                 }}
                             />
-                            <Button appearance="subtle"
+                            <Button
+                                appearance="subtle"
                                 style={{
-                                  color: rightOpen ? tokens.colorBrandForeground1 : tokens.colorNeutralForeground1,
+                                    color: rightOpen
+                                        ? tokens.colorBrandForeground1
+                                        : tokens.colorNeutralForeground1,
                                 }}
                                 icon={<PanelRight20Filled />}
                                 onClick={() => {

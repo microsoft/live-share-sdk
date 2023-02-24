@@ -23,10 +23,7 @@ import {
     Checkmark16Regular,
     Add16Regular,
 } from "@fluentui/react-icons";
-import {
-    useSharedMap,
-    useSharedState,
-} from "@microsoft/live-share-react";
+import { useSharedMap, useSharedState } from "@microsoft/live-share-react";
 import { FC, MutableRefObject, useEffect } from "react";
 import { FlexColumn, FlexRow } from "./flex";
 
@@ -70,10 +67,14 @@ export const SharedIdeaCard: FC<ISharedIdeaCardProps> = (props) => {
         setEntry: setVotesEntry,
         deleteEntry: deleteVoteEntry,
     } = useSharedMap(`${ideaId}-votes`);
-    const {
-        quickRecommendTags,
-        disposeQuickRecommendedTags,
-    } = useQuickTags(ideaId, text, searchQuickTagsRef, ideaTagsMapRef, ideaTextMapRef, ideaTags);
+    const { quickRecommendTags, disposeQuickRecommendedTags } = useQuickTags(
+        ideaId,
+        text,
+        searchQuickTagsRef,
+        ideaTagsMapRef,
+        ideaTextMapRef,
+        ideaTags
+    );
 
     const onChangeText: InputProps["onChange"] = (ev, data) => {
         const characterCap = 3000 * 4;

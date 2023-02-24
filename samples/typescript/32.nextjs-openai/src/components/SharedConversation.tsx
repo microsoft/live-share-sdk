@@ -171,3 +171,4 @@ export const SharedConversation: FC<ISharedConversationProps> = memo(
         );
     }
 );
+SharedConversation.displayName = "SharedConversation";

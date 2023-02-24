@@ -1,10 +1,7 @@
 import { OpenAICompletionOptions, OpenAIModelType } from "@/types";
 import { getRecommendedTagsText } from "@/utils";
 import { UserMeetingRole } from "@microsoft/live-share";
-import {
-    useLiveCoPilot,
-    useSharedState,
-} from "@microsoft/live-share-react";
+import { useLiveCoPilot, useSharedState } from "@microsoft/live-share-react";
 import { MutableRefObject, useEffect } from "react";
 import { useGetCompletion } from "./useGetCompletion";
 
@@ -40,17 +37,16 @@ export const useQuickTags = (
         OPEN_AI_MODEL_TYPE,
         OPEN_AI_OPTIONS
     );
-    const { liveCoPilot, completionValue, changePrompt } =
-        useLiveCoPilot(
-            `${ideaId}-ai-quick-tags`,
-            onGetCompletion,
-            ALLOWED_MEETING_ROLES,
-            DEFAULT_PROMPT_VALUE,
-            AUTO_COMPLETIONS_ENABLED,
-            DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS,
-            LOCK_PROMPT,
-            LOCK_COMPLETION
-        );
+    const { liveCoPilot, completionValue, changePrompt } = useLiveCoPilot(
+        `${ideaId}-ai-quick-tags`,
+        onGetCompletion,
+        ALLOWED_MEETING_ROLES,
+        DEFAULT_PROMPT_VALUE,
+        AUTO_COMPLETIONS_ENABLED,
+        DEFAULT_COMPLETIONS_DEBOUNCE_DELAY_MILLISECONDS,
+        LOCK_PROMPT,
+        LOCK_COMPLETION
+    );
 
     useEffect(() => {
         if (!text || !liveCoPilot?.haveCompletionLock) return;
@@ -77,15 +73,14 @@ export const useQuickTags = (
     }, [text, setQuickRecommendTags, changePrompt, liveCoPilot]);
 
     useEffect(() => {
-        if (typeof completionValue === "string") {
-            const trimmedResponseText = completionValue.trimStart();
-            const newTags = trimmedResponseText
-                .split(", ")
-                .map((t) => t.trim())
-                .filter((t) => !!t);
-            setQuickRecommendTags(newTags);
-            searchQuickTagsRef.current.set(text, newTags);
-        }
+        if (typeof completionValue !== "string") return;
+        const trimmedResponseText = completionValue.trimStart();
+        const newTags = trimmedResponseText
+            .split(", ")
+            .map((t) => t.trim())
+            .filter((t) => !!t);
+        setQuickRecommendTags(newTags);
+        searchQuickTagsRef.current.set(text, newTags);
     }, [completionValue]);
 
     return {

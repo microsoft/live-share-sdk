@@ -1,6 +1,5 @@
-
 export type IdeaConversationInitialIdea = {
-    id: string
+    id: string;
     text: string;
     votes: number;
     tags: string[];
@@ -9,6 +8,6 @@ export type IdeaConversationInitialIdea = {
 export type IdeaConversation = {
     createdAt: string;
     initialPromptText: string;
-    initialIdeas: IdeaConversationInitialIdea[],
+    initialIdeas: IdeaConversationInitialIdea[];
     initialResponseText?: string;
-}
+};

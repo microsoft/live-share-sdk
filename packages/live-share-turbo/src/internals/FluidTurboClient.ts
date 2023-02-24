@@ -11,7 +11,7 @@ import {
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 import { IFluidTurboClient } from "../interfaces/IFluidTurboClient";
-import { TurboObjectManager } from "../dds-objects";
+import { DynamicObjectManager } from "../dds-objects";
 
 /**
  * Base class for building Fluid Turbo clients.
@@ -43,10 +43,10 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
         return undefined;
     }
 
-    private get dynamicObjects(): TurboObjectManager | undefined {
+    private get dynamicObjects(): DynamicObjectManager | undefined {
         if (this.results) {
             return this.results.container.initialObjects
-                .TURBO_DYNAMIC_OBJECTS as TurboObjectManager;
+                .TURBO_DYNAMIC_OBJECTS as DynamicObjectManager;
         }
         return undefined;
     }
@@ -64,7 +64,7 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
         // The uniqueKey key makes the developer provided uniqueKey never conflict across different DDS objects
         if (!this.results || !this.dynamicObjects) {
             throw new Error(
-                "FluidTurboClient: getDDS must have valid dynamicObjects TurboObjectManager"
+                "FluidTurboClient: getDDS must have valid dynamicObjects DynamicObjectManager"
             );
         }
         await this.waitUntilConnected();

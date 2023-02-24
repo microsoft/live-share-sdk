@@ -63,7 +63,7 @@ This will use lerna to hoist and build all dependencies.
 
 ## Introduction
 
-There are two clients that you may use depending on your scenario: `LiveShareTurboClient` for Live Share, and `AzureTurboClient` for Azure Fluid Relay. These are used for connecting to Fluid sessions, and are structured differently than the more traditional `LiveShareClient` and `AzureClient` respectively. These clients expose a `.getDDS` function, which under the hood uses `TurboObjectManager` to dynamically get or create a given DDS. It also exposes a default `SharedMap` called `stateMap`, which you can use in your application to track basic app state.
+There are two clients that you may use depending on your scenario: `LiveShareTurboClient` for Live Share, and `AzureTurboClient` for Azure Fluid Relay. These are used for connecting to Fluid sessions, and are structured differently than the more traditional `LiveShareClient` and `AzureClient` respectively. These clients expose a `.getDDS` function, which under the hood uses `DynamicObjectManager` to dynamically get or create a given DDS. It also exposes a default `SharedMap` called `stateMap`, which you can use in your application to track basic app state.
 
 ### How this package compares against vanilla Fluid / Live Share
 

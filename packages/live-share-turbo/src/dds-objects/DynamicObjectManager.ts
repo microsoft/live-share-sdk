@@ -26,7 +26,7 @@ const taskManagerKey = "<<taskManagerKey>>";
  * If a DDS does not yet exist for a given key, a new one is created. Fluid `TaskManager` is used to ensure that only one person is responsible for
  * creating the DDS to prevent data loss. Note that a user must have an active websocket connection to create data objects under this method.
  */
-export class TurboObjectManager extends DataObject {
+export class DynamicObjectManager extends DataObject {
     private _dynamicObjectsMap: SharedMap | undefined;
     private _taskManager: TaskManager | undefined;
     private _container: IFluidContainer | undefined;
@@ -44,14 +44,14 @@ export class TurboObjectManager extends DataObject {
     /**
      * The objects fluid type/name.
      */
-    public static readonly TypeName = `@microsoft/live-share:TurboObjectManager`;
+    public static readonly TypeName = `@microsoft/live-share:DynamicObjectManager`;
 
     /**
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        TurboObjectManager.TypeName,
-        TurboObjectManager,
+        DynamicObjectManager.TypeName,
+        DynamicObjectManager,
         [TaskManager.getFactory()],
         {}
     );
@@ -101,7 +101,7 @@ export class TurboObjectManager extends DataObject {
                 } else {
                     pending.deferred.reject(
                         new Error(
-                            `TurboObjectManager: DDS undefined for key ${changed.key}`
+                            `DynamicObjectManager: DDS undefined for key ${changed.key}`
                         )
                     );
                 }

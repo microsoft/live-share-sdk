@@ -1,2 +1,2 @@
-export * from "./TurboObjectManager";
+export * from "./DynamicObjectManager";
 export * from "./LiveCoPilot";

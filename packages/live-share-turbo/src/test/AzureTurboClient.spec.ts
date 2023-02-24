@@ -137,7 +137,7 @@ describe("LiveShareTurboClient", () => {
             liveEvent1 !== undefined && liveEvent2 !== undefined,
             "test map(s) not defined"
         );
-        // Should be zero because they are created as initialObjects, not through the TurboObjectManager
+        // Should be zero because they are created as initialObjects, not through the DynamicObjectManager
         assert(
             [liveEvent1Created, liveEvent2Created].filter((created) => created)
                 .length === 0,

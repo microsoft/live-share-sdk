@@ -9,7 +9,7 @@ import {
     LoadableObjectClassRecord,
     SharedMap,
 } from "fluid-framework";
-import { TurboObjectManager } from "../dds-objects";
+import { DynamicObjectManager } from "../dds-objects";
 import { TaskManager  } from "@fluid-experimental/task-manager";
 
 // Register TaskManager as dynamic object
@@ -18,7 +18,7 @@ DynamicObjectRegistry.registerObjectClass(TaskManager, "TaskManager");
 const schema: ContainerSchema = {
     initialObjects: {
         TURBO_STATE_MAP: SharedMap,
-        TURBO_DYNAMIC_OBJECTS: TurboObjectManager,
+        TURBO_DYNAMIC_OBJECTS: DynamicObjectManager,
     },
 };
 

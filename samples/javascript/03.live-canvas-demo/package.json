@@ -21,7 +21,7 @@
         "fluid-framework": "~1.2.3"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.48.1",
+        "@typescript-eslint/eslint-plugin": "^5.54.0",
         "@typescript-eslint/parser": "^5.48.1",
         "buffer": "^6.0.3",
         "start-server-and-test": "^1.15.2"

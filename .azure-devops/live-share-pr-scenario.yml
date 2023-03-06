@@ -70,18 +70,8 @@ extends:
         - script: "npm run start"
           workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
           displayName: "npm run start"
-
-      - job: Phase2
-        displayName: Run Scenario Tests
-        pool:
-          name: 1ES-Teams-MMSWindows2019
-        condition: succeeded()
-        variables:
-          Build.SDL.Roslyn.Enabled: false
-        timeoutInMinutes: 10
-        cancelTimeoutInMinutes: 1
-
-        steps:
+          background: true
+        
         - script: "yarn test > logs"
           workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
           displayName: "yarn test"

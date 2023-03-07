@@ -1,5 +1,5 @@
 #!/bin/bash
-cd samples/javascript/02.react-video
+cd ../samples/javascript/02.react-video
 echo "$PWD"
 npm run build
 npm run start & 

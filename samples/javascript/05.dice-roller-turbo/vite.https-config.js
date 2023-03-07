@@ -14,5 +14,9 @@ export default defineConfig({
             // Needed to make ngrok work with Vite
             clientPort: 443,
         },
+        open: true,
+    },
+    optimizeDeps: {
+        force: true,
     },
 });

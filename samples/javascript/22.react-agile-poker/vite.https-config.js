@@ -13,5 +13,9 @@ export default defineConfig({
             clientPort: 443,
         },
         port: 3000,
+        open: true,
+    },
+    optimizeDeps: {
+        force: true,
     },
 });

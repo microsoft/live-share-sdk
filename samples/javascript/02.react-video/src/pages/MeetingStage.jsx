@@ -17,6 +17,8 @@ import { ConsoleLogger } from "./ConsoleLogger";
 import { LiveShareHost } from "@microsoft/teams-js";
 
 const MeetingStage = () => {
+    // Started initializing flag
+    const startedInitializingRef = useRef(false);
     // Initial media item selected in SidePanel.jsx
     const initialMediaItem = useRef(getInitialMediaItem());
     // HTML5 <video> element ref
@@ -28,6 +30,8 @@ const MeetingStage = () => {
 
     // Initial setup when context is returned
     useEffect(() => {
+        if (startedInitializingRef.current) return;
+        startedInitializingRef.current = true;
         (async function () {
             try {
                 // Set the initial video src for the player element

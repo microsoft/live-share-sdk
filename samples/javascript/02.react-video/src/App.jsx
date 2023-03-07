@@ -13,9 +13,12 @@ import TabConfig from "./pages/TabConfig";
 import { inTeams } from "./utils/inTeams";
 
 export default function App() {
+    const startedInitializingRef = useRef(false);
     const [initialized, setInitialized] = useState(false);
 
     useEffect(() => {
+        if (startedInitializingRef.current) return;
+        startedInitializingRef.current = true;
         if (!initialized) {
             if (inTeams()) {
                 console.log("App.js: initializing client SDK");

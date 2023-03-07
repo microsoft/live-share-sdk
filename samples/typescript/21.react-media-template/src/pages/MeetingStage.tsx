@@ -17,6 +17,8 @@ import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 import React from "react";
 
 const MeetingStage: FC = () => {
+    // Flag tracking whether player setup has started
+    const playerSetupStarted = useRef(false);
     // Teams context
     const context = useTeamsContext();
     // Media player
@@ -101,33 +103,25 @@ const MeetingStage: FC = () => {
 
     // Set up the media player
     useEffect(() => {
-        if (!player && selectedMediaItem) {
-            // Setup Azure Media Player
-            const amp = new AzureMediaPlayer("video", selectedMediaItem.src);
-            // Set player when AzureMediaPlayer is ready to go
-            const onReady = () => {
-                setPlayer(amp);
-                amp.removeEventListener("ready", onReady);
-            };
-            amp.addEventListener("ready", onReady);
-        }
+        if (player || !selectedMediaItem || playerSetupStarted.current) return;
+        playerSetupStarted.current = true;
+        // Setup Azure Media Player
+        const amp = new AzureMediaPlayer("video", selectedMediaItem.src);
+        // Set player when AzureMediaPlayer is ready to go
+        const onReady = () => {
+            setPlayer(amp);
+            amp.removeEventListener("ready", onReady);
+        };
+        amp.addEventListener("ready", onReady);
     }, [selectedMediaItem, player, setPlayer]);
 
-    const started = useMemo(() => {
-        return [
-            notificationStarted,
-            mediaSessionStarted,
-            presenceStarted,
-            takeControlStarted,
-            playlistStarted,
-        ].every((value) => value === true);
-    }, [
+    const started = [
         notificationStarted,
         mediaSessionStarted,
         presenceStarted,
         takeControlStarted,
         playlistStarted,
-    ]);
+    ].every((value) => value === true);
 
     // Render the media player
     return (

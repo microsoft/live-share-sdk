@@ -6,16 +6,19 @@
 import { FluentProvider, teamsDarkTheme } from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MeetingStage from "./pages/MeetingStage";
 import SidePanel from "./pages/SidePanel";
 import TabConfig from "./pages/TabConfig";
 import { inTeams } from "./utils/inTeams";
 
 export default function App() {
+    const initializeStartedRef = useRef(false);
     const [initialized, setInitialized] = useState(false);
 
     useEffect(() => {
+        if (initializeStartedRef.current) return;
+        initializeStartedRef.current = true;
         const initialize = async () => {
             try {
                 console.log("App.js: initializing client SDK initialized");

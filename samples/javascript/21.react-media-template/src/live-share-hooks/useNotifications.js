@@ -5,7 +5,7 @@
 
 // eslint-disable-next-line
 import { LiveEvent } from "@microsoft/live-share";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 /**
  * Hook for sending notifications to display across clients
@@ -20,6 +20,7 @@ import { useState, useEffect, useCallback } from "react";
  * - `sendNotification` is a callback method for sending a notification to other users in session.
  */
 export const useNotifications = (notificationEvent, context) => {
+    const initializeStartedRef = useRef(false);
     const [notificationToDisplay, setNotificationToDisplay] = useState();
     const [notificationStarted, setStarted] = useState(false);
 
@@ -39,26 +40,29 @@ export const useNotifications = (notificationEvent, context) => {
     );
 
     useEffect(() => {
-        if (notificationEvent && !notificationEvent.isInitialized) {
-            notificationEvent.on("received", (event, local) => {
-                // Display notification differently for local vs. remote users
-                if (local) {
-                    setNotificationToDisplay(`You ${event.text}`);
-                } else {
-                    setNotificationToDisplay(
-                        `${event.senderName} ${event.text}`
-                    );
-                }
-            });
-            console.log("useNotifications: starting notifications");
-            notificationEvent
-                .initialize()
-                .then(() => {
-                    console.log("useNotifications: notifications started");
-                    setStarted(true);
-                })
-                .catch((error) => console.error(error));
-        }
+        if (
+            !notificationEvent ||
+            notificationEvent.isInitialized ||
+            initializeStartedRef.current
+        )
+            return;
+        initializeStartedRef.current = true;
+        notificationEvent.on("received", (event, local) => {
+            // Display notification differently for local vs. remote users
+            if (local) {
+                setNotificationToDisplay(`You ${event.text}`);
+            } else {
+                setNotificationToDisplay(`${event.senderName} ${event.text}`);
+            }
+        });
+        console.log("useNotifications: starting notifications");
+        notificationEvent
+            .initialize()
+            .then(() => {
+                console.log("useNotifications: notifications started");
+                setStarted(true);
+            })
+            .catch((error) => console.error(error));
     }, [notificationEvent, setNotificationToDisplay, setStarted]);
 
     return {

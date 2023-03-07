@@ -68,6 +68,7 @@ extends:
           displayName: "npm run build sample"
 
         - task: Bash@3
-          script: |
-            sh scenario_test.sh
+          inputs:
+            script: |
+              sh scenario_test.sh
           displayName: "run test"

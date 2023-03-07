@@ -411,64 +411,51 @@ export const ExampleLiveCanvas = () => {
 };
 ```
 
-### useLiveCoPilot
+### useTaskManager
 
-If you want to build collaborative features powered by AI, you can use our experimental `useLiveCoPilot` hook, which uses the Live Share Turbo `LiveCoPilot` DDS. By providing a delegate to an OpenAI Completion API to our DDS, `LiveCoPilot` ensures that only one user is requesting AI completions at a time. Both the input and output are synchronized for everyone in the session. This can lower the cost of collaborative AI significantly.
+If you want to ensure that only one user is responsible for a given task, you can use `useTaskManager`, which uses Fluid's `TaskManager` DDS.
 
-Here is an example of this in action:
+Let's see this in action:
 
 ```javascript
-import { useLiveCoPilot } from "@microsoft/live-share-react";
-import { onGetCompletion } from "./utils"; // faking it here, but same as other example
+import { useTaskManager } from "@microsoft/live-share-react";
 
-// Fetch a completion string from your server for a prompt string. Interface is (prompt: string) => Promise<string>.
-async function onGetCompletion(prompt) {
-    const response = await fetch("/api/openai/completion", {
-        method: "POST",
-        body: JSON.stringify({
-            prompt,
-        }),
-        headers: new Headers({
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        }),
-    });
-    const { responseText } = await response.json();
-    return responseText;
-}
+export const ExampleTaskManager = () => {
+    const [taskId, setTaskId] = useState(undefined);
+    const { lockedTask } = useTaskManager(
+        "CUSTOM-TASK-MANAGER",
+        taskId,
+    );
 
-const allowedUserRoles = ["Organizer", "Presenter"]; // roles allowed to edit synchronized prompt/completion
-const defaultPrompt = `You are a helpful, friendly, and polite chat bot.`;
+    const displayText = lockedTask
+        ? "You are assigned the task"
+        : "Waiting for task assignment";
 
-export function ChatGPT() {
-  const {
-    promptValue,
-    completionValue,
-    changePrompt,
-  } = useLiveAPICompletion(
-    onGetCompletion,
-    allowedUserRoles, // optional
-    defaultPrompt, // optional
-  );
-  const fullText = promptValue + (completionValue ?? "");
-  return (
-    <>
-      <p>{fullText}</p>
-      <input
-          onChange={(ev, data) => {
-              const message = data.value;
-              const newText = fullText + "\nHUMAN: " + message + "\nAI:";
-              changePrompt(newText);
-          }}
-      />
-    </>
-  );
-}
+    return (
+        <div>
+            {!taskId && (
+                <button
+                    onClick={() => {
+                        setTaskId("task-id")
+                    }}
+                >
+                    {'Join task queue'}
+                </button>
+            )}
+            {taskId && (
+                <button
+                    onClick={() => {
+                        setTaskId(undefined)
+                    }}
+                >
+                    {'Leave task queue'}
+                </button>
+            )}
+            <p>{displayText}</p>
+        </div>
+    );
+};
 ```
-
-You can use `LiveCoPilot` in parallel with other data structures. For example, if you want to enable multiple users editing the same text simultaneously, you might consider using `SharedString`. To do this, you might listen for changes to the text in the `SharedString` and then call the `changePrompt()` method using the latest `sharedString.getText()` value. If you have more structured data (e.g., within a `SharedMap`), you can do something similar. If you do either of these approaches, you may look into using the `lockPrompt` flag within `LiveCoPilot`, which ensures only one person directly changes the prompt at a time.
-
-For examples of how to use that approach in your app, please look at our [Next.js OpenAI sample](../../samples/typescript/32.nextjs-openai).
 
 ### Custom Fluid object hooks
 
@@ -504,7 +491,6 @@ export const useSharedTree = (uniqueKey) => {
 | Sample name       | Description                                                             | Javascript                                            |
 | ----------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
 | Live Share React  | Simple example with each of our custom Live Share React hooks.          | [View](../../samples/javascript/05.dice-roller-turbo) |
-| NextJS + OpenAI   | Collaborative idea brainstorming & chat, powered by `LiveCoPilot`. | [View](../../samples/typescript/32.nextjs-openai)     |
 
 ## Package Compatibility
 

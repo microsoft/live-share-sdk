@@ -17,12 +17,9 @@ import {
     ExtendedMediaMetadata,
     MediaPlayerSynchronizer,
 } from "@microsoft/live-share-media";
-import { LiveCoPilot } from "@microsoft/live-share-turbo";
 import { IFluidContainer, SharedMap } from "fluid-framework";
 import { IReceiveLiveEvent } from "../interfaces";
 import {
-    OnAIChangeCompletionAction,
-    OnAIChangePromptAction,
     OnPauseTimerAction,
     OnPlayTimerAction,
     OnStartTimerAction,
@@ -187,31 +184,4 @@ export interface IUseLiveCanvasResults {
      * Live Canvas data object which synchronizes inking & cursors in the session. It is set when loaded and undefined while loading.
      */
     liveCanvas: LiveCanvas | undefined;
-}
-
-export interface IUseLiveCoPilotResults {
-    /**
-     * Stateful prompt value that will be used to generate completions.
-     */
-    promptValue: string;
-    /**
-     * Stateful completion value that was generated from the prompt value. Will be reset when `promptValue` is updated.
-     */
-    completionValue: string | undefined;
-    /**
-     * Local user is assigned to generate completions.
-     */
-    haveCompletionLock: boolean;
-    /**
-     * Callback method to update the prompt value.
-     */
-    changePrompt: OnAIChangePromptAction;
-    /**
-     * Callback method to send a completion value to users in the session.
-     */
-    sendCompletion: OnAIChangeCompletionAction;
-    /**
-     * The `LiveCoPilot` object, should you want to use it directly.
-     */
-    liveCoPilot: LiveCoPilot | undefined;
 }

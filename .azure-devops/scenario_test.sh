@@ -3,6 +3,7 @@ npm run start &
 success=0
 tries=5
 pause=30
+ret = ""
 while [ $success = 0 -a $tries -gt 0 ]; do
     sleep $pause
     let tries=tries-1

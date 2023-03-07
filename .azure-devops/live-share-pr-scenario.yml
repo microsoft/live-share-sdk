@@ -70,6 +70,7 @@ extends:
         - task: Bash@3
           inputs:
             targetType: "inline"
+            workingDirectory: ".azure-devops"
             script: |
               sh scenario_test.sh
           displayName: "run test"

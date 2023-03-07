@@ -62,6 +62,10 @@ extends:
         - script: "npm install --no-audit --legacy-peer-deps"
           workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
           displayName: "npm install sample"
+        
+        - script: "npm install jest"
+          workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
+          displayName: "npm install jest"
 
         - script: "npm run build"
           workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"

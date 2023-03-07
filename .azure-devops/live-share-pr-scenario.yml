@@ -67,10 +67,7 @@ extends:
           workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
           displayName: "npm run build sample"
 
-        - script: "npm run start"
-          workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
-          displayName: "npm run start"
-
-        - script: "yarn test > logs"
-          workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
-          displayName: "yarn test"
+        - task: Bash@3
+          script: |
+            sh scenario_test.sh
+          displayName: "run test"

@@ -70,7 +70,7 @@ extends:
         - task: Bash@3
           inputs:
             targetType: "inline"
-            workingDirectory: ".azure-devops"
+            workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
             script: |
-              sh scenario_test.sh
+              sh ../../../.azure-devops/scenario_test.sh
           displayName: "run test"

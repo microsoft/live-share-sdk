@@ -69,6 +69,7 @@ extends:
 
         - task: Bash@3
           inputs:
+            targetType: "inline"
             script: |
               sh scenario_test.sh
           displayName: "run test"

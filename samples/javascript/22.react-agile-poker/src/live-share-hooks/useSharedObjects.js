@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
     LivePresence,
     LiveState,
@@ -25,10 +25,13 @@ import { LiveShareHost } from "@microsoft/teams-js";
  * @returns Shared objects managed by the apps fluid container.
  */
 export function useSharedObjects() {
+    const startedRef = useRef(false);
     const [results, setResults] = useState();
     const [error, setError] = useState();
 
     useEffect(() => {
+        if (startedRef.current) return;
+        startedRef.current = true;
         // Check if user is in Teams
         const url = window.location.href.includes("/#/")
             ? new URL(`${window.location.href.split("/#/").join("/")}`)

@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { inTeams } from "../utils/inTeams";
 
@@ -16,8 +16,11 @@ export const parseJwt = (token) => {
 };
 
 export const useUserName = () => {
+    const startedRef = useRef(false);
     const [userName, setUserName] = useState(null);
     useEffect(() => {
+        if (startedRef.current) return;
+        startedRef.current = true;
         // Authenticate if auth object is null or there was an error
         if (!userName) {
             console.info("Attempting to get Teams auth token");

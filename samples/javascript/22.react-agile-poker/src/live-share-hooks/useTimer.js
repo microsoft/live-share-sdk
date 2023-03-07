@@ -3,9 +3,10 @@
  * Licensed under the MIT License.
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 export const useTimer = (timer, onTimerEnd) => {
+    const initializeStartedRef = useRef(false);
     const [timerMilliRemaining, setTimerMilliRemaining] = useState(0);
     const [timerStarted, setTimerStarted] = useState(false);
 
@@ -20,22 +21,23 @@ export const useTimer = (timer, onTimerEnd) => {
     }, [timer]);
 
     useEffect(() => {
-        if (timer && !timer.isInitialized) {
-            timer.on("finished", (config) => {
-                console.log("finished");
-                onTimerEnd();
-            });
+        if (!timer || timer.isInitialized || initializeStartedRef.current) return;
+        console.info("useTimer: initializing live timer");
+        initializeStartedRef.current = true;
+        timer.on("finished", (config) => {
+            console.log("finished");
+            onTimerEnd();
+        });
 
-            timer.on("onTick", (milliRemaining) => {
-                console.log("tick");
-                setTimerMilliRemaining(milliRemaining);
-            });
+        timer.on("onTick", (milliRemaining) => {
+            console.log("tick");
+            setTimerMilliRemaining(milliRemaining);
+        });
 
-            const allowedRoles = ["Organizer"];
+        const allowedRoles = ["Organizer"];
 
-            timer.initialize(allowedRoles);
-            setTimerStarted(true);
-        }
+        timer.initialize(allowedRoles);
+        setTimerStarted(true);
     }, [timer, onTimerEnd, setTimerStarted]);
 
     return {

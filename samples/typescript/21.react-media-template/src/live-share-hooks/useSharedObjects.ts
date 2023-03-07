@@ -4,21 +4,16 @@
  */
 
 import {
-    ILiveShareClientOptions,
     LiveShareClient,
     TestLiveShareHost,
 } from "@microsoft/live-share";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
 import { ContainerSchema, IFluidContainer, SharedMap } from "fluid-framework";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { LiveEvent, LivePresence } from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";
-import {
-    AzureConnectionConfig,
-    AzureContainerServices,
-} from "@fluidframework/azure-client";
+import { AzureContainerServices } from "@fluidframework/azure-client";
 import { LiveShareHost } from "@microsoft/teams-js";
 
 /**
@@ -31,6 +26,7 @@ import { LiveShareHost } from "@microsoft/teams-js";
  * @returns Shared objects managed by the apps fluid container.
  */
 export function useSharedObjects() {
+    const startedRef = useRef(false);
     const [results, setResults] = useState<{
         container: IFluidContainer;
         services: AzureContainerServices;
@@ -39,6 +35,8 @@ export function useSharedObjects() {
     const [error, setError] = useState();
 
     useEffect(() => {
+        if (startedRef.current) return;
+        startedRef.current = true;
         console.log("useSharedObjects: starting");
         // Check if user is in Teams
         const url = window.location.href.includes("/#/")

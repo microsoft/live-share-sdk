@@ -14,7 +14,7 @@ while [ $success = 0 -a $tries -gt 0 ]; do
     fi
 done
 if [ $success = 0 ]; then
-    echo ($RET) >&2
+    echo $(RET) >&2
     exit 1
 else
     echo "sucess" >&2

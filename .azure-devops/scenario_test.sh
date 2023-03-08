@@ -3,7 +3,7 @@ RET=""
 npm run start & 
 success=0
 tries=5
-pause=1
+pause=30
 while [ $success = 0 -a $tries -gt 0 ]; do
     sleep $pause
     let tries=tries-1
@@ -16,4 +16,6 @@ done
 if [ $success = 0 ]; then
     echo "failed" >&2
     exit 1
+else
+    echo "sucess" >&2
 fi

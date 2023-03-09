@@ -3,6 +3,8 @@ variables:
   value: '4b310c23-4420-4e37-bdee-ce6d119fd03d'
 - name: sdk_packages_directory
   value: "packages"
+- name: sdk_samples_directory
+  value: "samples"
 - name: teams_interactive_sdk_working_directory
   value: "packages/live-share"
 - name: teams_interactive_media_sdk_working_directory

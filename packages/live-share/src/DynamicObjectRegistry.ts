@@ -9,6 +9,7 @@ import {
     SharedString,
     SharedDirectory,
 } from "fluid-framework";
+import { ConsensusRegisterCollection } from "@fluidframework/register-collection";
 
 /**
  * Key for window global reference to loadable objects.
@@ -64,6 +65,7 @@ export class DynamicObjectRegistry {
  * Register default Fluid packages. If we can someday contribute Fluid code to make this happen centrally within Fluid, we can remove this in
  * the future.
  */
-DynamicObjectRegistry.registerObjectClass(SharedMap, "SharedMap");
-DynamicObjectRegistry.registerObjectClass(SharedString, "SharedString");
-DynamicObjectRegistry.registerObjectClass(SharedDirectory, "SharedDirectory");
+DynamicObjectRegistry.registerObjectClass(SharedMap, SharedMap.getFactory().type);
+DynamicObjectRegistry.registerObjectClass(SharedString, SharedString.getFactory().type);
+DynamicObjectRegistry.registerObjectClass(SharedDirectory, SharedDirectory.getFactory().type);
+DynamicObjectRegistry.registerObjectClass(ConsensusRegisterCollection, ConsensusRegisterCollection.getFactory().type);

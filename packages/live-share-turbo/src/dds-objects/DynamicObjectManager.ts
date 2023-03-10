@@ -4,9 +4,7 @@
  */
 
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
-import { TaskManager } from "@fluid-experimental/task-manager";
 import {
-    SharedMap,
     LoadableObjectClass,
     IFluidContainer,
 } from "fluid-framework";
@@ -15,31 +13,19 @@ import {
     FluidObject,
     IFluidLoadable,
 } from "@fluidframework/core-interfaces";
-import { Deferred, assert } from "@fluidframework/common-utils";
+import { assert } from "@fluidframework/common-utils";
+import { ConsensusRegisterCollection } from "@fluidframework/register-collection";
 
-const dynamicObjectsKey = "<<dynamicObjectsKey>>";
-const taskManagerKey = "<<taskManagerKey>>";
+type DynamicObjectsCollection = ConsensusRegisterCollection<IFluidHandle<any>>;
+const dynamicObjectsCollectionKey = "<<consensusRegisterCollectionKey>>";
 
 /**
  * Fluid DataObject used in `FluidTurboClient` for the purposes of dynamically loading DDSes.
  * @remarks
- * If a DDS does not yet exist for a given key, a new one is created. Fluid `TaskManager` is used to ensure that only one person is responsible for
- * creating the DDS to prevent data loss. Note that a user must have an active websocket connection to create data objects under this method.
+ * If a DDS does not yet exist for a given key, a new one is created. Fluid `ConsensusRegisterCollection` is used to ensure that only one person will create the DDS.
  */
 export class DynamicObjectManager extends DataObject {
-    private _dynamicObjectsMap: SharedMap | undefined;
-    private _taskManager: TaskManager | undefined;
-    private _container: IFluidContainer | undefined;
-    private _pendingGetDDSMap = new Map<
-        string,
-        {
-            deferred: Deferred<{
-                dds: FluidObject<any> & IFluidLoadable;
-                created: boolean;
-            }>;
-            loadableClass: LoadableObjectClass<any>;
-        }
-    >();
+    private _dynamicObjectsCollection: DynamicObjectsCollection | undefined;
 
     /**
      * The objects fluid type/name.
@@ -52,7 +38,7 @@ export class DynamicObjectManager extends DataObject {
     public static readonly factory = new DataObjectFactory(
         DynamicObjectManager.TypeName,
         DynamicObjectManager,
-        [TaskManager.getFactory()],
+        [ConsensusRegisterCollection.getFactory()],
         {}
     );
 
@@ -61,15 +47,16 @@ export class DynamicObjectManager extends DataObject {
      * initialize the state of the DataObject.
      */
     protected async initializingFirstTime() {
-        // Create a SharedMap for dynamic objects
-        const dynamicObjectsMap = SharedMap.create(
+        // We create the consensus registry collection just like any other DDS.
+        const consensusRegisterCollection = ConsensusRegisterCollection.create(
             this.runtime,
-            dynamicObjectsKey
+            dynamicObjectsCollectionKey
         );
-        // We create a TaskManager just like any other DDS.
-        const taskManager = TaskManager.create(this.runtime, taskManagerKey);
-        this.root.set(taskManagerKey, taskManager.handle);
-        this.root.set(dynamicObjectsKey, dynamicObjectsMap.handle);
+        // Set object(s) to root
+        this.root.set(
+            dynamicObjectsCollectionKey,
+            consensusRegisterCollection.handle
+        );
     }
 
     /**
@@ -78,66 +65,23 @@ export class DynamicObjectManager extends DataObject {
      */
     protected async hasInitialized() {
         // Get the dynamic objects map
-        const dynamicObjectsHandle =
-            this.root.get<IFluidHandle<SharedMap>>(dynamicObjectsKey);
-        this._dynamicObjectsMap = await dynamicObjectsHandle?.get();
-        // Get the task manager and listen for task assignments
-        const taskManagerHandle =
-            this.root.get<IFluidHandle<TaskManager>>(taskManagerKey);
-        this._taskManager = await taskManagerHandle?.get();
-        this.listenForTaskAssignments();
-        // Listen for changes to the dynamic objects map
-        this._dynamicObjectsMap?.on("valueChanged", async (changed, local) => {
-            const pending = this._pendingGetDDSMap.get(changed.key);
-            if (!pending) return;
-            // The user is waiting for a DDS value for this key, so we attempt to resolve their request
-            try {
-                const dds = await this.internalGetDDS(changed.key);
-                if (dds) {
-                    pending.deferred.resolve({
-                        dds,
-                        created: local === true,
-                    });
-                } else {
-                    pending.deferred.reject(
-                        new Error(
-                            `DynamicObjectManager: DDS undefined for key ${changed.key}`
-                        )
-                    );
-                }
-            } catch (error) {
-                pending.deferred.reject(error);
-            } finally {
-                // Stop tracking the pending request
-                this._pendingGetDDSMap.delete(changed.key);
-            }
-        });
+        const dynamicObjectsCollectionHandle = this.root.get<
+            IFluidHandle<DynamicObjectsCollection>
+        >(dynamicObjectsCollectionKey);
+        this._dynamicObjectsCollection =
+            await dynamicObjectsCollectionHandle?.get();
     }
 
     /**
-     * Convenience getter to get the `_taskManager` without having to check for undefined, since this will
+     * Convenience getter to get the `_dynamicObjectsCollection` without having to check for undefined, since this will
      * never be undefined after `initializingFirstTime`.
      */
-    private get taskManager() {
-        assert(this._taskManager !== undefined, "TaskManager not initialized");
-        return this._taskManager;
-    }
-    /**
-     * Convenience getter to get the `_dynamicObjectsMap` without having to check for undefined, since this will
-     * never be undefined after `initializingFirstTime`.
-     */
-    private get dynamicObjectsMap() {
+    private get dynamicObjectsCollection() {
         assert(
-            this._dynamicObjectsMap !== undefined,
-            "dynamicsObjectMap not initialized"
+            this._dynamicObjectsCollection !== undefined,
+            "_dynamicObjectsCollection not initialized"
         );
-        return this._dynamicObjectsMap;
-    }
-    private get container(): IFluidContainer | undefined {
-        return this._container;
-    }
-    private set container(value: IFluidContainer | undefined) {
-        this._container = value;
+        return this._dynamicObjectsCollection;
     }
 
     /**
@@ -159,28 +103,19 @@ export class DynamicObjectManager extends DataObject {
         dds: T;
         created: boolean;
     }> {
-        if (!this.container) {
-            this.container = container;
-        }
         // Check if the DDS already exists. If it does, return that.
-        const dds = await this.internalGetDDS<T>(key);
+        let dds: T | undefined = await this.internalGetDDS<T>(key);
         if (dds) {
             return {
                 dds,
                 created: false,
             };
         }
-        // Track a deferred promise for getting the DDS
-        const deferred = new Deferred<{
-            dds: T;
-            created: boolean;
-        }>();
-        this._pendingGetDDSMap.set(key, {
-            deferred,
-            loadableClass,
-        });
-        this.lockTaskWithSafeDisconnect(key);
-        return deferred.promise;
+        // Create a new DDS to attempt to store it into consensusRegisterCollection. The localDDS may not be used if it has first been written by another client.
+        // Fluid's garbage collector will clean up the DDS if it is not used.
+        const localDDS = await container.create(loadableClass);
+        // Get the DDS with consensus
+        return this.loadDDSWithConsensus(key, localDDS);
     }
 
     /**
@@ -192,59 +127,43 @@ export class DynamicObjectManager extends DataObject {
     private async internalGetDDS<
         T extends FluidObject<any> = FluidObject<any> & IFluidLoadable
     >(key: string): Promise<T | undefined> {
-        const ddsHandle = this._dynamicObjectsMap?.get<IFluidHandle<T>>(key);
-        if (ddsHandle) {
-            const dds = await ddsHandle.get();
-            return dds;
-        }
-        return undefined;
+        const ddsHandle = this.dynamicObjectsCollection.read(key);
+        return ddsHandle?.get();
     }
 
     /**
-     * Listen for assignments to tasks.
-     * @remarks
-     * `taskId` should correspond with the unique key of a dynamic object so that users will not receive task assignments for objects they are not attempting to
-     *  access.
+     * Recursively attempt to write a DDS to the consensusRegisterCollection. This is necessary because we may disconnect mid-write.
+     * 
+     * @param key unique identifier for DDS
+     * @param localDDS the DDS to write if we are the first to write
+     * @returns the DDS and whether or not it was created locally
      */
-    private async listenForTaskAssignments() {
-        this.taskManager.on("assigned", async (taskId: string) => {
-            const pending = this._pendingGetDDSMap.get(taskId);
-            if (pending) {
-                // The local user is waiting for a DDS response. Normally we would create a new one here, but as an extra layer of safety we double check
-                // to see if there is already one set for the given key.
-                try {
-                    const checkForInternalDDS = await this.internalGetDDS(
-                        taskId
-                    );
-                    if (checkForInternalDDS) {
-                        pending.deferred.resolve({
-                            dds: checkForInternalDDS,
-                            created: false,
-                        });
-                        this._pendingGetDDSMap.delete(taskId);
-                        return;
-                    }
-                } catch {}
-                // Create a new DDS and store a reference to the handle in dynamicObjectsMap
-                try {
-                    const newDDS = await this.container!.create(
-                        pending.loadableClass
-                    );
-                    this.dynamicObjectsMap.set(taskId, newDDS.handle);
-                } catch (error) {
-                    // Reject the pending promise
-                    pending.deferred.reject(error);
-                    this._pendingGetDDSMap.delete(taskId);
-                    // TODO: if this user is the last user in the queue and it still failed, perhaps we need to add some additional safety
-                }
-            }
-            // TODO: In @fluidframework/task-manager v2, there is a taskManager.complete() function that ejects everyone from queue. Once available, we should
-            // use that to further minimize risk. Perhaps we can request a feature to fully prevent that key from ever being queued again.
-            // Delay abandon to minimize risk...is this even necessary though?
-            setTimeout(() => {
-                this.taskManager.abandon(taskId);
-            }, 1000);
-        });
+    private async loadDDSWithConsensus<
+        T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
+    >(key: string, localDDS: T): Promise<{
+        dds: T;
+        created: boolean;
+    }> {
+        await this.waitUntilConnected();
+        // Check if we have since received the DDS from dynamicObjectsCollection
+        const dds = await this.internalGetDDS<T>(key);
+        if (dds) {
+            return {
+                dds,
+                created: false,
+            };
+        }
+        // Attempt to write local DDS to dynamicObjectsCollection
+        const acknowledged = await this.dynamicObjectsCollection.write(key, localDDS.handle);
+        // If we successfully write, return the local DDS
+        if (acknowledged) {
+            return {
+                dds: localDDS,
+                created: true,
+            };
+        }
+        // Fluid did not acknowledge the write, either because the container disconnected or someone else created the object already, so we need to try again
+        return await this.loadDDSWithConsensus(key, localDDS);
     }
 
     /**
@@ -264,24 +183,5 @@ export class DynamicObjectManager extends DataObject {
                 this.runtime.on("connected", onConnected);
             }
         });
-    }
-
-    /**
-     * Function to lock a task while the socket is connected.
-     *
-     * @param taskId identifier for the task to lock
-     * Attempt to lock the task while the socket is connected. If the socket disconnects, try again.
-     */
-    private async lockTaskWithSafeDisconnect(taskId: string) {
-        // `TaskManager` can only lock tasks while the socket is connected, so we wait before continuing
-        await this.waitUntilConnected();
-        try {
-            // Join the TaskManager queue to create the DDS
-            // TODO: In @fluidframework/task-manager v2, there is a taskManager.subscribeToTask() function so that this doesn't fail on disconnects
-            await this.taskManager.lockTask(taskId);
-        } catch {
-            // If the socket disconnects while we were in the task queue, recursively try again
-            this.lockTaskWithSafeDisconnect(taskId);
-        }
     }
 }

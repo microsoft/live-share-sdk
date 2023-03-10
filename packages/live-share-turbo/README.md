@@ -4,7 +4,7 @@
 
 Easily create collaborative apps, powered by [Fluid Framework](https://fluidframework.com/). This package is an experimental, alternative approach to building Fluid & Live Share applications that attempts to make it simpler to use dynamic distributed-data structures. One of the main benefits of Fluid is the efficient, hierarchal, and ultra-fast remote synchronized application state. Vanilla Fluid is highly customizable, allowing you to nest references to DDS objects within other ones. This is powerful but can be cumbersome to work with. By taking a more opinionated stance, Live Share Turbo makes it easy to leverage dynamic objects more easily than ever before.
 
-In traditional Fluid applications, you must define your Fluid container schema up front. In this package, you load data objects on the fly by simply providing a unique identifier for your object. If a data object matching that identifier exists already exists, the SDK will use that one; otherwise, a new one will be created on your behalf. Fluid Framework's `TaskManager` object is used to ensure that only one user will create the DDS for each unique identifier.
+In traditional Fluid applications, you must define your Fluid container schema up front. In this package, you load data objects on the fly by simply providing a unique identifier for your object. If a data object matching that identifier exists already exists, the SDK will use that one; otherwise, a new one will be created on your behalf. Fluid Framework's `ConsensusRegisterCollection` object is used to ensure that only one user will create the DDS for each unique identifier.
 
 Here is a simple example of how to get started:
 
@@ -196,9 +196,9 @@ document.getElementById("my-button").onclick = () => {
 
 ### Avoiding data loss
 
-In some circumstances while using this application -- particularly in cases of high latency while using Fluid's `Shared*` objects -- data loss is possible if multiple users attempt to create new data objects for the same key in short periods of time. This is mitigated by using `TaskManager` to ensure that only one user is responsible for creating each DDS, but this will require more testing before we can have 100% confidence that data loss is not possible.
+In some circumstances while using this application -- particularly in cases of high latency while using Fluid's `Shared*` objects -- data loss is possible if multiple users attempt to create new data objects for the same key in short periods of time. This is mitigated by using `ConsensusRegisterCollection` to ensure that only one user is responsible for creating each DDS, but this will require more testing before we can have 100% confidence that data loss is not possible.
 
-To minimize this risk, you can use the `initialObjects` prop when first creating a Fluid container and use identifiers for objects in a list. This has similar constraints as regular Fluid -- such as migrating schemas after first creating the container -- but is useful in scenarios where up-front data loss is unacceptable. Here is an example of how to do this in your application:
+To minimize this risk, you can also use the `initialObjects` prop when first creating a Fluid container and use identifiers for objects in a list. This has similar constraints as regular Fluid -- such as migrating schemas after first creating the container -- but is useful in scenarios where up-front data loss is unacceptable. Here is an example of how to do this in your application:
 
 ```javascript
 import { LiveShareHost } from "@microsoft/teams-js";

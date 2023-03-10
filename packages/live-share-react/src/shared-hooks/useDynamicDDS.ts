@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import React, { useState } from "react";
+import React from "react";
 import { FluidObject, IFluidLoadable } from "@fluidframework/core-interfaces";
 import { useFluidObjectsContext } from "../providers";
 import { LoadableObjectClass } from "fluid-framework";
@@ -22,8 +22,10 @@ export function useDynamicDDS<T extends IFluidLoadable = FluidObject<any> & IFlu
     onFirstInitialize?: (dds: T) => void,
 ): {
     dds: T | undefined;
+    error: Error | undefined;
 } {
-    const [dds, setDDS] = useState<T>();
+    const [dds, setDDS] = React.useState<T>();
+    const [error, setError] = React.useState<Error>();
     /**
      * Import container and DDS object register callbacks from AzureProvider.
      */
@@ -48,8 +50,12 @@ export function useDynamicDDS<T extends IFluidLoadable = FluidObject<any> & IFlu
                 if (mounted) {
                     setDDS(dds);
                 }
-            } catch (error: any) {
-                console.error(error);
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    setError(error);
+                } else {
+                    setError(new Error("useDynamicDDS: an unknown error occurred while getting the DDS"));
+                }
             }
         };
         onGetDDS();
@@ -60,5 +66,6 @@ export function useDynamicDDS<T extends IFluidLoadable = FluidObject<any> & IFlu
 
     return {
         dds,
+        error,
     };
 }

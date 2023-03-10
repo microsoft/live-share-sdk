@@ -10,10 +10,6 @@ import {
     SharedMap,
 } from "fluid-framework";
 import { DynamicObjectManager } from "../dds-objects";
-import { TaskManager  } from "@fluid-experimental/task-manager";
-
-// Register TaskManager as dynamic object
-DynamicObjectRegistry.registerObjectClass(TaskManager, "TaskManager");
 
 const schema: ContainerSchema = {
     initialObjects: {

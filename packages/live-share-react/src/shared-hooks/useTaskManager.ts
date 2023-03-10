@@ -1,6 +1,10 @@
-import React, { useEffect } from "react";
-import { TaskManager } from "@fluid-experimental/task-manager";
+import React from "react";
 import { useDynamicDDS } from "./useDynamicDDS";
+import { TaskManager  } from "@fluid-experimental/task-manager";
+import { DynamicObjectRegistry } from "@microsoft/live-share";
+
+// Register TaskManager as dynamic object
+DynamicObjectRegistry.registerObjectClass(TaskManager, TaskManager.getFactory().type);
 
 /**
  * A hook for joining a queue to lock tasks for a given id. Guaranteed to have only one user assigned to a task at a time.
@@ -30,7 +34,7 @@ export const useTaskManager = (uniqueKey: string, taskId?: string): {
     /**
      * When the task id changes, lock the task. When the task id is undefined, abandon the task.
      */
-    useEffect(() => {
+    React.useEffect(() => {
         let mounted = true;
         if (taskManager) {
             if (taskId && currentTaskIdRef.current !== taskId) {

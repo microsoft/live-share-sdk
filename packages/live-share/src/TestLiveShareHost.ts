@@ -43,9 +43,7 @@ export class TestLiveShareHost implements ILiveShareHost {
     private constructor(
         private _getLocalTestContainerId?: () => string | undefined,
         private _setLocalTestContainerId?: (containerId: string) => void
-    ) {
-        TestLiveShareHost.ensureWarned();
-    }
+    ) {}
 
     public defaultRoles: UserMeetingRole[] = [
         UserMeetingRole.organizer,
@@ -54,6 +52,7 @@ export class TestLiveShareHost implements ILiveShareHost {
     ];
 
     public getFluidTenantInfo(): Promise<IFluidTenantInfo> {
+        TestLiveShareHost.ensureWarned();
         return Promise.resolve({
             tenantId: "local",
             ordererEndpoint: "http://localhost:7070",

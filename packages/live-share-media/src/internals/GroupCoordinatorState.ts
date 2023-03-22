@@ -10,6 +10,7 @@ import {
     TimeInterval,
     IRuntimeSignaler,
     LiveTelemetryLogger,
+    LiveShareClient,
 } from "@microsoft/live-share";
 import EventEmitter from "events";
 import {
@@ -468,7 +469,7 @@ export class GroupCoordinatorState extends EventEmitter {
                                 );
                                 this._lastStateChange = event.playbackState;
                                 this._lastStateChangeTime =
-                                    LiveEvent.getTimestamp();
+                                    LiveShareClient.getTimestamp();
                             }
                             break;
                     }
@@ -494,7 +495,7 @@ export class GroupCoordinatorState extends EventEmitter {
     public async syncLocalMediaSession(): Promise<void> {
         // Skip further syncs if we're waiting or in a "soft suspension".
         const softSuspensionDelta =
-            LiveEvent.getTimestamp() - this._lastStateChangeTime;
+            LiveShareClient.getTimestamp() - this._lastStateChangeTime;
         if (!this.isWaiting && softSuspensionDelta >= 1000) {
             let { metadata, trackData, positionState, playbackState } =
                 this._getMediaPlayerState();

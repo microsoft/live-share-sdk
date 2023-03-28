@@ -17,7 +17,7 @@ variables:
   value: ''
 
 trigger:
-- main
+- scenario_test
 
 extends:
   template: azure-devops-templates/steps/coral/general_build_template.yml@SkypeSpaces-Infra
@@ -51,7 +51,7 @@ extends:
         cancelTimeoutInMinutes: 1
 
         steps:
-        - script: "npm install --no-audit"
+        - script: "npm install --no-audit --legacy-peer-deps"
           workingDirectory: ""
           displayName: "npm install"
 
@@ -59,6 +59,22 @@ extends:
           workingDirectory: ""
           displayName: "npm run build"
 
-        - script: "npm run test"
-          workingDirectory: "${{ variables.sdk_packages_directory }}/live-share"
-          displayName: "npm run test"
+        - script: "npm install --no-audit --legacy-peer-deps"
+          workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
+          displayName: "npm install sample"
+        
+        - script: "npm install jest"
+          workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
+          displayName: "npm install jest"
+
+        - script: "npm run build"
+          workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
+          displayName: "npm run build sample"
+
+        - task: Bash@3
+          inputs:
+            targetType: "inline"
+            workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
+            script: |
+              sh ../../../.azure-devops/scenario_test.sh
+          displayName: "run test"

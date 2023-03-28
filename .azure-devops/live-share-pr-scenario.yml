@@ -59,6 +59,10 @@ extends:
           workingDirectory: ""
           displayName: "npm run build"
 
+        - script: "yarn add @fluentui/react-components"
+          workingDirectory: ""
+          displayName: "yarn add fluentui"
+
         - script: "npm install --no-audit --legacy-peer-deps"
           workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
           displayName: "npm install sample"

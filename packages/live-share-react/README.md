@@ -492,6 +492,10 @@ export const useSharedTree = (uniqueKey) => {
 | ----------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
 | Live Share React  | Simple example with each of our custom Live Share React hooks.          | [View](../../samples/javascript/05.dice-roller-turbo) |
 
+## React version compatibility
+
+This package is compatible with React versions `^16.8.0` and greater, including React v18. In order to ensure compatibility with different versions React, this project does not currently use React Suspense for data fetching on load. We are closely monitoring React guidelines and may post updates as this evolves further. If you have feedback or thoughts on this topic, join the [discussion](https://github.com/microsoft/live-share-sdk/discussions/442).
+
 ## Package Compatibility
 
 TODO

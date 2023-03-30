@@ -490,7 +490,7 @@ export const useSharedTree = (uniqueKey) => {
 
 | Sample name       | Description                                                             | Javascript                                            |
 | ----------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
-| Live Share React  | Simple example with each of our custom Live Share React hooks.          | [View](../../samples/javascript/05.dice-roller-turbo) |
+| Live Share React  | Simple example with each of our custom Live Share React hooks.          | [View](../../samples/javascript/04.live-share-react)  |
 
 ## React version compatibility
 

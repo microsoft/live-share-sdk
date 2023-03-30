@@ -209,7 +209,7 @@ export interface IFluidTenantInfo {
     storageEndpoint: string;
 }
 
-export interface IClientUserInfo {
+export interface IClientInfo {
     userId: string;
     roles: UserMeetingRole[];
     displayName?: string;
@@ -276,5 +276,5 @@ export interface ILiveShareHost {
      * @returns `IUserInfo` for the queried client ID.
      */
     // TODO: make tmp returned undefined instead of throwing the error from the 404 if client not registered
-    getUserInfo(clientId: string): Promise<IClientUserInfo | undefined>;
+    getClientInfo(clientId: string): Promise<IClientInfo | undefined>;
 }

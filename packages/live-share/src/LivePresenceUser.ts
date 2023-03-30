@@ -4,10 +4,9 @@
  */
 
 import { LiveEvent } from "./LiveEvent";
-import { ILiveEvent, UserMeetingRole } from "./interfaces";
+import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
 import { cloneValue } from "./internals";
-import { IClient } from "@fluidframework/protocol-definitions";
 import { LiveShareClient } from "./LiveShareClient";
 
 /**
@@ -35,7 +34,6 @@ export enum PresenceState {
  * @hidden
  */
 export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
-    userId: string;
     state: PresenceState;
     data?: TData;
 }
@@ -45,19 +43,23 @@ export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
  */
 export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
-    private readonly _clients: string[] = [];
-    private _hostUserId?: string;
+    readonly _clients: string[] = [];
+    private _userId: string;
+    private _roles: UserMeetingRole[];
     private _displayName?: string;
-    private _roles?: UserMeetingRole[];
 
     /**
      * @hidden
      */
     constructor(
+        _clientInfo: IClientInfo,
         private _evt: ILivePresenceEvent<TData>,
         private _expirationPeriod: TimeInterval,
         private _isLocalUser: boolean
     ) {
+        this._userId = _clientInfo.userId;
+        this._roles = _clientInfo.roles;
+        this._displayName = _clientInfo.displayName;
         this.updateClients(this._evt);
         this._lastUpdateTime = LiveShareClient.getTimestamp();
     }
@@ -70,17 +72,10 @@ export class LivePresenceUser<TData = object> {
     }
 
     /**
-     * ID of the user.
+     * ID of the user. Can be undefined when first initialized.
      */
     public get userId(): string {
-        return this._evt.userId;
-    }
-
-    /**
-     * ID of the user.
-     */
-    public get hostUserId(): string | undefined {
-        return this._hostUserId;
+        return this._userId;
     }
 
     public get displayName(): string | undefined {
@@ -158,11 +153,13 @@ export class LivePresenceUser<TData = object> {
         }
 
         if (evt.clientId) {
-            LiveShareClient.getUserInfo(evt.clientId)
+            LiveShareClient.getClientInfo(evt.clientId)
                 .then((info) => {
-                    this._hostUserId = info?.userId;
-                    this._roles = info?.roles;
-                    this._displayName = info?.displayName;
+                    if (info) {
+                        this._userId = info?.userId;
+                        this._roles = info?.roles;
+                        this._displayName = info?.displayName;
+                    }
                 })
                 .catch((e) => {
                     console.warn(e);

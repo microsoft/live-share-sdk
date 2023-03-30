@@ -61,7 +61,6 @@ export class LivePresence<TData extends object = object> extends DataObject<{
     private _currentPresence: ILivePresenceEvent<TData> = {
         name: "UpdatePresence",
         timestamp: 0,
-        userId: "",
         state: PresenceState.offline,
         data: undefined,
     };
@@ -131,18 +130,21 @@ export class LivePresence<TData extends object = object> extends DataObject<{
     /**
      * Returns the ID of the local user.
      */
-    public get userId(): string {
-        return this._currentPresence.userId;
+    public get userId(): string | undefined {
+        const clientId = this._currentPresence.clientId;
+        if (!clientId) {
+            return undefined;
+        }
+        return this._users.find((user) => user._clients.includes(clientId))
+            ?.userId;
     }
 
     /**
      * Starts sharing presence information.
-     * @param userId Optional. ID of the local user. Defaults to a GUID if not provided.
      * @param data Optional. Custom data object to sshare. A deep copy of the data object is saved to avoid any accidental modifications.
      * @param state Optional. Initial presence state. Defaults to `PresenceState.online`.
      */
     public async initialize(
-        userId?: string,
         data?: TData,
         state = PresenceState.online
     ): Promise<void> {
@@ -153,7 +155,6 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         // Assign user ID
         // - If we don't set the timestamp the local user object will report as "offline".
         this._currentPresence.timestamp = LiveShareClient.getTimestamp();
-        this._currentPresence.userId = userId || v4();
         this._currentPresence.data = data;
         this._currentPresence.state = state;
 
@@ -349,33 +350,55 @@ export class LivePresence<TData extends object = object> extends DataObject<{
             }
         };
 
-        // Find user or where user should be inserted
-        let pos = 0;
-        const userId = evt.userId;
-        for (; pos < this._users.length; pos++) {
-            const current = this._users[pos];
-            const cmp = userId.localeCompare(current.userId);
-            if (cmp == 0) {
-                // User found. Apply update and check for changes
-                if (current.updateReceived(evt)) {
-                    emitEvent(current);
-                }
+        if (evt.clientId) {
+            LiveShareClient.getClientInfo(evt.clientId)
+                .then((info) => {
+                    if (info) {
+                        // Find user or where user should be inserted
+                        let pos = 0;
+                        const userId = info.userId;
+                        for (; pos < this._users.length; pos++) {
+                            const current = this._users[pos];
+                            const cmp = userId.localeCompare(current.userId);
+                            if (cmp == 0) {
+                                // User found. Apply update and check for changes
+                                if (current.updateReceived(evt)) {
+                                    emitEvent(current);
+                                }
 
-                return;
-            } else if (cmp > 0) {
-                // New user that should be inserted before this user
-                break;
-            }
+                                return;
+                            } else if (cmp > 0) {
+                                // New user that should be inserted before this user
+                                break;
+                            }
+                        }
+
+                        // Insert new user and send change event
+                        let isLocal: boolean = false;
+                        if (this._currentPresence.clientId) {
+                            isLocal =
+                                this._users
+                                    .find((user) => user.userId == userId)
+                                    ?._clients.includes(
+                                        this._currentPresence.clientId
+                                    ) ??
+                                evt.clientId == this._currentPresence.clientId;
+                        }
+
+                        const newUser = new LivePresenceUser<TData>(
+                            info,
+                            evt,
+                            this._expirationPeriod,
+                            isLocal
+                        );
+                        this._users.splice(pos, 0, newUser);
+                        emitEvent(newUser);
+                    }
+                })
+                .catch((e) => {
+                    console.warn(e);
+                });
         }
-
-        // Insert new user and send change event
-        const newUser = new LivePresenceUser<TData>(
-            evt,
-            this._expirationPeriod,
-            evt.userId == this._currentPresence.userId
-        );
-        this._users.splice(pos, 0, newUser);
-        emitEvent(newUser);
     }
 
     private waitUntilConnected(): Promise<string> {

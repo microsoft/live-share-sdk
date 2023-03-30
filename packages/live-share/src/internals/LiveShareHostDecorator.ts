@@ -9,7 +9,7 @@ import {
     IFluidContainerInfo,
     INtpTimeInfo,
     UserMeetingRole,
-    IClientUserInfo,
+    IClientInfo,
 } from "../interfaces";
 import { RequestCache } from "./RequestCache";
 import { waitForResult } from "./utils";
@@ -23,7 +23,7 @@ const CACHE_LIFETIME = 10 * 1000;
 export class LiveShareHostDecorator implements ILiveShareHost {
     private readonly _registerRequestCache: RequestCache<void> =
         new RequestCache(CACHE_LIFETIME);
-    private readonly _userInfoRequestCache: RequestCache<IClientUserInfo> =
+    private readonly _userInfoRequestCache: RequestCache<IClientInfo> =
         new RequestCache(CACHE_LIFETIME);
 
     /**
@@ -53,19 +53,19 @@ export class LiveShareHostDecorator implements ILiveShareHost {
         return this._host.getNtpTime();
     }
 
-    public async getUserInfo(
+    public async getClientInfo(
         clientId: string
-    ): Promise<IClientUserInfo | undefined> {
+    ): Promise<IClientInfo | undefined> {
         if (!clientId) {
             throw new Error(
-                `ClientManager: called getUserInfo() without a clientId`
+                `ClientManager: called getClientInfo() without a clientId`
             );
         }
         return this._userInfoRequestCache.cacheRequest(clientId, () => {
             return waitForResult(
                 async () => {
                     try {
-                        return await this._host.getUserInfo(clientId);
+                        return await this._host.getClientInfo(clientId);
                     } catch (error) {
                         // Error is thrown when client id is not registered
                         // Assume Client Id is local and to be newly registered.
@@ -75,7 +75,7 @@ export class LiveShareHostDecorator implements ILiveShareHost {
                             "getClientRolesError: " + JSON.stringify(error)
                         );
                         await this.registerClientId(clientId);
-                        return await this._host.getUserInfo(clientId);
+                        return await this._host.getClientInfo(clientId);
                     }
                 },
                 (result) => {
@@ -83,7 +83,7 @@ export class LiveShareHostDecorator implements ILiveShareHost {
                 },
                 () => {
                     return new Error(
-                        `ClientManager: timed out getting user info for a remote client ID`
+                        `ClientManager: timed out getting client info for a remote client ID`
                     );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE
@@ -112,7 +112,7 @@ export class LiveShareHostDecorator implements ILiveShareHost {
                     EXPONENTIAL_BACKOFF_SCHEDULE
                 );
             })
-            .then((_) => this.getUserInfo(clientId))
+            .then((_) => this.getClientInfo(clientId))
             .then((userInfo) => userInfo?.roles ?? []);
     }
 }

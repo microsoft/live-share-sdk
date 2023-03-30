@@ -21,7 +21,7 @@ import {
     ILiveShareHost,
     ContainerState,
     ITimestampProvider,
-    IClientUserInfo,
+    IClientInfo,
     IRoleVerifier,
     UserMeetingRole,
 } from "./interfaces";
@@ -411,10 +411,10 @@ export class LiveShareClient {
         );
     }
 
-    public static getUserInfo(
+    public static getClientInfo(
         clientId: string
-    ): Promise<IClientUserInfo | undefined> {
-        return LiveShareClient._host.getUserInfo(clientId);
+    ): Promise<IClientInfo | undefined> {
+        return LiveShareClient._host.getClientInfo(clientId);
     }
 
     /**

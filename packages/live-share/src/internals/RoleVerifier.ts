@@ -21,7 +21,7 @@ export class RoleVerifier implements IRoleVerifier {
         }
 
         if (Array.isArray(allowedRoles) && allowedRoles.length > 0) {
-            const info = await this._host.getUserInfo(clientId);
+            const info = await this._host.getClientInfo(clientId);
             const roles = info?.roles ?? [];
             for (let i = 0; i < allowedRoles.length; i++) {
                 const role = allowedRoles[i];

@@ -10,7 +10,7 @@ import {
     INtpTimeInfo,
     ContainerState,
     UserMeetingRole,
-    IClientUserInfo,
+    IClientInfo,
 } from "./interfaces";
 
 /**
@@ -108,8 +108,8 @@ export class TestLiveShareHost implements ILiveShareHost {
         return this;
     }
 
-    public async getUserInfo(clientId: string): Promise<IClientUserInfo> {
-        const info: IClientUserInfo = {
+    public async getClientInfo(clientId: string): Promise<IClientInfo> {
+        const info: IClientInfo = {
             userId: clientId, // set userId to clientId since not connected to teams
             roles: await this.getClientRoles(clientId),
             displayName: clientId.substring(0, 4),

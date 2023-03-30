@@ -135,6 +135,9 @@ export const AzureProvider: React.FC<IAzureProviderProps> = (
      * and `props.containerId` is not known.
      */
     React.useEffect(() => {
+        // This hook should only be called once, so we use a ref to track if it has been called.
+        // This is a workaround for the fact that useEffect is called twice on initial render in React V18.
+        // We are not doing this here for backwards compatibility. View the README for more information.
         if (
             results?.container?.connectionState !== undefined ||
             startedRef.current

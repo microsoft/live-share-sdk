@@ -39,8 +39,7 @@ export default function App() {
     if (!initialized) {
         return <div />;
     }
-    //const context = microsoftTeams.app.getContext();
-    //const theme = context.app.theme;
+    
     let currentTheme;
     microsoftTeams.app.getContext().then((context) => {
         currentTheme = context.app.theme;

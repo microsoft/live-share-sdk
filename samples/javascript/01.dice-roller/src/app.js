@@ -9,6 +9,7 @@ import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
 const searchParams = new URL(window.location).searchParams;
 const root = document.getElementById("content");
+let color = "white";
 
 // Define container schema
 
@@ -39,6 +40,10 @@ async function start() {
         if (context.page.frameContext == "meetingStage") {
             view = "stage";
         }
+        const theme = context.app.theme;
+        if (theme == "default") {
+            color = "black";
+    }
     }
 
     // Load the requested view
@@ -117,19 +122,18 @@ function renderStage(diceMap, elem) {
 
 const sideBarTemplate = document.createElement("template");
 
-sideBarTemplate["innerHTML"] = `
-  <style>
-    .wrapper { text-align: center; color: white }
-    .title { font-size: large; font-weight: bolder; }
-    .text { font-size: medium; }
-  </style>
-  <div class="wrapper">
-    <p class="title">Lets get started</p>
-    <p class="text">Press the share to stage button to share Dice Roller to the meeting stage.</p>
-  </div>
-`;
-
 function renderSideBar(elem) {
+    sideBarTemplate["innerHTML"] = `
+    <style>
+        .wrapper { text-align: center; color: ${color} }
+        .title { font-size: large; font-weight: bolder; }
+        .text { font-size: medium; }
+    </style>
+    <div class="wrapper">
+        <p class="title">Lets get started</p>
+        <p class="text">Press the share to stage button to share Dice Roller to the meeting stage.</p>
+    </div>
+    `;
     elem.appendChild(sideBarTemplate.content.cloneNode(true));
     const shareToStageButton = document.createElement("button");
     shareToStageButton["innerHTML"] = "Share to Stage";
@@ -151,19 +155,18 @@ function shareToStage() {
 
 const settingsTemplate = document.createElement("template");
 
-settingsTemplate["innerHTML"] = `
-  <style>
-    .wrapper { text-align: center; color: white }
-    .title { font-size: large; font-weight: bolder; }
-    .text { font-size: medium; }
-  </style>
-  <div class="wrapper">
-    <p class="title">Welcome to Dice Roller!</p>
-    <p class="text">Press the save button to continue.</p>
-  </div>
-`;
-
 function renderSettings(elem) {
+    settingsTemplate["innerHTML"] = `
+    <style>
+        .wrapper { text-align: center; color: ${color} }
+        .title { font-size: large; font-weight: bolder; }
+        .text { font-size: medium; }
+    </style>
+    <div class="wrapper">
+        <p class="title">Welcome to Dice Roller!</p>
+        <p class="text">Press the save button to continue.</p>
+    </div>
+    `;
     elem.appendChild(settingsTemplate.content.cloneNode(true));
 
     // Save the configurable tab

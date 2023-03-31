@@ -14,6 +14,7 @@ import { inTeams } from "./utils/inTeams";
 
 export default function App() {
     const [initialized, setInitialized] = useState(false);
+    const [teamsTheme, setteamsTheme] = useState(teamsLightTheme);
 
     useEffect(() => {
         if (!initialized) {
@@ -30,6 +31,21 @@ export default function App() {
                         setInitialized(true);
                     })
                     .catch((error) => console.error(error));
+                    microsoftTeams.app.getContext().then((context) => {
+                        const curTheme = context.app.theme;
+                        switch(curTheme) {
+                            case "dark":
+                                setteamsTheme(teamsDarkTheme);
+                                break;
+                            case "contrast":
+                                setteamsTheme(teamsHighContrastTheme);
+                                break;
+                            case "default":
+                            default:
+                                setteamsTheme(teamsLightTheme);
+                                break;
+                        }
+                    })
             } else {
                 setInitialized(true);
             }
@@ -39,21 +55,7 @@ export default function App() {
     if (!initialized) {
         return <div />;
     }
-    
-    let currentTheme;
-    microsoftTeams.app.getContext().then((context) => {
-        currentTheme = context.app.theme;
-    })
-    let teamsTheme;
-     switch(currentTheme) {
-        case "dark":
-            teamsTheme = teamsDarkTheme;
-        case "contrast":
-            teamsTheme = teamsHighContrastTheme
-        case "default":
-        default:
-            teamsTheme = teamsLightTheme
-    }
+    console.log(teamsTheme);
     
     return (
         <FluentProvider

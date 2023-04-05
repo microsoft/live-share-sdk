@@ -46,6 +46,15 @@ export default function App() {
                                 break;
                         }
                     })
+                    microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
+                        if (theme == "dark") {
+                            setteamsTheme(teamsDarkTheme);
+                        } else if (theme == "contrast") {
+                            setteamsTheme(teamsHighContrastTheme);
+                        } else {
+                            setteamsTheme(teamsLightTheme);
+                        }
+                    });
             } else {
                 setInitialized(true);
             }
@@ -55,16 +64,6 @@ export default function App() {
     if (!initialized) {
         return <div />;
     }
-
-    app.registerOnThemeChangeHandler(function(theme) {
-        if (theme == "dark") {
-            setteamsTheme(teamsDarkTheme);
-        } else if (theme == "contrast") {
-            setteamsTheme(teamsHighContrastTheme);
-        } else {
-            setteamsTheme(teamsLightTheme);
-        }
-    });
     
     return (
         <FluentProvider

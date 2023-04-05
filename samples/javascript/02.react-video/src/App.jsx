@@ -45,7 +45,7 @@ export default function App() {
                                 setteamsTheme(teamsLightTheme);
                                 break;
                         }
-                    })
+                    });
                     microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
                         if (theme == "dark") {
                             setteamsTheme(teamsDarkTheme);
@@ -53,7 +53,7 @@ export default function App() {
                             setteamsTheme(teamsHighContrastTheme);
                         } else {
                             setteamsTheme(teamsLightTheme);
-                        }
+                        }   
                     });
             } else {
                 setInitialized(true);

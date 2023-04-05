@@ -38,6 +38,15 @@ export default function App() {
                         setteamsTheme(teamsLightTheme);
                         break;
                 }
+                microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
+                    if (theme == "dark") {
+                        setteamsTheme(teamsDarkTheme);
+                    } else if (theme == "contrast") {
+                        setteamsTheme(teamsHighContrastTheme);
+                    } else {
+                        setteamsTheme(teamsLightTheme);
+                    }
+                });
             } catch (error) {
                 console.error(error);
             }
@@ -50,16 +59,6 @@ export default function App() {
     });
 
     const appReady = (inTeams() && initialized) || !inTeams();
-
-    app.registerOnThemeChangeHandler(function(theme) {
-        if (theme == "dark") {
-            setteamsTheme(teamsDarkTheme);
-        } else if (theme == "contrast") {
-            setteamsTheme(teamsHighContrastTheme);
-        } else {
-            setteamsTheme(teamsLightTheme);
-        }
-    });
 
     return (
         appReady && (

@@ -35,6 +35,13 @@ export default function App() {
                         setWebTheme(webLightTheme);
                         break;
                 }
+                microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
+                    if (theme == "dark") {
+                        setWebTheme(webDarkTheme);
+                    } else {
+                        setWebTheme(webLightTheme);
+                    }
+                });
             } catch (error) {
                 console.error(error);
             }
@@ -47,14 +54,6 @@ export default function App() {
     });
 
     const appReady = (inTeams() && initialized) || !inTeams();
-
-    app.registerOnThemeChangeHandler(function(theme) {
-        if (theme == "dark") {
-            setWebTheme(webDarkTheme);
-        } else {
-            setWebTheme(webLightTheme);
-        }
-    });
 
     return (
         appReady && (

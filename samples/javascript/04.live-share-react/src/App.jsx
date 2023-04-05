@@ -1,85 +1,56 @@
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
-import {
-    AzureProvider,
-    LiveShareProvider,
-} from "@microsoft/live-share-react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { inTeams } from "./utils/inTeams";
-import { useRef } from "react";
-import {
-    ExampleLivePresence,
-    ExampleSharedMap,
-    ExampleLiveState,
-    ExampleSharedState,
-    ExampleMediaSynchronizer,
-    ExampleLiveEvent,
-    ExampleLiveCanvas,
-    ExampleLiveTimer,
-    EXAMPLE_SHARED_MAP_KEY,
-} from "./components";
-import { TeamsClientLoader } from "./components/TeamsClientLoader";
-import { LiveShareHost } from "@microsoft/teams-js";
-import { TestLiveShareHost } from "@microsoft/live-share";
-import { SharedMap } from "fluid-framework";
+import { useRef, useEffect, useState } from "react";
+import { AzureAutoJoin, LiveShareAutoJoin, LiveShareManualJoin, TabConfig } from "./pages";
+import { AppRoutes } from "./constants";
 
-const localConnection = {
-    type: "local",
-    tokenProvider: new InsecureTokenProvider("", {
-        id: "123",
-    }),
-    endpoint: "http://localhost:7070",
-};
-const azureClientOptions = {
-    connection: localConnection,
-};
-const host = inTeams() ? LiveShareHost.create() : TestLiveShareHost.create();
+const IN_TEAMS = inTeams();
 
 export default function App() {
-    // set to false to use AzureClient Fluid container
-    const shouldUseLiveShare = useRef(true);
-    if (shouldUseLiveShare.current) {
-        return (
-            <TeamsClientLoader>
-                <LiveShareProvider
-                    joinOnLoad={true}
-                    host={host}
-                >
-                    <ExampleLiveState
-                        waitingContent={
-                            <>
-                                <ExampleMediaSynchronizer />
-                                <ExampleLiveEvent />
-                                <ExampleLiveCanvas />
-                            </>
-                        }
-                        startContent={
-                            <>
-                                <ExampleLiveTimer />
-                                <ExampleSharedState />
-                                <ExampleLivePresence />
-                                <ExampleSharedMap />
-                            </>
-                        }
-                    />
-                </LiveShareProvider>
-            </TeamsClientLoader>
-        );
-    }
+    const initializeStartedRef = useRef(false);
+    const [initialized, setInitialized] = useState(false);
+
+    useEffect(() => {
+        // This hook should only be called once, so we use a ref to track if it has been called.
+        // This is a workaround for the fact that useEffect is called twice on initial render in React V18.
+        // In production, you might consider using React Suspense if you are using React V18.
+        // We are not doing this here because many customers are still using React V17.
+        // We are monitoring the React Suspense situation closely and may revisit in the future.
+        if (initializeStartedRef.current || !IN_TEAMS) return;
+        initializeStartedRef.current = true;
+        const initialize = async () => {
+            try {
+                console.log("App.js: initializing client SDK initialized");
+                await microsoftTeams.app.initialize();
+                microsoftTeams.app.notifyAppLoaded();
+                microsoftTeams.app.notifySuccess();
+                setInitialized(true);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        console.log("App.js: initializing client SDK");
+        initialize();
+    }, []);
+
+    const appReady = (IN_TEAMS && initialized) || !IN_TEAMS;
+
     return (
-        <AzureProvider
-            clientOptions={azureClientOptions}
-            createOnLoad={true}
-            joinOnLoad={true}
-            containerId={window.location.hash.substring(1)}
-            initialObjects={{
-                /**
-                 * Optionally can defined custom objects and use them within their corresponding hook. See ExampleSharedMap to see
-                 * how this works.
-                 */
-                [EXAMPLE_SHARED_MAP_KEY]: SharedMap,
-            }}
-        >
-            <ExampleSharedState />
-            <ExampleSharedMap />
-        </AzureProvider>
+        <>
+            {appReady && (
+                <Router window={window} basename="/">
+                    <Routes>
+                        {/* Default route. In Teams, this will save the tab configuration for one of the below routes. Otherwise, we redirect to selected route. */}
+                        <Route exact path={AppRoutes.TabConfig} element={<TabConfig />} />
+                        {/* Example for automatically joining Live Share container when this component is rendered */}
+                        <Route exact path={AppRoutes.LiveShareAutoJoin} element={<LiveShareAutoJoin />} />
+                        {/* Example for manually joining Live Share session based on a user action */}
+                        <Route exact path={AppRoutes.LiveShareManualJoin} element={<LiveShareManualJoin />} />
+                        {/* Example for automatically creating or joining AzureClient container when this component is rendered */}
+                        <Route exact path={AppRoutes.AzureAutoJoin} element={<AzureAutoJoin />} />
+                    </Routes>
+                </Router>
+            )}
+        </>
     );
 }

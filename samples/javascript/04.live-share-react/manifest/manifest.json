@@ -26,7 +26,7 @@
     "accentColor": "#38a2ff",
     "configurableTabs": [
         {
-            "configurationUrl": "https://{YOUR_NGROK_ORIGIN}/config?inTeams=true",
+            "configurationUrl": "https://{YOUR_NGROK_ORIGIN}?inTeams=true",
             "canUpdateConfiguration": false,
             "scopes": [
                 "groupchat"
@@ -59,14 +59,6 @@
                 },
                 {
                     "name": "LiveShareSession.ReadWrite.Group",
-                    "type": "Delegated"
-                },
-                {
-                    "name": "OnlineMeetingIncomingAudio.Detect.Chat",
-                    "type": "Delegated"
-                },
-                {
-                    "name": "OnlineMeetingIncomingAudio.Detect.Group",
                     "type": "Delegated"
                 }
             ]

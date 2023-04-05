@@ -48,6 +48,14 @@ export default function App() {
 
     const appReady = (inTeams() && initialized) || !inTeams();
 
+    app.registerOnThemeChangeHandler(function(theme) {
+        if (theme == "dark") {
+            setWebTheme(webDarkTheme);
+        } else {
+            setWebTheme(webLightTheme);
+        }
+    });
+
     return (
         appReady && (
             <FluentProvider

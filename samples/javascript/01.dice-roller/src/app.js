@@ -43,7 +43,10 @@ async function start() {
         const theme = context.app.theme;
         if (theme == "default") {
             color = "black";
-    }
+        }
+        app.registerOnThemeChangeHandler(function(theme) {
+            color = theme === "default" ? "black" : "white";
+        });
     }
 
     // Load the requested view

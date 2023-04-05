@@ -55,7 +55,16 @@ export default function App() {
     if (!initialized) {
         return <div />;
     }
-    console.log(teamsTheme);
+
+    app.registerOnThemeChangeHandler(function(theme) {
+        if (theme == "dark") {
+            setteamsTheme(teamsDarkTheme);
+        } else if (theme == "contrast") {
+            setteamsTheme(teamsHighContrastTheme);
+        } else {
+            setteamsTheme(teamsLightTheme);
+        }
+    });
     
     return (
         <FluentProvider

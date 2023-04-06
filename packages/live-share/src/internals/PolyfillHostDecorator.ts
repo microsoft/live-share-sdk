@@ -24,13 +24,16 @@ export class PolyfillHostDecorator implements ILiveShareHost {
     private readonly _userRolesRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
 
-    private _failedGetClientInfoCount = 0;
+    private _getClientInfoTriesRemaining = 5;
+    private _getClientInfoExists = false;
 
     /**
      * @hidden
      * _host would be normal decorator: PolyfillHostDecorator(LiveShareHostDecorator(teamsJsHost))
      */
-    constructor(private readonly _host: ILiveShareHost) {}
+    constructor(private readonly _host: ILiveShareHost) {
+        this.warmupPolyfillCheck();
+    }
 
     public getFluidTenantInfo(): Promise<IFluidTenantInfo> {
         return this._host.getFluidTenantInfo();
@@ -120,12 +123,20 @@ export class PolyfillHostDecorator implements ILiveShareHost {
     public async getClientInfo(
         clientId: string
     ): Promise<IClientInfo | undefined> {
-        // fire getClientInfo and getClientRoles at same time.
-        // if getClientInfo resolves, return that
-        // if getClientInfo times out, return polyfil using getClientRoles, log warning
-        // if getClientInfo times out after multiple calls, start using only polyfill.
+        // 1. fire getClientInfo and getClientRoles at same time.
+        //    - on new versions of teams client getClientInfo and getClientRoles share same network cache, cheap to call.
+        //    - on old versions of teams client getClientRoles needs to be called anyway.
 
-        if (this._failedGetClientInfoCount > 5) {
+        // 2. if getClientInfo resolves, return that
+        // 3. if getClientInfo times out, return polyfil using getClientRoles, log warning
+        // 4. if getClientInfo times out after multiple calls, start using only polyfill.
+
+        if (this._getClientInfoExists) {
+            return this._host.getClientInfo(clientId);
+        }
+
+        if (this._getClientInfoTriesRemaining <= 0) {
+            console.log("using getClientInfo polyfill");
             return this.getClientRoles(clientId).then((roles) => {
                 return {
                     userId: clientId,
@@ -139,7 +150,7 @@ export class PolyfillHostDecorator implements ILiveShareHost {
         return this._host.getClientInfo(clientId).catch((e) => {
             if (e.message.contains("timed out")) {
                 console.log("using getClientInfo polyfill");
-                this._failedGetClientInfoCount++;
+                this._getClientInfoTriesRemaining--;
 
                 return getClientRoles.then((roles) => {
                     return {
@@ -158,5 +169,21 @@ export class PolyfillHostDecorator implements ILiveShareHost {
         clientId: string
     ): Promise<UserMeetingRole[]> {
         return this._host.registerClientId(clientId);
+    }
+
+    private warmupPolyfillCheck() {
+        // warmup doesn't use polyfill implementation
+        // "blah" clientId, error expected, hopefully not a timeout
+        this._host.getClientInfo("blah").catch((e) => {
+            if (e.message.contains("timed out")) {
+                this._getClientInfoTriesRemaining--;
+                if (this._getClientInfoTriesRemaining > 0) {
+                    this.warmupPolyfillCheck();
+                }
+            } else {
+                // resolved for reason other than timeout, api exists
+                this._getClientInfoExists = true;
+            }
+        });
     }
 }

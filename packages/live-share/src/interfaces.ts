@@ -271,6 +271,14 @@ export interface ILiveShareHost {
     registerClientId(clientId: string): Promise<UserMeetingRole[]>;
 
     /**
+     * @deprecated
+     * Queries the hosts role verification service for the roles associated with a given client ID.
+     * @param clientId ID of teh client to lookup.
+     * @returns An array of roles assigned to the queried client ID.
+     */
+    getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
+
+    /**
      * Queries the hosts `IUserInfo` for a given client ID.
      * @param clientId ID of the client to lookup.
      * @returns `IUserInfo` for the queried client ID.

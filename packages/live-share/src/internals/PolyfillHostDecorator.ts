@@ -15,19 +15,20 @@ import { RequestCache } from "./RequestCache";
 import { waitForResult } from "./utils";
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
-const CACHE_LIFETIME = 10 * 1000;
+const CACHE_LIFETIME = 5 * 60 * 1000; // original cache time
 
 /**
- * Live Share Host decorator used to reduce rapid duplicate requests.
+ * Experiment for polyfil
  */
-export class LiveShareHostDecorator implements ILiveShareHost {
-    private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> =
+export class PolyfillHostDecorator implements ILiveShareHost {
+    private readonly _userRolesRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
-    private readonly _userInfoRequestCache: RequestCache<IClientInfo> =
-        new RequestCache(CACHE_LIFETIME);
+
+    private _failedGetClientInfoCount = 0;
 
     /**
      * @hidden
+     * _host would be normal decorator: PolyfillHostDecorator(LiveShareHostDecorator(teamsJsHost))
      */
     constructor(private readonly _host: ILiveShareHost) {}
 
@@ -59,56 +60,27 @@ export class LiveShareHostDecorator implements ILiveShareHost {
     public async getClientRoles(
         clientId: string
     ): Promise<UserMeetingRole[] | undefined> {
-        return this._host.getClientRoles(clientId);
-    }
-
-    public async getClientInfo(
-        clientId: string
-    ): Promise<IClientInfo | undefined> {
         if (!clientId) {
             throw new Error(
                 `LiveShareHostDecorator: called getClientInfo() without a clientId`
             );
         }
-        return this._userInfoRequestCache.cacheRequest(clientId, () => {
+        return this._userRolesRequestCache.cacheRequest(clientId, () => {
             return waitForResult(
                 async () => {
+                    let rolesResult: UserMeetingRole[] | undefined;
                     try {
-                        return await this._host.getClientInfo(clientId);
+                        rolesResult = await this._host.getClientRoles(clientId);
                     } catch (error) {
                         // Error is thrown when client id is not registered
                         // Assume Client Id is local and to be newly registered.
                         // Our service is first writer wins, so we will not overwrite
                         // if previous states exist.
                         console.warn(
-                            "getClientInfoError: " + JSON.stringify(error)
+                            "getClientRolesError: " + JSON.stringify(error)
                         );
-                        await this.registerClientId(clientId);
-                        return await this._host.getClientInfo(clientId);
+                        return await this.registerClientId(clientId);
                     }
-                },
-                (result) => {
-                    return result?.userId != undefined;
-                },
-                () => {
-                    return new Error(
-                        `LiveShareHostDecorator: timed out getting client info for a remote client ID`
-                    );
-                },
-                EXPONENTIAL_BACKOFF_SCHEDULE
-            );
-        });
-    }
-
-    public async registerClientId(
-        clientId: string
-    ): Promise<UserMeetingRole[]> {
-        return this._registerRequestCache.cacheRequest(clientId, () => {
-            return waitForResult(
-                async () => {
-                    const rolesResult = await this._host.registerClientId(
-                        clientId
-                    );
                     if (!rolesResult) {
                         return undefined;
                     } else if (Array.isArray(rolesResult)) {
@@ -137,11 +109,54 @@ export class LiveShareHostDecorator implements ILiveShareHost {
                 },
                 () => {
                     return new Error(
-                        `LiveShareHostWrapper: timed out registering local client ID`
+                        `LiveShareHostDecorator: timed out getting roles for a remote client ID`
                     );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE
             );
         });
+    }
+
+    public async getClientInfo(
+        clientId: string
+    ): Promise<IClientInfo | undefined> {
+        // fire getClientInfo and getClientRoles at same time.
+        // if getClientInfo resolves, return that
+        // if getClientInfo times out, return polyfil using getClientRoles, log warning
+        // if getClientInfo times out after multiple calls, start using only polyfill.
+
+        if (this._failedGetClientInfoCount > 5) {
+            return this.getClientRoles(clientId).then((roles) => {
+                return {
+                    userId: clientId,
+                    displayName: undefined,
+                    roles: roles,
+                } as IClientInfo;
+            });
+        }
+
+        const getClientRoles = this.getClientRoles(clientId);
+        return this._host.getClientInfo(clientId).catch((e) => {
+            if (e.message.contains("timed out")) {
+                console.log("using getClientInfo polyfill");
+                this._failedGetClientInfoCount++;
+
+                return getClientRoles.then((roles) => {
+                    return {
+                        userId: clientId,
+                        displayName: undefined,
+                        roles: roles,
+                    } as IClientInfo;
+                });
+            } else {
+                return Promise.resolve(undefined);
+            }
+        });
+    }
+
+    public async registerClientId(
+        clientId: string
+    ): Promise<UserMeetingRole[]> {
+        return this._host.registerClientId(clientId);
     }
 }

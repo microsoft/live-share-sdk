@@ -15,8 +15,9 @@ const ALLOWED_ROLES = [
 export const ExampleLiveState = (props) => {
     const [state, data, setState] = useLiveState(
         "CUSTOM-STATE-ID",
+        ExampleAppState.WAITING,
+        undefined,
         ALLOWED_ROLES,
-        ExampleAppState.WAITING
     );
 
     if (state === ExampleAppState.WAITING) {

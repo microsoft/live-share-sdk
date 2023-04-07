@@ -1,6 +1,8 @@
 # Live Share React sample
 
-This sample shows how to use the [Live Share React](../../../packages/live-share-react) package in your application.
+![alt text](./assets/04-readme-preview-image.gif)
+
+This sample shows how to use the [Live Share React](../../../packages/live-share-react) package in your application. This sample is not intended to show real-world use cases, but rather show simple code examples for each feature of the SDK. For example, `LiveShareAutoJoin.jsx` shows how to use `LiveShareProvider` to easily join a Live Share session, while `ExampleSharedState.jsx` shows how to use the `useSharedState` hook to synchronize a checkbox.
 
 ## Testing Locally in Browser
 
@@ -12,10 +14,10 @@ Installs the latest node packages
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
+Builds the app for production to the `build` folder.
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
+The build is minified and the filenames include the hashes.
 Your app is ready to be deployed!
 
 `npm runs build:dev` run build the app in dev mode
@@ -26,17 +28,11 @@ Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 The page will reload when you make changes.\
-Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.\
-You can copy this URL and paste it into new browser tabs to test Live Share using a local server.\
+Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.
+You can copy this URL and paste it into new browser tabs to test Live Share using a local server.
 To test the side panel & video queue, you can replace your URL with `/sidepanel#{id}`.
 
 **Note:** if testing with HTTPS, such as when using a tunneling service like Ngrok, instead use the command `npm run start-https`.
-
-### Known issues when testing in browser
-
-When not in Teams, we don't have a way to know the user's userId, so we generate a random one.\
-That means you might not always start out in control of playback, and need to press "Take control".\
-Tab configuration page doesn't do anything in browser.
 
 ## Testing the app in Teams
 

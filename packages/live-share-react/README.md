@@ -43,6 +43,20 @@ export function SharedCheckbox() {
 
 ## Getting started
 
+## Installing
+
+To add the latest version of the SDK to your application using NPM:
+
+```bash
+npm install @microsoft/live-share-react --save
+```
+
+or using [Yarn](https://yarnpkg.com/):
+
+```bash
+yarn add @microsoft/live-share-react
+```
+
 ### Building package
 
 After cloning the [GitHub repository](https://www.github.com/microsoft/live-share-sdk), navigate to the root folder and perform:

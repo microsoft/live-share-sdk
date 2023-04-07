@@ -23,9 +23,9 @@ interface ILiveStateStatus<
  * Use this hook if you want to synchronize app state that will reset when all users leave the session.
  *
  * @param uniqueKey the unique key for the `LiveEvent`. If one does not yet exist, a new one will be created, otherwise it will use the existing one.
- * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state
  * @param initialState Optional. the initial state value of type TState
  * @param initialData Optional. the initial data value of type TData
+ * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state
  * @returns ordered values: first value is the synchronized state value, second is synchronized data value, and third is a setter to change the state/data values.
  */
 export function useLiveState<
@@ -33,9 +33,9 @@ export function useLiveState<
     TData extends object = object
 >(
     uniqueKey: string,
-    allowedRoles?: UserMeetingRole[],
     initialState?: TState,
-    initialData?: TData
+    initialData?: TData,
+    allowedRoles?: UserMeetingRole[]
 ): [TState | undefined, TData | undefined, SetLiveStateAction<TState, TData>] {
     const [current, setCurrent] = React.useState<
         ILiveStateStatus<TState, TData>
@@ -46,7 +46,10 @@ export function useLiveState<
     /**
      * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveState } = useDynamicDDS<LiveState<TData>>(uniqueKey, LiveState<TData>);
+    const { dds: liveState } = useDynamicDDS<LiveState<TData>>(
+        uniqueKey,
+        LiveState<TData>
+    );
 
     /**
      * Change state callback that is user facing
@@ -78,8 +81,7 @@ export function useLiveState<
      * Setup change listeners and start `LiveState` if needed
      */
     React.useEffect(() => {
-        if (liveState?.isInitialized === undefined)
-            return;
+        if (liveState === undefined) return;
 
         const onStateChanged = (state: TState, data: TData | undefined) => {
             setCurrent({

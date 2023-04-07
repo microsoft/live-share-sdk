@@ -17,6 +17,8 @@ import { ConsoleLogger } from "./ConsoleLogger";
 import { LiveShareHost } from "@microsoft/teams-js";
 
 const MeetingStage = () => {
+    // Started initializing flag
+    const startedInitializingRef = useRef(false);
     // Initial media item selected in SidePanel.jsx
     const initialMediaItem = useRef(getInitialMediaItem());
     // HTML5 <video> element ref
@@ -28,6 +30,13 @@ const MeetingStage = () => {
 
     // Initial setup when context is returned
     useEffect(() => {
+        // This hook should only be called once, so we use a ref to track if it has been called.
+        // This is a workaround for the fact that useEffect is called twice on initial render in React V18.
+        // In production, you might consider using React Suspense if you are using React V18.
+        // We are not doing this here because many customers are still using React V17.
+        // We are monitoring the React Suspense situation closely and may revisit in the future.
+        if (startedInitializingRef.current) return;
+        startedInitializingRef.current = true;
         (async function () {
             try {
                 // Set the initial video src for the player element

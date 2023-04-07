@@ -60,11 +60,11 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
     }, [userStoriesMap, setUserStories]);
 
     useEffect(() => {
-        if (userStoriesMap && !userStoriesStarted) {
-            setStarted(true);
-            userStoriesMap.on("valueChanged", refreshUserStories);
-            refreshUserStories();
-        }
+        if (!userStoriesMap || userStoriesStarted) return;
+        console.info("useUserStories: initializing user stories")
+        setStarted(true);
+        userStoriesMap.on("valueChanged", refreshUserStories);
+        refreshUserStories();
     }, [
         userStoriesMap,
         userStoriesStarted,

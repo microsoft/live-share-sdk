@@ -6,19 +6,27 @@
 import { FluentProvider, teamsDarkTheme } from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MeetingStage from "./pages/MeetingStage";
 import SidePanel from "./pages/SidePanel";
 import TabConfig from "./pages/TabConfig";
 import { inTeams } from "./utils/inTeams";
 
 export const App = () => {
+    const startedInitializingRef = useRef(false);
     const [initialized, setInitialized] = useState(false);
 
     useEffect(() => {
+        // This hook should only be called once, so we use a ref to track if it has been called.
+        // This is a workaround for the fact that useEffect is called twice on initial render in React V18.
+        // In production, you might consider using React Suspense if you are using React V18.
+        // We are not doing this here because many customers are still using React V17.
+        // We are monitoring the React Suspense situation closely and may revisit in the future.
+        if (startedInitializingRef.current) return;
+        startedInitializingRef.current = true;
         const initialize = async () => {
             try {
-                console.log("App.js: initializing client SDK initialized");
+                console.log("App.tsx: initializing client SDK initialized");
                 await microsoftTeams.app.initialize();
                 microsoftTeams.app.notifyAppLoaded();
                 microsoftTeams.app.notifySuccess();
@@ -29,7 +37,7 @@ export const App = () => {
         };
 
         if (inTeams()) {
-            console.log("App.js: initializing client SDK");
+            console.log("App.tsx: initializing client SDK");
             initialize();
         }
     });

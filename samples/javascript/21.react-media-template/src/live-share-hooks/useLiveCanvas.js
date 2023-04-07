@@ -4,7 +4,7 @@
  */
 
 import { InkingManager } from "@microsoft/live-share-canvas";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 /**
  *
@@ -13,13 +13,15 @@ import { useCallback, useEffect, useState } from "react";
  * @returns LiveCanvas callback helpers and inking manager.
  */
 export const useLiveCanvas = (liveCanvas, hostingElement) => {
+    const initializeStartedRef = useRef(false);
     const [inkingManager, setInkingManager] = useState(undefined);
     const [error, setError] = useState(undefined);
 
     const startInkingManager = useCallback(async () => {
-        if (!liveCanvas || !hostingElement) {
+        if (!liveCanvas || !hostingElement || initializeStartedRef.current) {
             return;
         }
+        initializeStartedRef.current = true;
 
         try {
             const inkingHost = hostingElement;

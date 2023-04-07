@@ -4,13 +4,16 @@ import { LiveCanvasPage } from "./Pages/LiveCanvasPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SidePanel from "./Pages/SidePanel";
 import TabConfig from "./Pages/TabConfig";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { inTeams } from "./utils/inTeams";
 
 export default function App() {
+    const startedInitializingRef = useRef(false);
     const [initialized, setInitialized] = useState(false);
 
     useEffect(() => {
+        if (startedInitializingRef.current) return;
+        startedInitializingRef.current = true;
         const initialize = async () => {
             try {
                 console.log("App.js: initializing client SDK initialized");

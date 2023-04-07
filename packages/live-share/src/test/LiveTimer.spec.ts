@@ -11,7 +11,8 @@ import { LiveTimer } from "../LiveTimer";
 import { Deferred } from "./Deferred";
 
 describeNoCompat("LiveTimer", (getTestObjectProvider) => {
-    const milliTolerance = 30;
+    // Target for milliTolerance is 30ms, but very rarely we see 31 due to JS callback scheduling is not exact.
+    const milliTolerance = 31;
     let provider: ITestObjectProvider;
     let object1: LiveTimer;
     let object2: LiveTimer;
@@ -184,7 +185,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         assert(finishedCounter === 1, `${finishedCounter}`);
     });
 
-    it("finish callback called within 30ms of ending", async () => {
+    it("finish callback called within 31ms of ending", async () => {
         const now = new Date().getTime();
         const object1done = new Deferred();
         object1.on("finished", (config) => {

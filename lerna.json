@@ -1,14 +1,8 @@
 {
     "packages": [
         "packages/*",
-        "samples/javascript/01.dice-roller",
-        "samples/javascript/02.react-video",
-        "samples/javascript/03.live-canvas-demo",
-        "samples/javascript/21.react-media-template",
-        "samples/javascript/22.react-agile-poker",
-        "samples/javascript/23.react-live-canvas",
-        "samples/javascript/31.live-canvas-tests",
-        "samples/typescript/21.react-media-template"
+        "samples/javascript/*",
+        "samples/typescript/*"
     ],
     "version": "0.0.0"
 }

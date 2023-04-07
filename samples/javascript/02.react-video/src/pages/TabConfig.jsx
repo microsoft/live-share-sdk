@@ -4,12 +4,15 @@
  */
 
 import * as microsoftTeams from "@microsoft/teams-js";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { getFlexColumnStyles } from "../styles/layouts";
 import { mergeClasses, Title2, Subtitle2 } from "@fluentui/react-components";
 
 const TabConfig = () => {
+    const startedRef = useRef(false);
     useEffect(() => {
+        if (startedRef.current) return;
+        startedRef.current = true;
         microsoftTeams.pages.config.registerOnSaveHandler(function (saveEvent) {
             microsoftTeams.pages.config.setConfig({
                 suggestedDisplayName: "Contoso",

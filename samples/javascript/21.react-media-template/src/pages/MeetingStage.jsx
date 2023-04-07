@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as liveShareHooks from "../live-share-hooks";
 import {
     LiveNotifications,
@@ -16,6 +16,8 @@ import { ACCEPT_PLAYBACK_CHANGES_FROM } from "../constants/allowed-roles";
 import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 
 const MeetingStage = () => {
+    // Flag tracking whether player setup has started
+    const playerSetupStarted = useRef(false);
     // Teams context
     const context = useTeamsContext();
     // Media player
@@ -100,34 +102,26 @@ const MeetingStage = () => {
 
     // Set up the media player
     useEffect(() => {
-        if (!player && selectedMediaItem) {
-            // Setup Azure Media Player
-            const src = [{ src: selectedMediaItem.src }];
-            const amp = new AzureMediaPlayer("video", src);
-            // Set player when AzureMediaPlayer is ready to go
-            const onReady = () => {
-                setPlayer(amp);
-                amp.removeEventListener("ready", onReady);
-            };
-            amp.addEventListener("ready", onReady);
-        }
+        if (player || !selectedMediaItem || playerSetupStarted.current) return;
+        playerSetupStarted.current = true;
+        // Setup Azure Media Player
+        const src = [{ src: selectedMediaItem.src }];
+        const amp = new AzureMediaPlayer("video", src);
+        // Set player when AzureMediaPlayer is ready to go
+        const onReady = () => {
+            setPlayer(amp);
+            amp.removeEventListener("ready", onReady);
+        };
+        amp.addEventListener("ready", onReady);
     }, [selectedMediaItem, player, setPlayer]);
 
-    const started = useMemo(() => {
-        return [
-            notificationStarted,
-            mediaSessionStarted,
-            presenceStarted,
-            takeControlStarted,
-            playlistStarted,
-        ].every((value) => value === true);
-    }, [
+    const started = [
         notificationStarted,
         mediaSessionStarted,
         presenceStarted,
         takeControlStarted,
         playlistStarted,
-    ]);
+    ].every((value) => value === true);
 
     // Render the media player
     return (

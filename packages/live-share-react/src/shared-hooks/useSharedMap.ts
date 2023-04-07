@@ -10,30 +10,6 @@ import { useDynamicDDS } from "./useDynamicDDS";
 import { SharedMap } from "fluid-framework";
 
 /**
- * Helper method for converting different initial data props into a Map<string, TData> to insert into the Fluid SharedMap
- * @template TData Optional typing for objects stored in the SharedMap. Default is `object` type.
- * @param initialData a JS Map, entries array, or JSON object.
- * @returns A Map<string, TData> with the entries provided.
- */
-function getInitialData<TData>(
-    initialData: SharedMapInitialData<TData>
-): Map<string, TData> {
-    if (isMap(initialData)) {
-        return initialData;
-    } else if (isEntries(initialData)) {
-        return new Map<string, TData>(initialData);
-    } else if (isJSON(initialData)) {
-        const values: (readonly [string, TData])[] = Object.keys(
-            initialData
-        ).map((key) => {
-            return [key, initialData[key]];
-        });
-        return new Map<string, TData>(values);
-    }
-    return new Map<string, TData>();
-}
-
-/**
  * React hook for using a Fluid `SharedMap`.
  *
  * @remarks
@@ -129,4 +105,28 @@ export function useSharedMap<TData extends object = object>(
         deleteEntry,
         sharedMap,
     };
+}
+
+/**
+ * Helper method for converting different initial data props into a Map<string, TData> to insert into the Fluid SharedMap
+ * @template TData Optional typing for objects stored in the SharedMap. Default is `object` type.
+ * @param initialData a JS Map, entries array, or JSON object.
+ * @returns A Map<string, TData> with the entries provided.
+ */
+function getInitialData<TData>(
+    initialData: SharedMapInitialData<TData>
+): Map<string, TData> {
+    if (isMap(initialData)) {
+        return initialData;
+    } else if (isEntries(initialData)) {
+        return new Map<string, TData>(initialData);
+    } else if (isJSON(initialData)) {
+        const values: (readonly [string, TData])[] = Object.keys(
+            initialData
+        ).map((key) => {
+            return [key, initialData[key]];
+        });
+        return new Map<string, TData>(values);
+    }
+    return new Map<string, TData>();
 }

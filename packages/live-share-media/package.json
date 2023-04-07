@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-media",
-    "version": "1.0.0-preview.5",
+    "version": "1.0.0-preview.6",
     "description": "Live Share classes that synchronize media playback across clients.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -14,7 +14,7 @@
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
     },
     "dependencies": {
-        "@microsoft/live-share": "1.0.0-preview.4",
+        "@microsoft/live-share": "1.0.0-preview.6",
         "fluid-framework": "~1.2.3"
     },
     "devDependencies": {

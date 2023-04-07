@@ -7,7 +7,7 @@ import {
     Card,
     CardPreview,
     CardFooter,
-} from "@fluentui/react-components/unstable";
+} from "@fluentui/react-components";
 import { Image, Text, Button } from "@fluentui/react-components";
 import { getFlexRowStyles } from "../styles/layouts";
 

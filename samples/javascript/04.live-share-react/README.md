@@ -1,6 +1,6 @@
 # Live Share React sample
 
-![alt text](./assets/04-readme-preview-image.gif)
+![GIF showing the sample functionality](./assets/04-readme-preview-image.gif)
 
 This sample shows how to use the [Live Share React](../../../packages/live-share-react) package in your application. This sample is not intended to show real-world use cases, but rather show simple code examples for each feature of the SDK. For example, `LiveShareAutoJoin.jsx` shows how to use `LiveShareProvider` to easily join a Live Share session, while `ExampleSharedState.jsx` shows how to use the `useSharedState` hook to synchronize a checkbox.
 

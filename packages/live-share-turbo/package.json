@@ -18,6 +18,7 @@
     },
     "dependencies": {
         "@fluidframework/azure-client": "~1.0.2",
+        "@fluidframework/register-collection": "~1.2.3",
         "@microsoft/live-share": "1.0.0-preview.6",
         "fluid-framework": "~1.2.3"
     },

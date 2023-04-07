@@ -9,7 +9,6 @@ import {
     SharedString,
     SharedDirectory,
 } from "fluid-framework";
-import { ConsensusRegisterCollection } from "@fluidframework/register-collection";
 
 /**
  * Key for window global reference to loadable objects.
@@ -68,4 +67,3 @@ export class DynamicObjectRegistry {
 DynamicObjectRegistry.registerObjectClass(SharedMap, SharedMap.getFactory().type);
 DynamicObjectRegistry.registerObjectClass(SharedString, SharedString.getFactory().type);
 DynamicObjectRegistry.registerObjectClass(SharedDirectory, SharedDirectory.getFactory().type);
-DynamicObjectRegistry.registerObjectClass(ConsensusRegisterCollection, ConsensusRegisterCollection.getFactory().type);

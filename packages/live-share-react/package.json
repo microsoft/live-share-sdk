@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/live-share-react",
-  "version": "1.0.0-preview.4",
+  "version": "1.0.0-preview.5",
   "description": "Build collaborative React apps using Microsoft's Fluid & Live Share frameworks with ease.",
   "author": "Microsoft",
   "license": "SEE LICENSE IN LICENSE",

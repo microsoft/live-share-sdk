@@ -15,6 +15,10 @@ import {
 } from "@fluidframework/core-interfaces";
 import { assert } from "@fluidframework/common-utils";
 import { ConsensusRegisterCollection } from "@fluidframework/register-collection";
+import { DynamicObjectRegistry } from "@microsoft/live-share";
+
+// Register ConsensusRegisterCollection
+DynamicObjectRegistry.registerObjectClass(ConsensusRegisterCollection, ConsensusRegisterCollection.getFactory().type);
 
 type DynamicObjectsCollection = ConsensusRegisterCollection<IFluidHandle<any>>;
 const dynamicObjectsCollectionKey = "<<consensusRegisterCollectionKey>>";

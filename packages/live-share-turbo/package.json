@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-turbo",
-    "version": "1.0.0-preview.4",
+    "version": "1.0.0-preview.7",
     "description": "Alternative & lightweight way to build collaborative apps using Microsoft's Fluid Framework & Live Share.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -18,7 +18,8 @@
     },
     "dependencies": {
         "@fluidframework/azure-client": "~1.0.2",
-        "@microsoft/live-share": "1.0.0-preview.4",
+        "@fluidframework/register-collection": "~1.2.3",
+        "@microsoft/live-share": "1.0.0-preview.7",
         "fluid-framework": "~1.2.3"
     },
     "devDependencies": {

@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 import { useNavigate } from "react-router-dom";
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -90,25 +90,12 @@ const SidePanel = () => {
         [sharingActive, selectMediaId, takeControl]
     );
 
-    const started = useMemo(() => {
-        console.log("~~~ SidePanel.jsx:");
-        console.log(" notificationStarted:", notificationStarted);
-        console.log(" presenceStarted:", presenceStarted);
-        console.log(" takeControlStarted:", takeControlStarted);
-        console.log(" playlistStarted:", playlistStarted);
-        console.log("~~~");
-        return [
-            notificationStarted,
-            presenceStarted,
-            takeControlStarted,
-            playlistStarted,
-        ].every((value) => value === true);
-    }, [
+    const started = [
         notificationStarted,
         presenceStarted,
         takeControlStarted,
         playlistStarted,
-    ]);
+    ].every((value) => value === true);
 
     return (
         <LiveSharePage

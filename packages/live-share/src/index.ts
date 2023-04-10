@@ -3,6 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+export * from "./DynamicObjectRegistry";
 export * from "./HostTimestampProvider";
 export * from "./interfaces";
 export * from "./LiveEvent";

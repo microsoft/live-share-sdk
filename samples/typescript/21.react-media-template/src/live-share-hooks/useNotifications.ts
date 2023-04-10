@@ -6,7 +6,7 @@
 // eslint-disable-next-line
 import { LiveEvent } from "@microsoft/live-share";
 import { app } from "@microsoft/teams-js";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 /**
  * Hook for sending notifications to display across clients
@@ -24,6 +24,7 @@ export const useNotifications = (
     notificationEvent?: LiveEvent,
     context?: app.Context
 ) => {
+    const startedInitializingRef = useRef(false);
     const [notificationToDisplay, setNotificationToDisplay] =
         useState<string>();
     const [notificationStarted, setStarted] = useState(false);
@@ -44,26 +45,28 @@ export const useNotifications = (
     );
 
     useEffect(() => {
-        if (notificationEvent && !notificationEvent.isInitialized) {
-            notificationEvent.on("received", (event, local) => {
-                // Display notification differently for local vs. remote users
-                if (local) {
-                    setNotificationToDisplay(`You ${event.text}`);
-                } else {
-                    setNotificationToDisplay(
-                        `${event.senderName} ${event.text}`
-                    );
-                }
-            });
-            console.log("useNotifications: starting notifications");
-            notificationEvent
-                .initialize()
-                .then(() => {
-                    console.log("useNotifications: notifications started");
-                    setStarted(true);
-                })
-                .catch((error) => console.error(error));
-        }
+        if (
+            !notificationEvent ||
+            notificationEvent.isInitialized ||
+            startedInitializingRef.current
+        )
+            return;
+        notificationEvent.on("received", (event, local) => {
+            // Display notification differently for local vs. remote users
+            if (local) {
+                setNotificationToDisplay(`You ${event.text}`);
+            } else {
+                setNotificationToDisplay(`${event.senderName} ${event.text}`);
+            }
+        });
+        console.log("useNotifications: initializing notifications");
+        notificationEvent
+            .initialize()
+            .then(() => {
+                console.log("useNotifications: notifications started");
+                setStarted(true);
+            })
+            .catch((error) => console.error(error));
     }, [notificationEvent, setNotificationToDisplay, setStarted]);
 
     return {

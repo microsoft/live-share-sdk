@@ -1,0 +1,52 @@
+{
+    "name": "@microsoft/live-share-turbo",
+    "version": "1.0.0-preview.7",
+    "description": "Alternative & lightweight way to build collaborative apps using Microsoft's Fluid Framework & Live Share.",
+    "author": "Microsoft",
+    "license": "SEE LICENSE IN LICENSE",
+    "main": "./bin/index.js",
+    "types": "./bin/index.d.ts",
+    "scripts": {
+        "clean": "npx shx rm -rf bin",
+        "build": "tsc -p tsconfig.build.json",
+        "test": "start-server-and-test start:server 7070 test:local-main",
+        "test:debug": "start-server-and-test start:server 7070 test:local-debug",
+        "start:server": "npx @fluidframework/azure-local-service > tinylicious.log 2>&1",
+        "test:local-main": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --timeout 10000 -r jsdom-global/register",
+        "test:local-debug": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --inspect-brk -r jsdom-global/register",
+        "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
+    },
+    "dependencies": {
+        "@fluidframework/azure-client": "~1.0.2",
+        "@fluidframework/register-collection": "~1.2.3",
+        "@microsoft/live-share": "1.0.0-preview.7",
+        "fluid-framework": "~1.2.3"
+    },
+    "devDependencies": {
+        "@fluidframework/azure-local-service": "^1.1.0",
+        "@fluidframework/test-client-utils": "~1.2.3",
+        "@fluidframework/test-runtime-utils": "~1.2.3",
+        "@fluidframework/test-utils": "~1.2.3",
+        "@fluidframework/test-version-utils": "~1.2.3",
+        "@types/assert": "^1.5.6",
+        "@types/mocha": "^10.0.1",
+        "@types/node": "^18.11.18",
+        "@types/uuid": "8.3.4",
+        "jsdom-global": "^3.0.2",
+        "jsdom": "^21.1.0",
+        "mocha": "^10.2.0",
+        "nyc": "^15.1.0",
+        "start-server-and-test": "^1.15.2",
+        "ts-mocha": "^10.0.0",
+        "typescript": "^4.6.4"
+    },
+    "repository": {
+        "directory": "packages/live-share-turbo",
+        "type": "git",
+        "url": "https://github.com/microsoft/live-share-sdk"
+    },
+    "homepage": "https://aka.ms/teamsliveshare",
+    "bugs": {
+        "url": "https://github.com/microsoft/live-share-sdk/issues"
+    }
+}

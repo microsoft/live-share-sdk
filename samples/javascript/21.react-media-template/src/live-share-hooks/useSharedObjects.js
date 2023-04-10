@@ -8,7 +8,7 @@ import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
 import { SharedMap } from "fluid-framework";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LiveEvent, LivePresence } from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";
 import { LiveShareHost } from "@microsoft/teams-js";
@@ -23,10 +23,18 @@ import { LiveShareHost } from "@microsoft/teams-js";
  * @returns Shared objects managed by the apps fluid container.
  */
 export function useSharedObjects() {
+    const startedRef = useRef(false);
     const [results, setResults] = useState();
     const [error, setError] = useState();
 
     useEffect(() => {
+        // This hook should only be called once, so we use a ref to track if it has been called.
+        // This is a workaround for the fact that useEffect is called twice on initial render in React V18.
+        // In production, you might consider using React Suspense if you are using React V18.
+        // We are not doing this here because many customers are still using React V17.
+        // We are monitoring the React Suspense situation closely and may revisit in the future.
+        if (startedRef.current) return;
+        startedRef.current = true;
         console.log("useSharedObjects: starting");
         // Check if user is in Teams
         const url = window.location.href.includes("/#/")

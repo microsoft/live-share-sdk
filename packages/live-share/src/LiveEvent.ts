@@ -16,6 +16,7 @@ import {
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { LocalRoleVerifier } from "./LocalRoleVerifier";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /**
  * Events supported by `LiveEvent` object.
@@ -251,3 +252,8 @@ export class LiveEvent<
         LiveEvent._roleVerifier = provider;
     }
 }
+
+/**
+ * Register `LiveEvent` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ */
+DynamicObjectRegistry.registerObjectClass(LiveEvent, LiveEvent.TypeName);

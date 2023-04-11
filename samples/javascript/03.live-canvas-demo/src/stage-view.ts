@@ -107,7 +107,6 @@ export class StageView extends View {
             };
 
             this._inkingManager = new InkingManager(inkingHost);
-            this._inkingManager.referencePoint = "topLeft";
 
             await liveCanvas.initialize(this._inkingManager);
 

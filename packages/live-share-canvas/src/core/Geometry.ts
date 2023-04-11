@@ -64,6 +64,15 @@ export function expandRect(rect: IRect, point: IPoint): IRect {
     };
 }
 
+export function combineRects(rect1: IRect, rect2: IRect): IRect {
+    return {
+        left: Math.min(rect1.left, rect2.left),
+        top: Math.min(rect1.top, rect2.top),
+        right: Math.max(rect1.right, rect2.right),
+        bottom: Math.max(rect1.bottom, rect2.bottom),
+    };
+}
+
 /**
  * Computes the distance between two points.
  * @param p1 The first point.

@@ -25,3 +25,16 @@ export function toggleElementVisibility(elementId: string, isVisible: boolean) {
         element.style.visibility = isVisible ? "visible" : "hidden";
     }
 }
+
+export function writeTextToClipboard(text: string, message: string) {
+    navigator.clipboard.writeText(text).then(
+        () => {
+            alert(message);
+        },
+        () => {
+            alert(
+                "The exported data couldn't be copied to the clipboard because permission to do so wasn't granted by the user."
+            );
+        }
+    );
+}

@@ -16,6 +16,7 @@ import {
     IPointerPoint,
     IRect,
     screenToViewport,
+    combineRects,
     viewportToScreen,
 } from "./Geometry";
 import {
@@ -24,6 +25,7 @@ import {
     IStrokeCreationOptions,
     StrokeType,
     StrokeMode,
+    IRawStroke,
 } from "./Stroke";
 import {
     InputFilter,
@@ -46,6 +48,8 @@ import {
     generateUniqueId,
     computeEndArrow,
     isPointInsideRectangle,
+    computeQuadPath,
+    renderQuadPathToSVG,
 } from "./Internals";
 
 /**
@@ -493,6 +497,7 @@ export class InkingManager extends EventEmitter {
         string,
         EphemeralCanvas
     >();
+    private _lastPointerMovePosition?: IPoint;
 
     private onHostResized = (
         entries: ResizeObserverEntry[],
@@ -889,15 +894,15 @@ export class InkingManager extends EventEmitter {
     }
 
     private queuePointerMovedNotification(position?: IPoint) {
-        if (this._pointerMovedNotificationTimeout !== undefined) {
-            window.clearTimeout(this._pointerMovedNotificationTimeout);
+        this._lastPointerMovePosition = position;
+
+        if (this._pointerMovedNotificationTimeout === undefined) {
+            this._pointerMovedNotificationTimeout = window.setTimeout(() => {
+                this.notifyPointerMoved(this._lastPointerMovePosition);
+
+                this._pointerMovedNotificationTimeout = undefined;
+            }, InkingManager.pointerMovedNotificationDelay);
         }
-
-        this._pointerMovedNotificationTimeout = window.setTimeout(() => {
-            this.notifyPointerMoved(position);
-
-            this._pointerMovedNotificationTimeout = undefined;
-        }, InkingManager.pointerMovedNotificationDelay);
     }
 
     private notifyPointerMoved(position?: IPoint) {
@@ -1063,6 +1068,100 @@ export class InkingManager extends EventEmitter {
         this.scheduleReRender();
 
         this.notifyClear();
+    }
+
+    /**
+     * Exports the current drawing as a collection of raw strokes.
+     * @returns A collection or raw strokes.
+     */
+    public exportRaw(): IRawStroke[] {
+        const result: IRawStroke[] = [];
+
+        this._strokes.forEach((stroke: IStroke) => {
+            result.push({
+                points: stroke.getAllPoints(),
+                timeStamp: stroke.timeStamp,
+                brush: { ...stroke.brush },
+            });
+        });
+
+        return result;
+    }
+
+    /**
+     * Exports the current drawing to an SVG.
+     * @returns A serialized SVG string.
+     */
+    public exportSVG(): string {
+        let shapes = "";
+        let viewBox: IRect | undefined;
+        let largestTipSize = 0;
+
+        this._strokes.forEach((stroke: IStroke) => {
+            const boundingRect = stroke.getBoundingRect();
+
+            viewBox = viewBox
+                ? combineRects(viewBox, boundingRect)
+                : boundingRect;
+
+            if (stroke.brush.tipSize > largestTipSize) {
+                largestTipSize = stroke.brush.tipSize;
+            }
+
+            const quadPath = computeQuadPath(
+                stroke.getAllPoints(),
+                0,
+                stroke.brush.tip,
+                stroke.brush.tipSize
+            );
+
+            let path = renderQuadPathToSVG(
+                quadPath,
+                stroke.brush.tip,
+                stroke.brush.color
+            );
+
+            if (stroke.brush.type === "highlighter") {
+                path = `<g opacity="${InkingCanvas.highlighterOpacity}">${path}</g>`;
+            }
+
+            shapes += path;
+        });
+
+        let svgViewBox = "";
+
+        if (viewBox) {
+            const halfTipSize = largestTipSize / 2;
+
+            // Add half the maximum brush tip size on each side
+            // of the view box, otherwise parts of some strokes
+            // would be clipped.
+            viewBox.left -= halfTipSize;
+            viewBox.top -= halfTipSize;
+            const viewBoxWidth = viewBox.right - viewBox.left + largestTipSize;
+            const viewBoxHeight = viewBox.bottom - viewBox.top + largestTipSize;
+
+            svgViewBox = `viewBox="${viewBox.left} ${viewBox.top} ${viewBoxWidth} ${viewBoxHeight}"`;
+        }
+
+        return `<svg ${svgViewBox} xmlns="http://www.w3.org/2000/svg">${shapes}</svg>`;
+    }
+
+    /**
+     * Imports (adds) the specified strokes into the drawing.
+     * @param rawStrokes The strokes to import.
+     */
+    public importRaw(rawStrokes: IRawStroke[]) {
+        for (const rawStroke of rawStrokes) {
+            const stroke = new Stroke({
+                brush: rawStroke.brush,
+                timeStamp: rawStroke.timeStamp,
+                points: rawStroke.points,
+                clientId: InkingManager.localClientId,
+            });
+
+            this.addStroke(stroke);
+        }
     }
 
     /**

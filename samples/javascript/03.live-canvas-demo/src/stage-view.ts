@@ -107,6 +107,7 @@ export class StageView extends View {
             };
 
             this._inkingManager = new InkingManager(inkingHost);
+            this._inkingManager.referencePoint = "topLeft";
 
             await liveCanvas.initialize(this._inkingManager);
 
@@ -294,7 +295,10 @@ export class StageView extends View {
                 this._inkingManager.importRaw(strokes);
             } catch (error: any) {
                 console.error(error);
-                alert("Unable to strokes from clipboard.\nError: " + error?.message);
+                alert(
+                    "Unable to strokes from clipboard.\nError: " +
+                        error?.message
+                );
             }
         });
 

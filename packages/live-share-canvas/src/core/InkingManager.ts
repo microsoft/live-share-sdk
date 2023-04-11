@@ -1080,7 +1080,6 @@ export class InkingManager extends EventEmitter {
         this._strokes.forEach((stroke: IStroke) => {
             result.push({
                 points: stroke.getAllPoints(),
-                timeStamp: stroke.timeStamp,
                 brush: { ...stroke.brush },
             });
         });
@@ -1155,7 +1154,6 @@ export class InkingManager extends EventEmitter {
         for (const rawStroke of rawStrokes) {
             const stroke = new Stroke({
                 brush: rawStroke.brush,
-                timeStamp: rawStroke.timeStamp,
                 points: rawStroke.points,
                 clientId: InkingManager.localClientId,
             });
@@ -1186,6 +1184,7 @@ export class InkingManager extends EventEmitter {
         canvas.resize(this.clientWidth, this.clientHeight);
         canvas.offset = this.offset;
         canvas.scale = this.scale;
+        canvas.referencePoint = this.referencePoint;
 
         let stroke: WetStroke;
 
@@ -1498,6 +1497,8 @@ export class InkingManager extends EventEmitter {
     set referencePoint(value: CanvasReferencePoint) {
         if (this._referencePoint !== value) {
             this._referencePoint = value;
+
+            this._dryCanvas.referencePoint = value;
 
             this.reRender();
         }

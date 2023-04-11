@@ -96,10 +96,6 @@ export interface IRawStroke {
      */
     readonly points: IPointerPoint[];
     /**
-     * The timestamp when the stroke was created.
-     */
-    readonly timeStamp: number;
-    /**
      * The brush used to draw the stroke.
      */
     readonly brush: IBrush;

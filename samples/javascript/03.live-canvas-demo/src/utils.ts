@@ -60,7 +60,6 @@ function isStroke(value: unknown): value is IRawStroke {
         typeof value === "object" &&
         !!value &&
         Array.isArray((value as any).points) &&
-        typeof (value as any).timeStamp === "number" &&
         typeof (value as any).brush === "object"
     );
 }

@@ -29,7 +29,7 @@ export class PolyfillHostDecorator implements ILiveShareHost {
 
     /**
      * @hidden
-     * _host would be normal decorator: PolyfillHostDecorator(LiveShareHostDecorator(teamsJsHost))
+     * _host would be `LiveShareHostDecorator` decorator: `new PolyfillHostDecorator(new LiveShareHostDecorator(teamsJsHost))`
      */
     constructor(private readonly _host: ILiveShareHost) {
         this.warmupPolyfillCheck();

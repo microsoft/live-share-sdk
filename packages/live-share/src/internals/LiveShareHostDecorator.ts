@@ -137,7 +137,7 @@ export class LiveShareHostDecorator implements ILiveShareHost {
                 },
                 () => {
                     return new Error(
-                        `LiveShareHostWrapper: timed out registering local client ID`
+                        `LiveShareHostDecorator: timed out registering local client ID`
                     );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE

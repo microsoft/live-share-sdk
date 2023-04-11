@@ -56,10 +56,6 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 if (!local) {
                     assert(user != null, `user1: Null user arg`);
                     assert(
-                        user.userId == "user2",
-                        `user1: Unexpected LOCAL userId: ${user.userId}`
-                    );
-                    assert(
                         user.state == PresenceState.online,
                         `user1: Unexpected presence state of ${user.state}`
                     );
@@ -75,7 +71,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         });
 
         assert(!object1.isInitialized, `presence already initialized`);
-        await object1.initialize("user1");
+        await object1.initialize();
         assert(object1.isInitialized, `presence not initialized`);
 
         const object2done = new Deferred();
@@ -83,10 +79,6 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             try {
                 if (local) {
                     assert(user != null, `user2: Null user arg`);
-                    assert(
-                        user.userId == "user2",
-                        `user2: Unexpected REMOTE userId: ${user.userId}`
-                    );
                     assert(
                         user.state == PresenceState.online,
                         `user2: Unexpected presence state of ${user.state}`
@@ -101,7 +93,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.initialize("user2");
+        await object2.initialize();
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -126,7 +118,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.initialize("user1", undefined, PresenceState.away);
+        await object1.initialize(undefined, PresenceState.away);
 
         const object2done = new Deferred();
         object2.on("presenceChanged", (user, local) => {
@@ -146,7 +138,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.initialize("user2", undefined, PresenceState.offline);
+        await object2.initialize(undefined, PresenceState.offline);
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -168,8 +160,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.initialize("user1", { foo: "bar" }, PresenceState.away);
-        assert(object1.userId == "user1");
+        await object1.initialize({ foo: "bar" }, PresenceState.away);
         assert(object1.state == PresenceState.away);
         assert(object1.data?.foo == "bar");
 
@@ -188,11 +179,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.initialize(
-            "user2",
-            { foo: "bar" },
-            PresenceState.offline
-        );
+        await object2.initialize({ foo: "bar" }, PresenceState.offline);
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -222,7 +209,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.initialize("user1");
+        await object1.initialize();
 
         const object2Ready = new Deferred();
         object2.on("presenceChanged", (user, local) => {
@@ -230,7 +217,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 object2Ready.resolve();
             }
         });
-        await object2.initialize("user2");
+        await object2.initialize();
 
         // Wait for everything to start
         await object2Ready.promise;
@@ -244,13 +231,18 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
     it("Should enumerate users with forEach()", async () => {
         const ready = new Deferred();
+        let object1UserId = "";
+        let object2UserId = "";
         object1.on("presenceChanged", (user, local) => {
-            if (!local) {
+            if (local) {
+                object1UserId = user.userId;
+            } else {
+                object2UserId = user.userId;
                 ready.resolve();
             }
         });
-        await object1.initialize("user1");
-        await object2.initialize("user2", undefined, PresenceState.away);
+        await object1.initialize();
+        await object2.initialize(undefined, PresenceState.away);
 
         // Wait for ready and perform test
         let user1Found = false;
@@ -258,10 +250,10 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         await ready.promise;
         object1.forEach((user) => {
             switch (user.userId) {
-                case "user1":
+                case object1UserId:
                     user1Found = true;
                     break;
-                case "user2":
+                case object2UserId:
                     user2Found = true;
                     break;
             }
@@ -272,13 +264,18 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
     it("Should filter users by state using forEach()", async () => {
         const ready = new Deferred();
+        let object1UserId = "";
+        let object2UserId = "";
         object1.on("presenceChanged", (user, local) => {
-            if (!local) {
+            if (local) {
+                object1UserId = user.userId;
+            } else {
+                object2UserId = user.userId;
                 ready.resolve();
             }
         });
-        await object1.initialize("user1");
-        await object2.initialize("user2", undefined, PresenceState.away);
+        await object1.initialize();
+        await object2.initialize(undefined, PresenceState.away);
 
         // Wait for ready and perform test
         let user1Found = false;
@@ -286,10 +283,10 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         await ready.promise;
         object1.forEach((user) => {
             switch (user.userId) {
-                case "user1":
+                case object1UserId:
                     user1Found = true;
                     break;
-                case "user2":
+                case object2UserId:
                     user2Found = true;
                     break;
             }
@@ -305,8 +302,8 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 ready.resolve();
             }
         });
-        await object1.initialize("user1");
-        await object2.initialize("user2", undefined, PresenceState.away);
+        await object1.initialize();
+        await object2.initialize(undefined, PresenceState.away);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -323,8 +320,8 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 ready.resolve();
             }
         });
-        await object1.initialize("user1");
-        await object2.initialize("user2", undefined, PresenceState.away);
+        await object1.initialize();
+        await object2.initialize(undefined, PresenceState.away);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -340,8 +337,8 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 ready.resolve();
             }
         });
-        await object1.initialize("user1");
-        await object2.initialize("user2", undefined, PresenceState.away);
+        await object1.initialize();
+        await object2.initialize(undefined, PresenceState.away);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -352,26 +349,31 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
     it("Should getPresenceForUser()", async () => {
         const ready = new Deferred();
+        let object1UserId = "";
+        let object2UserId = "";
         object1.on("presenceChanged", (user, local) => {
-            if (!local) {
+            if (local) {
+                object1UserId = user.userId;
+            } else {
+                object2UserId = user.userId;
                 ready.resolve();
             }
         });
-        await object1.initialize("user1");
-        await object2.initialize("user2", undefined, PresenceState.away);
+        await object1.initialize();
+        await object2.initialize(undefined, PresenceState.away);
 
         // Wait for ready and perform test
         await ready.promise;
-        const user1 = object1.getPresenceForUser("user1");
-        const user2 = object1.getPresenceForUser("user2");
+        const user1 = object1.getPresenceForUser(object1UserId);
+        const user2 = object1.getPresenceForUser(object2UserId);
 
         assert(
-            user1 && user1.userId == "user1",
+            user1 && user1.userId == object1UserId,
             `user1: missing or wrong user returned`
         );
         assert(user1.isLocalUser, `user1: not local user`);
         assert(
-            user2 && user2.userId == "user2",
+            user2 && user2.userId == object2UserId,
             `user2: missing or wrong user returned`
         );
         assert(!user2.isLocalUser, `user2: is local user`);
@@ -379,13 +381,18 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
     it("Should getPresenceForClient()", async () => {
         const ready = new Deferred();
+        let object1UserId = "";
+        let object2UserId = "";
         object1.on("presenceChanged", (user, local) => {
-            if (!local) {
+            if (local) {
+                object1UserId = user.userId;
+            } else {
+                object2UserId = user.userId;
                 ready.resolve();
             }
         });
-        await object1.initialize("user1");
-        await object2.initialize("user2", undefined, PresenceState.away);
+        await object1.initialize();
+        await object2.initialize(undefined, PresenceState.away);
 
         // Wait for ready and get client ID's
         await ready.promise;
@@ -397,12 +404,12 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         const user2 = object1.getPresenceForClient(client2);
 
         assert(
-            user1 && user1.userId == "user1",
+            user1 && user1.userId == object1UserId,
             `user1: missing or wrong user returned`
         );
         assert(user1.isLocalUser, `user1: not local user`);
         assert(
-            user2 && user2.userId == "user2",
+            user2 && user2.userId == object2UserId,
             `user2: missing or wrong user returned`
         );
         assert(!user2.isLocalUser, `user2: is local user`);
@@ -416,10 +423,10 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         object1.expirationPeriod = 0.2;
-        await object1.initialize("user1");
+        await object1.initialize();
 
         object2.expirationPeriod = 0.2;
-        await object2.initialize("user2");
+        await object2.initialize();
 
         // Wait for ready and then delay
         await ready.promise;

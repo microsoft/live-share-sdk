@@ -6,6 +6,7 @@
 import {
     LiveShareHostDecorator,
     LiveShareTokenProvider,
+    PolyfillHostDecorator,
     RoleVerifier,
 } from "./internals";
 import {
@@ -98,7 +99,9 @@ export class LiveShareClient {
         }
 
         // Save props
-        LiveShareClient._host = new LiveShareHostDecorator(host);
+        LiveShareClient._host = new PolyfillHostDecorator(
+            new LiveShareHostDecorator(host)
+        );
         LiveShareClient._roleVerifier = new RoleVerifier(LiveShareClient._host);
         this._options = Object.assign({} as ILiveShareClientOptions, options);
     }

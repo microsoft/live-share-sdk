@@ -117,7 +117,7 @@ export class TestLiveShareHost implements ILiveShareHost {
         return Promise.resolve(info);
     }
 
-    private getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
+    public async getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
         if (!clientId) {
             throw new Error(
                 `TestLiveShareHost: called getClientRoles() without a clientId`

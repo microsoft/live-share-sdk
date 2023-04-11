@@ -3,6 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { IRawStroke } from "@microsoft/live-share-canvas";
+
 export function runningInTeams(): boolean {
     const params = new URLSearchParams(window.location.search);
     const config = params.get("inTeams");
@@ -36,5 +38,29 @@ export function writeTextToClipboard(text: string, message: string) {
                 "The exported data couldn't be copied to the clipboard because permission to do so wasn't granted by the user."
             );
         }
+    );
+}
+
+export async function parseStrokesFromClipboard(): Promise<IRawStroke[]> {
+    // this will prompt user to consent to read from clipboard
+    const text = await navigator.clipboard.readText();
+    const rawJson: unknown = JSON.parse(text);
+    if (isStrokeList(rawJson)) {
+        return rawJson;
+    }
+    throw Error("Invalid JSON value in clipboard.");
+}
+
+function isStrokeList(value: unknown): value is IRawStroke[] {
+    return Array.isArray(value) && value.every(isStroke);
+}
+
+function isStroke(value: unknown): value is IRawStroke {
+    return (
+        typeof value === "object" &&
+        !!value &&
+        Array.isArray((value as any).points) &&
+        typeof (value as any).timeStamp === "number" &&
+        typeof (value as any).brush === "object"
     );
 }

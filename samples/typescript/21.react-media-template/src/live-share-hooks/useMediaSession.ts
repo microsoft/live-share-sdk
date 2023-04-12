@@ -48,6 +48,7 @@ export const useMediaSession = (
     selectedMediaItem?: MediaItem,
     player?: AzureMediaPlayer
 ) => {
+    const startedInitializingRef = useRef(false);
     const synchronizerRef = useRef<MediaPlayerSynchronizer>();
     const [mediaSessionStarted, setStarted] = useState(false);
     const [suspension, setSuspension] =
@@ -171,47 +172,49 @@ export const useMediaSession = (
     // effect that sets up the LiveMediaSession and MediaSynchronizer
     useEffect(() => {
         if (
-            mediaSession &&
-            !mediaSession.isInitialized &&
-            !synchronizerRef.current &&
-            selectedMediaItem &&
-            player
-        ) {
-            console.log(
-                "useSharedSynchronizer: setting up player for synchronizer"
-            );
-            // Query the HTML5 media element from the document and set initial src
-            // Begin synchronizing a MediaSynchronizer for the player and set reference
-            synchronizerRef.current = mediaSession.synchronize(player);
+            !mediaSession ||
+            mediaSession.isInitialized ||
+            synchronizerRef.current ||
+            !selectedMediaItem ||
+            !player ||
+            startedInitializingRef.current
+        )
+            return;
+        startedInitializingRef.current = true;
+        console.log(
+            "useSharedSynchronizer: setting up player for synchronizer"
+        );
+        // Query the HTML5 media element from the document and set initial src
+        // Begin synchronizing a MediaSynchronizer for the player and set reference
+        synchronizerRef.current = mediaSession.synchronize(player);
 
-            // Default to viewOnly mode; this will get set to false for the current presenter below
-            synchronizerRef.current.viewOnly = !localUserIsPresenting;
+        // Default to viewOnly mode; this will get set to false for the current presenter below
+        synchronizerRef.current.viewOnly = !localUserIsPresenting;
 
-            // Start synchronizing the media session
-            mediaSession.initialize(acceptPlaybackChangesFrom).then(() => {
-                console.log("useSharedSynchronizer: now synchronizing player");
-                setStarted(true);
-                if (inTeams()) {
-                    // Set up audio ducking
-                    console.log(
-                        "useMediaSession: registering speaking state change handler"
-                    );
-                    microsoftTeams.meeting.registerSpeakingStateChangeHandler(
-                        (speakingState) => {
-                            console.log(
-                                "audio state changed:",
-                                speakingState.isSpeakingDetected
-                            );
-                            if (speakingState.isSpeakingDetected) {
-                                synchronizerRef.current?.volumeManager?.startLimiting();
-                            } else {
-                                synchronizerRef.current?.volumeManager?.stopLimiting();
-                            }
+        // Start synchronizing the media session
+        mediaSession.initialize(acceptPlaybackChangesFrom).then(() => {
+            console.log("useSharedSynchronizer: now synchronizing player");
+            setStarted(true);
+            if (inTeams()) {
+                // Set up audio ducking
+                console.log(
+                    "useMediaSession: registering speaking state change handler"
+                );
+                microsoftTeams.meeting.registerSpeakingStateChangeHandler(
+                    (speakingState) => {
+                        console.log(
+                            "audio state changed:",
+                            speakingState.isSpeakingDetected
+                        );
+                        if (speakingState.isSpeakingDetected) {
+                            synchronizerRef.current?.volumeManager?.startLimiting();
+                        } else {
+                            synchronizerRef.current?.volumeManager?.stopLimiting();
                         }
-                    );
-                }
-            });
-        }
+                    }
+                );
+            }
+        });
     }, [
         mediaSession,
         selectedMediaItem,

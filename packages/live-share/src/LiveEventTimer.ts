@@ -6,6 +6,7 @@
 import { TimeInterval } from "./TimeInterval";
 import { LiveEventSource } from "./LiveEventSource";
 import { ILiveEvent } from "./interfaces";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /**
  * Periodically broadcasts an event to listening `LiveEventTarget` instances.

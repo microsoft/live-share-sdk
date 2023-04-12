@@ -41,7 +41,7 @@ extends:
     - stage: BuildLiveShareSDK
       jobs:
       - job: Phase1
-        displayName: Bluild Live Share SDK
+        displayName: Build Live Share SDK
         pool:
           name: 1ES-Teams-MMSWindows2019
         condition: succeeded()
@@ -51,7 +51,7 @@ extends:
         cancelTimeoutInMinutes: 1
 
         steps:
-        - script: "npm install --no-audit --legacy-peer-deps"
+        - script: "npm install --no-audit"
           workingDirectory: ""
           displayName: "npm install"
 

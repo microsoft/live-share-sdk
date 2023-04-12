@@ -5,13 +5,16 @@
 
 import * as microsoftTeams from "@microsoft/teams-js";
 import { app } from "@microsoft/teams-js";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { inTeams } from "../utils/inTeams";
 
 export const useTeamsContext = () => {
+    const startedRef = useRef(false);
     const [ctx, setCtx] = useState<app.Context>();
 
     useEffect(() => {
+        if (startedRef.current) return;
+        startedRef.current = true;
         if (!ctx?.user?.id) {
             // Add inTeams=true to URL params to get real Teams context
             if (inTeams()) {

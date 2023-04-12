@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { searchList } from "../utils/media-list";
 import { debounce } from "lodash";
 
@@ -22,9 +22,7 @@ export const usePlaylist = (playlistMap, sendNotification) => {
     const [selectedId, setSelectedId] = useState();
     const [playlistStarted, setStarted] = useState(false);
 
-    const selectedMediaIndex = useMemo(() => {
-        return mediaItems.findIndex((item) => item.id === selectedId);
-    }, [selectedId, mediaItems]);
+    const selectedMediaIndex = mediaItems.findIndex((item) => item.id === selectedId);
 
     const addMediaItem = useCallback(
         (id) => {

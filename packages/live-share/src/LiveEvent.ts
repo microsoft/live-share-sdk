@@ -8,6 +8,7 @@ import { IEvent } from "@fluidframework/common-definitions";
 import { ILiveEvent, UserMeetingRole, IClientTimestamp } from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /**
  * Events supported by `LiveEvent` object.
@@ -180,3 +181,8 @@ export class LiveEvent<
         return true;
     }
 }
+
+/**
+ * Register `LiveEvent` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ */
+DynamicObjectRegistry.registerObjectClass(LiveEvent, LiveEvent.TypeName);

@@ -38,6 +38,7 @@ export const usePresence = (
     presence?: LivePresence,
     context?: app.Context
 ) => {
+    const startedInitializingRef = useRef(false);
     const usersRef = useRef<LivePresenceUser<IUserData>[]>([]);
     const [users, setUsers] = useState(usersRef.current);
     const [localUser, setLocalUser] = useState<LivePresenceUser<IUserData>>();
@@ -61,63 +62,66 @@ export const usePresence = (
 
     // Effect which registers SharedPresence event listeners before joining space
     useEffect(() => {
-        if (presence && !presence.isInitialized && context) {
-            // Register presenceChanged event listener
-            presence.on(
-                "presenceChanged",
-                (userPresence: LivePresenceUser<IUserData>, local) => {
-                    console.log(
-                        "usePresence: presence received",
-                        userPresence,
-                        local
-                    );
-                    if (local) {
-                        // Get the roles of the local user
-                        userPresence
-                            .getRoles()
-                            .then((roles: UserMeetingRole[]) => {
-                                setLocalUserRoles(roles);
-                                setLocalUser(userPresence);
-                            })
-                            .catch((err) => {
-                                console.error(
-                                    "usePresence: getRoles error",
-                                    err
-                                );
-                                // Set local user state
-                                setLocalUser(userPresence);
-                            });
-                    }
-                    // Set users local state
-                    const userArray =
-                        presence.toArray() as LivePresenceUser<IUserData>[];
-                    setUsers(userArray);
+        if (
+            !presence ||
+            presence.isInitialized ||
+            !context ||
+            startedInitializingRef.current
+        )
+            return;
+        startedInitializingRef.current = true;
+        // Register presenceChanged event listener
+        presence.on(
+            "presenceChanged",
+            (userPresence: LivePresenceUser<IUserData>, local) => {
+                console.log(
+                    "usePresence: presence received",
+                    userPresence,
+                    local
+                );
+                if (local) {
+                    // Get the roles of the local user
+                    userPresence
+                        .getRoles()
+                        .then((roles: UserMeetingRole[]) => {
+                            setLocalUserRoles(roles);
+                            setLocalUser(userPresence);
+                        })
+                        .catch((err) => {
+                            console.error("usePresence: getRoles error", err);
+                            // Set local user state
+                            setLocalUser(userPresence);
+                        });
                 }
-            );
-            const userPrincipalName =
-                context?.user?.userPrincipalName ?? "someone@contoso.com";
-            const name = `@${userPrincipalName.split("@")[0]}`;
-            // Start presence tracking
-            console.log(
-                "usePresence: starting presence for userId",
-                context?.user?.id,
-                context?.user?.displayName
-            );
+                // Set users local state
+                const userArray =
+                    presence.toArray() as LivePresenceUser<IUserData>[];
+                setUsers(userArray);
+            }
+        );
+        const userPrincipalName =
+            context?.user?.userPrincipalName ?? "someone@contoso.com";
+        const name = `@${userPrincipalName.split("@")[0]}`;
+        // Start presence tracking
+        console.log(
+            "usePresence: starting presence for userId",
+            context?.user?.id,
+            context?.user?.displayName
+        );
 
-            const userData: IUserData = {
-                teamsUserId: context.user?.id,
-                joinedTimestamp: LiveEvent.getTimestamp(),
-                name,
-            };
+        const userData: IUserData = {
+            teamsUserId: context.user?.id,
+            joinedTimestamp: LiveEvent.getTimestamp(),
+            name,
+        };
 
-            presence
-                .initialize(context.user?.id, userData)
-                .then(() => {
-                    console.log("usePresence: started presence");
-                    setStarted(true);
-                })
-                .catch((error) => console.error(error));
-        }
+        presence
+            .initialize(context.user?.id, userData)
+            .then(() => {
+                console.log("usePresence: started presence");
+                setStarted(true);
+            })
+            .catch((error) => console.error(error));
     }, [presence, context, setUsers, setLocalUser]);
 
     return {

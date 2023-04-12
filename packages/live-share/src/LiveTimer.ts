@@ -12,6 +12,7 @@ import { IEvent } from "@fluidframework/common-definitions";
 import { cloneValue } from "./internals/utils";
 import { LiveEvent } from "./LiveEvent";
 import { LiveShareClient } from "./LiveShareClient";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /** for all time values millis from epoch is used */
 export interface ITimerConfig {
@@ -403,3 +404,8 @@ export class LiveTimer extends DataObject<{
         }
     }
 }
+
+/**
+ * Register `LiveTimer` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ */
+DynamicObjectRegistry.registerObjectClass(LiveTimer, LiveTimer.TypeName);

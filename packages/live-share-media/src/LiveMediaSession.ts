@@ -4,7 +4,7 @@
  */
 
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
-import { LiveTelemetryLogger, UserMeetingRole } from "@microsoft/live-share";
+import { DynamicObjectRegistry, LiveTelemetryLogger, UserMeetingRole } from "@microsoft/live-share";
 import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer";
 import { ITriggerActionEvent, TelemetryEvents } from "./internals";
 import {
@@ -298,3 +298,8 @@ export class LiveMediaSession extends DataObject {
         }
     }
 }
+
+/**
+ * Register `LiveMediaSession` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ */
+DynamicObjectRegistry.registerObjectClass(LiveMediaSession, LiveMediaSession.TypeName);

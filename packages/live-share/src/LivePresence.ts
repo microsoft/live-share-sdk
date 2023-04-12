@@ -16,8 +16,8 @@ import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { cloneValue, TelemetryEvents } from "./internals";
 import { TimeInterval } from "./TimeInterval";
-import { v4 } from "uuid";
 import { LiveShareClient } from "./LiveShareClient";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /**
  * Events supported by `LivePresence` object.
@@ -411,3 +411,8 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         });
     }
 }
+
+/**
+ * Register `LivePresence` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ */
+DynamicObjectRegistry.registerObjectClass(LivePresence, LivePresence.TypeName);

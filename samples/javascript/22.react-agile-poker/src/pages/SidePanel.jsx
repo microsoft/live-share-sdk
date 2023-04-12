@@ -11,7 +11,7 @@ import { useSharedObjects, useUserStories } from "../live-share-hooks";
 import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 // UI imports
 import { Button, Text, Subtitle2 } from "@fluentui/react-components";
-import { Card, CardFooter } from "@fluentui/react-components/unstable";
+import { Card, CardFooter } from "@fluentui/react-components";
 import { getFlexItemStyles } from "../styles/layout";
 import * as UI from "../components";
 import { LiveSharePage } from "../components/LiveSharePage";

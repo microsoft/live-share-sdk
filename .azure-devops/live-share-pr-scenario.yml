@@ -1,0 +1,80 @@
+# https://domoreexp.visualstudio.com/Teamspace/_build?definitionId=6457
+
+resources:
+  repositories:
+  - repository: SkypeSpaces-Infra
+    type: git
+    name: SkypeSpaces-Infra
+  - repository: MsTeamsServices-Tools
+    type: git
+    name: MsTeamsServices-Tools
+
+variables:
+- template: variables/variables.yml
+- name: esLintExclusionFilePath
+  value: "$(Build.SourcesDirectory)/.eslintignore"
+- name: esLintTargets
+  value: ''
+
+trigger:
+- scenario_test
+
+extends:
+  template: azure-devops-templates/steps/coral/general_build_template.yml@SkypeSpaces-Infra
+  parameters:    
+    name: 'build'
+    pool:
+      name: 1ES-Teams-MMSWindows2019
+    jobParams:
+      displayName: 'CI SDK Build'
+      condition: succeeded()
+      timeoutInMinutes: 30
+      cancelTimeoutInMinutes: 5
+    service_tree:
+      service_id: ${{ variables.ServiceTreeID }}
+      isProduction: false    
+    sdl:
+      esLint:
+        esLintExclusionFilePath: ${{ variables.esLintExclusionFilePath }}
+
+    stages:
+    - stage: BuildLiveShareSDK
+      jobs:
+      - job: Phase1
+        displayName: Build Live Share SDK
+        pool:
+          name: 1ES-Teams-MMSWindows2019
+        condition: succeeded()
+        variables:
+          Build.SDL.Roslyn.Enabled: false
+        timeoutInMinutes: 10
+        cancelTimeoutInMinutes: 1
+
+        steps:
+        - script: "npm install --no-audit"
+          workingDirectory: ""
+          displayName: "npm install"
+
+        - script: "npm run build"
+          workingDirectory: ""
+          displayName: "npm run build"
+
+        - script: "npm install --no-audit"
+          workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
+          displayName: "npm install sample"
+        
+        - script: "npm install jest"
+          workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
+          displayName: "npm install jest"
+
+        - script: "npm run build"
+          workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
+          displayName: "npm run build sample"
+
+        - task: Bash@3
+          inputs:
+            targetType: "inline"
+            workingDirectory: "${{ variables.sdk_samples_directory }}/javascript/02.react-video"
+            script: |
+              sh ../../../.azure-devops/scenario_test.sh
+          displayName: "run test"

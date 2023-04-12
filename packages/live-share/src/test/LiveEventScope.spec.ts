@@ -11,6 +11,8 @@ import { MockRoleVerifier } from "./MockRoleVerifier";
 import { MockTimestampProvider } from "./MockTimestampProvider";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { LiveShareClient } from "../LiveShareClient";
+import { RoleVerifier } from "../internals";
+import { TestLiveShareHost } from "../TestLiveShareHost";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
@@ -20,6 +22,14 @@ function createConnectedSignalers() {
 }
 
 describe("LiveEventScope", () => {
+    afterEach(async () => {
+        // restore defaults
+        LiveShareClient.setRoleVerifier(
+            new RoleVerifier(TestLiveShareHost.create(undefined, undefined))
+        );
+        LiveShareClient.setTimestampProvider(new LocalTimestampProvider());
+    });
+
     it("Should raise local and remote events", (done) => {
         let triggered = 0;
         const now = new Date().getTime();
@@ -102,7 +112,6 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            MockRoleVerifier.restoreDefaultVerifier();
             done();
         }, 10);
     });
@@ -157,7 +166,6 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            MockRoleVerifier.restoreDefaultVerifier();
             done();
         }, 10);
     });
@@ -187,7 +195,6 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(verifier.called);
             assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            MockRoleVerifier.restoreDefaultVerifier();
             done();
         }, 10);
     });
@@ -217,7 +224,6 @@ describe("LiveEventScope", () => {
         setTimeout(() => {
             assert(provider.called, `provider not called`);
             assert(triggered == 2, `triggered == ${triggered}`);
-            LiveShareClient.setTimestampProvider(new LocalTimestampProvider());
             done();
         }, 10);
     });

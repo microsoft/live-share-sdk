@@ -4,9 +4,6 @@
  */
 
 import { IRoleVerifier, UserMeetingRole } from "../interfaces";
-import { RoleVerifier } from "../internals";
-import { LiveShareClient } from "../LiveShareClient";
-import { TestLiveShareHost } from "../TestLiveShareHost";
 
 export class MockRoleVerifier implements IRoleVerifier {
     private _sendersRoles: UserMeetingRole[];
@@ -34,11 +31,5 @@ export class MockRoleVerifier implements IRoleVerifier {
 
         this.blocked = true;
         return Promise.resolve(false);
-    }
-
-    public static restoreDefaultVerifier() {
-        LiveShareClient.setRoleVerifier(
-            new RoleVerifier(TestLiveShareHost.create(undefined, undefined))
-        );
     }
 }

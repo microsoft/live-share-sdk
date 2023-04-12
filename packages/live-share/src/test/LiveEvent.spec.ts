@@ -14,6 +14,8 @@ import { MockRoleVerifier } from "./MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
 import { LiveShareClient } from "../LiveShareClient";
+import { RoleVerifier } from "../internals";
+import { TestLiveShareHost } from "../TestLiveShareHost";
 
 describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
@@ -39,6 +41,14 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
                 container2.once("connected", resolve)
             );
         }
+    });
+
+    afterEach(async () => {
+        // restore defaults
+        LiveShareClient.setRoleVerifier(
+            new RoleVerifier(TestLiveShareHost.create(undefined, undefined))
+        );
+        LiveShareClient.setTimestampProvider(new LocalTimestampProvider());
     });
 
     it("Should raise local and remote events", async () => {
@@ -116,9 +126,6 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         const timestamp = LiveShareClient.getTimestamp();
         assert(timestamp >= now, `Unexpected timestamp value`);
         assert(mock.called, `Mock not called`);
-
-        // Restore local provider
-        LiveShareClient.setTimestampProvider(new LocalTimestampProvider());
     });
 
     it("Should verifyRolesAllowed() using local role verifier", async () => {
@@ -138,9 +145,6 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         assert(allowed, `Role should be allowed`);
         assert(mock.called, `mock not called`);
         assert(mock.clientId == "test", `Invalid clientId of ${mock.clientId}`);
-
-        // Restore normal verifier
-        MockRoleVerifier.restoreDefaultVerifier();
     });
 
     it("Should allow newer received events", () => {

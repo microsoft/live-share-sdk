@@ -12,6 +12,16 @@ import { PresenceState } from "../LivePresenceUser";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { waitForDelay } from "../internals";
 import { Deferred } from "./Deferred";
+import { LiveShareClient } from "../LiveShareClient";
+import {
+    IClientInfo,
+    IFluidContainerInfo,
+    IFluidTenantInfo,
+    ILiveShareHost,
+    INtpTimeInfo,
+    UserMeetingRole,
+} from "../interfaces";
+import { TestLiveShareHost } from "../TestLiveShareHost";
 
 describeNoCompat("LivePresence", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
@@ -443,5 +453,80 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         });
 
         assert(count == 2, `Wrong number of users`);
+    });
+
+    it("isLocalUser should be true for both clients with same userId", async () => {
+        class SameUserLiveShareTestHost implements ILiveShareHost {
+            private test = TestLiveShareHost.create();
+            getFluidTenantInfo(): Promise<IFluidTenantInfo> {
+                return this.test.getFluidTenantInfo();
+            }
+            getFluidToken(containerId?: string | undefined): Promise<string> {
+                return this.test.getFluidToken(containerId);
+            }
+            getFluidContainerId(): Promise<IFluidContainerInfo> {
+                return this.test.getFluidContainerId();
+            }
+            setFluidContainerId(
+                containerId: string
+            ): Promise<IFluidContainerInfo> {
+                return this.test.setFluidContainerId(containerId);
+            }
+            getNtpTime(): Promise<INtpTimeInfo> {
+                return this.test.getNtpTime();
+            }
+            registerClientId(clientId: string): Promise<UserMeetingRole[]> {
+                return this.test.registerClientId(clientId);
+            }
+            getClientRoles(
+                clientId: string
+            ): Promise<UserMeetingRole[] | undefined> {
+                return this.test.getClientRoles(clientId);
+            }
+            getClientInfo(clientId: string): Promise<IClientInfo | undefined> {
+                return this.test.getClientRoles(clientId).then((roles) => {
+                    return {
+                        userId: "user1",
+                        roles: roles,
+                        displayName: "user1",
+                    } as IClientInfo;
+                });
+            }
+        }
+
+        // set same user test host
+        new LiveShareClient(new SameUserLiveShareTestHost());
+
+        const object1done = new Deferred();
+        object1.on("presenceChanged", (user, local) => {
+            try {
+                assert(user != null, `user1: Null user arg`);
+                assert(
+                    user.state == PresenceState.online,
+                    `user1: Unexpected presence state of ${user.state}`
+                );
+                assert(
+                    user.data == undefined,
+                    `user1: Unexpected data object of ${user.data}`
+                );
+                assert(user.isLocalUser == true, `user1: should be local`);
+                if (user._clients.length == 2) {
+                    object1done.resolve();
+                }
+            } catch (err) {
+                object1done.reject(err);
+            }
+        });
+
+        assert(!object1.isInitialized, `presence already initialized`);
+        await object1.initialize();
+        assert(object1.isInitialized, `presence not initialized`);
+        await object2.initialize();
+
+        // Wait for events to trigger
+        await Promise.all([object1done.promise]);
+
+        // reset to normal TestLiveShareHost
+        new LiveShareClient(TestLiveShareHost.create());
     });
 });

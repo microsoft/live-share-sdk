@@ -362,7 +362,7 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                             const cmp = userId.localeCompare(current.userId);
                             if (cmp == 0) {
                                 // User found. Apply update and check for changes
-                                if (current.updateReceived(evt)) {
+                                if (current.updateReceived(evt, local, info)) {
                                     emitEvent(current);
                                 }
 
@@ -377,11 +377,6 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                         let isLocal: boolean = false;
                         if (this._currentPresence.clientId) {
                             isLocal =
-                                this._users
-                                    .find((user) => user.userId == userId)
-                                    ?._clients.includes(
-                                        this._currentPresence.clientId
-                                    ) ??
                                 evt.clientId == this._currentPresence.clientId;
                         }
 

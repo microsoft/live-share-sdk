@@ -44,22 +44,16 @@ export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
 export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
     readonly _clients: string[] = [];
-    private _userId: string;
-    private _roles: UserMeetingRole[];
-    private _displayName?: string;
 
     /**
      * @hidden
      */
     constructor(
-        _clientInfo: IClientInfo,
+        private _clientInfo: IClientInfo,
         private _evt: ILivePresenceEvent<TData>,
         private _expirationPeriod: TimeInterval,
         private _isLocalUser: boolean
     ) {
-        this._userId = _clientInfo.userId;
-        this._roles = _clientInfo.roles;
-        this._displayName = _clientInfo.displayName;
         this.updateClients(this._evt);
         this._lastUpdateTime = LiveShareClient.getTimestamp();
     }
@@ -75,11 +69,11 @@ export class LivePresenceUser<TData = object> {
      * ID of the user. Can be undefined when first initialized.
      */
     public get userId(): string {
-        return this._userId;
+        return this._clientInfo.userId;
     }
 
     public get displayName(): string | undefined {
-        return this._displayName;
+        return this._clientInfo.displayName;
     }
 
     /**
@@ -104,7 +98,7 @@ export class LivePresenceUser<TData = object> {
      * Returns the user's meeting roles.
      */
     public getRoles(): Promise<UserMeetingRole[]> {
-        return Promise.resolve(this._roles ?? []);
+        return Promise.resolve(this._clientInfo.roles ?? []);
     }
 
     /**
@@ -118,18 +112,33 @@ export class LivePresenceUser<TData = object> {
     /**
      * @hidden
      */
-    public updateReceived(evt: ILivePresenceEvent<TData>): boolean {
+    public updateReceived(
+        evt: ILivePresenceEvent<TData>,
+        local: boolean,
+        info: IClientInfo
+    ): boolean {
+        let localChanged = false;
+        if (!this._isLocalUser && local) {
+            // same user, but different client
+            this._isLocalUser = local;
+            localChanged = true;
+        }
+
         this.updateClients(evt);
-        const current = this._evt;
-        if (LiveEvent.isNewer(current, evt)) {
+        const currentEvent = this._evt;
+        const currentClientInfo = this._clientInfo;
+        if (LiveEvent.isNewer(currentEvent, evt)) {
             // Save updated event
             this._evt = evt;
+            this._clientInfo = currentClientInfo;
             this._lastUpdateTime = LiveShareClient.getTimestamp();
 
             // Has anything changed?
             if (
-                evt.state != current.state ||
-                JSON.stringify(evt.data) != JSON.stringify(current.data)
+                evt.state != currentEvent.state ||
+                info != currentClientInfo ||
+                JSON.stringify(evt.data) != JSON.stringify(currentEvent.data) ||
+                localChanged
             ) {
                 return true;
             }
@@ -150,20 +159,6 @@ export class LivePresenceUser<TData = object> {
         // The user can be logged into multiple clients so add client to list if missing.
         if (evt.clientId && this._clients.indexOf(evt.clientId) < 0) {
             this._clients.push(evt.clientId);
-        }
-
-        if (evt.clientId) {
-            LiveShareClient.getClientInfo(evt.clientId)
-                .then((info) => {
-                    if (info) {
-                        this._userId = info?.userId;
-                        this._roles = info?.roles;
-                        this._displayName = info?.displayName;
-                    }
-                })
-                .catch((e) => {
-                    console.warn(e);
-                });
         }
     }
 }

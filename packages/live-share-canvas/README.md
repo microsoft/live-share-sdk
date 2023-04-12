@@ -4,7 +4,7 @@ Easily add collaborative inking to your Teams meeting app, powered by [Fluid Fra
 
 This package is an extension of Microsoft Live Share, and requires the `@microsoft/live-share` package. You can find it on [NPM](https://www.npmjs.com/package/@microsoft/live-share).
 
-You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
+You can find our documentation at [aka.ms/livesharecanvas](https://aka.ms/livesharecanvas).
 
 ## Installing
 
@@ -84,7 +84,7 @@ document.getElementById("btnPenBrushBlue").onclick = () => {
     inkingManager.penBrush.color = { r: 0, g: 0, b: 255, a: 1};
 }
 
-// Other tools and brush settings are available, please refer to the documentation
+// Other tools and brush settings are available, please refer to the documentation at https://aka.ms/livesharecanvas
 ```
 
 ## Code sample

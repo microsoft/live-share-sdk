@@ -242,7 +242,6 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         this.waitUntilConnected().then((clientId) => {
             // Broadcast state change
             const evt = this._updatePresenceEvent!.sendEvent({
-                userId: this._currentPresence.userId,
                 state: state ?? this._currentPresence.state,
                 data: cloneValue(data) ?? this._currentPresence.data,
             });

@@ -42,8 +42,12 @@ export function writeTextToClipboard(text: string, message: string) {
 }
 
 export async function parseStrokesFromClipboard(): Promise<IRawStroke[]> {
-    // this will prompt user to consent to read from clipboard
+    // this will prompt user to consent to read from clipboard. if user denies, this will throw.
     const text = await navigator.clipboard.readText();
+    return parseStrokesFromText(text);
+}
+
+function parseStrokesFromText(text: string): IRawStroke[] {
     const rawJson: unknown = JSON.parse(text);
     if (isStrokeList(rawJson)) {
         return rawJson;

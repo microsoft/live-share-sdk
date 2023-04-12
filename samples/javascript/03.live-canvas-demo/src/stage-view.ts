@@ -55,8 +55,8 @@ const appTemplate = `
                 <button id="btnOffsetRight">Offset right</button>
                 <button id="btnOffsetDown">Offset down</button>
                 <button id="btnResetView" style="margin-left: 20px;">Reset view</button>
-                <button id="btnImportRaw" style="margin-left: 20px;">Import raw strokes</button>
-                <button id="btnExportRaw">Export raw strokes</button>
+                <button id="btnExportRaw" style="margin-left: 20px;">Export raw strokes</button>
+                <button id="btnImportRaw">Import raw strokes</button>
                 <button id="btnExportSVG" style="margin-left: 20px;">Export SVG</button>
             </div>
         </div>
@@ -288,19 +288,6 @@ export class StageView extends View {
             }
         });
 
-        setupButton("btnImportRaw", async () => {
-            try {
-                const strokes = await Utils.parseStrokesFromClipboard();
-                this._inkingManager.importRaw(strokes);
-            } catch (error: any) {
-                console.error(error);
-                alert(
-                    "Unable to strokes from clipboard.\nError: " +
-                        error?.message
-                );
-            }
-        });
-
         setupButton("btnExportRaw", () => {
             const exportedStrokes = this._inkingManager.exportRaw();
 
@@ -308,6 +295,19 @@ export class StageView extends View {
                 JSON.stringify(exportedStrokes),
                 "Exported strokes have been copied to the clipboard."
             );
+        });
+
+        setupButton("btnImportRaw", async () => {
+            try {
+                const strokes = await Utils.parseStrokesFromClipboard();
+                this._inkingManager.importRaw(strokes);
+            } catch (error: any) {
+                console.error(error);
+                alert(
+                    "Unable to parse strokes from clipboard.\nError: " +
+                        error?.message
+                );
+            }
         });
 
         setupButton("btnExportSVG", () => {

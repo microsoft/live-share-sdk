@@ -20,10 +20,9 @@ export const usePresence = (presence, context) => {
 
     // Post initial user presence with name as additional data
     const updatePresence = useCallback(
-        ({ name, ready, answer }) => {
+        ({ ready, answer }) => {
             const localUserData = localUserRef.current?.data;
             presence.updatePresence(PresenceState.online, {
-                name: name !== undefined ? name : localUserData?.name,
                 avatarIndex: localUserData?.avatarIndex,
                 ready: ready !== undefined ? ready : localUserData?.ready,
                 answer: answer !== undefined ? answer : localUserData?.answer,
@@ -48,7 +47,13 @@ export const usePresence = (presence, context) => {
 
     // Effect which registers SharedPresence event listeners before joining space
     useEffect(() => {
-        if (!presence || presence.isInitialized || !context || initializeStartedRef.current) return;
+        if (
+            !presence ||
+            presence.isInitialized ||
+            !context ||
+            initializeStartedRef.current
+        )
+            return;
         console.info("usePresence: initializing presence");
         initializeStartedRef.current = true;
         presence.on("presenceChanged", (userPresence, local) => {
@@ -57,20 +62,10 @@ export const usePresence = (presence, context) => {
                     userId: userPresence.userId,
                     state: userPresence.state,
                     data: userPresence.data,
-                    roles: [],
+                    name: userPresence.displayName,
+                    roles: userPresence.roles,
                 };
-                // Get the roles of the local user
-                userPresence
-                    .getRoles()
-                    .then((roles) => {
-                        localUser.roles = roles;
-                        // Set local user state
-                        setLocalUser(localUser);
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        setLocalUser(localUser);
-                    });
+                setLocalUser(localUser);
             }
             // Update our local state
             const updatedUsers = presence
@@ -79,17 +74,11 @@ export const usePresence = (presence, context) => {
             setUsers(updatedUsers);
         });
         const defaultAvatarInformation = getRandomAvatar();
-        const userPrincipalName =
-            context?.user.userPrincipalName ??
-            `${defaultAvatarInformation.name}@contoso.com`;
-        const name = userPrincipalName.split("@")[0];
 
         presence.presenceUpdateInterval = 5;
         presence
             .initialize(
-                context?.user?.id,
                 {
-                    name,
                     avatarIndex: defaultAvatarInformation.avatarIndex,
                     ready: false,
                 },

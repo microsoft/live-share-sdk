@@ -1,5 +1,5 @@
 import { useLiveState } from "@microsoft/live-share-react";
-import { LiveEvent, UserMeetingRole } from "@microsoft/live-share";
+import { LiveShareClient, UserMeetingRole } from "@microsoft/live-share";
 
 const ExampleAppState = {
     WAITING: "WAITING",
@@ -28,7 +28,7 @@ export const ExampleLiveState = (props) => {
                     <button
                         onClick={() => {
                             setState(ExampleAppState.START, {
-                                timeStarted: LiveEvent.getTimestamp(),
+                                timeStarted: LiveShareClient.getTimestamp(),
                             });
                         }}
                     >

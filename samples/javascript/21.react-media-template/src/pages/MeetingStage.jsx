@@ -63,7 +63,7 @@ const MeetingStage = () => {
         takeControl, // callback method to take control of playback
     } = liveShareHooks.useTakeControl(
         takeControlMap,
-        localUser?.data?.teamsUserId,
+        localUser?.userId,
         localUserIsEligiblePresenter,
         users,
         sendNotification

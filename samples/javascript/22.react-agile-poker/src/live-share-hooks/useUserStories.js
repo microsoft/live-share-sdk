@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { LiveEvent } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 import { v4 as uuid } from "uuid";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 
@@ -23,7 +23,7 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
             const id = uuid();
             userStoriesMap?.set(id, {
                 text: userStoryText,
-                addedAt: LiveEvent.getTimestamp(),
+                addedAt: LiveShareClient.getTimestamp(),
                 addedBy: localUserId,
             });
         },
@@ -61,7 +61,7 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
 
     useEffect(() => {
         if (!userStoriesMap || userStoriesStarted) return;
-        console.info("useUserStories: initializing user stories")
+        console.info("useUserStories: initializing user stories");
         setStarted(true);
         userStoriesMap.on("valueChanged", refreshUserStories);
         refreshUserStories();

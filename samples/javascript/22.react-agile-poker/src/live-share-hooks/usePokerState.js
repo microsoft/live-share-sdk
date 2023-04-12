@@ -39,7 +39,12 @@ export const usePokerState = (pokerState) => {
     }, [changePokerState, stateRef]);
 
     useEffect(() => {
-        if (!pokerState || pokerState.isInitialized || initializeStartedRef.current) return;
+        if (
+            !pokerState ||
+            pokerState.isInitialized ||
+            initializeStartedRef.current
+        )
+            return;
         console.log("usePokerState: initializing poker state");
         initializeStartedRef.current = true;
         pokerState.on("stateChanged", (state, value, local) => {

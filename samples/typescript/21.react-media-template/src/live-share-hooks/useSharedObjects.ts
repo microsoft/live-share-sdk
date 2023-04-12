@@ -3,10 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import {
-    LiveShareClient,
-    TestLiveShareHost,
-} from "@microsoft/live-share";
+import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
 import { ContainerSchema, IFluidContainer, SharedMap } from "fluid-framework";
@@ -67,7 +64,7 @@ export function useSharedObjects() {
             mediaList.forEach((mediaItem) => {
                 playlistMap.set(mediaItem.id, {
                     ...mediaItem,
-                    timeAdded: LiveEvent.getTimestamp(),
+                    timeAdded: LiveShareClient.getTimestamp(),
                 });
             });
             playlistMap.set("selected-media-id", mediaList[0].id);

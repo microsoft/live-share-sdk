@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { LiveEvent } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
 
 /**
@@ -61,40 +61,17 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
                     state: userPresence.state,
                     data: userPresence.data,
                     timestamp: userPresence.timestamp,
-                    roles: [],
+                    roles: userPresence.roles,
                 };
-                // Get the roles of the local user
-                userPresence
-                    .getRoles()
-                    .then((roles) => {
-                        user.roles = roles;
-                        // Set local user state
-                        setLocalUser(user);
-                    })
-                    .catch((err) => {
-                        console.error("usePresence: getRoles error", err);
-                        // Set local user state
-                        setLocalUser(user);
-                    });
+                setLocalUser(user);
             }
             // Set users local state
             const userArray = presence.toArray();
             setUsers(userArray);
         });
-        const userPrincipalName =
-            context?.user.userPrincipalName ?? "someone@contoso.com";
-        const name = `@${userPrincipalName.split("@")[0]}`;
-        // Start presence tracking
-        console.log(
-            "usePresence: starting presence for userId",
-            context?.user.id,
-            context?.user.displayName
-        );
         presence
-            .initialize(undefined, {
-                teamsUserId: context.user?.id,
-                joinedTimestamp: LiveEvent.getTimestamp(),
-                name,
+            .initialize({
+                joinedTimestamp: LiveShareClient.getTimestamp(),
             })
             .then(() => {
                 console.log("usePresence: started presence");

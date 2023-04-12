@@ -40,7 +40,8 @@ export const UserAuth = ({ onLogIn }) => {
 
     useEffect(() => {
         try {
-            const hasAuth = localStorage.getItem(HAS_AUTH_LOCAL_STORAGE_KEY) === "true";
+            const hasAuth =
+                localStorage.getItem(HAS_AUTH_LOCAL_STORAGE_KEY) === "true";
             if (hasAuth) {
                 login();
             }

@@ -97,8 +97,8 @@ export class LivePresenceUser<TData = object> {
     /**
      * Returns the user's meeting roles.
      */
-    public getRoles(): Promise<UserMeetingRole[]> {
-        return Promise.resolve(this._clientInfo.roles ?? []);
+    public get roles(): UserMeetingRole[] {
+        return this._clientInfo.roles;
     }
 
     /**

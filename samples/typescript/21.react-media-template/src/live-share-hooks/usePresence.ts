@@ -4,10 +4,9 @@
  */
 
 import {
-    LiveEvent,
     LivePresence,
     LivePresenceUser,
-    PresenceState,
+    LiveShareClient,
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -80,18 +79,8 @@ export const usePresence = (
                     local
                 );
                 if (local) {
-                    // Get the roles of the local user
-                    userPresence
-                        .getRoles()
-                        .then((roles: UserMeetingRole[]) => {
-                            setLocalUserRoles(roles);
-                            setLocalUser(userPresence);
-                        })
-                        .catch((err) => {
-                            console.error("usePresence: getRoles error", err);
-                            // Set local user state
-                            setLocalUser(userPresence);
-                        });
+                    setLocalUserRoles(userPresence.roles);
+                    setLocalUser(userPresence);
                 }
                 // Set users local state
                 const userArray =
@@ -111,12 +100,12 @@ export const usePresence = (
 
         const userData: IUserData = {
             teamsUserId: context.user?.id,
-            joinedTimestamp: LiveEvent.getTimestamp(),
+            joinedTimestamp: LiveShareClient.getTimestamp(),
             name,
         };
 
         presence
-            .initialize(context.user?.id, userData)
+            .initialize(userData)
             .then(() => {
                 console.log("usePresence: started presence");
                 setStarted(true);

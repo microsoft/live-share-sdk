@@ -88,9 +88,9 @@ export const PlayerAvatar = ({ user, index }) => {
                         overflow: "hidden",
                         whiteSpace: "nowrap",
                     }}
-                    title={user.data?.name || "Loading..."}
+                    title={user.name || "Loading..."}
                 >
-                    {`${user.data?.name}`}
+                    {`${user.name}`}
                 </Text>
             </div>
         </div>

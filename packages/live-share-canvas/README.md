@@ -27,7 +27,7 @@ yarn add @microsoft/live-share-canvas
 After cloning the [GitHub repository](https://www.github.com/microsoft/live-share-sdk), navigate to the root folder and run:
 
 ```bash
-npm install --legacy-peer-dep
+npm install
 npm run build
 ```
 
@@ -43,11 +43,13 @@ This will use lerna to hoist and build all dependencies.
 ```
 
 ```javascript
+import { LiveShareHost } from "@microsoft/teams-js";
 import { LiveShareClient } from "@microsoft/live-share";
 import { LiveCanvas, InkingManager, InkingTool } from "@microsoft/live-share-canvas";
 
 // Setup the Fluid container
-const client = new LiveShareClient();
+const host = LiveShareHost.create();
+const client = new LiveShareClient(host);
 const containerSchema = {
     initialObjects: {
         // Include a LiveCanvas in your container schema
@@ -121,7 +123,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Reporting Security Issues
 
-Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/security/default).
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 

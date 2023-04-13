@@ -42,7 +42,7 @@ const serviceEndpointMap = new Map<string | undefined, string>()
     );
 
 /**
- * Options used to configure the `TeamsFluidClient` class.
+ * Options used to configure the `LiveShareClient` class.
  */
 export interface ILiveShareClientOptions {
     /**
@@ -73,7 +73,7 @@ export class LiveShareClient {
     private _roleVerifier?: RoleVerifier;
 
     /**
-     * Creates a new `TeamsFluidClient` instance.
+     * Creates a new `LiveShareClient` instance.
      * @param host Host for the current Live Share session.
      * @param options Optional. Configuration options for the client.
      */
@@ -143,7 +143,7 @@ export class LiveShareClient {
                         );
                     } else {
                         throw new Error(
-                            `TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
+                            `LiveShareClient: Unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
                         );
                     }
                 }
@@ -317,7 +317,7 @@ export class LiveShareClient {
             );
         } else {
             throw new Error(
-                `TeamsFluidClient: timed out attempting to create or get container for current context.`
+                `LiveShareClient: timed out attempting to create or get container for current context.`
             );
         }
     }

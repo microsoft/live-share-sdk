@@ -31,16 +31,16 @@ This will use lerna to hoist and build all dependencies.
 
 ## How to use this extension
 
--   This package depends on [Teams JS SDK](https://docs.microsoft.com/en-us/javascript/api/overview/msteams-client?view=msteams-client-js-latest). The version of `@microsoft/teams-js` you use in your app must match the one used in this project.
+- This package depends on [Teams JS SDK](https://docs.microsoft.com/javascript/api/overview/msteams-client?view=msteams-client-js-latest). The version of `@microsoft/teams-js` you use in your app must match the one used in this project.
 
 ```javascript
 
 import { ... } from "fluid-framework";
-import { TeamsFluidClient } from "@microsoft/live-share";
-import * as microsoftTeams from "@microsoft/teams-js";
+import { LiveShareClient } from "@microsoft/live-share";
+import { app, LiveShareHost } from "@microsoft/teams-js";
 
 // Initialize Teams Client SDK
-await microsoftTeams.app.initialize();
+await app.initialize();
 
 // Define Fluid schema
 const schema = {
@@ -51,7 +51,8 @@ const schema = {
     },
 };
 // create space based on Teams context
-const client = new TeamsFluidClient();
+const host = LiveShareHost.create();
+const client = new LiveShareClient(host);
 const { container } = await client.joinContainer(schema);
 
 ...
@@ -83,16 +84,16 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 There are several ways you can [contribute](../../CONTRIBUTING.md) to this project:
 
--   [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
--   Review the source code changes.
--   Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
--   [Contribute bug fixes](../../CONTRIBUTING.md).
+- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+- Review the source code changes.
+- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+- [Contribute bug fixes](../../CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.
 
 ## Reporting Security Issues
 
-Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/security/default).
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 

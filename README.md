@@ -1,10 +1,10 @@
 # Live Share SDK
 
-The Live Share SDK is in preview. You will need to be part of the [Developer Preview Program](https://docs.microsoft.com/en-us/microsoftteams/platform/resources/dev-preview/developer-preview-intro) for Microsoft Teams to use this feature.
+The Live Share SDK is in preview. You will need to be part of the [Developer Preview Program](https://docs.microsoft.com/microsoftteams/platform/resources/dev-preview/developer-preview-intro) for Microsoft Teams to use this feature.
 
-The Live Share SDK builds on the [Fluid Framework](https://fluidframework.com/) to enable the creation of collaborative experiences for Microsoft Teams and M365. This preview version focuses on building collaborative meeting applications for Microsoft Teams using Fluid. The SDK provides a `TeamsFluidClient` class for connecting to a special Fluid Container associated with each meeting. A collection of Live Share specific Distributed Data Structure classes are also provided to simplify building applications for common meeting scenarios like shared media playback.
+The Live Share SDK builds on the [Fluid Framework](https://fluidframework.com/) to enable the creation of collaborative experiences for Microsoft Teams and Microsoft 365. This preview version focuses on building collaborative meeting applications for Microsoft Teams using Fluid. The SDK provides a `LiveShareClient` class for connecting to a special Fluid Container associated with each meeting. A collection of Live Share specific Distributed Data Structure (DDS) classes are also provided to simplify building applications for common meeting scenarios like shared media playback.
 
-To get started, we recommend first familiarizing yourself with the [Fluid Framework](https://fluidframework.com/docs/) and building [Teams Meeting Apps](https://docs.microsoft.com/en-us/microsoftteams/platform/apps-in-teams-meetings/teams-apps-in-meetings). You can then follow our Quick Start Guide to build your first Teams Meeting App that uses Live Share.
+To get started, we recommend first familiarizing yourself with the [Fluid Framework](https://fluidframework.com/docs/) and [Live Share overview](https://aka.ms/teamsliveshare). You can then follow our [Quick Start Guide](https://learn.microsoft.com/microsoftteams/platform/apps-in-teams-meetings/teams-live-share-quick-start) to build your first Teams Meeting App that uses Live Share.
 
 You can find our detailed API reference documentation at [Live Share reference docs](https://docs.microsoft.com/javascript/api/@microsoft/live-share/) and [Live Share Media reference docs](https://docs.microsoft.com/javascript/api/@microsoft/live-share-media/).
 
@@ -57,11 +57,11 @@ yarn add @microsoft/live-share-media
 
 There are several ways you can [contribute](./CONTRIBUTING.md) to this project:
 
--   [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
-    -   (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
--   Review the source code changes.
--   Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
--   [Contribute bug fixes](./CONTRIBUTING.md).
+- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+  - (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
+- Review the source code changes.
+- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+- [Contribute bug fixes](./CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.
 
@@ -110,16 +110,18 @@ Unit tests for all of the packages can be run using `npm run test` or `npm run t
 
 There are several code samples available to use:
 
-| Sample name          | Description                                                                                                                               | Javascript                                            |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Dice Roller          | Enable all connected clients to roll a dice and view the result.                                                                          | [View](./samples/javascript/01.dice-roller/)          |
-| React Video          | Basic example showing how the EphemeralMediaSession object works with HTML5 video.                                                        | [View](./samples/javascript/02.react-video/)          |
-| React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](./samples/javascript/21.react-media-template/) |
-| Agile Poker          | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](./samples/javascript/22.react-agile-poker/)    |
+| Sample name           | Description                                                                                                                               | Javascript                                            |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Dice Roller           | Enable all connected clients to roll a dice and view the result.                                                                          | [View](./samples/javascript/01.dice-roller/)          |
+| React Video           | Basic example showing how the `LiveMediaSession` class works with HTML5 video.                                                            | [View](./samples/javascript/02.react-video/)          |
+| Live Canvas demo      | Synchronized pens, laser pointers, cursors, and more via Live Share Canvas.                                                               | [View](./samples/javascript/03.live-canvas-demo/)     |
+| Live Share React demo | Example of using the Live Share React package.                                                                                            | [View](./samples/javascript/04.live-share-react/)     |
+| React Media Template  | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](./samples/javascript/21.react-media-template/) |
+| Agile Poker           | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](./samples/javascript/22.react-agile-poker/)    |
 
 ## Reporting Security Issues
 
-Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/security/default).
 
 ## Licensing & Copyright
 

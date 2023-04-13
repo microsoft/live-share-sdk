@@ -10,7 +10,7 @@
         "start:client": "vite",
         "start:https": "vite --config vite.https-config.js",
         "start:server": "npx @fluidframework/azure-local-service@latest",
-        "start": "start-server-and-test start:server 7070 start:client",
+        "start": "npx tinylicious@0.7.2 7070",
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {

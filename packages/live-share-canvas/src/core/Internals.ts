@@ -3,7 +3,16 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 import { v4 as uuid } from "uuid";
-import { IPoint, IPointerPoint, IRect, ISegment } from ".";
+import {
+    BrushTipShape,
+    IColor,
+    IPoint,
+    IPointerPoint,
+    IRect,
+    ISegment,
+    getPressureAdjustedSize,
+    toCssRgbaColor,
+} from ".";
 
 /**
  * Pre-calculated Pi x 2.
@@ -178,6 +187,181 @@ export function computeQuadBetweenTwoRectangles(
             y: center2.y + signDeltaX * halfHeight2,
         },
     };
+}
+
+/**
+ * Computes all the quad segments joining the specified points.
+ * @param points The points to join.
+ * @param startPointIndex The index at which to start in the points collection.
+ * @param tipShape The shape of brush tip used to determine how to join points in the path.
+ * @param tipSize The size of the brush tip.
+ * @returns A collection of quad segments.
+ */
+export function computeQuadPath(
+    points: IPointerPoint[],
+    startPointIndex: number,
+    tipShape: BrushTipShape,
+    tipSize: number
+): IQuadPathSegment[] {
+    const result: IQuadPathSegment[] = [];
+    const tipHalfSize = tipSize / 2;
+
+    if (startPointIndex < points.length) {
+        let previousPoint: IPointerPoint | undefined = undefined;
+        let previousPointPressureAdjustedTip = 0;
+
+        if (startPointIndex > 0) {
+            previousPoint = points[startPointIndex - 1];
+            previousPointPressureAdjustedTip = getPressureAdjustedSize(
+                tipHalfSize,
+                previousPoint.pressure
+            );
+        }
+
+        for (let i = startPointIndex; i < points.length; i++) {
+            const p = points[i];
+
+            let pressureAdjustedTip = getPressureAdjustedSize(
+                tipHalfSize,
+                p.pressure
+            );
+
+            const segment: IQuadPathSegment = {
+                endPoint: p,
+                tipSize: pressureAdjustedTip,
+            };
+
+            if (previousPoint !== undefined) {
+                segment.quad =
+                    tipShape === "ellipse"
+                        ? computeQuadBetweenTwoCircles(
+                              p,
+                              pressureAdjustedTip,
+                              previousPoint,
+                              previousPointPressureAdjustedTip
+                          )
+                        : computeQuadBetweenTwoRectangles(
+                              p,
+                              pressureAdjustedTip,
+                              pressureAdjustedTip,
+                              previousPoint,
+                              previousPointPressureAdjustedTip,
+                              previousPointPressureAdjustedTip
+                          );
+            }
+
+            result.push(segment);
+
+            previousPoint = p;
+            previousPointPressureAdjustedTip = pressureAdjustedTip;
+        }
+    }
+
+    return result;
+}
+
+function toFixed(n: number): string {
+    return n.toFixed(5);
+}
+
+/**
+ * Renders a series of points as a closed and filled SVG <path> tag.
+ * @param points The points making up the path.
+ * @param color The fill color.
+ * @returns A string representing an SVG path.
+ */
+export function renderFilledSVGPath(points: IPoint[], color: IColor): string {
+    let pathData = "";
+
+    for (let i = 0; i < points.length; i++) {
+        const instruction = i === 0 ? "M" : "L";
+        const p = points[i];
+
+        pathData += `${instruction}${toFixed(p.x)} ${toFixed(p.y)}`;
+    }
+
+    return `<path d="${pathData}" fill="${toCssRgbaColor(color)}"/>`;
+}
+
+/**
+ * Renders a filled circle as an SVG <circle> tag.
+ * @param center The center of the circle, in pixels.
+ * @param radius The radius of the circle, in pixels.
+ * @param color The color of the circle.
+ */
+export function renderFilledSVGCircle(
+    center: IPoint,
+    radius: number,
+    color: IColor
+): string {
+    // eslint-disable-next-line prettier/prettier
+    return `<circle cx="${toFixed(center.x)}" cy="${toFixed(center.y)}" r="${toFixed(radius)}" fill="${toCssRgbaColor(color)}"/>`;
+}
+
+/**
+ * Renders a filled rectangle as an SVG <path> tag.
+ * @param center The center of the rectangle, in pixels.
+ * @param halfWidth The half-width of the rectangle, in pixels.
+ * @param halfHeight The half-height of the rectangle, in pixels.
+ * @param color The color of the rectangle.
+ */
+export function renderFilledSVGRectangle(
+    center: IPoint,
+    halfWidth: number,
+    halfHeight: number,
+    color: IColor
+): string {
+    const left: number = center.x - halfWidth;
+    const right: number = center.x + halfWidth;
+    const top: number = center.y - halfHeight;
+    const bottom: number = center.y + halfHeight;
+
+    return renderFilledSVGPath(
+        [
+            { x: left, y: top },
+            { x: right, y: top },
+            { x: right, y: bottom },
+            { x: left, y: bottom },
+        ],
+        color
+    );
+}
+
+/**
+ * Renders a quad path to a collection of SVG tags.
+ * @param path The path to render.
+ * @param tipShape The shape of the brush tip.
+ * @param color The color of the rendered path.
+ * @returns A serialized collection of SVG tags.
+ */
+export function renderQuadPathToSVG(
+    path: IQuadPathSegment[],
+    tipShape: BrushTipShape,
+    color: IColor
+): string {
+    let result = "";
+
+    for (let item of path) {
+        if (item.quad !== undefined) {
+            result += renderFilledSVGPath(
+                [item.quad.p1, item.quad.p2, item.quad.p3, item.quad.p4],
+                color
+            );
+        }
+
+        if (tipShape === "ellipse") {
+            result += renderFilledSVGCircle(item.endPoint, item.tipSize, color);
+        } else {
+            result += renderFilledSVGRectangle(
+                item.endPoint,
+                item.tipSize,
+                item.tipSize,
+                color
+            );
+        }
+    }
+
+    return result;
 }
 
 /**

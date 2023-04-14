@@ -17,7 +17,7 @@
     "dependencies": {
         "@microsoft/live-share": "1.0.0-preview.8",
         "@microsoft/live-share-turbo": "1.0.0-preview.8",
-        "@microsoft/teams-js": "^2.5.0",
+        "@microsoft/teams-js": "^2.10.1",
         "@typescript-eslint/eslint-plugin": "^5.48.1",
         "@typescript-eslint/parser": "^5.48.1",
         "fluid-framework": "~1.2.3"

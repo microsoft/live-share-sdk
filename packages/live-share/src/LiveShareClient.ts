@@ -24,24 +24,6 @@ import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { TimestampProvider } from "./TimestampProvider";
 
 /**
- * @hidden
- * Map v0.59 orderer endpoints to new v1.0 service endpoints
- */
-const serviceEndpointMap = new Map<string | undefined, string>()
-    .set(
-        "https://alfred.westus2.fluidrelay.azure.com",
-        "https://us.fluidrelay.azure.com"
-    )
-    .set(
-        "https://alfred.westeurope.fluidrelay.azure.com",
-        "https://eu.fluidrelay.azure.com"
-    )
-    .set(
-        "https://alfred.southeastasia.fluidrelay.azure.com",
-        "https://global.fluidrelay.azure.com"
-    );
-
-/**
  * Options used to configure the `TeamsFluidClient` class.
  */
 export interface ILiveShareClientOptions {
@@ -137,15 +119,9 @@ export class LiveShareClient {
                 // Compute endpoint
                 let endpoint = frsTenantInfo.serviceEndpoint;
                 if (!endpoint) {
-                    if (serviceEndpointMap.has(frsTenantInfo.serviceEndpoint)) {
-                        endpoint = serviceEndpointMap.get(
-                            frsTenantInfo.serviceEndpoint
-                        );
-                    } else {
-                        throw new Error(
-                            `TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
-                        );
-                    }
+                    throw new Error(
+                        `TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
+                    );
                 }
 
                 // Is this a local config?

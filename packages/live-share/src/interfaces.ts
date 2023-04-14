@@ -213,14 +213,14 @@ export interface IFluidTenantInfo {
      * As of Fluid 1.0 this configuration information has been deprecated in favor of
      * `serviceEndpoint`.
      */
-    ordererEndpoint: string;
+    ordererEndpoint?: string;
 
     /**
      * @deprecated
      * As of Fluid 1.0 this configuration information has been deprecated in favor of
      * `serviceEndpoint`.
      */
-    storageEndpoint: string;
+    storageEndpoint?: string;
 }
 
 /**

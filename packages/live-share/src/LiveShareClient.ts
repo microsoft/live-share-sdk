@@ -135,7 +135,8 @@ export class LiveShareClient {
                 const frsTenantInfo = await this._host.getFluidTenantInfo();
 
                 // Compute endpoint
-                let endpoint = frsTenantInfo.serviceEndpoint;
+                let endpoint: string | undefined =
+                    frsTenantInfo.serviceEndpoint;
                 if (!endpoint) {
                     if (serviceEndpointMap.has(frsTenantInfo.serviceEndpoint)) {
                         endpoint = serviceEndpointMap.get(

@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { FluentProvider, webDarkTheme } from "@fluentui/react-components";
+import { FluentProvider, webDarkTheme, webLightTheme } from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
@@ -15,6 +15,7 @@ import { inTeams } from "./utils/inTeams";
 export default function App() {
     const initializeStartedRef = useRef(false);
     const [initialized, setInitialized] = useState(false);
+    const [webTheme, setWebTheme] = useState(webDarkTheme);
 
     useEffect(() => {
         // This hook should only be called once, so we use a ref to track if it has been called.
@@ -31,6 +32,24 @@ export default function App() {
                 microsoftTeams.app.notifyAppLoaded();
                 microsoftTeams.app.notifySuccess();
                 setInitialized(true);
+                const context = await microsoftTeams.app.getContext();
+                const curTheme = context.app.theme;
+                switch(curTheme) {
+                    case "dark":
+                        setWebTheme(webDarkTheme);
+                        break;
+                    case "default":
+                    default:
+                        setWebTheme(webLightTheme);
+                        break;
+                }
+                microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
+                    if (theme == "dark") {
+                        setWebTheme(webDarkTheme);
+                    } else {
+                        setWebTheme(webLightTheme);
+                    }
+                });
             } catch (error) {
                 console.error(error);
             }
@@ -47,7 +66,7 @@ export default function App() {
     return (
         appReady && (
             <FluentProvider
-                theme={webDarkTheme}
+                theme={webTheme}
                 style={{
                     minHeight: "0px",
                     position: "absolute",

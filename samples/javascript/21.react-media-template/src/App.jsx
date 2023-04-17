@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { FluentProvider, teamsDarkTheme } from "@fluentui/react-components";
+import { FluentProvider, teamsDarkTheme, teamsLightTheme, teamsHighContrastTheme } from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +15,7 @@ import { inTeams } from "./utils/inTeams";
 export default function App() {
     const initializeStartedRef = useRef(false);
     const [initialized, setInitialized] = useState(false);
+    const [teamsTheme, setteamsTheme] = useState(teamsLightTheme);
 
     useEffect(() => {
         // This hook should only be called once, so we use a ref to track if it has been called.
@@ -31,6 +32,29 @@ export default function App() {
                 microsoftTeams.app.notifyAppLoaded();
                 microsoftTeams.app.notifySuccess();
                 setInitialized(true);
+                const context = await microsoftTeams.app.getContext();
+                const curTheme = context.app.theme;
+                switch(curTheme) {
+                    case "dark":
+                        setteamsTheme(teamsDarkTheme);
+                        break;
+                    case "contrast":
+                        setteamsTheme(teamsHighContrastTheme);
+                        break;
+                    case "default":
+                    default:
+                        setteamsTheme(teamsLightTheme);
+                        break;
+                }
+                microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
+                    if (theme == "dark") {
+                        setteamsTheme(teamsDarkTheme);
+                    } else if (theme == "contrast") {
+                        setteamsTheme(teamsHighContrastTheme);
+                    } else {
+                        setteamsTheme(teamsLightTheme);
+                    }
+                });
             } catch (error) {
                 console.error(error);
             }
@@ -47,7 +71,7 @@ export default function App() {
     return (
         appReady && (
             <FluentProvider
-                theme={teamsDarkTheme}
+                theme={teamsTheme}
                 style={{
                     minHeight: "0px",
                     position: "absolute",

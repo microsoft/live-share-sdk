@@ -51,8 +51,6 @@ export class TestLiveShareHost implements ILiveShareHost {
     public getFluidTenantInfo(): Promise<IFluidTenantInfo> {
         return Promise.resolve({
             tenantId: "local",
-            ordererEndpoint: "http://localhost:7070",
-            storageEndpoint: "http://localhost:7070",
             serviceEndpoint: "http://localhost:7070",
         });
     }

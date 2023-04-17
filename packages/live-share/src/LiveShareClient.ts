@@ -24,7 +24,25 @@ import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { TimestampProvider } from "./TimestampProvider";
 
 /**
- * Options used to configure the `TeamsFluidClient` class.
+ * @hidden
+ * Map v0.59 orderer endpoints to new v1.0 service endpoints
+ */
+const serviceEndpointMap = new Map<string | undefined, string>()
+    .set(
+        "https://alfred.westus2.fluidrelay.azure.com",
+        "https://us.fluidrelay.azure.com"
+    )
+    .set(
+        "https://alfred.westeurope.fluidrelay.azure.com",
+        "https://eu.fluidrelay.azure.com"
+    )
+    .set(
+        "https://alfred.southeastasia.fluidrelay.azure.com",
+        "https://global.fluidrelay.azure.com"
+    );
+
+/**
+ * Options used to configure the `LiveShareClient` class.
  */
 export interface ILiveShareClientOptions {
     /**
@@ -55,7 +73,7 @@ export class LiveShareClient {
     private _roleVerifier?: RoleVerifier;
 
     /**
-     * Creates a new `TeamsFluidClient` instance.
+     * Creates a new `LiveShareClient` instance.
      * @param host Host for the current Live Share session.
      * @param options Optional. Configuration options for the client.
      */
@@ -119,9 +137,15 @@ export class LiveShareClient {
                 // Compute endpoint
                 let endpoint = frsTenantInfo.serviceEndpoint;
                 if (!endpoint) {
-                    throw new Error(
-                        `TeamsFluidClient: Unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
-                    );
+                    if (serviceEndpointMap.has(frsTenantInfo.serviceEndpoint)) {
+                        endpoint = serviceEndpointMap.get(
+                            frsTenantInfo.serviceEndpoint
+                        );
+                    } else {
+                        throw new Error(
+                            `LiveShareClient: Unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
+                        );
+                    }
                 }
 
                 // Is this a local config?
@@ -293,7 +317,7 @@ export class LiveShareClient {
             );
         } else {
             throw new Error(
-                `TeamsFluidClient: timed out attempting to create or get container for current context.`
+                `LiveShareClient: timed out attempting to create or get container for current context.`
             );
         }
     }

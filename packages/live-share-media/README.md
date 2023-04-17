@@ -50,15 +50,16 @@ This will use lerna to hoist and build all dependencies.
 ```
 
 ```javascript
-import * as microsoftTeams from "@microsoft/teams-js";
-import { TeamsFluidClient } from "@microsoft/live-share";
+import { app, LiveShareHost } from "@microsoft/teams-js";
+import { LiveShareClient } from "@microsoft/live-share";
 import { LiveMediaSession } from "@microsoft/live-share-media";
 
 // Initialize the Teams Client SDK
 await microsoftTeams.app.initialize();
 
 // Setup the Fluid container
-const client = new TeamsFluidClient();
+const host = LiveShareHost.create();
+const client = new LiveShareClient(host);
 const schema = {
   initialObjects: {
     mediaSession: LiveMediaSession,
@@ -132,7 +133,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Reporting Security Issues
 
-Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/security/default).
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 

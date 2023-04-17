@@ -2,9 +2,9 @@
 <a href="#live-share-sdk" id="live-share-sdk" style="color: inherit; text-decoration: none;">
   <h1>Live Share SDK</h1>
 </a>
-<p>The Live Share SDK is in preview. You will need to be part of the <a href="https://docs.microsoft.com/en-us/microsoftteams/platform/resources/dev-preview/developer-preview-intro">Developer Preview Program</a> for Microsoft Teams to use this feature.</p>
-<p>The Live Share SDK builds on the <a href="https://fluidframework.com/">Fluid Framework</a> to enable the creation of collaborative experiences for Microsoft Teams and M365. This preview version focuses on building collaborative meeting applications for Microsoft Teams using Fluid. The SDK provides a <code>TeamsFluidClient</code> class for connecting to a special Fluid Container associated with each meeting. A collection of Live Share specific Distributed Data Structure classes are also provided to simplify building applications for common meeting scenarios like shared media playback.</p>
-<p>To get started, we recommend first familiarizing yourself with the <a href="https://fluidframework.com/docs/">Fluid Framework</a> and building <a href="https://docs.microsoft.com/en-us/microsoftteams/platform/apps-in-teams-meetings/teams-apps-in-meetings">Teams Meeting Apps</a>. You can then follow our Quick Start Guide to build your first Teams Meeting App that uses Live Share.</p>
+<p>The Live Share SDK is in preview. You will need to be part of the <a href="https://docs.microsoft.com/microsoftteams/platform/resources/dev-preview/developer-preview-intro">Developer Preview Program</a> for Microsoft Teams to use this feature.</p>
+<p>The Live Share SDK builds on the <a href="https://fluidframework.com/">Fluid Framework</a> to enable the creation of collaborative experiences for Microsoft Teams and Microsoft 365. This preview version focuses on building collaborative meeting applications for Microsoft Teams using Fluid. The SDK provides a <code>LiveShareClient</code> class for connecting to a special Fluid Container associated with each meeting. A collection of Live Share specific Distributed Data Structure (DDS) classes are also provided to simplify building applications for common meeting scenarios like shared media playback.</p>
+<p>To get started, we recommend first familiarizing yourself with the <a href="https://fluidframework.com/docs/">Fluid Framework</a> and <a href="https://aka.ms/teamsliveshare">Live Share overview</a>. You can then follow our <a href="https://learn.microsoft.com/microsoftteams/platform/apps-in-teams-meetings/teams-live-share-quick-start">Quick Start Guide</a> to build your first Teams Meeting App that uses Live Share.</p>
 <p>You can find our detailed API reference documentation at <a href="https://docs.microsoft.com/javascript/api/@microsoft/live-share/">Live Share reference docs</a> and <a href="https://docs.microsoft.com/javascript/api/@microsoft/live-share-media/">Live Share Media reference docs</a>.</p>
 
 <a href="#package-compatibility" id="package-compatibility" style="color: inherit; text-decoration: none;">
@@ -18,17 +18,26 @@
 <th>@microsoft/live-share</th>
 <th>@microsoft/teams-js</th>
 <th>fluid-framework</th>
-<th>@microsoft/live-share-(media or canvas)</th>
+<th>@microsoft/live-share-*</th>
 <th>@fluidframework/azure-client</th>
 <th>@microsoft/TeamsFx</th>
 <th>@microsoft/TeamsFx-react</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>1.0.0-preview.1</td>
+<td>1.0.0-preview.8</td>
+<td>^2.5.0</td>
+<td>~1.2.3</td>
+<td>1.0.0-preview.8 (optional)</td>
+<td>~1.0.2 (optional)</td>
+<td>^2.5.0 (optional)</td>
+<td>^2.5.0 (optional)</td>
+</tr>
+<tr>
+<td>1.0.0-preview.3</td>
 <td>2.0.0-experimental.1</td>
 <td>~1.2.3</td>
-<td>1.0.0-preview.1 (optional)</td>
+<td>1.0.0-preview.3 (optional)</td>
 <td>~1.0.2 (optional)</td>
 <td>2.0.0-experimental.0 (optional)</td>
 <td>2.0.0-experimental.0 (optional)</td>
@@ -112,13 +121,13 @@
 </a>
 <p>To build the projects packages (with symlinks to the locally built packages), we use Lerna to prevent dependency errors.</p>
 <p>Install all developer dependencies:</p>
-<pre><code class="language-bash"><span class="hl-0">npm install --legacy-peer-deps</span>
+<pre><code class="language-bash"><span class="hl-0">npm install</span>
 </code></pre>
 <p>Build packages and samples:</p>
 <pre><code class="language-bash"><span class="hl-0">npm run build</span>
 </code></pre>
 <p>Run the sample of of your choice:</p>
-<pre><code class="language-bash"><span class="hl-1">cd</span><span class="hl-0"> samples/01.dice-roller</span><br/><span class="hl-0">npm start</span>
+<pre><code class="language-bash"><span class="hl-1">cd</span><span class="hl-0"> samples/javascript/01.dice-roller</span><br/><span class="hl-0">npm start</span>
 </code></pre>
 <p>Unit tests for all of the packages can be run using <code>npm run test</code> or <code>npm run test:debug</code>. Any previously built files can be deleted prior to building by first running <code>npm run clean</code>.</p>
 
@@ -137,29 +146,39 @@
 <tbody><tr>
 <td>Dice Roller</td>
 <td>Enable all connected clients to roll a dice and view the result.</td>
-<td><a href="./samples/01.dice-roller/">View</a></td>
+<td><a href="./samples/javascript/01.dice-roller/">View</a></td>
 </tr>
 <tr>
 <td>React Video</td>
-<td>Basic example showing how the EphemeralMediaSession object works with HTML5 video.</td>
-<td><a href="./samples/02.react-video/">View</a></td>
+<td>Basic example showing how the <code>LiveMediaSession</code> class works with HTML5 video.</td>
+<td><a href="./samples/javascript/02.react-video/">View</a></td>
+</tr>
+<tr>
+<td>Live Canvas demo</td>
+<td>Synchronized pens, laser pointers, cursors, and more via Live Share Canvas.</td>
+<td><a href="./samples/javascript/03.live-canvas-demo/">View</a></td>
+</tr>
+<tr>
+<td>Live Share React demo</td>
+<td>Example of using the Live Share React package.</td>
+<td><a href="./samples/javascript/04.live-share-react/">View</a></td>
 </tr>
 <tr>
 <td>React Media Template</td>
 <td>Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video.</td>
-<td><a href="./samples/21.react-media-template/">View</a></td>
+<td><a href="./samples/javascript/21.react-media-template/">View</a></td>
 </tr>
 <tr>
 <td>Agile Poker</td>
 <td>Enable all connected clients to play an Agile Poker planning activity.</td>
-<td><a href="./samples/22.react-agile-poker/">View</a></td>
+<td><a href="./samples/javascript/22.react-agile-poker/">View</a></td>
 </tr>
 </tbody></table>
 
 <a href="#reporting-security-issues" id="reporting-security-issues" style="color: inherit; text-decoration: none;">
   <h2>Reporting Security Issues</h2>
 </a>
-<p>Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at <a href="mailto:secure@microsoft.com">secure@microsoft.com</a>. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the <a href="https://technet.microsoft.com/en-us/security/dn606155">MSRC PGP</a> key, can be found in the <a href="https://technet.microsoft.com/en-us/security/default">Security TechCenter</a>.</p>
+<p>Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at <a href="mailto:secure@microsoft.com">secure@microsoft.com</a>. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the <a href="https://technet.microsoft.com/security/dn606155">MSRC PGP</a> key, can be found in the <a href="https://technet.microsoft.com/security/default">Security TechCenter</a>.</p>
 
 <a href="#licensing-amp-copyright" id="licensing-amp-copyright" style="color: inherit; text-decoration: none;">
   <h2>Licensing &amp; Copyright</h2>
@@ -167,4 +186,4 @@
 <p>Copyright (c) Microsoft Corporation. All rights reserved.</p>
 <p>Live Share packages are licensed under a special <a href="./LICENSE">Microsoft Live Share SDK license</a>.</p>
 <p>Code samples are licensed separately under <a href="./samples/LICENSE">MIT license</a>.</p>
-</div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Modules</a></li><li class=" tsd-kind-module"><a href="modules/_microsoft_live_share.html">@microsoft/live-<wbr/>share</a></li><li class=" tsd-kind-module"><a href="modules/_microsoft_live_share_canvas.html">@microsoft/live-<wbr/>share-<wbr/>canvas</a></li><li class=" tsd-kind-module"><a href="modules/_microsoft_live_share_media.html">@microsoft/live-<wbr/>share-<wbr/>media</a></li></ul></nav></div></div></div><footer class="with-border-bottom"><div class="container"><h2>Legend</h2><div class="tsd-legend-group"><ul class="tsd-legend"><li class="tsd-kind-namespace"><span class="tsd-kind-icon">Namespace</span></li><li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li><li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li><li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li><li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li><li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li><li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li></ul></div><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="container tsd-generator"><p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div><div class="overlay"></div><script src="assets/main.js"></script></body></html>
+</div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Modules</a></li><li class=" tsd-kind-module"><a href="modules/_microsoft_live_share.html">@microsoft/live-<wbr/>share</a></li><li class=" tsd-kind-module"><a href="modules/_microsoft_live_share_canvas.html">@microsoft/live-<wbr/>share-<wbr/>canvas</a></li><li class=" tsd-kind-module"><a href="modules/_microsoft_live_share_media.html">@microsoft/live-<wbr/>share-<wbr/>media</a></li></ul></nav></div></div></div><footer class="with-border-bottom"><div class="container"><h2>Legend</h2><div class="tsd-legend-group"><ul class="tsd-legend"><li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li><li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li><li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li><li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li><li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li><li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li></ul></div><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="container tsd-generator"><p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div><div class="overlay"></div><script src="assets/main.js"></script></body></html>

@@ -1,6 +1,6 @@
 # React Video Sample
 
-This repository contains a simple example of how the `EphemeralMediaSession` object works with HTML5 `<video>`.
+This repository contains a simple example of how the `LiveMediaSession` object works with HTML5 `<video>`.
 
 ## Testing Locally in Browser
 

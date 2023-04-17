@@ -10,13 +10,13 @@
         "start:client": "vite",
         "start:https": "vite --config vite.https-config.js",
         "start:server": "npx @fluidframework/azure-local-service@latest",
-        "start": "start-server-and-test start:server 7070 start:client",
+        "start": "npx tinylicious@0.7.2 7070",
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
         "@fluidframework/test-client-utils": "~1.2.3",
-        "@microsoft/live-share": "1.0.0-preview.7",
-        "@microsoft/live-share-canvas": "1.0.0-preview.7",
+        "@microsoft/live-share": "1.0.0-preview.8",
+        "@microsoft/live-share-canvas": "1.0.0-preview.8",
         "@microsoft/teams-js": "^2.5.0",
         "fluid-framework": "~1.2.3"
     },

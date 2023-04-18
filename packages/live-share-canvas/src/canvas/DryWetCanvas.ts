@@ -5,17 +5,12 @@
 
 import { InkingCanvas } from "./InkingCanvas";
 import {
-    getPressureAdjustedSize,
     IPointerPoint,
     DefaultPenBrush,
     IBrush,
     toCssRgbaColor,
 } from "../core";
-import {
-    computeQuadBetweenTwoCircles,
-    computeQuadBetweenTwoRectangles,
-    IQuadPathSegment,
-} from "../core/Internals";
+import { computeQuadPath, IQuadPathSegment } from "../core/Internals";
 
 /**
  * Represents the base class from wet and dry canvases, implementing the common rendering logic.
@@ -26,65 +21,12 @@ export abstract class DryWetCanvas extends InkingCanvas {
     private _points: IPointerPoint[] = [];
 
     private computeQuadPath(tipSize: number): IQuadPathSegment[] {
-        const result: IQuadPathSegment[] = [];
-        const tipHalfSize = tipSize / 2;
-
-        if (this._pendingPointsStartIndex < this._points.length) {
-            let previousPoint: IPointerPoint | undefined = undefined;
-            let previousPointPressureAdjustedTip = 0;
-
-            if (this._pendingPointsStartIndex > 0) {
-                previousPoint = this._points[this._pendingPointsStartIndex - 1];
-                previousPointPressureAdjustedTip = getPressureAdjustedSize(
-                    tipHalfSize,
-                    previousPoint.pressure
-                );
-            }
-
-            for (
-                let i = this._pendingPointsStartIndex;
-                i < this._points.length;
-                i++
-            ) {
-                const p = this._points[i];
-
-                let pressureAdjustedTip = getPressureAdjustedSize(
-                    tipHalfSize,
-                    p.pressure
-                );
-
-                const segment: IQuadPathSegment = {
-                    endPoint: p,
-                    tipSize: pressureAdjustedTip,
-                };
-
-                if (previousPoint !== undefined) {
-                    segment.quad =
-                        this.brush.tip === "ellipse"
-                            ? computeQuadBetweenTwoCircles(
-                                  p,
-                                  pressureAdjustedTip,
-                                  previousPoint,
-                                  previousPointPressureAdjustedTip
-                              )
-                            : computeQuadBetweenTwoRectangles(
-                                  p,
-                                  pressureAdjustedTip,
-                                  pressureAdjustedTip,
-                                  previousPoint,
-                                  previousPointPressureAdjustedTip,
-                                  previousPointPressureAdjustedTip
-                              );
-                }
-
-                result.push(segment);
-
-                previousPoint = p;
-                previousPointPressureAdjustedTip = pressureAdjustedTip;
-            }
-        }
-
-        return result;
+        return computeQuadPath(
+            this._points,
+            this._pendingPointsStartIndex,
+            this.brush.tip,
+            tipSize
+        );
     }
 
     private renderQuadPath(

@@ -4,7 +4,7 @@ Easily add collaborative inking to your Teams meeting app, powered by [Fluid Fra
 
 This package is an extension of Microsoft Live Share, and requires the `@microsoft/live-share` package. You can find it on [NPM](https://www.npmjs.com/package/@microsoft/live-share).
 
-You can find our API reference documentation at [aka.ms/livesharedocs](https://aka.ms/livesharedocs).
+You can find our documentation at [aka.ms/livesharecanvas](https://aka.ms/livesharecanvas).
 
 ## Installing
 
@@ -27,7 +27,7 @@ yarn add @microsoft/live-share-canvas
 After cloning the [GitHub repository](https://www.github.com/microsoft/live-share-sdk), navigate to the root folder and run:
 
 ```bash
-npm install --legacy-peer-dep
+npm install
 npm run build
 ```
 
@@ -43,11 +43,13 @@ This will use lerna to hoist and build all dependencies.
 ```
 
 ```javascript
+import { LiveShareHost } from "@microsoft/teams-js";
 import { LiveShareClient } from "@microsoft/live-share";
 import { LiveCanvas, InkingManager, InkingTool } from "@microsoft/live-share-canvas";
 
 // Setup the Fluid container
-const client = new LiveShareClient();
+const host = LiveShareHost.create();
+const client = new LiveShareClient(host);
 const containerSchema = {
     initialObjects: {
         // Include a LiveCanvas in your container schema
@@ -84,7 +86,7 @@ document.getElementById("btnPenBrushBlue").onclick = () => {
     inkingManager.penBrush.color = { r: 0, g: 0, b: 255, a: 1};
 }
 
-// Other tools and brush settings are available, please refer to the documentation
+// Other tools and brush settings are available, please refer to the documentation at https://aka.ms/livesharecanvas
 ```
 
 ## Code sample
@@ -103,7 +105,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| 1.0.0-preview.7       | ^2.5.0               | ~1.2.3          | 1.0.0-preview.7 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
+| 1.0.0-preview.8       | ^2.5.0               | ~1.2.3          | 1.0.0-preview.8 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
 | 1.0.0-preview.3       | 2.0.0-experimental.1 | ~1.2.3          | 1.0.0-preview.3 (optional) | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.5.1                | 2.0.0-experimental.1 | ~1.2.3          | ~0.5.1 (optional)          | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)          | ~0.59.0 (optional)           | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
@@ -121,7 +123,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Reporting Security Issues
 
-Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC) at secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the [MSRC PGP](https://technet.microsoft.com/security/dn606155) key, can be found in the [Security TechCenter](https://technet.microsoft.com/security/default).
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 

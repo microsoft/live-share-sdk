@@ -11,12 +11,13 @@
         "start:client": "vite",
         "start:https": "vite src --config vite.https-config.js",
         "start:server": "npx @fluidframework/azure-local-service@latest",
+        "start-https": "start-server-and-test start:server 7070 start:https",
         "start": "start-server-and-test start:server 7070 start:client",
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
-        "@microsoft/live-share": "1.0.0-preview.7",
-        "@microsoft/teams-js": "^2.5.0",
+        "@microsoft/live-share": "1.0.0-preview.8",
+        "@microsoft/teams-js": "^2.10.1",
         "@typescript-eslint/eslint-plugin": "^5.48.1",
         "@typescript-eslint/parser": "^5.48.1",
         "fluid-framework": "~1.2.3"

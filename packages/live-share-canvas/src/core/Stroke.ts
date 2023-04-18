@@ -88,6 +88,20 @@ export enum StrokeType {
 }
 
 /**
+ * Represents the raw data of a stroke.
+ */
+export interface IRawStroke {
+    /**
+     * The stroke's points.
+     */
+    readonly points: IPointerPoint[];
+    /**
+     * The brush used to draw the stroke.
+     */
+    readonly brush: IBrush;
+}
+
+/**
  * Defines a stroke, i.e. a collection of points that can
  * be rendered on a canvas.
  */
@@ -118,6 +132,10 @@ export interface IStroke {
      * Computes the stroke's bounding rectangle.
      */
     getBoundingRect(): IRect;
+    /**
+     * Gets a copy of all the points in the stroke.
+     */
+    getAllPoints(): IPointerPoint[];
     /**
      * Splits this stroke into several other ones by "erasing"
      * the portions that are within the eraser rectangle.
@@ -427,6 +445,20 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
      */
     getPointAt(index: number): IPointerPoint {
         return this._points[index];
+    }
+
+    /**
+     * Gets a copy of all the points in the stroke.
+     * @returns A collection of points.
+     */
+    getAllPoints(): IPointerPoint[] {
+        const result: IPointerPoint[] = [];
+
+        for (const p of this._points) {
+            result.push({ ...p });
+        }
+
+        return result;
     }
 
     /**

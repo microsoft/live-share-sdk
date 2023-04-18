@@ -347,25 +347,25 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                 .then((info) => {
                     if (info) {
                         // for some reason, for non local users, tmp roster transiently doesn't contain a meeting participant.
-                        // when the particpant is missing the clientInfo matches `defaultUserInfo`
+                        // When the particpant is missing the `info` matches `defaultUserInfo`.
                         const defaultUserInfo: IClientInfo = {
                             userId: info.userId,
                             roles: [UserMeetingRole.guest],
                             displayName: undefined,
                         };
-                        const useValidOldInfo =
+                        const useValidExistingInfo =
                             JSON.stringify(info) ===
                             JSON.stringify(defaultUserInfo);
 
-                        if (useValidOldInfo) {
-                            const current = this._users.find(
+                        if (useValidExistingInfo) {
+                            const user = this._users.find(
                                 (user) => user.userId === info.userId
                             );
-                            if (current) {
+                            if (user) {
                                 const oldInfo: IClientInfo = {
-                                    userId: current.userId,
-                                    roles: current.roles,
-                                    displayName: current.displayName,
+                                    userId: user.userId,
+                                    roles: user.roles,
+                                    displayName: user.displayName,
                                 };
                                 this.updateMembersListWithInfo(
                                     evt,

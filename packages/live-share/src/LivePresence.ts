@@ -18,6 +18,7 @@ import { cloneValue, TelemetryEvents } from "./internals";
 import { TimeInterval } from "./TimeInterval";
 import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { IClientInfo } from "./interfaces";
 
 /**
  * Events supported by `LivePresence` object.
@@ -164,6 +165,13 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         // Create event scope
         this._scope = new LiveEventScope(this.runtime);
 
+        // make sure client info for local user is available
+        const localClientInfo = await LiveShareClient.getClientInfo(
+            this._currentPresence.clientId
+        );
+        // Add local user to list
+        this.updateMembersList(this._currentPresence, true, localClientInfo);
+
         // Listen for PresenceUpdated event (allow local presence changes to be echoed back)
         this._updatePresenceEvent = new LiveEventTarget(
             this._scope,
@@ -200,9 +208,6 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                 this.updateMembersList(state!, false);
             }
         );
-
-        // Add local user to list
-        this.updateMembersList(this._currentPresence, true);
     }
 
     /**
@@ -332,7 +337,28 @@ export class LivePresence<TData extends object = object> extends DataObject<{
 
     private updateMembersList(
         evt: ILivePresenceEvent<TData>,
-        local: boolean
+        local: boolean,
+        initLocalClientInfo?: IClientInfo
+    ): void {
+        if (initLocalClientInfo) {
+            this.updateMembersListWithInfo(evt, local, initLocalClientInfo);
+        } else if (evt.clientId) {
+            LiveShareClient.getClientInfo(evt.clientId)
+                .then((info) => {
+                    if (info) {
+                        this.updateMembersListWithInfo(evt, local, info);
+                    }
+                })
+                .catch((e) => {
+                    console.warn(e);
+                });
+        }
+    }
+
+    private updateMembersListWithInfo(
+        evt: ILivePresenceEvent<TData>,
+        local: boolean,
+        info: IClientInfo
     ): void {
         const emitEvent = (user: LivePresenceUser<TData>) => {
             this.emit(LivePresenceEvents.presenceChanged, user, local);
@@ -349,50 +375,33 @@ export class LivePresence<TData extends object = object> extends DataObject<{
             }
         };
 
-        if (evt.clientId) {
-            LiveShareClient.getClientInfo(evt.clientId)
-                .then((info) => {
-                    if (info) {
-                        // Find user or where user should be inserted
-                        let pos = 0;
-                        const userId = info.userId;
-                        for (; pos < this._users.length; pos++) {
-                            const current = this._users[pos];
-                            const cmp = userId.localeCompare(current.userId);
-                            if (cmp == 0) {
-                                // User found. Apply update and check for changes
-                                if (current.updateReceived(evt, local, info)) {
-                                    emitEvent(current);
-                                }
+        let pos = 0;
+        const userId = info.userId;
+        for (; pos < this._users.length; pos++) {
+            const current = this._users[pos];
+            const cmp = userId.localeCompare(current.userId);
+            if (cmp == 0) {
+                // User found. Apply update and check for changes
+                if (current.updateReceived(evt, info)) {
+                    emitEvent(current);
+                }
 
-                                return;
-                            } else if (cmp > 0) {
-                                // New user that should be inserted before this user
-                                break;
-                            }
-                        }
-
-                        // Insert new user and send change event
-                        let isLocal: boolean = false;
-                        if (this._currentPresence.clientId) {
-                            isLocal =
-                                evt.clientId == this._currentPresence.clientId;
-                        }
-
-                        const newUser = new LivePresenceUser<TData>(
-                            info,
-                            evt,
-                            this._expirationPeriod,
-                            isLocal
-                        );
-                        this._users.splice(pos, 0, newUser);
-                        emitEvent(newUser);
-                    }
-                })
-                .catch((e) => {
-                    console.warn(e);
-                });
+                return;
+            } else if (cmp > 0) {
+                // New user that should be inserted before this user
+                break;
+            }
         }
+
+        // Insert new user and send change event
+        const newUser = new LivePresenceUser<TData>(
+            info,
+            evt,
+            this._expirationPeriod,
+            evt.clientId == this._currentPresence.clientId
+        );
+        this._users.splice(pos, 0, newUser);
+        emitEvent(newUser);
     }
 
     private waitUntilConnected(): Promise<string> {

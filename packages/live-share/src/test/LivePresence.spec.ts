@@ -211,7 +211,10 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                         object1done.resolve();
                     } else {
                         triggered = true;
-                        assert(!user.data, `user1: data object passed`);
+                        assert(
+                            !user.data,
+                            `user1: data object passed when it shouldn't be`
+                        );
                         assert(user.state == PresenceState.online);
                     }
                 }

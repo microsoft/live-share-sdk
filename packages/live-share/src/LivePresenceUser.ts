@@ -114,34 +114,23 @@ export class LivePresenceUser<TData = object> {
      */
     public updateReceived(
         evt: ILivePresenceEvent<TData>,
-        local: boolean,
         info: IClientInfo
     ): boolean {
-        let localChanged = false;
-        if (!this._isLocalUser && local) {
-            // same user, but different client
-            this._isLocalUser = local;
-            localChanged = true;
-        }
-
         this.updateClients(evt);
         const currentEvent = this._evt;
         const currentClientInfo = this._clientInfo;
         if (LiveEvent.isNewer(currentEvent, evt)) {
             // Save updated event
             this._evt = evt;
-            this._clientInfo = currentClientInfo;
+            this._clientInfo = info;
             this._lastUpdateTime = LiveShareClient.getTimestamp();
 
             // Has anything changed?
-            if (
+            return (
                 evt.state != currentEvent.state ||
-                info != currentClientInfo ||
-                JSON.stringify(evt.data) != JSON.stringify(currentEvent.data) ||
-                localChanged
-            ) {
-                return true;
-            }
+                JSON.stringify(info) != JSON.stringify(currentClientInfo) ||
+                JSON.stringify(evt.data) != JSON.stringify(currentEvent.data)
+            );
         }
 
         return false;

@@ -345,38 +345,35 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         } else if (evt.clientId) {
             LiveShareClient.getClientInfo(evt.clientId)
                 .then((info) => {
-                    if (info) {
-                        // for some reason, for non local users, tmp roster transiently doesn't contain a meeting participant.
-                        // When the particpant is missing the `info` matches `defaultUserInfo`.
-                        const defaultUserInfo: IClientInfo = {
-                            userId: info.userId,
-                            roles: [UserMeetingRole.guest],
-                            displayName: undefined,
-                        };
-                        const useValidExistingInfo =
-                            JSON.stringify(info) ===
-                            JSON.stringify(defaultUserInfo);
+                    if (!info) {
+                        return;
+                    }
+                    // for some reason, for non local users, tmp roster transiently doesn't contain a meeting participant.
+                    // When the particpant is missing the `info` matches `defaultUserInfo`.
+                    const defaultUserInfo: IClientInfo = {
+                        userId: info.userId,
+                        roles: [UserMeetingRole.guest],
+                        displayName: undefined,
+                    };
+                    const useValidExistingInfo =
+                        JSON.stringify(info) ===
+                        JSON.stringify(defaultUserInfo);
 
-                        if (useValidExistingInfo) {
-                            const user = this._users.find(
-                                (user) => user.userId === info.userId
-                            );
-                            if (user) {
-                                const oldInfo: IClientInfo = {
-                                    userId: user.userId,
-                                    roles: user.roles,
-                                    displayName: user.displayName,
-                                };
-                                this.updateMembersListWithInfo(
-                                    evt,
-                                    local,
-                                    oldInfo
-                                );
-                            }
-                        } else {
-                            // normal flow
-                            this.updateMembersListWithInfo(evt, local, info);
+                    if (useValidExistingInfo) {
+                        const user = this._users.find(
+                            (user) => user.userId === info.userId
+                        );
+                        if (user) {
+                            const oldInfo: IClientInfo = {
+                                userId: user.userId,
+                                roles: user.roles,
+                                displayName: user.displayName,
+                            };
+                            this.updateMembersListWithInfo(evt, local, oldInfo);
                         }
+                    } else {
+                        // normal flow
+                        this.updateMembersListWithInfo(evt, local, info);
                     }
                 })
                 .catch((e) => {

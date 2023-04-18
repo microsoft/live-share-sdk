@@ -18,7 +18,7 @@ import { cloneValue, TelemetryEvents } from "./internals";
 import { TimeInterval } from "./TimeInterval";
 import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { IClientInfo } from "./interfaces";
+import { IClientInfo, UserMeetingRole } from "./interfaces";
 
 /**
  * Events supported by `LivePresence` object.
@@ -346,7 +346,37 @@ export class LivePresence<TData extends object = object> extends DataObject<{
             LiveShareClient.getClientInfo(evt.clientId)
                 .then((info) => {
                     if (info) {
-                        this.updateMembersListWithInfo(evt, local, info);
+                        // for some reason, for non local users, tmp roster transiently doesn't contain a meeting participant.
+                        // when the particpant is missing the clientInfo matches `defaultUserInfo`
+                        const defaultUserInfo: IClientInfo = {
+                            userId: info.userId,
+                            roles: [UserMeetingRole.guest],
+                            displayName: undefined,
+                        };
+                        const useValidOldInfo =
+                            JSON.stringify(info) ===
+                            JSON.stringify(defaultUserInfo);
+
+                        if (useValidOldInfo) {
+                            const current = this._users.find(
+                                (user) => user.userId === info.userId
+                            );
+                            if (current) {
+                                const oldInfo: IClientInfo = {
+                                    userId: current.userId,
+                                    roles: current.roles,
+                                    displayName: current.displayName,
+                                };
+                                this.updateMembersListWithInfo(
+                                    evt,
+                                    local,
+                                    oldInfo
+                                );
+                            }
+                        } else {
+                            // normal flow
+                            this.updateMembersListWithInfo(evt, local, info);
+                        }
                     }
                 })
                 .catch((e) => {

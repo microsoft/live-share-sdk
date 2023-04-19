@@ -348,29 +348,9 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                     if (!info) {
                         return;
                     }
-                    // for some reason, for non local users, tmp roster transiently doesn't contain a meeting participant.
-                    // When the particpant is missing the `info` matches `defaultUserInfo`.
-                    const defaultUserInfo: IClientInfo = {
-                        userId: info.userId,
-                        roles: [UserMeetingRole.guest],
-                        displayName: undefined,
-                    };
-                    const useValidExistingInfo =
-                        JSON.stringify(info) ===
-                        JSON.stringify(defaultUserInfo);
 
-                    if (useValidExistingInfo) {
-                        const user = this._users.find(
-                            (user) => user.userId === info.userId
-                        );
-                        if (user) {
-                            const oldInfo: IClientInfo = {
-                                userId: user.userId,
-                                roles: user.roles,
-                                displayName: user.displayName,
-                            };
-                            this.updateMembersListWithInfo(evt, local, oldInfo);
-                        }
+                    if (this.useTransientParticipantWorkaround(info)) {
+                        this.transientParticipantWorkaround(evt, local, info);
                     } else {
                         // normal flow
                         this.updateMembersListWithInfo(evt, local, info);
@@ -379,6 +359,34 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                 .catch((e) => {
                     console.warn(e);
                 });
+        }
+    }
+
+    private useTransientParticipantWorkaround(info: IClientInfo): boolean {
+        // for some reason, for non local users, tmp roster transiently doesn't contain a meeting participant.
+        // When the particpant is missing the `info` matches `defaultUserInfo`.
+        const defaultUserInfo: IClientInfo = {
+            userId: info.userId,
+            roles: [UserMeetingRole.guest],
+            displayName: undefined,
+        };
+        return JSON.stringify(info) === JSON.stringify(defaultUserInfo);
+    }
+
+    private transientParticipantWorkaround(
+        evt: ILivePresenceEvent<TData>,
+        local: boolean,
+        info: IClientInfo
+    ): void {
+        // when participant is missing, use existing information instead.
+        const user = this._users.find((user) => user.userId === info.userId);
+        if (user) {
+            const existingInfo: IClientInfo = {
+                userId: user.userId,
+                roles: user.roles,
+                displayName: user.displayName,
+            };
+            this.updateMembersListWithInfo(evt, local, existingInfo);
         }
     }
 

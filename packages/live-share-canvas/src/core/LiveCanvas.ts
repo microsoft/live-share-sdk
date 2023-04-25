@@ -36,6 +36,7 @@ import {
     ILiveEvent,
     UserMeetingRole,
     DynamicObjectRegistry,
+    LiveShareClient,
 } from "@microsoft/live-share";
 import { IBrush } from "./Brush";
 import {
@@ -55,18 +56,29 @@ enum InkingEventNames {
 /**
  * Encapsulates information about a user.
  */
-export interface IUserInfo {
+export type IUserInfo = IValidatedUserInfo & IEventUserInfo;
+
+/**
+ * Encapsulates non spoofable information about a user.
+ */
+export interface IValidatedUserInfo {
     /**
      * Optional. The user's display name.
      */
     displayName?: string;
+}
+
+/**
+ * Encapsulates information about a user that is okay to be sent through events.
+ */
+export interface IEventUserInfo {
     /**
      * Optional. The URI to the user's picture.
      */
     pictureUri?: string;
 }
 
-type IPointerMovedEvent = ILiveEvent & IPointerMovedEventArgs & IUserInfo;
+type IPointerMovedEvent = ILiveEvent & IPointerMovedEventArgs & IEventUserInfo;
 
 interface ISharedCursor {
     isCursorShared?: boolean;
@@ -75,11 +87,11 @@ interface ISharedCursor {
 type IBeginWetStrokeEvent = ILiveEvent &
     IBeginStrokeEventArgs &
     ISharedCursor &
-    IUserInfo;
+    IEventUserInfo;
 type IAddWetStrokePointsEvent = ILiveEvent &
     IAddPointsEventArgs &
     ISharedCursor &
-    IUserInfo;
+    IEventUserInfo;
 
 class LiveStroke {
     /**
@@ -411,12 +423,9 @@ export class LiveCanvas extends DataObject {
     private _liveCursorSweepTimeout?: number;
 
     private liveStrokeProcessed = (liveStroke: LiveStroke) => {
-        const userInfo = this.getLocalUserInfo();
-
         this._addWetStrokePointEventTarget.sendEvent({
             name: InkingEventNames.addWetStrokePoints,
             isCursorShared: this.isCursorShared ? true : undefined,
-            displayName: userInfo?.displayName,
             strokeId: liveStroke.id,
             points: liveStroke.points,
             endState: liveStroke.endState,
@@ -425,8 +434,12 @@ export class LiveCanvas extends DataObject {
         liveStroke.clear();
     };
 
-    private getLocalUserInfo(): IUserInfo | undefined {
-        return this.onGetLocalUserInfo ? this.onGetLocalUserInfo() : undefined;
+    private getLocalEventUserInfo(): IEventUserInfo {
+        return {
+            pictureUri: this.onGetLocalUserInfo
+                ? this.onGetLocalUserInfo()?.pictureUri
+                : undefined,
+        };
     }
 
     private setupWetInkProcessing(): void {
@@ -436,12 +449,10 @@ export class LiveCanvas extends DataObject {
                 PointerMovedEvent,
                 (eventArgs: IPointerMovedEventArgs) => {
                     if (this.isCursorShared) {
-                        const userInfo = this.getLocalUserInfo();
-
+                        const eventUserInfo = this.getLocalEventUserInfo();
                         this._pointerMovedEventTarget.sendEvent({
                             position: eventArgs.position,
-                            displayName: userInfo?.displayName,
-                            pictureUri: userInfo?.pictureUri,
+                            pictureUri: eventUserInfo?.pictureUri,
                         });
                     }
                 }
@@ -460,13 +471,11 @@ export class LiveCanvas extends DataObject {
 
                     this._pendingLiveStrokes.set(liveStroke.id, liveStroke);
 
-                    const userInfo = this.getLocalUserInfo();
-
+                    const eventUserInfo = this.getLocalEventUserInfo();
                     this._beginWetStrokeEventTarget.sendEvent({
                         name: InkingEventNames.beginWetStroke,
                         isCursorShared: this.isCursorShared ? true : undefined,
-                        displayName: userInfo?.displayName,
-                        pictureUri: userInfo?.pictureUri,
+                        pictureUri: eventUserInfo?.pictureUri,
                         ...eventArgs,
                     });
                 }
@@ -509,11 +518,11 @@ export class LiveCanvas extends DataObject {
             scope,
             InkingEventNames.pointerMove,
             (evt: IPointerMovedEvent, local: boolean) => {
-                if (!local && evt.clientId) {
+                const clientId = evt.clientId;
+                if (!local && clientId) {
                     this.updateCursorPosition(
-                        evt.clientId,
+                        clientId,
                         {
-                            displayName: evt.displayName,
                             pictureUri: evt.pictureUri,
                         },
                         evt.position
@@ -541,17 +550,17 @@ export class LiveCanvas extends DataObject {
 
                     this._wetStrokes.set(evt.strokeId, stroke);
 
-                    if (evt.clientId) {
+                    const clientId = evt.clientId;
+                    if (clientId) {
                         if (
                             evt.type !== StrokeType.persistent ||
                             !evt.isCursorShared
                         ) {
-                            this.removeCursor(evt.clientId);
+                            this.removeCursor(clientId);
                         } else {
                             this.updateCursorPosition(
-                                evt.clientId,
+                                clientId,
                                 {
-                                    displayName: evt.displayName,
                                     pictureUri: evt.pictureUri,
                                 },
                                 evt.startPoint
@@ -586,18 +595,18 @@ export class LiveCanvas extends DataObject {
                             stroke.end();
                         }
 
-                        if (evt.clientId) {
+                        const clientId = evt.clientId;
+                        if (clientId) {
                             if (
                                 stroke.type !== StrokeType.persistent ||
                                 evt.endState ||
                                 !evt.isCursorShared
                             ) {
-                                this.removeCursor(evt.clientId);
+                                this.removeCursor(clientId);
                             } else {
                                 this.updateCursorPosition(
-                                    evt.clientId,
+                                    clientId,
                                     {
-                                        displayName: evt.displayName,
                                         pictureUri: evt.pictureUri,
                                     },
                                     evt.points[evt.points.length - 1]
@@ -775,20 +784,26 @@ export class LiveCanvas extends DataObject {
 
     private updateCursorPosition(
         clientId: string,
-        userInfo?: IUserInfo,
+        eventUserInfo?: IEventUserInfo,
         position?: IPoint
     ) {
-        if (this._inkingManager) {
-            if (position) {
-                const liveCursor = this.getCursor(clientId, userInfo);
+        if (position) {
+            LiveShareClient.getClientInfo(clientId).then((clientInfo) => {
+                if (this._inkingManager) {
+                    const userInfo: IUserInfo = {
+                        displayName: clientInfo?.displayName,
+                        pictureUri: eventUserInfo?.pictureUri,
+                    };
+                    const liveCursor = this.getCursor(clientId, userInfo);
 
-                const screenPosition =
-                    this._inkingManager.viewportToScreen(position);
+                    const screenPosition =
+                        this._inkingManager.viewportToScreen(position);
 
-                liveCursor.setPosition(screenPosition);
-            } else {
-                this.removeCursor(clientId);
-            }
+                    liveCursor.setPosition(screenPosition);
+                }
+            });
+        } else {
+            this.removeCursor(clientId);
         }
     }
 
@@ -820,7 +835,7 @@ export class LiveCanvas extends DataObject {
      * friendly display name and/or a picture that will be used on remote devices
      * to render shared cursors.
      */
-    onGetLocalUserInfo?: () => IUserInfo | undefined;
+    onGetLocalUserInfo?: () => IEventUserInfo | undefined;
 
     /**
      * Optional callback that allows the consuming application to provide its own

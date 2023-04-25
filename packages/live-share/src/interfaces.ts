@@ -253,7 +253,6 @@ export interface ILiveShareHost {
      * @param clientId Unique ID assigned to the local Fluid client.
      * @returns An array of meeting roles assigned to the local user.
      */
-    // TODO: maybe change return type to Promise<void>
     registerClientId(clientId: string): Promise<UserMeetingRole[]>;
 
     /**
@@ -269,6 +268,5 @@ export interface ILiveShareHost {
      * @param clientId ID of the client to lookup.
      * @returns `IUserInfo` for the queried client ID.
      */
-    // TODO: make tmp returned undefined instead of throwing the error from the 404 if client not registered
     getClientInfo(clientId: string): Promise<IClientInfo | undefined>;
 }

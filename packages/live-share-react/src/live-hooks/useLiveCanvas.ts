@@ -9,7 +9,7 @@ import {
     InkingManager,
     InkingTool,
     IPoint,
-    IUserInfo,
+    IEventUserInfo,
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
 import React from "react";
@@ -46,7 +46,7 @@ export function useLiveCanvas(
     scale?: number,
     referencePoint?: CanvasReferencePoint,
     isCursorShared?: boolean,
-    localUserCursor?: IUserInfo
+    localUserCursor?: IEventUserInfo
 ): IUseLiveCanvasResults {
     /**
      * User facing: inking manager instance
@@ -56,7 +56,10 @@ export function useLiveCanvas(
     /**
      * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveCanvas } = useDynamicDDS<LiveCanvas>(uniqueKey, LiveCanvas);
+    const { dds: liveCanvas } = useDynamicDDS<LiveCanvas>(
+        uniqueKey,
+        LiveCanvas
+    );
 
     /**
      * Setup the InkingManager and LiveCanvas
@@ -162,10 +165,7 @@ export function useLiveCanvas(
      * Sets the isCursorShared of the liveCanvas based on the 'isCursorShared' prop
      */
     React.useEffect(() => {
-        if (
-            liveCanvas &&
-            isCursorShared !== undefined
-        ) {
+        if (liveCanvas && isCursorShared !== undefined) {
             liveCanvas.isCursorShared = isCursorShared;
         }
     }, [isCursorShared, liveCanvas]);
@@ -175,18 +175,13 @@ export function useLiveCanvas(
      */
     React.useEffect(() => {
         if (liveCanvas && localUserCursor) {
-            liveCanvas.onGetLocalUserInfo = (): IUserInfo | undefined => {
+            liveCanvas.onGetLocalUserInfo = (): IEventUserInfo | undefined => {
                 return {
-                    displayName: localUserCursor.displayName,
                     pictureUri: localUserCursor.pictureUri,
                 };
             };
         }
-    }, [
-        localUserCursor?.displayName,
-        localUserCursor?.pictureUri,
-        liveCanvas,
-    ]);
+    }, [localUserCursor?.pictureUri, liveCanvas]);
 
     /**
      * Return hook response

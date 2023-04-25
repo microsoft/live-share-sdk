@@ -30,7 +30,6 @@ export const useTimer = (timer, onTimerEnd) => {
         });
 
         timer.on("onTick", (milliRemaining) => {
-            console.log("tick");
             setTimerMilliRemaining(milliRemaining);
         });
 

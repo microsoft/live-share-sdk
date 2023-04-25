@@ -8,14 +8,6 @@ import React from "react";
 import { SetLiveStateAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
 
-interface ILiveStateStatus<
-    TState extends string = string,
-    TData extends object = object
-> {
-    state?: TState;
-    data?: TData;
-}
-
 /**
  * React hook for using a Live Share `LiveState`.
  *
@@ -24,38 +16,30 @@ interface ILiveStateStatus<
  *
  * @param uniqueKey the unique key for the `LiveEvent`. If one does not yet exist, a new one will be created, otherwise it will use the existing one.
  * @param initialState Optional. the initial state value of type TState
- * @param initialData Optional. the initial data value of type TData
  * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state
- * @returns ordered values: first value is the synchronized state value, second is synchronized data value, and third is a setter to change the state/data values.
+ * @returns ordered values: first value is the synchronized state value and the second is a setter to change the state value.
  */
 export function useLiveState<
-    TState extends string = string,
-    TData extends object = object
+    TState = undefined,
 >(
     uniqueKey: string,
-    initialState?: TState,
-    initialData?: TData,
+    initialState: TState,
     allowedRoles?: UserMeetingRole[]
-): [TState | undefined, TData | undefined, SetLiveStateAction<TState, TData>] {
-    const [current, setCurrent] = React.useState<
-        ILiveStateStatus<TState, TData>
-    >({
-        state: initialState,
-        data: initialData,
-    });
+): [TState, SetLiveStateAction<TState>] {
+    const [currentState, setCurrentState] = React.useState<TState>(initialState);
     /**
      * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveState } = useDynamicDDS<LiveState<TData>>(
+    const { dds: liveState } = useDynamicDDS<LiveState<TState>>(
         uniqueKey,
-        LiveState<TData>
+        LiveState<TState>
     );
 
     /**
      * Change state callback that is user facing
      */
-    const changeState = React.useCallback(
-        (state: TState, value?: TData | undefined) => {
+    const setState = React.useCallback(
+        (state: TState) => {
             if (!liveState) {
                 console.error(
                     new Error(
@@ -72,7 +56,7 @@ export function useLiveState<
                 );
                 return;
             }
-            liveState?.changeState(state, value);
+            liveState.set(state);
         },
         [liveState]
     );
@@ -83,26 +67,23 @@ export function useLiveState<
     React.useEffect(() => {
         if (liveState === undefined) return;
 
-        const onStateChanged = (state: TState, data: TData | undefined) => {
-            setCurrent({
-                state,
-                data,
-            });
+        const onStateChanged = (state: TState) => {
+            setCurrentState(state);
         };
         liveState.on("stateChanged", onStateChanged);
         if (!liveState.isInitialized) {
-            liveState.initialize(allowedRoles, initialState, initialData);
+            liveState.initialize(allowedRoles, initialState);
             if (liveState.state) {
-                onStateChanged(liveState.state as TState, liveState.data);
+                onStateChanged(liveState.state);
             }
         } else if (liveState.state) {
-            onStateChanged(liveState.state as TState, liveState.data);
+            onStateChanged(liveState.state);
         }
 
         return () => {
             liveState?.off("stateChanged", onStateChanged);
         };
-    }, [liveState?.isInitialized]);
+    }, [liveState]);
 
-    return [current?.state, current?.data, changeState];
+    return [currentState, setState];
 }

@@ -44,9 +44,8 @@ export type DisposeSharedStateAction = () => void;
 
 // Live Share actions
 
-export type SetLiveStateAction<TState, TData> = (
+export type SetLiveStateAction<TState = undefined> = (
     state: TState,
-    value?: TData | undefined
 ) => void;
 
 export type SendLiveEventAction<TEvent> = (event: TEvent) => void;

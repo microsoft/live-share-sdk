@@ -133,14 +133,15 @@ const MeetingStage = () => {
                 {/* Display error if failed to join space */}
                 {error && <UI.ErrorPane error={error} />}
 
-                {(!state || state === "waiting") && (
+                {(state === "waiting") && (
                     <UI.WaitingRoom
                         localUserId={context?.user?.id}
                         users={users}
                         userStory={userStory}
                         onStartCosting={() => {
                             beginTimer();
-                            onStartCosting();
+                            const url = new URL(window.location);
+                            onStartCosting(url.searchParams.get("userStoryId") || "0");
                         }}
                     />
                 )}
@@ -164,7 +165,8 @@ const MeetingStage = () => {
                         userStory={userStory}
                         onStartCosting={() => {
                             beginTimer();
-                            onStartCosting();
+                            const url = new URL(window.location);
+                            onStartCosting(url.searchParams.get("userStoryId") || "0");
                         }}
                         onStartWaiting={onStartWaiting}
                     />

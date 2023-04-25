@@ -12,6 +12,7 @@ import { LiveState } from "../LiveState";
 import { Deferred } from "./Deferred";
 
 interface TestStateData {
+    status: string;
     value: string;
 }
 
@@ -19,6 +20,11 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
     let object1: LiveState<TestStateData>;
     let object2: LiveState<TestStateData>;
+
+    const mockDefaultValue: TestStateData = {
+        status: "defaultState",
+        value: "defaultValue",
+    };
 
     // Temporarily change update interval
     before(() => (LiveObjectSynchronizer.updateInterval = 20));
@@ -39,12 +45,12 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         );
 
         // need to be connected to send signals
-        if (!container1.connected) {
+        if (!(container1 as any).connected) {
             await new Promise((resolve) =>
                 container1.once("connected", resolve)
             );
         }
-        if (!container2.connected) {
+        if (!(container2 as any).connected) {
             await new Promise((resolve) =>
                 container2.once("connected", resolve)
             );
@@ -53,14 +59,14 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
 
     it("Should changeState() to new state and value", async () => {
         const object1done = new Deferred();
-        object1.on("stateChanged", (state, data, local) => {
+        object1.on("stateChanged", (state, local) => {
             try {
                 if (local) {
-                    assert(state == "newState", `object1: state == '${state}'`);
-                    assert(typeof data == "object", `object1: data is NULL`);
+                    assert(typeof state == "object", `object1: data is NULL`);
+                    assert(state.status == "newState", `object1: state == '${state}'`);
                     assert(
-                        data.value == "newValue",
-                        `object1: data == '${data}'`
+                        state.value == "newValue",
+                        `object1: state == '${state}'`
                     );
                     object1done.resolve();
                 }
@@ -68,17 +74,21 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.initialize();
+        await object1.initialize(mockDefaultValue);
+        assert(
+            object1.state.status == mockDefaultValue.status,
+            `object2: status == '${object1.state.status}'`
+        );
 
         const object2done = new Deferred();
-        object2.on("stateChanged", (state, data, local) => {
+        object2.on("stateChanged", (state, local) => {
             try {
                 if (!local) {
-                    assert(state == "newState", `object2: state == '${state}'`);
-                    assert(typeof data == "object", `object2: data is NULL`);
+                    assert(typeof state == "object", `object1: data is NULL`);
+                    assert(state.status == "newState", `object1: status == '${state}'`);
                     assert(
-                        data.value == "newValue",
-                        `object2: data == '${data}'`
+                        state.value == "newValue",
+                        `object1: value == '${state.value}'`
                     );
                     object2done.resolve();
                 }
@@ -86,9 +96,9 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.initialize();
+        await object2.initialize(mockDefaultValue);
 
-        object1.changeState("newState", { value: "newValue" });
+        object1.set({ status: "newState", value: "newValue" });
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -96,16 +106,17 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
 
     it("Should changeState() to new value for same state", async () => {
         const done = new Deferred();
-        object1.on("stateChanged", (state, data, local) => {
+        object1.on("stateChanged", (state, local) => {
             try {
                 if (!local) {
+                    assert(typeof state == "object", `object1: data is NULL`);
                     assert(
-                        state == "testState",
-                        `object1: state == '${state}'`
+                        state.status == "testState",
+                        `object1: status == '${state.status}'`
                     );
                     assert(
-                        data.value == "secondValue",
-                        `object1: data == '${data}'`
+                        state.value == "secondValue",
+                        `object1: value == '${state.value}'`
                     );
                     done.resolve();
                 }
@@ -113,28 +124,29 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                 done.reject(err);
             }
         });
-        await object1.initialize();
+        await object1.initialize(mockDefaultValue);
 
-        object2.on("stateChanged", (state, data, local) => {
+        object2.on("stateChanged", (state, local) => {
             try {
                 if (!local) {
+                    assert(typeof state == "object", `object1: data is NULL`);
                     assert(
-                        state == "testState",
-                        `object2: state == '${state}'`
+                        state.status == "testState",
+                        `object2: status == '${state.status}'`
                     );
                     assert(
-                        data.value == "firstValue",
-                        `object2: data == '${data}'`
+                        state.value == "firstValue",
+                        `object2: value == '${state.value}'`
                     );
-                    object2.changeState(state, { value: "secondValue" });
+                    object2.set({ status: "testState", value: "secondValue" });
                 }
             } catch (err) {
                 done.reject(err);
             }
         });
-        await object2.initialize();
+        await object2.initialize(mockDefaultValue);
 
-        object1.changeState("testState", { value: "firstValue" });
+        object1.set({ status: "testState", value: "firstValue" });
 
         // Wait for events to trigger
         await done.promise;

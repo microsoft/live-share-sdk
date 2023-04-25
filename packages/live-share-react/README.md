@@ -223,7 +223,7 @@ import { UserMeetingRole } from "@microsoft/live-share";
 const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter ];
 
 export function AppState() {
-  const [state, data, setState] = useLiveState("CUSTOM-STATE-ID", ALLOWED_ROLES, ExampleAppState.WAITING);
+  const [state, setState] = useLiveState("CUSTOM-STATE-ID", ExampleAppState.WAITING, ALLOWED_ROLES);
 
   if (state === ExampleAppState.WAITING) {
     return (

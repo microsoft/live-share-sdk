@@ -223,7 +223,7 @@ import { UserMeetingRole } from "@microsoft/live-share";
 const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter ];
 
 export function AppState() {
-  const [state, data, setState] = useLiveState("CUSTOM-STATE-ID", ALLOWED_ROLES, ExampleAppState.WAITING);
+  const [state, setState] = useLiveState("CUSTOM-STATE-ID", ExampleAppState.WAITING, ALLOWED_ROLES);
 
   if (state === ExampleAppState.WAITING) {
     return (
@@ -518,7 +518,8 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| 1.0.0-preview.8       | ^2.5.0               | ~1.2.3          | 1.0.0-preview.8 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
+| 1.0.0-preview.10       | ^2.10.1              | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
+| 1.0.0-preview.8       | ^2.5.0               | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
 | 1.0.0-preview.3       | 2.0.0-experimental.1 | ~1.2.3          | 1.0.0-preview.3 (optional) | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.5.1                | 2.0.0-experimental.1 | ~1.2.3          | ~0.5.1 (optional)          | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
 | ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)          | ~0.59.0 (optional)           | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |

@@ -3,8 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { SharedMap } from "fluid-framework";
-import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
+import { LiveShareClient, LiveState, TestLiveShareHost, UserMeetingRole } from "@microsoft/live-share";
 import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
 const searchParams = new URL(window.location).searchParams;
@@ -12,17 +11,9 @@ const root = document.getElementById("content");
 let color = "white";
 
 // Define container schema
-
-const diceValueKey = "dice-value-key";
-
 const containerSchema = {
-    initialObjects: { diceMap: SharedMap },
+    initialObjects: { diceState: LiveState },
 };
-
-function onContainerFirstCreated(container) {
-    // Set initial state of the rolled dice to 1.
-    container.initialObjects.diceMap.set(diceValueKey, 1);
-}
 
 // STARTUP LOGIC
 
@@ -61,7 +52,12 @@ async function start() {
         default:
             try {
                 const { container } = await joinContainer();
-                renderStage(container.initialObjects.diceMap, root);
+                const diceState = container.initialObjects.diceState;
+                // You can optionally declare what roles you want to be able to change state
+                const allowedRoles = [UserMeetingRole.organizer, UserMeetingRole.presenter];
+                // Initialize diceState with initial state of 1 and allowed roles 
+                await diceState.initialize(1, allowedRoles);
+                renderStage(diceState, root);
             } catch (error) {
                 renderError(root, error);
             }
@@ -79,7 +75,7 @@ async function joinContainer() {
     const client = new LiveShareClient(host);
 
     // Join container
-    return await client.joinContainer(containerSchema, onContainerFirstCreated);
+    return await client.joinContainer(containerSchema);
 }
 
 // STAGE VIEW
@@ -98,7 +94,7 @@ stageTemplate["innerHTML"] = `
   </div>
 `;
 
-function renderStage(diceMap, elem) {
+function renderStage(diceState, elem) {
     elem.appendChild(stageTemplate.content.cloneNode(true));
 
     const rollButton = elem.querySelector(".roll");
@@ -106,11 +102,11 @@ function renderStage(diceMap, elem) {
 
     // Set the value at our dataKey with a random number between 1 and 6.
     rollButton.onclick = () =>
-        diceMap.set(diceValueKey, Math.floor(Math.random() * 6) + 1);
+        diceState.set(Math.floor(Math.random() * 6) + 1);
 
     // Get the current value of the shared data to update the view whenever it changes.
     const updateDice = () => {
-        const diceValue = diceMap.get(diceValueKey);
+        const diceValue = diceState.state;
         // Unicode 0x2680-0x2685 are the sides of a dice (⚀⚁⚂⚃⚄⚅)
         dice.textContent = String.fromCodePoint(0x267f + diceValue);
         dice.style.color = `hsl(${diceValue * 60}, 70%, 30%)`;
@@ -118,7 +114,7 @@ function renderStage(diceMap, elem) {
     updateDice();
 
     // Use the changed event to trigger the rerender whenever the value changes.
-    diceMap.on("valueChanged", updateDice);
+    diceState.on("stateChanged", updateDice);
 }
 
 // SIDEBAR VIEW

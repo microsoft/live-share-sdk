@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/live-share-react",
-  "version": "1.0.0-preview.8",
+  "version": "1.0.0-preview.10",
   "description": "Build collaborative React apps using Microsoft's Fluid & Live Share frameworks with ease.",
   "author": "Microsoft",
   "license": "SEE LICENSE IN LICENSE",
@@ -14,10 +14,10 @@
   "dependencies": {
     "@fluidframework/azure-client": "~1.0.2",
     "@fluid-experimental/task-manager": "~1.2.3",
-    "@microsoft/live-share": "1.0.0-preview.8",
-    "@microsoft/live-share-canvas": "1.0.0-preview.8",
-    "@microsoft/live-share-media": "1.0.0-preview.8",
-    "@microsoft/live-share-turbo": "1.0.0-preview.8",
+    "@microsoft/live-share": "1.0.0-preview.10",
+    "@microsoft/live-share-canvas": "1.0.0-preview.10",
+    "@microsoft/live-share-media": "1.0.0-preview.10",
+    "@microsoft/live-share-turbo": "1.0.0-preview.10",
     "fluid-framework": "~1.2.3",
     "url": "^0.11.0",
     "uuid": "^8.3.2"

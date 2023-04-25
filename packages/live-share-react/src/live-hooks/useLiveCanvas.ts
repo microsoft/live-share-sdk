@@ -163,18 +163,18 @@ export function useLiveCanvas(
      */
     React.useEffect(() => {
         if (
-            liveCanvas?.isCursorShared !== undefined &&
+            liveCanvas &&
             isCursorShared !== undefined
         ) {
             liveCanvas.isCursorShared = isCursorShared;
         }
-    }, [isCursorShared, liveCanvas?.isCursorShared]);
+    }, [isCursorShared, liveCanvas]);
 
     /**
      * Sets the onGetLocalUserInfo method of the liveCanvas based on the 'localUserCursor' prop
      */
     React.useEffect(() => {
-        if (liveCanvas?.onGetLocalUserInfo !== undefined && localUserCursor) {
+        if (liveCanvas && localUserCursor) {
             liveCanvas.onGetLocalUserInfo = (): IUserInfo | undefined => {
                 return {
                     displayName: localUserCursor.displayName,
@@ -185,7 +185,7 @@ export function useLiveCanvas(
     }, [
         localUserCursor?.displayName,
         localUserCursor?.pictureUri,
-        liveCanvas?.onGetLocalUserInfo,
+        liveCanvas,
     ]);
 
     /**

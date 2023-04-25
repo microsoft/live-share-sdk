@@ -15,8 +15,8 @@
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
-        "@microsoft/live-share": "1.0.0-preview.8",
-        "@microsoft/live-share-turbo": "1.0.0-preview.8",
+        "@microsoft/live-share": "1.0.0-preview.10",
+        "@microsoft/live-share-turbo": "1.0.0-preview.10",
         "@microsoft/teams-js": "^2.10.1",
         "@typescript-eslint/eslint-plugin": "^5.48.1",
         "@typescript-eslint/parser": "^5.48.1",

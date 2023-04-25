@@ -4,6 +4,7 @@
  */
 
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { assert } from "@fluidframework/common-utils";
 import { IEvent } from "@fluidframework/common-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { cloneValue, TelemetryEvents } from "./internals";
@@ -27,22 +28,20 @@ export enum LiveStateEvents {
 
 /**
  * Event typings for `LiveState` class.
- * @template TData Optional data object that's synchronized with the state.
+ * @template TState State object that's synchronized with the state.
  */
-export interface ILiveStateEvents<TData = undefined> extends IEvent {
+export interface ILiveStateEvents<TState = any> extends IEvent {
     /**
      * An `LiveState` objects state has changed.
      * @param event Name of event.
      * @param listener Function called when event is triggered.
      * @param listener.state The new state. Can be the same as the previous state.
-     * @param listener.data Optional data object for the new state.
      * @param listener.local If true, a local state change occurred.
      */
     (
         event: "stateChanged",
         listener: (
-            state: string,
-            data: TData | undefined,
+            state: TState,
             local: boolean
         ) => void
     ): any;
@@ -55,27 +54,23 @@ export interface ILiveStateEvents<TData = undefined> extends IEvent {
  * The primary benefit of using the `LiveState` object in a Teams meeting, versus something
  * like a `SharedMap`, is that you can restrict the roles of who's allowed to perform state
  * changes.
- * @template TData Optional data object that's synchronized with the state.
+ * @template TState Optional data object that's synchronized with the state.
  */
-export class LiveState<TData = undefined> extends DataObject<{
-    Events: ILiveStateEvents<TData>;
+export class LiveState<TState = any> extends DataObject<{
+    Events: ILiveStateEvents<TState>;
 }> {
     private _logger = new LiveTelemetryLogger(this.runtime);
     private _allowedRoles: UserMeetingRole[] = [];
-    private _currentState: IStateChangeEvent<TData> = {
-        name: "ChangeState",
-        timestamp: 0,
-        state: LiveState.INITIAL_STATE,
-    };
+    private _currentState?: IStateChangeEvent<TState>;
 
     private _scope?: LiveEventScope;
-    private _changeStateEvent?: LiveEventTarget<IStateChangeEvent<TData>>;
-    private _synchronizer?: LiveObjectSynchronizer<IStateChangeEvent<TData>>;
+    private _changeStateEvent?: LiveEventTarget<IStateChangeEvent<TState>>;
+    private _synchronizer?: LiveObjectSynchronizer<IStateChangeEvent<TState>>;
 
     /**
      * The objects initial state if not explicitly initialized.
      */
-    public static readonly INITIAL_STATE = "";
+    public static readonly INITIAL_STATE = undefined;
 
     /**
      * The objects fluid type/name.
@@ -108,31 +103,31 @@ export class LiveState<TData = undefined> extends DataObject<{
     }
 
     /**
-     * Optional data object for the current state.
-     */
-    public get data(): TData | undefined {
-        return cloneValue(this._currentState.data);
-    }
-
-    /**
      * The current state.
      */
-    public get state(): string {
-        return this._currentState.state;
+    public get state(): TState {
+        return this.currentState.state;
     }
 
     /**
      * Starts the object.
+     * @param initialState Initial state value
      * @param allowedRoles Optional. List of roles allowed to make state changes.
      */
     public async initialize(
+        initialState: TState,
         allowedRoles?: UserMeetingRole[],
-        state = LiveState.INITIAL_STATE,
-        data?: TData
     ): Promise<void> {
         if (this._scope) {
             throw new Error(`LiveState already started.`);
         }
+
+        // Set initial state
+        this.currentState = {
+            name: "ChangeState",
+            timestamp: 0,
+            state: initialState,
+        };
 
         // Save off allowed roles
         this._allowedRoles = allowedRoles || [];
@@ -181,20 +176,18 @@ export class LiveState<TData = undefined> extends DataObject<{
     }
 
     /**
-     * Changes to a new state with an optional data object.
+     * Set a new state value
      * @param state New state name.
-     * @param data Optional. Data object to associate with the new state.
      */
-    public changeState(state: string, data?: TData): void {
+    public set(state: TState): void {
         if (!this._scope) {
             throw new Error(`LiveState not started.`);
         }
 
         // Broadcast state change
-        const clone = cloneValue(data);
+        const clone = cloneValue(state);
         const evt = this._changeStateEvent!.sendEvent({
-            state: state,
-            data: clone,
+            state: clone,
         });
 
         // Update local state immediately
@@ -203,8 +196,26 @@ export class LiveState<TData = undefined> extends DataObject<{
         this.updateState(evt, true);
     }
 
+    /**
+     * The current state.
+     */
+    private get currentState(): IStateChangeEvent<TState> {
+        assert(
+            this._currentState !== undefined,
+            "LiveState is not initialized"
+        );
+        return this._currentState;
+    }
+
+    /**
+     * The current state.
+     */
+    private set currentState(value: IStateChangeEvent<TState>) {
+        this._currentState = value;
+    }
+
     private remoteStateReceived(
-        evt: IStateChangeEvent<TData>,
+        evt: IStateChangeEvent<TState>,
         sender: string
     ): void {
         LiveShareClient.verifyRolesAllowed(sender, this._allowedRoles)
@@ -212,7 +223,7 @@ export class LiveState<TData = undefined> extends DataObject<{
                 // Ensure that state is allowed, newer, and not the initial state.
                 if (
                     allowed &&
-                    LiveEvent.isNewer(this._currentState, evt) &&
+                    LiveEvent.isNewer(this.currentState, evt) &&
                     evt.state !== LiveState.INITIAL_STATE
                 ) {
                     this.updateState(evt, false);
@@ -226,14 +237,13 @@ export class LiveState<TData = undefined> extends DataObject<{
             });
     }
 
-    private updateState(evt: IStateChangeEvent<TData>, local: boolean) {
-        const oldState = this._currentState.state;
+    private updateState(evt: IStateChangeEvent<TState>, local: boolean) {
+        const oldState = this.currentState.state;
         const newState = evt.state;
-        this._currentState = evt;
+        this.currentState = evt;
         this.emit(
             LiveStateEvents.stateChanged,
-            evt.state,
-            cloneValue(evt.data),
+            cloneValue(evt.state),
             local
         );
         this._logger.sendTelemetryEvent(
@@ -244,8 +254,7 @@ export class LiveState<TData = undefined> extends DataObject<{
 }
 
 interface IStateChangeEvent<T> extends ILiveEvent {
-    state: string;
-    data?: T;
+    state: T;
 }
 
 /**

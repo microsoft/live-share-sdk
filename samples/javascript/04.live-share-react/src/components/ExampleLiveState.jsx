@@ -6,28 +6,27 @@ const ExampleAppState = {
     START: "START",
 };
 
-const ALLOWED_ROLES = [
-    UserMeetingRole.organizer,
-    UserMeetingRole.presenter,
-    UserMeetingRole.attendee,
-];
+const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter];
+const INITIAL_STATE = {
+    status: ExampleAppState.WAITING,
+};
 
 export const ExampleLiveState = (props) => {
-    const [state, data, setState] = useLiveState(
+    const [state, setState] = useLiveState(
         "CUSTOM-STATE-ID",
-        ExampleAppState.WAITING,
-        undefined,
-        ALLOWED_ROLES,
+        INITIAL_STATE,
+        ALLOWED_ROLES
     );
 
-    if (state === ExampleAppState.WAITING) {
+    if (state.status === ExampleAppState.WAITING) {
         return (
             <div style={{ padding: "12px 12px" }}>
                 <div className="flex row">
                     <h2>{`Start round:`}</h2>
                     <button
                         onClick={() => {
-                            setState(ExampleAppState.START, {
+                            setState({
+                                status: ExampleAppState.START,
                                 timeStarted: LiveShareClient.getTimestamp(),
                             });
                         }}
@@ -43,10 +42,12 @@ export const ExampleLiveState = (props) => {
     return (
         <div style={{ padding: "12px 12px" }}>
             <div className="flex row">
-                <h2>{`Time started: ${data.timeStarted}`}</h2>
+                <h2>{`Time started: ${state.timeStarted}`}</h2>
                 <button
                     onClick={() => {
-                        setState(ExampleAppState.WAITING, undefined);
+                        setState({
+                            status: ExampleAppState.WAITING,
+                        });
                     }}
                 >
                     {"End"}

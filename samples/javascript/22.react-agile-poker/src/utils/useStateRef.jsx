@@ -14,7 +14,7 @@ export const useStateRef = (initialValue) => {
             reference.current = value;
             setState(reference.current);
         },
-        [reference, setState]
+        []
     );
 
     return [state, reference, setValue];

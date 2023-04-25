@@ -21,6 +21,11 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
     let object1: LiveState<TestStateData>;
     let object2: LiveState<TestStateData>;
 
+    const mockDefaultValue: TestStateData = {
+        status: "defaultState",
+        value: "defaultValue",
+    };
+
     // Temporarily change update interval
     before(() => (LiveObjectSynchronizer.updateInterval = 20));
     after(() => (LiveObjectSynchronizer.updateInterval = 15000));
@@ -69,7 +74,11 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.initialize();
+        await object1.initialize(mockDefaultValue);
+        assert(
+            object1.state.status == mockDefaultValue.status,
+            `object2: status == '${object1.state.status}'`
+        );
 
         const object2done = new Deferred();
         object2.on("stateChanged", (state, local) => {
@@ -87,7 +96,7 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.initialize();
+        await object2.initialize(mockDefaultValue);
 
         object1.set({ status: "newState", value: "newValue" });
 
@@ -115,7 +124,7 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                 done.reject(err);
             }
         });
-        await object1.initialize();
+        await object1.initialize(mockDefaultValue);
 
         object2.on("stateChanged", (state, local) => {
             try {
@@ -135,7 +144,7 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                 done.reject(err);
             }
         });
-        await object2.initialize();
+        await object2.initialize(mockDefaultValue);
 
         object1.set({ status: "testState", value: "firstValue" });
 

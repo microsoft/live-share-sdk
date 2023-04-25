@@ -20,7 +20,7 @@ import { useDynamicDDS } from "../shared-hooks";
  * @returns ordered values: first value is the synchronized state value and the second is a setter to change the state value.
  */
 export function useLiveState<
-    TState = undefined,
+    TState = any,
 >(
     uniqueKey: string,
     initialState: TState,
@@ -72,11 +72,9 @@ export function useLiveState<
         };
         liveState.on("stateChanged", onStateChanged);
         if (!liveState.isInitialized) {
-            liveState.initialize(allowedRoles, initialState);
-            if (liveState.state) {
-                onStateChanged(liveState.state);
-            }
-        } else if (liveState.state) {
+            liveState.initialize(initialState, allowedRoles);
+        }
+        if (JSON.stringify(liveState.state) !== JSON.stringify(initialState)) {
             onStateChanged(liveState.state);
         }
 

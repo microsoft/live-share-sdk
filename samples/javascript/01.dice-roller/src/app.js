@@ -55,8 +55,8 @@ async function start() {
                 const diceState = container.initialObjects.diceState;
                 // You can optionally declare what roles you want to be able to change state
                 const allowedRoles = [UserMeetingRole.organizer, UserMeetingRole.presenter];
-                // Initialize diceState with allowed roles and initial state of 1
-                await diceState.initialize(allowedRoles, 1);
+                // Initialize diceState with initial state of 1 and allowed roles 
+                await diceState.initialize(1, allowedRoles);
                 renderStage(diceState, root);
             } catch (error) {
                 renderError(root, error);

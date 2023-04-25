@@ -27,7 +27,7 @@ export const usePokerState = (pokerState) => {
         (newState, newValue) => {
             if (!pokerState) return;
             if (!AVAILABLE_STATES.includes(newState)) return;
-            console.log("changing to", newState, newValue)
+            console.log("usePokerState: changing state to", newState, newValue);
             pokerState.set({
                 state: newState,
                 value: newValue,
@@ -42,7 +42,7 @@ export const usePokerState = (pokerState) => {
 
     const onStartCosting = useCallback(
         (userStory) => {
-            console.log("changing to userStory", userStory);
+            console.log("usePokerState: changing to userStory", userStory);
             changePokerState("costing", userStory);
         },
         [changePokerState]
@@ -59,7 +59,6 @@ export const usePokerState = (pokerState) => {
         pokerState.on("stateChanged", (state) => {
             if (state.state === stateRef.current.state) return;
             if (!AVAILABLE_STATES.includes(state.state)) return;
-            console.log("stateChanged", state);
             setState({
                 state: state.state,
                 value: state.value,
@@ -67,7 +66,7 @@ export const usePokerState = (pokerState) => {
         });
         const allowedRoles = ["Organizer"];
         pokerState
-            .initialize(allowedRoles, INITIAL_STATE)
+            .initialize(INITIAL_STATE, allowedRoles)
             .then(() => {
                 setStarted(true);
             })

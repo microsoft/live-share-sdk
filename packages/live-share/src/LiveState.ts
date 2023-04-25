@@ -4,6 +4,7 @@
  */
 
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { assert } from "@fluidframework/common-utils";
 import { IEvent } from "@fluidframework/common-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { cloneValue, TelemetryEvents } from "./internals";
@@ -28,7 +29,7 @@ export enum LiveStateEvents {
  * Event typings for `LiveState` class.
  * @template TState State object that's synchronized with the state.
  */
-export interface ILiveStateEvents<TState = undefined> extends IEvent {
+export interface ILiveStateEvents<TState = any> extends IEvent {
     /**
      * An `LiveState` objects state has changed.
      * @param event Name of event.
@@ -39,7 +40,7 @@ export interface ILiveStateEvents<TState = undefined> extends IEvent {
     (
         event: "stateChanged",
         listener: (
-            state: TState | undefined,
+            state: TState,
             local: boolean
         ) => void
     ): any;
@@ -54,16 +55,12 @@ export interface ILiveStateEvents<TState = undefined> extends IEvent {
  * changes.
  * @template TState Optional data object that's synchronized with the state.
  */
-export class LiveState<TState = undefined> extends DataObject<{
+export class LiveState<TState = any> extends DataObject<{
     Events: ILiveStateEvents<TState>;
 }> {
     private _logger = new LiveTelemetryLogger(this.runtime);
     private _allowedRoles: UserMeetingRole[] = [];
-    private _currentState: IStateChangeEvent<TState> = {
-        name: "ChangeState",
-        timestamp: 0,
-        state: LiveState.INITIAL_STATE,
-    };
+    private _currentState?: IStateChangeEvent<TState>;
 
     private _scope?: LiveEventScope;
     private _changeStateEvent?: LiveEventTarget<IStateChangeEvent<TState>>;
@@ -107,24 +104,29 @@ export class LiveState<TState = undefined> extends DataObject<{
     /**
      * The current state.
      */
-    public get state(): TState | undefined {
-        return this._currentState.state;
+    public get state(): TState {
+        return this.currentState.state;
     }
 
     /**
      * Starts the object.
+     * @param initialState Initial state value
      * @param allowedRoles Optional. List of roles allowed to make state changes.
      */
     public async initialize(
+        initialState: TState,
         allowedRoles?: UserMeetingRole[],
-        initialState: TState | undefined = LiveState.INITIAL_STATE,
     ): Promise<void> {
         if (this._scope) {
             throw new Error(`LiveState already started.`);
         }
 
         // Set initial state
-        this._currentState.state = initialState;
+        this.currentState = {
+            name: "ChangeState",
+            timestamp: 0,
+            state: initialState,
+        };
 
         // Save off allowed roles
         this._allowedRoles = allowedRoles || [];
@@ -193,6 +195,24 @@ export class LiveState<TState = undefined> extends DataObject<{
         this.updateState(evt, true);
     }
 
+    /**
+     * The current state.
+     */
+    private get currentState(): IStateChangeEvent<TState> {
+        assert(
+            this._currentState !== undefined,
+            "LiveState is not initialized"
+        );
+        return this._currentState;
+    }
+
+    /**
+     * The current state.
+     */
+    private set currentState(value: IStateChangeEvent<TState>) {
+        this._currentState = value;
+    }
+
     private remoteStateReceived(
         evt: IStateChangeEvent<TState>,
         sender: string
@@ -202,7 +222,7 @@ export class LiveState<TState = undefined> extends DataObject<{
                 // Ensure that state is allowed, newer, and not the initial state.
                 if (
                     allowed &&
-                    LiveEvent.isNewer(this._currentState, evt) &&
+                    LiveEvent.isNewer(this.currentState, evt) &&
                     evt.state !== LiveState.INITIAL_STATE
                 ) {
                     this.updateState(evt, false);
@@ -217,9 +237,9 @@ export class LiveState<TState = undefined> extends DataObject<{
     }
 
     private updateState(evt: IStateChangeEvent<TState>, local: boolean) {
-        const oldState = this._currentState.state;
+        const oldState = this.currentState.state;
         const newState = evt.state;
-        this._currentState = evt;
+        this.currentState = evt;
         this.emit(
             LiveStateEvents.stateChanged,
             cloneValue(evt.state),
@@ -233,7 +253,7 @@ export class LiveState<TState = undefined> extends DataObject<{
 }
 
 interface IStateChangeEvent<T> extends ILiveEvent {
-    state: T | undefined;
+    state: T;
 }
 
 /**

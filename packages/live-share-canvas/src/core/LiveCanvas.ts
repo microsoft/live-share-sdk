@@ -518,10 +518,9 @@ export class LiveCanvas extends DataObject {
             scope,
             InkingEventNames.pointerMove,
             (evt: IPointerMovedEvent, local: boolean) => {
-                const clientId = evt.clientId;
-                if (!local && clientId) {
+                if (!local && evt.clientId) {
                     this.updateCursorPosition(
-                        clientId,
+                        evt.clientId,
                         {
                             pictureUri: evt.pictureUri,
                         },
@@ -550,16 +549,15 @@ export class LiveCanvas extends DataObject {
 
                     this._wetStrokes.set(evt.strokeId, stroke);
 
-                    const clientId = evt.clientId;
-                    if (clientId) {
+                    if (evt.clientId) {
                         if (
                             evt.type !== StrokeType.persistent ||
                             !evt.isCursorShared
                         ) {
-                            this.removeCursor(clientId);
+                            this.removeCursor(evt.clientId);
                         } else {
                             this.updateCursorPosition(
-                                clientId,
+                                evt.clientId,
                                 {
                                     pictureUri: evt.pictureUri,
                                 },
@@ -595,17 +593,16 @@ export class LiveCanvas extends DataObject {
                             stroke.end();
                         }
 
-                        const clientId = evt.clientId;
-                        if (clientId) {
+                        if (evt.clientId) {
                             if (
                                 stroke.type !== StrokeType.persistent ||
                                 evt.endState ||
                                 !evt.isCursorShared
                             ) {
-                                this.removeCursor(clientId);
+                                this.removeCursor(evt.clientId);
                             } else {
                                 this.updateCursorPosition(
-                                    clientId,
+                                    evt.clientId,
                                     {
                                         pictureUri: evt.pictureUri,
                                     },

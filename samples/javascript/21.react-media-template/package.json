@@ -12,7 +12,7 @@
         "@microsoft/live-share": "1.0.0-preview.10",
         "@microsoft/live-share-canvas": "1.0.0-preview.10",
         "@microsoft/live-share-media": "1.0.0-preview.10",
-        "@microsoft/teams-js": "^2.10.1",
+        "@microsoft/teams-js": "^2.11.0-beta.0",
         "@testing-library/jest-dom": "^5.16.5",
         "@testing-library/react": "^13.4.0",
         "@testing-library/user-event": "^14.4.3",

@@ -54,21 +54,6 @@ enum InkingEventNames {
 }
 
 /**
- * Encapsulates information about a user.
- */
-export type IUserInfo = IValidatedUserInfo & IEventUserInfo;
-
-/**
- * Encapsulates non spoofable information about a user.
- */
-interface IValidatedUserInfo {
-    /**
-     * Optional. The user's display name.
-     */
-    displayName?: string;
-}
-
-/**
  * Encapsulates information about a user that is okay to be sent through events.
  */
 interface IEventUserInfo {
@@ -76,6 +61,16 @@ interface IEventUserInfo {
      * Optional. The URI to the user's picture.
      */
     pictureUri?: string;
+}
+
+/**
+ * Encapsulates information about a user.
+ */
+export interface IUserInfo extends IEventUserInfo {
+    /**
+     * Optional. The user's display name.
+     */
+    displayName?: string;
 }
 
 type IPointerMovedEvent = ILiveEvent & IPointerMovedEventArgs & IEventUserInfo;

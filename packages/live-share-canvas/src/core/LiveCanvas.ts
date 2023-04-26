@@ -61,7 +61,7 @@ export type IUserInfo = IValidatedUserInfo & IEventUserInfo;
 /**
  * Encapsulates non spoofable information about a user.
  */
-export interface IValidatedUserInfo {
+interface IValidatedUserInfo {
     /**
      * Optional. The user's display name.
      */
@@ -71,7 +71,7 @@ export interface IValidatedUserInfo {
 /**
  * Encapsulates information about a user that is okay to be sent through events.
  */
-export interface IEventUserInfo {
+interface IEventUserInfo {
     /**
      * Optional. The URI to the user's picture.
      */
@@ -434,12 +434,10 @@ export class LiveCanvas extends DataObject {
         liveStroke.clear();
     };
 
-    private getLocalEventUserInfo(): IEventUserInfo {
-        return {
-            pictureUri: this.onGetLocalUserInfo
-                ? this.onGetLocalUserInfo()?.pictureUri
-                : undefined,
-        };
+    private getLocalUserPictureUrl(): string | undefined {
+        return this.onGetLocalUserPictureUrl
+            ? this.onGetLocalUserPictureUrl()
+            : undefined;
     }
 
     private setupWetInkProcessing(): void {
@@ -449,10 +447,9 @@ export class LiveCanvas extends DataObject {
                 PointerMovedEvent,
                 (eventArgs: IPointerMovedEventArgs) => {
                     if (this.isCursorShared) {
-                        const eventUserInfo = this.getLocalEventUserInfo();
                         this._pointerMovedEventTarget.sendEvent({
                             position: eventArgs.position,
-                            pictureUri: eventUserInfo?.pictureUri,
+                            pictureUri: this.getLocalUserPictureUrl(),
                         });
                     }
                 }
@@ -471,11 +468,10 @@ export class LiveCanvas extends DataObject {
 
                     this._pendingLiveStrokes.set(liveStroke.id, liveStroke);
 
-                    const eventUserInfo = this.getLocalEventUserInfo();
                     this._beginWetStrokeEventTarget.sendEvent({
                         name: InkingEventNames.beginWetStroke,
                         isCursorShared: this.isCursorShared ? true : undefined,
-                        pictureUri: eventUserInfo?.pictureUri,
+                        pictureUri: this.getLocalUserPictureUrl(),
                         ...eventArgs,
                     });
                 }
@@ -829,10 +825,9 @@ export class LiveCanvas extends DataObject {
 
     /**
      * Optional callback that allows the consuming application to provide a
-     * friendly display name and/or a picture that will be used on remote devices
-     * to render shared cursors.
+     * a profile picture that will be used on remote devices to render shared cursors.
      */
-    onGetLocalUserInfo?: () => IEventUserInfo | undefined;
+    onGetLocalUserPictureUrl?: () => string | undefined;
 
     /**
      * Optional callback that allows the consuming application to provide its own

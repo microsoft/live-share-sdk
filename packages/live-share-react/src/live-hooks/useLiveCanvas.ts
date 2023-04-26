@@ -9,7 +9,6 @@ import {
     InkingManager,
     InkingTool,
     IPoint,
-    IEventUserInfo,
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
 import React from "react";
@@ -33,7 +32,7 @@ import { isRefObject } from "../utils";
  * @param scale Optional. Stateful scale number to use in the `InkingManager`. Defaults to 1 and must be greater than 0.
  * @param referencePoint Optional. Stateful reference point enum to use in the `InkingManger`. Defaults to "center".
  * @param isCursorShared Optional. Stateful boolean flag for whether cursor should be shared in `LiveCanvas`. Defaults to false.
- * @param localUserCursor Optional. Stateful `IUserInfo` object for the local user's metadata to display alongside their cursor. Defaults to undefined.
+ * @param localUserPictureUrl Optional. url string for the local user to display alongside their cursor. Defaults to undefined.
  * @returns IUseLiveCanvasResults object that contains the `liveCanvas` data object and `inkingManager`.
  */
 export function useLiveCanvas(
@@ -46,7 +45,7 @@ export function useLiveCanvas(
     scale?: number,
     referencePoint?: CanvasReferencePoint,
     isCursorShared?: boolean,
-    localUserCursor?: IEventUserInfo
+    localUserPictureUrl?: string
 ): IUseLiveCanvasResults {
     /**
      * User facing: inking manager instance
@@ -174,14 +173,12 @@ export function useLiveCanvas(
      * Sets the onGetLocalUserInfo method of the liveCanvas based on the 'localUserCursor' prop
      */
     React.useEffect(() => {
-        if (liveCanvas && localUserCursor) {
-            liveCanvas.onGetLocalUserInfo = (): IEventUserInfo | undefined => {
-                return {
-                    pictureUri: localUserCursor.pictureUri,
-                };
+        if (liveCanvas && localUserPictureUrl) {
+            liveCanvas.onGetLocalUserPictureUrl = (): string | undefined => {
+                return localUserPictureUrl;
             };
         }
-    }, [localUserCursor?.pictureUri, liveCanvas]);
+    }, [localUserPictureUrl, liveCanvas]);
 
     /**
      * Return hook response

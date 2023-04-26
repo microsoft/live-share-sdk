@@ -11,6 +11,7 @@ import {
     UserMeetingRole,
     IClientInfo,
 } from "../interfaces";
+import { InternalDontUseGetClientInfoRetryPolyfill } from "./PolyfillHostDecorator";
 import { RequestCache } from "./RequestCache";
 import { waitForResult } from "./utils";
 
@@ -20,7 +21,9 @@ const CACHE_LIFETIME = 4 * 1000;
 /**
  * Live Share Host decorator used to reduce rapid duplicate requests.
  */
-export class LiveShareHostDecorator implements ILiveShareHost {
+export class LiveShareHostDecorator
+    implements ILiveShareHost, InternalDontUseGetClientInfoRetryPolyfill
+{
     private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
     private readonly _userInfoRequestCache: RequestCache<IClientInfo> =
@@ -63,7 +66,8 @@ export class LiveShareHostDecorator implements ILiveShareHost {
     }
 
     public async getClientInfo(
-        clientId: string
+        clientId: string,
+        retrySchedule?: number[] // TODO: delete (not a breaking change to remove, see InternalDontUseGetClientInfoRetryPolyfill)
     ): Promise<IClientInfo | undefined> {
         if (!clientId) {
             throw new Error(
@@ -95,7 +99,7 @@ export class LiveShareHostDecorator implements ILiveShareHost {
                         `LiveShareHostDecorator: timed out getting client info for a remote client ID`
                     );
                 },
-                EXPONENTIAL_BACKOFF_SCHEDULE
+                retrySchedule ?? EXPONENTIAL_BACKOFF_SCHEDULE
             );
         });
     }

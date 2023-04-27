@@ -36,7 +36,8 @@ export class PolyfillHostDecorator implements ILiveShareHost {
     private readonly _userRolesRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
 
-    private _getClientInfoTriesRemaining = 2;
+    private _totalTries = 4;
+    private _getClientInfoTriesRemaining = this._totalTries;
     private _getClientInfoExists = false;
 
     /**
@@ -163,14 +164,13 @@ export class PolyfillHostDecorator implements ILiveShareHost {
 
         const getClientRoles = this.getClientRoles(clientId);
         return this._host
-            .getClientInfo(clientId, [200])
+            .getClientInfo(clientId, this.getRetrySchedule())
             .then((clientInfo) => {
                 this._getClientInfoExists = true;
                 return clientInfo;
             })
             .catch((e) => {
                 if (e.message.includes("timed out")) {
-                    console.log("using getClientInfo polyfill");
                     this._getClientInfoTriesRemaining--;
 
                     return getClientRoles.then((roles) => {
@@ -193,9 +193,11 @@ export class PolyfillHostDecorator implements ILiveShareHost {
     }
 
     private warmupPolyfillCheck() {
+        if (this._getClientInfoExists) return;
+
         // warmup doesn't use polyfill implementation
         // "blah" clientId, error expected, hopefully not a timeout
-        this._host.getClientInfo("blah", [200]).catch((e) => {
+        this._host.getClientInfo("blah", [0]).catch((e) => {
             if (e.message.includes("timed out")) {
                 this._getClientInfoTriesRemaining--;
                 if (this._getClientInfoTriesRemaining > 0) {
@@ -206,5 +208,13 @@ export class PolyfillHostDecorator implements ILiveShareHost {
                 this._getClientInfoExists = true;
             }
         });
+    }
+
+    // retry little bit longer when getting to end of retries remaining.
+    private getRetrySchedule(): number[] {
+        const fullRetrySchedule = [200, 400, 400, 800, 1200];
+        const retryAmount =
+            this._totalTries - Math.max(0, this._getClientInfoTriesRemaining);
+        return fullRetrySchedule.slice(0, retryAmount);
     }
 }

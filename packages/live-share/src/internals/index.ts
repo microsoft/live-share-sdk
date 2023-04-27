@@ -9,4 +9,4 @@ export * from "./RequestCache";
 export * from "./RoleVerifier";
 export * from "./utils";
 export * from "./LiveShareHostDecorator";
-export * from "./PolyfillHostDecorator";
+export * from "./BackwardsCompatibilityHostDecorator";

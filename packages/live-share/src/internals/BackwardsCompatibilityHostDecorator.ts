@@ -17,12 +17,12 @@ import { waitForResult } from "./utils";
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
 const CACHE_LIFETIME = 5 * 60 * 1000; // original cache time
 
-export interface InternalDontUseGetClientInfoRetryPolyfill {
-    /**
-     * Adds retry schedule optionally. doesn't break ILiveShareHost interface.
-     *
-     * For internal use only.
-     */
+/**
+ * Optionally Adds `retrySchedule` to `getClientInfo`. doesn't break `ILiveShareHost` interface.
+ *
+ * For internal use only. Will be deleted.
+ */
+export interface BackwardsCompatibilityGetClientInfoRetrySchedule {
     getClientInfo(
         clientId: string,
         retrySchedule?: number[]
@@ -30,9 +30,12 @@ export interface InternalDontUseGetClientInfoRetryPolyfill {
 }
 
 /**
- * Experiment for polyfil
+ * Decorator that provides backwards compatibility for getClientInfo
+ * If getClientInfo does not exist on an unsupported client, `IUserInfo.displayName` will be undefined
+ *
+ * For internal use only. Will be deleted.
  */
-export class PolyfillHostDecorator implements ILiveShareHost {
+export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
     private readonly _userRolesRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
 
@@ -42,13 +45,13 @@ export class PolyfillHostDecorator implements ILiveShareHost {
 
     /**
      * @hidden
-     * _host would be `LiveShareHostDecorator` decorator: `new PolyfillHostDecorator(new LiveShareHostDecorator(teamsJsHost))`
+     * _host would be `BackwardsCompatibilityHostDecorator` decorator: `new BackwardsCompatibilityHostDecorator(new LiveShareHostDecorator(teamsJsHost))`
      */
     constructor(
         private readonly _host: ILiveShareHost &
-            InternalDontUseGetClientInfoRetryPolyfill
+            BackwardsCompatibilityGetClientInfoRetrySchedule
     ) {
-        this.warmupPolyfillCheck();
+        this.warmupCheckGetClientInfoExists();
     }
 
     public getFluidTenantInfo(): Promise<IFluidTenantInfo> {
@@ -81,7 +84,7 @@ export class PolyfillHostDecorator implements ILiveShareHost {
     ): Promise<UserMeetingRole[] | undefined> {
         if (!clientId) {
             throw new Error(
-                `LiveShareHostDecorator: called getClientInfo() without a clientId`
+                `BackwardsCompatibilityHostDecorator: called getClientInfo() without a clientId`
             );
         }
         return this._userRolesRequestCache.cacheRequest(clientId, () => {
@@ -128,7 +131,7 @@ export class PolyfillHostDecorator implements ILiveShareHost {
                 },
                 () => {
                     return new Error(
-                        `LiveShareHostDecorator: timed out getting roles for a remote client ID`
+                        `BackwardsCompatibilityHostDecorator: timed out getting roles for a remote client ID`
                     );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE
@@ -192,16 +195,16 @@ export class PolyfillHostDecorator implements ILiveShareHost {
         return this._host.registerClientId(clientId);
     }
 
-    private warmupPolyfillCheck() {
+    private warmupCheckGetClientInfoExists() {
         if (this._getClientInfoExists) return;
 
         // warmup doesn't use polyfill implementation
-        // "blah" clientId, error expected, hopefully not a timeout
-        this._host.getClientInfo("blah", [0]).catch((e) => {
+        // "fakeId" clientId, error expected, hopefully not a timeout
+        this._host.getClientInfo("fakeId", [0]).catch((e) => {
             if (e.message.includes("timed out")) {
                 this._getClientInfoTriesRemaining--;
                 if (this._getClientInfoTriesRemaining > 0) {
-                    this.warmupPolyfillCheck();
+                    this.warmupCheckGetClientInfoExists();
                 }
             } else {
                 // resolved for reason other than timeout, api exists
@@ -212,9 +215,8 @@ export class PolyfillHostDecorator implements ILiveShareHost {
 
     // retry little bit longer when getting to end of retries remaining.
     private getRetrySchedule(): number[] {
-        const fullRetrySchedule = [200, 400, 400, 800, 1200];
         const retryAmount =
             this._totalTries - Math.max(0, this._getClientInfoTriesRemaining);
-        return fullRetrySchedule.slice(0, retryAmount);
+        return EXPONENTIAL_BACKOFF_SCHEDULE.slice(0, retryAmount);
     }
 }

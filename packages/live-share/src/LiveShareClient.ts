@@ -4,9 +4,9 @@
  */
 
 import {
+    BackwardsCompatibilityHostDecorator,
     LiveShareHostDecorator,
     LiveShareTokenProvider,
-    PolyfillHostDecorator,
     RoleVerifier,
 } from "./internals";
 import {
@@ -99,7 +99,7 @@ export class LiveShareClient {
         }
 
         // Save props
-        LiveShareClient._host = new PolyfillHostDecorator(
+        LiveShareClient._host = new BackwardsCompatibilityHostDecorator(
             new LiveShareHostDecorator(host)
         );
         LiveShareClient._roleVerifier = new RoleVerifier(LiveShareClient._host);

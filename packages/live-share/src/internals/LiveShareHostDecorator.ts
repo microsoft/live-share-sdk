@@ -11,18 +11,18 @@ import {
     UserMeetingRole,
     IClientInfo,
 } from "../interfaces";
-import { InternalDontUseGetClientInfoRetryPolyfill } from "./PolyfillHostDecorator";
+import { BackwardsCompatibilityGetClientInfoRetrySchedule } from "./BackwardsCompatibilityHostDecorator";
 import { RequestCache } from "./RequestCache";
 import { waitForResult } from "./utils";
 
-const EXPONENTIAL_BACKOFF_SCHEDULE = [200, 400, 400, 800, 1200];
+const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
 const CACHE_LIFETIME = 4 * 1000;
 
 /**
  * Live Share Host decorator used to reduce rapid duplicate requests.
  */
 export class LiveShareHostDecorator
-    implements ILiveShareHost, InternalDontUseGetClientInfoRetryPolyfill
+    implements ILiveShareHost, BackwardsCompatibilityGetClientInfoRetrySchedule
 {
     private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);

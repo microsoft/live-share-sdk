@@ -24,6 +24,7 @@
         "@typescript-eslint/eslint-plugin": "^5.48.1",
         "@typescript-eslint/parser": "^5.48.1",
         "buffer": "^6.0.3",
-        "start-server-and-test": "^1.15.2"
+        "start-server-and-test": "^1.15.2",
+        "vite": "^4.0.4"
     }
 }

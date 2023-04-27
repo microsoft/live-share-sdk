@@ -1,8 +1,0 @@
-{
-    "packages": [
-        "packages/*",
-        "samples/javascript/*",
-        "samples/typescript/*"
-    ],
-    "version": "0.0.0"
-}

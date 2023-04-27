@@ -9,12 +9,35 @@
         "samples/typescript/*"
     ],
     "scripts": {
-        "build":"npm run build:packages && npm run build:samples",
-        "build:packages":"npm run build -w='packages'",
-        "build:samples":"npm run build -w='samples/javascript' -w='samples/typescript'",
+        "build": "npm run build:packages && npm run build:samples",
+        "todo_not_working_on_windows:build:packages": "npm run build -w='packages'",
+
+        "build:packages": "npm run build:packages:live-share && npm-run-all --parallel build:packages:live-share-*",
+        "build:packages:live-share": "npm --prefix packages/live-share run build",
+        "build:packages:live-share-canvas": "npm --prefix packages/live-share-canvas run build",
+        "build:packages:live-share-media": "npm --prefix packages/live-share-media run build",
+        "build:packages:live-share-react": "npm --prefix packages/live-share-react run build",
+        "build:packages:live-share-turbo": "npm --prefix packages/live-share-turbo run build",
+
+        "todo_not_working_on_windows:build:samples": "npm run build -w='samples/javascript' -w='samples/typescript'",
+
+        "build:samples": "npm-run-all --parallel build:samples:*",
+        "build:samples:js:01": "npm --prefix samples/javascript/01.dice-roller run build",
+        "build:samples:js:02": "npm --prefix samples/javascript/02.react-video run build",
+        "build:samples:js:03": "npm --prefix samples/javascript/03.live-canvas-demo run build",
+        "build:samples:js:04": "npm --prefix samples/javascript/04.live-share-react run build",
+        "build:samples:js:05": "npm --prefix samples/javascript/05.dice-roller-turbo run build",
+        "build:samples:js:21": "npm --prefix samples/javascript/21.react-media-template run build",
+        "build:samples:js:22": "npm --prefix samples/javascript/22.react-agile-poker run build",
+        "build:samples:js:23": "npm --prefix samples/javascript/23.react-live-canvas run build",
+        "build:samples:js:31": "npm --prefix samples/javascript/31.live-canvas-tests run build",
+        "build:samples:ts.21": "npm --prefix samples/typescript/21.react-media-template run build",
         "build:docs": "typedoc",
         "doctor": "eslint **/src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "author": "",
-    "license": "Microsoft"
+    "license": "Microsoft",
+    "devDependencies": {
+        "npm-run-all": "^4.1.5"
+    }
 }

@@ -12,7 +12,7 @@
         "build": "npm run build:packages && npm run build:samples",
         "todo_not_working_on_windows:build:packages": "npm run build -w='packages'",
 
-        "build:packages": "npm run build:packages:live-share && npm-run-all --parallel build:packages:live-share-*",
+        "build:packages": "npm run build:packages:live-share && npm-run-all --parallel build:packages:live-share-canvas build:packages:live-share-media build:packages:live-share-turbo && npm run build:packages:live-share-react",
         "build:packages:live-share": "npm --prefix packages/live-share run build",
         "build:packages:live-share-canvas": "npm --prefix packages/live-share-canvas run build",
         "build:packages:live-share-media": "npm --prefix packages/live-share-media run build",

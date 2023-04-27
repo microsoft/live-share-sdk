@@ -18,6 +18,7 @@ const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
 const CACHE_LIFETIME = 5 * 60 * 1000; // original cache time
 
 /**
+ * @hidden
  * Optionally Adds `retrySchedule` to `getClientInfo`. doesn't break `ILiveShareHost` interface.
  *
  * For internal use only. Will be deleted.
@@ -30,6 +31,7 @@ export interface BackwardsCompatibilityGetClientInfoRetrySchedule {
 }
 
 /**
+ * @hidden
  * Decorator that provides backwards compatibility for getClientInfo
  * If getClientInfo does not exist on an unsupported client, `IUserInfo.displayName` will be undefined
  *

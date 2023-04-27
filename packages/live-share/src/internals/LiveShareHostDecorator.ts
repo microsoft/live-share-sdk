@@ -19,6 +19,7 @@ const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
 const CACHE_LIFETIME = 4 * 1000;
 
 /**
+ * @hidden
  * Live Share Host decorator used to reduce rapid duplicate requests.
  */
 export class LiveShareHostDecorator

@@ -458,7 +458,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         assert(count == 2, `Wrong number of users`);
     });
 
-    it("isLocalUser should be true for both clients with same userId", async () => {
+    it("isLocalUser should be true for both clients with same userId and contain both clientIds", async () => {
         class SameUserLiveShareTestHost implements ILiveShareHost {
             private test = TestLiveShareHost.create();
             getFluidTenantInfo(): Promise<IFluidTenantInfo> {
@@ -513,11 +513,28 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                     `user1: Unexpected data object of ${user.data}`
                 );
                 assert(user.isLocalUser == true, `user1: should be local`);
-                if (user._clients.length == 2) {
-                    object1done.resolve();
-                }
+                object1done.resolve();
             } catch (err) {
                 object1done.reject(err);
+            }
+        });
+
+        const object2done = new Deferred();
+        object2.on("presenceChanged", (user, local) => {
+            try {
+                assert(user != null, `user1: Null user arg`);
+                assert(
+                    user.state == PresenceState.online,
+                    `user1: Unexpected presence state of ${user.state}`
+                );
+                assert(
+                    user.data == undefined,
+                    `user1: Unexpected data object of ${user.data}`
+                );
+                assert(user.isLocalUser == true, `user1: should be local`);
+                object2done.resolve();
+            } catch (err) {
+                object2done.reject(err);
             }
         });
 
@@ -527,7 +544,19 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         await object2.initialize();
 
         // Wait for events to trigger
-        await Promise.all([object1done.promise]);
+        await Promise.all([object1done.promise, object2done.promise]);
+
+        // cannot check for new clients on same user in `presenceChanged` callback, will evaluate as being equal.
+        // wait for a sync to happen, and check for new clients with getPresenceForUser
+        await waitForDelay(50);
+        assert(
+            object1.getPresenceForUser("user1")?._clients.length == 2,
+            "user should have two clients"
+        );
+        assert(
+            object2.getPresenceForUser("user1")?._clients.length == 2,
+            "user should have two clients"
+        );
 
         // reset to normal TestLiveShareHost
         new LiveShareClient(TestLiveShareHost.create());

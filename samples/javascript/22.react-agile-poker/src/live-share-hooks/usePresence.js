@@ -57,6 +57,7 @@ export const usePresence = (presence, context) => {
         console.info("usePresence: initializing presence");
         initializeStartedRef.current = true;
         presence.on("presenceChanged", (userPresence, local) => {
+            console.log(userPresence);
             if (local) {
                 const localUser = {
                     userId: userPresence.userId,
@@ -70,7 +71,14 @@ export const usePresence = (presence, context) => {
             // Update our local state
             const updatedUsers = presence
                 .toArray()
-                .filter((user) => user.state === PresenceState.online);
+                .filter((user) => user.state === PresenceState.online)
+                .map((userPresence) => ({
+                    userId: userPresence.userId,
+                    state: userPresence.state,
+                    data: userPresence.data,
+                    name: userPresence.displayName,
+                    roles: userPresence.roles,
+                }));
             setUsers(updatedUsers);
         });
         const defaultAvatarInformation = getRandomAvatar();

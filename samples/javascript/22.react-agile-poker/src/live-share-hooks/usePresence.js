@@ -57,7 +57,6 @@ export const usePresence = (presence, context) => {
         console.info("usePresence: initializing presence");
         initializeStartedRef.current = true;
         presence.on("presenceChanged", (userPresence, local) => {
-            console.log(userPresence);
             if (local) {
                 const localUser = {
                     userId: userPresence.userId,

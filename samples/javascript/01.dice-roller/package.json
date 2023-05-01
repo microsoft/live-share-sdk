@@ -19,7 +19,7 @@
         "@microsoft/live-share": "1.0.0-preview.10",
         "@microsoft/teams-js": "^2.10.1",
         "@typescript-eslint/eslint-plugin": "^5.48.1",
-        "@typescript-eslint/parser": "^5.48.1",
+        "@typescript-eslint/parser": "^5.59.1",
         "fluid-framework": "~1.2.3"
     },
     "devDependencies": {

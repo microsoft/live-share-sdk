@@ -83,7 +83,7 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         });
         await object2.initialize();
 
-        object1.sendEvent();
+        object1.send();
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -105,7 +105,7 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     it("Should throw error if sendEvent() called before start", async () => {
         try {
-            await object1.sendEvent();
+            object1.send();
             assert(false, `exception not thrown`);
         } catch (err) {
             console.error("There was an error");

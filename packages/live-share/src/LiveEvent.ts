@@ -115,7 +115,7 @@ export class LiveEvent<
      * was sent and the clientId if known. The clientId will be `undefined` if the client is
      * disconnected at time of delivery.
      */
-    public sendEvent(evt?: Partial<TEvent>): TEvent {
+    public send(evt?: Partial<TEvent>): TEvent {
         if (!this._eventTarget) {
             throw new Error(`LiveEvent not started.`);
         }

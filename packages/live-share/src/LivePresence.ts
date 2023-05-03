@@ -263,6 +263,13 @@ export class LivePresence<TData extends object = object> extends DataObject<{
     }
 
     /**
+     * @deprecated use `update()` instead
+     */
+    public updatePresence(state?: PresenceState, data?: TData): void {
+        return this.update(data, state);
+    }
+
+    /**
      * Enumerates each user the object is tracking presence for.
      * @param callback Function to call for each user.
      * @param callback.user Current presence information for a user.

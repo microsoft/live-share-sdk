@@ -124,6 +124,13 @@ export class LiveEvent<
     }
 
     /**
+     * @deprecated use `send()` instead
+     */
+    public sendEvent(evt?: Partial<TEvent>): TEvent {
+        return this.send(evt);
+    }
+
+    /**
      * Returns true if a received event is newer then the current event.
      *
      * #### remarks

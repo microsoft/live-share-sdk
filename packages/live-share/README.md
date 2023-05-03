@@ -9,13 +9,13 @@ You can find our API reference documentation at [aka.ms/livesharedocs](https://a
 To add the latest version of the SDK to your application using NPM:
 
 ```bash
-npm install @microsoft/live-share --save
+npm install fluid-framework @fluidframework/azure-client @microsoft/live-share --save
 ```
 
 or using [Yarn](https://yarnpkg.com/):
 
 ```bash
-yarn add @microsoft/live-share
+yarn add fluid-framework @fluidframework/azure-client @microsoft/live-share
 ```
 
 ## Building the extension
@@ -31,7 +31,7 @@ This will use lerna to hoist and build all dependencies.
 
 ## How to use this extension
 
-- This package depends on [Teams JS SDK](https://docs.microsoft.com/javascript/api/overview/msteams-client?view=msteams-client-js-latest). The version of `@microsoft/teams-js` you use in your app must match the one used in this project.
+- Teams apps that use this package depend on [Teams JS SDK](https://docs.microsoft.com/javascript/api/overview/msteams-client?view=msteams-client-js-latest). The version of `@microsoft/teams-js` you use in your app must match the one used in this project (see the below version compatibility chart).
 
 ```javascript
 
@@ -75,6 +75,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
+| 1.0.0-preview.11       | ^2.11.0              | ^1.2.3          | 1.0.0-preview.11 (optional) | ^1.0.0 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
 | 1.0.0-preview.10       | ^2.10.1              | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
 | 1.0.0-preview.8       | ^2.5.0               | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
 | 1.0.0-preview.3       | 2.0.0-experimental.1 | ~1.2.3          | 1.0.0-preview.3 (optional) | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |

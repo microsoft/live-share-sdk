@@ -22,7 +22,7 @@ export const usePresence = (presence, context) => {
     const updatePresence = useCallback(
         ({ ready, answer }) => {
             const localUserData = localUserRef.current?.data;
-            presence.updatePresence(PresenceState.online, {
+            presence.update({
                 avatarIndex: localUserData?.avatarIndex,
                 ready: ready !== undefined ? ready : localUserData?.ready,
                 answer: answer !== undefined ? answer : localUserData?.answer,

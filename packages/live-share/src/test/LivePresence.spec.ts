@@ -47,12 +47,12 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         );
 
         // need to be connected to send signals
-        if (!container1.connected) {
+        if (!(container1 as any).connected) {
             await new Promise((resolve) =>
                 container1.once("connected", resolve)
             );
         }
-        if (!container2.connected) {
+        if (!(container1 as any).connected) {
             await new Promise((resolve) =>
                 container2.once("connected", resolve)
             );
@@ -195,7 +195,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         await Promise.all([object1done.promise, object2done.promise]);
     });
 
-    it("Should updatePresence()", async () => {
+    it("Should update() user presence", async () => {
         let triggered = false;
         const object1done = new Deferred();
         object1.on("presenceChanged", (user, local) => {
@@ -236,7 +236,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         await object2Ready.promise;
 
         // Update presence
-        object2.updatePresence(PresenceState.offline, { foo: "bar" });
+        object2.update({ foo: "bar" }, PresenceState.offline);
 
         // Wait for finish
         await object1done.promise;

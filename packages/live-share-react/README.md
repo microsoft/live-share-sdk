@@ -181,7 +181,7 @@ import { PresenceState } from "@microsoft/live-share";
 export function OnlineUsers() {
   const { localUser, allUsers, updatePresence } = useLivePresence(
     "CUSTOM-USER-ID", // optional user id
-    { name: "First Last" } // optional custom data object
+    { favoriteColor: "red" } // optional custom data object
   );
   return (
     <div>
@@ -190,16 +190,18 @@ export function OnlineUsers() {
         {allUsers
           .filter((user) => user.state === PresenceState.online)
           .map((user) => (
-            <div key={user.userId}>{user.name}</div>
+            <div key={user.userId}>
+                {user.displayName + " " + user.data!.favoriteColor}
+            </div>
           ))}
       </div>
       <button
         onClick={() => {
           updatePresence(
+            localUser.data,
             localUser?.state === PresenceState.offline
               ? PresenceState.online
               : PresenceState.offline,
-            localUser.data
           );
         }}
       >

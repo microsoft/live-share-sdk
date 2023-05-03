@@ -56,8 +56,8 @@ export type OnReceivedLiveEventAction<TEvent> = (
 ) => void;
 
 export type OnUpdateLivePresenceAction<TData extends object = object> = (
+    data?: TData | undefined,
     state?: PresenceState | undefined,
-    data?: TData | undefined
 ) => void;
 
 export type OnStartTimerAction = (

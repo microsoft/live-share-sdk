@@ -222,23 +222,24 @@ export class LivePresence<TData extends object = object> extends DataObject<{
 
     /**
      * Returns a snapshot of the current list of presence objects being tracked.
+     * @param filter Optional. Presence state to filter enumeration to.
      * @returns Array of presence objects.
      */
-    public toArray(): LivePresenceUser<TData>[] {
+    public toArray(filter?: PresenceState): LivePresenceUser<TData>[] {
         const list: LivePresenceUser<TData>[] = [];
-        this.forEach((presence) => list.push(presence));
+        this.forEach((presence) => list.push(presence), filter);
         return list;
     }
 
     /**
-     * Updates the users presence state and/or shared data object.
+     * Updates the local user's presence shared data object and/or state.
      *
      * @remarks
      * This will trigger the immediate broadcast of the users presence to all other clients.
-     * @param state Optional. Presence state to change.
      * @param data Optional. Data object to change. A deep copy of the data object is saved to avoid any future changes.
+     * @param state Optional. Presence state to change.
      */
-    public updatePresence(state?: PresenceState, data?: TData): void {
+    public update(data?: TData, state?: PresenceState): void {
         if (!this._scope) {
             throw new Error(`LivePresence: not started.`);
         }

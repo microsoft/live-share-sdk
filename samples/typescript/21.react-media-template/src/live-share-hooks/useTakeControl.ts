@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LiveEvent, LivePresenceUser } from "@microsoft/live-share";
+import { LivePresenceUser, LiveShareClient } from "@microsoft/live-share";
 // eslint-disable-next-line
 import { SharedMap } from "fluid-framework";
 import { IUserData } from "./usePresence";
@@ -74,7 +74,7 @@ export const useTakeControl = (
     // Set the local user ID
     const takeControl = useCallback(() => {
         if (!!localUserId && localUserIsEligiblePresenter) {
-            takeControlMap?.set(localUserId, LiveEvent.getTimestamp());
+            takeControlMap?.set(localUserId, LiveShareClient.getTimestamp());
             if (sendNotification) {
                 sendNotification("took control");
             }

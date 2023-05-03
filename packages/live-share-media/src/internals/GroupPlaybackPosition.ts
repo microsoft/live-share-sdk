@@ -4,9 +4,9 @@
  */
 
 import {
-    LiveEvent,
     IRuntimeSignaler,
     TimeInterval,
+    LiveShareClient,
 } from "@microsoft/live-share";
 import { GroupTransportState } from "./GroupTransportState";
 import { GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
@@ -129,7 +129,7 @@ export class GroupPlaybackPosition {
      */
     public get maxPosition(): number {
         if (this._transportState.playbackState == "playing") {
-            const now = LiveEvent.getTimestamp();
+            const now = LiveShareClient.getTimestamp();
             const projected =
                 this._transportState.startPosition +
                 (now - this._transportState.timestamp) / 1000;
@@ -162,7 +162,7 @@ export class GroupPlaybackPosition {
             projectedPosition: number
         ) => void
     ): void {
-        const now = LiveEvent.getTimestamp();
+        const now = LiveShareClient.getTimestamp();
         const ignoreBefore = now - this._updateInterval.milliseconds * 2;
         const shouldProject = !this._transportState.track.metadata?.liveStream;
         this._positions.forEach((value, key) => {

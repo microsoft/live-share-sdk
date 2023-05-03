@@ -9,7 +9,6 @@ import {
     InkingManager,
     InkingTool,
     IPoint,
-    IUserInfo,
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
 import React from "react";
@@ -33,7 +32,7 @@ import { isRefObject } from "../utils";
  * @param scale Optional. Stateful scale number to use in the `InkingManager`. Defaults to 1 and must be greater than 0.
  * @param referencePoint Optional. Stateful reference point enum to use in the `InkingManger`. Defaults to "center".
  * @param isCursorShared Optional. Stateful boolean flag for whether cursor should be shared in `LiveCanvas`. Defaults to false.
- * @param localUserCursor Optional. Stateful `IUserInfo` object for the local user's metadata to display alongside their cursor. Defaults to undefined.
+ * @param localUserPictureUrl Optional. url string for the local user to display alongside their cursor. Defaults to undefined.
  * @returns IUseLiveCanvasResults object that contains the `liveCanvas` data object and `inkingManager`.
  */
 export function useLiveCanvas(
@@ -46,7 +45,7 @@ export function useLiveCanvas(
     scale?: number,
     referencePoint?: CanvasReferencePoint,
     isCursorShared?: boolean,
-    localUserCursor?: IUserInfo
+    localUserPictureUrl?: string
 ): IUseLiveCanvasResults {
     /**
      * User facing: inking manager instance
@@ -56,7 +55,10 @@ export function useLiveCanvas(
     /**
      * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveCanvas } = useDynamicDDS<LiveCanvas>(uniqueKey, LiveCanvas);
+    const { dds: liveCanvas } = useDynamicDDS<LiveCanvas>(
+        uniqueKey,
+        LiveCanvas
+    );
 
     /**
      * Setup the InkingManager and LiveCanvas
@@ -162,10 +164,7 @@ export function useLiveCanvas(
      * Sets the isCursorShared of the liveCanvas based on the 'isCursorShared' prop
      */
     React.useEffect(() => {
-        if (
-            liveCanvas &&
-            isCursorShared !== undefined
-        ) {
+        if (liveCanvas && isCursorShared !== undefined) {
             liveCanvas.isCursorShared = isCursorShared;
         }
     }, [isCursorShared, liveCanvas]);
@@ -174,19 +173,12 @@ export function useLiveCanvas(
      * Sets the onGetLocalUserInfo method of the liveCanvas based on the 'localUserCursor' prop
      */
     React.useEffect(() => {
-        if (liveCanvas && localUserCursor) {
-            liveCanvas.onGetLocalUserInfo = (): IUserInfo | undefined => {
-                return {
-                    displayName: localUserCursor.displayName,
-                    pictureUri: localUserCursor.pictureUri,
-                };
+        if (liveCanvas && localUserPictureUrl) {
+            liveCanvas.onGetLocalUserPictureUrl = (): string | undefined => {
+                return localUserPictureUrl;
             };
         }
-    }, [
-        localUserCursor?.displayName,
-        localUserCursor?.pictureUri,
-        liveCanvas,
-    ]);
+    }, [localUserPictureUrl, liveCanvas]);
 
     /**
      * Return hook response

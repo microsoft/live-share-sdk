@@ -181,7 +181,7 @@ import { PresenceState } from "@microsoft/live-share";
 export function OnlineUsers() {
   const { localUser, allUsers, updatePresence } = useLivePresence(
     "CUSTOM-USER-ID", // optional user id
-    { name: "First Last" } // optional custom data object
+    { favoriteColor: "red" } // optional custom data object
   );
   return (
     <div>
@@ -190,16 +190,18 @@ export function OnlineUsers() {
         {allUsers
           .filter((user) => user.state === PresenceState.online)
           .map((user) => (
-            <div key={user.userId}>{user.name}</div>
+            <div key={user.userId}>
+                {user.displayName + " " + user.data!.favoriteColor}
+            </div>
           ))}
       </div>
       <button
         onClick={() => {
           updatePresence(
+            localUser.data,
             localUser?.state === PresenceState.offline
               ? PresenceState.online
               : PresenceState.offline,
-            localUser.data
           );
         }}
       >
@@ -479,25 +481,89 @@ Implementations may vary for each dynamic object & hook. We will try and update 
 
 Example:
 
-```javascript
-import { DynamicObjectRegistry } from "@microsoft/live-share";
+```typescript
+import React from "react";
 import { useDynamicDDS } from "@microsoft/live-share-react";
-import { SharedTree } from "@fluid-experimental/shared-tree";
-import { useCallback } from "react";
+import { DynamicObjectRegistry } from "@microsoft/live-share";
+import { TaskManager  } from "@fluid-experimental/task-manager";
 
-// Register the experimental `SharedTree` DDS
-DynamicObjectRegistry.registerObjectClass(SharedTree, "SharedTree");
+// Register TaskManager as dynamic object
+DynamicObjectRegistry.registerObjectClass(TaskManager, TaskManager.getFactory().type);
 
-// Custom useSharedTree hook
-export const useSharedTree = (uniqueKey) => {
-    const onFirstInitialize = useCallback((dds) => {
-        // Set initial values for the newly created SharedTree dds here
-    }. []);
-    const { dds: sharedTree } = useDynamicDDS(uniqueKey, SharedTree, onFirstInitialize);
+/**
+ * A hook for joining a queue to lock tasks for a given id. Guaranteed to have only one user assigned to a task at a time.
+ * 
+ * @param uniqueKey the unique key for the TaskManager DDS
+ * @param taskId the task id to lock
+ * @returns stateful data about the status of the task lock
+ */
+export const useTaskManager = (uniqueKey: string, taskId?: string): {
+    lockedTask: boolean;
+    taskManager: TaskManager | undefined;
+} => {
+    /**
+     * TaskId currently in queue for
+     */
+    const currentTaskIdRef = React.useRef<string | undefined>(undefined);
+    /**
+     * Stateful boolean that is true when the user is currently assigned the task
+     */
+    const [lockedTask, setLockedTask] = React.useState<boolean>(false);
+
+    /**
+     * User facing: dynamically load the TaskManager DDS for the given unique key.
+     */
+    const { dds: taskManager } = useDynamicDDS<TaskManager>(uniqueKey, TaskManager);
+
+    /**
+     * When the task id changes, lock the task. When the task id is undefined, abandon the task.
+     */
+    React.useEffect(() => {
+        let mounted = true;
+        if (taskManager) {
+            if (taskId && currentTaskIdRef.current !== taskId) {
+                if (currentTaskIdRef.current) {
+                    taskManager.abandon(currentTaskIdRef.current);
+                    setLockedTask(false);
+                }
+                currentTaskIdRef.current = taskId;
+                const onLockTask = async () => {
+                    try {
+                        await taskManager.lockTask(taskId);
+                        if (mounted) {
+                            setLockedTask(true);
+                        }
+                    } catch {
+                        if (mounted) {
+                            setLockedTask(false);
+                            currentTaskIdRef.current = undefined;
+                        }
+                    }
+                }
+                onLockTask();
+            } else if (!taskId && currentTaskIdRef.current) {
+                taskManager.abandon(currentTaskIdRef.current);
+                setLockedTask(false);
+                currentTaskIdRef.current = undefined;
+            }
+        }
+        /**
+         * When the component unmounts, abandon the task if it is still locked
+         */
+        return () => {
+            mounted = false;
+            if (currentTaskIdRef.current) {
+                taskManager?.abandon(currentTaskIdRef.current);
+            }
+            currentTaskIdRef.current = undefined;
+        }
+    }, [taskManager, taskId]);
+
     return {
-        sharedTree,
+        lockedTask,
+        taskManager,
     };
-}
+};
 ```
 
 ## Code samples

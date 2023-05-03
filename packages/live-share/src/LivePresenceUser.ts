@@ -4,9 +4,10 @@
  */
 
 import { LiveEvent } from "./LiveEvent";
-import { ILiveEvent, UserMeetingRole } from "./interfaces";
+import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
 import { cloneValue } from "./internals";
+import { LiveShareClient } from "./LiveShareClient";
 
 /**
  * List of possible presence states.
@@ -33,7 +34,6 @@ export enum PresenceState {
  * @hidden
  */
 export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
-    userId: string;
     state: PresenceState;
     data?: TData;
 }
@@ -43,18 +43,19 @@ export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
  */
 export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
-    private readonly _clients: string[] = [];
+    readonly _clients: string[] = [];
 
     /**
      * @hidden
      */
     constructor(
+        private _clientInfo: IClientInfo,
         private _evt: ILivePresenceEvent<TData>,
         private _expirationPeriod: TimeInterval,
         private _isLocalUser: boolean
     ) {
         this.updateClients(this._evt);
-        this._lastUpdateTime = LiveEvent.getTimestamp();
+        this._lastUpdateTime = LiveShareClient.getTimestamp();
     }
 
     /**
@@ -65,10 +66,14 @@ export class LivePresenceUser<TData = object> {
     }
 
     /**
-     * ID of the user.
+     * ID of the user. Can be undefined when first initialized.
      */
     public get userId(): string {
-        return this._evt.userId;
+        return this._clientInfo.userId;
+    }
+
+    public get displayName(): string | undefined {
+        return this._clientInfo.displayName;
     }
 
     /**
@@ -92,12 +97,8 @@ export class LivePresenceUser<TData = object> {
     /**
      * Returns the user's meeting roles.
      */
-    public getRoles(): Promise<UserMeetingRole[]> {
-        if (this._isLocalUser) {
-            return LiveEvent.registerClientId(this._evt.clientId!);
-        } else {
-            return LiveEvent.getClientRoles(this._evt.clientId!);
-        }
+    public get roles(): UserMeetingRole[] {
+        return this._clientInfo.roles;
     }
 
     /**
@@ -111,28 +112,32 @@ export class LivePresenceUser<TData = object> {
     /**
      * @hidden
      */
-    public updateReceived(evt: ILivePresenceEvent<TData>): boolean {
+    public updateReceived(
+        evt: ILivePresenceEvent<TData>,
+        info: IClientInfo
+    ): boolean {
         this.updateClients(evt);
-        const current = this._evt;
-        if (LiveEvent.isNewer(current, evt)) {
+        const currentEvent = this._evt;
+        const currentClientInfo = this._clientInfo;
+        if (LiveEvent.isNewer(currentEvent, evt)) {
             // Save updated event
             this._evt = evt;
-            this._lastUpdateTime = LiveEvent.getTimestamp();
+            this._clientInfo = info;
+            this._lastUpdateTime = LiveShareClient.getTimestamp();
 
             // Has anything changed?
-            if (
-                evt.state != current.state ||
-                JSON.stringify(evt.data) != JSON.stringify(current.data)
-            ) {
-                return true;
-            }
+            return (
+                evt.state != currentEvent.state ||
+                JSON.stringify(info) != JSON.stringify(currentClientInfo) ||
+                JSON.stringify(evt.data) != JSON.stringify(currentEvent.data)
+            );
         }
 
         return false;
     }
 
     private hasExpired(): boolean {
-        const now = LiveEvent.getTimestamp();
+        const now = LiveShareClient.getTimestamp();
         const elapsed = now - this._lastUpdateTime;
         return (
             !this._isLocalUser && elapsed > this._expirationPeriod.milliseconds

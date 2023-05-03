@@ -146,6 +146,7 @@ const MeetingStage: FC = () => {
                     suspended={suspended}
                     canvasRef={canvasRef}
                     inkingManager={inkingManager}
+                    liveCanvas={liveCanvas}
                     play={play}
                     pause={pause}
                     seekTo={seekTo}

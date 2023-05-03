@@ -5,17 +5,9 @@
 
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
-import { LocalTimestampProvider } from "./LocalTimestampProvider";
-import {
-    ILiveEvent,
-    ITimestampProvider,
-    IRoleVerifier,
-    UserMeetingRole,
-    IClientTimestamp,
-} from "./interfaces";
+import { ILiveEvent, UserMeetingRole, IClientTimestamp } from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
-import { LocalRoleVerifier } from "./LocalRoleVerifier";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /**
@@ -59,10 +51,6 @@ export class LiveEvent<
 > extends DataObject<{
     Events: ILiveEventEvents<TEvent>;
 }> {
-    private static _timestampProvider: ITimestampProvider =
-        new LocalTimestampProvider();
-    private static _roleVerifier: IRoleVerifier = new LocalRoleVerifier();
-
     private _eventTarget?: LiveEventTarget<TEvent>;
 
     /**
@@ -127,7 +115,7 @@ export class LiveEvent<
      * was sent and the clientId if known. The clientId will be `undefined` if the client is
      * disconnected at time of delivery.
      */
-    public sendEvent(evt?: Partial<TEvent>): TEvent {
+    public send(evt?: Partial<TEvent>): TEvent {
         if (!this._eventTarget) {
             throw new Error(`LiveEvent not started.`);
         }
@@ -136,46 +124,10 @@ export class LiveEvent<
     }
 
     /**
-     * Returns the current timestamp as the number of milliseconds sine the Unix Epoch.
+     * @deprecated use `send()` instead
      */
-    public static getTimestamp(): number {
-        return LiveEvent._timestampProvider.getTimestamp();
-    }
-
-    /**
-     * Returns the list of roles supported for a client.
-     * @param clientId Client ID to lookup.
-     * @returns The list of roles for the client.
-     */
-    public static getClientRoles(clientId: string): Promise<UserMeetingRole[]> {
-        return LiveEvent._roleVerifier.getClientRoles(clientId);
-    }
-
-    /**
-     * Registers client id of the current user.
-     * @param clientId Client ID to map to current user.
-     * @returns The list of roles for the client.
-     */
-    public static registerClientId(
-        clientId: string
-    ): Promise<UserMeetingRole[]> {
-        return LiveEvent._roleVerifier.registerClientId(clientId);
-    }
-
-    /**
-     * Verifies that a client has one of the specified roles.
-     * @param clientId Client ID to inspect.
-     * @param allowedRoles User roles that are allowed.
-     * @returns True if the client has one of the specified roles.
-     */
-    public static verifyRolesAllowed(
-        clientId: string,
-        allowedRoles: UserMeetingRole[]
-    ): Promise<boolean> {
-        return LiveEvent._roleVerifier.verifyRolesAllowed(
-            clientId,
-            allowedRoles
-        );
+    public sendEvent(evt?: Partial<TEvent>): TEvent {
+        return this.send(evt);
     }
 
     /**
@@ -234,22 +186,6 @@ export class LiveEvent<
         }
 
         return true;
-    }
-
-    /**
-     * Assigns a custom timestamp provider.
-     * @param provider The timestamp provider to use.
-     */
-    public static setTimestampProvider(provider: ITimestampProvider): void {
-        LiveEvent._timestampProvider = provider;
-    }
-
-    /**
-     * @hidden
-     * Assigns a new role verifier.
-     */
-    public static setRoleVerifier(provider: IRoleVerifier): void {
-        LiveEvent._roleVerifier = provider;
     }
 }
 

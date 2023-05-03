@@ -31,7 +31,7 @@ export const useNotifications = (notificationEvent, context) => {
                 context?.user.userPrincipalName ?? "Someone@contoso.com";
             const name = userPrincipalName.split("@")[0];
             // Emit the event
-            notificationEvent?.sendEvent({
+            notificationEvent?.send({
                 text: notificationText,
                 senderName: name,
             });

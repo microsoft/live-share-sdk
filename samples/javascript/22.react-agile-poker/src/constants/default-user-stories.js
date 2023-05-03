@@ -1,11 +1,11 @@
-import { LiveEvent } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 
 let defaultUserStories;
 export const getDefaultUserStories = () => {
     if (defaultUserStories) {
         return defaultUserStories;
     }
-    const currentTime = LiveEvent.getTimestamp();
+    const currentTime = LiveShareClient.getTimestamp();
     defaultUserStories = [
         {
             id: "0",

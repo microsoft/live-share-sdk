@@ -9,7 +9,7 @@ import {
     LivePresence,
 } from "@microsoft/live-share";
 import React from "react";
-import { IUseLivePresenceResults } from "../types";
+import { IUseLivePresenceResults, OnUpdateLivePresenceAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
 
 /**
@@ -31,7 +31,6 @@ import { useDynamicDDS } from "../shared-hooks";
  * to update the local user's presence and the `LivePresence` Fluid object.
  */
 export function useLivePresence<TData extends object = object>(
-    userId?: string | undefined,
     initialData?: TData | undefined,
     initialPresenceState: PresenceState = PresenceState.online,
     uniqueKey: string = ":<dds-default>"
@@ -45,7 +44,10 @@ export function useLivePresence<TData extends object = object>(
     /**
      * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: livePresence } = useDynamicDDS<LivePresence<TData>>(uniqueKey, LivePresence<TData>);
+    const { dds: livePresence } = useDynamicDDS<LivePresence<TData>>(
+        uniqueKey,
+        LivePresence<TData>
+    );
 
     /**
      * User facing: list of non-local user's presence objects.
@@ -64,8 +66,8 @@ export function useLivePresence<TData extends object = object>(
     /**
      * User facing: callback to update the local user's presence.
      */
-    const updatePresence = React.useCallback(
-        (state?: PresenceState | undefined, data?: TData | undefined) => {
+    const updatePresence: OnUpdateLivePresenceAction<TData> = React.useCallback(
+        (data?: TData | undefined, state?: PresenceState | undefined) => {
             if (!livePresence) {
                 console.error(
                     new Error(
@@ -82,7 +84,7 @@ export function useLivePresence<TData extends object = object>(
                 );
                 return;
             }
-            livePresence.updatePresence(state, data);
+            livePresence.update(data, state);
         },
         [livePresence]
     );
@@ -91,8 +93,7 @@ export function useLivePresence<TData extends object = object>(
      * Setup change listeners and start `LivePresence` if needed
      */
     React.useEffect(() => {
-        if (livePresence === undefined)
-            return;
+        if (livePresence === undefined) return;
 
         const onPresenceChanged = () => {
             const updatedLocalUsers: LivePresenceUser<TData>[] = [];
@@ -104,7 +105,7 @@ export function useLivePresence<TData extends object = object>(
         livePresence.on("presenceChanged", onPresenceChanged);
 
         if (!livePresence.isInitialized) {
-            livePresence.initialize(userId, initialData, initialPresenceState);
+            livePresence.initialize(initialData, initialPresenceState);
         } else {
             onPresenceChanged();
         }

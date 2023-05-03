@@ -16,9 +16,9 @@ import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { cloneValue, TelemetryEvents } from "./internals";
 import { TimeInterval } from "./TimeInterval";
-import { v4 } from "uuid";
-import { LiveEvent } from "./LiveEvent";
+import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { IClientInfo, UserMeetingRole } from "./interfaces";
 
 /**
  * Events supported by `LivePresence` object.
@@ -62,7 +62,6 @@ export class LivePresence<TData extends object = object> extends DataObject<{
     private _currentPresence: ILivePresenceEvent<TData> = {
         name: "UpdatePresence",
         timestamp: 0,
-        userId: "",
         state: PresenceState.offline,
         data: undefined,
     };
@@ -132,18 +131,21 @@ export class LivePresence<TData extends object = object> extends DataObject<{
     /**
      * Returns the ID of the local user.
      */
-    public get userId(): string {
-        return this._currentPresence.userId;
+    public get userId(): string | undefined {
+        const clientId = this._currentPresence.clientId;
+        if (!clientId) {
+            return undefined;
+        }
+        return this._users.find((user) => user._clients.includes(clientId))
+            ?.userId;
     }
 
     /**
      * Starts sharing presence information.
-     * @param userId Optional. ID of the local user. Defaults to a GUID if not provided.
      * @param data Optional. Custom data object to sshare. A deep copy of the data object is saved to avoid any accidental modifications.
      * @param state Optional. Initial presence state. Defaults to `PresenceState.online`.
      */
     public async initialize(
-        userId?: string,
         data?: TData,
         state = PresenceState.online
     ): Promise<void> {
@@ -153,8 +155,7 @@ export class LivePresence<TData extends object = object> extends DataObject<{
 
         // Assign user ID
         // - If we don't set the timestamp the local user object will report as "offline".
-        this._currentPresence.timestamp = LiveEvent.getTimestamp();
-        this._currentPresence.userId = userId || v4();
+        this._currentPresence.timestamp = LiveShareClient.getTimestamp();
         this._currentPresence.data = data;
         this._currentPresence.state = state;
 
@@ -163,6 +164,13 @@ export class LivePresence<TData extends object = object> extends DataObject<{
 
         // Create event scope
         this._scope = new LiveEventScope(this.runtime);
+
+        // make sure client info for local user is available
+        const localClientInfo = await LiveShareClient.getClientInfo(
+            this._currentPresence.clientId
+        );
+        // Add local user to list
+        this.updateMembersList(this._currentPresence, true, localClientInfo);
 
         // Listen for PresenceUpdated event (allow local presence changes to be echoed back)
         this._updatePresenceEvent = new LiveEventTarget(
@@ -189,7 +197,8 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                 //   clients. That's because the LiveEvent.isNewer() check will fail.  Updating
                 //   the timestamp of the outgoing update is the best way to show proof that the client
                 //   is still alive.
-                this._currentPresence.timestamp = LiveEvent.getTimestamp();
+                this._currentPresence.timestamp =
+                    LiveShareClient.getTimestamp();
 
                 // Return current presence
                 return this._currentPresence;
@@ -199,9 +208,6 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                 this.updateMembersList(state!, false);
             }
         );
-
-        // Add local user to list
-        this.updateMembersList(this._currentPresence, true);
     }
 
     /**
@@ -216,23 +222,24 @@ export class LivePresence<TData extends object = object> extends DataObject<{
 
     /**
      * Returns a snapshot of the current list of presence objects being tracked.
+     * @param filter Optional. Presence state to filter enumeration to.
      * @returns Array of presence objects.
      */
-    public toArray(): LivePresenceUser<TData>[] {
+    public toArray(filter?: PresenceState): LivePresenceUser<TData>[] {
         const list: LivePresenceUser<TData>[] = [];
-        this.forEach((presence) => list.push(presence));
+        this.forEach((presence) => list.push(presence), filter);
         return list;
     }
 
     /**
-     * Updates the users presence state and/or shared data object.
+     * Updates the local user's presence shared data object and/or state.
      *
      * @remarks
      * This will trigger the immediate broadcast of the users presence to all other clients.
-     * @param state Optional. Presence state to change.
      * @param data Optional. Data object to change. A deep copy of the data object is saved to avoid any future changes.
+     * @param state Optional. Presence state to change.
      */
-    public updatePresence(state?: PresenceState, data?: TData): void {
+    public update(data?: TData, state?: PresenceState): void {
         if (!this._scope) {
             throw new Error(`LivePresence: not started.`);
         }
@@ -241,7 +248,6 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         this.waitUntilConnected().then((clientId) => {
             // Broadcast state change
             const evt = this._updatePresenceEvent!.sendEvent({
-                userId: this._currentPresence.userId,
                 state: state ?? this._currentPresence.state,
                 data: cloneValue(data) ?? this._currentPresence.data,
             });
@@ -254,6 +260,13 @@ export class LivePresence<TData extends object = object> extends DataObject<{
             this._currentPresence = evt;
             this.updateMembersList(evt, true);
         });
+    }
+
+    /**
+     * @deprecated use `update()` instead
+     */
+    public updatePresence(state?: PresenceState, data?: TData): void {
+        return this.update(data, state);
     }
 
     /**
@@ -332,7 +345,63 @@ export class LivePresence<TData extends object = object> extends DataObject<{
 
     private updateMembersList(
         evt: ILivePresenceEvent<TData>,
-        local: boolean
+        local: boolean,
+        initLocalClientInfo?: IClientInfo
+    ): void {
+        if (initLocalClientInfo) {
+            this.updateMembersListWithInfo(evt, local, initLocalClientInfo);
+        } else if (evt.clientId) {
+            LiveShareClient.getClientInfo(evt.clientId)
+                .then((info) => {
+                    if (!info) {
+                        return;
+                    }
+
+                    if (this.useTransientParticipantWorkaround(info)) {
+                        this.transientParticipantWorkaround(evt, local, info);
+                    } else {
+                        // normal flow
+                        this.updateMembersListWithInfo(evt, local, info);
+                    }
+                })
+                .catch((e) => {
+                    console.warn(e);
+                });
+        }
+    }
+
+    private useTransientParticipantWorkaround(info: IClientInfo): boolean {
+        // for some reason, for non local users, tmp roster transiently doesn't contain a meeting participant.
+        // When the particpant is missing the `info` matches `defaultUserInfo`.
+        const defaultUserInfo: IClientInfo = {
+            userId: info.userId,
+            roles: [UserMeetingRole.guest],
+            displayName: undefined,
+        };
+        return JSON.stringify(info) === JSON.stringify(defaultUserInfo);
+    }
+
+    private transientParticipantWorkaround(
+        evt: ILivePresenceEvent<TData>,
+        local: boolean,
+        info: IClientInfo
+    ): void {
+        // when participant is missing, use existing information instead.
+        const user = this._users.find((user) => user.userId === info.userId);
+        if (user) {
+            const existingInfo: IClientInfo = {
+                userId: user.userId,
+                roles: user.roles,
+                displayName: user.displayName,
+            };
+            this.updateMembersListWithInfo(evt, local, existingInfo);
+        }
+    }
+
+    private updateMembersListWithInfo(
+        evt: ILivePresenceEvent<TData>,
+        local: boolean,
+        info: IClientInfo
     ): void {
         const emitEvent = (user: LivePresenceUser<TData>) => {
             this.emit(LivePresenceEvents.presenceChanged, user, local);
@@ -349,15 +418,14 @@ export class LivePresence<TData extends object = object> extends DataObject<{
             }
         };
 
-        // Find user or where user should be inserted
         let pos = 0;
-        const userId = evt.userId;
+        const userId = info.userId;
         for (; pos < this._users.length; pos++) {
             const current = this._users[pos];
             const cmp = userId.localeCompare(current.userId);
             if (cmp == 0) {
                 // User found. Apply update and check for changes
-                if (current.updateReceived(evt)) {
+                if (current.updateReceived(evt, info)) {
                     emitEvent(current);
                 }
 
@@ -370,9 +438,10 @@ export class LivePresence<TData extends object = object> extends DataObject<{
 
         // Insert new user and send change event
         const newUser = new LivePresenceUser<TData>(
+            info,
             evt,
             this._expirationPeriod,
-            evt.userId == this._currentPresence.userId
+            evt.clientId == this._currentPresence.clientId
         );
         this._users.splice(pos, 0, newUser);
         emitEvent(newUser);

@@ -3,6 +3,7 @@ import {
     InkingTool,
     fromCssColor,
     InkingManager,
+    LiveCanvas,
 } from "@microsoft/live-share-canvas";
 import { Image } from "@fluentui/react-components";
 import { FlexRow } from "./flex";
@@ -17,12 +18,14 @@ import HighlighterIcon from "../assets/highlighter.svg";
 import EraserIcon from "../assets/eraser.svg";
 
 interface InkingControlsProps {
+    liveCanvas: LiveCanvas;
     inkingManager: InkingManager;
     setIsEnabled: (enabled: boolean) => void;
     isEnabled: boolean;
 }
 
 export const InkingControls: FC<InkingControlsProps> = ({
+    liveCanvas,
     inkingManager,
     setIsEnabled,
     isEnabled,
@@ -34,7 +37,10 @@ export const InkingControls: FC<InkingControlsProps> = ({
                 inkingManager.tool = tool;
                 setSelectedTool(tool);
             }
-            if (isEnabled && tool === selectedTool) {
+            if (
+                isEnabled &&
+                tool === selectedTool
+            ) {
                 setIsEnabled(false);
             } else {
                 setIsEnabled(true);
@@ -44,11 +50,15 @@ export const InkingControls: FC<InkingControlsProps> = ({
     );
 
     useEffect(() => {
-        if (inkingManager) {
-            // Change default color of pen brush
-            inkingManager.penBrush.color = fromCssColor("#E3182D");
-        }
+        if (!inkingManager) return;
+        // Change default color of pen brush
+        inkingManager.penBrush.color = fromCssColor("#E3182D");
     }, [inkingManager]);
+
+    useEffect(() => {
+        if (!liveCanvas) return;
+        liveCanvas.isCursorShared = true;
+    }, [liveCanvas]);
 
     return (
         <FlexRow marginSpacer style={{ marginLeft: "8px", marginRight: "4px" }}>

@@ -11,6 +11,7 @@ import { IClientTimestamp, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
 import { cloneValue } from "./internals/utils";
 import { LiveEvent } from "./LiveEvent";
+import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /** for all time values millis from epoch is used */
@@ -272,7 +273,7 @@ export class LiveTimer extends DataObject<{
                 duration: this._currentConfig.duration,
                 position:
                     this._currentConfig.position +
-                    (LiveEvent.getTimestamp() -
+                    (LiveShareClient.getTimestamp() -
                         this._currentConfig.configChangedAt),
             });
 
@@ -296,7 +297,7 @@ export class LiveTimer extends DataObject<{
     }
 
     private remoteConfigReceived(config: ITimerConfig, sender: string): void {
-        LiveEvent.verifyRolesAllowed(sender, this._allowedRoles)
+        LiveShareClient.verifyRolesAllowed(sender, this._allowedRoles)
             .then((allowed) => {
                 // Ensure that state is allowed, newer, and not the initial state.
                 const currentClientTimestamp: IClientTimestamp = {
@@ -372,7 +373,7 @@ export class LiveTimer extends DataObject<{
         }
         const tickCallback = () => {
             if (this._currentConfig.running) {
-                const timestamp = LiveEvent.getTimestamp();
+                const timestamp = LiveShareClient.getTimestamp();
                 const endTime = endTimeFromConfig(this._currentConfig);
                 if (timestamp >= endTime) {
                     const newConfig: ITimerConfig = {

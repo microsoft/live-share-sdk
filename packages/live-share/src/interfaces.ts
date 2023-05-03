@@ -94,20 +94,6 @@ export interface ITimestampProvider {
  */
 export interface IRoleVerifier {
     /**
-     * Returns the list of roles supported for a client.
-     * @param clientId Client ID to lookup.
-     * @returns The list of roles for the client.
-     */
-    getClientRoles(clientId: string): Promise<UserMeetingRole[]>;
-
-    /**
-     * Registers client of the current user.
-     * @param clientId Client ID to map to current user.
-     * @returns The list of roles for the client.
-     */
-    registerClientId(clientId: string): Promise<UserMeetingRole[]>;
-
-    /**
      * Verifies that a client has one of the specified roles.
      * @param clientId Client ID to inspect.
      * @param allowedRoles User roles that are allowed.
@@ -210,6 +196,25 @@ export interface IFluidTenantInfo {
 }
 
 /**
+ * Returned from `LiveShareHost.getClientInfo()` to specify the user information for a given `clientId`.
+ * Each user individually requests this data for each other user in the session, making it secure & trusted.
+ */
+export interface IClientInfo {
+    /**
+     * The user identifier that corresponds to the provided client identifier.
+     */
+    userId: string;
+    /**
+     * List of roles of the user.
+     */
+    roles: UserMeetingRole[];
+    /**
+     * Optional. The display name for the user.
+     */
+    displayName?: string;
+}
+
+/**
  * Interface for hosting a Live Share session within a client like Teams.
  */
 export interface ILiveShareHost {
@@ -264,9 +269,17 @@ export interface ILiveShareHost {
     registerClientId(clientId: string): Promise<UserMeetingRole[]>;
 
     /**
+     * @deprecated
      * Queries the hosts role verification service for the roles associated with a given client ID.
      * @param clientId ID of teh client to lookup.
      * @returns An array of roles assigned to the queried client ID.
      */
     getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
+
+    /**
+     * Queries the hosts `IUserInfo` for a given client ID.
+     * @param clientId ID of the client to lookup.
+     * @returns `IUserInfo` for the queried client ID.
+     */
+    getClientInfo(clientId: string): Promise<IClientInfo | undefined>;
 }

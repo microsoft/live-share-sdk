@@ -13,6 +13,7 @@ import { LiveEventTarget } from "./LiveEventTarget";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /**
@@ -217,7 +218,7 @@ export class LiveState<TState = any> extends DataObject<{
         evt: IStateChangeEvent<TState>,
         sender: string
     ): void {
-        LiveEvent.verifyRolesAllowed(sender, this._allowedRoles)
+        LiveShareClient.verifyRolesAllowed(sender, this._allowedRoles)
             .then((allowed) => {
                 // Ensure that state is allowed, newer, and not the initial state.
                 if (

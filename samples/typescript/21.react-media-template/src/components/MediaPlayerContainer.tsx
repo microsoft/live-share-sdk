@@ -44,7 +44,7 @@ import {
 import { InkCanvas } from "./InkCanvas";
 import { InkingControls } from "./InkingControls";
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
-import { InkingManager } from "@microsoft/live-share-canvas";
+import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
 
 const events = [
@@ -74,6 +74,7 @@ interface PlayerState {
 
 export interface MediaPlayerContainerProps {
     player?: AzureMediaPlayer;
+    liveCanvas?: LiveCanvas;
     localUserIsPresenting: boolean;
     localUserIsEligiblePresenter: boolean;
     suspended: boolean;
@@ -90,6 +91,7 @@ export interface MediaPlayerContainerProps {
 
 export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
     player,
+    liveCanvas,
     localUserIsPresenting,
     localUserIsEligiblePresenter,
     suspended,
@@ -417,8 +419,9 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
                                 }}
                             />
                             {/* Ink Toggle */}
-                            {localUserIsPresenting && inkingManager && (
+                            {localUserIsPresenting && inkingManager && liveCanvas && (
                                 <InkingControls
+                                    liveCanvas={liveCanvas}
                                     inkingManager={inkingManager}
                                     isEnabled={inkActive}
                                     setIsEnabled={setInkActive}

@@ -1,15 +1,12 @@
 import { useLiveState } from "@microsoft/live-share-react";
-import { LiveEvent, UserMeetingRole } from "@microsoft/live-share";
+import { LiveShareClient, UserMeetingRole } from "@microsoft/live-share";
 
 const ExampleAppState = {
     WAITING: "WAITING",
     START: "START",
 };
 
-const ALLOWED_ROLES = [
-    UserMeetingRole.organizer,
-    UserMeetingRole.presenter,
-];
+const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter];
 const INITIAL_STATE = {
     status: ExampleAppState.WAITING,
 };
@@ -18,7 +15,7 @@ export const ExampleLiveState = (props) => {
     const [state, setState] = useLiveState(
         "CUSTOM-STATE-ID",
         INITIAL_STATE,
-        ALLOWED_ROLES,
+        ALLOWED_ROLES
     );
 
     if (state.status === ExampleAppState.WAITING) {
@@ -30,7 +27,7 @@ export const ExampleLiveState = (props) => {
                         onClick={() => {
                             setState({
                                 status: ExampleAppState.START,
-                                timeStarted: LiveEvent.getTimestamp(),
+                                timeStarted: LiveShareClient.getTimestamp(),
                             });
                         }}
                     >

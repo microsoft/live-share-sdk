@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent, LiveEvent } from "@microsoft/live-share";
+import { IEvent, LiveShareClient } from "@microsoft/live-share";
 import EventEmitter from "events";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
@@ -136,7 +136,7 @@ export class GroupTransportState extends EventEmitter {
                 seekTime: state.startPosition,
             });
         } else if (state.playbackState == "playing") {
-            const now = LiveEvent.getTimestamp();
+            const now = LiveShareClient.getTimestamp();
             const projectedPosition =
                 state.startPosition + (now - state.timestamp) / 1000;
             this.emit(GroupTransportStateEvents.transportStateChange, {

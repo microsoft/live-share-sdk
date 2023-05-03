@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LiveEvent } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 // eslint-disable-next-line
 import { SharedMap } from "fluid-framework";
 
@@ -38,7 +38,7 @@ export const useTakeControl = (
             userId: user.userId,
             state: user.state,
             data: user.data,
-            lastInControlTimestamp: history[user.data?.teamsUserId] || 0,
+            lastInControlTimestamp: history[user.userId] || 0,
         }));
         mappedOnlineUsers.sort((a, b) => {
             // Sort by joined timestamp in descending
@@ -56,13 +56,13 @@ export const useTakeControl = (
         if (!presentingUser || !localUserId) {
             return false;
         }
-        return localUserId === presentingUser?.data?.teamsUserId;
+        return localUserId === presentingUser?.userId;
     }, [localUserId, presentingUser]);
 
     // Set the local user ID
     const takeControl = useCallback(() => {
         if (!!localUserId && localUserIsEligiblePresenter) {
-            takeControlMap?.set(localUserId, LiveEvent.getTimestamp());
+            takeControlMap?.set(localUserId, LiveShareClient.getTimestamp());
             if (sendNotification) {
                 sendNotification("took control");
             }

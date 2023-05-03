@@ -40,7 +40,7 @@ const SidePanel = () => {
 
     const { takeControlStarted, takeControl } = liveShareHooks.useTakeControl(
         takeControlMap,
-        localUser?.data?.teamsUserId,
+        localUser?.userId,
         localUserIsEligiblePresenter,
         users
     );

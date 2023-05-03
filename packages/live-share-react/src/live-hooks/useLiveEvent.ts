@@ -72,7 +72,7 @@ export function useLiveEvent<TEvent extends object = object>(
                 );
                 return;
             }
-            liveEvent?.sendEvent(event);
+            liveEvent?.send(event);
         },
         [liveEvent?.isInitialized]
     );

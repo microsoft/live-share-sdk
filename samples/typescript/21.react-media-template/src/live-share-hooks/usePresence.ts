@@ -4,10 +4,9 @@
  */
 
 import {
-    LiveEvent,
     LivePresence,
     LivePresenceUser,
-    PresenceState,
+    LiveShareClient,
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -42,7 +41,6 @@ export const usePresence = (
     const usersRef = useRef<LivePresenceUser<IUserData>[]>([]);
     const [users, setUsers] = useState(usersRef.current);
     const [localUser, setLocalUser] = useState<LivePresenceUser<IUserData>>();
-    const [localUserRoles, setLocalUserRoles] = useState<UserMeetingRole[]>([]);
     const [presenceStarted, setStarted] = useState(false);
 
     // Local user is an eligible presenter
@@ -54,11 +52,11 @@ export const usePresence = (
             return false;
         }
         return (
-            localUserRoles.filter((role) =>
+            localUser.roles.filter((role) =>
                 acceptPlaybackChangesFrom.includes(role)
             ).length > 0
         );
-    }, [acceptPlaybackChangesFrom, presence, localUser, localUserRoles]);
+    }, [acceptPlaybackChangesFrom, presence, localUser]);
 
     // Effect which registers SharedPresence event listeners before joining space
     useEffect(() => {
@@ -80,18 +78,7 @@ export const usePresence = (
                     local
                 );
                 if (local) {
-                    // Get the roles of the local user
-                    userPresence
-                        .getRoles()
-                        .then((roles: UserMeetingRole[]) => {
-                            setLocalUserRoles(roles);
-                            setLocalUser(userPresence);
-                        })
-                        .catch((err) => {
-                            console.error("usePresence: getRoles error", err);
-                            // Set local user state
-                            setLocalUser(userPresence);
-                        });
+                    setLocalUser(userPresence);
                 }
                 // Set users local state
                 const userArray =
@@ -111,12 +98,12 @@ export const usePresence = (
 
         const userData: IUserData = {
             teamsUserId: context.user?.id,
-            joinedTimestamp: LiveEvent.getTimestamp(),
+            joinedTimestamp: LiveShareClient.getTimestamp(),
             name,
         };
 
         presence
-            .initialize(context.user?.id, userData)
+            .initialize(userData)
             .then(() => {
                 console.log("usePresence: started presence");
                 setStarted(true);

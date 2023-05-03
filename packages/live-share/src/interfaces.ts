@@ -195,9 +195,22 @@ export interface IFluidTenantInfo {
     serviceEndpoint: string;
 }
 
+/**
+ * Returned from `LiveShareHost.getClientInfo()` to specify the user information for a given `clientId`.
+ * Each user individually requests this data for each other user in the session, making it secure & trusted.
+ */
 export interface IClientInfo {
+    /**
+     * The user identifier that corresponds to the provided client identifier.
+     */
     userId: string;
+    /**
+     * List of roles of the user.
+     */
     roles: UserMeetingRole[];
+    /**
+     * Optional. The display name for the user.
+     */
     displayName?: string;
 }
 

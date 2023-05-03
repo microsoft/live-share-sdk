@@ -15,7 +15,7 @@ import { inTeams } from "./utils/inTeams";
 export default function App() {
     const initializeStartedRef = useRef(false);
     const [initialized, setInitialized] = useState(false);
-    const [teamsTheme, setteamsTheme] = useState(teamsLightTheme);
+    const [teamsTheme, setTeamsTheme] = useState(teamsLightTheme);
 
     useEffect(() => {
         // This hook should only be called once, so we use a ref to track if it has been called.
@@ -36,23 +36,23 @@ export default function App() {
                 const curTheme = context.app.theme;
                 switch(curTheme) {
                     case "dark":
-                        setteamsTheme(teamsDarkTheme);
+                        setTeamsTheme(teamsDarkTheme);
                         break;
                     case "contrast":
-                        setteamsTheme(teamsHighContrastTheme);
+                        setTeamsTheme(teamsHighContrastTheme);
                         break;
                     case "default":
                     default:
-                        setteamsTheme(teamsLightTheme);
+                        setTeamsTheme(teamsLightTheme);
                         break;
                 }
                 microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
                     if (theme == "dark") {
-                        setteamsTheme(teamsDarkTheme);
+                        setTeamsTheme(teamsDarkTheme);
                     } else if (theme == "contrast") {
-                        setteamsTheme(teamsHighContrastTheme);
+                        setTeamsTheme(teamsHighContrastTheme);
                     } else {
-                        setteamsTheme(teamsLightTheme);
+                        setTeamsTheme(teamsLightTheme);
                     }
                 });
             } catch (error) {

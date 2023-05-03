@@ -41,7 +41,6 @@ export const usePresence = (
     const usersRef = useRef<LivePresenceUser<IUserData>[]>([]);
     const [users, setUsers] = useState(usersRef.current);
     const [localUser, setLocalUser] = useState<LivePresenceUser<IUserData>>();
-    const [localUserRoles, setLocalUserRoles] = useState<UserMeetingRole[]>([]);
     const [presenceStarted, setStarted] = useState(false);
 
     // Local user is an eligible presenter
@@ -53,11 +52,11 @@ export const usePresence = (
             return false;
         }
         return (
-            localUserRoles.filter((role) =>
+            localUser.roles.filter((role) =>
                 acceptPlaybackChangesFrom.includes(role)
             ).length > 0
         );
-    }, [acceptPlaybackChangesFrom, presence, localUser, localUserRoles]);
+    }, [acceptPlaybackChangesFrom, presence, localUser]);
 
     // Effect which registers SharedPresence event listeners before joining space
     useEffect(() => {
@@ -79,7 +78,6 @@ export const usePresence = (
                     local
                 );
                 if (local) {
-                    setLocalUserRoles(userPresence.roles);
                     setLocalUser(userPresence);
                 }
                 // Set users local state

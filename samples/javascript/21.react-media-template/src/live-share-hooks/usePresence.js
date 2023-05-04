@@ -25,7 +25,7 @@ import { app } from "@microsoft/teams-js";
  * - `users` is an array of user presence objects in the session.
  * - `localUserIsEligiblePresenter` is a boolean indicating whether the local user is an eligible presenter.
  */
-export const usePresence = (acceptPlaybackChangesFrom, presence, context) => {
+export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
     const startedInitializingRef = useRef(false);
     const usersRef = useRef([]);
     const [users, setUsers] = useState(usersRef.current);

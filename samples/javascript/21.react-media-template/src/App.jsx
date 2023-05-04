@@ -15,7 +15,7 @@ import { inTeams } from "./utils/inTeams";
 export default function App() {
     const initializeStartedRef = useRef(false);
     const [initialized, setInitialized] = useState(false);
-    const [teamsTheme, setTeamsTheme] = useState(teamsLightTheme);
+    const [teamsTheme, setTeamsTheme] = useState(teamsDarkTheme);
 
     useEffect(() => {
         // This hook should only be called once, so we use a ref to track if it has been called.

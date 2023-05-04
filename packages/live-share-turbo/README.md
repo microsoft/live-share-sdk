@@ -41,13 +41,13 @@ You can find our API reference documentation at [aka.ms/livesharedocs](https://a
 To add the latest version of the SDK to your application using NPM:
 
 ```bash
-npm install @microsoft/live-share-turbo --save
+npm install fluid-framework @fluidframework/azure-client @microsoft/live-share @microsoft/live-share-turbo --save
 ```
 
 or using [Yarn](https://yarnpkg.com/):
 
 ```bash
-yarn add @microsoft/live-share-turbo
+yarn add fluid-framework @fluidframework/azure-client @microsoft/live-share @microsoft/live-share-turbo --save
 ```
 
 ## Building the extension

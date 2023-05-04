@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/live-share-react",
-  "version": "1.0.0-preview.11",
+  "version": "1.0.0-preview.12",
   "description": "Build collaborative React apps using Microsoft's Fluid & Live Share frameworks with ease.",
   "author": "Microsoft",
   "license": "SEE LICENSE IN LICENSE",
@@ -12,7 +12,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@microsoft/live-share-turbo": "1.0.0-preview.11",
+    "@microsoft/live-share-turbo": "1.0.0-preview.12",
     "url": "^0.11.0",
     "uuid": "^8.3.2"
   },
@@ -20,9 +20,9 @@
     "@babel/core": "^7.12.3",
     "@fluidframework/azure-client": "~1.0.3",
     "@fluidframework/test-client-utils": "^1.3.6",
-    "@microsoft/live-share": "1.0.0-preview.11",
-    "@microsoft/live-share-canvas": "1.0.0-preview.11",
-    "@microsoft/live-share-media": "1.0.0-preview.11",
+    "@microsoft/live-share": "1.0.0-preview.12",
+    "@microsoft/live-share-canvas": "1.0.0-preview.12",
+    "@microsoft/live-share-media": "1.0.0-preview.12",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/uuid": "^8.3.4",
@@ -32,9 +32,9 @@
   },
   "peerDependencies": {
     "@fluidframework/azure-client": "^1.0.0",
-    "@microsoft/live-share": "1.0.0-preview.11",
-    "@microsoft/live-share-canvas": "1.0.0-preview.11",
-    "@microsoft/live-share-media": "1.0.0-preview.11",
+    "@microsoft/live-share": "1.0.0-preview.12",
+    "@microsoft/live-share-canvas": "1.0.0-preview.12",
+    "@microsoft/live-share-media": "1.0.0-preview.12",
     "fluid-framework": "^1.2.3",
     "react": "^16.8.0 || ^17 || ^18",
     "react-dom": "^16.8.0 || ^17 || ^18"

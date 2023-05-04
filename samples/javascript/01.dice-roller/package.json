@@ -17,7 +17,7 @@
     },
     "dependencies": {
         "@fluidframework/azure-client": "~1.0.3",
-        "@microsoft/live-share": "1.0.0-preview.11",
+        "@microsoft/live-share": "1.0.0-preview.12",
         "@microsoft/teams-js": "^2.11.0",
         "@typescript-eslint/eslint-plugin": "^5.48.1",
         "@typescript-eslint/parser": "^5.48.1",

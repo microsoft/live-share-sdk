@@ -2,7 +2,8 @@
     "entryPoints": [
         "packages/live-share/",
         "packages/live-share-canvas/",
-        "packages/live-share-media/"
+        "packages/live-share-media/",
+        "packages/live-share-react/"
     ],
     "entryPointStrategy": "packages",
     "excludeExternals": true,

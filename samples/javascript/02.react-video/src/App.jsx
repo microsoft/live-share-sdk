@@ -5,7 +5,7 @@
 
 import { FluentProvider, teamsDarkTheme, teamsLightTheme, teamsHighContrastTheme } from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MeetingStage from "./pages/MeetingStage";
 import SidePanel from "./pages/SidePanel";
@@ -15,7 +15,7 @@ import { inTeams } from "./utils/inTeams";
 export default function App() {
     const startedInitializingRef = useRef(false);
     const [initialized, setInitialized] = useState(false);
-    const [teamsTheme, setteamsTheme] = useState(teamsLightTheme);
+    const [teamsTheme, setTeamsTheme] = useState(teamsDarkTheme);
 
     useEffect(() => {
         // This hook should only be called once, so we use a ref to track if it has been called.
@@ -43,24 +43,24 @@ export default function App() {
                         const curTheme = context.app.theme;
                         switch(curTheme) {
                             case "dark":
-                                setteamsTheme(teamsDarkTheme);
+                                setTeamsTheme(teamsDarkTheme);
                                 break;
                             case "contrast":
-                                setteamsTheme(teamsHighContrastTheme);
+                                setTeamsTheme(teamsHighContrastTheme);
                                 break;
                             case "default":
                             default:
-                                setteamsTheme(teamsLightTheme);
+                                setTeamsTheme(teamsLightTheme);
                                 break;
                         }
                     });
                     microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
                         if (theme == "dark") {
-                            setteamsTheme(teamsDarkTheme);
+                            setTeamsTheme(teamsDarkTheme);
                         } else if (theme == "contrast") {
-                            setteamsTheme(teamsHighContrastTheme);
+                            setTeamsTheme(teamsHighContrastTheme);
                         } else {
-                            setteamsTheme(teamsLightTheme);
+                            setTeamsTheme(teamsLightTheme);
                         }   
                     });
             } else {

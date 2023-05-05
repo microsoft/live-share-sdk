@@ -15,16 +15,17 @@ import { renderMeetingSidePanel } from "./renderMeetingSidePanel";
 import { renderTabConfig } from "./renderTabConfig";
 import { renderError } from "./renderError";
 import { SharedMap } from "fluid-framework";
+import { AppTheme, IPresenceData } from "./types-interfaces";
 
 const searchParams = new URL(window.location.href).searchParams;
-const root = document.getElementById("content");
-let theme = "light";
+const root = document.getElementById("content")!;
+let theme: AppTheme = "light";
 
 // Define container schema
 const containerSchema = {
     initialObjects: {
-        diceState: LiveState, // shared dice value, resets once all users close app
-        presence: LivePresence, // each user has their own dice value, resets once all users close app
+        diceState: LiveState<number>, // shared dice value, resets once all users close app
+        presence: LivePresence<IPresenceData>, // each user has their own dice value, resets once all users close app
         storedDiceMap: SharedMap, // stored dice value that will last 6 hours from session creation
     },
 };

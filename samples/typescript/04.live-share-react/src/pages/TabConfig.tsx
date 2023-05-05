@@ -1,5 +1,5 @@
 import { pages } from "@microsoft/teams-js";
-import { useEffect, useState } from "react";
+import { ChangeEventHandler, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { AppRoutes } from "../constants";
 import { inTeams } from "../utils/inTeams";
@@ -7,11 +7,11 @@ import { inTeams } from "../utils/inTeams";
 const IN_TEAMS = inTeams();
 
 export const TabConfig = () => {
-    const [selectedRoute, setSelectedRoute] = useState(undefined);
+    const [selectedRoute, setSelectedRoute] = useState<string | undefined>(undefined);
     const navigate = useNavigate();
 
     // Radio button change callback
-    const onSelectedRouteChange = (e) => {
+    const onSelectedRouteChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         setSelectedRoute(e.currentTarget.value);
     }
 

@@ -49,12 +49,10 @@ async function renderSharedDice(diceState, wrapperElem) {
 }
 
 async function renderPresenceDiceList(presence, wrapperElem) {
-    // Event listener callback for presence changes
-    const onPresenceChanged = (userPresence, local) => {
+    // Use the changed event to trigger the rerender whenever the remote value changes.
+    presence.on("presenceChanged", (userPresence, local) => {
         renderUserDice(presence, userPresence, local, wrapperElem);
-    };
-    // Use the changed event to trigger the rerender whenever the value changes.
-    presence.on("presenceChanged", onPresenceChanged);
+    });
 
     // Initialize presence with a custom data object
     await presence.initialize({

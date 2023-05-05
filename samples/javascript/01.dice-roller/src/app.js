@@ -39,12 +39,8 @@ async function start() {
     if (searchParams.get("inTeams")) {
         // Initialize teams app
         await app.initialize();
-
-        // Get our frameContext from context of our app in Teams
+        // Get Teams app context to get the initial theme
         const context = await app.getContext();
-        if (context.page.frameContext == "meetingStage") {
-            view = "stage";
-        }
         theme = context.app.theme === "default" ? "light" : "dark";
         app.registerOnThemeChangeHandler((theme) => {
             theme = theme === "default" ? "light" : "dark";

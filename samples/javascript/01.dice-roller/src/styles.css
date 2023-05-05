@@ -1,0 +1,108 @@
+.wrapper {
+    text-align: center;
+    max-height: 100vh;
+    overflow-y: none;
+    font-family: "Segoe UI"
+}
+.wrapper.light {
+    color: black;
+}
+.wrapper.dark {
+    color: white;
+}
+.wrapper.stage {
+    overflow-y: auto;
+}
+.wrapper.error {
+    text-align: center;
+    color: red;
+}
+h2 {
+    margin: 12px;
+    margin-top: 32px;
+    text-align: left;
+}
+h3 {
+    margin-top: 16px;
+    margin-bottom: 4px;
+}
+p {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+.dice {
+    font-size: 200px;
+    line-height: 100%;
+}
+.dice.side-panel {
+    font-size: 100px;
+}
+.roll {
+    font-size: 36px;
+}
+.roll.side-panel {
+    font-size: 16px;
+}
+button {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 4px 16px;
+    border-color: gray;
+}
+button:hover {
+    background-color: gray;
+}
+.flex {
+    display: flex;
+    align-items: center;
+}
+.user-dice-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+.user-name {
+    font-size: 20px;
+    width: 100%;
+    text-align: left;
+    margin-right: 12px;
+}
+.dice.user {
+    font-size: 56px;
+    line-height: 100%;
+    /* Hack to make button appear more centered with dice, which appears off center */
+    margin-bottom: 4px;
+}
+.roll.user {
+    font-size: 16px;
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 4px 8px;
+    border-color: gray;
+    margin-right: 12px;
+}
+.title {
+    font-size: large;
+    font-weight: bolder;
+    margin-top: 12px;
+}
+.text {
+    font-size: medium;
+}
+.error-title {
+    font-size: large;
+    font-weight: bolder;
+}
+.error-text {
+    font-size: medium;
+}
+.divider {
+    height: 1px;
+    width: 100%;
+    background-color: gray;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}

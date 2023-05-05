@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
 import { pages } from "@microsoft/teams-js";
 
 export function renderTabConfig(elem, theme) {

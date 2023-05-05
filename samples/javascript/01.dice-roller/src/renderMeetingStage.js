@@ -1,4 +1,7 @@
-// STAGE VIEW
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
 
 import { PresenceState, UserMeetingRole } from "@microsoft/live-share";
 import { getRandomDiceValue, stylizeDiceElem } from "./utils";

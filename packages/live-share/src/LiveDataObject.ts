@@ -1,4 +1,4 @@
-import { DataObject, DataObjectTypes } from "@fluidframework/aqueduct";
+import { DataObject, DataObjectTypes, IDataObjectProps } from "@fluidframework/aqueduct";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { assert } from "@fluidframework/common-utils";
 
@@ -32,5 +32,9 @@ export abstract class LiveDataObject<
     }
     public set liveRuntime(value: LiveShareRuntime) {
         this._liveRuntime = value;
+    }
+
+    public constructor(props: IDataObjectProps<I>) {
+        super(props);
     }
 }

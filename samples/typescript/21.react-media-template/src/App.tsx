@@ -69,7 +69,6 @@ export const App = () => {
     const appReady = (inTeams() && initialized) || !inTeams();
 
     if (appReady) {
-        console.log(teamsTheme);
         return (
             <FluentProvider
                 theme={teamsTheme}
@@ -93,7 +92,6 @@ export const App = () => {
                 </Router>
             </FluentProvider>
         );
-    } else {
-        return null;
     }
+    return null;
 };

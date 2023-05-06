@@ -1,7 +1,6 @@
 import {
     DataObjectTypes,
     IDataObjectProps,
-    PureDataObjectFactory,
 } from "@fluidframework/aqueduct";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { LiveDataObject } from "./LiveDataObject";
@@ -13,52 +12,8 @@ import {
 } from "fluid-framework";
 
 /**
- * @hidden
- */
-interface ConstructorWithFactory<
-    T extends LiveDataObject<I>,
-    I extends DataObjectTypes = DataObjectTypes
-> {
-    new (props: IDataObjectProps<I>): T;
-    factory: PureDataObjectFactory<T, I>;
-}
-
-/**
- * @hidden
- * Create a new class extending LiveDataObject to inject in _liveRuntime
- */
-function proxyLiveDataObjectClass<
-    T extends LiveDataObject<I>,
-    I extends DataObjectTypes = DataObjectTypes
->(
-    BaseClass: new (props: IDataObjectProps<I>) => T,
-    runtime: LiveShareRuntime
-): ConstructorWithFactory<T, I> {
-    class ProxiedBaseClass extends (BaseClass as new (
-        props: IDataObjectProps<I>
-    ) => LiveDataObject<I>) {
-        constructor(props: IDataObjectProps<I>) {
-            super(props);
-            this["liveRuntime"] = runtime;
-        }
-    }
-
-    const DynamicClass = class extends BaseClass {
-        public static readonly factory = new Proxy((BaseClass as any).factory, {
-            get: function (target, prop, receiver) {
-                if (prop === "ctor") {
-                    return ProxiedBaseClass;
-                }
-                return Reflect.get(target, prop, receiver);
-            },
-        });
-    };
-
-    return DynamicClass;
-}
-
-/**
  * Inject Live Share dependencies into your Fluid container schema.
+ * This should only be done once, right before connecting to a container.
  * @remarks
  * Users should not use this method unless you are connecting to a container using `LiveShareClient`.
  * This is intended to be used when you are using another Fluid client, such as `AzureClient`.
@@ -71,12 +26,13 @@ export function getLiveShareContainerSchemaProxy(
     schema: ContainerSchema,
     liveRuntime: LiveShareRuntime
 ): ContainerSchema {
+    // Each container must proxy LiveDataObject classes separately.
+    // This map is used to de-duplicate proxies for each class.
+    const existingProxyRegistries = new Map<string, LoadableObjectClass<any>>();
+    
     const initialObjectEntries = Object.entries(schema.initialObjects).map(
         ([key, ObjectClass]) => {
-            return [
-                key,
-                getLiveDataObjectClassProxy(ObjectClass, liveRuntime),
-            ];
+            return [key, getLiveDataObjectClassProxy(existingProxyRegistries, ObjectClass, liveRuntime)];
         }
     );
     const newInitialObjects: LoadableObjectClassRecord =
@@ -85,7 +41,7 @@ export function getLiveShareContainerSchemaProxy(
     return {
         initialObjects: newInitialObjects,
         dynamicObjectTypes: schema.dynamicObjectTypes?.map((ObjectClass) =>
-            getLiveDataObjectClassProxy(ObjectClass, liveRuntime)
+            getLiveDataObjectClassProxy(existingProxyRegistries, ObjectClass, liveRuntime)
         ),
     };
 }
@@ -97,18 +53,67 @@ export function getLiveShareContainerSchemaProxy(
  * @remarks
  * Exported publicly for use in Live Share Turbo
  */
-export function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
+function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
+    existingProxyRegistries: Map<string, LoadableObjectClass<any>>,
     ObjectClass: LoadableObjectClass<any>,
     liveRuntime: LiveShareRuntime
 ): LoadableObjectClass<TClass> {
-    return isLiveDataObject(ObjectClass)
-        ? proxyLiveDataObjectClass(ObjectClass, liveRuntime) as LoadableObjectClass<TClass>
-        : ObjectClass as LoadableObjectClass<TClass>;
+    if (isLiveDataObject(ObjectClass)) {
+        // We should only be proxying one Live Share DDS per type.
+        // This is because Fluid attempts to de-duplicate by comparing classes, but we are dynamically creating proxies.
+        // They then enforce this de-duplication using the factory type name, throwing an error in `parseDataObjectsFromSharedObjects`.
+        // So, we ensure that we only create the proxy once per container.
+        const typeName = (ObjectClass as any).TypeName;
+        const CheckExisting = existingProxyRegistries.get(typeName);
+        if (CheckExisting !== undefined) {
+            return CheckExisting;
+        }
+        // Create a new proxy for this type and insert it into proxiedClasses
+        const NewProxy = proxyLiveDataObjectClass(
+            ObjectClass,
+            liveRuntime
+        ) as unknown as LoadableObjectClass<TClass>;
+        existingProxyRegistries.set(typeName, NewProxy);
+        return NewProxy;
+    }
+    return ObjectClass;
 }
 
 /**
  * @hidden
  */
-function isLiveDataObject(value: any): value is LiveDataObject {
+function isLiveDataObject(value: any): value is typeof LiveDataObject {
     return value.LiveEnabled === true;
+}
+
+/**
+ * @hidden
+ * Create a new class extending LiveDataObject to inject in _liveRuntime
+ */
+function proxyLiveDataObjectClass<I extends DataObjectTypes = DataObjectTypes>(
+    BaseClass: typeof LiveDataObject<I>,
+    runtime: LiveShareRuntime
+): typeof LiveDataObject<I> {
+    class ProxiedBaseClass extends (BaseClass as unknown as new (
+        props: IDataObjectProps<I>
+    ) => LiveDataObject<I>) {
+        constructor(props: IDataObjectProps<I>) {
+            super(props);
+            this["liveRuntime"] = runtime;
+        }
+    }
+
+    const DynamicClass: typeof LiveDataObject<I> = class extends BaseClass {
+        public static TypeName = (BaseClass as any).TypeName;
+        public static readonly factory = new Proxy((BaseClass as any).factory, {
+            get: function (target, prop, receiver) {
+                if (prop === "ctor") {
+                    return ProxiedBaseClass;
+                }
+                return Reflect.get(target, prop, receiver);
+            },
+        });
+    };
+
+    return DynamicClass;
 }

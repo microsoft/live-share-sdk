@@ -152,7 +152,6 @@ export class LiveShareClient {
             const pStartRuntime = runtime.start();
 
             const schema = getLiveShareContainerSchemaProxy(fluidContainerSchema, runtime);
-            console.log(schema);
 
             // Initialize FRS connection config
             let config:

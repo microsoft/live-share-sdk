@@ -3,7 +3,6 @@
  * Licensed under the MIT License.
  */
 
-// eslint-disable-next-line
 import { LiveEvent } from "@microsoft/live-share";
 import { app } from "@microsoft/teams-js";
 import { useState, useEffect, useCallback, useRef } from "react";

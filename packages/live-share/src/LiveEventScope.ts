@@ -12,7 +12,7 @@ import { TypedEventEmitter } from "@fluidframework/common-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { LiveShareClient } from "./LiveShareClient";
-import { LiveShareRuntime } from "./LiveDataObjectRuntime";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 
 /**
  * Live event callback.

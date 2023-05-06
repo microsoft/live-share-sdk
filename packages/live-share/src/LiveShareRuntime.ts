@@ -7,7 +7,7 @@ import { RoleVerifier } from "./internals";
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp
  */
 export class LiveShareRuntime {
-    private readonly _host: ILiveShareHost;
+    private _host: ILiveShareHost;
     private _timestampProvider: ITimestampProvider;
     private _roleVerifier: IRoleVerifier;
 
@@ -67,6 +67,37 @@ export class LiveShareRuntime {
         clientId: string
     ): Promise<IClientInfo | undefined> {
         return this._host.getClientInfo(clientId);
+    }
+
+    /**
+     * Set the timestamp provider for the runtime
+     * @param newTimestampProvider timestamp provider to set
+     */
+    public setTimestampProvider(newTimestampProvider: ITimestampProvider) {
+        this._timestampProvider = newTimestampProvider;
+    }
+
+    /**
+     * Set the timestamp provider for the runtime
+     * @param newTimestampProvider timestamp provider to set
+     */
+    public setRoleVerifier(newRoleVerifier: IRoleVerifier) {
+        this._roleVerifier = newRoleVerifier;
+    }
+
+    /**
+     * Set the host for the runtime
+     * @param newHost ILiveShareHost to change
+     */
+    public setHost(newHost: ILiveShareHost) {
+        this._host = newHost;
+        if (this._timestampProvider instanceof HostTimestampProvider) {
+            this._timestampProvider.stop();
+            this.setTimestampProvider(new HostTimestampProvider(this._host));
+        }
+        if (this._roleVerifier instanceof RoleVerifier) {
+            this.setRoleVerifier(new RoleVerifier(this._host));
+        }
     }
 
     /**

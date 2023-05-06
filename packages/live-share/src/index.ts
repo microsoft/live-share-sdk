@@ -24,4 +24,4 @@ export * from "./TimeInterval";
 export * from "./TimestampProvider";
 export * from "./schema-utils";
 export * from "./LiveDataObject";
-export * from "./LiveDataObjectRuntime";
+export * from "./LiveShareRuntime";

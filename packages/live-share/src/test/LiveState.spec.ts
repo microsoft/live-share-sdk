@@ -10,6 +10,11 @@ import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { LiveState } from "../LiveState";
 import { Deferred } from "./Deferred";
+import { LiveShareRuntime } from "../LiveShareRuntime";
+import { TestLiveShareHost } from "../TestLiveShareHost";
+import { LocalTimestampProvider } from "../LocalTimestampProvider";
+import { getLiveDataObjectClassProxy } from "../schema-utils";
+import { DataObjectClass } from "fluid-framework";
 
 interface TestStateData {
     status: string;
@@ -30,15 +35,45 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
     before(() => (LiveObjectSynchronizer.updateInterval = 20));
     after(() => (LiveObjectSynchronizer.updateInterval = 15000));
 
+    let liveRuntime1 = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let liveRuntime2 = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+
+    let ObjectProxy1 = getLiveDataObjectClassProxy<LiveState<TestStateData>>(
+        LiveState,
+        liveRuntime1
+    ) as DataObjectClass<LiveState<TestStateData>>;
+    let ObjectProxy2 = getLiveDataObjectClassProxy<LiveState<TestStateData>>(
+        LiveState,
+        liveRuntime2
+    ) as DataObjectClass<LiveState<TestStateData>>;
+
+    afterEach(async () => {
+        // restore defaults
+        liveRuntime1 = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
+        );
+        liveRuntime2 = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
+        );
+    });
+
     beforeEach(async () => {
         provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(LiveState.factory);
+        const container1 = await provider.createContainer(ObjectProxy1.factory);
         object1 = await requestFluidObject<LiveState<TestStateData>>(
             container1,
             "default"
         );
 
-        const container2 = await provider.loadContainer(LiveState.factory);
+        const container2 = await provider.loadContainer(ObjectProxy2.factory);
         object2 = await requestFluidObject<LiveState<TestStateData>>(
             container2,
             "default"
@@ -63,7 +98,10 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
             try {
                 if (local) {
                     assert(typeof state == "object", `object1: data is NULL`);
-                    assert(state.status == "newState", `object1: state == '${state}'`);
+                    assert(
+                        state.status == "newState",
+                        `object1: state == '${state}'`
+                    );
                     assert(
                         state.value == "newValue",
                         `object1: state == '${state}'`
@@ -85,7 +123,10 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
             try {
                 if (!local) {
                     assert(typeof state == "object", `object1: data is NULL`);
-                    assert(state.status == "newState", `object1: status == '${state}'`);
+                    assert(
+                        state.status == "newState",
+                        `object1: status == '${state}'`
+                    );
                     assert(
                         state.value == "newValue",
                         `object1: value == '${state.value}'`

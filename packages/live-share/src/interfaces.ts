@@ -5,7 +5,7 @@
 
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidContainer } from "fluid-framework";
-import { LiveShareRuntime } from "./LiveDataObjectRuntime";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 
 /**
  * Base interface for all event objects.

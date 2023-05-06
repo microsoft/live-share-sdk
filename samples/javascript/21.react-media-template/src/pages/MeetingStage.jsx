@@ -35,6 +35,7 @@ const MeetingStage = () => {
         liveCanvas, // LiveEvent Fluid object
         container, // Fluid container
         error, // Join container error
+        liveRuntime, // LiveShareRuntime instance, used for getting reference server timestamp
     } = liveShareHooks.useSharedObjects();
 
     // Notification hook
@@ -66,7 +67,8 @@ const MeetingStage = () => {
         localUser?.userId,
         localUserIsEligiblePresenter,
         users,
-        sendNotification
+        liveRuntime,
+        sendNotification,
     );
 
     // Playlist map

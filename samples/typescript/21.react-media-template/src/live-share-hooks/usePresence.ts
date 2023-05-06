@@ -6,7 +6,6 @@
 import {
     LivePresence,
     LivePresenceUser,
-    LiveShareClient,
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -98,7 +97,7 @@ export const usePresence = (
 
         const userData: IUserData = {
             teamsUserId: context.user?.id,
-            joinedTimestamp: LiveShareClient.getTimestamp(),
+            joinedTimestamp: presence.liveRuntime.getTimestamp(),
             name,
         };
 

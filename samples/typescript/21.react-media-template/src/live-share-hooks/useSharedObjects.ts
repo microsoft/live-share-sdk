@@ -3,15 +3,32 @@
  * Licensed under the MIT License.
  */
 
-import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
+import {
+    ILiveShareJoinResults,
+    LiveShareClient,
+    TestLiveShareHost,
+    LiveEvent,
+    LivePresence,
+} from "@microsoft/live-share";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
-import { ContainerSchema, IFluidContainer, SharedMap } from "fluid-framework";
+import { IFluidContainer, SharedMap } from "fluid-framework";
 import { useEffect, useState, useRef } from "react";
-import { LiveEvent, LivePresence } from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";
-import { AzureContainerServices } from "@fluidframework/azure-client";
 import { LiveShareHost } from "@microsoft/teams-js";
+
+interface IUseSharedObjectsResult extends Partial<ILiveShareJoinResults> {
+    presence: LivePresence | undefined,
+    mediaSession: LiveMediaSession
+        | undefined,
+    notificationEvent: LiveEvent
+        | undefined,
+    takeControlMap: SharedMap | undefined,
+    playlistMap: SharedMap | undefined,
+    inkEvent: LiveEvent | undefined,
+    liveCanvas: LiveCanvas | undefined,
+    error: Error | undefined,
+}
 
 /**
  * Hook that creates/loads the apps shared objects.
@@ -22,13 +39,9 @@ import { LiveShareHost } from "@microsoft/teams-js";
  *
  * @returns Shared objects managed by the apps fluid container.
  */
-export function useSharedObjects() {
+export function useSharedObjects(): IUseSharedObjectsResult {
     const startedRef = useRef(false);
-    const [results, setResults] = useState<{
-        container: IFluidContainer;
-        services: AzureContainerServices;
-        created: boolean;
-    }>();
+    const [results, setResults] = useState<ILiveShareJoinResults>();
     const [error, setError] = useState();
 
     useEffect(() => {
@@ -64,14 +77,14 @@ export function useSharedObjects() {
             mediaList.forEach((mediaItem) => {
                 playlistMap.set(mediaItem.id, {
                     ...mediaItem,
-                    timeAdded: LiveShareClient.getTimestamp(),
+                    timeAdded: 0,
                 });
             });
             playlistMap.set("selected-media-id", mediaList[0].id);
         };
 
         // Define container schema
-        const schema: ContainerSchema = {
+        const schema = {
             initialObjects: {
                 presence: LivePresence,
                 mediaSession: LiveMediaSession,
@@ -97,7 +110,10 @@ export function useSharedObjects() {
                 console.log("useSharedObjects: joined container");
                 setResults(results);
             })
-            .catch((err) => setError(err));
+            .catch((err) => {
+                console.error(err);
+                setError(err);
+            });
     }, []);
 
     const container = results?.container;
@@ -117,5 +133,6 @@ export function useSharedObjects() {
         container,
         error,
         services: results?.services,
+        liveRuntime: results?.liveRuntime,
     };
 }

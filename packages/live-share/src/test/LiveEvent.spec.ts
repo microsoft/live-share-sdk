@@ -13,21 +13,42 @@ import { MockTimestampProvider } from "./MockTimestampProvider";
 import { MockRoleVerifier } from "./MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
-import { LiveShareClient } from "../LiveShareClient";
-import { RoleVerifier } from "../internals";
 import { TestLiveShareHost } from "../TestLiveShareHost";
+import { getLiveDataObjectClassProxy } from "../schema-utils";
+import { LiveShareRuntime } from "../LiveShareRuntime";
+import { DataObjectClass } from "fluid-framework";
 
 describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
     let object1: LiveEvent;
     let object2: LiveEvent;
+    let liveRuntime1: LiveShareRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let LiveEventProxy1 = getLiveDataObjectClassProxy<LiveEvent>(
+        LiveEvent,
+        liveRuntime1
+    ) as DataObjectClass<LiveEvent>;
+    let liveRuntime2: LiveShareRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let LiveEventProxy2 = getLiveDataObjectClassProxy<LiveEvent>(
+        LiveEvent,
+        liveRuntime2
+    ) as DataObjectClass<LiveEvent>;
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(LiveEvent.factory);
+        const container1 = await provider.createContainer(
+            LiveEventProxy1.factory
+        );
         object1 = await requestFluidObject<LiveEvent>(container1, "default");
 
-        const container2 = await provider.loadContainer(LiveEvent.factory);
+        const container2 = await provider.loadContainer(
+            LiveEventProxy2.factory
+        );
         object2 = await requestFluidObject<LiveEvent>(container2, "default");
 
         // need to be connected to send signals
@@ -45,10 +66,8 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     afterEach(async () => {
         // restore defaults
-        LiveShareClient.setRoleVerifier(
-            new RoleVerifier(TestLiveShareHost.create(undefined, undefined))
-        );
-        LiveShareClient.setTimestampProvider(new LocalTimestampProvider());
+        liveRuntime1.setTimestampProvider(new LocalTimestampProvider());
+        liveRuntime2.setTimestampProvider(new LocalTimestampProvider());
     });
 
     it("Should raise local and remote events", async () => {
@@ -114,22 +133,25 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     it("Should getTimestamp() using local timestamp provider", () => {
         const now = new Date().getTime();
-        const timestamp = LiveShareClient.getTimestamp();
+        const timestamp = liveRuntime1.getTimestamp();
         assert(timestamp >= now);
     });
 
-    it("Should getTimestamp() using custom timestamp providers", () => {
+    it("Should getTimestamp() using custom timestamp providers", async () => {
         const mock = new MockTimestampProvider();
-        LiveShareClient.setTimestampProvider(mock);
+        const customRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            mock
+        );
 
         const now = new Date().getTime();
-        const timestamp = LiveShareClient.getTimestamp();
+        const timestamp = customRuntime.getTimestamp();
         assert(timestamp >= now, `Unexpected timestamp value`);
         assert(mock.called, `Mock not called`);
     });
 
     it("Should verifyRolesAllowed() using local role verifier", async () => {
-        const allowed = await LiveShareClient.verifyRolesAllowed("test", [
+        const allowed = await liveRuntime1.verifyRolesAllowed("test", [
             UserMeetingRole.presenter,
         ]);
         assert(allowed, `Role should be allowed`);
@@ -137,9 +159,13 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     it("Should verifyRolesAllowed() using custom role verifier", async () => {
         const mock = new MockRoleVerifier([UserMeetingRole.presenter]);
-        LiveShareClient.setRoleVerifier(mock);
+        const customRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            undefined,
+            mock
+        );
 
-        const allowed = await LiveShareClient.verifyRolesAllowed("test", [
+        const allowed = await customRuntime.verifyRolesAllowed("test", [
             UserMeetingRole.presenter,
         ]);
         assert(allowed, `Role should be allowed`);

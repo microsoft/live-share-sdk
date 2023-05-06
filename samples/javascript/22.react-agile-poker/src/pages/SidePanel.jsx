@@ -23,10 +23,12 @@ const SidePanel = () => {
     const navigate = useNavigate();
 
     const context = useTeamsContext();
-    const { container, userStoriesMap } = useSharedObjects();
+    const { container, userStoriesMap, liveRuntime } = useSharedObjects();
     const { userStoriesStarted, userStories, addUserStory } = useUserStories(
         userStoriesMap,
-        context?.user?.id
+        context?.user?.id,
+        undefined,
+        liveRuntime,
     );
 
     useEffect(() => {

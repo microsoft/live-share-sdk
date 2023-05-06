@@ -3,11 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import {
-    LivePresence,
-    LiveShareClient,
-    UserMeetingRole,
-} from "@microsoft/live-share";
+import { LivePresence, UserMeetingRole } from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { app } from "@microsoft/teams-js";
 
@@ -79,7 +75,7 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
 
         const userData = {
             teamsUserId: context.user?.id,
-            joinedTimestamp: LiveShareClient.getTimestamp(),
+            joinedTimestamp: presence.liveRuntime.getTimestamp(),
             name,
         };
 

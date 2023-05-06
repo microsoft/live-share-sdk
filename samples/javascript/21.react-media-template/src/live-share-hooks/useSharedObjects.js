@@ -53,7 +53,7 @@ export function useSharedObjects() {
             mediaList.forEach((mediaItem) => {
                 container.initialObjects.playlistMap.set(mediaItem.id, {
                     ...mediaItem,
-                    timeAdded: LiveShareClient.getTimestamp(),
+                    timeAdded: 0,
                 });
             });
             container.initialObjects.playlistMap.set(
@@ -104,5 +104,6 @@ export function useSharedObjects() {
         container,
         error,
         services: results?.services,
+        liveRuntime: results?.liveRuntime,
     };
 }

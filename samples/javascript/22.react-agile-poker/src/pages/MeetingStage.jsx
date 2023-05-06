@@ -18,7 +18,7 @@ import { LiveSharePage } from "../components/LiveSharePage";
 
 const MeetingStage = () => {
     const context = useTeamsContext();
-    const { container, pokerState, presence, timer, userStoriesMap, error } =
+    const { container, pokerState, presence, timer, userStoriesMap, error, liveRuntime } =
         useSharedObjects();
     const [answer, answerRef, setAnswer] = useStateRef(null);
     const previousStateRef = useRef();
@@ -48,7 +48,8 @@ const MeetingStage = () => {
     const { userStoriesStarted, userStory, assignPoints } = useUserStories(
         userStoriesMap,
         context?.user?.id,
-        userStoryId
+        userStoryId,
+        liveRuntime,
     );
 
     // LiveTimer hook for tracking round timer

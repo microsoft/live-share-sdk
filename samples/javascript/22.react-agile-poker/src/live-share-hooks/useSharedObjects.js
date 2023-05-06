@@ -97,5 +97,6 @@ export function useSharedObjects() {
         container,
         error,
         services: results?.services,
+        liveRuntime: results?.liveRuntime,
     };
 }

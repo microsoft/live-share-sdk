@@ -9,6 +9,11 @@ import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveTimer } from "../LiveTimer";
 import { Deferred } from "./Deferred";
+import { LiveShareRuntime } from "../LiveShareRuntime";
+import { DataObjectClass } from "fluid-framework";
+import { TestLiveShareHost } from "../TestLiveShareHost";
+import { LocalTimestampProvider } from "../LocalTimestampProvider";
+import { getLiveDataObjectClassProxy } from "../schema-utils";
 
 describeNoCompat("LiveTimer", (getTestObjectProvider) => {
     // Target for milliTolerance is 30ms, but very rarely we see 31 due to JS callback scheduling is not exact.
@@ -17,12 +22,42 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
     let object1: LiveTimer;
     let object2: LiveTimer;
 
+    let liveRuntime1 = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let liveRuntime2 = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+
+    let ObjectProxy1 = getLiveDataObjectClassProxy<LiveTimer>(
+        LiveTimer,
+        liveRuntime1
+    ) as DataObjectClass<LiveTimer>;
+    let ObjectProxy2 = getLiveDataObjectClassProxy<LiveTimer>(
+        LiveTimer,
+        liveRuntime2
+    ) as DataObjectClass<LiveTimer>;
+
+    afterEach(async () => {
+        // restore defaults
+        liveRuntime1 = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
+        );
+        liveRuntime2 = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
+        );
+    });
+
     beforeEach(async () => {
         provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(LiveTimer.factory);
+        const container1 = await provider.createContainer(ObjectProxy1.factory);
         object1 = await requestFluidObject<LiveTimer>(container1, "default");
 
-        const container2 = await provider.loadContainer(LiveTimer.factory);
+        const container2 = await provider.loadContainer(ObjectProxy2.factory);
         object2 = await requestFluidObject<LiveTimer>(container2, "default");
 
         // need to be connected to send signals

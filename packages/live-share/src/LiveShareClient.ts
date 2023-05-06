@@ -30,7 +30,7 @@ import {
 } from "./interfaces";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
-import { LiveShareRuntime } from "./LiveDataObjectRuntime";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveShareContainerSchemaProxy } from "./schema-utils";
 
 /**
@@ -113,7 +113,7 @@ export class LiveShareClient {
      * If true the client is configured to use a local test server.
      */
     public get isTesting(): boolean {
-        return this._options.connection?.type == "local";
+        return this._options.connection?.type == "local" || this._host instanceof TestLiveShareHost;
     }
 
     /**
@@ -139,7 +139,7 @@ export class LiveShareClient {
     ): Promise<ILiveShareJoinResults> {
         performance.mark(`TeamsSync: join container`);
         try {
-            // Configure LiveDataObjectRuntime and apply to ContainerSchema
+            // Configure LiveShareRuntime and apply to ContainerSchema
             const timestampProvider = this.isTesting
                 ? new LocalTimestampProvider()
                 : this._options?.timestampProvider;
@@ -152,6 +152,7 @@ export class LiveShareClient {
             const pStartRuntime = runtime.start();
 
             const schema = getLiveShareContainerSchemaProxy(fluidContainerSchema, runtime);
+            console.log(schema);
 
             // Initialize FRS connection config
             let config:
@@ -247,6 +248,8 @@ export class LiveShareClient {
                 ...result[0],
                 liveRuntime: runtime,
             };
+        } catch (error: unknown) {
+            throw error;
         } finally {
             performance.measure(
                 `TeamsSync: container joined`,

@@ -3,8 +3,9 @@ import {
     IDataObjectProps,
     PureDataObjectFactory,
 } from "@fluidframework/aqueduct";
+import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { LiveDataObject } from "./LiveDataObject";
-import { LiveShareRuntime } from "./LiveDataObjectRuntime";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 import {
     ContainerSchema,
     LoadableObjectClass,
@@ -38,11 +39,11 @@ function proxyLiveDataObjectClass<
     ) => LiveDataObject<I>) {
         constructor(props: IDataObjectProps<I>) {
             super(props);
-            this["_liveRuntime"] = runtime;
+            this["liveRuntime"] = runtime;
         }
     }
 
-    const FinalClass = class extends BaseClass {
+    const DynamicClass = class extends BaseClass {
         public static readonly factory = new Proxy((BaseClass as any).factory, {
             get: function (target, prop, receiver) {
                 if (prop === "ctor") {
@@ -53,7 +54,7 @@ function proxyLiveDataObjectClass<
         });
     };
 
-    return FinalClass;
+    return DynamicClass;
 }
 
 /**
@@ -63,7 +64,7 @@ function proxyLiveDataObjectClass<
  * This is intended to be used when you are using another Fluid client, such as `AzureClient`.
  *
  * @param schema Fluid ContainerSchema you would like to inject the runtime into
- * @param liveRuntime LiveDataObjectRuntime instance
+ * @param liveRuntime LiveShareRuntime instance
  * @returns ContainerSchema with injected dependencies
  */
 export function getLiveShareContainerSchemaProxy(
@@ -96,13 +97,13 @@ export function getLiveShareContainerSchemaProxy(
  * @remarks
  * Exported publicly for use in Live Share Turbo
  */
-export function getLiveDataObjectClassProxy(
+export function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
     ObjectClass: LoadableObjectClass<any>,
     liveRuntime: LiveShareRuntime
-): LoadableObjectClass<any> {
+): LoadableObjectClass<TClass> {
     return isLiveDataObject(ObjectClass)
-        ? proxyLiveDataObjectClass(ObjectClass, liveRuntime)
-        : ObjectClass;
+        ? proxyLiveDataObjectClass(ObjectClass, liveRuntime) as LoadableObjectClass<TClass>
+        : ObjectClass as LoadableObjectClass<TClass>;
 }
 
 /**

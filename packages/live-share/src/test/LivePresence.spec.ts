@@ -22,6 +22,10 @@ import {
     UserMeetingRole,
 } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
+import { LiveShareRuntime } from "../LiveShareRuntime";
+import { LocalTimestampProvider } from "../LocalTimestampProvider";
+import { DataObjectClass } from "fluid-framework";
+import { getLiveDataObjectClassProxy } from "../schema-utils";
 
 describeNoCompat("LivePresence", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
@@ -32,15 +36,35 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
     before(() => (LiveObjectSynchronizer.updateInterval = 20));
     after(() => (LiveObjectSynchronizer.updateInterval = 5000));
 
+    let liveRuntime1 = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let liveRuntime2 = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+
+    let ObjectProxy1 = getLiveDataObjectClassProxy<
+        LivePresence<{ foo: string }>
+    >(LivePresence, liveRuntime1) as DataObjectClass<
+        LivePresence<{ foo: string }>
+    >;
+    let ObjectProxy2 = getLiveDataObjectClassProxy<
+        LivePresence<{ foo: string }>
+    >(LivePresence, liveRuntime2) as DataObjectClass<
+        LivePresence<{ foo: string }>
+    >;
+
     beforeEach(async () => {
         provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(LivePresence.factory);
+        const container1 = await provider.createContainer(ObjectProxy1.factory);
         object1 = await requestFluidObject<LivePresence<{ foo: string }>>(
             container1,
             "default"
         );
 
-        const container2 = await provider.loadContainer(LivePresence.factory);
+        const container2 = await provider.loadContainer(ObjectProxy2.factory);
         object2 = await requestFluidObject<LivePresence<{ foo: string }>>(
             container2,
             "default"
@@ -486,19 +510,21 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             ): Promise<UserMeetingRole[] | undefined> {
                 return this.test.getClientRoles(clientId);
             }
-            getClientInfo(clientId: string): Promise<IClientInfo | undefined> {
+            async getClientInfo(clientId: string): Promise<IClientInfo | undefined> {
                 return this.test.getClientRoles(clientId).then((roles) => {
                     return {
                         userId: "user1",
-                        roles: roles,
+                        roles: roles ?? [],
                         displayName: "user1",
-                    } as IClientInfo;
+                    };
                 });
             }
         }
 
         // set same user test host
-        new LiveShareClient(new SameUserLiveShareTestHost());
+        const mockHost = new SameUserLiveShareTestHost();
+        liveRuntime1.setHost(mockHost);
+        liveRuntime2.setHost(mockHost);
 
         const object1done = new Deferred();
         object1.on("presenceChanged", (user, local) => {
@@ -549,16 +575,23 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         // cannot check for new clients on same user in `presenceChanged` callback, will evaluate as being equal.
         // wait for a sync to happen, and check for new clients with getPresenceForUser
         await waitForDelay(50);
+        const user1Presence = object1.getPresenceForUser("user1");
         assert(
-            object1.getPresenceForUser("user1")?._clients.length == 2,
+            user1Presence !== undefined,
+            "user1 should be defined in object1"
+        );
+        const user2Presence = object2.getPresenceForUser("user1");
+        assert(
+            user2Presence !== undefined,
+            "user1 should be defined in object2"
+        );
+        assert(
+            user1Presence._clients.length == 2,
             "user should have two clients"
         );
         assert(
-            object2.getPresenceForUser("user1")?._clients.length == 2,
+            user2Presence._clients.length == 2,
             "user should have two clients"
         );
-
-        // reset to normal TestLiveShareHost
-        new LiveShareClient(TestLiveShareHost.create());
     });
 });

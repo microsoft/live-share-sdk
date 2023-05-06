@@ -8,6 +8,7 @@ import {
     LiveShareHostDecorator,
     LiveShareTokenProvider,
     RoleVerifier,
+    getInsecureTokenProvider,
 } from "./internals";
 import {
     AzureClient,
@@ -15,22 +16,22 @@ import {
     AzureLocalConnectionConfig,
     AzureRemoteConnectionConfig,
     ITelemetryBaseLogger,
-    IUser,
 } from "@fluidframework/azure-client";
-import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
+import {
+    ContainerSchema,
+    IFluidContainer,
+} from "@fluidframework/fluid-static";
 import {
     ILiveShareHost,
     ContainerState,
     ITimestampProvider,
-    IClientInfo,
     IRoleVerifier,
-    UserMeetingRole,
+    ILiveShareJoinResults,
 } from "./interfaces";
-import { HostTimestampProvider } from "./HostTimestampProvider";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
-import { TimestampProvider } from "./TimestampProvider";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
+import { LiveShareRuntime } from "./LiveDataObjectRuntime";
+import { getLiveShareContainerSchemaProxy } from "./schema-utils";
 
 /**
  * @hidden
@@ -70,22 +71,22 @@ export interface ILiveShareClientOptions {
      * Optional. Custom timestamp provider to use.
      */
     readonly timestampProvider?: ITimestampProvider;
+
+    /**
+     * Optional. Custom role verifier to use.
+     */
+    readonly roleVerifier?: IRoleVerifier;
 }
 
 /**
  * Client used to connect to fluid containers within a Microsoft Teams context.
  */
 export class LiveShareClient {
-    private static _host: ILiveShareHost = TestLiveShareHost.create(
+    private _host: ILiveShareHost = TestLiveShareHost.create(
         undefined,
         undefined
     );
     private readonly _options: ILiveShareClientOptions;
-    private static _timestampProvider: ITimestampProvider =
-        new LocalTimestampProvider();
-    private static _roleVerifier: IRoleVerifier = new RoleVerifier(
-        LiveShareClient._host
-    );
 
     /**
      * Creates a new `LiveShareClient` instance.
@@ -101,11 +102,9 @@ export class LiveShareClient {
         // Save static host.
         // BackwardsCompatibilityHostDecorator is used for backwards compatibility with older versions of the Teams client.
         // LiveShareHostDecorator is used as a thin caching layer for some host APIs.
-        LiveShareClient._host = new BackwardsCompatibilityHostDecorator(
+        this._host = new BackwardsCompatibilityHostDecorator(
             new LiveShareHostDecorator(host)
         );
-        // Save static role verifier.
-        LiveShareClient._roleVerifier = new RoleVerifier(LiveShareClient._host);
         // Save options
         this._options = Object.assign({} as ILiveShareClientOptions, options);
     }
@@ -132,21 +131,27 @@ export class LiveShareClient {
      * state of of the containers object prior to the container being attached.
      * @param fluidContainerSchema Fluid objects to create.
      * @param onContainerFirstCreated Optional. Callback that's called when the container is first created.
-     * @returns The fluid `container` and `services` objects to use along with a `created` flag that if true means the container had to be created.
+     * @returns the results of join container.
      */
     public async joinContainer(
         fluidContainerSchema: ContainerSchema,
         onContainerFirstCreated?: (container: IFluidContainer) => void
-    ): Promise<{
-        container: IFluidContainer;
-        services: AzureContainerServices;
-        created: boolean;
-    }> {
+    ): Promise<ILiveShareJoinResults> {
         performance.mark(`TeamsSync: join container`);
         try {
-            // Configure role verifier and timestamp provider
-            const pRoleVerifier = this.initializeRoleVerifier();
-            const pTimestampProvider = this.initializeTimestampProvider();
+            // Configure LiveDataObjectRuntime and apply to ContainerSchema
+            const timestampProvider = this.isTesting
+                ? new LocalTimestampProvider()
+                : this._options?.timestampProvider;
+            const runtime = new LiveShareRuntime(
+                this._host,
+                timestampProvider,
+                this._options.roleVerifier
+            );
+            // Start runtime if needed
+            const pStartRuntime = runtime.start();
+
+            const schema = getLiveShareContainerSchemaProxy(fluidContainerSchema, runtime);
 
             // Initialize FRS connection config
             let config:
@@ -154,8 +159,7 @@ export class LiveShareClient {
                 | AzureLocalConnectionConfig
                 | undefined = this._options.connection;
             if (!config) {
-                const frsTenantInfo =
-                    await LiveShareClient._host.getFluidTenantInfo();
+                const frsTenantInfo = await this._host.getFluidTenantInfo();
 
                 // Compute endpoint
                 let endpoint: string | undefined =
@@ -177,19 +181,14 @@ export class LiveShareClient {
                     config = {
                         type: "local",
                         endpoint: endpoint!,
-                        tokenProvider: new InsecureTokenProvider("", {
-                            id: "123",
-                            name: "Test User",
-                        } as IUser),
+                        tokenProvider: await getInsecureTokenProvider(),
                     };
                 } else {
                     config = {
                         type: "remote",
                         tenantId: frsTenantInfo.tenantId,
                         endpoint: endpoint!,
-                        tokenProvider: new LiveShareTokenProvider(
-                            LiveShareClient._host
-                        ),
+                        tokenProvider: new LiveShareTokenProvider(this._host),
                     } as AzureRemoteConnectionConfig;
                 }
             }
@@ -203,7 +202,7 @@ export class LiveShareClient {
             // Create container on first access
             const pContainer = this.getOrCreateContainer(
                 client,
-                fluidContainerSchema,
+                schema,
                 0,
                 onContainerFirstCreated
             );
@@ -211,8 +210,7 @@ export class LiveShareClient {
             // Wait in parallel for everything to finish initializing.
             const result = await Promise.all([
                 pContainer,
-                pRoleVerifier,
-                pTimestampProvider,
+                pStartRuntime,
             ]);
 
             performance.mark(`TeamsSync: container connecting`);
@@ -237,9 +235,7 @@ export class LiveShareClient {
                     try {
                         const clientId = connections[i]?.id;
                         if (clientId) {
-                            await LiveShareClient._host.registerClientId(
-                                clientId
-                            );
+                            await this._host.registerClientId(clientId);
                         }
                     } catch (err: any) {
                         console.error(err.toString());
@@ -247,58 +243,16 @@ export class LiveShareClient {
                 }
             });
 
-            return result[0];
+            return {
+                ...result[0],
+                liveRuntime: runtime,
+            };
         } finally {
             performance.measure(
                 `TeamsSync: container joined`,
                 `TeamsSync: join container`
             );
         }
-    }
-
-    /**
-     * @hidden
-     */
-    protected async initializeRoleVerifier(): Promise<void> {
-        if (!this.isTesting) {
-            // Register role verifier as current verifier for events
-            LiveShareClient._roleVerifier = new RoleVerifier(
-                LiveShareClient._host
-            );
-        }
-
-        return Promise.resolve();
-    }
-
-    /**
-     * @hidden
-     */
-    protected async initializeTimestampProvider(): Promise<void> {
-        if (!this.isTesting) {
-            // Was a custom timestamp provider passed in.
-            if (this._options.timestampProvider) {
-                // Use configured one
-                LiveShareClient._timestampProvider =
-                    this._options.timestampProvider;
-            } else {
-                // Create a new host based timestamp provider
-                LiveShareClient._timestampProvider = new HostTimestampProvider(
-                    LiveShareClient._host
-                );
-            }
-
-            // Start provider if needed
-            if (
-                typeof (LiveShareClient._timestampProvider as TimestampProvider)
-                    .start == "function"
-            ) {
-                return (
-                    LiveShareClient._timestampProvider as TimestampProvider
-                ).start();
-            }
-        }
-
-        return Promise.resolve();
     }
 
     private async getOrCreateContainer(
@@ -312,7 +266,7 @@ export class LiveShareClient {
         created: boolean;
     }> {
         // Get container ID mapping
-        const containerInfo = await LiveShareClient._host.getFluidContainerId();
+        const containerInfo = await this._host.getFluidContainerId();
 
         // Create container on first access
         if (containerInfo.shouldCreate) {
@@ -370,7 +324,7 @@ export class LiveShareClient {
         const newContainerId = await container.attach();
 
         // Attempt to save container ID mapping
-        const containerInfo = await LiveShareClient._host.setFluidContainerId(
+        const containerInfo = await this._host.setFluidContainerId(
             newContainerId
         );
         if (containerInfo.containerState != ContainerState.added) {
@@ -394,50 +348,5 @@ export class LiveShareClient {
         return new Promise((resolve) => {
             setTimeout(() => resolve(), delay);
         });
-    }
-
-    /**
-     * Returns the current timestamp as the number of milliseconds sine the Unix Epoch.
-     */
-    public static getTimestamp(): number {
-        return LiveShareClient._timestampProvider.getTimestamp();
-    }
-
-    /**
-     * Verifies that a client has one of the specified roles.
-     * @param clientId Client ID to inspect.
-     * @param allowedRoles User roles that are allowed.
-     * @returns True if the client has one of the specified roles.
-     */
-    public static verifyRolesAllowed(
-        clientId: string,
-        allowedRoles: UserMeetingRole[]
-    ): Promise<boolean> {
-        return LiveShareClient._roleVerifier.verifyRolesAllowed(
-            clientId,
-            allowedRoles
-        );
-    }
-
-    public static getClientInfo(
-        clientId: string
-    ): Promise<IClientInfo | undefined> {
-        return LiveShareClient._host.getClientInfo(clientId);
-    }
-
-    /**
-     * Assigns a custom timestamp provider.
-     * @param provider The timestamp provider to use.
-     */
-    public static setTimestampProvider(provider: ITimestampProvider): void {
-        LiveShareClient._timestampProvider = provider;
-    }
-
-    /**
-     * @hidden
-     * Assigns a new role verifier.
-     */
-    public static setRoleVerifier(provider: IRoleVerifier): void {
-        LiveShareClient._roleVerifier = provider;
     }
 }

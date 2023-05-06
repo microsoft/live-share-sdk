@@ -12,6 +12,7 @@ import { TypedEventEmitter } from "@fluidframework/common-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { LiveShareClient } from "./LiveShareClient";
+import { LiveShareRuntime } from "./LiveDataObjectRuntime";
 
 /**
  * Live event callback.
@@ -65,7 +66,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      * @param allowedRoles Optional. List of roles allowed to send events using this scope.
      * You should use a second scope if you need mixed permission support.
      */
-    constructor(runtime: IRuntimeSignaler, allowedRoles?: UserMeetingRole[]) {
+    constructor(runtime: IRuntimeSignaler, private _liveRuntime: LiveShareRuntime, allowedRoles?: UserMeetingRole[]) {
         super();
         this._runtime = runtime;
         this._allowedRoles = allowedRoles || [];
@@ -84,7 +85,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             // identifiable sender clientId.  The listener is responsible for deciding how
             // it wants to handle local/remote signals
             if (this._runtime.connected && clientId !== null) {
-                LiveShareClient.verifyRolesAllowed(clientId, this._allowedRoles)
+                this._liveRuntime.verifyRolesAllowed(clientId, this._allowedRoles)
                     .then((value) => {
                         if (value) {
                             this.emitter.emit(
@@ -178,7 +179,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             ...(evt as TEvent),
             clientId: this._runtime.clientId,
             name: eventName,
-            timestamp: LiveShareClient.getTimestamp(),
+            timestamp: this._liveRuntime.getTimestamp(),
         };
 
         // Send event

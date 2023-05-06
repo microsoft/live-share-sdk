@@ -5,18 +5,18 @@
 
 import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
 import React from "react";
-import { ILiveShareContainerResults } from "../types";
 import { useSharedStateRegistry } from "../internal-hooks";
-import { ILiveShareClientOptions, ILiveShareHost } from "@microsoft/live-share";
+import { ILiveShareClientOptions, ILiveShareHost, ILiveShareJoinResults, LiveShareRuntime } from "@microsoft/live-share";
 import { FluidContext } from "./AzureProvider";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 
 interface ILiveShareContext {
     created: boolean | undefined;
+    liveRuntime: LiveShareRuntime | undefined;
     join: (
         initialObjects?: LoadableObjectClassRecord,
         onInitializeContainer?: (container: IFluidContainer) => void
-    ) => Promise<ILiveShareContainerResults>;
+    ) => Promise<ILiveShareJoinResults>;
 }
 
 export const LiveShareContext = React.createContext<ILiveShareContext>(
@@ -62,7 +62,7 @@ export const LiveShareProvider: React.FC<
         new LiveShareTurboClient(props.host, props.clientOptions)
     );
     const [results, setResults] = React.useState<
-        ILiveShareContainerResults | undefined
+        ILiveShareJoinResults | undefined
     >();
     const [joinError, setJoinError] = React.useState<Error | undefined>();
 
@@ -75,10 +75,9 @@ export const LiveShareProvider: React.FC<
         async (
             initialObjects?: LoadableObjectClassRecord,
             onInitializeContainer?: (container: IFluidContainer) => void
-        ): Promise<ILiveShareContainerResults> => {
+        ): Promise<ILiveShareJoinResults> => {
             startedRef.current = true;
-            const results: ILiveShareContainerResults =
-                await clientRef.current.join(initialObjects, onInitializeContainer);
+            const results = await clientRef.current.join(initialObjects, onInitializeContainer);
             setResults(results);
             return results;
         },
@@ -111,6 +110,7 @@ export const LiveShareProvider: React.FC<
         <LiveShareContext.Provider
             value={{
                 created: results?.created,
+                liveRuntime: results?.liveRuntime,
                 join,
             }}
         >

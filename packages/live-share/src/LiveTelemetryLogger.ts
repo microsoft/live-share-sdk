@@ -11,6 +11,7 @@ import {
 } from "@fluidframework/common-definitions";
 import { IRuntimeSignaler } from "./LiveEventScope";
 import { LiveShareClient } from "./LiveShareClient";
+import { LiveShareRuntime } from "./LiveDataObjectRuntime";
 
 /**
  * Properties included on all events sent by `LiveTelemetryLogger`.
@@ -50,7 +51,10 @@ export class LiveTelemetryLogger {
      * Creates a new `LiveTelemetryLogger` instance.
      * @param runtime Containers runtime instance.
      */
-    public constructor(runtime: IRuntimeSignaler) {
+    public constructor(
+        runtime: IRuntimeSignaler,
+        private readonly _liveRuntime: LiveShareRuntime
+    ) {
         this._runtime = runtime;
     }
 
@@ -120,7 +124,7 @@ export class LiveTelemetryLogger {
         eventName: string,
         additionalProperties?: Partial<ILiveTelemetryProperties>
     ): T {
-        const now = LiveShareClient.getTimestamp();
+        const now = this._liveRuntime.getTimestamp();
         return {
             eventName: eventName,
             clientId: this._runtime.clientId,

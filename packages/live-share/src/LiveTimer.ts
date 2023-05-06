@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
@@ -13,6 +13,7 @@ import { cloneValue } from "./internals/utils";
 import { LiveEvent } from "./LiveEvent";
 import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { LiveDataObject } from "./LiveDataObject";
 
 /** for all time values millis from epoch is used */
 export interface ITimerConfig {
@@ -86,7 +87,7 @@ interface IPauseEvent extends ILiveEvent {
     position: number;
 }
 
-export class LiveTimer extends DataObject<{
+export class LiveTimer extends LiveDataObject<{
     Events: ILiveTimerEvents;
 }> {
     private _allowedRoles: UserMeetingRole[] = [];
@@ -168,7 +169,7 @@ export class LiveTimer extends DataObject<{
         this._allowedRoles = allowedRoles || [];
 
         // Create event scope
-        this._scope = new LiveEventScope(this.runtime, allowedRoles);
+        this._scope = new LiveEventScope(this.runtime, this.liveRuntime, allowedRoles);
 
         // TODO: make enum for event type names
         this._playEvent = new LiveEventTarget(
@@ -273,7 +274,7 @@ export class LiveTimer extends DataObject<{
                 duration: this._currentConfig.duration,
                 position:
                     this._currentConfig.position +
-                    (LiveShareClient.getTimestamp() -
+                    (this.liveRuntime.getTimestamp() -
                         this._currentConfig.configChangedAt),
             });
 
@@ -297,7 +298,7 @@ export class LiveTimer extends DataObject<{
     }
 
     private remoteConfigReceived(config: ITimerConfig, sender: string): void {
-        LiveShareClient.verifyRolesAllowed(sender, this._allowedRoles)
+        this.liveRuntime.verifyRolesAllowed(sender, this._allowedRoles)
             .then((allowed) => {
                 // Ensure that state is allowed, newer, and not the initial state.
                 const currentClientTimestamp: IClientTimestamp = {
@@ -373,7 +374,7 @@ export class LiveTimer extends DataObject<{
         }
         const tickCallback = () => {
             if (this._currentConfig.running) {
-                const timestamp = LiveShareClient.getTimestamp();
+                const timestamp = this.liveRuntime.getTimestamp();
                 const endTime = endTimeFromConfig(this._currentConfig);
                 if (timestamp >= endTime) {
                     const newConfig: ITimerConfig = {

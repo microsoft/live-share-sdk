@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
@@ -19,6 +19,7 @@ import { TimeInterval } from "./TimeInterval";
 import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import { IClientInfo, UserMeetingRole } from "./interfaces";
+import { LiveDataObject } from "./LiveDataObject";
 
 /**
  * Events supported by `LivePresence` object.
@@ -53,10 +54,10 @@ export interface ILivePresenceEvents<TData extends object = object>
  * Live fluid object that synchronizes presence information for the user with other clients.
  * @template TData Type of data object to share with clients.
  */
-export class LivePresence<TData extends object = object> extends DataObject<{
+export class LivePresence<TData extends object = object> extends LiveDataObject<{
     Events: ILivePresenceEvents<TData>;
 }> {
-    private _logger = new LiveTelemetryLogger(this.runtime);
+    private _logger?: LiveTelemetryLogger;
     private _expirationPeriod = new TimeInterval(20000);
     private _users: LivePresenceUser<TData>[] = [];
     private _currentPresence: ILivePresenceEvent<TData> = {
@@ -152,10 +153,11 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         if (this._scope) {
             throw new Error(`LivePresence: already started.`);
         }
+        this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
         // Assign user ID
         // - If we don't set the timestamp the local user object will report as "offline".
-        this._currentPresence.timestamp = LiveShareClient.getTimestamp();
+        this._currentPresence.timestamp = this.liveRuntime.getTimestamp();
         this._currentPresence.data = data;
         this._currentPresence.state = state;
 
@@ -163,10 +165,10 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         this._currentPresence.clientId = await this.waitUntilConnected();
 
         // Create event scope
-        this._scope = new LiveEventScope(this.runtime);
+        this._scope = new LiveEventScope(this.runtime, this.liveRuntime);
 
         // make sure client info for local user is available
-        const localClientInfo = await LiveShareClient.getClientInfo(
+        const localClientInfo = await this.liveRuntime.getClientInfo(
             this._currentPresence.clientId
         );
         // Add local user to list
@@ -198,7 +200,7 @@ export class LivePresence<TData extends object = object> extends DataObject<{
                 //   the timestamp of the outgoing update is the best way to show proof that the client
                 //   is still alive.
                 this._currentPresence.timestamp =
-                    LiveShareClient.getTimestamp();
+                    this.liveRuntime.getTimestamp();
 
                 // Return current presence
                 return this._currentPresence;
@@ -351,7 +353,7 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         if (initLocalClientInfo) {
             this.updateMembersListWithInfo(evt, local, initLocalClientInfo);
         } else if (evt.clientId) {
-            LiveShareClient.getClientInfo(evt.clientId)
+            this.liveRuntime.getClientInfo(evt.clientId)
                 .then((info) => {
                     if (!info) {
                         return;
@@ -406,12 +408,12 @@ export class LivePresence<TData extends object = object> extends DataObject<{
         const emitEvent = (user: LivePresenceUser<TData>) => {
             this.emit(LivePresenceEvents.presenceChanged, user, local);
             if (local) {
-                this._logger.sendTelemetryEvent(
+                this._logger?.sendTelemetryEvent(
                     TelemetryEvents.LivePresence.LocalPresenceChanged,
                     { user: evt }
                 );
             } else {
-                this._logger.sendTelemetryEvent(
+                this._logger?.sendTelemetryEvent(
                     TelemetryEvents.LivePresence.RemotePresenceChanged,
                     { user: evt }
                 );
@@ -441,7 +443,8 @@ export class LivePresence<TData extends object = object> extends DataObject<{
             info,
             evt,
             this._expirationPeriod,
-            evt.clientId == this._currentPresence.clientId
+            evt.clientId == this._currentPresence.clientId,
+            this.liveRuntime,
         );
         this._users.splice(pos, 0, newUser);
         emitEvent(newUser);

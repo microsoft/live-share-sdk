@@ -8,6 +8,7 @@ import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
 import { cloneValue } from "./internals";
 import { LiveShareClient } from "./LiveShareClient";
+import { LiveShareRuntime } from "./LiveDataObjectRuntime";
 
 /**
  * List of possible presence states.
@@ -52,10 +53,11 @@ export class LivePresenceUser<TData = object> {
         private _clientInfo: IClientInfo,
         private _evt: ILivePresenceEvent<TData>,
         private _expirationPeriod: TimeInterval,
-        private _isLocalUser: boolean
+        private _isLocalUser: boolean,
+        private _liveRuntime: LiveShareRuntime,
     ) {
         this.updateClients(this._evt);
-        this._lastUpdateTime = LiveShareClient.getTimestamp();
+        this._lastUpdateTime = this._liveRuntime.getTimestamp();
     }
 
     /**
@@ -123,7 +125,7 @@ export class LivePresenceUser<TData = object> {
             // Save updated event
             this._evt = evt;
             this._clientInfo = info;
-            this._lastUpdateTime = LiveShareClient.getTimestamp();
+            this._lastUpdateTime = this._liveRuntime.getTimestamp();
 
             // Has anything changed?
             return (
@@ -137,7 +139,7 @@ export class LivePresenceUser<TData = object> {
     }
 
     private hasExpired(): boolean {
-        const now = LiveShareClient.getTimestamp();
+        const now = this._liveRuntime.getTimestamp();
         const elapsed = now - this._lastUpdateTime;
         return (
             !this._isLocalUser && elapsed > this._expirationPeriod.milliseconds

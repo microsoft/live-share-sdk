@@ -11,6 +11,7 @@ import {
     IRuntimeSignaler,
     TimeInterval,
     UserMeetingRole,
+    LiveShareRuntime,
 } from "@microsoft/live-share";
 import {
     CoordinationWaitPoint,
@@ -69,6 +70,7 @@ export interface IMediaPlayerState {
  */
 export class LiveMediaSessionCoordinator extends EventEmitter {
     private readonly _runtime: IRuntimeSignaler;
+    private readonly _liveRuntime: LiveShareRuntime;
     private readonly _logger: LiveTelemetryLogger;
     private readonly _getPlayerState: () => IMediaPlayerState;
     private _positionUpdateInterval = new TimeInterval(2000);
@@ -94,11 +96,13 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      */
     constructor(
         runtime: IRuntimeSignaler,
+        liveRuntime: LiveShareRuntime,
         getPlayerState: () => IMediaPlayerState
     ) {
         super();
         this._runtime = runtime;
-        this._logger = new LiveTelemetryLogger(runtime);
+        this._liveRuntime = liveRuntime;
+        this._logger = new LiveTelemetryLogger(runtime, liveRuntime);
         this._getPlayerState = getPlayerState;
     }
 
@@ -530,13 +534,18 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         // Create event scopes
         const scope = new LiveEventScope(
             this._runtime,
+            this._liveRuntime,
             acceptTransportChangesFrom
         );
-        const unrestrictedScope = new LiveEventScope(this._runtime);
+        const unrestrictedScope = new LiveEventScope(
+            this._runtime,
+            this._liveRuntime
+        );
 
         // Initialize internal coordinator state
         this._groupState = new GroupCoordinatorState(
             this._runtime,
+            this._liveRuntime,
             this._maxPlaybackDrift,
             this._positionUpdateInterval,
             this._getPlayerState

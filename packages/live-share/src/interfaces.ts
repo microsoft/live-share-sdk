@@ -3,6 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { AzureContainerServices } from "@fluidframework/azure-client";
+import { IFluidContainer } from "fluid-framework";
+import { LiveShareRuntime } from "./LiveDataObjectRuntime";
+
 /**
  * Base interface for all event objects.
  */
@@ -282,4 +286,27 @@ export interface ILiveShareHost {
      * @returns `IUserInfo` for the queried client ID.
      */
     getClientInfo(clientId: string): Promise<IClientInfo | undefined>;
+}
+
+/**
+ * Response object from `.joinContainer()` in `LiveShareClient`
+ */
+export interface ILiveShareJoinResults {
+    /**
+     * Fluid container
+     */
+    container: IFluidContainer;
+    /**
+     * Azure Container Services, which includes things like Fluid Audience
+     */
+    services: AzureContainerServices;
+    /**
+     * Live Share Runtime, which is used by DDS's to validate roles, synchronize clock, etc.
+     * You can use this to get the server-side timestamp or stop the timestamp provider from running.
+     */
+    liveRuntime: LiveShareRuntime;
+    /**
+     * Whether the local user was the one to create the container
+     */
+    created: boolean;
 }

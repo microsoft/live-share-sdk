@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { assert } from "@fluidframework/common-utils";
 import { IEvent } from "@fluidframework/common-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
@@ -15,6 +15,7 @@ import { LiveEvent } from "./LiveEvent";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
 import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { LiveDataObject } from "./LiveDataObject";
 
 /**
  * Events supported by [LiveState` object.
@@ -56,10 +57,10 @@ export interface ILiveStateEvents<TState = any> extends IEvent {
  * changes.
  * @template TState Optional data object that's synchronized with the state.
  */
-export class LiveState<TState = any> extends DataObject<{
+export class LiveState<TState = any> extends LiveDataObject<{
     Events: ILiveStateEvents<TState>;
 }> {
-    private _logger = new LiveTelemetryLogger(this.runtime);
+    private _logger?: LiveTelemetryLogger;
     private _allowedRoles: UserMeetingRole[] = [];
     private _currentState?: IStateChangeEvent<TState>;
 
@@ -121,6 +122,7 @@ export class LiveState<TState = any> extends DataObject<{
         if (this._scope) {
             throw new Error(`LiveState already started.`);
         }
+        this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime)
 
         // Set initial state
         this.currentState = {
@@ -133,7 +135,7 @@ export class LiveState<TState = any> extends DataObject<{
         this._allowedRoles = allowedRoles || [];
 
         // Create event scope
-        this._scope = new LiveEventScope(this.runtime, allowedRoles);
+        this._scope = new LiveEventScope(this.runtime, this.liveRuntime, allowedRoles);
 
         // Listen for remote state changes
         this._changeStateEvent = new LiveEventTarget(
@@ -218,7 +220,7 @@ export class LiveState<TState = any> extends DataObject<{
         evt: IStateChangeEvent<TState>,
         sender: string
     ): void {
-        LiveShareClient.verifyRolesAllowed(sender, this._allowedRoles)
+        this.liveRuntime.verifyRolesAllowed(sender, this._allowedRoles)
             .then((allowed) => {
                 // Ensure that state is allowed, newer, and not the initial state.
                 if (
@@ -230,7 +232,7 @@ export class LiveState<TState = any> extends DataObject<{
                 }
             })
             .catch((err) => {
-                this._logger.sendErrorEvent(
+                this._logger?.sendErrorEvent(
                     TelemetryEvents.LiveState.RoleVerificationError,
                     err
                 );
@@ -246,7 +248,7 @@ export class LiveState<TState = any> extends DataObject<{
             cloneValue(evt.state),
             local
         );
-        this._logger.sendTelemetryEvent(
+        this._logger?.sendTelemetryEvent(
             TelemetryEvents.LiveState.StateChanged,
             { oldState, newState }
         );

@@ -37,6 +37,7 @@ import {
     UserMeetingRole,
     DynamicObjectRegistry,
     LiveShareClient,
+    LiveDataObject,
 } from "@microsoft/live-share";
 import { IBrush } from "./Brush";
 import {
@@ -354,7 +355,7 @@ class BuiltInLiveCursor extends LiveCursor {
 /**
  * Enables live and collaborative inking.
  */
-export class LiveCanvas extends DataObject {
+export class LiveCanvas extends LiveDataObject {
     private static readonly dryInkMapKey = "dryInk";
 
     /**
@@ -503,7 +504,7 @@ export class LiveCanvas extends DataObject {
         }
 
         // Setup incoming events
-        const scope = new LiveEventScope(this.runtime, this.allowedRoles);
+        const scope = new LiveEventScope(this.runtime, this.liveRuntime, this.allowedRoles);
 
         this._pointerMovedEventTarget = new LiveEventTarget(
             scope,
@@ -776,7 +777,7 @@ export class LiveCanvas extends DataObject {
         position?: IPoint
     ) {
         if (position) {
-            LiveShareClient.getClientInfo(clientId).then((clientInfo) => {
+            this.liveRuntime.getClientInfo(clientId).then((clientInfo) => {
                 if (this._inkingManager) {
                     const userInfo: IUserInfo = {
                         displayName: clientInfo?.displayName,

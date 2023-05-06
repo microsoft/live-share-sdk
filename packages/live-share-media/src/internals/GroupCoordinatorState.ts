@@ -11,6 +11,7 @@ import {
     IRuntimeSignaler,
     LiveTelemetryLogger,
     LiveShareClient,
+    LiveShareRuntime,
 } from "@microsoft/live-share";
 import EventEmitter from "events";
 import {
@@ -93,6 +94,7 @@ export enum GroupCoordinatorStateEvents {
  */
 export class GroupCoordinatorState extends EventEmitter {
     private readonly _runtime: IRuntimeSignaler;
+    private readonly _liveRuntime: LiveShareRuntime;
     private readonly _logger: LiveTelemetryLogger;
     private readonly _maxPlaybackDrift: TimeInterval;
     private _getMediaPlayerState: () => IMediaPlayerState;
@@ -116,13 +118,15 @@ export class GroupCoordinatorState extends EventEmitter {
 
     constructor(
         runtime: IRuntimeSignaler,
+        liveRuntime: LiveShareRuntime,
         maxPlaybackDrift: TimeInterval,
         positionUpdateInterval: TimeInterval,
         getMediaPlayerState: () => IMediaPlayerState
     ) {
         super();
         this._runtime = runtime;
-        this._logger = new LiveTelemetryLogger(runtime);
+        this._liveRuntime = liveRuntime;
+        this._logger = new LiveTelemetryLogger(runtime, liveRuntime);
         this._maxPlaybackDrift = maxPlaybackDrift;
         this._playbackTrack = new GroupPlaybackTrack(getMediaPlayerState);
         this._playbackTrackData = new GroupPlaybackTrackData(
@@ -130,11 +134,13 @@ export class GroupCoordinatorState extends EventEmitter {
         );
         this._transportState = new GroupTransportState(
             this._playbackTrack,
-            getMediaPlayerState
+            getMediaPlayerState,
+            this._liveRuntime,
         );
         this._playbackPosition = new GroupPlaybackPosition(
             this._transportState,
             this._runtime,
+            this._liveRuntime,
             positionUpdateInterval
         );
         this._getMediaPlayerState = getMediaPlayerState;
@@ -469,7 +475,7 @@ export class GroupCoordinatorState extends EventEmitter {
                                 );
                                 this._lastStateChange = event.playbackState;
                                 this._lastStateChangeTime =
-                                    LiveShareClient.getTimestamp();
+                                    this._liveRuntime.getTimestamp();
                             }
                             break;
                     }
@@ -495,7 +501,7 @@ export class GroupCoordinatorState extends EventEmitter {
     public async syncLocalMediaSession(): Promise<void> {
         // Skip further syncs if we're waiting or in a "soft suspension".
         const softSuspensionDelta =
-            LiveShareClient.getTimestamp() - this._lastStateChangeTime;
+            this._liveRuntime.getTimestamp() - this._lastStateChangeTime;
         if (!this.isWaiting && softSuspensionDelta >= 1000) {
             let { metadata, trackData, positionState, playbackState } =
                 this._getMediaPlayerState();

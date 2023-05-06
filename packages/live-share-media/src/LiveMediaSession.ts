@@ -4,7 +4,7 @@
  */
 
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
-import { DynamicObjectRegistry, LiveTelemetryLogger, UserMeetingRole } from "@microsoft/live-share";
+import { DynamicObjectRegistry, LiveDataObject, LiveTelemetryLogger, UserMeetingRole } from "@microsoft/live-share";
 import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer";
 import { ITriggerActionEvent, TelemetryEvents } from "./internals";
 import {
@@ -23,7 +23,7 @@ import { IMediaPlayer } from "./IMediaPlayer";
 /**
  * Live fluid object that synchronizes media playback across multiple clients.
  */
-export class LiveMediaSession extends DataObject {
+export class LiveMediaSession extends LiveDataObject {
     private _actionThrottler: MediaSessionActionThrottler =
         new RepeatedActionThrottler();
     private _logger?: LiveTelemetryLogger;
@@ -184,10 +184,10 @@ export class LiveMediaSession extends DataObject {
     }
 
     protected async hasInitialized(): Promise<void> {
-        this._logger = new LiveTelemetryLogger(this.runtime);
+        this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
         // Create coordinator and listen for triggered actions
-        this._coordinator = new LiveMediaSessionCoordinator(this.runtime, () =>
+        this._coordinator = new LiveMediaSessionCoordinator(this.runtime, this.liveRuntime, () =>
             this.getCurrentPlayerState()
         );
         this._coordinator.on(

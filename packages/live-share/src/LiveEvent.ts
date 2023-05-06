@@ -9,6 +9,7 @@ import { ILiveEvent, UserMeetingRole, IClientTimestamp } from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { LiveDataObject } from "./LiveDataObject";
 
 /**
  * Events supported by `LiveEvent` object.
@@ -48,7 +49,7 @@ export interface ILiveEventEvents<TEvent extends ILiveEvent> extends IEvent {
  */
 export class LiveEvent<
     TEvent extends ILiveEvent = ILiveEvent
-> extends DataObject<{
+> extends LiveDataObject<{
     Events: ILiveEventEvents<TEvent>;
 }> {
     private _eventTarget?: LiveEventTarget<TEvent>;
@@ -92,7 +93,7 @@ export class LiveEvent<
             throw new Error(`LiveEvent already started.`);
         }
 
-        const scope = new LiveEventScope(this.runtime, allowedRoles);
+        const scope = new LiveEventScope(this.runtime, this.liveRuntime, allowedRoles);
         this._eventTarget = new LiveEventTarget(
             scope,
             "event",

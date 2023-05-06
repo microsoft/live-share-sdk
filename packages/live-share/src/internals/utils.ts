@@ -3,6 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { ITokenProvider } from "@fluidframework/azure-client";
+
 /**
  * @hidden
  */
@@ -70,7 +72,10 @@ export function waitForResult<TResult>(
     });
 }
 
-// BUGBUG: Workaround for Teams Client not rejecting errors :(
+/**
+ * BUGBUG: Workaround for Teams Client not rejecting errors :(
+ * @hidden
+ */
 function timeoutRequest<TResult>(
     fnRequest: () => Promise<TResult | undefined>,
     timeout: number
@@ -83,4 +88,22 @@ function timeoutRequest<TResult>(
         clearTimeout(hTimer);
         resolve(result);
     });
+}
+
+/**
+ * Dynamically import InsecureTokenProvider class, in case developer does not yet have "@fluidframework/test-client-utils",
+ * since don't want to require that they include it in package.json.
+ * @hidden
+ */
+export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
+    try {
+        const { InsecureTokenProvider } = await require("@fluidframework/test-client-utils");
+        const tokenProvider = new InsecureTokenProvider("", {
+            id: "123",
+            name: "Test User",
+        });
+        return tokenProvider as ITokenProvider;
+    } catch {
+        throw new Error("@microsoft/live-share: when using 'local' connection type, you must have @fluidframework/test-client-utils installed");
+    }
 }

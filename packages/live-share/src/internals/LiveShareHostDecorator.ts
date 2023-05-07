@@ -13,7 +13,12 @@ import {
 } from "../interfaces";
 import { BackwardsCompatibilityGetClientInfoRetrySchedule } from "./BackwardsCompatibilityHostDecorator";
 import { RequestCache } from "./RequestCache";
-import { isErrorLike, isIClientInfo, isMobileWorkaroundRolesResponse, isRolesArray } from "./type-guards";
+import {
+    isErrorLike,
+    isIClientInfo,
+    isMobileWorkaroundRolesResponse,
+    isRolesArray,
+} from "./type-guards";
 import { waitForResult } from "./utils";
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
@@ -80,9 +85,7 @@ export class LiveShareHostDecorator
             return waitForResult<IClientInfo, IClientInfo | undefined>(
                 async () => {
                     try {
-                        const info = await this._host.getClientInfo(
-                            clientId
-                        );
+                        const info = await this._host.getClientInfo(clientId);
                         return info;
                     } catch (error: unknown) {
                         // We do a check in BackwardsCompatibilityHostDecorator for fakeId.
@@ -94,17 +97,15 @@ export class LiveShareHostDecorator
                         // Assume Client Id is local and to be newly registered.
                         // Our service is first writer wins, so we will not overwrite
                         // if previous states exist.
-                        if (isErrorLike(error)) {
-                            console.warn(
-                                "getClientInfoError: " + error.message
-                            );
-                        } else {
-                            console.warn("getClientInfoError: an unknown error occurred");
-                        }
-                        await this.registerClientId(clientId);
-                        const info = await this._host.getClientInfo(
-                            clientId
+                        console.warn(
+                            `LiveShareHostDecorator.getClientInfo error: ${
+                                isErrorLike(error)
+                                    ? error.message
+                                    : "an unknown error occurred"
+                            }`
                         );
+                        await this.registerClientId(clientId);
+                        const info = await this._host.getClientInfo(clientId);
                         return info;
                     }
                 },
@@ -117,19 +118,24 @@ export class LiveShareHostDecorator
                     return null;
                 },
                 (error: unknown) => {
-                    const message: string = isErrorLike(error) ? error.message : "unknown";
                     return new Error(
-                        `LiveShareHostDecorator: getting client info for a remote client ID for reason: ${message}`
+                        `LiveShareHostDecorator: getting client info for a remote client ID for reason: ${
+                            isErrorLike(error) ? error.message : "unknown"
+                        }`
                     );
                 },
                 retrySchedule ?? EXPONENTIAL_BACKOFF_SCHEDULE,
                 (error: unknown) => {
                     // Errors here do not include any timeout errors, so if it is an error from "fakeId", we immediately reject it
                     if (clientId === "fakeId") {
-                        return new Error(isErrorLike(error) ? error.message : "an unknown error occurred");
+                        return new Error(
+                            isErrorLike(error)
+                                ? error.message
+                                : "an unknown error occurred"
+                        );
                     }
                     return null;
-                },
+                }
             );
         });
     }
@@ -140,9 +146,7 @@ export class LiveShareHostDecorator
         return this._registerRequestCache.cacheRequest(clientId, () => {
             return waitForResult<UserMeetingRole[], unknown>(
                 async () => {
-                    return await this._host.registerClientId(
-                        clientId
-                    );
+                    return await this._host.registerClientId(clientId);
                 },
                 (result) => {
                     if (isRolesArray(result)) {
@@ -157,9 +161,10 @@ export class LiveShareHostDecorator
                     return null;
                 },
                 (reason: unknown) => {
-                    const message = isErrorLike(reason) ? reason.message : "unknown";
                     return new Error(
-                        `LiveShareHostDecorator: registering local client ID for reason: ${message}`
+                        `LiveShareHostDecorator: registering local client ID for reason: ${
+                            isErrorLike(reason) ? reason.message : "unknown"
+                        }`
                     );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE

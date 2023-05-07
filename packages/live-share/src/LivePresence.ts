@@ -54,12 +54,15 @@ export interface ILivePresenceEvents<TData extends object = object>
  * Live fluid object that synchronizes presence information for the user with other clients.
  * @template TData Type of data object to share with clients.
  */
-export class LivePresence<TData extends object = object> extends LiveDataObject<{
+export class LivePresence<
+    TData extends object = object
+> extends LiveDataObject<{
     Events: ILivePresenceEvents<TData>;
 }> {
     private _logger?: LiveTelemetryLogger;
     private _expirationPeriod = new TimeInterval(20000);
     private _users: LivePresenceUser<TData>[] = [];
+    private _lastEmitPresenceStateMap = new Map<string, PresenceState>();
     private _currentPresence: ILivePresenceEvent<TData> = {
         name: "UpdatePresence",
         timestamp: 0,
@@ -353,7 +356,8 @@ export class LivePresence<TData extends object = object> extends LiveDataObject<
         if (initLocalClientInfo) {
             this.updateMembersListWithInfo(evt, local, initLocalClientInfo);
         } else if (evt.clientId) {
-            this.liveRuntime.getClientInfo(evt.clientId)
+            this.liveRuntime
+                .getClientInfo(evt.clientId)
                 .then((info) => {
                     if (!info) {
                         return;
@@ -406,6 +410,7 @@ export class LivePresence<TData extends object = object> extends LiveDataObject<
         info: IClientInfo
     ): void {
         const emitEvent = (user: LivePresenceUser<TData>) => {
+            this._lastEmitPresenceStateMap.set(user.userId, user.state);
             this.emit(LivePresenceEvents.presenceChanged, user, local);
             if (local) {
                 this._logger?.sendTelemetryEvent(
@@ -420,23 +425,24 @@ export class LivePresence<TData extends object = object> extends LiveDataObject<
             }
         };
 
-        let pos = 0;
-        const userId = info.userId;
-        for (; pos < this._users.length; pos++) {
-            const current = this._users[pos];
-            const cmp = userId.localeCompare(current.userId);
-            if (cmp == 0) {
+        let isNewUser = true;
+        for (let pos = 0; pos < this._users.length; pos++) {
+            const checkUser = this._users[pos];
+            if (info.userId === checkUser.userId) {
                 // User found. Apply update and check for changes
-                if (current.updateReceived(evt, info)) {
-                    emitEvent(current);
+                if (checkUser.updateReceived(evt, info)) {
+                    emitEvent(checkUser);
                 }
-
-                return;
-            } else if (cmp > 0) {
-                // New user that should be inserted before this user
-                break;
+                isNewUser = false;
+            } else if (
+                this._lastEmitPresenceStateMap.get(checkUser.userId) !==
+                checkUser.state
+            ) {
+                // The user's PresenceState has changed
+                emitEvent(checkUser);
             }
         }
+        if (!isNewUser) return;
 
         // Insert new user and send change event
         const newUser = new LivePresenceUser<TData>(
@@ -444,9 +450,9 @@ export class LivePresence<TData extends object = object> extends LiveDataObject<
             evt,
             this._expirationPeriod,
             evt.clientId == this._currentPresence.clientId,
-            this.liveRuntime,
+            this.liveRuntime
         );
-        this._users.splice(pos, 0, newUser);
+        this._users.push(newUser);
         emitEvent(newUser);
     }
 

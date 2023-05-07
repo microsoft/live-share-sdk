@@ -39,7 +39,6 @@ export class AzureLiveShareHost implements ILiveShareHost {
      * @param audience Azure Audience
      */
     public setAudience(audience: IAzureAudience) {
-        console.log("setting audience", audience);
         this._azureAudienceDeferred.resolve(audience);
     }
 
@@ -174,7 +173,7 @@ export class AzureLiveShareHost implements ILiveShareHost {
                     (connection) => connection.id === clientId
                 )
             ) {
-                return checkMember
+                return checkMember;
             }
         }
         return undefined;

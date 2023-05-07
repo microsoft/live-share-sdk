@@ -50,21 +50,6 @@ export class LiveShareRuntime {
     }
 
     /**
-     * Start the timestamp provider
-     */
-    public async start() {
-        // Start provider if needed
-        if (
-            this.isTimestampProvider(this._timestampProvider) &&
-            !this._timestampProvider.isRunning
-        ) {
-            await this._timestampProvider.start();
-        }
-
-        return Promise.resolve();
-    }
-
-    /**
      * Returns the current timestamp as the number of milliseconds sine the Unix Epoch.
      */
     public getTimestamp(): number {
@@ -128,6 +113,34 @@ export class LiveShareRuntime {
         }
         if (this._roleVerifier instanceof RoleVerifier) {
             this.setRoleVerifier(new RoleVerifier(this._host));
+        }
+    }
+
+    /**
+     * Start the timestamp provider
+     */
+    public async start() {
+        // Start provider if needed
+        if (
+            this.isTimestampProvider(this._timestampProvider) &&
+            !this._timestampProvider.isRunning
+        ) {
+            await this._timestampProvider.start();
+        }
+
+        return Promise.resolve();
+    }
+
+    /**
+     * Stop the timestamp provider
+     */
+    public stop() {
+        // Start provider if needed
+        if (
+            this.isTimestampProvider(this._timestampProvider) &&
+            this._timestampProvider.isRunning
+        ) {
+            this._timestampProvider.stop();
         }
     }
 

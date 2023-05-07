@@ -3,7 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ContainerSchema, IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
+import {
+    ContainerSchema,
+    IFluidContainer,
+    LoadableObjectClassRecord,
+} from "fluid-framework";
 import {
     AzureClient,
     AzureClientProps,
@@ -23,6 +27,7 @@ import {
  * @see FluidTurboClient
  */
 export class AzureTurboClient extends FluidTurboClient {
+    private _host: ILiveShareHost;
     private _client: AzureClient;
     private _results:
         | {
@@ -35,9 +40,10 @@ export class AzureTurboClient extends FluidTurboClient {
      * Creates a new client instance using configuration parameters.
      * @param props - Properties for initializing a new AzureClient instance
      */
-    constructor(props: AzureClientProps) {
+    constructor(props: AzureClientProps, host: ILiveShareHost = AzureLiveShareHost.create(true)) {
         super();
         this._client = new AzureClient(props);
+        this._host = host;
     }
 
     /**
@@ -60,15 +66,17 @@ export class AzureTurboClient extends FluidTurboClient {
      */
     public async createContainer(
         initialObjects?: LoadableObjectClassRecord,
-        host?: ILiveShareHost
     ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const { host:hostInUse, runtime, schema } = this.getContainerSetup(initialObjects, host);
+        const {
+            runtime,
+            schema,
+        } = this.getContainerSetup(initialObjects);
         this._results = await this._client.createContainer(schema);
-        if (hostInUse instanceof AzureLiveShareHost) {
-            hostInUse.setAudience(this._results.services.audience);
+        if (this._host instanceof AzureLiveShareHost) {
+            this._host.setAudience(this._results.services.audience);
         }
         await runtime.start();
         return this._results;
@@ -84,15 +92,17 @@ export class AzureTurboClient extends FluidTurboClient {
     public async getContainer(
         id: string,
         initialObjects?: LoadableObjectClassRecord,
-        host?: ILiveShareHost
     ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const { host:hostInUse, runtime, schema } = this.getContainerSetup(initialObjects, host);
+        const {
+            runtime,
+            schema,
+        } = this.getContainerSetup(initialObjects);
         this._results = await this._client.getContainer(id, schema);
-        if (hostInUse instanceof AzureLiveShareHost) {
-            hostInUse.setAudience(this._results.services.audience);
+        if (this._host instanceof AzureLiveShareHost) {
+            this._host.setAudience(this._results.services.audience);
         }
         await runtime.start();
         return this._results;
@@ -100,17 +110,11 @@ export class AzureTurboClient extends FluidTurboClient {
 
     private getContainerSetup(
         initialObjects?: LoadableObjectClassRecord,
-        host?: ILiveShareHost
     ): {
-        schema: ContainerSchema,
-        runtime: LiveShareRuntime,
-        host: ILiveShareHost,
+        schema: ContainerSchema;
+        runtime: LiveShareRuntime;
     } {
-        const _host = host || AzureLiveShareHost.create(true);
-        const timestampProvider = !host
-            ? new LocalTimestampProvider()
-            : undefined;
-        const runtime = new LiveShareRuntime(_host, timestampProvider);
+        const runtime = new LiveShareRuntime(this._host);
         const schema = getLiveShareContainerSchemaProxy(
             getContainerSchema(initialObjects),
             runtime
@@ -118,7 +122,6 @@ export class AzureTurboClient extends FluidTurboClient {
         return {
             schema,
             runtime,
-            host: _host,
         };
-    };
+    }
 }

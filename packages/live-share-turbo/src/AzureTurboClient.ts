@@ -18,7 +18,6 @@ import {
     AzureLiveShareHost,
     ILiveShareHost,
     LiveShareRuntime,
-    LocalTimestampProvider,
     getLiveShareContainerSchemaProxy,
 } from "@microsoft/live-share";
 

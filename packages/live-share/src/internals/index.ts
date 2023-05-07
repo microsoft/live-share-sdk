@@ -10,3 +10,5 @@ export * from "./RoleVerifier";
 export * from "./utils";
 export * from "./LiveShareHostDecorator";
 export * from "./BackwardsCompatibilityHostDecorator";
+export * from "./Deferred";
+export * from "./type-guards";

@@ -11,7 +11,7 @@ import { LivePresence } from "../LivePresence";
 import { PresenceState } from "../LivePresenceUser";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { waitForDelay } from "../internals";
-import { Deferred } from "./Deferred";
+import { Deferred } from "../internals";
 import { LiveShareClient } from "../LiveShareClient";
 import {
     IClientInfo,

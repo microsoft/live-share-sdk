@@ -1,7 +1,17 @@
 import { HostTimestampProvider } from "./HostTimestampProvider";
 import { TimestampProvider } from "./TimestampProvider";
-import { IClientInfo, ILiveShareHost, IRoleVerifier, ITimestampProvider, UserMeetingRole } from "./interfaces";
-import { RoleVerifier } from "./internals";
+import {
+    IClientInfo,
+    ILiveShareHost,
+    IRoleVerifier,
+    ITimestampProvider,
+    UserMeetingRole,
+} from "./interfaces";
+import {
+    BackwardsCompatibilityHostDecorator,
+    LiveShareHostDecorator,
+    RoleVerifier,
+} from "./internals";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp
@@ -12,15 +22,31 @@ export class LiveShareRuntime {
     private _roleVerifier: IRoleVerifier;
 
     /**
-     * 
+     *
      * @param host Host for the current Live Share session.
      * @param customTimestampProvider Optional. Custom timestamp provider to use.
      * @param customRoleVerifier Optional. Custom role verifier to use.
+     * @param decorate choose whether or not to automatically decorate host with `BackwardsCompatibilityHostDecorator` and `LiveShareHostDecorator`
      */
-    constructor(host: ILiveShareHost, timestampProvider?: ITimestampProvider, roleVerifier?: IRoleVerifier) {
-        this._host = host;
-        this._timestampProvider = !!timestampProvider ? timestampProvider : new HostTimestampProvider(this._host);
-        this._roleVerifier = !!roleVerifier ? roleVerifier : new RoleVerifier(this._host);
+    constructor(
+        host: ILiveShareHost,
+        timestampProvider?: ITimestampProvider,
+        roleVerifier?: IRoleVerifier,
+        decorate: boolean = true
+    ) {
+        // BackwardsCompatibilityHostDecorator is used for backwards compatibility with older versions of the Teams client.
+        // LiveShareHostDecorator is used as a thin caching layer for some host APIs.
+        this._host = decorate
+            ? new BackwardsCompatibilityHostDecorator(
+                  new LiveShareHostDecorator(host)
+              )
+            : host;
+        this._timestampProvider = !!timestampProvider
+            ? timestampProvider
+            : new HostTimestampProvider(this._host);
+        this._roleVerifier = !!roleVerifier
+            ? roleVerifier
+            : new RoleVerifier(this._host);
     }
 
     /**
@@ -28,7 +54,10 @@ export class LiveShareRuntime {
      */
     public async start() {
         // Start provider if needed
-        if (this.isTimestampProvider(this._timestampProvider) && !this._timestampProvider.isRunning) {
+        if (
+            this.isTimestampProvider(this._timestampProvider) &&
+            !this._timestampProvider.isRunning
+        ) {
             await this._timestampProvider.start();
         }
 
@@ -52,10 +81,7 @@ export class LiveShareRuntime {
         clientId: string,
         allowedRoles: UserMeetingRole[]
     ): Promise<boolean> {
-        return this._roleVerifier.verifyRolesAllowed(
-            clientId,
-            allowedRoles
-        );
+        return this._roleVerifier.verifyRolesAllowed(clientId, allowedRoles);
     }
 
     /**
@@ -63,34 +89,39 @@ export class LiveShareRuntime {
      * @param clientId Fluid clientId we are requesting user info for
      * @returns IClientInfo object if the user is known, otherwise it will return undefined
      */
-    public getClientInfo(
-        clientId: string
-    ): Promise<IClientInfo | undefined> {
+    public getClientInfo(clientId: string): Promise<IClientInfo | undefined> {
         return this._host.getClientInfo(clientId);
     }
 
     /**
      * Set the timestamp provider for the runtime
-     * @param newTimestampProvider timestamp provider to set
+     * @param timestampProvider timestamp provider to set
      */
-    public setTimestampProvider(newTimestampProvider: ITimestampProvider) {
-        this._timestampProvider = newTimestampProvider;
+    public setTimestampProvider(timestampProvider: ITimestampProvider) {
+        this._timestampProvider = timestampProvider;
     }
 
     /**
-     * Set the timestamp provider for the runtime
-     * @param newTimestampProvider timestamp provider to set
+     * Set the role verifier for the runtime
+     * @param roleVerifier role verifier to set
      */
-    public setRoleVerifier(newRoleVerifier: IRoleVerifier) {
-        this._roleVerifier = newRoleVerifier;
+    public setRoleVerifier(roleVerifier: IRoleVerifier) {
+        this._roleVerifier = roleVerifier;
     }
 
     /**
      * Set the host for the runtime
-     * @param newHost ILiveShareHost to change
+     * @param host ILiveShareHost to change
+     * @param decorate choose whether or not to automatically decorate host with `BackwardsCompatibilityHostDecorator` and `LiveShareHostDecorator`
      */
-    public setHost(newHost: ILiveShareHost) {
-        this._host = newHost;
+    public setHost(host: ILiveShareHost, decorate: boolean = true) {
+        // BackwardsCompatibilityHostDecorator is used for backwards compatibility with older versions of the Teams client.
+        // LiveShareHostDecorator is used as a thin caching layer for some host APIs.
+        this._host = decorate
+            ? new BackwardsCompatibilityHostDecorator(
+                  new LiveShareHostDecorator(host)
+              )
+            : host;
         if (this._timestampProvider instanceof HostTimestampProvider) {
             this._timestampProvider.stop();
             this.setTimestampProvider(new HostTimestampProvider(this._host));

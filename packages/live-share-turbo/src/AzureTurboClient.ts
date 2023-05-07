@@ -3,13 +3,20 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
+import { ContainerSchema, IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
 import {
     AzureClient,
     AzureClientProps,
     AzureContainerServices,
 } from "@fluidframework/azure-client";
 import { FluidTurboClient, getContainerSchema } from "./internals";
+import {
+    AzureLiveShareHost,
+    ILiveShareHost,
+    LiveShareRuntime,
+    LocalTimestampProvider,
+    getLiveShareContainerSchemaProxy,
+} from "@microsoft/live-share";
 
 /**
  * The `FluidTurboClient` implementation for the `AzureClient`.
@@ -48,15 +55,22 @@ export class AzureTurboClient extends FluidTurboClient {
     /**
      * Creates a new detached container instance in the Azure Fluid Relay.
      * @param initialObjects Optional. Fluid ContainerSchema initialObjects.
+     * @param host Optional. ILiveShareHost implementation to use when using Live Share DDS's.
      * @returns New detached container instance along with associated services.
      */
-    public async createContainer(initialObjects?: LoadableObjectClassRecord): Promise<{
+    public async createContainer(
+        initialObjects?: LoadableObjectClassRecord,
+        host?: ILiveShareHost
+    ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const schema = getContainerSchema(initialObjects);
+        const { host:hostInUse, runtime, schema } = this.getContainerSetup(initialObjects, host);
         this._results = await this._client.createContainer(schema);
-        // this.registerDynamicObjectListeners();
+        if (hostInUse instanceof AzureLiveShareHost) {
+            hostInUse.setAudience(this._results.services.audience);
+        }
+        await runtime.start();
         return this._results;
     }
 
@@ -64,18 +78,47 @@ export class AzureTurboClient extends FluidTurboClient {
      * Accesses the existing container given its unique ID in the Azure Fluid Relay.
      * @param id - Unique ID of the container in Azure Fluid Relay.
      * @param initialObjects Optional. Fluid ContainerSchema initialObjects.
+     * @param host Optional. ILiveShareHost implementation to use when using Live Share DDS's.
      * @returns Existing container instance along with associated services.
      */
     public async getContainer(
         id: string,
         initialObjects?: LoadableObjectClassRecord,
+        host?: ILiveShareHost
     ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const schema = getContainerSchema(initialObjects);
+        const { host:hostInUse, runtime, schema } = this.getContainerSetup(initialObjects, host);
         this._results = await this._client.getContainer(id, schema);
-        // this.registerDynamicObjectListeners();
+        if (hostInUse instanceof AzureLiveShareHost) {
+            hostInUse.setAudience(this._results.services.audience);
+        }
+        await runtime.start();
         return this._results;
     }
+
+    private getContainerSetup(
+        initialObjects?: LoadableObjectClassRecord,
+        host?: ILiveShareHost
+    ): {
+        schema: ContainerSchema,
+        runtime: LiveShareRuntime,
+        host: ILiveShareHost,
+    } {
+        const _host = host || AzureLiveShareHost.create(true);
+        const timestampProvider = !host
+            ? new LocalTimestampProvider()
+            : undefined;
+        const runtime = new LiveShareRuntime(_host, timestampProvider);
+        const schema = getLiveShareContainerSchemaProxy(
+            getContainerSchema(initialObjects),
+            runtime
+        );
+        return {
+            schema,
+            runtime,
+            host: _host,
+        };
+    };
 }

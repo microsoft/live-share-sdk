@@ -12,6 +12,7 @@ import {
     IClientInfo,
 } from "../interfaces";
 import { RequestCache } from "./RequestCache";
+import { isErrorLike, isMobileWorkaroundRolesResponse, isRolesArray } from "./type-guards";
 import { waitForResult } from "./utils";
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
@@ -44,6 +45,7 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
     private _totalTries = 4;
     private _getClientInfoTriesRemaining = this._totalTries;
     private _getClientInfoExists = false;
+    private _hasWarnedPolyfill = false;
 
     /**
      * @hidden
@@ -90,46 +92,21 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
             );
         }
         return this._userRolesRequestCache.cacheRequest(clientId, () => {
-            return waitForResult(
+            return waitForResult<UserMeetingRole[], unknown>(
                 async () => {
-                    let rolesResult: UserMeetingRole[] | undefined;
-                    try {
-                        rolesResult = await this._host.getClientRoles(clientId);
-                    } catch (error) {
-                        // Error is thrown when client id is not registered
-                        // Assume Client Id is local and to be newly registered.
-                        // Our service is first writer wins, so we will not overwrite
-                        // if previous states exist.
-                        console.warn(
-                            "getClientRolesError: " + JSON.stringify(error)
-                        );
-                        return await this.registerClientId(clientId);
-                    }
-                    if (!rolesResult) {
-                        return undefined;
-                    } else if (Array.isArray(rolesResult)) {
-                        return rolesResult;
-                    } else {
-                        //TODO: Mobile client return type is object.
-                        // clean up after mobile fixes return type.
-                        const rolesArray = (rolesResult as any).userRoles;
-                        if (!rolesArray) {
-                            return rolesResult;
-                        } else {
-                            return rolesArray;
-                        }
-                    }
+                    return await this._host.getClientRoles(clientId);
                 },
                 (result) => {
-                    if (!result) {
-                        return false;
-                    } else if (Array.isArray(result)) {
-                        return true;
-                    } else if (!result.userRoles) {
-                        return false;
-                    } else {
-                        return Array.isArray(result.userRoles);
+                    if (isRolesArray(result)) {
+                        return {
+                            response: result,
+                        };
+                    } else if (isMobileWorkaroundRolesResponse(result)) {
+                        return {
+                            response: result.userRoles,
+                        };
                     }
+                    return null;
                 },
                 () => {
                     return new Error(
@@ -157,38 +134,39 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
         }
 
         if (this._getClientInfoTriesRemaining <= 0) {
-            console.log("using getClientInfo polyfill");
-            return this.getClientRoles(clientId).then((roles) => {
-                return {
-                    userId: clientId,
-                    displayName: undefined,
-                    roles: roles,
-                } as IClientInfo;
-            });
+            if (!this._hasWarnedPolyfill) {
+                console.warn("BackwardsCompatibilityHostDecorator.getClientInfo: using getClientInfo polyfill");
+                this._hasWarnedPolyfill = true;
+            }
+            const roles = await this.getClientRoles(clientId);
+            return {
+                userId: clientId,
+                displayName: undefined,
+                roles: roles ?? [],
+            };
         }
 
         const getClientRoles = this.getClientRoles(clientId);
-        return this._host
-            .getClientInfo(clientId, this.getRetrySchedule())
-            .then((clientInfo) => {
-                this._getClientInfoExists = true;
-                return clientInfo;
-            })
-            .catch((e) => {
-                if (e.message.includes("timed out")) {
-                    this._getClientInfoTriesRemaining--;
-
-                    return getClientRoles.then((roles) => {
-                        return {
-                            userId: clientId,
-                            displayName: undefined,
-                            roles: roles,
-                        } as IClientInfo;
-                    });
-                } else {
-                    return Promise.resolve(undefined);
+        try {
+            const clientInfo = await this._host.getClientInfo(clientId, this.getRetrySchedule())
+            this._getClientInfoExists = true;
+            return clientInfo;
+        } catch (error: unknown) {
+            if (isErrorLike(error) && error.message.includes("timed out")) {
+                this._getClientInfoTriesRemaining--;
+                if (this._getClientInfoTriesRemaining <= 0) {
+                    console.warn("BackwardsCompatibilityHostDecorator.getClientInfo: will use getClientInfo polyfill");
                 }
-            });
+
+                const roles = await getClientRoles;
+                return {
+                    userId: clientId,
+                    displayName: undefined,
+                    roles: roles ?? [],
+                };
+            }
+        }
+        return undefined;
     }
 
     public async registerClientId(
@@ -207,6 +185,8 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
                 this._getClientInfoTriesRemaining--;
                 if (this._getClientInfoTriesRemaining > 0) {
                     this.warmupCheckGetClientInfoExists();
+                } else {
+                    console.warn("BackwardsCompatibilityHostDecorator.getClientInfo: will use getClientInfo polyfill");
                 }
             } else {
                 // resolved for reason other than timeout, api exists

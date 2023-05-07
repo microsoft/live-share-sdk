@@ -8,7 +8,7 @@ import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveTimer } from "../LiveTimer";
-import { Deferred } from "./Deferred";
+import { Deferred } from "../internals";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import { DataObjectClass } from "fluid-framework";
 import { TestLiveShareHost } from "../TestLiveShareHost";

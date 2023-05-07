@@ -32,7 +32,7 @@ export function getLiveShareContainerSchemaProxy(
     
     const initialObjectEntries = Object.entries(schema.initialObjects).map(
         ([key, ObjectClass]) => {
-            return [key, getLiveDataObjectClassProxy(existingProxyRegistries, ObjectClass, liveRuntime)];
+            return [key, getLiveDataObjectClassProxy(ObjectClass, liveRuntime, existingProxyRegistries)];
         }
     );
     const newInitialObjects: LoadableObjectClassRecord =
@@ -41,7 +41,7 @@ export function getLiveShareContainerSchemaProxy(
     return {
         initialObjects: newInitialObjects,
         dynamicObjectTypes: schema.dynamicObjectTypes?.map((ObjectClass) =>
-            getLiveDataObjectClassProxy(existingProxyRegistries, ObjectClass, liveRuntime)
+            getLiveDataObjectClassProxy(ObjectClass, liveRuntime, existingProxyRegistries)
         ),
     };
 }
@@ -50,13 +50,11 @@ export function getLiveShareContainerSchemaProxy(
  * @hidden
  * Inject Live Share dependencies to relevant `LiveDataObject` derived classes.
  * Regular `DataObject` classes are not proxied.
- * @remarks
- * Exported publicly for use in Live Share Turbo
  */
-function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
-    existingProxyRegistries: Map<string, LoadableObjectClass<any>>,
+export function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
     ObjectClass: LoadableObjectClass<any>,
-    liveRuntime: LiveShareRuntime
+    liveRuntime: LiveShareRuntime,
+    existingProxyRegistries: Map<string, LoadableObjectClass<any>> = new Map(),
 ): LoadableObjectClass<TClass> {
     if (isLiveDataObject(ObjectClass)) {
         // We should only be proxying one Live Share DDS per type.

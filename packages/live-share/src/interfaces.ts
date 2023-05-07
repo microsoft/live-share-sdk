@@ -281,9 +281,9 @@ export interface ILiveShareHost {
     getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
 
     /**
-     * Queries the hosts `IUserInfo` for a given client ID.
+     * Queries the hosts `IClientInfo` for a given client ID.
      * @param clientId ID of the client to lookup.
-     * @returns `IUserInfo` for the queried client ID.
+     * @returns `IUserInfo` for the queried client ID, or undefined if the client hasn't yet been registered
      */
     getClientInfo(clientId: string): Promise<IClientInfo | undefined>;
 }

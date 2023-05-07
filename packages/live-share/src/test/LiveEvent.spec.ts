@@ -8,7 +8,7 @@ import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveEvent } from "../LiveEvent";
-import { Deferred } from "./Deferred";
+import { Deferred } from "../internals";
 import { MockTimestampProvider } from "./MockTimestampProvider";
 import { MockRoleVerifier } from "./MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";

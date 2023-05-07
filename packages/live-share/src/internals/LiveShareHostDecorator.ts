@@ -13,6 +13,7 @@ import {
 } from "../interfaces";
 import { BackwardsCompatibilityGetClientInfoRetrySchedule } from "./BackwardsCompatibilityHostDecorator";
 import { RequestCache } from "./RequestCache";
+import { isErrorLike, isIClientInfo, isMobileWorkaroundRolesResponse, isRolesArray } from "./type-guards";
 import { waitForResult } from "./utils";
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
@@ -76,31 +77,59 @@ export class LiveShareHostDecorator
             );
         }
         return this._userInfoRequestCache.cacheRequest(clientId, () => {
-            return waitForResult(
+            return waitForResult<IClientInfo, IClientInfo | undefined>(
                 async () => {
                     try {
-                        return await this._host.getClientInfo(clientId);
-                    } catch (error) {
+                        const info = await this._host.getClientInfo(
+                            clientId
+                        );
+                        return info;
+                    } catch (error: unknown) {
+                        // We do a check in BackwardsCompatibilityHostDecorator for fakeId.
+                        // If this ID, just throw that error rather than waste resources.
+                        if (clientId === "fakeId") {
+                            throw error;
+                        }
                         // Error is thrown when client id is not registered
                         // Assume Client Id is local and to be newly registered.
                         // Our service is first writer wins, so we will not overwrite
                         // if previous states exist.
-                        console.warn(
-                            "getClientInfoError: " + JSON.stringify(error)
-                        );
+                        if (isErrorLike(error)) {
+                            console.warn(
+                                "getClientInfoError: " + error.message
+                            );
+                        } else {
+                            console.warn("getClientInfoError: an unknown error occurred");
+                        }
                         await this.registerClientId(clientId);
-                        return await this._host.getClientInfo(clientId);
+                        const info = await this._host.getClientInfo(
+                            clientId
+                        );
+                        return info;
                     }
                 },
                 (result) => {
-                    return result?.userId != undefined;
+                    if (isIClientInfo(result)) {
+                        return {
+                            response: result,
+                        };
+                    }
+                    return null;
                 },
-                () => {
+                (error: unknown) => {
+                    const message: string = isErrorLike(error) ? error.message : "unknown";
                     return new Error(
-                        `LiveShareHostDecorator: timed out getting client info for a remote client ID`
+                        `LiveShareHostDecorator: getting client info for a remote client ID for reason: ${message}`
                     );
                 },
-                retrySchedule ?? EXPONENTIAL_BACKOFF_SCHEDULE
+                retrySchedule ?? EXPONENTIAL_BACKOFF_SCHEDULE,
+                (error: unknown) => {
+                    // Errors here do not include any timeout errors, so if it is an error from "fakeId", we immediately reject it
+                    if (clientId === "fakeId") {
+                        return new Error(isErrorLike(error) ? error.message : "an unknown error occurred");
+                    }
+                    return null;
+                },
             );
         });
     }
@@ -109,40 +138,28 @@ export class LiveShareHostDecorator
         clientId: string
     ): Promise<UserMeetingRole[]> {
         return this._registerRequestCache.cacheRequest(clientId, () => {
-            return waitForResult(
+            return waitForResult<UserMeetingRole[], unknown>(
                 async () => {
-                    const rolesResult = await this._host.registerClientId(
+                    return await this._host.registerClientId(
                         clientId
                     );
-                    if (!rolesResult) {
-                        return undefined;
-                    } else if (Array.isArray(rolesResult)) {
-                        return rolesResult;
-                    } else {
-                        //TODO: Mobile client return type is object.
-                        // clean up after mobile fixes return type.
-                        const rolesArray = (rolesResult as any).userRoles;
-                        if (!rolesArray) {
-                            return rolesResult;
-                        } else {
-                            return rolesArray;
-                        }
-                    }
                 },
                 (result) => {
-                    if (!result) {
-                        return false;
-                    } else if (Array.isArray(result)) {
-                        return true;
-                    } else if (!result.userRoles) {
-                        return false;
-                    } else {
-                        return Array.isArray(result.userRoles);
+                    if (isRolesArray(result)) {
+                        return {
+                            response: result,
+                        };
+                    } else if (isMobileWorkaroundRolesResponse(result)) {
+                        return {
+                            response: result.userRoles,
+                        };
                     }
+                    return null;
                 },
-                () => {
+                (reason: unknown) => {
+                    const message = isErrorLike(reason) ? reason.message : "unknown";
                     return new Error(
-                        `LiveShareHostDecorator: timed out registering local client ID`
+                        `LiveShareHostDecorator: registering local client ID for reason: ${message}`
                     );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE

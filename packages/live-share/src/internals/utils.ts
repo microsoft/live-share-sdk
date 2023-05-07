@@ -43,31 +43,56 @@ export function waitForDelay(delay: number): Promise<void> {
     });
 }
 
+class TimeoutError extends Error {
+    constructor() {
+        super("timed out");
+    }
+}
+
 /**
  * @hidden
  */
-export function waitForResult<TResult>(
-    fnRequest: () => Promise<TResult | undefined>,
-    fnSucceeded: (result: TResult | undefined) => boolean,
-    fnTimeout: () => Error,
-    retrySchedule: number[]
-): Promise<TResult> {
+export function waitForResult<TSuccessResult, TRequestResult>(
+    fnRequest: () => Promise<TRequestResult>,
+    fnValidateResponse: (result: TRequestResult) => {
+        response: TSuccessResult,
+    } | null,
+    fnTimeout: (reason: unknown) => Error,
+    retrySchedule: number[],
+    fnRequestError?: (error: unknown) => Error | null
+): Promise<TSuccessResult> {
     let retries: number = 0;
-    return new Promise<TResult>(async (resolve, reject) => {
+    return new Promise<TSuccessResult>(async (resolve, reject) => {
         while (true) {
-            const result = await timeoutRequest(
-                fnRequest,
-                1000 * (retries + 1)
-            );
-            if (fnSucceeded(result)) {
-                resolve(result!);
-                break;
-            } else if (retries >= retrySchedule.length) {
-                reject(fnTimeout());
-                break;
-            } else {
-                await waitForDelay(retrySchedule[retries++]);
+            try {
+                const result = await timeoutRequest(
+                    fnRequest,
+                    1000 * (retries + 1)
+                );
+                const validated = fnValidateResponse(result);
+                if (validated !== null) {
+                    resolve(validated.response);
+                    break;
+                } else if (retries >= retrySchedule.length) {
+                    reject(new Error("waitForResult: invalid response"));
+                    break;
+                }
+            } catch (error: unknown) {
+                if (retries >= retrySchedule.length) {
+                    reject(fnTimeout(error));
+                    break;
+                }
+                // Check if this error is something that should cause us to skip the retry schedule
+                if (!!fnRequestError && !(error instanceof TimeoutError)) {
+                    const rejectNowError = fnRequestError(error);
+                    if (rejectNowError !== null) {
+                        reject(rejectNowError);
+                        break;
+                    }
+                }
             }
+            
+            await waitForDelay(retrySchedule[retries++]);
         }
     });
 }
@@ -77,16 +102,20 @@ export function waitForResult<TResult>(
  * @hidden
  */
 function timeoutRequest<TResult>(
-    fnRequest: () => Promise<TResult | undefined>,
+    fnRequest: () => Promise<TResult>,
     timeout: number
-): Promise<TResult | undefined> {
-    return new Promise<TResult | undefined>(async (resolve) => {
+): Promise<TResult> {
+    return new Promise<TResult>(async (resolve, reject) => {
         const hTimer = setTimeout(() => {
-            resolve(undefined);
+            reject(new TimeoutError());
         }, timeout);
-        const result = await fnRequest();
+        try {
+            const result = await fnRequest();
+            resolve(result);
+        } catch (error: unknown) {
+            reject(error);
+        }
         clearTimeout(hTimer);
-        resolve(result);
     });
 }
 
@@ -97,13 +126,16 @@ function timeoutRequest<TResult>(
  */
 export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
     try {
-        const { InsecureTokenProvider } = await require("@fluidframework/test-client-utils");
+        const { InsecureTokenProvider } =
+            await require("@fluidframework/test-client-utils");
         const tokenProvider = new InsecureTokenProvider("", {
             id: "123",
             name: "Test User",
         });
         return tokenProvider as ITokenProvider;
     } catch {
-        throw new Error("@microsoft/live-share: when using 'local' connection type, you must have @fluidframework/test-client-utils installed");
+        throw new Error(
+            "@microsoft/live-share: when using 'local' connection type, you must have @fluidframework/test-client-utils installed"
+        );
     }
 }

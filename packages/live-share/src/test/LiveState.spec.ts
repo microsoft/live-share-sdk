@@ -9,7 +9,7 @@ import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { LiveState } from "../LiveState";
-import { Deferred } from "./Deferred";
+import { Deferred } from "../internals";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import { TestLiveShareHost } from "../TestLiveShareHost";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";

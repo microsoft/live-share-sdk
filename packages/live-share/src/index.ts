@@ -25,3 +25,4 @@ export * from "./TimestampProvider";
 export * from "./schema-utils";
 export * from "./LiveDataObject";
 export * from "./LiveShareRuntime";
+export * from "./AzureLiveShareHost";

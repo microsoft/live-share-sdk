@@ -7,7 +7,7 @@ import { strict as assert } from "assert";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { MockContainerRuntimeSignaler } from "./MockContainerRuntimeSignaler";
 import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
-import { Deferred } from "./Deferred";
+import { Deferred } from "../internals";
 
 function createConnectedSignalers() {
     const localContainer = new MockContainerRuntimeSignaler();

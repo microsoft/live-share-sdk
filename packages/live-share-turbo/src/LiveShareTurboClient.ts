@@ -10,7 +10,6 @@ import {
     ILiveShareHost,
     ILiveShareJoinResults,
 } from "@microsoft/live-share";
-import { AzureContainerServices } from "@fluidframework/azure-client";
 import { FluidTurboClient, getContainerSchema } from "./internals";
 
 /**

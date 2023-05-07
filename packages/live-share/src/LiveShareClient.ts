@@ -98,13 +98,7 @@ export class LiveShareClient {
         if (!host || typeof host.getFluidTenantInfo != "function") {
             throw new Error(`LiveShareClient: host not passed in`);
         }
-
-        // Save static host.
-        // BackwardsCompatibilityHostDecorator is used for backwards compatibility with older versions of the Teams client.
-        // LiveShareHostDecorator is used as a thin caching layer for some host APIs.
-        this._host = new BackwardsCompatibilityHostDecorator(
-            new LiveShareHostDecorator(host)
-        );
+        this._host = host;
         // Save options
         this._options = Object.assign({} as ILiveShareClientOptions, options);
     }

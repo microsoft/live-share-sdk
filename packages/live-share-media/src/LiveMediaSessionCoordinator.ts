@@ -80,7 +80,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     private _setTrackEvent?: LiveEventTarget<ISetTrackEvent>;
     private _setTrackDataEvent?: LiveEventTarget<ISetTrackDataEvent>;
     private _positionUpdateEvent?: LiveEventTarget<IPositionUpdateEvent>;
-    private _joinedEvent?: LiveEventTarget<{}>;
+    private _joinedEvent?: LiveEventTarget<undefined>;
 
     // Distributed state
     private _groupState?: GroupCoordinatorState;
@@ -638,7 +638,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             .then((verified) => {
                 if (!verified) return;
                 // Send initial joined event
-                return this._joinedEvent?.sendEvent({});
+                return this._joinedEvent?.sendEvent(undefined);
             })
             .catch((err) => {
                 this._logger.sendErrorEvent(

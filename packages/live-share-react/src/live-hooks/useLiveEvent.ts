@@ -49,32 +49,26 @@ export function useLiveEvent<TEvent extends object = object>(
     /**
      * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveEvent } = useDynamicDDS<LiveEvent>(uniqueKey, LiveEvent);
+    const { dds: liveEvent } = useDynamicDDS<LiveEvent<TEvent>>(uniqueKey, LiveEvent<TEvent>);
 
     /**
      * User facing: callback to send event through `LiveEvent`
      */
     const sendEvent: SendLiveEventAction<TEvent> = React.useCallback(
-        (event: TEvent) => {
-            if (liveEvent?.isInitialized === undefined) {
-                console.error(
-                    new Error(
-                        "Cannot call emitEvent when liveEvent is undefined"
-                    )
+        async (event: TEvent) => {
+            if (liveEvent === undefined) {
+                throw new Error(
+                    "Cannot call emitEvent when liveEvent is undefined"
                 );
-                return;
             }
             if (!liveEvent.isInitialized) {
-                console.error(
-                    new Error(
-                        "Cannot call emitEvent while liveEvent is not started"
-                    )
+                throw new Error(
+                    "Cannot call emitEvent while liveEvent is not started"
                 );
-                return;
             }
-            liveEvent?.send(event);
+            return await liveEvent.send(event);
         },
-        [liveEvent?.isInitialized]
+        [liveEvent]
     );
 
     /**
@@ -106,7 +100,7 @@ export function useLiveEvent<TEvent extends object = object>(
             // on unmount, remove event listeners
             liveEvent?.off(LiveEventEvents.received, onEventReceived);
         };
-    }, [liveEvent?.isInitialized]);
+    }, [liveEvent]);
 
     return {
         latestEvent,

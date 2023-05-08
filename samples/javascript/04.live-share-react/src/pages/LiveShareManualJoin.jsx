@@ -1,4 +1,4 @@
-import { TestLiveShareHost } from "@microsoft/live-share";
+import { TestLiveShareHost, UserMeetingRole } from "@microsoft/live-share";
 import { LiveShareProvider, useLiveShareContext } from "@microsoft/live-share-react";
 import { LiveShareHost } from "@microsoft/teams-js";
 import { useState } from "react";
@@ -17,6 +17,21 @@ import { inTeams } from "../utils/inTeams";
 
 const IN_TEAMS = inTeams();
 const host = IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create();
+// If you want to test role validation locally, you can override the roles of remote/local users.
+// This will only work well with a max of two clients.
+if (host instanceof TestLiveShareHost) {
+    const url = new URL(window.location.href);
+    const scopes = url.searchParams.get("scopes");
+    if (scopes === "read") {
+        host.defaultLocalRoles = [
+            UserMeetingRole.attendee
+        ];
+    } else if (scopes === "write") {
+        host.defaultRemoteRoles = [
+            UserMeetingRole.attendee
+        ];
+    }
+}
 
 export const LiveShareManualJoin = () => {
     return (

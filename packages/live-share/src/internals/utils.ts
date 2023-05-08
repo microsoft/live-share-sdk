@@ -9,7 +9,7 @@ import { v4 as uuid } from "uuid";
 /**
  * @hidden
  */
-export function cloneValue<T>(value: T | undefined): T | undefined {
+export function cloneValue<T>(value: T): T {
     return typeof value == "object" ? JSON.parse(JSON.stringify(value)) : value;
 }
 

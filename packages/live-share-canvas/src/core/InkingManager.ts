@@ -50,7 +50,7 @@ import {
     isPointInsideRectangle,
     computeQuadPath,
     renderQuadPathToSVG,
-} from "./Internals";
+} from "./internals";
 
 /**
  * Defines available inking tools.

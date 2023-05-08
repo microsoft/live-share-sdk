@@ -10,7 +10,7 @@ import {
     IStroke,
     IBrush,
 } from "../core";
-import { IQuad, TWO_PI } from "../core/Internals";
+import { IQuad, TWO_PI } from "../core/internals";
 
 /**
  * Defines the refernece point of a canvas. The reference point is the origin used for

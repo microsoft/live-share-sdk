@@ -6,14 +6,13 @@
 import { TimeInterval } from "./TimeInterval";
 import { LiveEventSource } from "./LiveEventSource";
 import { ILiveEvent } from "./interfaces";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /**
  * Periodically broadcasts an event to listening `LiveEventTarget` instances.
  */
-export class LiveEventTimer<T extends ILiveEvent> {
+export class LiveEventTimer<T extends object = object> {
     private _eventSource: LiveEventSource<T>;
-    private _createEvent: () => Partial<T>;
+    private _createEvent: () => T;
     private _delay: TimeInterval;
     private _isRunning = false;
     private _timer?: any;
@@ -27,7 +26,7 @@ export class LiveEventTimer<T extends ILiveEvent> {
      */
     constructor(
         eventSource: LiveEventSource<T>,
-        createEvent: () => Partial<T>,
+        createEvent: () => T,
         delay: number,
         repeat = false
     ) {
@@ -68,9 +67,9 @@ export class LiveEventTimer<T extends ILiveEvent> {
      * timeouts. Call `start` after calling `sendEvent` if you'd like to skip the next timer
      * interval.
      */
-    public sendEvent(): void {
+    public sendEvent(): Promise<ILiveEvent<T>> {
         const evt = this._createEvent();
-        this._eventSource.sendEvent(evt);
+        return this._eventSource.sendEvent(evt);
     }
 
     /**
@@ -100,7 +99,10 @@ export class LiveEventTimer<T extends ILiveEvent> {
         this._timer = setTimeout(() => {
             this._timer = undefined;
             const startedAt = new Date().getTime();
-            this.sendEvent();
+            this.sendEvent()
+                .catch((err) => {
+                    console.warn(err);
+                });
 
             // Auto-repeat
             if (this._isRunning && this.repeat) {

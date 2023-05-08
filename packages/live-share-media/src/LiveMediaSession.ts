@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { DynamicObjectRegistry, LiveDataObject, LiveTelemetryLogger, UserMeetingRole } from "@microsoft/live-share";
 import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer";
 import { ITriggerActionEvent, TelemetryEvents } from "./internals";
@@ -107,13 +107,16 @@ export class LiveMediaSession extends LiveDataObject {
 
     /**
      * initialize the object.
-     * @param acceptTransportChangesFrom Optional. List of roles allowed to group transport
+     * @param allowedRoles Optional. List of roles allowed to group transport
      * operations like play/pause/seek/setTrack.
      */
     public initialize(
-        acceptTransportChangesFrom?: UserMeetingRole[]
+        allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
-        return this.coordinator.initialize(acceptTransportChangesFrom);
+        if (allowedRoles) {
+            this._allowedRoles = allowedRoles;
+        }
+        return this.coordinator.initialize(allowedRoles);
     }
 
     /**

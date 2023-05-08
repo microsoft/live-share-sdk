@@ -22,6 +22,7 @@ export const TelemetryEvents = {
         UserTappedVideoToPlay: transmit(
             "MediaPlayerSynchronizer:UserTappedVideoToPlay"
         ),
+        UserTappedVideoToPlayError: "MediaPlayerSynchronizer:UserTappedVideoToPlayError",
         PlaybackRateChangeBlocked:
             "MediaPlayerSynchronizer:PlaybackRateChangeBlocked",
         PlayerBlockedOperation: transmit(
@@ -72,6 +73,8 @@ export const TelemetryEvents = {
         RemoteSeekToReceived: transmit(
             "SessionCoordinator:RemoteSeekToReceived"
         ),
+        PositionUpdateEventError: "SessionCoordinator:PositionUpdateEventError",
+        SendJoinedEventError: "SessionCoordinator:SendJoinedEventError",
     },
     GroupCoordinator: {
         TrackChanged: "GroupCoordinator:TrackChanged",

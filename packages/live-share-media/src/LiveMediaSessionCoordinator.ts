@@ -7,7 +7,6 @@ import {
     LiveEventScope,
     LiveTelemetryLogger,
     LiveEventTarget,
-    ILiveEvent,
     IRuntimeSignaler,
     TimeInterval,
     UserMeetingRole,
@@ -15,11 +14,8 @@ import {
 } from "@microsoft/live-share";
 import {
     CoordinationWaitPoint,
-    ExtendedMediaSessionActionDetails,
     ExtendedMediaMetadata,
     ExtendedMediaSessionPlaybackState,
-    MediaSessionCoordinatorEvents,
-    MediaSessionCoordinatorState,
     MediaSessionCoordinatorSuspension,
 } from "./MediaSessionExtensions";
 import {
@@ -29,7 +25,6 @@ import {
     IPositionUpdateEvent,
     GroupCoordinatorState,
     GroupCoordinatorStateEvents,
-    ITriggerActionEvent,
     ISetTrackDataEvent,
 } from "./internals";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
@@ -85,10 +80,12 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     private _setTrackEvent?: LiveEventTarget<ISetTrackEvent>;
     private _setTrackDataEvent?: LiveEventTarget<ISetTrackDataEvent>;
     private _positionUpdateEvent?: LiveEventTarget<IPositionUpdateEvent>;
-    private _joinedEvent?: LiveEventTarget<ILiveEvent>;
+    private _joinedEvent?: LiveEventTarget<{}>;
 
     // Distributed state
     private _groupState?: GroupCoordinatorState;
+
+    private _allowedRoles?: UserMeetingRole[];
 
     /**
      * @hidden
@@ -206,7 +203,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * Throws an exception if the session/coordinator hasn't been initialized, no track has been
      * loaded, or `canPlayPause` is false.
      */
-    public play(): void {
+    public async play(): Promise<void> {
         if (!this._hasInitialized) {
             throw new Error(
                 `LiveMediaSessionCoordinator.play() called before initialize() called.`
@@ -234,7 +231,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             null,
             { position: position }
         );
-        this._playEvent!.sendEvent({
+        await this._playEvent!.sendEvent({
             track: this._groupState.playbackTrack.current,
             position: position,
         });
@@ -247,7 +244,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * Throws an exception if the session/coordinator hasn't been initialized, no track has been
      * loaded, or `canPlayPause` is false.
      */
-    public pause(): void {
+    public async pause(): Promise<void> {
         if (!this._hasInitialized) {
             throw new Error(
                 `LiveMediaSessionCoordinator.pause() called before initialize() called.`
@@ -275,7 +272,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             null,
             { position: position }
         );
-        this._pauseEvent!.sendEvent({
+        await this._pauseEvent!.sendEvent({
             track: this._groupState.playbackTrack.current,
             position: position,
         });
@@ -289,7 +286,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * loaded, or `canSeek` is false.
      * @param time Playback position in seconds to seek to.
      */
-    public seekTo(time: number): void {
+    public async seekTo(time: number): Promise<void> {
         if (!this._hasInitialized) {
             throw new Error(
                 `LiveMediaSessionCoordinator.seekTo() called before initialize() called.`
@@ -314,10 +311,15 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             null,
             { position: time }
         );
-        this._seekToEvent!.sendEvent({
-            track: this._groupState.playbackTrack.current,
-            position: time,
-        });
+        try {
+            await this._seekToEvent!.sendEvent({
+                track: this._groupState.playbackTrack.current,
+                position: time,
+            });
+        } catch (err) {
+            await this._groupState!.syncLocalMediaSession();
+            throw err;
+        }
     }
 
     /**
@@ -329,10 +331,10 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @param metadata The track to load or `null` to indicate that the end of the track is reached.
      * @param waitPoints Optional. List of static wait points to configure for the track.  Dynamic wait points can be added via the `beginSuspension()` call.
      */
-    public setTrack(
+    public async setTrack(
         metadata: ExtendedMediaMetadata | null,
         waitPoints?: CoordinationWaitPoint[]
-    ): void {
+    ): Promise<void> {
         if (!this._hasInitialized) {
             throw new Error(
                 `LiveMediaSessionCoordinator.setTrack() called before initialize() called.`
@@ -349,7 +351,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         this._logger.sendTelemetryEvent(
             TelemetryEvents.SessionCoordinator.SetTrackCalled
         );
-        this._setTrackEvent!.sendEvent({
+        await this._setTrackEvent!.sendEvent({
             metadata: metadata,
             waitPoints: waitPoints || [],
         });
@@ -366,7 +368,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * false.
      * @param data New data object to sync with the group. This value will be synchronized using a last writer wins strategy.
      */
-    public setTrackData(data: object | null): void {
+    public async setTrackData(data: object | null): Promise<void> {
         if (!this._hasInitialized) {
             throw new Error(
                 `LiveMediaSessionCoordinator.setTrackData() called before initialize() called.`
@@ -383,7 +385,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         this._logger.sendTelemetryEvent(
             TelemetryEvents.SessionCoordinator.SetTrackDataCalled
         );
-        this._setTrackDataEvent!.sendEvent({
+        await this._setTrackDataEvent!.sendEvent({
             data: data,
         });
     }
@@ -524,13 +526,36 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         }
 
         // Send position update event
-        const evt = this._groupState!.createPositionUpdateEvent(state);
-        this._positionUpdateEvent?.sendEvent(evt);
+        this.verifyLocalUserRoles()
+            .then((valid) => {
+                const evt = this._groupState!.createPositionUpdateEvent(state);
+                if (!valid) {
+                    // We still need to update _groupState with the local user's position.
+                    // So we do this here rather than on the receiving end.
+                    this._groupState!.handlePositionUpdate(
+                        {
+                            clientId: this._runtime.clientId ?? "",
+                            timestamp: this._liveRuntime.getTimestamp(),
+                            data: evt,
+                        },
+                        true
+                    );
+                    return;
+                }
+                return this._positionUpdateEvent?.sendEvent(evt);
+            })
+            .catch((err) => {
+                this._logger.sendErrorEvent(
+                    TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
+                    err
+                );
+            });
     }
 
     protected async createChildren(
         acceptTransportChangesFrom?: UserMeetingRole[]
     ): Promise<void> {
+        this._allowedRoles = acceptTransportChangesFrom;
         // Create event scopes
         const scope = new LiveEventScope(
             this._runtime,
@@ -605,14 +630,22 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                     }
                 );
                 const state = this._getPlayerState();
-                const update =
-                    this._groupState!.createPositionUpdateEvent(state);
-                this._positionUpdateEvent?.sendEvent(update);
+                this.sendPositionUpdate(state);
             }
         );
 
-        // Send initial joined event
-        this._joinedEvent.sendEvent({});
+        this.verifyLocalUserRoles()
+            .then((verified) => {
+                if (!verified) return;
+                // Send initial joined event
+                return this._joinedEvent?.sendEvent({});
+            })
+            .catch((err) => {
+                this._logger.sendErrorEvent(
+                    TelemetryEvents.SessionCoordinator.SendJoinedEventError,
+                    err
+                );
+            });
     }
 
     private getPlayerPosition(): number {
@@ -626,5 +659,28 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                     ? positionState.position
                     : 0.0;
         }
+    }
+
+    private async verifyLocalUserRoles(): Promise<boolean> {
+        const clientId = await this.waitUntilConnected();
+        return this._liveRuntime.verifyRolesAllowed(
+            clientId,
+            this._allowedRoles ?? []
+        );
+    }
+
+    private waitUntilConnected(): Promise<string> {
+        return new Promise((resolve) => {
+            const onConnected = (clientId: string) => {
+                this._runtime.off("connected", onConnected);
+                resolve(clientId);
+            };
+
+            if (this._runtime.clientId && this._runtime.connected) {
+                resolve(this._runtime.clientId);
+            } else {
+                this._runtime.on("connected", onConnected);
+            }
+        });
     }
 }

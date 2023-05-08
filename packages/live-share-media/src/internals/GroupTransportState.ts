@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent, LiveShareRuntime, LiveShareClient } from "@microsoft/live-share";
+import { ILiveEvent, LiveShareRuntime, LiveShareClient } from "@microsoft/live-share";
 import EventEmitter from "events";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
@@ -35,7 +35,7 @@ export enum GroupTransportStateEvents {
 /**
  * @hidden
  */
-export interface ITransportStateChangeEvent extends IEvent {
+export interface ITransportStateChangeEvent extends ILiveEvent {
     action: ExtendedMediaSessionAction;
     seekTime?: number;
 }

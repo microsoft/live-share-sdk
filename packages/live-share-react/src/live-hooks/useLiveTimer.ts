@@ -31,7 +31,7 @@ export function useLiveTimer(
     onStart?: OnTimerDidStartAction,
     onPause?: OnTimerDidPauseAction,
     onPlay?: OnTimerDidPlayAction,
-    onFinish?: OnTimerDidFinishAction,
+    onFinish?: OnTimerDidFinishAction
 ): IUseLiveTimerResults {
     /**
      * User facing: Stateful timer config.
@@ -47,11 +47,13 @@ export function useLiveTimer(
     const { dds: liveTimer } = useDynamicDDS<LiveTimer>(uniqueKey, LiveTimer);
 
     /**
-     * User facing: callback to send event through `LiveTimer`
+     * Callback to send event through `LiveTimer`
+     * @param duration the duration for the timer in milliseconds
+     * @returns void promise that will throw when user does not have required roles
      */
     const start: OnStartTimerAction = React.useCallback(
-        (duration: number): void => {
-            if (liveTimer?.isInitialized === undefined) {
+        async (duration: number) => {
+            if (liveTimer === undefined) {
                 console.error(
                     new Error("Cannot call start when liveTimer is undefined")
                 );
@@ -65,16 +67,17 @@ export function useLiveTimer(
                 );
                 return;
             }
-            liveTimer?.start(duration);
+            return await liveTimer.start(duration);
         },
-        [liveTimer?.isInitialized]
+        [liveTimer]
     );
 
     /**
-     * User facing: callback to send event through `LiveTimer`
+     * Callback to send event through `LiveTimer`
+     * @returns void promise that will throw when user does not have required roles
      */
-    const play: OnPlayTimerAction = React.useCallback((): void => {
-        if (liveTimer?.isInitialized === undefined) {
+    const play: OnPlayTimerAction = React.useCallback(async () => {
+        if (liveTimer === undefined) {
             console.error(
                 new Error("Cannot call play when liveTimer is undefined")
             );
@@ -86,14 +89,15 @@ export function useLiveTimer(
             );
             return;
         }
-        liveTimer?.play();
-    }, [liveTimer?.isInitialized]);
+        return await liveTimer.play();
+    }, [liveTimer]);
 
     /**
-     * User facing: callback to send event through `LiveTimer`
+     * Callback to send event through `LiveTimer`
+     * @returns void promise that will throw when user does not have required roles
      */
-    const pause: OnPauseTimerAction = React.useCallback((): void => {
-        if (liveTimer?.isInitialized === undefined) {
+    const pause: OnPauseTimerAction = React.useCallback(async () => {
+        if (liveTimer === undefined) {
             console.error(
                 new Error("Cannot call pause when liveTimer is undefined")
             );
@@ -105,15 +109,14 @@ export function useLiveTimer(
             );
             return;
         }
-        liveTimer?.pause();
-    }, [liveTimer?.isInitialized]);
+        return await liveTimer.pause();
+    }, [liveTimer]);
 
     /**
      * Setup change listeners and start `LiveTimer` if needed
      */
     React.useEffect(() => {
-        if (liveTimer === undefined)
-            return;
+        if (liveTimer === undefined) return;
         // Register event listeners
         const onTimerConfigChange = (config: ITimerConfig) => {
             setTimerConfig(config);

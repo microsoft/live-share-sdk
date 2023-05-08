@@ -73,13 +73,13 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     it("Should raise local and remote events", async () => {
         const now = new Date().getTime();
         const object1done = new Deferred();
-        object1.on("received", (evt, local) => {
+        object1.on("received", (evt, local, clientId, timestamp) => {
             try {
                 assert(local == true, `Not a local event`);
                 assert(evt != null, `Null event arg`);
-                assert(evt.clientId != null, `Missing clientId`);
-                assert(typeof evt.timestamp == "number", `Missing timestamp`);
-                assert(evt.timestamp >= now, `Timestamp too old`);
+                assert(clientId != null, `Missing clientId`);
+                assert(typeof timestamp == "number", `Missing timestamp`);
+                assert(timestamp >= now, `Timestamp too old`);
                 object1done.resolve();
             } catch (err) {
                 object1done.reject(err);
@@ -88,13 +88,13 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         await object1.initialize();
 
         const object2done = new Deferred();
-        object2.on("received", (evt, local) => {
+        object2.on("received", (evt, local, clientId, timestamp) => {
             try {
                 assert(local == false, `Unexpected local event`);
                 assert(evt != null, `Null event arg`);
-                assert(evt.clientId != null, `Missing clientId`);
-                assert(typeof evt.timestamp == "number", `Missing timestamp`);
-                assert(evt.timestamp >= now, `Timestamp too old`);
+                assert(clientId != null, `Missing clientId`);
+                assert(typeof timestamp == "number", `Missing timestamp`);
+                assert(timestamp >= now, `Timestamp too old`);
                 object2done.resolve();
             } catch (err) {
                 object2done.reject(err);
@@ -102,7 +102,7 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         });
         await object2.initialize();
 
-        object1.send();
+        object1.send({});
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -124,7 +124,7 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     it("Should throw error if sendEvent() called before start", async () => {
         try {
-            object1.send();
+            await object1.send({});
             assert(false, `exception not thrown`);
         } catch (err) {
             console.error("There was an error");
@@ -174,16 +174,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should allow newer received events", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 1001,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -191,16 +193,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should block older received events", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 999,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -208,16 +212,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should block events with same timestamp from same client", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -225,16 +231,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should allow events with same timestamp and a different clientId that sorts lower", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -242,16 +250,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should block events with same timestamp and a different clientId that sorts higher", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 1000,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -259,16 +269,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should debounce newer events", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 1050,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received, 100);
@@ -276,16 +288,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should allow older events that would have debounced the current event", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 950,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received, 100);

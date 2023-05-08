@@ -12,11 +12,6 @@ import { LiveShareRuntime } from "./LiveShareRuntime";
  */
 export interface IEvent {
     /**
-     * Additional event properties.
-     */
-    [key: string]: any;
-
-    /**
      * Name of the event.
      */
     name: string;
@@ -29,7 +24,7 @@ export interface IClientTimestamp {
     /**
      * Current client ID, if known. The client ID will be `undefined` if the client is currently disconnected.
      */
-    clientId?: string;
+    clientId: string;
 
     /**
      * Global timestamp of when the event was sent.
@@ -38,18 +33,11 @@ export interface IClientTimestamp {
 }
 
 /**
- * Base interface for all live share events.
+ * Base type for all incoming live share events of a certain type
  */
-export interface ILiveEvent extends IEvent, IClientTimestamp {}
-
-/**
- * Removes the base properties from an event that derives from `ILiveEvent`.
- * @template TEvent Type of event.
- */
-export type OutgoingLiveEvent<TEvent extends ILiveEvent> = Omit<
-    TEvent,
-    "name" | "clientId" | "timestamp"
->;
+export interface ILiveEvent<TEvent = any> extends IEvent, IClientTimestamp {
+    data: TEvent;
+}
 
 /**
  * Allowed roles during a meeting.

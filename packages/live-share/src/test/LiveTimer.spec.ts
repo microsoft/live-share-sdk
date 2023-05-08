@@ -91,7 +91,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        object1.initialize();
+        await object1.initialize();
 
         const object2done = new Deferred();
         object2.on("started", (config, local) => {
@@ -109,7 +109,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        object2.initialize();
+        await object2.initialize();
 
         object1.start(1);
 

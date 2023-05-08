@@ -11,7 +11,6 @@ import {
 import { TypedEventEmitter } from "@fluidframework/common-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
-import { LiveShareClient } from "./LiveShareClient";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 
 /**
@@ -20,8 +19,8 @@ import { LiveShareRuntime } from "./LiveShareRuntime";
  * @param evt The event that was sent/received.
  * @param local If true the `evt` is an event that was sent.
  */
-export type LiveEventListener<TEvent extends ILiveEvent> = (
-    evt: TEvent,
+export type LiveEventListener<TEvent> = (
+    evt: ILiveEvent<TEvent>,
     local: boolean
 ) => void;
 
@@ -34,6 +33,7 @@ export interface IRuntimeSignaler {
     readonly connected: boolean;
     readonly logger: ITelemetryLogger;
     on(event: "connected", listener: (clientId: string) => void): this;
+    off(event: "connected", listener: (clientId: string) => void): this;
     on(
         event: "signal",
         listener: (message: IInboundSignalMessage, local: boolean) => void
@@ -66,7 +66,11 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      * @param allowedRoles Optional. List of roles allowed to send events using this scope.
      * You should use a second scope if you need mixed permission support.
      */
-    constructor(runtime: IRuntimeSignaler, private _liveRuntime: LiveShareRuntime, allowedRoles?: UserMeetingRole[]) {
+    constructor(
+        runtime: IRuntimeSignaler,
+        private _liveRuntime: LiveShareRuntime,
+        allowedRoles?: UserMeetingRole[]
+    ) {
         super();
         this._runtime = runtime;
         this._allowedRoles = allowedRoles || [];
@@ -74,43 +78,39 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             this.emit("error", error);
         });
         this._runtime.on("signal", (message, local) => {
+            if (!message.clientId || !this._runtime.connected) return;
             // We don't trust the clientId in the message content as it could have been tampered
             // with (in fact it could be missing if the message was queued when disconnected.)
             // We'll overwrite the contents clientId with the messages clientId which can't be
             // spoofed.
             const clientId = message.clientId;
-            (message.content as ILiveEvent).clientId = clientId as string;
+            message.content.clientId = clientId;
 
             // Only call listeners when the runtime is connected and if the signal has an
             // identifiable sender clientId.  The listener is responsible for deciding how
             // it wants to handle local/remote signals
-            if (this._runtime.connected && clientId !== null) {
-                this._liveRuntime.verifyRolesAllowed(clientId, this._allowedRoles)
-                    .then((value) => {
-                        if (value) {
-                            this.emitter.emit(
-                                message.type,
-                                message.content,
-                                local
-                            );
-                        } else {
-                            this._runtime.logger.sendErrorEvent(
-                                { eventName: "SharedEvent:invalidRole" },
-                                new Error(
-                                    `The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(
-                                        this._allowedRoles
-                                    )}.`
-                                )
-                            );
-                        }
-                    })
-                    .catch((err) => {
+            this._liveRuntime
+                .verifyRolesAllowed(clientId, this._allowedRoles)
+                .then((value) => {
+                    if (value) {
+                        this.emitter.emit(message.type, message.content, local);
+                    } else {
                         this._runtime.logger.sendErrorEvent(
-                            { eventName: "SharedEvent:invalidRole" },
-                            err
+                            { eventName: "LiveEvent:invalidRole" },
+                            new Error(
+                                `The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(
+                                    this._allowedRoles
+                                )}.`
+                            )
                         );
-                    });
-            }
+                    }
+                })
+                .catch((err) => {
+                    this._runtime.logger.sendErrorEvent(
+                        { eventName: "LiveEvent:invalidRole" },
+                        err
+                    );
+                });
         });
     }
 
@@ -138,7 +138,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      * @param eventName Name of event to listen for.
      * @param listener Function to call when the named event is sent or received.
      */
-    public onEvent<TEvent extends ILiveEvent>(
+    public onEvent<TEvent>(
         eventName: string,
         listener: LiveEventListener<TEvent>
     ): this {
@@ -152,7 +152,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      * @param eventName Name of event to un-register.
      * @param listener Function that was originally passed to `onEvent()`.
      */
-    public offEvent<TEvent extends ILiveEvent>(
+    public offEvent<TEvent>(
         eventName: string,
         listener: LiveEventListener<TEvent>
     ): this {
@@ -170,21 +170,48 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      * @returns The full event, including `ILiveEvent.name`,
      * `ILiveEvent.timestamp`, and `ILiveEvent.clientId` fields if known.
      */
-    public sendEvent<TEvent extends ILiveEvent>(
+    public async sendEvent<TEvent>(
         eventName: string,
-        evt: Partial<TEvent> = {}
-    ): TEvent {
+        evt: TEvent
+    ): Promise<ILiveEvent<TEvent>> {
+        const clientId = await this.waitUntilConnected();
+        const isAllowed = await this._liveRuntime.verifyRolesAllowed(
+            clientId,
+            this._allowedRoles
+        );
+        if (!isAllowed) {
+            throw new Error(
+                `The local user doesn't have a role of ${JSON.stringify(
+                    this._allowedRoles
+                )}.`
+            );
+        }
         // Clone passed in event and fill out required props.
-        const clone: TEvent = {
-            ...(evt as TEvent),
-            clientId: this._runtime.clientId,
+        const clone: ILiveEvent<TEvent> = {
+            clientId,
             name: eventName,
             timestamp: this._liveRuntime.getTimestamp(),
+            data: evt,
         };
 
         // Send event
         this._runtime.submitSignal(eventName, clone);
 
         return clone;
+    }
+
+    private waitUntilConnected(): Promise<string> {
+        return new Promise((resolve) => {
+            const onConnected = (clientId: string) => {
+                this._runtime.off("connected", onConnected);
+                resolve(clientId);
+            };
+
+            if (this._runtime.clientId && this._runtime.connected) {
+                resolve(this._runtime.clientId);
+            } else {
+                this._runtime.on("connected", onConnected);
+            }
+        });
     }
 }

@@ -2,7 +2,7 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the Microsoft Live Share SDK License.
  */
-import { LiveTelemetryLogger, IEvent } from "@microsoft/live-share";
+import { LiveTelemetryLogger, ILiveEvent } from "@microsoft/live-share";
 import EventEmitter from "events";
 import {
     ExtendedMediaSessionAction,
@@ -21,7 +21,7 @@ import { TelemetryEvents } from "./internals";
 /**
  * Event data returned by `MediaPlayerSynchronizer` object.
  */
-export interface IMediaPlayerSynchronizerEvent extends IEvent {
+export interface IMediaPlayerSynchronizerEvent extends ILiveEvent {
     /**
      * Event details.
      */
@@ -164,7 +164,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                                 TelemetryEvents.MediaPlayerSynchronizer
                                     .UserTappedVideoToPlay
                             );
-                            this.play();
+                            this.play().catch((err) => {
+                                this._logger.sendErrorEvent(
+                                    TelemetryEvents.MediaPlayerSynchronizer
+                                        .UserTappedVideoToPlayError,
+                                    err
+                                );
+                            });
                         }
                     }
                     // block play if player state is playing when expected synced state is paused and coordinator is not suspended.
@@ -499,12 +505,12 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * For proper operation apps should avoid calling `mediaSession.coordinator.play()` directly
      * and instead use the synchronizers `play()` method.
      */
-    public play(): void {
+    public async play(): Promise<void> {
         this._logger.sendTelemetryEvent(
             TelemetryEvents.MediaPlayerSynchronizer.PlayCalled
         );
         this._expectedPlaybackState = "playing";
-        this._mediaSession.coordinator.play();
+        await this._mediaSession.coordinator.play();
 
         this.dispatchUserAction({ action: "play" });
     }
@@ -516,12 +522,12 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * For proper operation apps should avoid calling `mediaSession.coordinator.pause()` directly
      * and instead use the synchronizers `pause()` method.
      */
-    public pause(): void {
+    public async pause(): Promise<void> {
         this._logger.sendTelemetryEvent(
             TelemetryEvents.MediaPlayerSynchronizer.PauseCalled
         );
         this._expectedPlaybackState = "paused";
-        this._mediaSession.coordinator.pause();
+        await this._mediaSession.coordinator.pause();
 
         this.dispatchUserAction({ action: "pause" });
     }
@@ -533,7 +539,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * For proper operation apps should avoid calling `mediaSession.coordinator.seekTo()` directly
      * and instead use the synchronizers `seekTo()` method.
      */
-    public seekTo(time: number): void {
+    public async seekTo(time: number): Promise<void> {
         // Always seek player to new time.
         // - This resolves an issue where the timeline scrubber can temporarily snap back to the original
         //   location.
@@ -544,7 +550,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
             null,
             { position: time }
         );
-        this._mediaSession.coordinator.seekTo(time);
+        await this._mediaSession.coordinator.seekTo(time);
 
         this.dispatchUserAction({ action: "seekto", seekTime: time });
     }
@@ -556,14 +562,14 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * For proper operation apps should avoid calling `mediaSession.coordinator.setTrack()` directly
      * and instead use the synchronizers `setTrack()` method.
      */
-    public setTrack(
+    public async setTrack(
         track: ExtendedMediaMetadata,
         waitPoints?: CoordinationWaitPoint[]
-    ): void {
+    ): Promise<void> {
         this._logger.sendTelemetryEvent(
             TelemetryEvents.MediaPlayerSynchronizer.SetTrackCalled
         );
-        this._mediaSession.coordinator.setTrack(track, waitPoints);
+        await this._mediaSession.coordinator.setTrack(track, waitPoints);
 
         this.dispatchUserAction({ action: "settrack", metadata: track });
     }
@@ -575,12 +581,12 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * For proper operation apps should avoid calling `mediaSession.coordinator.setTrackData()` directly
      * and instead use the synchronizers `setTrackData()` method.
      */
-    public setTrackData(data: object | null): void {
+    public async setTrackData(data: object | null): Promise<void> {
         this._logger.sendTelemetryEvent(
             TelemetryEvents.MediaPlayerSynchronizer.SetTrackDataCalled
         );
         this._trackData = data;
-        this._mediaSession.coordinator.setTrackData(data);
+        await this._mediaSession.coordinator.setTrackData(data);
 
         this.dispatchUserAction({ action: "datachange", data: data });
     }

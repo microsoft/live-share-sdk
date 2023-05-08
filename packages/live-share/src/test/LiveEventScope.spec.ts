@@ -42,7 +42,7 @@ describe("LiveEventScope", () => {
         );
     });
 
-    it("Should raise local and remote events", (done) => {
+    it("Should raise local and remote events", async () => {
         let triggered = 0;
         const now = new Date().getTime();
         const signalers = createConnectedSignalers();
@@ -74,16 +74,12 @@ describe("LiveEventScope", () => {
             triggered++;
         });
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(triggered == 2, `triggered == ${triggered}`);
-            done();
-        }, 10);
+        assert(triggered == 2, `triggered == ${triggered}`);
     });
 
-    it("Should unsubscribe from events", (done) => {
+    it("Should unsubscribe from events", async () => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
         const localScope = new LiveEventScope(
@@ -99,22 +95,16 @@ describe("LiveEventScope", () => {
         );
         remoteScope.onEvent("test", handler);
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(triggered == 2);
+        assert(triggered == 2);
 
-            remoteScope.offEvent("test", handler);
-            localScope.sendEvent("test", {});
-            setTimeout(() => {
-                assert((triggered as any) == 3);
-                done();
-            }, 10);
-        }, 10);
+        remoteScope.offEvent("test", handler);
+        await localScope.sendEvent("test", {});
+        assert((triggered as any) == 3);
     });
 
-    it("Should verify senders role", (done) => {
+    it("Should verify senders role", async () => {
         const verifier = new MockRoleVerifier([UserMeetingRole.organizer]);
         localLiveRuntime.setRoleVerifier(verifier);
         remoteLiveRuntime.setRoleVerifier(verifier);
@@ -135,17 +125,13 @@ describe("LiveEventScope", () => {
         );
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(verifier.called);
-            assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            done();
-        }, 10);
+        assert(verifier.called);
+        assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
     });
 
-    it("Should block invalid senders", (done) => {
+    it("Should block invalid senders", async () => {
         const verifier = new MockRoleVerifier([]);
         localLiveRuntime.setRoleVerifier(verifier);
         remoteLiveRuntime.setRoleVerifier(verifier);
@@ -166,17 +152,23 @@ describe("LiveEventScope", () => {
         );
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        localScope.sendEvent("test", {});
+        try {
+            await localScope.sendEvent("test", {});
+            assert(false, "Event should not have been sent");
+        } catch (err) {
+            assert(
+                err?.message.includes(
+                    `The local user doesn't have a role of ["Organizer"]`
+                ),
+                "Unexpected error"
+            );
+        }
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(verifier.called);
-            assert(triggered == 0, `Unexpected trigger count of ${triggered}`);
-            done();
-        }, 10);
+        assert(verifier.called);
+        assert(triggered == 0, `Unexpected trigger count of ${triggered}`);
     });
 
-    it("Should support event scopes with multiple roles", (done) => {
+    it("Should support event scopes with multiple roles", async () => {
         const verifier = new MockRoleVerifier([UserMeetingRole.presenter]);
         localLiveRuntime.setRoleVerifier(verifier);
         remoteLiveRuntime.setRoleVerifier(verifier);
@@ -197,17 +189,13 @@ describe("LiveEventScope", () => {
         );
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(verifier.called);
-            assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            done();
-        }, 10);
+        assert(verifier.called);
+        assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
     });
 
-    it("Should support senders with multiple roles", (done) => {
+    it("Should support senders with multiple roles", async () => {
         const verifier = new MockRoleVerifier([
             UserMeetingRole.organizer,
             UserMeetingRole.presenter,
@@ -231,17 +219,13 @@ describe("LiveEventScope", () => {
         );
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(verifier.called);
-            assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            done();
-        }, 10);
+        assert(verifier.called);
+        assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
     });
 
-    it("Should support custom timestamp providers", (done) => {
+    it("Should support custom timestamp providers", async () => {
         const provider = new MockTimestampProvider();
         localLiveRuntime.setTimestampProvider(provider);
         remoteLiveRuntime.setTimestampProvider(provider);
@@ -267,13 +251,9 @@ describe("LiveEventScope", () => {
             triggered++;
         });
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(provider.called, `provider not called`);
-            assert(triggered == 2, `triggered == ${triggered}`);
-            done();
-        }, 10);
+        assert(provider.called, `provider not called`);
+        assert(triggered == 2, `triggered == ${triggered}`);
     });
 });

@@ -172,7 +172,7 @@ export function CardList() {
 
 ### useLivePresence
 
-Presence makes it easy to track which users are currently in the session and assign custom data to them. Unlike other hooks, `useLivePresence` has a default ID set for you, but you can override it with your own if you'd like.
+Presence makes it easy to track which users are currently in the session and assign custom data to them.
 
 ```javascript
 import { useLivePresence } from "@microsoft/live-share-react";
@@ -180,7 +180,7 @@ import { PresenceState } from "@microsoft/live-share";
 
 export function OnlineUsers() {
   const { localUser, allUsers, updatePresence } = useLivePresence(
-    "CUSTOM-USER-ID", // optional user id
+    "UNIQUE-PRESENCE-KEY", // required unique key for presence
     { favoriteColor: "red" } // optional custom data object
   );
   return (

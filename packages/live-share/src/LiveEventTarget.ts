@@ -5,7 +5,6 @@
 
 import { LiveEventScope, LiveEventListener } from "./LiveEventScope";
 import { LiveEventSource } from "./LiveEventSource";
-import { ILiveEvent } from "./interfaces";
 
 /**
  * Receives events broadcast by an `LiveEventSource`.
@@ -17,7 +16,7 @@ import { ILiveEvent } from "./interfaces";
  * @template TEvent Type of event to broadcast.
  */
 export class LiveEventTarget<
-    TEvent extends ILiveEvent = ILiveEvent
+    TEvent
 > extends LiveEventSource<TEvent> {
     /**
      * Creates a new `LiveEventTarget` instance.

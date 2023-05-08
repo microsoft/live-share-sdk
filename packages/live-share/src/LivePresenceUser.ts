@@ -7,7 +7,6 @@ import { LiveEvent } from "./LiveEvent";
 import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
 import { cloneValue } from "./internals";
-import { LiveShareClient } from "./LiveShareClient";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 
 /**
@@ -34,10 +33,15 @@ export enum PresenceState {
 /**
  * @hidden
  */
-export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
+export interface ILivePresenceEvent<TData = object> {
     state: PresenceState;
     data?: TData;
 }
+
+/**
+ * @hidden
+ */
+export type LivePresenceReceivedEventData<TData = object> = ILiveEvent<ILivePresenceEvent<TData>>;
 
 /**
  * A use that presence is being tracked for.
@@ -51,7 +55,7 @@ export class LivePresenceUser<TData = object> {
      */
     constructor(
         private _clientInfo: IClientInfo,
-        private _evt: ILivePresenceEvent<TData>,
+        private _evt: LivePresenceReceivedEventData<TData>,
         private _expirationPeriod: TimeInterval,
         private _isLocalUser: boolean,
         private _liveRuntime: LiveShareRuntime,
@@ -86,14 +90,14 @@ export class LivePresenceUser<TData = object> {
      * for a period of time.
      */
     public get state(): PresenceState {
-        return this.hasExpired() ? PresenceState.offline : this._evt.state;
+        return this.hasExpired() ? PresenceState.offline : this._evt.data.state;
     }
 
     /**
      * Optional data shared by the user.
      */
     public get data(): TData | undefined {
-        return cloneValue(this._evt.data);
+        return cloneValue(this._evt.data.data);
     }
 
     /**
@@ -115,7 +119,7 @@ export class LivePresenceUser<TData = object> {
      * @hidden
      */
     public updateReceived(
-        evt: ILivePresenceEvent<TData>,
+        evt: LivePresenceReceivedEventData<TData>,
         info: IClientInfo
     ): boolean {
         this.updateClients(evt);
@@ -129,9 +133,9 @@ export class LivePresenceUser<TData = object> {
 
             // Has anything changed?
             return (
-                evt.state != currentEvent.state ||
+                evt.data.state != currentEvent.data.state ||
                 JSON.stringify(info) != JSON.stringify(currentClientInfo) ||
-                JSON.stringify(evt.data) != JSON.stringify(currentEvent.data)
+                JSON.stringify(evt.data.data) != JSON.stringify(currentEvent.data.data)
             );
         }
 
@@ -146,7 +150,7 @@ export class LivePresenceUser<TData = object> {
         );
     }
 
-    private updateClients(evt: ILivePresenceEvent<TData>): void {
+    private updateClients(evt: LivePresenceReceivedEventData<TData>): void {
         // The user can be logged into multiple clients so add client to list if missing.
         if (evt.clientId && this._clients.indexOf(evt.clientId) < 0) {
             this._clients.push(evt.clientId);

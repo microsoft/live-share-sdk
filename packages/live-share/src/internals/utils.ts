@@ -4,6 +4,7 @@
  */
 
 import { ITokenProvider } from "@fluidframework/azure-client";
+import { v4 as uuid } from "uuid";
 
 /**
  * @hidden
@@ -129,7 +130,7 @@ export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
         const { InsecureTokenProvider } =
             await require("@fluidframework/test-client-utils");
         const tokenProvider = new InsecureTokenProvider("", {
-            id: "123",
+            id: uuid(),
             name: "Test User",
         });
         return tokenProvider as ITokenProvider;

@@ -10,9 +10,15 @@ import {
 import { Deferred } from "./internals";
 
 /**
- * @beta
+ * @alpha
  * This host enables using Live Share through your own `AzureClient` implementation.
- * If you are using `LiveShareClient`, you should override the methods throwing not implemented exceptions.
+ * This is not intended to be used with `LiveShareClient`.
+ * We provide no SLA guarantees on this implementation while it is in alpha.
+ * 
+ * @remarks
+ * To use this API, first pass your `ContainerSchema` through the `proxyLiveDataObjectClass` function.
+ * This should be done before calling `.getContainer()` or `createContainer()`.
+ * Then, call `setAudience()` with the `IAzureAudience` object (in `AzureContainerServices`) returned by the `AzureClient`.
  */
 export class AzureLiveShareHost implements ILiveShareHost {
     private _azureAudienceDeferred = new Deferred<IAzureAudience>();

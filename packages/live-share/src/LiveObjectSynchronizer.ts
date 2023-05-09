@@ -159,7 +159,7 @@ export class LiveObjectSynchronizerManager extends TypedEventEmitter<IContainerL
     }
 
     /**
-     * Gets the most recent event sent for a given `objectId`.
+     * Gets the most recent event sent for a given `objectId` and `clientId`.
      * @param objectId the `LiveDataObject` id
      * @param clientId the client to get the value for
      * @returns the latest event sent, or undefined if there is none

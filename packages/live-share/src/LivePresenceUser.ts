@@ -119,7 +119,7 @@ export class LivePresenceUser<TData = object> {
         return Array.from(this._connections.values());
     }
 
-    public connection(
+    public getConnection(
         clientId: string
     ): LivePresenceConnection<TData> | undefined {
         return this._connections.get(clientId);

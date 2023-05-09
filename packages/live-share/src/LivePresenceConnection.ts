@@ -42,7 +42,10 @@ export class LivePresenceConnection<TData = object> {
         return cloneValue(this._evt.data.data);
     }
 
-    updateConnection(evt: LivePresenceReceivedEventData<TData>) {
+    /**
+     * @hidden
+     */
+    public updateConnection(evt: LivePresenceReceivedEventData<TData>) {
         if (this._evt.clientId !== evt.clientId) {
             throw new Error(
                 `LivePresenceConnection.updateConnection called with event with different clientId`

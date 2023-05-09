@@ -137,8 +137,7 @@ export class LivePresence<
         if (!clientId) {
             return undefined;
         }
-        return this._users.find((user) => user._clients.includes(clientId))
-            ?.userId;
+        return this._users.find((user) => user.isFromClient(clientId))?.userId;
     }
 
     /**
@@ -152,7 +151,6 @@ export class LivePresence<
         state = PresenceState.online,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
-        this.context.containerRuntime
         if (this._scope) {
             throw new Error(`LivePresence: already started.`);
         }
@@ -198,7 +196,9 @@ export class LivePresence<
         );
 
         // Create object synchronizer
-        this._synchronizer = new LiveObjectSynchronizer<ILivePresenceEvent<TData>>(
+        this._synchronizer = new LiveObjectSynchronizer<
+            ILivePresenceEvent<TData>
+        >(
             this.id,
             this.runtime,
             this.liveRuntime,
@@ -448,7 +448,12 @@ export class LivePresence<
     ): void {
         const emitEvent = (user: LivePresenceUser<TData>) => {
             this._lastEmitPresenceStateMap.set(user.userId, user.state);
-            this.emit(LivePresenceEvents.presenceChanged, user, local);
+            this.emit(
+                LivePresenceEvents.presenceChanged,
+                user,
+                local,
+                evt.clientId
+            );
             if (local) {
                 this._logger?.sendTelemetryEvent(
                     TelemetryEvents.LivePresence.LocalPresenceChanged,
@@ -467,7 +472,7 @@ export class LivePresence<
             const checkUser = this._users[pos];
             if (info.userId === checkUser.userId) {
                 // User found. Apply update and check for changes
-                if (checkUser.updateReceived(evt, info)) {
+                if (checkUser.updateReceived(evt, info, local)) {
                     emitEvent(checkUser);
                 }
                 isNewUser = false;

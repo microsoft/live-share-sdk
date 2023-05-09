@@ -3,13 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    BackwardsCompatibilityHostDecorator,
-    LiveShareHostDecorator,
-    LiveShareTokenProvider,
-    RoleVerifier,
-    getInsecureTokenProvider,
-} from "./internals";
+import { LiveShareTokenProvider, getInsecureTokenProvider } from "./internals";
 import {
     AzureClient,
     AzureContainerServices,
@@ -17,10 +11,7 @@ import {
     AzureRemoteConnectionConfig,
     ITelemetryBaseLogger,
 } from "@fluidframework/azure-client";
-import {
-    ContainerSchema,
-    IFluidContainer,
-} from "@fluidframework/fluid-static";
+import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import {
     ILiveShareHost,
     ContainerState,
@@ -32,6 +23,7 @@ import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveShareContainerSchemaProxy } from "./schema-utils";
+import { RootDataObject } from "fluid-framework";
 
 /**
  * @hidden
@@ -107,7 +99,10 @@ export class LiveShareClient {
      * If true the client is configured to use a local test server.
      */
     public get isTesting(): boolean {
-        return this._options.connection?.type == "local" || this._host instanceof TestLiveShareHost;
+        return (
+            this._options.connection?.type == "local" ||
+            this._host instanceof TestLiveShareHost
+        );
     }
 
     /**
@@ -145,7 +140,10 @@ export class LiveShareClient {
             // Start runtime if needed
             const pStartRuntime = runtime.start();
 
-            const schema = getLiveShareContainerSchemaProxy(fluidContainerSchema, runtime);
+            const schema = getLiveShareContainerSchemaProxy(
+                fluidContainerSchema,
+                runtime
+            );
 
             // Initialize FRS connection config
             let config:
@@ -202,10 +200,8 @@ export class LiveShareClient {
             );
 
             // Wait in parallel for everything to finish initializing.
-            const result = await Promise.all([
-                pContainer,
-                pStartRuntime,
-            ]);
+            const result = await Promise.all([pContainer, pStartRuntime]);
+            runtime.setAudience(result[0].services.audience);
 
             performance.mark(`TeamsSync: container connecting`);
 

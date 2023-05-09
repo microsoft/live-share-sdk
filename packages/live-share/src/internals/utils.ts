@@ -129,8 +129,9 @@ export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
     try {
         const { InsecureTokenProvider } =
             await require("@fluidframework/test-client-utils");
+        const userIdParam = new URL(window.location.href)?.searchParams?.get("userId");
         const tokenProvider = new InsecureTokenProvider("", {
-            id: uuid(),
+            id: userIdParam ?? uuid(),
             name: "Test User",
         });
         return tokenProvider as ITokenProvider;

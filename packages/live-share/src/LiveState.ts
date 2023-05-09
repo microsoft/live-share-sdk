@@ -72,7 +72,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
 
     private _scope?: LiveEventScope;
     private _changeStateEvent?: LiveEventTarget<TState>;
-    private _synchronizer?: LiveObjectSynchronizer<ILiveEvent<TState>>;
+    private _synchronizer?: LiveObjectSynchronizer<TState>;
 
     /**
      * The objects fluid type/name.
@@ -155,22 +155,37 @@ export class LiveState<TState = any> extends LiveDataObject<{
         );
 
         // Create object synchronizer
-        this._synchronizer = new LiveObjectSynchronizer(
+        this._synchronizer = new LiveObjectSynchronizer<TState>(
             this.id,
             this.runtime,
-            this.context.containerRuntime,
+            this.liveRuntime,
             (connecting) => {
                 // Return current state
-                return this._latestEvent;
+                return this._latestEvent!.data;
             },
             (connecting, evt, sender) => {
-                if (!evt) return;
                 // Check for state change
                 this.remoteStateReceived(evt, sender);
+            },
+            async (connecting) => {
+                if (connecting) return true;
+                // If user has eligible roles, allow the update to be sent
+                try {
+                    return await this.verifyLocalUserRoles();
+                } catch {
+                    return false;
+                }
             }
         );
-
-        return Promise.resolve();
+        // Get the initial remote state, if there is any
+        // const events = this._synchronizer.getEvents();
+        // if (!events) return;
+        // for (let eIndex = 0; eIndex < events.length; eIndex++) {
+        //     const event = events[eIndex];
+        //     const didApply = await this.remoteStateReceived(event, event.clientId);
+        //     console.log(didApply);
+        //     if (didApply) break;
+        // }
     }
 
     /**
@@ -217,23 +232,25 @@ export class LiveState<TState = any> extends LiveDataObject<{
         this._latestEvent = value;
     }
 
-    private remoteStateReceived(
+    // Returns true if the remote state was applied successfully
+    private async remoteStateReceived(
         evt: ILiveEvent<TState>,
-        sender: string
-    ): void {
-        this.liveRuntime
-            .verifyRolesAllowed(sender, this._allowedRoles)
-            .then((allowed) => {
-                // Ensure that state is allowed, newer, and not the initial state.
-                if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt)) return;
-                this.updateState(evt, false);
-            })
-            .catch((err) => {
-                this._logger?.sendErrorEvent(
-                    TelemetryEvents.LiveState.RoleVerificationError,
-                    err
-                );
-            });
+        sender: string,
+    ): Promise<boolean> {
+        try {
+            const allowed = await this.liveRuntime
+                .verifyRolesAllowed(sender, this._allowedRoles);
+            // Ensure that state is allowed, newer, and not the initial state.
+            if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt)) return false;
+            this.updateState(evt, false);
+            return true;
+        } catch (err) {
+            this._logger?.sendErrorEvent(
+                TelemetryEvents.LiveState.RoleVerificationError,
+                err
+            );
+            return false;
+        }
     }
 
     private updateState(evt: ILiveEvent<TState>, local: boolean) {

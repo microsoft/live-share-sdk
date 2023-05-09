@@ -98,6 +98,8 @@ function proxyLiveDataObjectClass<I extends DataObjectTypes = DataObjectTypes>(
         constructor(props: IDataObjectProps<I>) {
             super(props);
             this["liveRuntime"] = runtime;
+            // Pass reference to the container runtime
+            runtime.__dangerouslySetContainerRuntime(this.context.containerRuntime);
         }
     }
 

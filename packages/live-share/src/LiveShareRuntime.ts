@@ -1,25 +1,35 @@
+import { assert } from "@fluidframework/common-utils";
 import { HostTimestampProvider } from "./HostTimestampProvider";
-import { TimestampProvider } from "./TimestampProvider";
+import {
+    LiveObjectSynchronizerManager,
+} from "./LiveObjectSynchronizer";
 import {
     IClientInfo,
     ILiveShareHost,
     IRoleVerifier,
     ITimestampProvider,
     UserMeetingRole,
+    IContainerRuntimeSignaler
 } from "./interfaces";
 import {
     BackwardsCompatibilityHostDecorator,
     LiveShareHostDecorator,
     RoleVerifier,
+    isTimestampProvider,
 } from "./internals";
+import { IAzureAudience } from "@fluidframework/azure-client";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp
  */
 export class LiveShareRuntime {
+    private _started: boolean = false;
     private _host: ILiveShareHost;
     private _timestampProvider: ITimestampProvider;
     private _roleVerifier: IRoleVerifier;
+    private _containerRuntime?: IContainerRuntimeSignaler;
+    private _objectManager: LiveObjectSynchronizerManager | null = null;
+    private _audience?: IAzureAudience;
 
     /**
      *
@@ -47,6 +57,17 @@ export class LiveShareRuntime {
         this._roleVerifier = !!roleVerifier
             ? roleVerifier
             : new RoleVerifier(this._host);
+    }
+
+    /**
+     * `LiveObjectSynchronizerManager` instance
+     */
+    public get objectManager(): LiveObjectSynchronizerManager {
+        assert(
+            this._objectManager !== null,
+            "LiveObjectSynchronizerManager not initialized."
+        );
+        return this._objectManager;
     }
 
     /**
@@ -117,37 +138,73 @@ export class LiveShareRuntime {
     }
 
     /**
+     * Set the audience for the runtime
+     * @param audience `IAzureAudience` returned by `AzureClient`
+     */
+    public setAudience(audience: IAzureAudience) {
+        this._audience = audience;
+        this._objectManager?.setAudience(this._audience);
+    }
+
+    /**
      * Start the timestamp provider
      */
     public async start() {
+        if (this._started) {
+            throw new Error("LiveShareRuntime.start(): cannot call start when already started");
+        }
+        this._started = true;
+        if (this._objectManager) {
+            this.startObjectSynchronizerManager();
+        }
         // Start provider if needed
         if (
-            this.isTimestampProvider(this._timestampProvider) &&
+            isTimestampProvider(this._timestampProvider) &&
             !this._timestampProvider.isRunning
         ) {
             await this._timestampProvider.start();
         }
-
-        return Promise.resolve();
     }
 
     /**
      * Stop the timestamp provider
      */
     public stop() {
+        if (!this._started) {
+            throw new Error("LiveShareRuntime.stop(): cannot call stop when not already started");
+        }
+        this._started = false;
         // Start provider if needed
         if (
-            this.isTimestampProvider(this._timestampProvider) &&
+            isTimestampProvider(this._timestampProvider) &&
             this._timestampProvider.isRunning
         ) {
             this._timestampProvider.stop();
         }
+        this.objectManager.stop();
+    }
+
+    /**
+     * @hidden
+     * Do not use this API unless you know what you are doing. Can cause the object synchronizer to stop working.
+     */
+    public __dangerouslySetContainerRuntime(cRuntime: IContainerRuntimeSignaler) {
+        if (this._containerRuntime === cRuntime) return;
+        this._containerRuntime = cRuntime;
+        if (this._objectManager) {
+            this._objectManager.stop();
+        }
+        this._objectManager = new LiveObjectSynchronizerManager(
+            this, this._containerRuntime
+        );
+        this.startObjectSynchronizerManager();
     }
 
     /**
      * @hidden
      */
-    protected isTimestampProvider(value: any): value is TimestampProvider {
-        return typeof value?.start === "function";
+    private startObjectSynchronizerManager() {
+        // If this is being set after the objectManager was started, 
+        this.objectManager.start();
     }
 }

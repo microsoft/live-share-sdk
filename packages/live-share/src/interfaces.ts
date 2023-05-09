@@ -3,6 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { IAudience } from "@fluidframework/container-definitions";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidContainer } from "fluid-framework";
 import { LiveShareRuntime } from "./LiveShareRuntime";
@@ -297,4 +299,27 @@ export interface ILiveShareJoinResults {
      * Whether the local user was the one to create the container
      */
     created: boolean;
+}
+
+/**
+ * Duck type of something that provides the expected signalling functionality at the container level.
+ *
+ * @remarks
+ * Simplifies the mocks needed to unit test the `LiveObjectSynchronizer`. Applications can
+ * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
+ */
+export interface IContainerRuntimeSignaler {
+    on(
+        event: "signal",
+        listener: (message: IInboundSignalMessage, local: boolean) => void
+    ): this;
+    off(
+        event: "signal",
+        listener: (message: IInboundSignalMessage, local: boolean) => void
+    ): this;
+    submitSignal(type: string, content: any): void;
+    /**
+     * Returns the current audience.
+     */
+    getAudience(): IAudience;
 }

@@ -55,8 +55,8 @@ export abstract class LiveDataObject<
                 resolve(clientId);
             };
 
-            if (this.runtime.connected) {
-                resolve(this.runtime.clientId as string);
+            if (this.runtime.clientId) {
+                resolve(this.runtime.clientId);
             } else {
                 this.runtime.on("connected", onConnected);
             }

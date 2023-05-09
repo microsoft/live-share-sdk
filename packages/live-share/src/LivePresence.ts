@@ -67,7 +67,7 @@ export class LivePresence<
 
     private _scope?: LiveEventScope;
     private _updatePresenceEvent?: LiveEventTarget<ILivePresenceEvent<TData>>;
-    private _synchronizer?: LiveObjectSynchronizer<ILiveEvent<TData>>;
+    private _synchronizer?: LiveObjectSynchronizer<ILivePresenceEvent<TData>>;
 
     /**
      * The objects fluid type/name.
@@ -152,6 +152,7 @@ export class LivePresence<
         state = PresenceState.online,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
+        this.context.containerRuntime
         if (this._scope) {
             throw new Error(`LivePresence: already started.`);
         }
@@ -197,12 +198,10 @@ export class LivePresence<
         );
 
         // Create object synchronizer
-        this._synchronizer = new LiveObjectSynchronizer<
-            LivePresenceReceivedEventData<TData>
-        >(
+        this._synchronizer = new LiveObjectSynchronizer<ILivePresenceEvent<TData>>(
             this.id,
             this.runtime,
-            this.context.containerRuntime,
+            this.liveRuntime,
             (connecting) => {
                 // Update timestamp for current presence
                 // - If we don't do this the user will timeout and show as "offline" for all other
@@ -213,13 +212,30 @@ export class LivePresence<
                     this.liveRuntime.getTimestamp();
 
                 // Return current presence
-                return this._currentPresence;
+                return this._currentPresence!.data;
             },
             (connecting, state, sender) => {
                 // Add user to list
-                this.updateMembersList(state!, false);
+                this.updateMembersList(state, false);
+            },
+            async (connecting) => {
+                if (connecting) return true;
+                // If user has eligible roles, allow the update to be sent
+                try {
+                    return await this.verifyLocalUserRoles();
+                } catch {
+                    return false;
+                }
             }
         );
+        // Broadcast initial presence, or silently fail trying
+        // this.update(this._currentPresence!.data.data, this._currentPresence!.data.state)
+        //     .catch(() => {});
+        // // Update remote user initial presence for existing values
+        // this._synchronizer!.getEvents()?.forEach((evt) => {
+        //     if (evt.clientId === this._currentPresence?.clientId) return;
+        //     this.updateMembersList(evt, false, localClientInfo);
+        // });
     }
 
     /**

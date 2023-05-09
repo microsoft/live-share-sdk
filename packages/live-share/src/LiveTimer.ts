@@ -198,7 +198,7 @@ export class LiveTimer extends LiveDataObject<{
         this._synchronizer = new LiveObjectSynchronizer<ITimerConfig>(
             this.id,
             this.runtime,
-            this.context.containerRuntime,
+            this.liveRuntime,
             (connecting) => {
                 // Return current state
                 return this._currentConfig;
@@ -206,7 +206,19 @@ export class LiveTimer extends LiveDataObject<{
             (connecting, state, sender) => {
                 if (!state || !sender) return;
                 // Check for state change
-                this.remoteConfigReceived(state, sender);
+                this.remoteConfigReceived({
+                    ...state.data,
+                    clientId: sender
+                }, sender);
+            },
+            async (connecting) => {
+                if (connecting) return true;
+                // If user has eligible roles, allow the update to be sent
+                try {
+                    return await this.verifyLocalUserRoles();
+                } catch {
+                    return false;
+                }
             }
         );
     }

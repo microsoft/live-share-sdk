@@ -15,7 +15,7 @@ import {
 } from "@fluidframework/core-interfaces";
 import { assert } from "@fluidframework/common-utils";
 import { ConsensusRegisterCollection } from "@fluidframework/register-collection";
-import { DynamicObjectRegistry } from "@microsoft/live-share";
+import { DynamicObjectRegistry, LiveDataObject } from "@microsoft/live-share";
 
 // Register ConsensusRegisterCollection
 DynamicObjectRegistry.registerObjectClass(ConsensusRegisterCollection, ConsensusRegisterCollection.getFactory().type);
@@ -28,7 +28,7 @@ const dynamicObjectsCollectionKey = "<<consensusRegisterCollectionKey>>";
  * @remarks
  * If a DDS does not yet exist for a given key, a new one is created. Fluid `ConsensusRegisterCollection` is used to ensure that only one person will create the DDS.
  */
-export class DynamicObjectManager extends DataObject {
+export class DynamicObjectManager extends LiveDataObject {
     private _dynamicObjectsCollection: DynamicObjectsCollection | undefined;
 
     /**
@@ -168,24 +168,5 @@ export class DynamicObjectManager extends DataObject {
         }
         // Fluid did not acknowledge the write, either because the container disconnected or someone else created the object already, so we need to try again
         return await this.loadDDSWithConsensus(key, localDDS);
-    }
-
-    /**
-     * Wait until the socket is connected before continuing.
-     * @returns promise with clientId that resolves when the socket is connected
-     */
-    private waitUntilConnected(): Promise<string> {
-        return new Promise((resolve) => {
-            const onConnected = (clientId: string) => {
-                this.runtime.off("connected", onConnected);
-                resolve(clientId);
-            };
-
-            if (this.runtime.connected) {
-                resolve(this.runtime.clientId as string);
-            } else {
-                this.runtime.on("connected", onConnected);
-            }
-        });
     }
 }

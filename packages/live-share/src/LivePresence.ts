@@ -133,7 +133,7 @@ export class LivePresence<
         if (!clientId) {
             return undefined;
         }
-        return this._users.find((user) => user.isFromClient(clientId))?.userId;
+        return this.getUserForClient(clientId)?.userId;
     }
 
     /**
@@ -222,10 +222,9 @@ export class LivePresence<
      * @param filter Optional. Presence state to filter enumeration to.
      * @returns Array of presence objects.
      */
-    public toArray(filter?: PresenceState): LivePresenceUser<TData>[] {
-        const list: LivePresenceUser<TData>[] = [];
-        this.forEach((presence) => list.push(presence), filter);
-        return list;
+    public getUsers(filter?: PresenceState): LivePresenceUser<TData>[] {
+        if (!filter) return this._users;
+        return this._users.filter((user) => user.state == filter);
     }
 
     /**
@@ -255,59 +254,14 @@ export class LivePresence<
     }
 
     /**
-     * Enumerates each user the object is tracking presence for.
-     * @param callback Function to call for each user.
-     * @param callback.user Current presence information for a user.
-     * @param filter Optional. Presence state to filter enumeration to.
-     */
-    public forEach(
-        callback: (user: LivePresenceUser<TData>) => void,
-        filter?: PresenceState
-    ): void {
-        this._users.forEach((user) => {
-            // Ensure user matches filter
-            if (filter == undefined || user.state == filter) {
-                callback(user);
-            }
-        });
-    }
-
-    /**
-     * Counts the number of users that the object is tracking presence for.
-     * @param filter Optional. Presence state to filter count to.
-     * @returns Total number of other users we've seen or number of users with a given presence status.
-     */
-    public getCount(filter?: PresenceState): number {
-        if (filter != undefined) {
-            let cnt = 0;
-            this._users.forEach((user) => {
-                if (user.state == filter) {
-                    cnt++;
-                }
-            });
-
-            return cnt;
-        }
-
-        return this._users.length;
-    }
-
-    /**
      * Returns the current presence info for a specific client ID.
      * @param clientId The ID of the client to retrieve.
      * @returns The current presence information for the client if they've connected to the space.
      */
-    public getPresenceForClient(
+    public getUserForClient(
         clientId: string
     ): LivePresenceUser<TData> | undefined {
-        for (let i = 0; i < this._users.length; i++) {
-            const user = this._users[i];
-            if (user.isFromClient(clientId)) {
-                return user;
-            }
-        }
-
-        return undefined;
+        return this._users.find((user) => user.isFromClient(clientId));
     }
 
     /**
@@ -315,17 +269,8 @@ export class LivePresence<
      * @param userId The ID of the user to retrieve.
      * @returns The current presence information for the user if they've connected to the space.
      */
-    public getPresenceForUser(
-        userId: string
-    ): LivePresenceUser<TData> | undefined {
-        for (let i = 0; i < this._users.length; i++) {
-            const user = this._users[i];
-            if (user.userId == userId) {
-                return user;
-            }
-        }
-
-        return undefined;
+    public getUser(userId: string): LivePresenceUser<TData> | undefined {
+        return this._users.find((user) => user.userId == userId);
     }
 
     private updateMembersList(

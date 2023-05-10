@@ -116,8 +116,17 @@ export class LivePresenceUser<TData = object> {
     /**
      * Returns the user's connections.
      */
-    public get connections(): LivePresenceConnection<TData>[] {
-        return Array.from(this._connections.values());
+    public getConnections(
+        filter?: PresenceState
+    ): LivePresenceConnection<TData>[] {
+        const list: LivePresenceConnection<TData>[] = [];
+        this._connections.forEach((connection) => {
+            // Ensure connection matches filter
+            if (filter == undefined || connection.state == filter) {
+                list.push(connection);
+            }
+        });
+        return list;
     }
 
     public getConnection(

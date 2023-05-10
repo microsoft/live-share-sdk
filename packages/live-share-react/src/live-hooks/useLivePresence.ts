@@ -99,7 +99,7 @@ export function useLivePresence<TData extends object = object>(
 
         const onPresenceChanged = () => {
             const updatedLocalUsers: LivePresenceUser<TData>[] = [];
-            livePresence?.forEach((user) => {
+            livePresence?.getUsers().forEach((user) => {
                 updatedLocalUsers.push(user);
             });
             setAllUsers(updatedLocalUsers);
@@ -107,7 +107,11 @@ export function useLivePresence<TData extends object = object>(
         livePresence.on("presenceChanged", onPresenceChanged);
 
         if (!livePresence.isInitialized) {
-            livePresence.initialize(initialData, initialPresenceState, allowedRoles);
+            livePresence.initialize(
+                initialData,
+                initialPresenceState,
+                allowedRoles
+            );
         } else {
             onPresenceChanged();
         }

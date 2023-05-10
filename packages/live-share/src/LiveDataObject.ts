@@ -2,6 +2,7 @@ import { DataObject, DataObjectTypes, IDataObjectProps } from "@fluidframework/a
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { assert } from "@fluidframework/common-utils";
 import { UserMeetingRole } from "./interfaces";
+import { waitUntilConnected } from "./internals";
 
 /**
  * Extends Fluid's DataObject class. Intended for use with Live Share custom DDS's that rely on a `ILiveShareHost`.
@@ -49,18 +50,7 @@ export abstract class LiveDataObject<
      * @returns clientId
      */
     protected waitUntilConnected(): Promise<string> {
-        return new Promise((resolve) => {
-            const onConnected = (clientId: string) => {
-                this.runtime.off("connected", onConnected);
-                resolve(clientId);
-            };
-
-            if (this.runtime.clientId) {
-                resolve(this.runtime.clientId);
-            } else {
-                this.runtime.on("connected", onConnected);
-            }
-        });
+        return waitUntilConnected(this.runtime);
     }
 
     

@@ -180,7 +180,11 @@ export class LiveTimer extends LiveDataObject<{
         this._allowedRoles = allowedRoles || [];
 
         // Create event scope
-        this._scope = new LiveEventScope(this.runtime, this.liveRuntime, allowedRoles);
+        this._scope = new LiveEventScope(
+            this.runtime,
+            this.liveRuntime,
+            allowedRoles
+        );
 
         // TODO: make enum for event type names
         this._playEvent = new LiveEventTarget(
@@ -198,7 +202,10 @@ export class LiveTimer extends LiveDataObject<{
         this._synchronizer = new LiveObjectSynchronizer<ITimerConfig>(
             this.id,
             this.runtime,
-            this.liveRuntime,
+            this.liveRuntime
+        );
+        await this._synchronizer.start(
+            this._currentConfig,
             (connecting) => {
                 // Return current state
                 return this._currentConfig;
@@ -206,10 +213,13 @@ export class LiveTimer extends LiveDataObject<{
             (connecting, state, sender) => {
                 if (!state || !sender) return;
                 // Check for state change
-                this.remoteConfigReceived({
-                    ...state.data,
-                    clientId: sender
-                }, sender);
+                this.remoteConfigReceived(
+                    {
+                        ...state.data,
+                        clientId: sender,
+                    },
+                    sender
+                );
             },
             async (connecting) => {
                 if (connecting) return true;
@@ -221,6 +231,20 @@ export class LiveTimer extends LiveDataObject<{
                 }
             }
         );
+        // Get the initial remote state, if there is any
+        const events = this._synchronizer.getEvents();
+        if (!events) return;
+        for (let eIndex = 0; eIndex < events.length; eIndex++) {
+            const event = events[eIndex];
+            const didApply = await this.remoteConfigReceived(
+                {
+                    ...event.data,
+                    clientId: event.clientId,
+                },
+                event.clientId
+            );
+            if (didApply) break;
+        }
     }
 
     /**
@@ -270,7 +294,10 @@ export class LiveTimer extends LiveDataObject<{
         }
     }
 
-    private async playInternal(duration: number, position: number): Promise<void> {
+    private async playInternal(
+        duration: number,
+        position: number
+    ): Promise<void> {
         // Broadcast state change
         const event: PlayEventReceived = await this._playEvent!.sendEvent({
             duration: duration,
@@ -278,7 +305,7 @@ export class LiveTimer extends LiveDataObject<{
         });
 
         // Update local state immediately
-        this.updateConfig(this.playEventToConfig(event), true);
+        await this.updateConfig(this.playEventToConfig(event), true);
     }
 
     /**
@@ -303,54 +330,65 @@ export class LiveTimer extends LiveDataObject<{
             });
 
             // Update local state immediately
-            this.updateConfig(this.pauseEventToConfig(event), true);
+            await this.updateConfig(this.pauseEventToConfig(event), true);
         }
     }
 
     private _handlePlay(event: PlayEventReceived, local: boolean) {
         if (!local) {
             const newConfig = this.playEventToConfig(event);
-            this.remoteConfigReceived(newConfig, event.clientId);
+            this.remoteConfigReceived(newConfig, event.clientId).catch((err) =>
+                console.error(err)
+            );
         }
     }
 
     private _handlePause(event: PauseEventReceived, local: boolean) {
         if (!local) {
             const newConfig = this.pauseEventToConfig(event);
-            this.remoteConfigReceived(newConfig, event.clientId);
+            this.remoteConfigReceived(newConfig, event.clientId).catch((err) =>
+                console.error(err)
+            );
         }
     }
 
-    private remoteConfigReceived(config: ITimerConfig, sender: string): void {
-        this.liveRuntime.verifyRolesAllowed(sender, this._allowedRoles)
-            .then((allowed) => {
-                // Ensure that state is allowed, newer, and not the initial state.
-                const currentClientTimestamp: IClientTimestamp = {
-                    timestamp: this._currentConfig.configChangedAt,
-                    clientId: this._currentConfig.clientId,
-                };
+    private async remoteConfigReceived(
+        config: ITimerConfig,
+        sender: string
+    ): Promise<boolean> {
+        try {
+            const allowed = await this.liveRuntime.verifyRolesAllowed(
+                sender,
+                this._allowedRoles
+            );
+            // Ensure that state is allowed, newer, and not the initial state.
+            const currentClientTimestamp: IClientTimestamp = {
+                timestamp: this._currentConfig.configChangedAt,
+                clientId: this._currentConfig.clientId,
+            };
 
-                const newClientTimestamp: IClientTimestamp = {
-                    timestamp: config.configChangedAt,
-                    clientId: sender,
-                };
+            const newClientTimestamp: IClientTimestamp = {
+                timestamp: config.configChangedAt,
+                clientId: sender,
+            };
 
-                const isConfigNewer = LiveEvent.isNewer(
-                    currentClientTimestamp,
-                    newClientTimestamp
-                );
+            const isConfigNewer = LiveEvent.isNewer(
+                currentClientTimestamp,
+                newClientTimestamp
+            );
 
-                if (allowed && isConfigNewer) {
-                    config.clientId = sender;
-                    this.updateConfig(config, false);
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+            if (allowed && isConfigNewer) {
+                config.clientId = sender;
+                this.updateConfig(config, false);
+                return true;
+            }
+            return false;
+        } catch (err) {
+            return false;
+        }
     }
 
-    private updateConfig(config: ITimerConfig, local: boolean) {
+    private async updateConfig(config: ITimerConfig, local: boolean) {
         const userExposedConfig = cloneValue(config);
         this._currentConfig = userExposedConfig;
 
@@ -366,6 +404,9 @@ export class LiveTimer extends LiveDataObject<{
 
         if (userExposedConfig.running) {
             this.startTicking();
+        }
+        if (local) {
+            return await this._synchronizer!.sendEvent(config);
         }
     }
 
@@ -407,7 +448,10 @@ export class LiveTimer extends LiveDataObject<{
                         position: this._currentConfig.duration,
                         running: false,
                     };
-                    this.updateConfig(newConfig, true);
+                    this.updateConfig(newConfig, true)
+                        .catch((err) => {
+                            console.error(err);
+                        });
                 } else {
                     this.emit(LiveTimerEvents.onTick, endTime - timestamp);
                     this.scheduleAnimationFrame(tickCallback);

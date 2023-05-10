@@ -65,8 +65,6 @@ export class LivePresence<
     private _lastEmitPresenceStateMap = new Map<string, PresenceState>();
     private _currentPresence?: LivePresenceReceivedEventData<TData>;
 
-    private _scope?: LiveEventScope;
-    private _updatePresenceEvent?: LiveEventTarget<ILivePresenceEvent<TData>>;
     private _synchronizer?: LiveObjectSynchronizer<ILivePresenceEvent<TData>>;
 
     /**
@@ -88,7 +86,7 @@ export class LivePresence<
      * Returns true if the object has been initialized.
      */
     public get isInitialized(): boolean {
-        return !!this._scope;
+        return !!this._synchronizer;
     }
 
     /**
@@ -152,8 +150,7 @@ export class LivePresence<
         state = PresenceState.online,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
-        this.context.containerRuntime
-        if (this._scope) {
+        if (this._synchronizer) {
             throw new Error(`LivePresence: already started.`);
         }
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
@@ -161,47 +158,15 @@ export class LivePresence<
         // Save off allowed roles
         this._allowedRoles = allowedRoles || [];
 
-        this._currentPresence = {
-            clientId: await this.waitUntilConnected(),
-            name: "UpdatePresence",
-            timestamp: this.liveRuntime.getTimestamp(),
-            data: {
+        // Create object synchronizer
+        this._synchronizer = new LiveObjectSynchronizer<
+            ILivePresenceEvent<TData>
+        >(this.id, this.runtime, this.liveRuntime);
+        await this._synchronizer!.start(
+            {
                 state,
                 data,
             },
-        };
-
-        // Create event scope
-        this._scope = new LiveEventScope(
-            this.runtime,
-            this.liveRuntime,
-            allowedRoles
-        );
-
-        // make sure client info for local user is available
-        const localClientInfo = await this.liveRuntime.getClientInfo(
-            this._currentPresence.clientId
-        );
-        // Add local user to list
-        this.updateMembersList(this._currentPresence, true, localClientInfo);
-
-        // Listen for PresenceUpdated event (allow local presence changes to be echoed back)
-        this._updatePresenceEvent = new LiveEventTarget(
-            this._scope,
-            "UpdatePresence",
-            (evt, local) => {
-                if (!local) {
-                    // Update users list
-                    this.updateMembersList(evt, local);
-                }
-            }
-        );
-
-        // Create object synchronizer
-        this._synchronizer = new LiveObjectSynchronizer<ILivePresenceEvent<TData>>(
-            this.id,
-            this.runtime,
-            this.liveRuntime,
             (connecting) => {
                 // Update timestamp for current presence
                 // - If we don't do this the user will timeout and show as "offline" for all other
@@ -228,14 +193,19 @@ export class LivePresence<
                 }
             }
         );
+        // make sure client info for local user is available
+        this._currentPresence = this._synchronizer!.getLatestEventForClient(await this.waitUntilConnected());
         // Broadcast initial presence, or silently fail trying
-        // this.update(this._currentPresence!.data.data, this._currentPresence!.data.state)
-        //     .catch(() => {});
-        // // Update remote user initial presence for existing values
-        // this._synchronizer!.getEvents()?.forEach((evt) => {
-        //     if (evt.clientId === this._currentPresence?.clientId) return;
-        //     this.updateMembersList(evt, false, localClientInfo);
-        // });
+        this.update(
+            this._currentPresence!.data.data,
+            this._currentPresence!.data.state
+        ).catch(() => {});
+        // Update remote user initial presence for existing values
+        this._synchronizer!.getEvents()?.forEach((evt) => {
+            if (evt.clientId === this._currentPresence?.clientId) return;
+            // Add user to list
+            this.updateMembersList(evt, false);
+        });
     }
 
     /**
@@ -268,12 +238,12 @@ export class LivePresence<
      * @param state Optional. Presence state to change.
      */
     public async update(data?: TData, state?: PresenceState): Promise<void> {
-        if (!this._scope || !this._currentPresence) {
+        if (!this._synchronizer || !this._currentPresence) {
             throw new Error(`LivePresence: not started.`);
         }
 
         // Broadcast state change
-        const evt = await this._updatePresenceEvent!.sendEvent({
+        const evt = await this._synchronizer!.sendEvent({
             state: state ?? this._currentPresence.data.state,
             data: cloneValue(data) ?? this._currentPresence.data.data,
         });

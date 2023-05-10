@@ -5,6 +5,7 @@
 
 import { ITokenProvider } from "@fluidframework/azure-client";
 import { v4 as uuid } from "uuid";
+import { IRuntimeSignaler } from "../LiveEventScope";
 
 /**
  * @hidden
@@ -140,4 +141,24 @@ export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
             "@microsoft/live-share: when using 'local' connection type, you must have @fluidframework/test-client-utils installed"
         );
     }
+}
+
+/**
+ * @hidden
+ * Waits until connected and gets the most recent clientId
+ * @returns clientId
+ */
+export function waitUntilConnected(runtime: IRuntimeSignaler): Promise<string> {
+    return new Promise((resolve) => {
+        const onConnected = (clientId: string) => {
+            runtime.off("connected", onConnected);
+            resolve(clientId);
+        };
+
+        if (runtime.clientId) {
+            resolve(runtime.clientId);
+        } else {
+            runtime.on("connected", onConnected);
+        }
+    });
 }

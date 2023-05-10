@@ -191,7 +191,9 @@ export class LivePresence<
             }
         );
         // make sure client info for local user is available
-        this._currentPresence = this._synchronizer!.getLatestEventForClient(await this.waitUntilConnected());
+        this._currentPresence = this._synchronizer!.getLatestEventForClient(
+            await this.waitUntilConnected()
+        );
         // Broadcast initial presence, or silently fail trying
         this.update(
             this._currentPresence!.data.data,
@@ -328,49 +330,35 @@ export class LivePresence<
 
     private updateMembersList(
         evt: LivePresenceReceivedEventData<TData>,
-        local: boolean,
-        initLocalClientInfo?: IClientInfo
+        local: boolean
     ): void {
-        if (!evt.clientId) return;
+        if (!evt.clientId) return; // TODO: delete in ryans pr
         this.liveRuntime
             .verifyRolesAllowed(evt.clientId, this._allowedRoles)
             .then((allowed) => {
                 if (!allowed) return;
-                if (initLocalClientInfo) {
-                    this.updateMembersListWithInfo(
-                        evt,
-                        local,
-                        initLocalClientInfo
-                    );
-                } else if (evt.clientId) {
-                    this.liveRuntime
-                        .getClientInfo(evt.clientId)
-                        .then((info) => {
-                            if (!info) return;
+                this.liveRuntime
+                    .getClientInfo(evt.clientId)
+                    .then((info) => {
+                        if (!info) return;
 
-                            if (this.useTransientParticipantWorkaround(info)) {
-                                this.transientParticipantWorkaround(
-                                    evt,
-                                    local,
-                                    info
-                                );
-                            } else {
-                                // normal flow
-                                this.updateMembersListWithInfo(
-                                    evt,
-                                    local,
-                                    info
-                                );
-                            }
-                        })
-                        .catch((err) => {
-                            this._logger?.sendErrorEvent(
-                                TelemetryEvents.LivePresence
-                                    .RoleVerificationError,
-                                err
+                        if (this.useTransientParticipantWorkaround(info)) {
+                            this.transientParticipantWorkaround(
+                                evt,
+                                local,
+                                info
                             );
-                        });
-                }
+                        } else {
+                            // normal flow
+                            this.updateMembersListWithInfo(evt, local, info);
+                        }
+                    })
+                    .catch((err) => {
+                        this._logger?.sendErrorEvent(
+                            TelemetryEvents.LivePresence.RoleVerificationError,
+                            err
+                        );
+                    });
             })
             .catch((err) => {
                 this._logger?.sendErrorEvent(
@@ -458,8 +446,8 @@ export class LivePresence<
             info,
             evt,
             this._expirationPeriod,
-            evt.clientId === this._currentPresence?.clientId,
-            this.liveRuntime
+            this.liveRuntime,
+            local
         );
         this._users.push(newUser);
         emitEvent(newUser);

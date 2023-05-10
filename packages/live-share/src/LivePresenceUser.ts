@@ -53,6 +53,7 @@ export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
     private _connections: Map<string, LivePresenceConnection<TData>> =
         new Map();
+    private _isLocalUser: boolean = false;
 
     /**
      * @hidden
@@ -61,10 +62,10 @@ export class LivePresenceUser<TData = object> {
         private _clientInfo: IClientInfo,
         private _evt: LivePresenceReceivedEventData<TData>,
         private _expirationPeriod: TimeInterval,
-        private _isLocalUser: boolean,
-        private _liveRuntime: LiveShareRuntime
+        private _liveRuntime: LiveShareRuntime,
+        _isLocalEvent: boolean
     ) {
-        this.updateClients(this._evt, this.isLocalUser);
+        this.updateClients(this._evt, _isLocalEvent);
         this._lastUpdateTime = this._liveRuntime.getTimestamp();
     }
 
@@ -179,6 +180,11 @@ export class LivePresenceUser<TData = object> {
         if (connection) {
             connection.updateConnection(evt);
         } else {
+            if (local) {
+                // local user may have received event from non local connection first,
+                // resulting in local user being false, set to true
+                this._isLocalUser = local;
+            }
             this._connections.set(
                 evt.clientId,
                 new LivePresenceConnection(

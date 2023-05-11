@@ -3,20 +3,23 @@ import { TestLiveShareHost } from "../TestLiveShareHost";
 import { IContainerRuntimeSignaler } from "../interfaces";
 import { MockContainerRuntimeSignaler } from "./MockContainerRuntimeSignaler";
 import { MockTimestampProvider } from "./MockTimestampProvider";
+import { LocalTimestampProvider } from "../LocalTimestampProvider";
 
 export class MockLiveShareRuntime extends LiveShareRuntime {
-    constructor(shouldCreateMockContainer = false, private readonly updateInterval = 10000) {
+    constructor(
+        shouldCreateMockContainer = false,
+        private readonly updateInterval = 10000
+    ) {
         const host = TestLiveShareHost.create();
-        super(
-            host,
-            new MockTimestampProvider()
-        );
+        super(host, new LocalTimestampProvider());
         if (shouldCreateMockContainer) {
             const localContainer = new MockContainerRuntimeSignaler();
             this.__dangerouslySetContainerRuntime(localContainer);
         }
     }
-    override __dangerouslySetContainerRuntime(container: IContainerRuntimeSignaler) {
+    override __dangerouslySetContainerRuntime(
+        container: IContainerRuntimeSignaler
+    ) {
         if (this._containerRuntime) return;
         super.__dangerouslySetContainerRuntime(container);
         this.objectManager.updateInterval = this.updateInterval;

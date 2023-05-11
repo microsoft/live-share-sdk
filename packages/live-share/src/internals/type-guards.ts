@@ -11,13 +11,13 @@ interface IMobileWorkaroundRolesResponse {
 export function isMobileWorkaroundRolesResponse(
     value: any
 ): value is IMobileWorkaroundRolesResponse {
-    return isRolesArray(value?.userRoles);
+    return isClientRolesResponse(value?.userRoles);
 }
 
 /**
  * @hidden
  */
-export function isRolesArray(value: any): value is UserMeetingRole[] {
+export function isClientRolesResponse(value: any): value is UserMeetingRole[] {
     return (
         Array.isArray(value) && value.every((val) => typeof val === "string")
     );
@@ -26,8 +26,11 @@ export function isRolesArray(value: any): value is UserMeetingRole[] {
 /**
  * @hidden
  */
-export function isIClientInfo(value: any): value is IClientInfo {
-    return value?.userId !== undefined && isRolesArray(value?.roles);
+export function isIClientInfo(value: any): value is IClientInfo | undefined {
+    return (
+        value === undefined ||
+        (value?.userId !== undefined && isClientRolesResponse(value?.roles))
+    );
 }
 
 /**

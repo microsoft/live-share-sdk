@@ -6,10 +6,7 @@
 import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { assert } from "@fluidframework/common-utils";
 import { IEvent } from "@fluidframework/common-definitions";
-import {
-    ILiveEvent,
-    UserMeetingRole,
-} from "./interfaces";
+import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { cloneValue, TelemetryEvents } from "./internals";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
@@ -135,31 +132,35 @@ export class LiveState<TState = any> extends LiveDataObject<{
         this._synchronizer = new LiveObjectSynchronizer<TState>(
             this.id,
             this.runtime,
-            this.liveRuntime,
+            this.liveRuntime
         );
-        await this._synchronizer.start(initialState, (connecting) => {
-            // Return current state
-            return this._latestEvent!.data;
-        },
-        (connecting, evt, sender) => {
-            // Check for state change
-            this.remoteStateReceived(evt, sender);
-        },
-        async (connecting) => {
-            if (connecting) return true;
-            // If user has eligible roles, allow the update to be sent
-            try {
-                return await this.verifyLocalUserRoles();
-            } catch {
-                return false;
+        await this._synchronizer.start(
+            initialState,
+            async (evt, sender, local) => {
+                // Check for state change.
+                // If it was valid, this will override the local user's previous value.
+                return await this.remoteStateReceived(evt, sender, local);
+            },
+            async (connecting) => {
+                if (connecting) return true;
+                // If user has eligible roles, allow the update to be sent
+                try {
+                    return await this.verifyLocalUserRoles();
+                } catch {
+                    return false;
+                }
             }
-        });
+        );
         // Get the initial remote state, if there is any
         const events = this._synchronizer.getEvents();
         if (!events) return;
         for (let eIndex = 0; eIndex < events.length; eIndex++) {
             const event = events[eIndex];
-            const didApply = await this.remoteStateReceived(event, event.clientId);
+            const didApply = await this.remoteStateReceived(
+                event,
+                event.clientId,
+                event.clientId === await this.waitUntilConnected()
+            );
             if (didApply) break;
         }
     }
@@ -212,13 +213,18 @@ export class LiveState<TState = any> extends LiveDataObject<{
     private async remoteStateReceived(
         evt: ILiveEvent<TState>,
         sender: string,
+        local: boolean
     ): Promise<boolean> {
         try {
-            const allowed = await this.liveRuntime
-                .verifyRolesAllowed(sender, this._allowedRoles);
+            const allowed = await this.liveRuntime.verifyRolesAllowed(
+                sender,
+                this._allowedRoles
+            );
             // Ensure that state is allowed, newer, and not the initial state.
-            if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt)) return false;
-            this.updateState(evt, false);
+            if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt))
+                return false;
+            console.log("applying change", evt);
+            this.updateState(evt, local);
             return true;
         } catch (err) {
             this._logger?.sendErrorEvent(

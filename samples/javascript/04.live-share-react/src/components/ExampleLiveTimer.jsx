@@ -15,6 +15,7 @@ export function ExampleLiveTimer() {
         TICK_RATE_MILLISECONDS
     );
 
+    const activeTimerDuration = timerConfig?.duration ?? duration;
     return (
         <div>
             <div className="full-width">
@@ -74,7 +75,7 @@ export function ExampleLiveTimer() {
                 </button>
                 {milliRemaining !== undefined && (
                     <p>{`${Math.round(milliRemaining / 1000)} / ${Math.round(
-                        timerConfig.duration / 1000
+                        activeTimerDuration / 1000
                     )} seconds`}</p>
                 )}
                 {milliRemaining === undefined && (

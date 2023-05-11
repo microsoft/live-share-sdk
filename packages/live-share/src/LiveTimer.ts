@@ -206,14 +206,10 @@ export class LiveTimer extends LiveDataObject<{
         );
         await this._synchronizer.start(
             this._currentConfig,
-            (connecting) => {
-                // Return current state
-                return this._currentConfig;
-            },
-            (connecting, state, sender) => {
-                if (!state || !sender) return;
-                // Check for state change
-                this.remoteConfigReceived(
+            async (state, sender) => {
+                // Check for state change.
+                // If it was valid, this will override the local user's previous value.
+                return await this.remoteConfigReceived(
                     {
                         ...state.data,
                         clientId: sender,
@@ -448,10 +444,9 @@ export class LiveTimer extends LiveDataObject<{
                         position: this._currentConfig.duration,
                         running: false,
                     };
-                    this.updateConfig(newConfig, true)
-                        .catch((err) => {
-                            console.error(err);
-                        });
+                    this.updateConfig(newConfig, true).catch((err) => {
+                        console.error(err);
+                    });
                 } else {
                     this.emit(LiveTimerEvents.onTick, endTime - timestamp);
                     this.scheduleAnimationFrame(tickCallback);

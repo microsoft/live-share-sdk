@@ -1,0 +1,256 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the Microsoft Live Share SDK License.
+ */
+
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
+import { TypedEventEmitter } from "@fluidframework/common-utils";
+import { IRuntimeSignaler } from "./LiveEventScope";
+import { LiveShareRuntime } from "./LiveShareRuntime";
+import { IContainerRuntimeSignaler, ILiveEvent } from "./interfaces";
+import { LiveEvent } from "./LiveEvent";
+import {
+    ContainerSynchronizer,
+    GetAndUpdateStateHandlers,
+    IContainerLiveObjectStoreEvents,
+    ILiveClientEventMap,
+    ILiveObjectStore,
+    ObjectSynchronizerEvents,
+    StateSyncEventContent,
+    cloneValue,
+    isILiveEvent,
+    waitUntilConnected,
+} from "./internals";
+import { IAzureAudience } from "@fluidframework/azure-client";
+
+/**
+ * Manager of all of the `LiveObjectSynchronizer` objects
+ *
+ * @remarks
+ * This is intended for use through `LiveShareRuntime`.
+ */
+export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectStoreEvents> {
+    private objectStoreMap: ILiveObjectStore = new Map();
+
+    private _audience?: IAzureAudience;
+    /**
+     * Create a new registry for all of the `LiveObjectSynchronizer` objects for a Live Share session.
+     * @param _liveRuntime runtime for the Live Share session.
+     */
+    public constructor(
+        private readonly _liveRuntime: LiveShareRuntime,
+        private readonly _containerRuntime: IContainerRuntimeSignaler
+    ) {
+        super();
+    }
+    /**
+     * The update interval in milliseconds
+     */
+    public updateInterval = 10000;
+
+    private _synchronizer?: ContainerSynchronizer;
+
+    /**
+     * Start listening for changes
+     */
+    public start() {
+        this._containerRuntime.on("signal", this.onReceivedSignal.bind(this));
+    }
+
+    /**
+     * Stop listening for changes
+     */
+    public stop() {
+        this._containerRuntime.off("signal", this.onReceivedSignal.bind(this));
+        this.objectStoreMap.clear();
+    }
+
+    /**
+     * Register your `LiveObjectSynchronizer`.
+     *
+     * @param id the unique identifier for the synchronizer
+     * @param runtime the IRuntimeSignaler made available through the `DataObject`
+     * @param initialState the initial state for the session.
+     * @param handlers the handlers for getting and updating state
+     */
+    public async registerObject<TState>(
+        id: string,
+        runtime: IRuntimeSignaler,
+        initialState: TState,
+        handlers: GetAndUpdateStateHandlers<TState>
+    ): Promise<void> {
+        const initialEvent: ILiveEvent<TState> = {
+            clientId: await waitUntilConnected(runtime),
+            timestamp: 0, // initial state should always have timestamp of zero, so that it doesn't override remote values
+            data: initialState,
+            name: ObjectSynchronizerEvents.update,
+        };
+        this.updateEventLocallyInStore(id, initialEvent);
+
+        // Get/create containers synchronizer
+        if (!this._synchronizer) {
+            this._synchronizer = new ContainerSynchronizer(
+                runtime,
+                this._containerRuntime,
+                this._liveRuntime,
+                this
+            );
+        }
+
+        // Register object
+        this._synchronizer.registerObject(
+            id,
+            handlers as unknown as GetAndUpdateStateHandlers<TState>
+        );
+    }
+
+    /**
+     * Unregister your `LiveObjectSynchronizer`.
+     *
+     * @param id the unique identifier for the synchronizer
+     */
+    public unregisterObject(id: string): void {
+        if (this._synchronizer) {
+            this._synchronizer.unregisterObject(id);
+        }
+    }
+
+    /**
+     * Gets the most recent event sent for a given `objectId`.
+     * @param objectId the `LiveDataObject` id
+     * @returns the latest event sent, or undefined if there is none
+     */
+    public getLatestEventForObject<TState = any>(
+        objectId: string
+    ): ILiveEvent<TState> | undefined {
+        return this.getEventsForObject(objectId)?.[0];
+    }
+
+    /**
+     * Gets the most recent event sent for a given `objectId` and `clientId`.
+     * @param objectId the `LiveDataObject` id
+     * @param clientId the client to get the value for
+     * @returns the latest event sent, or undefined if there is none
+     */
+    public getLatestEventForObjectClient<TState = any>(
+        objectId: string,
+        clientId: string
+    ): ILiveEvent<TState> | undefined {
+        return this.objectStoreMap.get(objectId)?.get(clientId);
+    }
+
+    /**
+     * Gets the most recent events sent for a given `objectId`.
+     * @param objectId the `LiveDataObject` id
+     * @returns the latest events sent, or undefined if there are none
+     */
+    public getEventsForObject<TState = any>(
+        objectId: string
+    ): ILiveEvent<TState>[] | undefined {
+        const clientMap = this.objectStoreMap.get(objectId);
+        if (!clientMap) return undefined;
+        return [...clientMap.values()]?.sort(
+            (a, b) => b.timestamp - a.timestamp
+        );
+    }
+
+    /**
+     * Sends a one-time event for a given object
+     * @param objectId the `LiveDataObject` id
+     * @param data the date for the event to send
+     * @returns the event that was sent
+     */
+    public async sendEventForObject<TState = any>(
+        objectId: string,
+        data: TState
+    ): Promise<ILiveEvent<TState>> {
+        const valueSent = await this._synchronizer!.sendEventForObject(
+            objectId,
+            data
+        );
+        const didUpdate = this.updateEventLocallyInStore(objectId, valueSent);
+        console.log("sendEventForObject didUpdate =", didUpdate);
+        return valueSent;
+    }
+
+    /**
+     * Set the audience
+     */
+    public setAudience(audience: IAzureAudience) {
+        this._audience = audience;
+    }
+
+    private onReceivedSignal(message: IInboundSignalMessage, local: boolean) {
+        if (
+            local ||
+            !message.clientId ||
+            !isILiveEvent(message.content) ||
+            typeof message.content.data !== "object"
+        )
+            return;
+        console.log("received remote update", message);
+        this.dispatchUpdates(
+            ObjectSynchronizerEvents.update,
+            message.clientId,
+            message.content.timestamp,
+            message.content.data,
+            local
+        );
+        // If the non-local user is connecting for the first time
+        if (message.type === ObjectSynchronizerEvents.connect) {
+            this._synchronizer!.onSendUpdates();
+        }
+    }
+
+    private dispatchUpdates(
+        type: string,
+        senderId: string,
+        timestamp: number,
+        updates: StateSyncEventContent,
+        local: boolean
+    ) {
+        for (const id in updates) {
+            const data = updates[id];
+            const receivedEvent: ILiveEvent<any> = {
+                clientId: senderId,
+                timestamp,
+                data: cloneValue(data),
+                name: type,
+            };
+            const didUpdate = this.updateEventLocallyInStore(id, receivedEvent);
+            if (!didUpdate) continue;
+            // if (local) return;
+            this.emit(
+                ObjectSynchronizerEvents.update,
+                id,
+                cloneValue(receivedEvent),
+                local,
+                this.updateEventLocallyInStore.bind(this)
+            );
+        }
+    }
+
+    /**
+     * @returns true if it was inserted, or false if it was skipped because the event is older
+     */
+    private updateEventLocallyInStore(
+        objectId: string,
+        event: ILiveEvent<any>
+    ): boolean {
+        let clientMap: ILiveClientEventMap<any> | undefined =
+            this.objectStoreMap.get(objectId);
+        if (clientMap) {
+            const existingEvent = clientMap.get(event.clientId);
+            if (existingEvent) {
+                // We already have an event for this user, so we update it if it is newer
+                if (!LiveEvent.isNewer(existingEvent, event)) return false;
+            }
+            clientMap.set(event.clientId, event);
+        } else {
+            clientMap = new Map();
+            clientMap.set(event.clientId, event);
+            this.objectStoreMap.set(objectId, clientMap);
+        }
+        return true;
+    }
+}

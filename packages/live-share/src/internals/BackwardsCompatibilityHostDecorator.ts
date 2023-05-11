@@ -12,7 +12,7 @@ import {
     IClientInfo,
 } from "../interfaces";
 import { RequestCache } from "./RequestCache";
-import { isErrorLike, isMobileWorkaroundRolesResponse, isRolesArray } from "./type-guards";
+import { isErrorLike, isMobileWorkaroundRolesResponse, isClientRolesResponse } from "./type-guards";
 import { waitForResult } from "./utils";
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
@@ -97,7 +97,7 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
                     return await this._host.getClientRoles(clientId);
                 },
                 (result) => {
-                    if (isRolesArray(result)) {
+                    if (isClientRolesResponse(result)) {
                         return {
                             response: result,
                         };

@@ -7,73 +7,78 @@ import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
+import { IContainer } from "@fluidframework/container-definitions";
 import { LiveTimer } from "../LiveTimer";
 import { Deferred } from "../internals";
-import { LiveShareRuntime } from "../LiveShareRuntime";
 import { DataObjectClass } from "fluid-framework";
-import { TestLiveShareHost } from "../TestLiveShareHost";
-import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { getLiveDataObjectClassProxy } from "../schema-utils";
+import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
-describeNoCompat("LiveTimer", (getTestObjectProvider) => {
-    // Target for milliTolerance is 30ms, but very rarely we see 31 due to JS callback scheduling is not exact.
-    const milliTolerance = 31;
-    let provider: ITestObjectProvider;
-    let object1: LiveTimer;
-    let object2: LiveTimer;
+async function getObjects(getTestObjectProvider, updateInterval: number = 10000) {
+    // Temporarily change update interval
+    let liveRuntime1 = new MockLiveShareRuntime(true, updateInterval);
+    let liveRuntime2 = new MockLiveShareRuntime(true, updateInterval);
+    liveRuntime1.connectToOtherRuntime(liveRuntime2);
 
-    let liveRuntime1 = new LiveShareRuntime(
-        TestLiveShareHost.create(),
-        new LocalTimestampProvider()
-    );
-    let liveRuntime2 = new LiveShareRuntime(
-        TestLiveShareHost.create(),
-        new LocalTimestampProvider()
-    );
-
-    let ObjectProxy1 = getLiveDataObjectClassProxy<LiveTimer>(
+    let ObjectProxy1: any = getLiveDataObjectClassProxy<LiveTimer>(
         LiveTimer,
         liveRuntime1
-    ) as DataObjectClass<LiveTimer>;
-    let ObjectProxy2 = getLiveDataObjectClassProxy<LiveTimer>(
+    );
+    let ObjectProxy2: any = getLiveDataObjectClassProxy<LiveTimer>(
         LiveTimer,
         liveRuntime2
-    ) as DataObjectClass<LiveTimer>;
+    );
 
-    afterEach(async () => {
-        // restore defaults
-        liveRuntime1 = new LiveShareRuntime(
-            TestLiveShareHost.create(),
-            new LocalTimestampProvider()
+    await liveRuntime1.start();
+    await liveRuntime2.start();
+
+    let provider: ITestObjectProvider = getTestObjectProvider();
+
+    let container1 = await provider.createContainer(ObjectProxy1.factory);
+    let object1 = await requestFluidObject<LiveTimer>(
+        container1,
+        "default"
+    );
+
+    let container2 = await provider.loadContainer(ObjectProxy2.factory);
+    let object2 = await requestFluidObject<LiveTimer>(
+        container2,
+        "default"
+    );
+    // need to be connected to send signals
+    if (!container1.connect) {
+        await new Promise((resolve) =>
+            container1.once("connected", resolve)
         );
-        liveRuntime2 = new LiveShareRuntime(
-            TestLiveShareHost.create(),
-            new LocalTimestampProvider()
+    }
+    if (!container2.connect) {
+        await new Promise((resolve) =>
+            container2.once("connected", resolve)
         );
-    });
+    }
+    const dispose = () => {
+        object1.dispose();
+        object2.dispose();
+        container1.disconnect?.();
+        container2.disconnect?.();
+        liveRuntime1.stop();
+        liveRuntime2.stop();
+    }
+    return {
+        object1,
+        object2,
+        dispose,
+    };
+}
+const milliTolerance = 31;
 
-    beforeEach(async () => {
-        provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(ObjectProxy1.factory);
-        object1 = await requestFluidObject<LiveTimer>(container1, "default");
-
-        const container2 = await provider.loadContainer(ObjectProxy2.factory);
-        object2 = await requestFluidObject<LiveTimer>(container2, "default");
-
-        // need to be connected to send signals
-        if (!container1.connect) {
-            await new Promise((resolve) =>
-                container1.once("connected", resolve)
-            );
-        }
-        if (!container2.connect) {
-            await new Promise((resolve) =>
-                container2.once("connected", resolve)
-            );
-        }
-    });
-
+describeNoCompat("LiveTimer", (getTestObjectProvider) => {
     it("Should raise local and remote start events", async () => {
+        const {
+            object1,
+            object2,
+            dispose,
+        } = await getObjects(getTestObjectProvider);
         const now = new Date().getTime();
         const object1done = new Deferred();
         object1.on("started", (config, local) => {
@@ -115,9 +120,16 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
+
+        dispose();
     });
 
     it("Should throw error if already initialized", async () => {
+        const {
+            object1,
+            object2,
+            dispose,
+        } = await getObjects(getTestObjectProvider);
         await object1.initialize();
         try {
             // Ensure initialized
@@ -129,18 +141,33 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         } catch (err) {
             console.error("there was an error");
         }
+
+        object1.dispose();
+        object2.dispose();
     });
 
     it("Should throw error if start(duration) called before initialize", async () => {
+        const {
+            object1,
+            object2,
+            dispose,
+        } = await getObjects(getTestObjectProvider);
         try {
             await object1.start(10);
             assert(false, `exception not thrown`);
         } catch (err) {
             console.error("there was an error");
         }
+
+        dispose();
     });
 
     it("pause and play, check resumes at correct position", async () => {
+        const {
+            object1,
+            object2,
+            dispose,
+        } = await getObjects(getTestObjectProvider);
         const object1done = new Deferred();
         let pausePosition = 0;
         object1.on("paused", (config, local) => {
@@ -186,9 +213,16 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
+
+        dispose();
     });
 
     it("start overrides existing timer", async () => {
+        const {
+            object1,
+            object2,
+            dispose,
+        } = await getObjects(getTestObjectProvider);
         const testDone = new Deferred();
         let startedCounter = 0;
         let finishedCounter = 0;
@@ -200,8 +234,9 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
             finishedCounter += 1;
         });
 
-        object1.initialize();
-        object2.initialize();
+        let init1 = object1.initialize();
+        let init2 = object2.initialize();
+        await Promise.all([init1, init2]);
 
         object1.start(40);
         setTimeout(() => {
@@ -216,11 +251,18 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
 
         // Wait for events to trigger
         await testDone.promise;
-        assert(startedCounter === 3, `${startedCounter}`);
-        assert(finishedCounter === 1, `${finishedCounter}`);
+        assert(startedCounter === 3, `expect 3, got ${startedCounter}`);
+        assert(finishedCounter === 1, `expect 1, got ${finishedCounter}`);
+
+        dispose();
     });
 
     it("finish callback called within 31ms of ending", async () => {
+        const {
+            object1,
+            object2,
+            dispose,
+        } = await getObjects(getTestObjectProvider);
         const now = new Date().getTime();
         const object1done = new Deferred();
         object1.on("finished", (config) => {
@@ -264,9 +306,16 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
+
+        dispose();
     });
 
     it("500 milli tick rate", async () => {
+        const {
+            object1,
+            object2,
+            dispose,
+        } = await getObjects(getTestObjectProvider);
         const object1done = new Deferred();
         object1.tickRate = 500;
         let tickCounter = 0;
@@ -288,5 +337,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
 
         // Wait for events to trigger
         await object1done.promise;
+
+        dispose();
     });
 });

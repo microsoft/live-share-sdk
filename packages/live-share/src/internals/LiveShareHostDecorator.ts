@@ -17,7 +17,7 @@ import {
     isErrorLike,
     isIClientInfo,
     isMobileWorkaroundRolesResponse,
-    isRolesArray,
+    isClientRolesResponse,
 } from "./type-guards";
 import { waitForResult } from "./utils";
 
@@ -33,7 +33,7 @@ export class LiveShareHostDecorator
 {
     private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
-    private readonly _userInfoRequestCache: RequestCache<IClientInfo> =
+    private readonly _userInfoRequestCache: RequestCache<IClientInfo | undefined> =
         new RequestCache(CACHE_LIFETIME);
 
     /**
@@ -82,7 +82,7 @@ export class LiveShareHostDecorator
             );
         }
         return this._userInfoRequestCache.cacheRequest(clientId, () => {
-            return waitForResult<IClientInfo, IClientInfo | undefined>(
+            return waitForResult<IClientInfo | undefined, IClientInfo | undefined>(
                 async () => {
                     try {
                         const info = await this._host.getClientInfo(clientId);
@@ -149,7 +149,7 @@ export class LiveShareHostDecorator
                     return await this._host.registerClientId(clientId);
                 },
                 (result) => {
-                    if (isRolesArray(result)) {
+                    if (isClientRolesResponse(result)) {
                         return {
                             response: result,
                         };

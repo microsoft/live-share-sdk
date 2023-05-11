@@ -99,6 +99,9 @@ function proxyLiveDataObjectClass<I extends DataObjectTypes = DataObjectTypes>(
             super(props);
             this["liveRuntime"] = runtime;
             // Pass reference to the container runtime
+            if (!this.context || !this.context.containerRuntime) {
+                throw Error("proxyLiveDataObjectClass: required dependencies unknown");
+            }
             runtime.__dangerouslySetContainerRuntime(this.context.containerRuntime);
         }
     }

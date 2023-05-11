@@ -1,4 +1,5 @@
 import { cloneValue } from "./internals";
+import { LiveEvent } from "./LiveEvent";
 import {
     LivePresenceReceivedEventData,
     PresenceState,
@@ -51,6 +52,7 @@ export class LivePresenceConnection<TData = object> {
                 `LivePresenceConnection.updateConnection called with event with different clientId`
             );
         }
+        if (!LiveEvent.isNewer(this._evt, evt)) return;
         this._evt = evt;
     }
 

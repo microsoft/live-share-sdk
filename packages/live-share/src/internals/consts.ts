@@ -28,3 +28,11 @@ export const TelemetryEvents = {
 function transmit(eventName: string): string {
     return `${eventName}#transmit`;
 }
+
+/**
+ * @hidden
+ */
+export const ObjectSynchronizerEvents = {
+    update: "update",
+    connect: "connect"
+}

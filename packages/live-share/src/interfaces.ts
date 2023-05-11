@@ -318,8 +318,31 @@ export interface IContainerRuntimeSignaler {
         listener: (message: IInboundSignalMessage, local: boolean) => void
     ): this;
     submitSignal(type: string, content: any): void;
-    /**
-     * Returns the current audience.
-     */
-    getAudience(): IAudience;
 }
+
+/**
+ * Callback function used to the receive the state update sent by a remote live object.
+ * @template TState Type of state object being synchronized.
+ * @param state The remote object initial or current state.
+ * @param senderId The clientId of the sender provider for role verification purposes.
+ * @param local True if the user that sent this change is the local user.
+ * @return return true if this update is valid/desired to be applied for this user's state
+ * 
+ * @remarks
+ * For `LivePresence`, we would always return false, since we don't want other user's presence to override our own.
+ * For `LiveState`, we return true if the event was sent by a user with valid roles & it is newer.
+ */
+export type UpdateSynchronizationState<TState> = (
+    state: ILiveEvent<TState>,
+    senderId: string,
+    local: boolean
+) => Promise<boolean>;
+
+/**
+ * Callback function used to validate whether or not the local user can send an update for this object.
+ *
+ * @template TState Type of state object being synchronized.
+ * @param connecting If true, the message type we are validating is to send the local user's "connect" message.
+ * @returns return true if the local user can send this update, or false if not.
+ */
+export type GetLocalUserCanSend = (connecting: boolean) => Promise<boolean>;

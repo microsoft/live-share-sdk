@@ -1,9 +1,6 @@
 import { assert } from "@fluidframework/common-utils";
 import { HostTimestampProvider } from "./HostTimestampProvider";
 import {
-    LiveObjectSynchronizerManager,
-} from "./LiveObjectSynchronizer";
-import {
     IClientInfo,
     ILiveShareHost,
     IRoleVerifier,
@@ -18,6 +15,7 @@ import {
     isTimestampProvider,
 } from "./internals";
 import { IAzureAudience } from "@fluidframework/azure-client";
+import { LiveObjectManager } from "./LiveObjectManager";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp
@@ -27,8 +25,8 @@ export class LiveShareRuntime {
     private _host: ILiveShareHost;
     private _timestampProvider: ITimestampProvider;
     private _roleVerifier: IRoleVerifier;
-    private _containerRuntime?: IContainerRuntimeSignaler;
-    private _objectManager: LiveObjectSynchronizerManager | null = null;
+    protected _containerRuntime?: IContainerRuntimeSignaler;
+    private _objectManager: LiveObjectManager | null = null;
     private _audience?: IAzureAudience;
 
     /**
@@ -62,7 +60,7 @@ export class LiveShareRuntime {
     /**
      * `LiveObjectSynchronizerManager` instance
      */
-    public get objectManager(): LiveObjectSynchronizerManager {
+    public get objectManager(): LiveObjectManager {
         assert(
             this._objectManager !== null,
             "LiveObjectSynchronizerManager not initialized."
@@ -194,7 +192,7 @@ export class LiveShareRuntime {
         if (this._objectManager) {
             this._objectManager.stop();
         }
-        this._objectManager = new LiveObjectSynchronizerManager(
+        this._objectManager = new LiveObjectManager(
             this, this._containerRuntime
         );
         this.startObjectSynchronizerManager();

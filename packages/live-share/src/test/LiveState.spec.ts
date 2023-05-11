@@ -125,29 +125,15 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                         typeof state.value == "string",
                         `object2: state.value is not a string`
                     );
-                    if (!object2ConnectReceived && state.status == mockDefaultValue.status) {
-                        object2ConnectReceived = true;
-                        assert(
-                            state.status == mockDefaultValue.status,
-                            `object1: status == '${JSON.stringify(
-                                state.status
-                            )}'`
-                        );
-                        assert(
-                            state.value == mockDefaultValue.value,
-                            `object1: value == '${JSON.stringify(state.value)}'`
-                        );
-                    } else {
-                        assert(
-                            state.status == "newState",
-                            `object1: status == '${JSON.stringify(state)}'`
-                        );
-                        assert(
-                            state.value == "newValue",
-                            `object1: value == '${JSON.stringify(state)}'`
-                        );
-                        object2done.resolve();
-                    }
+                    assert(
+                        state.status == "newState",
+                        `object1: status == '${JSON.stringify(state)}'`
+                    );
+                    assert(
+                        state.value == "newValue",
+                        `object1: value == '${JSON.stringify(state)}'`
+                    );
+                    object2done.resolve();
                 }
             } catch (err) {
                 object2done.reject(err);
@@ -176,7 +162,6 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
             getTestObjectProvider
         );
         const done = new Deferred();
-        let object1ConnectReceived = false;
         object1.on("stateChanged", (state, local) => {
             try {
                 if (!local) {
@@ -192,30 +177,15 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                         typeof state.value == "string",
                         `object1: state.value is not a string`
                     );
-                    // We might receive a 'connect' event from the other client first
-                    if (!object1ConnectReceived && state.status == mockDefaultValue.status) {
-                        object1ConnectReceived = true;
-                        assert(
-                            state.status == mockDefaultValue.status,
-                            `object1: status == '${JSON.stringify(
-                                state.status
-                            )}'`
-                        );
-                        assert(
-                            state.value == mockDefaultValue.value,
-                            `object1: value == '${JSON.stringify(state.value)}'`
-                        );
-                    } else {
-                        assert(
-                            state.status == "testState",
-                            `object1: status == '${state.status}'`
-                        );
-                        assert(
-                            state.value == "secondValue",
-                            `object1: value == '${state.value}'`
-                        );
-                        done.resolve();
-                    }
+                    assert(
+                        state.status == "testState",
+                        `object1: status == '${state.status}'`
+                    );
+                    assert(
+                        state.value == "secondValue",
+                        `object1: value == '${state.value}'`
+                    );
+                    done.resolve();
                 }
             } catch (err) {
                 done.reject(err);
@@ -223,7 +193,6 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         });
         const init1 = object1.initialize(mockDefaultValue);
 
-        let object2ConnectReceived = false;
         object2.on("stateChanged", (state, local) => {
             try {
                 if (!local) {
@@ -239,33 +208,18 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
                         typeof state.value == "string",
                         `object2: state.value is not a string`
                     );
-                    // We might receive a connect event from the other client first
-                    if (!object2ConnectReceived && state.status == mockDefaultValue.status) {
-                        object2ConnectReceived = true;
-                        assert(
-                            state.status == mockDefaultValue.status,
-                            `object1: status == '${JSON.stringify(
-                                state.status
-                            )}'`
-                        );
-                        assert(
-                            state.value == mockDefaultValue.value,
-                            `object1: value == '${JSON.stringify(state.value)}'`
-                        );
-                    } else {
-                        assert(
-                            state.status == "testState",
-                            `object2: status == '${state.status}'`
-                        );
-                        assert(
-                            state.value == "firstValue",
-                            `object2: value == '${state.value}'`
-                        );
-                        object2.set({
-                            status: "testState",
-                            value: "secondValue",
-                        });
-                    }
+                    assert(
+                        state.status == "testState",
+                        `object2: status == '${state.status}'`
+                    );
+                    assert(
+                        state.value == "firstValue",
+                        `object2: value == '${state.value}'`
+                    );
+                    object2.set({
+                        status: "testState",
+                        value: "secondValue",
+                    });
                 }
             } catch (err) {
                 done.reject(err);

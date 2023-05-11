@@ -6,7 +6,7 @@ import {
     ProcessRelatedChangeHandler,
     StateSyncEventContent,
 } from "./internal-interfaces";
-import { LiveObjectManager } from "../LiveObjectManager";
+import { LiveObjectManager } from "./LiveObjectManager";
 import { ObjectSynchronizerEvents } from "./consts";
 import { waitUntilConnected } from "./utils";
 

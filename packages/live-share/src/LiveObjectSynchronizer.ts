@@ -12,6 +12,8 @@ import {
 } from "./interfaces";
 
 /**
+ * @hidden
+ * 
  * Synchronizes the underlying state of an live object with all of the other instances of
  * the object connected to the same container.
  *

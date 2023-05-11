@@ -5,10 +5,10 @@
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { TypedEventEmitter } from "@fluidframework/common-utils";
-import { IRuntimeSignaler } from "./LiveEventScope";
-import { LiveShareRuntime } from "./LiveShareRuntime";
-import { IContainerRuntimeSignaler, ILiveEvent } from "./interfaces";
-import { LiveEvent } from "./LiveEvent";
+import { IRuntimeSignaler } from "../LiveEventScope";
+import { LiveShareRuntime } from "../LiveShareRuntime";
+import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";
+import { LiveEvent } from "../LiveEvent";
 import {
     ContainerSynchronizer,
     GetAndUpdateStateHandlers,
@@ -20,10 +20,11 @@ import {
     cloneValue,
     isILiveEvent,
     waitUntilConnected,
-} from "./internals";
+} from "./";
 import { IAzureAudience } from "@fluidframework/azure-client";
 
 /**
+ * @hidden
  * Manager of all of the `LiveObjectSynchronizer` objects
  *
  * @remarks

@@ -13,4 +13,5 @@ export * from "./BackwardsCompatibilityHostDecorator";
 export * from "./Deferred";
 export * from "./type-guards";
 export * from "./internal-interfaces";
+export * from "./LiveObjectManager";
 export * from "./ContainerSynchronizer";

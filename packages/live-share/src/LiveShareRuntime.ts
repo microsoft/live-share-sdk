@@ -13,9 +13,9 @@ import {
     LiveShareHostDecorator,
     RoleVerifier,
     isTimestampProvider,
+    LiveObjectManager,
 } from "./internals";
 import { IAzureAudience } from "@fluidframework/azure-client";
-import { LiveObjectManager } from "./LiveObjectManager";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp

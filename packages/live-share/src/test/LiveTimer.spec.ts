@@ -65,242 +65,230 @@ async function getObjects(
 const milliTolerance = 31;
 
 describeNoCompat("LiveTimer", (getTestObjectProvider) => {
-    // it("Should raise local and remote start events", async () => {
-    //     const {
-    //         object1,
-    //         object2,
-    //         dispose,
-    //     } = await getObjects(getTestObjectProvider);
-    //     const now = new Date().getTime();
-    //     const object1done = new Deferred();
-    //     object1.on("started", (config, local) => {
-    //         try {
-    //             assert(local == true, `Not a local event`);
-    //             assert(config != null, `Null config arg`);
-    //             assert(config.clientId != null, `Missing clientId`);
-    //             assert(
-    //                 typeof config.configChangedAt == "number",
-    //                 `Missing timestamp`
-    //             );
-    //             assert(config.configChangedAt >= now, `Timestamp too old`);
-    //             object1done.resolve();
-    //         } catch (err) {
-    //             object1done.reject(err);
-    //         }
-    //     });
-    //     await object1.initialize();
+    it("Should raise local and remote start events", async () => {
+        const { object1, object2, dispose } = await getObjects(
+            getTestObjectProvider
+        );
+        const now = new Date().getTime();
+        const object1done = new Deferred();
+        object1.on("started", (config, local) => {
+            try {
+                assert(local == true, `Not a local event`);
+                assert(config != null, `Null config arg`);
+                assert(config.clientId != null, `Missing clientId`);
+                assert(
+                    typeof config.configChangedAt == "number",
+                    `Missing timestamp`
+                );
+                assert(config.configChangedAt >= now, `Timestamp too old`);
+                object1done.resolve();
+            } catch (err) {
+                object1done.reject(err);
+            }
+        });
+        await object1.initialize();
 
-    //     const object2done = new Deferred();
-    //     object2.on("started", (config, local) => {
-    //         try {
-    //             assert(local == false, `Unexpected local event`);
-    //             assert(config != null, `Null config arg`);
-    //             assert(config.clientId != null, `Missing clientId`);
-    //             assert(
-    //                 typeof config.configChangedAt == "number",
-    //                 `Missing timestamp`
-    //             );
-    //             assert(config.configChangedAt >= now, `Timestamp too old`);
-    //             object2done.resolve();
-    //         } catch (err) {
-    //             object2done.reject(err);
-    //         }
-    //     });
-    //     await object2.initialize();
+        const object2done = new Deferred();
+        object2.on("started", (config, local) => {
+            try {
+                assert(local == false, `Unexpected local event`);
+                assert(config != null, `Null config arg`);
+                assert(config.clientId != null, `Missing clientId`);
+                assert(
+                    typeof config.configChangedAt == "number",
+                    `Missing timestamp`
+                );
+                assert(config.configChangedAt >= now, `Timestamp too old`);
+                object2done.resolve();
+            } catch (err) {
+                object2done.reject(err);
+            }
+        });
+        await object2.initialize();
 
-    //     object1.start(1);
+        object1.start(1);
 
-    //     // Wait for events to trigger
-    //     await Promise.all([object1done.promise, object2done.promise]);
+        // Wait for events to trigger
+        await Promise.all([object1done.promise, object2done.promise]);
 
-    //     dispose();
-    // });
+        dispose();
+    });
 
-    // it("Should throw error if already initialized", async () => {
-    //     const {
-    //         object1,
-    //         object2,
-    //         dispose,
-    //     } = await getObjects(getTestObjectProvider);
-    //     await object1.initialize();
-    //     try {
-    //         // Ensure initialized
-    //         assert(object1.isInitialized, `not initialized`);
+    it("Should throw error if already initialized", async () => {
+        const { object1, object2, dispose } = await getObjects(
+            getTestObjectProvider
+        );
+        await object1.initialize();
+        try {
+            // Ensure initialized
+            assert(object1.isInitialized, `not initialized`);
 
-    //         // Try second call to initialize.
-    //         await object1.initialize();
-    //         assert(false, `exception not thrown`);
-    //     } catch (err) {
-    //         console.error("there was an error");
-    //     }
+            // Try second call to initialize.
+            await object1.initialize();
+            assert(false, `exception not thrown`);
+        } catch (err) {
+            console.error("there was an error");
+        }
 
-    //     object1.dispose();
-    //     object2.dispose();
-    // });
+        object1.dispose();
+        object2.dispose();
+    });
 
-    // it("Should throw error if start(duration) called before initialize", async () => {
-    //     const {
-    //         object1,
-    //         object2,
-    //         dispose,
-    //     } = await getObjects(getTestObjectProvider);
-    //     try {
-    //         await object1.start(10);
-    //         assert(false, `exception not thrown`);
-    //     } catch (err) {
-    //         console.error("there was an error");
-    //     }
+    it("Should throw error if start(duration) called before initialize", async () => {
+        const { object1, object2, dispose } = await getObjects(
+            getTestObjectProvider
+        );
+        try {
+            await object1.start(10);
+            assert(false, `exception not thrown`);
+        } catch (err) {
+            console.error("there was an error");
+        }
 
-    //     dispose();
-    // });
+        dispose();
+    });
 
-    // it("pause and play, check resumes at correct position", async () => {
-    //     const {
-    //         object1,
-    //         object2,
-    //         dispose,
-    //     } = await getObjects(getTestObjectProvider);
-    //     const object1done = new Deferred();
-    //     let pausePosition = 0;
-    //     object1.on("paused", (config, local) => {
-    //         pausePosition = config.position;
-    //     });
-    //     object1.on("played", (config, local) => {
-    //         try {
-    //             assert(pausePosition !== 0, "never paused");
-    //             assert(
-    //                 config.position === pausePosition,
-    //                 `did not resume at pause position`
-    //             );
-    //             object1done.resolve();
-    //         } catch (err) {
-    //             object1done.reject(err);
-    //         }
-    //     });
-    //     object1.initialize();
+    it("pause and play, check resumes at correct position", async () => {
+        const { object1, object2, dispose } = await getObjects(
+            getTestObjectProvider
+        );
+        const object1done = new Deferred();
+        let pausePosition = 0;
+        object1.on("paused", (config, local) => {
+            pausePosition = config.position;
+        });
+        object1.on("played", (config, local) => {
+            try {
+                assert(pausePosition !== 0, "never paused");
+                assert(
+                    config.position === pausePosition,
+                    `did not resume at pause position`
+                );
+                object1done.resolve();
+            } catch (err) {
+                object1done.reject(err);
+            }
+        });
+        object1.initialize();
 
-    //     const object2done = new Deferred();
-    //     object2.on("played", (config, local) => {
-    //         try {
-    //             assert(pausePosition !== 0, "never paused");
-    //             assert(
-    //                 config.position === pausePosition,
-    //                 `did not resume at pause position`
-    //             );
-    //             object2done.resolve();
-    //         } catch (err) {
-    //             object2done.reject(err);
-    //         }
-    //     });
-    //     object2.initialize();
+        const object2done = new Deferred();
+        object2.on("played", (config, local) => {
+            try {
+                assert(pausePosition !== 0, "never paused");
+                assert(
+                    config.position === pausePosition,
+                    `did not resume at pause position`
+                );
+                object2done.resolve();
+            } catch (err) {
+                object2done.reject(err);
+            }
+        });
+        object2.initialize();
 
-    //     object1.start(50);
+        object1.start(50);
 
-    //     setTimeout(() => {
-    //         object1.pause();
-    //         setTimeout(() => {
-    //             object2.play();
-    //         }, 20);
-    //     }, 20);
+        setTimeout(() => {
+            object1.pause();
+            setTimeout(() => {
+                object2.play();
+            }, 20);
+        }, 20);
 
-    //     // Wait for events to trigger
-    //     await Promise.all([object1done.promise, object2done.promise]);
+        // Wait for events to trigger
+        await Promise.all([object1done.promise, object2done.promise]);
 
-    //     dispose();
-    // });
+        dispose();
+    });
 
-    // it("start overrides existing timer", async () => {
-    //     const {
-    //         object1,
-    //         object2,
-    //         dispose,
-    //     } = await getObjects(getTestObjectProvider);
-    //     const testDone = new Deferred();
-    //     let startedCounter = 0;
-    //     let finishedCounter = 0;
+    it("start overrides existing timer", async () => {
+        const { object1, object2, dispose } = await getObjects(
+            getTestObjectProvider
+        );
+        const testDone = new Deferred();
+        let startedCounter = 0;
+        let finishedCounter = 0;
 
-    //     object2.on("started", (config, local) => {
-    //         startedCounter += 1;
-    //     });
-    //     object2.on("finished", (config) => {
-    //         finishedCounter += 1;
-    //     });
+        object2.on("started", (config, local) => {
+            startedCounter += 1;
+        });
+        object2.on("finished", (config) => {
+            finishedCounter += 1;
+        });
 
-    //     let init1 = object1.initialize();
-    //     let init2 = object2.initialize();
-    //     await Promise.all([init1, init2]);
+        let init1 = object1.initialize();
+        let init2 = object2.initialize();
+        await Promise.all([init1, init2]);
 
-    //     object1.start(40);
-    //     setTimeout(() => {
-    //         object1.start(40);
-    //         setTimeout(() => {
-    //             object1.start(20);
-    //             setTimeout(() => {
-    //                 testDone.resolve();
-    //             }, 30);
-    //         }, 10);
-    //     }, 10);
+        object1.start(40);
+        setTimeout(() => {
+            object1.start(40);
+            setTimeout(() => {
+                object1.start(20);
+                setTimeout(() => {
+                    testDone.resolve();
+                }, 30);
+            }, 10);
+        }, 10);
 
-    //     // Wait for events to trigger
-    //     await testDone.promise;
-    //     assert(startedCounter === 3, `expect 3, got ${startedCounter}`);
-    //     assert(finishedCounter === 1, `expect 1, got ${finishedCounter}`);
+        // Wait for events to trigger
+        await testDone.promise;
+        assert(startedCounter === 3, `expect 3, got ${startedCounter}`);
+        assert(finishedCounter === 1, `expect 1, got ${finishedCounter}`);
 
-    //     dispose();
-    // });
+        dispose();
+    });
 
-    // it("finish callback called within 31ms of ending", async () => {
-    //     const {
-    //         object1,
-    //         object2,
-    //         dispose,
-    //     } = await getObjects(getTestObjectProvider);
-    //     const now = new Date().getTime();
-    //     const object1done = new Deferred();
-    //     object1.on("finished", (config) => {
-    //         try {
-    //             assert(config != null, `Null config arg`);
-    //             assert(config.clientId != null, `Missing clientId`);
-    //             assert(
-    //                 typeof config.configChangedAt == "number",
-    //                 `Missing timestamp`
-    //             );
-    //             const milliDifference =
-    //                 config.configChangedAt - now - config.duration;
-    //             assert(milliDifference <= milliTolerance, `${milliDifference}`);
-    //             object1done.resolve();
-    //         } catch (err) {
-    //             object1done.reject(err);
-    //         }
-    //     });
-    //     object1.initialize();
+    it("finish callback called within 31ms of ending", async () => {
+        const { object1, object2, dispose } = await getObjects(
+            getTestObjectProvider
+        );
+        const now = new Date().getTime();
+        const object1done = new Deferred();
+        object1.on("finished", (config) => {
+            try {
+                assert(config != null, `Null config arg`);
+                assert(config.clientId != null, `Missing clientId`);
+                assert(
+                    typeof config.configChangedAt == "number",
+                    `Missing timestamp`
+                );
+                const milliDifference =
+                    config.configChangedAt - now - config.duration;
+                assert(milliDifference <= milliTolerance, `${milliDifference}`);
+                object1done.resolve();
+            } catch (err) {
+                object1done.reject(err);
+            }
+        });
+        object1.initialize();
 
-    //     const object2done = new Deferred();
-    //     object2.on("finished", (config) => {
-    //         try {
-    //             assert(config != null, `Null config arg`);
-    //             assert(config.clientId != null, `Missing clientId`);
-    //             assert(
-    //                 typeof config.configChangedAt == "number",
-    //                 `Missing timestamp`
-    //             );
-    //             const milliDifference =
-    //                 config.configChangedAt - now - config.duration;
-    //             assert(milliDifference <= milliTolerance, `${milliDifference}`);
-    //             object2done.resolve();
-    //         } catch (err) {
-    //             object2done.reject(err);
-    //         }
-    //     });
-    //     object2.initialize();
+        const object2done = new Deferred();
+        object2.on("finished", (config) => {
+            try {
+                assert(config != null, `Null config arg`);
+                assert(config.clientId != null, `Missing clientId`);
+                assert(
+                    typeof config.configChangedAt == "number",
+                    `Missing timestamp`
+                );
+                const milliDifference =
+                    config.configChangedAt - now - config.duration;
+                assert(milliDifference <= milliTolerance, `${milliDifference}`);
+                object2done.resolve();
+            } catch (err) {
+                object2done.reject(err);
+            }
+        });
+        object2.initialize();
 
-    //     object1.start(100);
+        object1.start(100);
 
-    //     // Wait for events to trigger
-    //     await Promise.all([object1done.promise, object2done.promise]);
+        // Wait for events to trigger
+        await Promise.all([object1done.promise, object2done.promise]);
 
-    //     dispose();
-    // });
+        dispose();
+    });
 
     it("500 milli tick rate", async () => {
         const { object1, object2, dispose } = await getObjects(

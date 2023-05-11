@@ -124,6 +124,13 @@ const MeetingStage: FC = () => {
         takeControlStarted,
         playlistStarted,
     ].every((value) => value === true);
+    console.log({
+        notificationStarted,
+        mediaSessionStarted,
+        presenceStarted,
+        takeControlStarted,
+        playlistStarted,
+    });
 
     // Render the media player
     return (

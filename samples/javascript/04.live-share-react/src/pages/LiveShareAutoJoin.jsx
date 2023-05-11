@@ -13,14 +13,14 @@ import {
     TeamsClientLoader,
 } from "../components";
 import { inTeams } from "../utils/inTeams";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const IN_TEAMS = inTeams();
 
 export const LiveShareAutoJoin = () => {
-    const [host] = useState(IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create());
+    const hostRef = useRef(IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create());
     return (
-        <LiveShareProvider joinOnLoad host={host}>
+        <LiveShareProvider joinOnLoad host={hostRef.current}>
             <ExampleLiveState
                 waitingContent={
                     <>

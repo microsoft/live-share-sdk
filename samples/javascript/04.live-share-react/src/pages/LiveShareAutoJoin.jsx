@@ -13,32 +13,31 @@ import {
     TeamsClientLoader,
 } from "../components";
 import { inTeams } from "../utils/inTeams";
+import { useState } from "react";
 
 const IN_TEAMS = inTeams();
-const host = IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create();
 
 export const LiveShareAutoJoin = () => {
+    const [host] = useState(IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create());
     return (
-        <TeamsClientLoader>
-            <LiveShareProvider joinOnLoad host={host}>
-                <ExampleLiveState
-                    waitingContent={
-                        <>
-                            <ExampleMediaSynchronizer />
-                            <ExampleLiveEvent />
-                            <ExampleLiveCanvas />
-                        </>
-                    }
-                    startContent={
-                        <>
-                            <ExampleLiveTimer />
-                            <ExampleSharedState />
-                            <ExampleLivePresence />
-                            <ExampleSharedMap />
-                        </>
-                    }
-                />
-            </LiveShareProvider>
-        </TeamsClientLoader>
+        <LiveShareProvider joinOnLoad host={host}>
+            <ExampleLiveState
+                waitingContent={
+                    <>
+                        <ExampleMediaSynchronizer />
+                        <ExampleLiveEvent />
+                        <ExampleLiveCanvas />
+                    </>
+                }
+                startContent={
+                    <>
+                        <ExampleLiveTimer />
+                        <ExampleSharedState />
+                        <ExampleLivePresence />
+                        <ExampleSharedMap />
+                    </>
+                }
+            />
+        </LiveShareProvider>
     );
 };

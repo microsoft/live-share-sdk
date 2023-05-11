@@ -193,7 +193,8 @@ export class LivePresence<
                 } catch {
                     return false;
                 }
-            }
+            },
+            true, // We want to update the timestamp periodically so that we know if a user is active
         );
         // Broadcast initial presence, or silently fail trying
         await this.update(

@@ -79,14 +79,6 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         initialState: TState,
         handlers: GetAndUpdateStateHandlers<TState>
     ): Promise<void> {
-        const initialEvent: ILiveEvent<TState> = {
-            clientId: await waitUntilConnected(runtime),
-            timestamp: 0, // initial state should always have timestamp of zero, so that it doesn't override remote values
-            data: initialState,
-            name: ObjectSynchronizerEvents.update,
-        };
-        this.updateEventLocallyInStore(id, initialEvent);
-
         // Get/create containers synchronizer
         if (!this._synchronizer) {
             this._synchronizer = new ContainerSynchronizer(
@@ -102,6 +94,14 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             id,
             handlers as unknown as GetAndUpdateStateHandlers<TState>
         );
+
+        const initialEvent: ILiveEvent<TState> = {
+            clientId: await waitUntilConnected(runtime),
+            timestamp: 0, // initial state should always have timestamp of zero, so that it doesn't override remote values
+            data: initialState,
+            name: ObjectSynchronizerEvents.update,
+        };
+        this.updateEventLocallyInStore(id, initialEvent);
     }
 
     /**
@@ -192,7 +192,6 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         this.dispatchUpdates(
             ObjectSynchronizerEvents.update,
             message.clientId,
-            message.content.timestamp,
             message.content.data,
             local
         );
@@ -205,7 +204,6 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     private dispatchUpdates(
         type: string,
         senderId: string,
-        timestamp: number,
         updates: StateSyncEventContent,
         local: boolean
     ) {
@@ -213,8 +211,8 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             const data = updates[id];
             const receivedEvent: ILiveEvent<any> = {
                 clientId: senderId,
-                timestamp,
-                data: cloneValue(data),
+                timestamp: data.timestamp,
+                data: cloneValue(data.data),
                 name: type,
             };
             const didUpdate = this.updateEventLocallyInStore(id, receivedEvent);

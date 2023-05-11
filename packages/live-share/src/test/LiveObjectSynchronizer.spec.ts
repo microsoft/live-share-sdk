@@ -148,7 +148,8 @@ describe("LiveObjectSynchronizer", () => {
         await localLiveRuntime.start();
         await remoteLiveRuntime.start();
 
-        let received = 0;
+        let sent = 0;
+        let changesEmitted = 0;
         const done = new Deferred();
         const localRuntime = new MockRuntimeSignaler();
         const localObject = new LiveObjectSynchronizer<ITestState>(
@@ -169,16 +170,22 @@ describe("LiveObjectSynchronizer", () => {
                         `local: invalid state received: ${state}`
                     );
                     assert(sender, `local: sender  ID not received`);
-                    received++;
-                    if (received == 2) {
-                        done.resolve();
-                    }
+                    // We event is only emitted when the timestamp of a value has changed
+                    changesEmitted++;
+                    assert(changesEmitted < 2, "received is >= 2")
                 } catch (err) {
                     done.reject(err);
                 }
                 return Promise.resolve(true);
             },
-            () => Promise.resolve(true)
+            () => {
+                sent++;
+                if (sent == 2) {
+                    done.resolve();
+                }
+                // If this is called, it will send out an update
+                return Promise.resolve(true)
+            }
         );
 
         const remoteRuntime = new MockRuntimeSignaler();

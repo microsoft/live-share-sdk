@@ -9,13 +9,14 @@ import { IEvent } from "@fluidframework/common-definitions";
  * @hidden
  */
 export interface StateSyncEventContent {
-    [id: string]: any;
+    [id: string]: Omit<ILiveEvent<any>, "name" | "clientId">;
 }
 
 /**
  * @hidden
  */
 export interface GetAndUpdateStateHandlers<TState> {
+    shouldUpdateTimestampPeriodically: boolean;
     updateState: UpdateSynchronizationState<TState>;
     getLocalUserCanSend: GetLocalUserCanSend;
 }

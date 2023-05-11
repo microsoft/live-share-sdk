@@ -123,19 +123,25 @@ export class ContainerSynchronizer {
         // We send as a batch update in case we eventually want to support batching/queuing at this layer, and to reuse existing code.
         const updateEvents = await this.sendEventUpdates(
             {
-                [objectId]: data,
+                [objectId]: {
+                    data,
+                    timestamp: this._liveRuntime.getTimestamp(),
+                },
             },
             ObjectSynchronizerEvents.update
         );
         if (!updateEvents) {
             throw new Error("Unable to send an event with empty updates");
         }
-        console.log("sendEventForObject: sent one-time event", updateEvents.data[objectId]);
+        console.log(
+            "sendEventForObject: sent one-time event",
+            updateEvents.data[objectId]
+        );
         const valueSent = {
             clientId: updateEvents.clientId,
-            timestamp: updateEvents.timestamp,
+            timestamp: updateEvents.data[objectId].timestamp,
             name: updateEvents.name,
-            data: updateEvents.data[objectId],
+            data: updateEvents.data[objectId].data,
         };
         return valueSent;
     }
@@ -206,7 +212,16 @@ export class ContainerSynchronizer {
                             localClientId
                         );
                     if (typeof state == "object") {
-                        updates[objectId] = state.data;
+                        updates[objectId] = {
+                            data: state.data,
+                            timestamp:
+                                handlers.shouldUpdateTimestampPeriodically
+                                    ? this._liveRuntime.getTimestamp()
+                                    : evtType ===
+                                      ObjectSynchronizerEvents.connect
+                                    ? 0
+                                    : state.timestamp,
+                        };
                         continue;
                     }
                 }
@@ -245,6 +260,7 @@ export class ContainerSynchronizer {
             local
         );
         if (!overwriteForLocal) return;
+        console.log("processRelatedChange", objectId);
         processRelatedChange(objectId, {
             ...event,
             clientId: await this.waitUntilConnected(),

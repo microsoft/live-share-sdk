@@ -271,9 +271,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         const object2Ready = new Deferred();
         object2.on("presenceChanged", (user, local) => {
-            if (local) {
-                object2Ready.resolve();
-            }
+            object2Ready.resolve();
         });
         await object2.initialize();
 

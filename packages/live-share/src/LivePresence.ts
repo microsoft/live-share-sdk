@@ -5,8 +5,6 @@
 
 import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
-import { LiveEventScope } from "./LiveEventScope";
-import { LiveEventTarget } from "./LiveEventTarget";
 import {
     LivePresenceUser,
     PresenceState,
@@ -135,8 +133,7 @@ export class LivePresence<
         if (!clientId) {
             return undefined;
         }
-        return this._users.find((user) => user._clients.includes(clientId))
-            ?.userId;
+        return this.getUserForClient(clientId)?.userId;
     }
 
     /**
@@ -194,7 +191,9 @@ export class LivePresence<
             }
         );
         // make sure client info for local user is available
-        this._currentPresence = this._synchronizer!.getLatestEventForClient(await this.waitUntilConnected());
+        this._currentPresence = this._synchronizer!.getLatestEventForClient(
+            await this.waitUntilConnected()
+        );
         // Broadcast initial presence, or silently fail trying
         this.update(
             this._currentPresence!.data.data,
@@ -223,10 +222,9 @@ export class LivePresence<
      * @param filter Optional. Presence state to filter enumeration to.
      * @returns Array of presence objects.
      */
-    public toArray(filter?: PresenceState): LivePresenceUser<TData>[] {
-        const list: LivePresenceUser<TData>[] = [];
-        this.forEach((presence) => list.push(presence), filter);
-        return list;
+    public getUsers(filter?: PresenceState): LivePresenceUser<TData>[] {
+        if (!filter) return this._users;
+        return this._users.filter((user) => user.state == filter);
     }
 
     /**
@@ -256,59 +254,14 @@ export class LivePresence<
     }
 
     /**
-     * Enumerates each user the object is tracking presence for.
-     * @param callback Function to call for each user.
-     * @param callback.user Current presence information for a user.
-     * @param filter Optional. Presence state to filter enumeration to.
-     */
-    public forEach(
-        callback: (user: LivePresenceUser<TData>) => void,
-        filter?: PresenceState
-    ): void {
-        this._users.forEach((user) => {
-            // Ensure user matches filter
-            if (filter == undefined || user.state == filter) {
-                callback(user);
-            }
-        });
-    }
-
-    /**
-     * Counts the number of users that the object is tracking presence for.
-     * @param filter Optional. Presence state to filter count to.
-     * @returns Total number of other users we've seen or number of users with a given presence status.
-     */
-    public getCount(filter?: PresenceState): number {
-        if (filter != undefined) {
-            let cnt = 0;
-            this._users.forEach((user) => {
-                if (user.state == filter) {
-                    cnt++;
-                }
-            });
-
-            return cnt;
-        }
-
-        return this._users.length;
-    }
-
-    /**
      * Returns the current presence info for a specific client ID.
      * @param clientId The ID of the client to retrieve.
      * @returns The current presence information for the client if they've connected to the space.
      */
-    public getPresenceForClient(
+    public getUserForClient(
         clientId: string
     ): LivePresenceUser<TData> | undefined {
-        for (let i = 0; i < this._users.length; i++) {
-            const user = this._users[i];
-            if (user.isFromClient(clientId)) {
-                return user;
-            }
-        }
-
-        return undefined;
+        return this._users.find((user) => user.isFromClient(clientId));
     }
 
     /**
@@ -316,64 +269,41 @@ export class LivePresence<
      * @param userId The ID of the user to retrieve.
      * @returns The current presence information for the user if they've connected to the space.
      */
-    public getPresenceForUser(
-        userId: string
-    ): LivePresenceUser<TData> | undefined {
-        for (let i = 0; i < this._users.length; i++) {
-            const user = this._users[i];
-            if (user.userId == userId) {
-                return user;
-            }
-        }
-
-        return undefined;
+    public getUser(userId: string): LivePresenceUser<TData> | undefined {
+        return this._users.find((user) => user.userId == userId);
     }
 
     private updateMembersList(
         evt: LivePresenceReceivedEventData<TData>,
-        local: boolean,
-        initLocalClientInfo?: IClientInfo
+        local: boolean
     ): void {
-        if (!evt.clientId) return;
+        if (!evt.clientId) return; // TODO: delete in ryans pr
         this.liveRuntime
             .verifyRolesAllowed(evt.clientId, this._allowedRoles)
             .then((allowed) => {
                 if (!allowed) return;
-                if (initLocalClientInfo) {
-                    this.updateMembersListWithInfo(
-                        evt,
-                        local,
-                        initLocalClientInfo
-                    );
-                } else if (evt.clientId) {
-                    this.liveRuntime
-                        .getClientInfo(evt.clientId)
-                        .then((info) => {
-                            if (!info) return;
+                this.liveRuntime
+                    .getClientInfo(evt.clientId)
+                    .then((info) => {
+                        if (!info) return;
 
-                            if (this.useTransientParticipantWorkaround(info)) {
-                                this.transientParticipantWorkaround(
-                                    evt,
-                                    local,
-                                    info
-                                );
-                            } else {
-                                // normal flow
-                                this.updateMembersListWithInfo(
-                                    evt,
-                                    local,
-                                    info
-                                );
-                            }
-                        })
-                        .catch((err) => {
-                            this._logger?.sendErrorEvent(
-                                TelemetryEvents.LivePresence
-                                    .RoleVerificationError,
-                                err
+                        if (this.useTransientParticipantWorkaround(info)) {
+                            this.transientParticipantWorkaround(
+                                evt,
+                                local,
+                                info
                             );
-                        });
-                }
+                        } else {
+                            // normal flow
+                            this.updateMembersListWithInfo(evt, local, info);
+                        }
+                    })
+                    .catch((err) => {
+                        this._logger?.sendErrorEvent(
+                            TelemetryEvents.LivePresence.RoleVerificationError,
+                            err
+                        );
+                    });
             })
             .catch((err) => {
                 this._logger?.sendErrorEvent(
@@ -418,7 +348,12 @@ export class LivePresence<
     ): void {
         const emitEvent = (user: LivePresenceUser<TData>) => {
             this._lastEmitPresenceStateMap.set(user.userId, user.state);
-            this.emit(LivePresenceEvents.presenceChanged, user, local);
+            this.emit(
+                LivePresenceEvents.presenceChanged,
+                user,
+                local,
+                evt.clientId
+            );
             if (local) {
                 this._logger?.sendTelemetryEvent(
                     TelemetryEvents.LivePresence.LocalPresenceChanged,
@@ -437,7 +372,7 @@ export class LivePresence<
             const checkUser = this._users[pos];
             if (info.userId === checkUser.userId) {
                 // User found. Apply update and check for changes
-                if (checkUser.updateReceived(evt, info)) {
+                if (checkUser.updateReceived(evt, info, local)) {
                     emitEvent(checkUser);
                 }
                 isNewUser = false;
@@ -456,8 +391,8 @@ export class LivePresence<
             info,
             evt,
             this._expirationPeriod,
-            evt.clientId === this._currentPresence?.clientId,
-            this.liveRuntime
+            this.liveRuntime,
+            local
         );
         this._users.push(newUser);
         emitEvent(newUser);

@@ -9,10 +9,8 @@ import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LivePresence } from "../LivePresence";
 import { PresenceState } from "../LivePresenceUser";
-import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { waitForDelay } from "../internals";
 import { Deferred } from "../internals";
-import { LiveShareClient } from "../LiveShareClient";
 import {
     IClientInfo,
     IFluidContainerInfo,
@@ -32,10 +30,6 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
     let object1: LivePresence<{ foo: string }>;
     let object2: LivePresence<{ foo: string }>;
 
-    // Temporarily change update interval
-    before(() => (LiveObjectSynchronizer.updateInterval = 20));
-    after(() => (LiveObjectSynchronizer.updateInterval = 5000));
-
     let liveRuntime1 = new LiveShareRuntime(
         TestLiveShareHost.create(),
         new LocalTimestampProvider()
@@ -44,6 +38,16 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         TestLiveShareHost.create(),
         new LocalTimestampProvider()
     );
+
+    // Temporarily change update interval
+    // before(() => {
+    //     liveRuntime1.objectManager.updateInterval = 20;
+    //     liveRuntime2.objectManager.updateInterval = 20;
+    // });
+    // after(() => {
+    //     liveRuntime1.objectManager.updateInterval = 10000;
+    //     liveRuntime2.objectManager.updateInterval = 10000;
+    // });
 
     let ObjectProxy1 = getLiveDataObjectClassProxy<
         LivePresence<{ foo: string }>
@@ -285,7 +289,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         let user1Found = false;
         let user2Found = false;
         await ready.promise;
-        object1.forEach((user) => {
+        object1.getUsers().forEach((user) => {
             switch (user.userId) {
                 case object1UserId:
                     user1Found = true;
@@ -318,7 +322,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         let user1Found = false;
         let user2Found = false;
         await ready.promise;
-        object1.forEach((user) => {
+        object1.getUsers().forEach((user) => {
             switch (user.userId) {
                 case object1UserId:
                     user1Found = true;
@@ -332,7 +336,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         assert(user1Found && !user2Found);
     });
 
-    it("Should return members using toArray()", async () => {
+    it("Should return members using getUsers()", async () => {
         const ready = new Deferred();
         object1.on("presenceChanged", (user, local) => {
             if (!local) {
@@ -344,9 +348,9 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         // Wait for ready and perform test
         await ready.promise;
-        const users = object1.toArray();
+        const users = object1.getUsers();
 
-        assert(Array.isArray(users), `toArray() didn't return an array`);
+        assert(Array.isArray(users), `getUsers() didn't return an array`);
         assert(users.length == 2, `Array has a length of ${users.length}`);
     });
 
@@ -362,7 +366,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         // Wait for ready and perform test
         await ready.promise;
-        const cnt = object1.getCount();
+        const cnt = object1.getUsers().length;
 
         assert(cnt == 2);
     });
@@ -379,12 +383,12 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         // Wait for ready and perform test
         await ready.promise;
-        const cnt = object1.getCount(PresenceState.away);
+        const cnt = object1.getUsers(PresenceState.away).length;
 
         assert(cnt == 1);
     });
 
-    it("Should getPresenceForUser()", async () => {
+    it("Should getUser()", async () => {
         const ready = new Deferred();
         let object1UserId = "";
         let object2UserId = "";
@@ -401,8 +405,8 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         // Wait for ready and perform test
         await ready.promise;
-        const user1 = object1.getPresenceForUser(object1UserId);
-        const user2 = object1.getPresenceForUser(object2UserId);
+        const user1 = object1.getUser(object1UserId);
+        const user2 = object1.getUser(object2UserId);
 
         assert(
             user1 && user1.userId == object1UserId,
@@ -437,8 +441,8 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         const client2 = (object2 as any)._currentPresence.clientId;
 
         // Perform test
-        const user1 = object1.getPresenceForClient(client1);
-        const user2 = object1.getPresenceForClient(client2);
+        const user1 = object1.getUserForClient(client1);
+        const user2 = object1.getUserForClient(client2);
 
         assert(
             user1 && user1.userId == object1UserId,
@@ -471,7 +475,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         // Delay for a few updates
         let count = 0;
-        object1.forEach((user) => {
+        object1.getUsers().forEach((user) => {
             count++;
             assert(
                 user.state == PresenceState.online,
@@ -510,7 +514,9 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             ): Promise<UserMeetingRole[] | undefined> {
                 return this.test.getClientRoles(clientId);
             }
-            async getClientInfo(clientId: string): Promise<IClientInfo | undefined> {
+            async getClientInfo(
+                clientId: string
+            ): Promise<IClientInfo | undefined> {
                 return this.test.getClientRoles(clientId).then((roles) => {
                     return {
                         userId: "user1",
@@ -573,24 +579,24 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         await Promise.all([object1done.promise, object2done.promise]);
 
         // cannot check for new clients on same user in `presenceChanged` callback, will evaluate as being equal.
-        // wait for a sync to happen, and check for new clients with getPresenceForUser
+        // wait for a sync to happen, and check for new clients with getUser
         await waitForDelay(50);
-        const user1Presence = object1.getPresenceForUser("user1");
+        const user1Presence = object1.getUser("user1");
         assert(
             user1Presence !== undefined,
             "user1 should be defined in object1"
         );
-        const user2Presence = object2.getPresenceForUser("user1");
+        const user2Presence = object2.getUser("user1");
         assert(
             user2Presence !== undefined,
             "user1 should be defined in object2"
         );
         assert(
-            user1Presence._clients.length == 2,
+            user1Presence.getConnections().length == 2,
             "user should have two clients"
         );
         assert(
-            user2Presence._clients.length == 2,
+            user2Presence.getConnections().length == 2,
             "user should have two clients"
         );
     });

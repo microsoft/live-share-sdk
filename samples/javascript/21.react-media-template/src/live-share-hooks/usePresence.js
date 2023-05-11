@@ -60,7 +60,7 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
                 setLocalUser(userPresence);
             }
             // Set users local state
-            const userArray = presence.toArray();
+            const userArray = presence.getUsers();
             setUsers(userArray);
         });
         const userPrincipalName =

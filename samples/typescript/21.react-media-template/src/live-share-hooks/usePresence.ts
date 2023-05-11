@@ -22,7 +22,7 @@ export interface IUserData {
  *
  * @remarks
  *
- * @param {LivePresence} presence presence object from Fluid container.
+ * @param {LivePresence<IUserData>} presence presence object from Fluid container.
  * @param {UserMeetingRole[]} acceptPlaybackChangesFrom List of acceptable roles for playback transport commands.
  * @param {microsoftTeams.app.Context} context Teams context object
  * @returns `{started, localUser, users, presentingUser, localUserIsEligiblePresenter, localUserIsPresenting, takeControl}` where:
@@ -33,7 +33,7 @@ export interface IUserData {
  */
 export const usePresence = (
     acceptPlaybackChangesFrom: UserMeetingRole[],
-    presence?: LivePresence,
+    presence?: LivePresence<IUserData>,
     context?: app.Context
 ) => {
     const startedInitializingRef = useRef(false);
@@ -81,7 +81,7 @@ export const usePresence = (
                 }
                 // Set users local state
                 const userArray =
-                    presence.toArray() as LivePresenceUser<IUserData>[];
+                    presence.getUsers();
                 setUsers(userArray);
             }
         );

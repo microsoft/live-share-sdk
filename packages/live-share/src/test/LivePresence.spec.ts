@@ -31,13 +31,12 @@ async function getObjects(
     customHost?: ILiveShareHost
 ) {
     // Temporarily change update interval
-    let liveRuntime1 = new MockLiveShareRuntime(true, updateInterval);
-    let liveRuntime2 = new MockLiveShareRuntime(true, updateInterval);
+    let liveRuntime1 = new MockLiveShareRuntime(false, updateInterval);
+    let liveRuntime2 = new MockLiveShareRuntime(false, updateInterval);
     if (customHost) {
         liveRuntime1.setHost(customHost);
         liveRuntime2.setHost(customHost);
     }
-    liveRuntime1.connectToOtherRuntime(liveRuntime2);
 
     let ObjectProxy1: any = getLiveDataObjectClassProxy<
         LivePresence<{ foo: string }>

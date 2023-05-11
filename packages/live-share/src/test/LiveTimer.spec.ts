@@ -16,9 +16,8 @@ import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
 async function getObjects(getTestObjectProvider, updateInterval: number = 10000) {
     // Temporarily change update interval
-    let liveRuntime1 = new MockLiveShareRuntime(true, updateInterval);
-    let liveRuntime2 = new MockLiveShareRuntime(true, updateInterval);
-    liveRuntime1.connectToOtherRuntime(liveRuntime2);
+    let liveRuntime1 = new MockLiveShareRuntime(false, updateInterval);
+    let liveRuntime2 = new MockLiveShareRuntime(false, updateInterval);
 
     let ObjectProxy1: any = getLiveDataObjectClassProxy<LiveTimer>(
         LiveTimer,

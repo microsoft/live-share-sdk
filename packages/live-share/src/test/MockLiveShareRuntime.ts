@@ -16,7 +16,7 @@ export class MockLiveShareRuntime extends LiveShareRuntime {
             this.__dangerouslySetContainerRuntime(localContainer);
         }
     }
-    override __dangerouslySetContainerRuntime(container: MockContainerRuntimeSignaler) {
+    override __dangerouslySetContainerRuntime(container: IContainerRuntimeSignaler) {
         if (this._containerRuntime) return;
         super.__dangerouslySetContainerRuntime(container);
         this.objectManager.updateInterval = this.updateInterval;

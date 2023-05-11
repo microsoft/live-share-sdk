@@ -19,9 +19,8 @@ interface TestStateData {
 
 async function getObjects(getTestObjectProvider) {
     // Temporarily change update interval
-    let liveRuntime1 = new MockLiveShareRuntime(true);
-    let liveRuntime2 = new MockLiveShareRuntime(true);
-    liveRuntime1.connectToOtherRuntime(liveRuntime2);
+    let liveRuntime1 = new MockLiveShareRuntime(false);
+    let liveRuntime2 = new MockLiveShareRuntime(false);
 
     let ObjectProxy1: any = getLiveDataObjectClassProxy<
         LiveState<TestStateData>

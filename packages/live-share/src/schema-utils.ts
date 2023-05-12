@@ -15,7 +15,7 @@ import {
  * Inject Live Share dependencies into your Fluid container schema.
  * This should only be done once, right before connecting to a container.
  * @remarks
- * Users should not use this method unless you are connecting to a container using `LiveShareClient`.
+ * Users should not use this method if you are connecting to a container using `LiveShareClient`.
  * This is intended to be used when you are using another Fluid client, such as `AzureClient`.
  *
  * @param schema Fluid ContainerSchema you would like to inject the runtime into

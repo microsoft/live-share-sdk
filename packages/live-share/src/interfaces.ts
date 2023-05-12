@@ -24,7 +24,7 @@ export interface IEvent {
  */
 export interface IClientTimestamp {
     /**
-     * Current client ID, if known. The client ID will be `undefined` if the client is currently disconnected.
+     * Client ID for the active socket connection.
      */
     clientId: string;
 

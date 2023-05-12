@@ -139,7 +139,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
             async (evt, sender, local) => {
                 // Check for state change.
                 // If it was valid, this will override the local user's previous value.
-                return await this.remoteStateReceived(evt, sender, local);
+                return await this.onReceivedStateEvent(evt, sender, local);
             },
             async (connecting) => {
                 if (connecting) return true;
@@ -156,7 +156,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
         if (!events) return;
         for (let eIndex = 0; eIndex < events.length; eIndex++) {
             const event = events[eIndex];
-            const didApply = await this.remoteStateReceived(
+            const didApply = await this.onReceivedStateEvent(
                 event,
                 event.clientId,
                 event.clientId === await this.waitUntilConnected()
@@ -210,7 +210,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
     }
 
     // Returns true if the remote state was applied successfully
-    private async remoteStateReceived(
+    private async onReceivedStateEvent(
         evt: ILiveEvent<TState>,
         sender: string,
         local: boolean

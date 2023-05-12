@@ -93,18 +93,6 @@ export interface ILiveTimerEvents extends IEvent {
     (event: "onTick", listener: (milliRemaining: number) => void): any;
 }
 
-interface IPlayEvent {
-    duration: number;
-    position: number;
-}
-type PlayEventReceived = ILiveEvent<IPlayEvent>;
-
-interface IPauseEvent {
-    duration: number;
-    position: number;
-}
-type PauseEventReceived = ILiveEvent<IPauseEvent>;
-
 export class LiveTimer extends LiveDataObject<{
     Events: ILiveTimerEvents;
 }> {

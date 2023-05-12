@@ -173,6 +173,7 @@ export class LiveTimer extends LiveDataObject<{
     /**
      * Initializes the object and starts listening for remote changes
      * @param allowedRoles Optional. List of roles allowed to make state changes.
+     * @returns a void promise
      */
     public async initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
         if (this.isInitialized) {
@@ -237,6 +238,7 @@ export class LiveTimer extends LiveDataObject<{
      * @remarks
      * Starting an already started timer will restart the timer with a new duration.
      * @param duration in Milliseconds
+     * @returns a void promise, and will throw if the user does not have the required roles
      */
     public async start(duration: number): Promise<void> {
         if (!this.isInitialized) {
@@ -248,9 +250,10 @@ export class LiveTimer extends LiveDataObject<{
 
     /**
      * Resumes the timer.
-     *
      * @remarks
      * Playing an already playing timer does nothing.
+     * 
+     * @returns a void promise, and will throw if the user does not have the required roles
      */
     public async play(): Promise<void> {
         if (!this.isInitialized) {
@@ -293,6 +296,8 @@ export class LiveTimer extends LiveDataObject<{
      *
      * @remarks
      * Pausing an already paused timer does nothing.
+     * 
+     * @returns a void promise, and will throw if the user does not have the required roles
      */
     public async pause(): Promise<void> {
         if (!this.isInitialized) {

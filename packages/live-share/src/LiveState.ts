@@ -107,6 +107,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
      * Starts the object.
      * @param initialState Initial state value
      * @param allowedRoles Optional. List of roles allowed to make state changes.
+     * @returns a void promise that resolves once complete
      */
     public async initialize(
         initialState: TState,
@@ -178,6 +179,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
     /**
      * Set a new state value
      * @param state New state name.
+     * @returns a void promise, and will throw if the user does not have the required roles
      */
     public async set(state: TState): Promise<void> {
         if (!this.isInitialized) {

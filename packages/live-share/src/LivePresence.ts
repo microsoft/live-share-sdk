@@ -243,6 +243,7 @@ export class LivePresence<
      * This will trigger the immediate broadcast of the users presence to all other clients.
      * @param data Optional. Data object to change. A deep copy of the data object is saved to avoid any future changes.
      * @param state Optional. Presence state to change.
+     * @returns a void promise, and will throw if the user does not have the required roles
      */
     public async update(data?: TData, state?: PresenceState): Promise<void> {
         if (!this._synchronizer || !this._currentPresence) {

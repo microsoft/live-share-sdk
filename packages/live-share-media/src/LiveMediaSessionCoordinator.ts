@@ -202,6 +202,8 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @remarks
      * Throws an exception if the session/coordinator hasn't been initialized, no track has been
      * loaded, or `canPlayPause` is false.
+     * 
+     * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async play(): Promise<void> {
         if (!this._hasInitialized) {
@@ -243,6 +245,8 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @remarks
      * Throws an exception if the session/coordinator hasn't been initialized, no track has been
      * loaded, or `canPlayPause` is false.
+     * 
+     * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async pause(): Promise<void> {
         if (!this._hasInitialized) {
@@ -285,6 +289,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * Throws an exception if the session/coordinator hasn't been initialized, no track has been
      * loaded, or `canSeek` is false.
      * @param time Playback position in seconds to seek to.
+     * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async seekTo(time: number): Promise<void> {
         if (!this._hasInitialized) {
@@ -330,6 +335,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * false.
      * @param metadata The track to load or `null` to indicate that the end of the track is reached.
      * @param waitPoints Optional. List of static wait points to configure for the track.  Dynamic wait points can be added via the `beginSuspension()` call.
+     * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async setTrack(
         metadata: ExtendedMediaMetadata | null,
@@ -367,6 +373,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * Throws an exception if the session/coordinator hasn't been initialized or `canSetTrackData` is
      * false.
      * @param data New data object to sync with the group. This value will be synchronized using a last writer wins strategy.
+     * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async setTrackData(data: object | null): Promise<void> {
         if (!this._hasInitialized) {

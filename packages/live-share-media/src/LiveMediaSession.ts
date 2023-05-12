@@ -109,6 +109,7 @@ export class LiveMediaSession extends LiveDataObject {
      * initialize the object.
      * @param allowedRoles Optional. List of roles allowed to group transport
      * operations like play/pause/seek/setTrack.
+     * @returns a void promise that resolves once complete
      */
     public initialize(
         allowedRoles?: UserMeetingRole[]

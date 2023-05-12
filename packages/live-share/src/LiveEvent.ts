@@ -137,7 +137,7 @@ export class LiveEvent<TEvent = any> extends LiveDataObject<{
      * The event will be queued for delivery if the client isn't currently connected.
      * @param evt Event to send. If omitted, an event will still be sent but it won't
      * include any custom event data.
-     * @returns The full event object that was sent, including the timestamp of when the event
+     * @returns A promise with the full event object that was sent, including the timestamp of when the event
      * was sent and the clientId if known. The clientId will be `undefined` if the client is
      * disconnected at time of delivery.
      */

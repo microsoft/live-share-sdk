@@ -16,9 +16,10 @@ import { IFluidContainer, SharedMap } from "fluid-framework";
 import { useEffect, useState, useRef } from "react";
 import { mediaList } from "../utils/media-list";
 import { LiveShareHost } from "@microsoft/teams-js";
+import { IUserData } from "./usePresence";
 
 interface IUseSharedObjectsResult extends Partial<ILiveShareJoinResults> {
-    presence: LivePresence | undefined,
+    presence: LivePresence<IUserData> | undefined,
     mediaSession: LiveMediaSession
         | undefined,
     notificationEvent: LiveEvent
@@ -86,7 +87,7 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         // Define container schema
         const schema = {
             initialObjects: {
-                presence: LivePresence,
+                presence: LivePresence<IUserData>,
                 mediaSession: LiveMediaSession,
                 notificationEvent: LiveEvent,
                 liveCanvas: LiveCanvas,
@@ -119,7 +120,7 @@ export function useSharedObjects(): IUseSharedObjectsResult {
     const container = results?.container;
     const initialObjects = container?.initialObjects;
     return {
-        presence: initialObjects?.presence as LivePresence | undefined,
+        presence: initialObjects?.presence as LivePresence<IUserData> | undefined,
         mediaSession: initialObjects?.mediaSession as
             | LiveMediaSession
             | undefined,

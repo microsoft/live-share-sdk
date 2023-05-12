@@ -67,7 +67,7 @@ export function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
             return CheckExisting;
         }
         // Create a new proxy for this type and insert it into proxiedClasses
-        const NewProxy = proxyLiveDataObjectClass(
+        const NewProxy = getLiveDataObjectProxyClassInternal(
             ObjectClass,
             liveRuntime
         ) as unknown as LoadableObjectClass<TClass>;
@@ -88,7 +88,7 @@ function isLiveDataObject(value: any): value is typeof LiveDataObject {
  * @hidden
  * Create a new class extending LiveDataObject to inject in _liveRuntime
  */
-function proxyLiveDataObjectClass<I extends DataObjectTypes = DataObjectTypes>(
+function getLiveDataObjectProxyClassInternal<I extends DataObjectTypes = DataObjectTypes>(
     BaseClass: typeof LiveDataObject<I>,
     runtime: LiveShareRuntime
 ): typeof LiveDataObject<I> {
@@ -100,7 +100,7 @@ function proxyLiveDataObjectClass<I extends DataObjectTypes = DataObjectTypes>(
             this["liveRuntime"] = runtime;
             // Pass reference to the container runtime
             if (!this.context || !this.context.containerRuntime) {
-                throw Error("proxyLiveDataObjectClass: required dependencies unknown");
+                throw Error("getLiveDataObjectProxyClassInternal: required dependencies unknown");
             }
             runtime.__dangerouslySetContainerRuntime(this.context.containerRuntime);
         }

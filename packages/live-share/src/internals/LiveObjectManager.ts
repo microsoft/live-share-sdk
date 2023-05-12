@@ -141,7 +141,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     }
 
     /**
-     * Gets the most recent events sent for a given `objectId`.
+     * Gets the events sent for a given `objectId`, sorted by most recent.
      * @param objectId the `LiveDataObject` id
      * @returns the latest events sent, or undefined if there are none
      */

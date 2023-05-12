@@ -6,7 +6,12 @@
 import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
 import React from "react";
 import { useSharedStateRegistry } from "../internal-hooks";
-import { ILiveShareClientOptions, ILiveShareHost, ILiveShareJoinResults, ITimestampProvider } from "@microsoft/live-share";
+import {
+    ILiveShareClientOptions,
+    ILiveShareHost,
+    ILiveShareJoinResults,
+    ITimestampProvider,
+} from "@microsoft/live-share";
 import { FluidContext } from "./AzureProvider";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 
@@ -75,9 +80,7 @@ interface ILiveShareProviderProps {
 /**
  * React Context provider component for using Live Share data objects & joining a Live Share session using `LiveShareClient`.
  */
-export const LiveShareProvider: React.FC<
-    ILiveShareProviderProps
-> = (props) => {
+export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
     const startedRef = React.useRef(false);
     const clientRef = React.useRef(
         new LiveShareTurboClient(props.host, props.clientOptions)
@@ -98,7 +101,10 @@ export const LiveShareProvider: React.FC<
             onInitializeContainer?: (container: IFluidContainer) => void
         ): Promise<ILiveShareJoinResults> => {
             startedRef.current = true;
-            const results = await clientRef.current.join(initialObjects, onInitializeContainer);
+            const results = await clientRef.current.join(
+                initialObjects,
+                onInitializeContainer
+            );
             setResults(results);
             return results;
         },
@@ -112,7 +118,8 @@ export const LiveShareProvider: React.FC<
         // This hook should only be called once, so we use a ref to track if it has been called.
         // This is a workaround for the fact that useEffect is called twice on initial render in React V18.
         // We are not doing this here for backwards compatibility. View the README for more information.
-        if (results !== undefined || startedRef.current || !props.joinOnLoad) return;
+        if (results !== undefined || startedRef.current || !props.joinOnLoad)
+            return;
         join(props.initialObjects).catch((error) => {
             console.error(error);
             if (error instanceof Error) {

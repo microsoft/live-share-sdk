@@ -3,11 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import {
-    Card,
-    CardPreview,
-    CardFooter,
-} from "@fluentui/react-components";
+import { Card, CardPreview, CardFooter } from "@fluentui/react-components";
 import { Image, Text, Button, mergeClasses } from "@fluentui/react-components";
 import { Delete20Regular } from "@fluentui/react-icons";
 import { getFlexRowStyles, getFlexItemStyles } from "../styles/layouts";

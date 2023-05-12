@@ -4,7 +4,7 @@
  */
 
 import { TestLiveShareHost } from "@microsoft/live-share";
-import { LiveShareTurboClient, } from "@microsoft/live-share-turbo";
+import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 import { SharedMap } from "fluid-framework";
 import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
@@ -99,8 +99,12 @@ async function renderDiceElement(client, wrapper, diceIndex) {
     const onDidFirstInitialize = (dds) => {
         // Set initial state of the rolled dice to 1.
         dds.set(diceValueKey, 1);
-    }
-    const diceMap = await client.getDDS(dynamicMapKey, SharedMap, onDidFirstInitialize);
+    };
+    const diceMap = await client.getDDS(
+        dynamicMapKey,
+        SharedMap,
+        onDidFirstInitialize
+    );
     // Insert dice roller UI into wrapper element
     const diceTemplate = document.createElement("template");
     const diceContainerId = `dice-container-${diceIndex}`;
@@ -131,7 +135,6 @@ async function renderDiceElement(client, wrapper, diceIndex) {
     // Use the changed event to trigger the rerender whenever the value changes.
     diceMap.on("valueChanged", updateDice);
 }
-
 
 // SIDEBAR VIEW
 

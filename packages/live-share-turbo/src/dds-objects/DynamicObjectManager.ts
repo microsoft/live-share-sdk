@@ -4,10 +4,7 @@
  */
 
 import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
-import {
-    LoadableObjectClass,
-    IFluidContainer,
-} from "fluid-framework";
+import { LoadableObjectClass, IFluidContainer } from "fluid-framework";
 import {
     IFluidHandle,
     FluidObject,
@@ -18,7 +15,10 @@ import { ConsensusRegisterCollection } from "@fluidframework/register-collection
 import { DynamicObjectRegistry, LiveDataObject } from "@microsoft/live-share";
 
 // Register ConsensusRegisterCollection
-DynamicObjectRegistry.registerObjectClass(ConsensusRegisterCollection, ConsensusRegisterCollection.getFactory().type);
+DynamicObjectRegistry.registerObjectClass(
+    ConsensusRegisterCollection,
+    ConsensusRegisterCollection.getFactory().type
+);
 
 type DynamicObjectsCollection = ConsensusRegisterCollection<IFluidHandle<any>>;
 const dynamicObjectsCollectionKey = "<<consensusRegisterCollectionKey>>";
@@ -137,14 +137,17 @@ export class DynamicObjectManager extends LiveDataObject {
 
     /**
      * Recursively attempt to write a DDS to the consensusRegisterCollection. This is necessary because we may disconnect mid-write.
-     * 
+     *
      * @param key unique identifier for DDS
      * @param localDDS the DDS to write if we are the first to write
      * @returns the DDS and whether or not it was created locally
      */
     private async loadDDSWithConsensus<
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
-    >(key: string, localDDS: T): Promise<{
+    >(
+        key: string,
+        localDDS: T
+    ): Promise<{
         dds: T;
         created: boolean;
     }> {
@@ -158,7 +161,10 @@ export class DynamicObjectManager extends LiveDataObject {
             };
         }
         // Attempt to write local DDS to dynamicObjectsCollection
-        const acknowledged = await this.dynamicObjectsCollection.write(key, localDDS.handle);
+        const acknowledged = await this.dynamicObjectsCollection.write(
+            key,
+            localDDS.handle
+        );
         // If we successfully write, return the local DDS
         if (acknowledged) {
             return {

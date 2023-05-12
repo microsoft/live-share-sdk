@@ -18,8 +18,15 @@ import { LiveSharePage } from "../components/LiveSharePage";
 
 const MeetingStage = () => {
     const context = useTeamsContext();
-    const { container, pokerState, presence, timer, userStoriesMap, error, timestampProvider } =
-        useSharedObjects();
+    const {
+        container,
+        pokerState,
+        presence,
+        timer,
+        userStoriesMap,
+        error,
+        timestampProvider,
+    } = useSharedObjects();
     const [answer, answerRef, setAnswer] = useStateRef(null);
     const previousStateRef = useRef();
 
@@ -49,7 +56,7 @@ const MeetingStage = () => {
         userStoriesMap,
         context?.user?.id,
         userStoryId,
-        timestampProvider,
+        timestampProvider
     );
 
     // LiveTimer hook for tracking round timer
@@ -134,7 +141,7 @@ const MeetingStage = () => {
                 {/* Display error if failed to join space */}
                 {error && <UI.ErrorPane error={error} />}
 
-                {(state === "waiting") && (
+                {state === "waiting" && (
                     <UI.WaitingRoom
                         localUserId={context?.user?.id}
                         users={users}
@@ -142,7 +149,9 @@ const MeetingStage = () => {
                         onStartCosting={() => {
                             beginTimer();
                             const url = new URL(window.location);
-                            onStartCosting(url.searchParams.get("userStoryId") || "0");
+                            onStartCosting(
+                                url.searchParams.get("userStoryId") || "0"
+                            );
                         }}
                     />
                 )}
@@ -167,7 +176,9 @@ const MeetingStage = () => {
                         onStartCosting={() => {
                             beginTimer();
                             const url = new URL(window.location);
-                            onStartCosting(url.searchParams.get("userStoryId") || "0");
+                            onStartCosting(
+                                url.searchParams.get("userStoryId") || "0"
+                            );
                         }}
                         onStartWaiting={onStartWaiting}
                     />

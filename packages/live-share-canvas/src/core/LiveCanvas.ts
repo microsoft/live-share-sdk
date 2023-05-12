@@ -587,10 +587,7 @@ export class LiveCanvas extends LiveDataObject {
         this._addWetStrokePointEventTarget = new LiveEventTarget(
             scope,
             InkingEventNames.addWetStrokePoints,
-            (
-                evt: ILiveEvent<IAddWetStrokePointsEvent>,
-                local: boolean
-            ) => {
+            (evt: ILiveEvent<IAddWetStrokePointsEvent>, local: boolean) => {
                 if (!local) {
                     const stroke = this._wetStrokes.get(evt.data.strokeId);
 

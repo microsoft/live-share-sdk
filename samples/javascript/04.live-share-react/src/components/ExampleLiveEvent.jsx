@@ -1,13 +1,13 @@
 import { UserMeetingRole } from "@microsoft/live-share";
 import { useLiveEvent } from "@microsoft/live-share-react";
 
-const ALLOWED_ROLES = [
-    UserMeetingRole.organizer,
-    UserMeetingRole.presenter,
-];
+const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter];
 
 export const ExampleLiveEvent = () => {
-    const { latestEvent, allEvents, sendEvent } = useLiveEvent("EVENT-ID", ALLOWED_ROLES);
+    const { latestEvent, allEvents, sendEvent } = useLiveEvent(
+        "EVENT-ID",
+        ALLOWED_ROLES
+    );
 
     return (
         <div style={{ marginTop: "12px" }}>

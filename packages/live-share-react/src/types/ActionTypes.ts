@@ -79,14 +79,16 @@ export type DisposeSharedStateAction = () => void;
  * (state: TState) => Promise<void>
  */
 export type SetLiveStateAction<TState = undefined> = (
-    state: TState,
+    state: TState
 ) => Promise<void>;
 
 /**
  * Callback for SendLiveEventAction<TEvent>.
  * (event: TEvent) => Promise<void>
  */
-export type SendLiveEventAction<TEvent> = (event: TEvent) => Promise<ILiveEvent<TEvent>>;
+export type SendLiveEventAction<TEvent> = (
+    event: TEvent
+) => Promise<ILiveEvent<TEvent>>;
 
 /**
  * Callback for OnReceivedLiveEventAction<TEvent>.
@@ -103,16 +105,14 @@ export type OnReceivedLiveEventAction<TEvent> = (
  */
 export type OnUpdateLivePresenceAction<TData extends object = object> = (
     data?: TData | undefined,
-    state?: PresenceState | undefined,
+    state?: PresenceState | undefined
 ) => Promise<void>;
 
 /**
  * Callback for OnStartTimerAction.
  * (duration: number) => Promise<void>
  */
-export type OnStartTimerAction = (
-    duration: number
-) => Promise<void>;
+export type OnStartTimerAction = (duration: number) => Promise<void>;
 
 /**
  * Callback for OnPlayTimerAction.

@@ -6,7 +6,7 @@ import {
     IRoleVerifier,
     ITimestampProvider,
     UserMeetingRole,
-    IContainerRuntimeSignaler
+    IContainerRuntimeSignaler,
 } from "./interfaces";
 import {
     BackwardsCompatibilityHostDecorator,
@@ -49,10 +49,10 @@ export class LiveShareRuntime {
                   new LiveShareHostDecorator(host)
               )
             : host;
-        this._timestampProvider = !!timestampProvider
+        this._timestampProvider = timestampProvider
             ? timestampProvider
             : new HostTimestampProvider(this._host);
-        this._roleVerifier = !!roleVerifier
+        this._roleVerifier = roleVerifier
             ? roleVerifier
             : new RoleVerifier(this._host);
     }
@@ -156,7 +156,9 @@ export class LiveShareRuntime {
      */
     public async start() {
         if (this._started) {
-            throw new Error("LiveShareRuntime.start(): cannot call start when already started");
+            throw new Error(
+                "LiveShareRuntime.start(): cannot call start when already started"
+            );
         }
         this._started = true;
         if (this._objectManager) {
@@ -176,7 +178,9 @@ export class LiveShareRuntime {
      */
     public stop() {
         if (!this._started) {
-            throw new Error("LiveShareRuntime.stop(): cannot call stop when not already started");
+            throw new Error(
+                "LiveShareRuntime.stop(): cannot call stop when not already started"
+            );
         }
         this._started = false;
         // Start provider if needed
@@ -193,14 +197,17 @@ export class LiveShareRuntime {
      * @hidden
      * Do not use this API unless you know what you are doing. Can cause the object synchronizer to stop working.
      */
-    public __dangerouslySetContainerRuntime(cRuntime: IContainerRuntimeSignaler) {
+    public __dangerouslySetContainerRuntime(
+        cRuntime: IContainerRuntimeSignaler
+    ) {
         if (this._containerRuntime === cRuntime) return;
         this._containerRuntime = cRuntime;
         if (this._objectManager) {
             this._objectManager.stop();
         }
         this._objectManager = new LiveObjectManager(
-            this, this._containerRuntime
+            this,
+            this._containerRuntime
         );
         this.startObjectSynchronizerManager();
     }
@@ -209,7 +216,7 @@ export class LiveShareRuntime {
      * @hidden
      */
     private startObjectSynchronizerManager() {
-        // If this is being set after the objectManager was started, 
+        // If this is being set after the objectManager was started,
         this.objectManager.start();
     }
 }

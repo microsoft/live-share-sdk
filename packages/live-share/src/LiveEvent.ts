@@ -5,11 +5,7 @@
 
 import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
-import {
-    UserMeetingRole,
-    IClientTimestamp,
-    ILiveEvent,
-} from "./interfaces";
+import { UserMeetingRole, IClientTimestamp, ILiveEvent } from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";

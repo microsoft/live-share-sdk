@@ -160,7 +160,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
             const didApply = await this.onReceivedStateEvent(
                 event,
                 event.clientId,
-                event.clientId === await this.waitUntilConnected()
+                event.clientId === (await this.waitUntilConnected())
             );
             if (didApply) break;
         }

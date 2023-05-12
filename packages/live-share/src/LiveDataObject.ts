@@ -1,4 +1,8 @@
-import { DataObject, DataObjectTypes, IDataObjectProps } from "@fluidframework/aqueduct";
+import {
+    DataObject,
+    DataObjectTypes,
+    IDataObjectProps,
+} from "@fluidframework/aqueduct";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { assert } from "@fluidframework/common-utils";
 import { UserMeetingRole } from "./interfaces";
@@ -51,15 +55,16 @@ export abstract class LiveDataObject<
         return waitUntilConnected(this.runtime);
     }
 
-    
     /**
      * Verify that the user has the required roles
      * @returns boolean true if user has the required roles
      */
     protected async verifyLocalUserRoles(): Promise<boolean> {
         const clientId = await this.waitUntilConnected();
-        return this.liveRuntime
-            .verifyRolesAllowed(clientId, this._allowedRoles ?? [])
+        return this.liveRuntime.verifyRolesAllowed(
+            clientId,
+            this._allowedRoles ?? []
+        );
     }
 
     /**
@@ -73,12 +78,10 @@ export abstract class LiveDataObject<
     /**
      * @hidden
      * Utility function that lets you run a function if successful, or throw a consistent Error if not.
-     * @param fnSuccess function to run if user has needed roles 
+     * @param fnSuccess function to run if user has needed roles
      * @returns TResponse if successful. Should never throw an error.
      */
-    public async onLocalUserAllowed(
-        fnSuccess: () => void,
-    ): Promise<void> {
+    public async onLocalUserAllowed(fnSuccess: () => void): Promise<void> {
         const valid = await this.verifyLocalUserRoles();
         if (!valid) return;
         fnSuccess();

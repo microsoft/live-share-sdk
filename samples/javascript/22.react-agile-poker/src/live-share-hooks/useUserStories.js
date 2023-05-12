@@ -7,7 +7,12 @@ import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { v4 as uuid } from "uuid";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 
-export const useUserStories = (userStoriesMap, localUserId, userStoryId, timestampProvider) => {
+export const useUserStories = (
+    userStoriesMap,
+    localUserId,
+    userStoryId,
+    timestampProvider
+) => {
     const [userStories, setUserStories] = useState([]);
     const [userStoriesStarted, setStarted] = useState(false);
     const initialUserStoryIdRef = useRef(getInitialUserStoryId());

@@ -202,7 +202,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @remarks
      * Throws an exception if the session/coordinator hasn't been initialized, no track has been
      * loaded, or `canPlayPause` is false.
-     * 
+     *
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async play(): Promise<void> {
@@ -245,7 +245,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @remarks
      * Throws an exception if the session/coordinator hasn't been initialized, no track has been
      * loaded, or `canPlayPause` is false.
-     * 
+     *
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async pause(): Promise<void> {

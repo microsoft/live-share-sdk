@@ -69,7 +69,7 @@ const MeetingStage = () => {
         localUserIsEligiblePresenter,
         users,
         timestampProvider,
-        sendNotification,
+        sendNotification
     );
 
     // Playlist map

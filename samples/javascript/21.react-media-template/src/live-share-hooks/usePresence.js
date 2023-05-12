@@ -3,7 +3,11 @@
  * Licensed under the MIT License.
  */
 
-import { LivePresence, UserMeetingRole, ITimestampProvider } from "@microsoft/live-share";
+import {
+    LivePresence,
+    UserMeetingRole,
+    ITimestampProvider,
+} from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { app } from "@microsoft/teams-js";
 
@@ -22,7 +26,12 @@ import { app } from "@microsoft/teams-js";
  * - `users` is an array of user presence objects in the session.
  * - `localUserIsEligiblePresenter` is a boolean indicating whether the local user is an eligible presenter.
  */
-export const usePresence = (presence, acceptPlaybackChangesFrom, context, timestampProvider) => {
+export const usePresence = (
+    presence,
+    acceptPlaybackChangesFrom,
+    context,
+    timestampProvider
+) => {
     const startedInitializingRef = useRef(false);
     const usersRef = useRef([]);
     const [users, setUsers] = useState(usersRef.current);

@@ -70,9 +70,8 @@ export const useSharedStateRegistry = (
                 );
             }
             // Set initial values, if known
-            const stateMap = results?.container.initialObjects.TURBO_STATE_MAP as
-                | SharedMap
-                | undefined;
+            const stateMap = results?.container.initialObjects
+                .TURBO_STATE_MAP as SharedMap | undefined;
             const initialValue = stateMap?.get(uniqueKey);
             if (initialValue) {
                 setLocalStateAction(initialValue);
@@ -102,7 +101,8 @@ export const useSharedStateRegistry = (
         (uniqueKey: string, value: any) => {
             if (!results) return;
             const { container } = results;
-            const stateMap = container.initialObjects.TURBO_STATE_MAP as SharedMap;
+            const stateMap = container.initialObjects
+                .TURBO_STATE_MAP as SharedMap;
             stateMap.set(uniqueKey, value);
         },
         [results]
@@ -118,7 +118,8 @@ export const useSharedStateRegistry = (
             let actionsMap =
                 registeredSharedSetStateActionMapRef.current.get(uniqueKey);
             actionsMap?.clear();
-            const stateMap = container.initialObjects.TURBO_STATE_MAP as SharedMap;
+            const stateMap = container.initialObjects
+                .TURBO_STATE_MAP as SharedMap;
             stateMap.delete(uniqueKey);
         },
         [results]

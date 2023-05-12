@@ -3,7 +3,12 @@
  * Licensed under the MIT License.
  */
 
-import { LiveShareClient, LiveState, TestLiveShareHost, UserMeetingRole } from "@microsoft/live-share";
+import {
+    LiveShareClient,
+    LiveState,
+    TestLiveShareHost,
+    UserMeetingRole,
+} from "@microsoft/live-share";
 import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
 const searchParams = new URL(window.location).searchParams;
@@ -35,7 +40,7 @@ async function start() {
         if (theme == "default") {
             color = "black";
         }
-        app.registerOnThemeChangeHandler(function(theme) {
+        app.registerOnThemeChangeHandler(function (theme) {
             color = theme === "default" ? "black" : "white";
         });
     }
@@ -54,8 +59,11 @@ async function start() {
                 const { container } = await joinContainer();
                 const diceState = container.initialObjects.diceState;
                 // You can optionally declare what roles you want to be able to change state
-                const allowedRoles = [UserMeetingRole.organizer, UserMeetingRole.presenter];
-                // Initialize diceState with initial state of 1 and allowed roles 
+                const allowedRoles = [
+                    UserMeetingRole.organizer,
+                    UserMeetingRole.presenter,
+                ];
+                // Initialize diceState with initial state of 1 and allowed roles
                 await diceState.initialize(1, allowedRoles);
                 renderStage(diceState, root);
             } catch (error) {
@@ -101,8 +109,7 @@ function renderStage(diceState, elem) {
     const dice = elem.querySelector(".dice");
 
     // Set the value at our dataKey with a random number between 1 and 6.
-    rollButton.onclick = () =>
-        diceState.set(Math.floor(Math.random() * 6) + 1);
+    rollButton.onclick = () => diceState.set(Math.floor(Math.random() * 6) + 1);
 
     // Get the current value of the shared data to update the view whenever it changes.
     const updateDice = () => {

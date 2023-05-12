@@ -15,9 +15,7 @@ import { LiveEventSource } from "./LiveEventSource";
  * events to other instances of itself.
  * @template TEvent Type of event to broadcast.
  */
-export class LiveEventTarget<
-    TEvent
-> extends LiveEventSource<TEvent> {
+export class LiveEventTarget<TEvent> extends LiveEventSource<TEvent> {
     /**
      * Creates a new `LiveEventTarget` instance.
      * @param scope Scope to use for sending events.

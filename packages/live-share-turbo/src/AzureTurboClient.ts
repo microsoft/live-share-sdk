@@ -39,7 +39,10 @@ export class AzureTurboClient extends FluidTurboClient {
      * Creates a new client instance using configuration parameters.
      * @param props - Properties for initializing a new AzureClient instance
      */
-    constructor(props: AzureClientProps, host: ILiveShareHost = AzureLiveShareHost.create(true)) {
+    constructor(
+        props: AzureClientProps,
+        host: ILiveShareHost = AzureLiveShareHost.create(true)
+    ) {
         super();
         this._client = new AzureClient(props);
         this._host = host;
@@ -64,15 +67,12 @@ export class AzureTurboClient extends FluidTurboClient {
      * @returns New detached container instance along with associated services.
      */
     public async createContainer(
-        initialObjects?: LoadableObjectClassRecord,
+        initialObjects?: LoadableObjectClassRecord
     ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const {
-            runtime,
-            schema,
-        } = this.getContainerSetup(initialObjects);
+        const { runtime, schema } = this.getContainerSetup(initialObjects);
         this._results = await this._client.createContainer(schema);
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
@@ -90,15 +90,12 @@ export class AzureTurboClient extends FluidTurboClient {
      */
     public async getContainer(
         id: string,
-        initialObjects?: LoadableObjectClassRecord,
+        initialObjects?: LoadableObjectClassRecord
     ): Promise<{
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const {
-            runtime,
-            schema,
-        } = this.getContainerSetup(initialObjects);
+        const { runtime, schema } = this.getContainerSetup(initialObjects);
         this._results = await this._client.getContainer(id, schema);
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
@@ -107,9 +104,7 @@ export class AzureTurboClient extends FluidTurboClient {
         return this._results;
     }
 
-    private getContainerSetup(
-        initialObjects?: LoadableObjectClassRecord,
-    ): {
+    private getContainerSetup(initialObjects?: LoadableObjectClassRecord): {
         schema: ContainerSchema;
         runtime: LiveShareRuntime;
     } {

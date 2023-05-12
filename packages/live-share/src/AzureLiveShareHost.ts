@@ -14,7 +14,7 @@ import { Deferred } from "./internals";
  * This host enables using Live Share through your own `AzureClient` implementation.
  * This is not intended to be used with `LiveShareClient`.
  * We provide no SLA guarantees on this implementation while it is in alpha.
- * 
+ *
  * @remarks
  * To use this API, first pass your `ContainerSchema` through the `getLiveShareContainerSchemaProxy` function.
  * This should be done before calling `.getContainer()` or `createContainer()`.

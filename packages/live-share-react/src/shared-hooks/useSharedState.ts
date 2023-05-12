@@ -79,7 +79,11 @@ export function useSharedState<S>(
         return () => {
             unregisterSharedSetStateAction(uniqueKey, componentIdRef.current);
         };
-    }, [uniqueKey, registerSharedSetStateAction, unregisterSharedSetStateAction]);
+    }, [
+        uniqueKey,
+        registerSharedSetStateAction,
+        unregisterSharedSetStateAction,
+    ]);
 
     return [localState, setSharedState, disposeSharedState];
 }

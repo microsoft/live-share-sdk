@@ -22,7 +22,8 @@ export const TelemetryEvents = {
         UserTappedVideoToPlay: transmit(
             "MediaPlayerSynchronizer:UserTappedVideoToPlay"
         ),
-        UserTappedVideoToPlayError: "MediaPlayerSynchronizer:UserTappedVideoToPlayError",
+        UserTappedVideoToPlayError:
+            "MediaPlayerSynchronizer:UserTappedVideoToPlayError",
         PlaybackRateChangeBlocked:
             "MediaPlayerSynchronizer:PlaybackRateChangeBlocked",
         PlayerBlockedOperation: transmit(

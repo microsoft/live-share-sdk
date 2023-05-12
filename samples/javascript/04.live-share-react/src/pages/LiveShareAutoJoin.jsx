@@ -33,7 +33,7 @@ export const LiveShareAutoJoin = () => {
 const LiveShareAutoJoinRenderer = () => {
     // Get the join state from `useLiveShareContext`
     const { joined, joinError } = useLiveShareContext();
-    if (!!joinError) {
+    if (joinError) {
         return <div>{joinError?.message}</div>;
     }
     if (!joined) {

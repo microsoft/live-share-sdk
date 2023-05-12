@@ -12,6 +12,7 @@ import { TypedEventEmitter } from "@fluidframework/common-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { LiveShareRuntime } from "./LiveShareRuntime";
+import { waitUntilConnected } from "./internals";
 
 /**
  * Live event callback.
@@ -201,17 +202,6 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
     }
 
     private waitUntilConnected(): Promise<string> {
-        return new Promise((resolve) => {
-            const onConnected = (clientId: string) => {
-                this._runtime.off("connected", onConnected);
-                resolve(clientId);
-            };
-
-            if (this._runtime.clientId && this._runtime.connected) {
-                resolve(this._runtime.clientId);
-            } else {
-                this._runtime.on("connected", onConnected);
-            }
-        });
+        return waitUntilConnected(this._runtime);
     }
 }

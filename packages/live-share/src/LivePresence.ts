@@ -40,7 +40,7 @@ export interface ILivePresenceEvents<TData extends object = object>
      * @param event Name of event.
      * @param listener Function called when event is triggered.
      * @param listener.user Presence information that changed.
-     * @param listener.local If true the local users presence changed.
+     * @param listener.local If true the local client initiated this presence change.
      * @param listener.clientId The client ID for the user that send this message.
      */
     (
@@ -282,7 +282,7 @@ export class LivePresence<
      */
     private async updateMembersList(
         evt: LivePresenceReceivedEventData<TData>,
-        local: boolean // TODO: different all places with either localConnection or localUser
+        localEvent: boolean
     ): Promise<boolean> {
         try {
             const allowed = await this.liveRuntime.verifyRolesAllowed(
@@ -293,7 +293,7 @@ export class LivePresence<
             // Update local presence immediately
             // - The _updatePresenceEvent won't be triggered until the presence change is actually sent. If
             //   the client is disconnected this could be several seconds later.
-            if (local) {
+            if (localEvent) {
                 this._currentPresence = evt;
             }
             const info = await this.liveRuntime.getClientInfo(evt.clientId);
@@ -301,10 +301,14 @@ export class LivePresence<
             if (!info) return false;
 
             if (this.useTransientParticipantWorkaround(info)) {
-                return this.transientParticipantWorkaround(evt, local, info);
+                return this.transientParticipantWorkaround(
+                    evt,
+                    localEvent,
+                    info
+                );
             }
             // normal flow
-            return this.updateMembersListWithInfo(evt, local, info);
+            return this.updateMembersListWithInfo(evt, localEvent, info);
         } catch (err) {
             this._logger?.sendErrorEvent(
                 TelemetryEvents.LiveState.RoleVerificationError,
@@ -334,7 +338,7 @@ export class LivePresence<
      */
     private transientParticipantWorkaround(
         evt: LivePresenceReceivedEventData<TData>,
-        local: boolean,
+        localEvent: boolean,
         info: IClientInfo
     ): boolean {
         // when participant is missing, use existing information instead.
@@ -345,15 +349,19 @@ export class LivePresence<
                 roles: user.roles,
                 displayName: user.displayName,
             };
-            return this.updateMembersListWithInfo(evt, local, existingInfo);
+            return this.updateMembersListWithInfo(
+                evt,
+                localEvent,
+                existingInfo
+            );
         }
         // This user has not yet been inserted, so we attempt to insert it with defaultUserInfo
-        return this.updateMembersListWithInfo(evt, local, info);
+        return this.updateMembersListWithInfo(evt, localEvent, info);
     }
 
     private updateMembersListWithInfo(
         evt: LivePresenceReceivedEventData<TData>,
-        local: boolean,
+        localEvent: boolean,
         info: IClientInfo
     ): boolean {
         const emitEvent = (user: LivePresenceUser<TData>) => {
@@ -361,10 +369,10 @@ export class LivePresence<
             this.emit(
                 LivePresenceEvents.presenceChanged,
                 user,
-                local,
+                localEvent,
                 evt.clientId
             );
-            if (local) {
+            if (localEvent) {
                 this._logger?.sendTelemetryEvent(
                     TelemetryEvents.LivePresence.LocalPresenceChanged,
                     { user: evt }
@@ -383,7 +391,7 @@ export class LivePresence<
             const checkUser = this._users[pos];
             if (info.userId === checkUser.userId) {
                 // User found. Apply update and check for changes
-                if (checkUser.updateReceived(evt, info, local)) {
+                if (checkUser.updateReceived(evt, info, localEvent)) {
                     emitEvent(checkUser);
                     didUpdate = true;
                 }
@@ -405,7 +413,7 @@ export class LivePresence<
             evt,
             this._expirationPeriod,
             this.liveRuntime,
-            local
+            localEvent
         );
         this._users.push(newUser);
         emitEvent(newUser);

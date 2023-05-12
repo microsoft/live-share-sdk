@@ -47,7 +47,7 @@ export type LivePresenceReceivedEventData<TData = object> = ILiveEvent<
 >;
 
 /**
- * A use that presence is being tracked for.
+ * A user that presence is being tracked for.
  */
 export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
@@ -63,9 +63,9 @@ export class LivePresenceUser<TData = object> {
         private _evt: LivePresenceReceivedEventData<TData>,
         private _expirationPeriod: TimeInterval,
         private _liveRuntime: LiveShareRuntime,
-        _isLocalEvent: boolean
+        _constructedFromLocalEvent: boolean
     ) {
-        this.updateClients(this._evt, _isLocalEvent);
+        this.updateClients(this._evt, _constructedFromLocalEvent);
         this._lastUpdateTime = this._liveRuntime.getTimestamp();
     }
 
@@ -149,9 +149,9 @@ export class LivePresenceUser<TData = object> {
     public updateReceived(
         evt: LivePresenceReceivedEventData<TData>,
         info: IClientInfo,
-        local: boolean
+        localEvent: boolean
     ): boolean {
-        this.updateClients(evt, local);
+        this.updateClients(evt, localEvent);
         const currentEvent = this._evt;
         const currentClientInfo = this._clientInfo;
         if (LiveEvent.isNewer(currentEvent, evt)) {
@@ -192,23 +192,23 @@ export class LivePresenceUser<TData = object> {
 
     private updateClients(
         evt: LivePresenceReceivedEventData<TData>,
-        local: boolean
+        localEvent: boolean
     ): void {
         // The user can be logged into multiple clients
         const connection = this._connections.get(evt.clientId);
         if (connection) {
             connection.updateConnection(evt);
         } else {
-            if (local) {
+            if (localEvent) {
                 // local user may have received event from non local connection first,
                 // resulting in local user being false, set to true
-                this._isLocalUser = local;
+                this._isLocalUser = localEvent;
             }
             this._connections.set(
                 evt.clientId,
                 new LivePresenceConnection(
                     evt,
-                    local,
+                    localEvent,
                     this._expirationPeriod,
                     this._liveRuntime
                 )

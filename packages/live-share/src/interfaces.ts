@@ -325,9 +325,9 @@ export interface IContainerRuntimeSignaler {
  * @template TState Type of state object being synchronized.
  * @param state The remote object initial or current state.
  * @param senderId The clientId of the sender provider for role verification purposes.
- * @param local True if the user that sent this change is the local user.
+ * @param local True if the client that sent this change is the local client.
  * @return return true if this update is valid/desired to be applied for this user's state
- * 
+ *
  * @remarks
  * For `LivePresence`, we would always return false, since we don't want other user's presence to override our own.
  * For `LiveState`, we return true if the event was sent by a user with valid roles & it is newer.

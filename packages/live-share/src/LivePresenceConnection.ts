@@ -19,6 +19,13 @@ export class LivePresenceConnection<TData = object> {
     ) {}
 
     /**
+     * If `true` the connection is a local connection.
+     */
+    public get isLocalConnection(): boolean {
+        return this._isLocalConnection;
+    }
+
+    /**
      * ID of the client.
      */
     public get clientId(): string {

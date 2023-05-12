@@ -22,7 +22,7 @@ import {
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { getLiveShareContainerSchemaProxy } from "./schema-utils";
+import { getLiveShareContainerSchemaProxy } from "./schema-injection-utils";
 import { RootDataObject } from "fluid-framework";
 
 /**

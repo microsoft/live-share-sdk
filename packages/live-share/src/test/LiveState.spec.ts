@@ -9,7 +9,7 @@ import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveState } from "../LiveState";
 import { Deferred } from "../internals";
-import { getLiveDataObjectClassProxy } from "../schema-utils";
+import { getLiveDataObjectClassProxy } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
 interface TestStateData {

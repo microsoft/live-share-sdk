@@ -20,7 +20,7 @@ import {
     UserMeetingRole,
 } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { getLiveDataObjectClassProxy } from "../schema-utils";
+import { getLiveDataObjectClassProxy } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
 async function getObjects(

@@ -1,8 +1,9 @@
-import {
-    DataObjectTypes,
-    IDataObjectProps,
-} from "@fluidframework/aqueduct";
+import { DataObjectTypes, IDataObjectProps } from "@fluidframework/aqueduct";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
+import {
+    LoadableObjectCtor,
+    DataObjectClass,
+} from "@fluidframework/fluid-static";
 import { LiveDataObject } from "./LiveDataObject";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import {
@@ -10,6 +11,16 @@ import {
     LoadableObjectClass,
     LoadableObjectClassRecord,
 } from "fluid-framework";
+
+/**
+ * A LiveObjectClass is a class that has a factory that can create a DDS (SharedObject) and a
+ * constructor that will return the type of the DataObject.
+ * @typeParam T - The class of the SharedObject
+ */
+type LiveObjectClass<T extends IFluidLoadable> = {
+    TypeName: string;
+} & DataObjectClass<T> &
+    LoadableObjectCtor<T>;
 
 /**
  * Inject Live Share dependencies into your Fluid container schema.
@@ -29,10 +40,17 @@ export function getLiveShareContainerSchemaProxy(
     // Each container must proxy LiveDataObject classes separately.
     // This map is used to de-duplicate proxies for each class.
     const existingProxyRegistries = new Map<string, LoadableObjectClass<any>>();
-    
+
     const initialObjectEntries = Object.entries(schema.initialObjects).map(
         ([key, ObjectClass]) => {
-            return [key, getLiveDataObjectClassProxy(ObjectClass, liveRuntime, existingProxyRegistries)];
+            return [
+                key,
+                getLiveDataObjectClassProxy(
+                    ObjectClass,
+                    liveRuntime,
+                    existingProxyRegistries
+                ),
+            ];
         }
     );
     const newInitialObjects: LoadableObjectClassRecord =
@@ -41,7 +59,11 @@ export function getLiveShareContainerSchemaProxy(
     return {
         initialObjects: newInitialObjects,
         dynamicObjectTypes: schema.dynamicObjectTypes?.map((ObjectClass) =>
-            getLiveDataObjectClassProxy(ObjectClass, liveRuntime, existingProxyRegistries)
+            getLiveDataObjectClassProxy(
+                ObjectClass,
+                liveRuntime,
+                existingProxyRegistries
+            )
         ),
     };
 }
@@ -54,7 +76,7 @@ export function getLiveShareContainerSchemaProxy(
 export function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
     ObjectClass: LoadableObjectClass<any>,
     liveRuntime: LiveShareRuntime,
-    existingProxyRegistries: Map<string, LoadableObjectClass<any>> = new Map(),
+    existingProxyRegistries: Map<string, LoadableObjectClass<any>> = new Map()
 ): LoadableObjectClass<TClass> {
     if (isLiveDataObject(ObjectClass)) {
         // We should only be proxying one Live Share DDS per type.
@@ -70,7 +92,7 @@ export function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
         const NewProxy = getLiveDataObjectProxyClassInternal(
             ObjectClass,
             liveRuntime
-        ) as unknown as LoadableObjectClass<TClass>;
+        );
         existingProxyRegistries.set(typeName, NewProxy);
         return NewProxy;
     }
@@ -88,10 +110,12 @@ function isLiveDataObject(value: any): value is typeof LiveDataObject {
  * @hidden
  * Create a new class extending LiveDataObject to inject in _liveRuntime
  */
-function getLiveDataObjectProxyClassInternal<I extends DataObjectTypes = DataObjectTypes>(
+function getLiveDataObjectProxyClassInternal<
+    I extends DataObjectTypes = DataObjectTypes
+>(
     BaseClass: typeof LiveDataObject<I>,
     runtime: LiveShareRuntime
-): typeof LiveDataObject<I> {
+): LiveObjectClass<any> {
     class ProxiedBaseClass extends (BaseClass as unknown as new (
         props: IDataObjectProps<I>
     ) => LiveDataObject<I>) {
@@ -100,13 +124,17 @@ function getLiveDataObjectProxyClassInternal<I extends DataObjectTypes = DataObj
             this.__dangerouslySetLiveRuntime(runtime);
             // Pass reference to the container runtime
             if (!this.context || !this.context.containerRuntime) {
-                throw Error("getLiveDataObjectProxyClassInternal: required dependencies unknown");
+                throw Error(
+                    "getLiveDataObjectProxyClassInternal: required dependencies unknown"
+                );
             }
-            runtime.__dangerouslySetContainerRuntime(this.context.containerRuntime);
+            runtime.__dangerouslySetContainerRuntime(
+                this.context.containerRuntime
+            );
         }
     }
 
-    const DynamicClass: typeof LiveDataObject<I> = class extends BaseClass {
+    const DynamicClass: LiveObjectClass<any> = class extends BaseClass {
         public static TypeName = (BaseClass as any).TypeName;
         public static readonly factory = new Proxy((BaseClass as any).factory, {
             get: function (target, prop, receiver) {

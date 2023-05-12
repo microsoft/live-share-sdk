@@ -7,11 +7,9 @@ import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
-import { IContainer } from "@fluidframework/container-definitions";
 import { LiveTimer } from "../LiveTimer";
 import { Deferred } from "../internals";
-import { DataObjectClass } from "fluid-framework";
-import { getLiveDataObjectClassProxy } from "../schema-utils";
+import { getLiveDataObjectClassProxy } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
 async function getObjects(

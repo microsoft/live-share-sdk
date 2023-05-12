@@ -45,7 +45,11 @@ export interface ILivePresenceEvents<TData extends object = object>
      */
     (
         event: "presenceChanged",
-        listener: (user: LivePresenceUser<TData>, local: boolean, clientId: string) => void
+        listener: (
+            user: LivePresenceUser<TData>,
+            local: boolean,
+            clientId: string
+        ) => void
     ): any;
 }
 
@@ -108,6 +112,9 @@ export class LivePresence<
 
     public set expirationPeriod(value: number) {
         this._expirationPeriod.seconds = value > 0.1 ? value : 0.1;
+        this.getUsers().forEach((user) => {
+            user.expirationPeriod = this._expirationPeriod;
+        });
     }
 
     /**
@@ -138,7 +145,7 @@ export class LivePresence<
     }
 
     /**
-     * Returns the most recent client ID of the local user.
+     * Returns the client ID of the local connection.
      */
     public get clientId(): string | undefined {
         return this._currentPresence?.clientId;
@@ -194,7 +201,7 @@ export class LivePresence<
                     return false;
                 }
             },
-            true, // We want to update the timestamp periodically so that we know if a user is active
+            true // We want to update the timestamp periodically so that we know if a user is active
         );
         // Broadcast initial presence, or silently fail trying
         await this.update(
@@ -275,7 +282,7 @@ export class LivePresence<
      */
     private async updateMembersList(
         evt: LivePresenceReceivedEventData<TData>,
-        local: boolean,
+        local: boolean // TODO: different all places with either localConnection or localUser
     ): Promise<boolean> {
         try {
             const allowed = await this.liveRuntime.verifyRolesAllowed(
@@ -289,24 +296,15 @@ export class LivePresence<
             if (local) {
                 this._currentPresence = evt;
             }
-            const info = await this.liveRuntime
-                .getClientInfo(evt.clientId);
+            const info = await this.liveRuntime.getClientInfo(evt.clientId);
             // So if undefined
             if (!info) return false;
 
             if (this.useTransientParticipantWorkaround(info)) {
-                return this.transientParticipantWorkaround(
-                    evt,
-                    local,
-                    info
-                );
+                return this.transientParticipantWorkaround(evt, local, info);
             }
             // normal flow
-            return this.updateMembersListWithInfo(
-                evt,
-                local,
-                info
-            );
+            return this.updateMembersListWithInfo(evt, local, info);
         } catch (err) {
             this._logger?.sendErrorEvent(
                 TelemetryEvents.LiveState.RoleVerificationError,

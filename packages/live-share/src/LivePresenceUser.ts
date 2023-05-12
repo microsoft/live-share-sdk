@@ -172,6 +172,16 @@ export class LivePresenceUser<TData = object> {
         return false;
     }
 
+    /**
+     * @hidden
+     */
+    public set expirationPeriod(value: TimeInterval) {
+        this._expirationPeriod = value;
+        this._connections.forEach((connection) => {
+            connection.expirationPeriod = value;
+        });
+    }
+
     private hasExpired(): boolean {
         const now = this._liveRuntime.getTimestamp();
         const elapsed = now - this._lastUpdateTime;

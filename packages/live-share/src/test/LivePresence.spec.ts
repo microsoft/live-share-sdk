@@ -7,7 +7,6 @@ import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
-import { IContainer } from "@fluidframework/container-definitions";
 import { LivePresence } from "../LivePresence";
 import { PresenceState } from "../LivePresenceUser";
 import { waitForDelay } from "../internals";
@@ -21,7 +20,6 @@ import {
     UserMeetingRole,
 } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { DataObjectClass } from "fluid-framework";
 import { getLiveDataObjectClassProxy } from "../schema-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
@@ -69,7 +67,7 @@ async function getObjects(
         await new Promise((resolve) => container2.once("connected", resolve));
     }
 
-    const dispose = () => {
+    const disposeAll = () => {
         object1.dispose();
         object2.dispose();
         container1.disconnect?.();
@@ -77,16 +75,28 @@ async function getObjects(
         liveRuntime1.stop();
         liveRuntime2.stop();
     };
+    const disposeObject1 = () => {
+        object1.dispose();
+        container1.disconnect?.();
+        liveRuntime1.stop();
+    };
+    const disposeObject2 = () => {
+        object2.dispose();
+        container2.disconnect?.();
+        liveRuntime2.stop();
+    };
     return {
         object1,
         object2,
-        dispose,
+        disposeAll,
+        disposeObject1,
+        disposeObject2,
     };
 }
 
 describeNoCompat("LivePresence", (getTestObjectProvider) => {
     it("Should exchange initial presence information", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const object1done = new Deferred();
@@ -137,11 +147,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should start in alternate state", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const object1done = new Deferred();
@@ -187,11 +197,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should start with initial data", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const object1done = new Deferred();
@@ -233,11 +243,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should update() user presence", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         let triggered = false;
@@ -283,11 +293,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         // Wait for finish
         await object1done.promise;
 
-        dispose();
+        disposeAll();
     });
 
     it("Should enumerate users with forEach()", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const ready = new Deferred();
@@ -323,11 +333,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         assert(user1Found && user2Found);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should filter users by state using forEach()", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const ready = new Deferred();
@@ -363,11 +373,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         assert(user1Found && !user2Found);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should return members using getUsers()", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const ready = new Deferred();
@@ -390,11 +400,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         assert(Array.isArray(users), `getUsers() didn't return an array`);
         assert(users.length == 2, `Array has a length of ${users.length}`);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should getCount() of the number of users being tracked", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const ready = new Deferred();
@@ -412,11 +422,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         assert(cnt == 2);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should filter getCount()", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const ready = new Deferred();
@@ -434,11 +444,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         assert(cnt == 1);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should getUser()", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const ready = new Deferred();
@@ -471,11 +481,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         );
         assert(!user2.isLocalUser, `user2: is local user`);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should getPresenceForClient()", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
         const ready = new Deferred();
@@ -543,11 +553,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         );
         assert(!user2.isLocalUser, `user2: is local user`);
 
-        dispose();
+        disposeAll();
     });
 
     it("Should send periodic presence updates", async () => {
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider,
             20
         );
@@ -579,53 +589,13 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         assert(count == 2, `Wrong number of users`);
 
-        dispose();
+        disposeAll();
     });
 
     it("isLocalUser should be true for both clients with same userId and contain both clientIds", async () => {
-        class SameUserLiveShareTestHost implements ILiveShareHost {
-            private test = TestLiveShareHost.create();
-            getFluidTenantInfo(): Promise<IFluidTenantInfo> {
-                return this.test.getFluidTenantInfo();
-            }
-            getFluidToken(containerId?: string | undefined): Promise<string> {
-                return this.test.getFluidToken(containerId);
-            }
-            getFluidContainerId(): Promise<IFluidContainerInfo> {
-                return this.test.getFluidContainerId();
-            }
-            setFluidContainerId(
-                containerId: string
-            ): Promise<IFluidContainerInfo> {
-                return this.test.setFluidContainerId(containerId);
-            }
-            getNtpTime(): Promise<INtpTimeInfo> {
-                return this.test.getNtpTime();
-            }
-            registerClientId(clientId: string): Promise<UserMeetingRole[]> {
-                return this.test.registerClientId(clientId);
-            }
-            getClientRoles(
-                clientId: string
-            ): Promise<UserMeetingRole[] | undefined> {
-                return this.test.getClientRoles(clientId);
-            }
-            async getClientInfo(
-                clientId: string
-            ): Promise<IClientInfo | undefined> {
-                return this.test.getClientRoles(clientId).then((roles) => {
-                    return {
-                        userId: "user1",
-                        roles: roles ?? [],
-                        displayName: "user1",
-                    };
-                });
-            }
-        }
-
         // set same user test host
         const mockHost = new SameUserLiveShareTestHost();
-        const { object1, object2, dispose } = await getObjects(
+        const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider,
             10000,
             mockHost
@@ -708,6 +678,192 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             "user should have two clients"
         );
 
-        dispose();
+        disposeAll();
+    });
+
+    it("two connections should have their own data/state for same user, user state should be most recent", async () => {
+        // set same user test host
+        const mockHost = new SameUserLiveShareTestHost();
+        const { object1, object2, disposeAll } = await getObjects(
+            getTestObjectProvider,
+            10000,
+            mockHost
+        );
+
+        const object1Cat = new Deferred();
+        const object1Dog = new Deferred();
+        object1.on("presenceChanged", async (user, local, clientId) => {
+            if (user.data?.foo == "cat") {
+                object1Cat.resolve();
+            } else if (user.data?.foo == "dog") {
+                object1Dog.resolve();
+            }
+        });
+
+        const object2Cat = new Deferred();
+        const object2Dog = new Deferred();
+        object2.on("presenceChanged", async (user, local, clientId) => {
+            if (user.data?.foo == "dog") {
+                object2Dog.resolve();
+            } else if (user.data?.foo == "cat") {
+                object2Cat.resolve();
+            }
+        });
+
+        assert(!object1.isInitialized, `presence already initialized`);
+        const init1 = object1.initialize();
+        const init2 = object2.initialize();
+        await Promise.all([init1, init2]);
+        assert(object1.isInitialized, `presence not initialized`);
+
+        await object1.update({ foo: "cat" });
+        // Wait for events to trigger
+        await Promise.all([object1Cat, object2Cat]);
+        let object1User = object1.getUser("user1");
+        let object2User = object2.getUser("user1");
+        assert(object1User !== undefined, "user1 should be defined in object1");
+        assert(object2User !== undefined, "user1 should be defined in object2");
+        assert(
+            object1User.getConnections().length == 2,
+            "user should have two clients"
+        );
+        assert(
+            object2User.getConnections().length == 2,
+            "user should have two clients"
+        );
+        assert(
+            object1User.data?.foo == "cat",
+            "object1 data.foo should be cat"
+        );
+        assert(
+            object2User.data?.foo == "cat",
+            "object2 data.foo should be cat"
+        );
+        assert(
+            object1User.getConnection(object1.clientId!)?.data?.foo == "cat",
+            "object1.connection1 data.foo should be cat"
+        );
+        assert(
+            object1User.getConnection(object2.clientId!)?.data == undefined,
+            "object1.connection2 data.foo should be undefined"
+        );
+        assert(
+            object2User.getConnection(object1.clientId!)?.data?.foo == "cat",
+            "object2.connection1 data.foo should be cat"
+        );
+        assert(
+            object2User.getConnection(object2.clientId!)?.data == undefined,
+            "object2.connection2 data.foo should be undefined"
+        );
+
+        await object2.update({ foo: "dog" });
+        // redeclare to supress incorrect lint warning, delete to see
+        object1User = object1.getUser("user1")!;
+        object2User = object2.getUser("user1")!;
+
+        assert(
+            object1User.data?.foo == "dog",
+            "object1 data.foo should be dog"
+        );
+        assert(
+            object2User.data?.foo == "dog",
+            "object2 data.foo should be dog"
+        );
+        assert(
+            object1User?.getConnection(object1.clientId!)?.data?.foo == "cat",
+            "object1.connection1.data.foo should STILL be cat"
+        );
+        assert(
+            object1User?.getConnection(object2.clientId!)?.data?.foo == "dog",
+            "object1.connection2 data.foo should be dog"
+        );
+        assert(
+            object2User?.getConnection(object1.clientId!)?.data?.foo == "cat",
+            "object2.connection1 data.foo should STILL be cat"
+        );
+        assert(
+            object2User?.getConnection(object2.clientId!)?.data?.foo == "dog",
+            "object2.connection2 data.foo should be dog"
+        );
+
+        disposeAll();
+    });
+
+    it("test offline timeout for user and connections", async () => {
+        // set same user test host
+        const mockHost = new SameUserLiveShareTestHost();
+        const { object1, object2, disposeAll, disposeObject1, disposeObject2 } =
+            await getObjects(getTestObjectProvider, 10000, mockHost);
+
+        assert(!object1.isInitialized, `presence already initialized`);
+        const init1 = object1.initialize();
+        const init2 = object2.initialize();
+        await Promise.all([init1, init2]);
+        assert(object1.isInitialized, `presence not initialized`);
+
+        // Wait for events to trigger
+        let object1User = object1.getUser("user1");
+        let object2User = object2.getUser("user1");
+        assert(object1User !== undefined, "user1 should be defined in object1");
+        assert(object2User !== undefined, "user1 should be defined in object2");
+        assert(
+            object1User.getConnections().length == 2,
+            "user should have two clients"
+        );
+        assert(
+            object2User.getConnections().length == 2,
+            "user should have two clients"
+        );
+
+        const object2ClientId = object2.clientId!;
+
+        disposeObject2();
+        object1.expirationPeriod = 0.1;
+        assert(
+            object1User.getConnection(object2ClientId)?.state ==
+                PresenceState.online,
+            "object2 should still be online from object1's perspective"
+        );
+        await waitForDelay(150);
+        assert(
+            object1User.getConnection(object2ClientId)?.state ==
+                PresenceState.offline,
+            "object2 should be offline"
+        );
+        disposeObject1();
     });
 });
+
+class SameUserLiveShareTestHost implements ILiveShareHost {
+    private test = TestLiveShareHost.create();
+    getFluidTenantInfo(): Promise<IFluidTenantInfo> {
+        return this.test.getFluidTenantInfo();
+    }
+    getFluidToken(containerId?: string | undefined): Promise<string> {
+        return this.test.getFluidToken(containerId);
+    }
+    getFluidContainerId(): Promise<IFluidContainerInfo> {
+        return this.test.getFluidContainerId();
+    }
+    setFluidContainerId(containerId: string): Promise<IFluidContainerInfo> {
+        return this.test.setFluidContainerId(containerId);
+    }
+    getNtpTime(): Promise<INtpTimeInfo> {
+        return this.test.getNtpTime();
+    }
+    registerClientId(clientId: string): Promise<UserMeetingRole[]> {
+        return this.test.registerClientId(clientId);
+    }
+    getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined> {
+        return this.test.getClientRoles(clientId);
+    }
+    async getClientInfo(clientId: string): Promise<IClientInfo | undefined> {
+        return this.test.getClientRoles(clientId).then((roles) => {
+            return {
+                userId: "user1",
+                roles: roles ?? [],
+                displayName: "user1",
+            };
+        });
+    }
+}

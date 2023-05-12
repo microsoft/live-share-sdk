@@ -74,7 +74,8 @@ export class LiveShareHostDecorator
 
     public async getClientInfo(
         clientId: string,
-        retrySchedule?: number[] // TODO: delete (not a breaking change to remove, see InternalDontUseGetClientInfoRetryPolyfill)
+        lateFinish?: () => void, // TODO: delete this and below (not a breaking change to remove, see InternalDontUseGetClientInfoRetryPolyfill)
+        retrySchedule?: number[], 
     ): Promise<IClientInfo | undefined> {
         if (!clientId) {
             throw new Error(
@@ -135,7 +136,8 @@ export class LiveShareHostDecorator
                         );
                     }
                     return null;
-                }
+                },
+                lateFinish // TODO: delete (not a breaking change to remove, see InternalDontUseGetClientInfoRetryPolyfill)
             );
         });
     }

@@ -57,11 +57,13 @@ class TimeoutError extends Error {
 export function waitForResult<TSuccessResult, TRequestResult>(
     fnRequest: () => Promise<TRequestResult>,
     fnValidateResponse: (result: TRequestResult) => {
-        response: TSuccessResult,
+        response: TSuccessResult;
     } | null,
     fnTimeout: (reason: unknown) => Error,
     retrySchedule: number[],
-    fnRequestError?: (error: unknown) => Error | null
+    fnRequestError?: (error: unknown) => Error | null,
+    lateFinish?: () => void,
+    basedDelayMilliseconds: number = 1000
 ): Promise<TSuccessResult> {
     let retries: number = 0;
     return new Promise<TSuccessResult>(async (resolve, reject) => {
@@ -69,7 +71,11 @@ export function waitForResult<TSuccessResult, TRequestResult>(
             try {
                 const result = await timeoutRequest(
                     fnRequest,
-                    1000 * (retries + 1)
+                    Math.max(
+                        basedDelayMilliseconds * (retries + 1),
+                        basedDelayMilliseconds * 3
+                    ),
+                    lateFinish
                 );
                 const validated = fnValidateResponse(result);
                 if (validated !== null) {
@@ -93,7 +99,7 @@ export function waitForResult<TSuccessResult, TRequestResult>(
                     }
                 }
             }
-            
+
             await waitForDelay(retrySchedule[retries++]);
         }
     });
@@ -103,19 +109,27 @@ export function waitForResult<TSuccessResult, TRequestResult>(
  * BUGBUG: Workaround for Teams Client not rejecting errors :(
  * @hidden
  */
-function timeoutRequest<TResult>(
+export function timeoutRequest<TResult>(
     fnRequest: () => Promise<TResult>,
-    timeout: number
+    timeout: number,
+    lateFinish?: () => void
 ): Promise<TResult> {
     return new Promise<TResult>(async (resolve, reject) => {
-        const hTimer = setTimeout(() => {
-            reject(new TimeoutError());
+        let hTimer: NodeJS.Timeout | null = setTimeout(() => {
+            reject(new Error("timeout"));
+            hTimer = null;
         }, timeout);
         try {
             const result = await fnRequest();
             resolve(result);
+            if (hTimer == null) {
+                lateFinish?.();
+            }
         } catch (error: unknown) {
             reject(error);
+            if (hTimer == null) {
+                lateFinish?.();
+            }
         }
         clearTimeout(hTimer);
     });
@@ -130,7 +144,9 @@ export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
     try {
         const { InsecureTokenProvider } =
             await require("@fluidframework/test-client-utils");
-        const userIdParam = new URL(window.location.href)?.searchParams?.get("userId");
+        const userIdParam = new URL(window.location.href)?.searchParams?.get(
+            "userId"
+        );
         const tokenProvider = new InsecureTokenProvider("", {
             id: userIdParam ?? uuid(),
             name: "Test User",

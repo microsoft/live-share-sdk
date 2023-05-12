@@ -12,7 +12,11 @@ import {
     IClientInfo,
 } from "../interfaces";
 import { RequestCache } from "./RequestCache";
-import { isErrorLike, isMobileWorkaroundRolesResponse, isClientRolesResponse } from "./type-guards";
+import {
+    isErrorLike,
+    isMobileWorkaroundRolesResponse,
+    isClientRolesResponse,
+} from "./type-guards";
 import { waitForResult } from "./utils";
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
@@ -27,6 +31,7 @@ const CACHE_LIFETIME = 5 * 60 * 1000; // original cache time
 export interface BackwardsCompatibilityGetClientInfoRetrySchedule {
     getClientInfo(
         clientId: string,
+        lateFinish?: () => void,
         retrySchedule?: number[]
     ): Promise<IClientInfo | undefined>;
 }
@@ -135,7 +140,9 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
 
         if (this._getClientInfoTriesRemaining <= 0) {
             if (!this._hasWarnedPolyfill) {
-                console.warn("BackwardsCompatibilityHostDecorator.getClientInfo: using getClientInfo polyfill");
+                console.warn(
+                    "BackwardsCompatibilityHostDecorator.getClientInfo: using getClientInfo polyfill"
+                );
                 this._hasWarnedPolyfill = true;
             }
             const roles = await this.getClientRoles(clientId);
@@ -148,14 +155,19 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
 
         const getClientRoles = this.getClientRoles(clientId);
         try {
-            const clientInfo = await this._host.getClientInfo(clientId, this.getRetrySchedule())
+            const clientInfo = await this._host.getClientInfo(clientId, () => {
+                // The request initially timed out, but then it later was rejected/resolved for a legitimate reason
+                this._getClientInfoExists = true;
+            });
             this._getClientInfoExists = true;
             return clientInfo;
         } catch (error: unknown) {
             if (isErrorLike(error) && error.message.includes("timed out")) {
                 this._getClientInfoTriesRemaining--;
                 if (this._getClientInfoTriesRemaining <= 0) {
-                    console.warn("BackwardsCompatibilityHostDecorator.getClientInfo: will use getClientInfo polyfill");
+                    console.warn(
+                        "BackwardsCompatibilityHostDecorator.getClientInfo: will use getClientInfo polyfill"
+                    );
                 }
 
                 const roles = await getClientRoles;
@@ -180,25 +192,29 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
 
         // warmup doesn't use polyfill implementation
         // "fakeId" clientId, error expected, hopefully not a timeout
-        this._host.getClientInfo("fakeId", [0]).catch((e) => {
-            if (e.message.includes("timed out")) {
-                this._getClientInfoTriesRemaining--;
-                if (this._getClientInfoTriesRemaining > 0) {
-                    this.warmupCheckGetClientInfoExists();
+        this._host
+            .getClientInfo(
+                "fakeId",
+                () => {
+                    // The request initially timed out, but then it later was rejected/resolved for a legitimate reason
+                    this._getClientInfoExists = true;
+                },
+                []
+            )
+            .catch((e) => {
+                if (e.message.includes("timed out")) {
+                    this._getClientInfoTriesRemaining--;
+                    if (this._getClientInfoTriesRemaining > 0) {
+                        this.warmupCheckGetClientInfoExists();
+                    } else {
+                        console.warn(
+                            "BackwardsCompatibilityHostDecorator.getClientInfo: will use getClientInfo polyfill"
+                        );
+                    }
                 } else {
-                    console.warn("BackwardsCompatibilityHostDecorator.getClientInfo: will use getClientInfo polyfill");
+                    // resolved for reason other than timeout, api exists
+                    this._getClientInfoExists = true;
                 }
-            } else {
-                // resolved for reason other than timeout, api exists
-                this._getClientInfoExists = true;
-            }
-        });
-    }
-
-    // retry little bit longer when getting to end of retries remaining.
-    private getRetrySchedule(): number[] {
-        const retryAmount =
-            this._totalTries - Math.max(0, this._getClientInfoTriesRemaining);
-        return EXPONENTIAL_BACKOFF_SCHEDULE.slice(0, retryAmount);
+            });
     }
 }

@@ -3,353 +3,154 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { IRuntimeSignaler } from "./LiveEventScope";
+import { LiveShareRuntime } from "./LiveShareRuntime";
+import {
+    GetLocalUserCanSend,
+    ILiveEvent,
+    UpdateSynchronizationState,
+} from "./interfaces";
 
 /**
- * Callback function used to the get the current state of an live object that's being
- * synchronized.
- * @template TState Type of state object being synchronized.
- * @param connecting If true a "connect" message is being sent and the initial connecting state of the object is being requested.
- * @returns The objects current state or undefined if not known or available.
- */
-export type GetSynchronizationState<TState extends object> = (
-    connecting: boolean
-) => TState | undefined;
-
-/**
- * Callback function used to the receive the state update sent by a remote live object.
- * @template TState Type of state object being synchronized.
- * @param connecting If true a "connect" message was received and `state` represents the remote objects initial state.
- * @param state The remote object initial or current state.
- * @param senderId The clientId of the sender provider for role verification purposes.
- */
-export type UpdateSynchronizationState<TState extends object> = (
-    connecting: boolean,
-    state: TState | undefined,
-    senderId: string
-) => void;
-
-/**
- * Duck type of something that provides the expected signalling functionality at the container level.
+ * @internal
+ * @hidden
+ * 
+ * Synchronizes the underlying state of an live object with all of the other instances of the object connected to the same container.
  *
  * @remarks
- * Simplifies the mocks needed to unit test the `LiveObjectSynchronizer`. Applications can
- * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
- */
-export interface IContainerRuntimeSignaler {
-    on(
-        event: "signal",
-        listener: (message: IInboundSignalMessage, local: boolean) => void
-    ): this;
-    submitSignal(type: string, content: any): void;
-}
-
-/**
- * Synchronizes the underlying state of an live object with all of the other instances of
- * the object connected to the same container.
+ * When a user first connects to a Live Share session, a "connect" message will be sent out to other users via `LiveObjectManager`.
+ * Each other client will then broadcast out their latest values for each `LiveObjectSynchronizer` instance they listen to.
+ * These responses get cached internally, while waiting for a `LiveObjectSynchronizer` instance to register to receive & listen to them. `LiveObjectManger`
+ * will continue listening for ongoing changes made as well, even if the user has not yet registered the corresponding `LiveObjectSynchronizer` id.
+ * 
+ * As mentioned, "connect" events are sent when the user first connects to a container, and not when first registering the object. This is because this ping-ping
+ * algorithm is an N^2 burden on our servers, due to connect events leading to every client in the session broadcasting an event in response. Doing it once
+ * up front allows us to limit this to a single N^2 message per connection, limiting the burden for larger meeting sizes.
  *
- * @remarks
- * When a synchronizer for a live object is first created it will broadcast a `"connect"`
- * message, containing the objects initial state, to all other instances of the object that are
- * currently running on other clients. Those instances will respond to the sent "connect" message
- * by broadcasting an `"update"` message containing the current state of their object.
+ * Anytime a remote "connect" or "update" event is received, the synchronizer will call the passed in `updateState` callback with the
+ * remote objects state and the senders clientId for role verification purposes. It is up to the user of `LiveObjectSynchronizer` to decide
+ * whether that event is valid or not. `updateState` is also expecting a boolean to be returned, which determines whether that state should
+ * be applied locally for the user as well. For `LivePresence` for example, we never want another user's state to override their own.
+ * For `LiveState` and `LiveTimer`, we always want valid events to overwrite that tracked by the local user, since the user that initiated
+ * the change could leave the session at any point.
+ * 
+ * To ensure that potential conflicts or dropped socket events get resolved, background updates are sent periodically. This update includes
+ * all of the local client's most recent state for each `LiveObjectSynchronizer` they have registered. These messages get sent automatically.
+ * The rate at which these ping events are sent can be adjusted for a container by setting `this.liveRuntime.objectManager.updateInterval` property
+ * through your `LiveDataObject` instance.
+ * 
+ * Updates sent in the background are by default sent using the timestamp from when the state was last updated for that client. To change this behavior,
+ * set the `shouldUpdateTimestampPeriodically` in `.start()` to make those timestamps update automatically before sending "update" messages.
+ * 
+ * `LiveObjectSynchronizer` also exposes an `sendEvent` API, which will take an object matching `TState` and broadcast that out to other clients. Both this
+ * API and the background updates both validate the validity of an outgoing message using `getLocalUserCanSend`, which is an asynchronous callback
+ * that allows `LiveDataObject` instances to proactively determine when it is appropriate to send a message (e.g., has required roles). While these
+ * messages should also be validated on the receiving end, this can help prevent sending an excess of messages that we already know are going to fail,
+ * reducing load & cost of the service.
  *
- * Anytime a remote "connect" or "update" event is received, the synchronizer will call the passed
- * in `updateState` callback with the remote objects state and the senders clientId for role
- * verification purposes. The logic for processing these state updates will vary but implementations
- * will generally want to include a timestamp in their state update so that clients can protect
- * against out-of-order and delayed updates. Deriving your state update from `ILiveEvent` and
- * using `LiveEvent.isNewer` to compare the received update with the current update makes this
- * simple.
- *
- * Once the initial "connect" event is sent, the synchronizer will periodically broadcast additional
- * "update" events containing the live objects current state. This redundancy helps to guard
- * against missed events and can be used as a ping for scenarios like presence where users can
- * disconnect from the container without notice.  The rate at which these ping events are sent can be
- * adjusted globally by setting the static `LiveObjectSynchronizer.updateInterval` property.
- *
- * While each new synchronizer instance will result in a separate "connect" message being sent, the
- * periodic updates that are sent get batched together into a single "update" message. This lets apps
- * add as many live objects to a container as they'd like without increasing the number of
- * messages being broadcast to the container.
- *
- * Only a single synchronizer is allowed per live object. Attempting to create more than one
- * synchronizer for the same live object will result in an exception being raised.
+ * Only a single synchronizer is allowed per live object. Attempting to create more than one synchronizer for the same live object will result in an exception
+ * being raised.
+ * 
  * @template TState Type of state object being synchronized. This object should be a simple JSON object that uses only serializable primitives.
  */
-export class LiveObjectSynchronizer<TState extends object> {
-    private readonly _id: string;
-    private readonly _containerRuntime: IContainerRuntimeSignaler;
+export class LiveObjectSynchronizer<TState> {
     private _isDisposed = false;
 
     /**
      * Creates a new `LiveObjectSynchronizer` instance.
      *
-     * @remarks
-     * Consumers should subscribe to the synchronizers `"received"` event to process the remote
-     * state updates being sent by other instances of the live object.
-     * @param id ID of the live object being synchronized. This should be the value of `this.id` in a class that derives from `DataObject`.
+     * @param id ID of the live object being synchronized. This should be the value of `this.id` in a class that derives from `LiveDataObject`.
      ^ @param runtime The objects local runtime. This should be the value of `this.runtime`.
-     * @param containerRuntime The runtime for the objects container. This should be the value of `this.context.containerRuntime`.
-     * @param getState A function called to retrieve the objects current state. This will be called prior to a "connect" or "update" message being sent.
-     * @param updateState A function called to process a state update received from a remote instance. This will be called anytime a "connect" or "update" message is received.
+     * @param liveRuntime The runtime for the Live Share session. This should be the value of `this.liveRuntime` in a class derived from `LiveDataObject`.
      */
     constructor(
-        id: string,
-        runtime: IRuntimeSignaler,
-        containerRuntime: IContainerRuntimeSignaler,
-        getState: GetSynchronizationState<TState>,
-        updateState: UpdateSynchronizationState<TState>
-    ) {
-        this._id = id;
-        this._containerRuntime = containerRuntime;
+        private readonly id: string,
+        private readonly runtime: IRuntimeSignaler,
+        private readonly liveRuntime: LiveShareRuntime
+    ) {}
 
-        LiveObjectSynchronizer.registerObject<TState>(
-            runtime,
-            containerRuntime,
-            id,
-            { getState, updateState }
+    /**
+     * Starts a `LiveObjectSynchronizer` instance.
+     *
+     * @param initialState The initial state for the local user. Does not impact remote state that has been set since connecting to the session.
+     * @param updateState A function called to process a state update received from a remote instance. This will be called anytime a "connect" or "update" message is received.
+     * @param getLocalUserCanSend A async function called to determine whether the local user can send a connect/update message. Return true if the user can send the update.
+     * @param shouldUpdateTimestampPeriodically flag for updating the timestamp whenever sending out a periodic update
+     */
+    public start(
+        initialState: TState,
+        updateState: UpdateSynchronizationState<TState>,
+        getLocalUserCanSend: GetLocalUserCanSend,
+        shouldUpdateTimestampPeriodically = false
+    ): Promise<void> {
+        return this.liveRuntime.objectManager.registerObject<TState>(
+            this.id,
+            this.runtime,
+            initialState,
+            {
+                updateState,
+                getLocalUserCanSend,
+                shouldUpdateTimestampPeriodically,
+            }
         );
     }
 
     /**
      * Disposes of the synchronizer.
-     *
-     * @remarks
-     * All synchronization for the container will stop once the last instance has been disposed of.
      */
     public dispose(): void {
         if (!this._isDisposed) {
             this._isDisposed = true;
-            LiveObjectSynchronizer.unregisterObject(
-                this._containerRuntime,
-                this._id
-            );
+            this.liveRuntime.objectManager.unregisterObject(this.id);
         }
     }
 
-    public static updateInterval = 5000;
-
-    private static _synchronizers = new Map<any, ContainerSynchronizer>();
-
-    private static registerObject<TState extends object>(
-        runtime: IRuntimeSignaler,
-        containerRuntime: IContainerRuntimeSignaler,
-        id: string,
-        handlers: GetAndUpdateStateHandlers<TState>
-    ): void {
-        // Get/create containers synchronizer
-        let synchronizer = this._synchronizers.get(containerRuntime);
-        if (!synchronizer) {
-            synchronizer = new ContainerSynchronizer(runtime, containerRuntime);
-            this._synchronizers.set(containerRuntime, synchronizer);
-        }
-
-        // Register object
-        synchronizer.registerObject(
-            id,
-            handlers as unknown as GetAndUpdateStateHandlers<object>
+    /**
+     * Gets the most recent event sent for the synchronizer.
+     * @remarks
+     * This does not determine the validity of a message. For a sorted list of events sent by all clients,
+     * use the `getEvents` API. You can then loop through that list and validate each message until you find
+     * the most valid API.
+     * 
+     * @param objectId the `LiveDataObject` id
+     * @returns the latest event sent, or undefined if there is none.
+     */
+    public getLatestEvent(): ILiveEvent<TState> | undefined {
+        return this.liveRuntime.objectManager.getLatestEventForObject<TState>(
+            this.id
         );
     }
 
-    private static unregisterObject(
-        containerRuntime: IContainerRuntimeSignaler,
-        id: string
-    ): void {
-        let synchronizer = this._synchronizers.get(containerRuntime);
-        if (synchronizer) {
-            const lastObject = synchronizer.unregisterObject(id);
-            if (lastObject) {
-                this._synchronizers.delete(containerRuntime);
-            }
-        }
-    }
-}
-
-const CONNECT_EVENT = "connect";
-const UPDATE_EVENT = "update";
-
-interface GetAndUpdateStateHandlers<TState extends object> {
-    getState: GetSynchronizationState<TState>;
-    updateState: UpdateSynchronizationState<TState>;
-}
-
-interface StateSyncEventContent {
-    [id: string]: object | undefined;
-}
-
-class ContainerSynchronizer {
-    private readonly _runtime: IRuntimeSignaler;
-    private readonly _containerRuntime: IContainerRuntimeSignaler;
-    private readonly _objects = new Map<
-        string,
-        GetAndUpdateStateHandlers<object>
-    >();
-    private _unconnectedKeys: string[] = [];
-    private _connectedKeys: string[] = [];
-    private _refCount = 0;
-    private _hTimer: any;
-
-    constructor(
-        runtime: IRuntimeSignaler,
-        containerRuntime: IContainerRuntimeSignaler
-    ) {
-        // Listen for runtime to connect/re-connect
-        this._runtime = runtime;
-        this._runtime.on("connected", (clientId) => {
-            if (this._unconnectedKeys.length > 0) {
-                // Send CONNECT_EVENT for all unconnected objects
-                this.sendGroupEvent(this._unconnectedKeys, CONNECT_EVENT);
-
-                // Move keys to connected list
-                this._connectedKeys = this._connectedKeys.concat(
-                    this._unconnectedKeys
-                );
-                this._unconnectedKeys = [];
-            }
-        });
-
-        // Listen for a global CONNECT/UPDATE event to be received
-        this._containerRuntime = containerRuntime;
-        this._containerRuntime.on("signal", (message, local) => {
-            // Ignore local signals
-            if (!local && typeof message.content == "object") {
-                switch (message.type) {
-                    case CONNECT_EVENT:
-                        this.dispatchUpdates(
-                            message.clientId!,
-                            message.content,
-                            true
-                        );
-                        break;
-                    case UPDATE_EVENT:
-                        this.dispatchUpdates(
-                            message.clientId!,
-                            message.content,
-                            false
-                        );
-                        break;
-                }
-            }
-        });
+    /**
+     * Gets the most recent event sent for the synchronizer for a given clientId
+     * @param clientId the client to get the value for
+     * @returns the latest event sent, or undefined if there is none
+     */
+    public getLatestEventForClient(
+        clientId: string
+    ): ILiveEvent<TState> | undefined {
+        return this.liveRuntime.objectManager.getLatestEventForObjectClient<TState>(
+            this.id,
+            clientId
+        );
     }
 
-    public registerObject(
-        id: string,
-        handlers: GetAndUpdateStateHandlers<object>
-    ): void {
-        if (this._objects.has(id)) {
-            throw new Error(
-                `LiveObjectSynchronizer: too many calls to registerObject() for object '${id}'`
-            );
-        }
-
-        // Save object ref
-        this._objects.set(id, handlers);
-
-        // Connect object to group
-        if (this._runtime.connected) {
-            // Send single connect event
-            const connectState: StateSyncEventContent = {
-                [id]: handlers.getState(true),
-            };
-            this._containerRuntime.submitSignal(CONNECT_EVENT, connectState);
-            this._connectedKeys.push(id);
-        } else {
-            // Queue connect event
-            this._unconnectedKeys.push(id);
-        }
-
-        // Start update timer on first ref
-        if (this._refCount++ == 0) {
-            this._hTimer = setInterval(() => {
-                try {
-                    this.sendGroupEvent(this._connectedKeys, UPDATE_EVENT);
-                } catch (err: any) {
-                    console.error(
-                        `LiveObjectSynchronizer: error sending update - ${err.toString()}`
-                    );
-                }
-            }, LiveObjectSynchronizer.updateInterval);
-        }
+    /**
+     * Gets the most recent events sent for the synchronizer.
+     * @returns the latest events sent, or undefined if there are none
+     */
+    public getEvents(): ILiveEvent<TState>[] | undefined {
+        return this.liveRuntime.objectManager.getEventsForObject<TState>(
+            this.id
+        );
     }
 
-    public unregisterObject(id: string): boolean {
-        if (this._objects.has(id)) {
-            // Remove object ref
-            this._objects.delete(id);
-
-            // Stop update timer on last de-ref
-            if (--this._refCount == 0) {
-                clearInterval(this._hTimer);
-                this._hTimer = undefined;
-                return true;
-            }
-
-            // Remove id from key lists
-            this._connectedKeys = this._connectedKeys.filter(
-                (key) => key != id
-            );
-            this._unconnectedKeys = this._unconnectedKeys.filter(
-                (key) => key != id
-            );
-        }
-
-        return false;
-    }
-
-    private sendGroupEvent(keys: string[], evt: string): void {
-        // Compose list of updates
-        const updates: StateSyncEventContent = {};
-        keys.forEach((id) => {
-            try {
-                // Ignore components that return undefined
-                const state = this._objects.get(id)?.getState(false);
-                if (typeof state == "object") {
-                    updates[id] = state;
-                }
-            } catch (err: any) {
-                console.error(
-                    `LiveObjectSynchronizer: error getting an objects state - ${err.toString()}`
-                );
-            }
-        });
-
-        // Send event if we have any updates to broadcast
-        // - `send` is only set if at least one component returns an update.
-        if (Object.keys(updates).length > 0) {
-            this._containerRuntime.submitSignal(evt, updates);
-        }
-    }
-
-    private dispatchUpdates(
-        senderId: string,
-        updates: StateSyncEventContent,
-        connecting: boolean
-    ): void {
-        const keys: string[] = [];
-        for (const id in updates) {
-            // Dispatch received state update
-            const handlers = this._objects.get(id);
-            if (handlers) {
-                try {
-                    keys.push(id);
-                    const state = updates[id];
-                    if (typeof state == "object") {
-                        handlers.updateState(connecting, state, senderId);
-                    }
-                } catch (err: any) {
-                    console.error(
-                        `LiveObjectSynchronizer: error processing received update - ${err.toString()}`
-                    );
-                }
-            }
-        }
-
-        // Send immediate update of current state if connect message
-        if (connecting) {
-            this.sendGroupEvent(keys, UPDATE_EVENT);
-        }
+    /**
+     * Sends a one-time event through the synchronizer
+     * @param data the date for the event to send
+     * @returns the event that was sent
+     */
+    public sendEvent<TState = any>(data: TState): Promise<ILiveEvent<TState>> {
+        return this.liveRuntime.objectManager.sendEventForObject(this.id, data);
     }
 }

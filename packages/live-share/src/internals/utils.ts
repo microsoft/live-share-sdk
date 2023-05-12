@@ -3,10 +3,14 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { ITokenProvider } from "@fluidframework/azure-client";
+import { v4 as uuid } from "uuid";
+import { IRuntimeSignaler } from "../LiveEventScope";
+
 /**
  * @hidden
  */
-export function cloneValue<T>(value: T | undefined): T | undefined {
+export function cloneValue<T>(value: T): T {
     return typeof value == "object" ? JSON.parse(JSON.stringify(value)) : value;
 }
 
@@ -41,46 +45,136 @@ export function waitForDelay(delay: number): Promise<void> {
     });
 }
 
+class TimeoutError extends Error {
+    constructor() {
+        super("timed out");
+    }
+}
+
 /**
  * @hidden
  */
-export function waitForResult<TResult>(
-    fnRequest: () => Promise<TResult | undefined>,
-    fnSucceeded: (result: TResult | undefined) => boolean,
-    fnTimeout: () => Error,
-    retrySchedule: number[]
-): Promise<TResult> {
+export function waitForResult<TSuccessResult, TRequestResult>(
+    fnRequest: () => Promise<TRequestResult>,
+    fnValidateResponse: (result: TRequestResult) => {
+        response: TSuccessResult;
+    } | null,
+    fnTimeout: (reason: unknown) => Error,
+    retrySchedule: number[],
+    fnRequestError?: (error: unknown) => Error | null,
+    lateFinish?: () => void,
+    basedDelayMilliseconds: number = 1000
+): Promise<TSuccessResult> {
     let retries: number = 0;
-    return new Promise<TResult>(async (resolve, reject) => {
+    return new Promise<TSuccessResult>(async (resolve, reject) => {
         while (true) {
-            const result = await timeoutRequest(
-                fnRequest,
-                1000 * (retries + 1)
-            );
-            if (fnSucceeded(result)) {
-                resolve(result!);
-                break;
-            } else if (retries >= retrySchedule.length) {
-                reject(fnTimeout());
-                break;
-            } else {
-                await waitForDelay(retrySchedule[retries++]);
+            try {
+                const result = await timeoutRequest(
+                    fnRequest,
+                    Math.max(
+                        basedDelayMilliseconds * (retries + 1),
+                        basedDelayMilliseconds * 3
+                    ),
+                    lateFinish
+                );
+                const validated = fnValidateResponse(result);
+                if (validated !== null) {
+                    resolve(validated.response);
+                    break;
+                } else if (retries >= retrySchedule.length) {
+                    reject(new Error("waitForResult: invalid response"));
+                    break;
+                }
+            } catch (error: unknown) {
+                if (retries >= retrySchedule.length) {
+                    reject(fnTimeout(error));
+                    break;
+                }
+                // Check if this error is something that should cause us to skip the retry schedule
+                if (!!fnRequestError && !(error instanceof TimeoutError)) {
+                    const rejectNowError = fnRequestError(error);
+                    if (rejectNowError !== null) {
+                        reject(rejectNowError);
+                        break;
+                    }
+                }
             }
+
+            await waitForDelay(retrySchedule[retries++]);
         }
     });
 }
 
-// BUGBUG: Workaround for Teams Client not rejecting errors :(
-function timeoutRequest<TResult>(
-    fnRequest: () => Promise<TResult | undefined>,
-    timeout: number
-): Promise<TResult | undefined> {
-    return new Promise<TResult | undefined>(async (resolve) => {
-        const hTimer = setTimeout(() => {
-            resolve(undefined);
+/**
+ * BUGBUG: Workaround for Teams Client not rejecting errors :(
+ * @hidden
+ */
+export function timeoutRequest<TResult>(
+    fnRequest: () => Promise<TResult>,
+    timeout: number,
+    lateFinish?: () => void
+): Promise<TResult> {
+    return new Promise<TResult>(async (resolve, reject) => {
+        let hTimer: NodeJS.Timeout | null = setTimeout(() => {
+            reject(new Error("timeout"));
+            hTimer = null;
         }, timeout);
-        const result = await fnRequest();
+        try {
+            const result = await fnRequest();
+            resolve(result);
+            if (hTimer == null) {
+                lateFinish?.();
+            }
+        } catch (error: unknown) {
+            reject(error);
+            if (hTimer == null) {
+                lateFinish?.();
+            }
+        }
         clearTimeout(hTimer);
-        resolve(result);
+    });
+}
+
+/**
+ * Dynamically import InsecureTokenProvider class, in case developer does not yet have "@fluidframework/test-client-utils",
+ * since don't want to require that they include it in package.json.
+ * @hidden
+ */
+export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
+    try {
+        const { InsecureTokenProvider } =
+            await require("@fluidframework/test-client-utils");
+        const userIdParam = new URL(window.location.href)?.searchParams?.get(
+            "userId"
+        );
+        const tokenProvider = new InsecureTokenProvider("", {
+            id: userIdParam ?? uuid(),
+            name: "Test User",
+        });
+        return tokenProvider as ITokenProvider;
+    } catch {
+        throw new Error(
+            "@microsoft/live-share: when using 'local' connection type, you must have @fluidframework/test-client-utils installed"
+        );
+    }
+}
+
+/**
+ * @hidden
+ * Waits until connected and gets the most recent clientId
+ * @returns clientId
+ */
+export function waitUntilConnected(runtime: IRuntimeSignaler): Promise<string> {
+    return new Promise((resolve) => {
+        const onConnected = (clientId: string) => {
+            runtime.off("connected", onConnected);
+            resolve(clientId);
+        };
+
+        if (runtime.clientId) {
+            resolve(runtime.clientId);
+        } else {
+            runtime.on("connected", onConnected);
+        }
     });
 }

@@ -4,13 +4,12 @@
  */
 
 import {
-    IEvent,
     ILiveEvent,
-    LiveEvent,
     TimeInterval,
     IRuntimeSignaler,
     LiveTelemetryLogger,
-    LiveShareClient,
+    LiveShareRuntime,
+    IEvent,
 } from "@microsoft/live-share";
 import EventEmitter from "events";
 import {
@@ -41,7 +40,7 @@ import { TelemetryEvents } from "./consts";
 /**
  * @hidden
  */
-export interface IPositionUpdateEvent extends ILiveEvent {
+export interface IPositionUpdateEvent {
     track: IPlaybackTrack;
     trackData: IPlaybackTrackData;
     transport: ITransportState;
@@ -53,7 +52,7 @@ export interface IPositionUpdateEvent extends ILiveEvent {
 /**
  * @hidden
  */
-export interface ITransportCommandEvent extends ILiveEvent {
+export interface ITransportCommandEvent {
     track: IPlaybackTrack;
     position: number;
 }
@@ -61,7 +60,7 @@ export interface ITransportCommandEvent extends ILiveEvent {
 /**
  * @hidden
  */
-export interface ISetTrackEvent extends ILiveEvent {
+export interface ISetTrackEvent {
     metadata: ExtendedMediaMetadata | null;
     waitPoints: CoordinationWaitPoint[];
 }
@@ -69,7 +68,7 @@ export interface ISetTrackEvent extends ILiveEvent {
 /**
  * @hidden
  */
-export interface ISetTrackDataEvent extends ILiveEvent {
+export interface ISetTrackDataEvent {
     data: object | null;
 }
 
@@ -93,6 +92,7 @@ export enum GroupCoordinatorStateEvents {
  */
 export class GroupCoordinatorState extends EventEmitter {
     private readonly _runtime: IRuntimeSignaler;
+    private readonly _liveRuntime: LiveShareRuntime;
     private readonly _logger: LiveTelemetryLogger;
     private readonly _maxPlaybackDrift: TimeInterval;
     private _getMediaPlayerState: () => IMediaPlayerState;
@@ -116,13 +116,15 @@ export class GroupCoordinatorState extends EventEmitter {
 
     constructor(
         runtime: IRuntimeSignaler,
+        liveRuntime: LiveShareRuntime,
         maxPlaybackDrift: TimeInterval,
         positionUpdateInterval: TimeInterval,
         getMediaPlayerState: () => IMediaPlayerState
     ) {
         super();
         this._runtime = runtime;
-        this._logger = new LiveTelemetryLogger(runtime);
+        this._liveRuntime = liveRuntime;
+        this._logger = new LiveTelemetryLogger(runtime, liveRuntime);
         this._maxPlaybackDrift = maxPlaybackDrift;
         this._playbackTrack = new GroupPlaybackTrack(getMediaPlayerState);
         this._playbackTrackData = new GroupPlaybackTrackData(
@@ -130,11 +132,13 @@ export class GroupCoordinatorState extends EventEmitter {
         );
         this._transportState = new GroupTransportState(
             this._playbackTrack,
-            getMediaPlayerState
+            getMediaPlayerState,
+            this._liveRuntime,
         );
         this._playbackPosition = new GroupPlaybackPosition(
             this._transportState,
             this._runtime,
+            this._liveRuntime,
             positionUpdateInterval
         );
         this._getMediaPlayerState = getMediaPlayerState;
@@ -279,7 +283,7 @@ export class GroupCoordinatorState extends EventEmitter {
 
     public createPositionUpdateEvent(
         state: IMediaPlayerState
-    ): Partial<IPositionUpdateEvent> {
+    ): IPositionUpdateEvent {
         const { positionState, playbackState } = state;
         if (this.isSuspended) {
             // Report suspension state
@@ -304,12 +308,12 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
-    public handleSetTrack(event: ISetTrackEvent, local: boolean): void {
+    public handleSetTrack(event: ILiveEvent<ISetTrackEvent>, local: boolean): void {
         // Update shared track
         // - Will trigger 'trackChange' event to update media session
         const updated = this.playbackTrack.updateTrack({
-            metadata: event.metadata,
-            waitPoints: event.waitPoints,
+            metadata: event.data.metadata,
+            waitPoints: event.data.waitPoints,
             timestamp: event.timestamp,
             clientId: event.clientId || "",
         });
@@ -328,11 +332,11 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
-    public handleSetTrackData(event: ISetTrackDataEvent, local: boolean): void {
+    public handleSetTrackData(event: ILiveEvent<ISetTrackDataEvent>, local: boolean): void {
         // Update shared track data
         // - Will trigger 'dataChange' event to update media session
         const updated = this.playbackTrackData.updateData({
-            data: event.data,
+            data: event.data.data,
             timestamp: event.timestamp,
             clientId: event.clientId || "",
         });
@@ -352,13 +356,13 @@ export class GroupCoordinatorState extends EventEmitter {
     }
 
     public handleTransportCommand(
-        event: ITransportCommandEvent,
+        event: ILiveEvent<ITransportCommandEvent>,
         local: boolean
     ): void {
         // Ensure change is for current track
         // - Will trigger a 'trackChange' event if newer track.
-        this.playbackTrack.updateTrack(event.track);
-        if (this.playbackTrack.compare(event.track.metadata)) {
+        this.playbackTrack.updateTrack(event.data.track);
+        if (this.playbackTrack.compare(event.data.track.metadata)) {
             // Update playback state
             let playbackState = this.transportState.playbackState;
             switch (event.name) {
@@ -373,7 +377,7 @@ export class GroupCoordinatorState extends EventEmitter {
             // Try to update playback state
             const newState: ITransportState = {
                 playbackState: playbackState,
-                startPosition: event.position,
+                startPosition: event.data.position,
                 timestamp: event.timestamp,
                 clientId: event.clientId || "",
             };
@@ -421,30 +425,30 @@ export class GroupCoordinatorState extends EventEmitter {
     }
 
     public handlePositionUpdate(
-        event: IPositionUpdateEvent,
+        event: Omit<ILiveEvent<IPositionUpdateEvent>, "name">,
         local: boolean
     ): void {
         // Ensure change is for current track
         // - Will trigger a 'trackChange' event if newer track.
-        this.playbackTrack.updateTrack(event.track);
-        if (this.playbackTrack.compare(event.track.metadata)) {
+        this.playbackTrack.updateTrack(event.data.track);
+        if (this.playbackTrack.compare(event.data.track.metadata)) {
             // Ensure we have the latest track data
-            this.playbackTrackData.updateData(event.trackData);
+            this.playbackTrackData.updateData(event.data.trackData);
 
             // Update transport state if needed
             // - Ignore transport state changes if the client has ended as this will cause the local
             //   player to start playback even though the video may have ended for everyone.
-            if (event.playbackState != "ended") {
-                this.transportState.updateState(event.transport);
+            if (event.data.playbackState != "ended") {
+                this.transportState.updateState(event.data.transport);
             }
 
             // Ensure change is for current transport state
-            if (this.transportState.compare(event.transport)) {
+            if (this.transportState.compare(event.data.transport)) {
                 // Update playback position
                 const position: ICurrentPlaybackPosition = {
-                    playbackState: event.playbackState,
-                    waitPoint: event.waitPoint,
-                    position: event.position,
+                    playbackState: event.data.playbackState,
+                    waitPoint: event.data.waitPoint,
+                    position: event.data.position,
                     timestamp: event.timestamp,
                     clientId: event.clientId || "",
                 };
@@ -456,20 +460,20 @@ export class GroupCoordinatorState extends EventEmitter {
                     // - This is needed because the catchup logic can try to sink the client with
                     //  the rest of the group while the local player is trying to to seek to a
                     //  new position.
-                    switch (event.playbackState) {
+                    switch (event.data.playbackState) {
                         case "none":
                         case "paused":
                         case "playing":
-                            if (event.playbackState != this._lastStateChange) {
+                            if (event.data.playbackState != this._lastStateChange) {
                                 this._logger.sendTelemetryEvent(
                                     TelemetryEvents.GroupCoordinator
                                         .BeginSoftSuspension,
                                     null,
-                                    { playbackState: event.playbackState }
+                                    { playbackState: event.data.playbackState }
                                 );
-                                this._lastStateChange = event.playbackState;
+                                this._lastStateChange = event.data.playbackState;
                                 this._lastStateChangeTime =
-                                    LiveShareClient.getTimestamp();
+                                    this._liveRuntime.getTimestamp();
                             }
                             break;
                     }
@@ -495,7 +499,7 @@ export class GroupCoordinatorState extends EventEmitter {
     public async syncLocalMediaSession(): Promise<void> {
         // Skip further syncs if we're waiting or in a "soft suspension".
         const softSuspensionDelta =
-            LiveShareClient.getTimestamp() - this._lastStateChangeTime;
+            this._liveRuntime.getTimestamp() - this._lastStateChangeTime;
         if (!this.isWaiting && softSuspensionDelta >= 1000) {
             let { metadata, trackData, positionState, playbackState } =
                 this._getMediaPlayerState();

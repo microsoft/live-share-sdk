@@ -13,6 +13,8 @@ export const TelemetryEvents = {
     LivePresence: {
         LocalPresenceChanged: "LivePresence:LocalPresenceChange",
         RemotePresenceChanged: "LivePresence:RemotePresenceChange",
+        GetClientInfoError: "LivePresence:GetClientInfoError",
+        RoleVerificationError: "LivePresence:RoleVerificationError",
     },
     LiveState: {
         StateChanged: "LiveState:StateChanged",
@@ -25,4 +27,12 @@ export const TelemetryEvents = {
  */
 function transmit(eventName: string): string {
     return `${eventName}#transmit`;
+}
+
+/**
+ * @hidden
+ */
+export const ObjectSynchronizerEvents = {
+    update: "update",
+    connect: "connect"
 }

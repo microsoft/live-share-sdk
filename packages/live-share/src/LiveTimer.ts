@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
@@ -11,19 +11,36 @@ import { IClientTimestamp, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
 import { cloneValue } from "./internals/utils";
 import { LiveEvent } from "./LiveEvent";
-import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { LiveDataObject } from "./LiveDataObject";
 
-/** for all time values millis from epoch is used */
-export interface ITimerConfig {
-    configChangedAt: number;
-    clientId: string;
+export interface ITimerConfigData {
+    /**
+     * Duration of timer
+     */
     duration: number;
-    // position when config change occured
+    /**
+     * position when config change occurred
+     */
     position: number;
-    // running or not when config change occured
+    /**
+     * Whether the timer was running or not when config change occurred
+     */
     running: boolean;
 }
+
+export interface ITimerConfig extends ITimerConfigData {
+    /**
+     * Time the config changed at
+     */
+    configChangedAt: number;
+    /**
+     * The clientId that made the change
+     */
+    clientId: string;
+}
+
+type ITimerConfigEvent = Omit<ILiveEvent<ITimerConfigData>, "name">;
 
 /**
  * Events supported by `LiveTimer` object.
@@ -76,32 +93,31 @@ export interface ILiveTimerEvents extends IEvent {
     (event: "onTick", listener: (milliRemaining: number) => void): any;
 }
 
-interface IPlayEvent extends ILiveEvent {
+interface IPlayEvent {
     duration: number;
     position: number;
 }
+type PlayEventReceived = ILiveEvent<IPlayEvent>;
 
-interface IPauseEvent extends ILiveEvent {
+interface IPauseEvent {
     duration: number;
     position: number;
 }
+type PauseEventReceived = ILiveEvent<IPauseEvent>;
 
-export class LiveTimer extends DataObject<{
+export class LiveTimer extends LiveDataObject<{
     Events: ILiveTimerEvents;
 }> {
-    private _allowedRoles: UserMeetingRole[] = [];
-    private _currentConfig: ITimerConfig = {
-        configChangedAt: 0,
+    private _currentConfig: ITimerConfigEvent = {
         clientId: "",
-        duration: 0,
-        position: 0,
-        running: false,
-    } as ITimerConfig;
-
-    private _scope?: LiveEventScope;
-    private _playEvent?: LiveEventTarget<IPlayEvent>;
-    private _pauseEvent?: LiveEventTarget<IPauseEvent>;
-    private _synchronizer?: LiveObjectSynchronizer<ITimerConfig>;
+        timestamp: 0,
+        data: {
+            duration: 0,
+            position: 0,
+            running: false,
+        },
+    };
+    private _synchronizer?: LiveObjectSynchronizer<ITimerConfigData>;
     private _defaultTickRate = 20;
     private _tickRate = this._defaultTickRate;
 
@@ -124,7 +140,7 @@ export class LiveTimer extends DataObject<{
      * Returns true if the object has been initialized.
      */
     public get isInitialized(): boolean {
-        return !!this._scope;
+        return !!this._synchronizer;
     }
 
     /**
@@ -155,47 +171,55 @@ export class LiveTimer extends DataObject<{
     }
 
     /**
-     * initalizes the object.
+     * Initializes the object and starts listening for remote changes
      * @param allowedRoles Optional. List of roles allowed to make state changes.
+     * @returns a void promise
      */
-    // TODO: should this be an async method and wait till connected like LivePresence?
-    public initialize(allowedRoles?: UserMeetingRole[]): void {
-        if (this._scope) {
+    public async initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
+        if (this.isInitialized) {
             throw new Error(`LiveTimer already started.`);
         }
 
         // Save off allowed roles
         this._allowedRoles = allowedRoles || [];
 
-        // Create event scope
-        this._scope = new LiveEventScope(this.runtime, allowedRoles);
-
-        // TODO: make enum for event type names
-        this._playEvent = new LiveEventTarget(
-            this._scope,
-            "Play",
-            (event, local) => this._handlePlay(event, local)
-        );
-        this._pauseEvent = new LiveEventTarget(
-            this._scope,
-            "Pause",
-            (event, local) => this._handlePause(event, local)
-        );
-
         // Create object synchronizer
-        this._synchronizer = new LiveObjectSynchronizer<ITimerConfig>(
+        this._synchronizer = new LiveObjectSynchronizer<ITimerConfigData>(
             this.id,
             this.runtime,
-            this.context.containerRuntime,
-            (connecting) => {
-                // Return current state
-                return this._currentConfig;
+            this.liveRuntime
+        );
+        await this._synchronizer.start(
+            this._currentConfig.data,
+            async (state, sender) => {
+                // Check for state change.
+                // If it was valid, this will override the local user's previous value.
+                return await this.remoteConfigReceived(state, sender);
             },
-            (connecting, state, sender) => {
-                // Check for state change
-                this.remoteConfigReceived(state!, sender);
+            async (connecting) => {
+                if (connecting) return true;
+                // If user has eligible roles, allow the update to be sent
+                try {
+                    return await this.verifyLocalUserRoles();
+                } catch {
+                    return false;
+                }
             }
         );
+        // Get the initial remote state, if there is any
+        const events = this._synchronizer.getEvents();
+        if (!events) return;
+        for (let eIndex = 0; eIndex < events.length; eIndex++) {
+            const event = events[eIndex];
+            const didApply = await this.remoteConfigReceived(
+                {
+                    ...event,
+                    clientId: event.clientId,
+                },
+                event.clientId
+            );
+            if (didApply) break;
+        }
     }
 
     /**
@@ -214,46 +238,57 @@ export class LiveTimer extends DataObject<{
      * @remarks
      * Starting an already started timer will restart the timer with a new duration.
      * @param duration in Milliseconds
+     * @returns a void promise, and will throw if the user does not have the required roles
      */
-    public start(duration: number): void {
-        if (!this._scope) {
+    public async start(duration: number): Promise<void> {
+        if (!this.isInitialized) {
             throw new Error(`LiveTimer not started.`);
         }
 
-        this.playInternal(duration, 0);
+        await this.playInternal(duration, 0);
     }
 
     /**
      * Resumes the timer.
-     *
      * @remarks
      * Playing an already playing timer does nothing.
+     * 
+     * @returns a void promise, and will throw if the user does not have the required roles
      */
-    public play(): void {
-        if (!this._scope) {
+    public async play(): Promise<void> {
+        if (!this.isInitialized) {
             throw new Error(`LiveTimer not started.`);
         }
 
         if (
-            !this._currentConfig.running &&
-            this._currentConfig.position < this._currentConfig.duration
+            !this._currentConfig.data.running &&
+            this._currentConfig.data.position <
+                this._currentConfig.data.duration
         ) {
-            this.playInternal(
-                this._currentConfig.duration,
-                this._currentConfig.position
+            await this.playInternal(
+                this._currentConfig.data.duration,
+                this._currentConfig.data.position
             );
         }
     }
 
-    private playInternal(duration: number, position: number): void {
+    private async playInternal(
+        duration: number,
+        position: number
+    ): Promise<void> {
         // Broadcast state change
-        const event: IPlayEvent = this._playEvent!.sendEvent({
-            duration: duration,
-            position: position,
-        });
+        const event: ITimerConfigEvent = {
+            timestamp: this.liveRuntime.getTimestamp(),
+            clientId: await this.waitUntilConnected(),
+            data: {
+                duration: duration,
+                position: position,
+                running: true,
+            },
+        };
 
         // Update local state immediately
-        this.updateConfig(this.playEventToConfig(event), true);
+        await this.updateConfig(event, true);
     }
 
     /**
@@ -261,129 +296,113 @@ export class LiveTimer extends DataObject<{
      *
      * @remarks
      * Pausing an already paused timer does nothing.
+     * 
+     * @returns a void promise, and will throw if the user does not have the required roles
      */
-    public pause(): void {
-        if (!this._scope) {
+    public async pause(): Promise<void> {
+        if (!this.isInitialized) {
             throw new Error(`LiveTimer not started.`);
         }
 
-        if (this._currentConfig.running) {
+        if (this._currentConfig.data.running) {
             // Broadcast state change
-            const event = this._pauseEvent!.sendEvent({
-                duration: this._currentConfig.duration,
-                position:
-                    this._currentConfig.position +
-                    (LiveShareClient.getTimestamp() -
-                        this._currentConfig.configChangedAt),
-            });
+            const event: ITimerConfigEvent = {
+                timestamp: this.liveRuntime.getTimestamp(),
+                clientId: await this.waitUntilConnected(),
+                data: {
+                    duration: this._currentConfig.data.duration,
+                    position:
+                        this._currentConfig.data.position +
+                        (this.liveRuntime.getTimestamp() -
+                            this._currentConfig.timestamp),
+                    running: false,
+                },
+            };
 
             // Update local state immediately
-            this.updateConfig(this.pauseEventToConfig(event), true);
+            await this.updateConfig(event, true);
         }
     }
 
-    private _handlePlay(event: IPlayEvent, local: boolean) {
-        if (!local) {
-            const newConfig = this.playEventToConfig(event);
-            this.remoteConfigReceived(newConfig, event.clientId!);
+    private async remoteConfigReceived(
+        config: ITimerConfigEvent,
+        sender: string
+    ): Promise<boolean> {
+        try {
+            const allowed = await this.liveRuntime.verifyRolesAllowed(
+                sender,
+                this._allowedRoles
+            );
+            // Ensure that state is allowed, newer, and not the initial state.
+            const currentClientTimestamp: IClientTimestamp = {
+                timestamp: this._currentConfig.timestamp,
+                clientId: this._currentConfig.clientId,
+            };
+
+            const isConfigNewer = LiveEvent.isNewer(
+                currentClientTimestamp,
+                config
+            );
+
+            if (allowed && isConfigNewer) {
+                this.updateConfig(config, false);
+                return true;
+            }
+            return false;
+        } catch (err) {
+            return false;
         }
     }
 
-    private _handlePause(event: IPauseEvent, local: boolean) {
-        if (!local) {
-            const newConfig = this.pauseEventToConfig(event);
-            this.remoteConfigReceived(newConfig, event.clientId!);
-        }
-    }
+    private async updateConfig(event: ITimerConfigEvent, local: boolean) {
+        const userExposedConfig = {
+            clientId: event.clientId,
+            configChangedAt: event.timestamp,
+            ...event.data,
+        };
+        this._currentConfig = event;
 
-    private remoteConfigReceived(config: ITimerConfig, sender: string): void {
-        LiveShareClient.verifyRolesAllowed(sender, this._allowedRoles)
-            .then((allowed) => {
-                // Ensure that state is allowed, newer, and not the initial state.
-                const currentClientTimestamp: IClientTimestamp = {
-                    timestamp: this._currentConfig.configChangedAt,
-                    clientId: this._currentConfig.clientId,
-                };
-
-                const newClientTimestamp: IClientTimestamp = {
-                    timestamp: config.configChangedAt,
-                    clientId: config.clientId,
-                };
-
-                const isConfigNewer = LiveEvent.isNewer(
-                    currentClientTimestamp,
-                    newClientTimestamp
-                );
-
-                if (allowed && isConfigNewer && config.clientId) {
-                    this.updateConfig(config, false);
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }
-
-    private updateConfig(config: ITimerConfig, local: boolean) {
-        const clone = cloneValue(config)!;
-        this._currentConfig = clone;
-
-        // TODO: do we need to clone this one?
-        const userExposedConfig = cloneValue(clone);
-        if (config.position === 0) {
+        if (event.data.position === 0) {
             this.emit(LiveTimerEvents.started, userExposedConfig, local);
-        } else if (config.duration === config.position) {
+        } else if (event.data.duration === event.data.position) {
             this.emit(LiveTimerEvents.finished, userExposedConfig);
-        } else if (config.running) {
+        } else if (event.data.running) {
             this.emit(LiveTimerEvents.played, userExposedConfig, local);
         } else {
             this.emit(LiveTimerEvents.paused, userExposedConfig, local);
         }
 
-        if (clone.running) {
+        if (event.data.running) {
             this.startTicking();
         }
-    }
-
-    private playEventToConfig(event: IPlayEvent): ITimerConfig {
-        const newConfig: ITimerConfig = {
-            configChangedAt: event.timestamp,
-            clientId: event.clientId!,
-            duration: event.duration,
-            position: event.position,
-            running: true,
-        };
-        return newConfig;
-    }
-
-    private pauseEventToConfig(event: IPauseEvent): ITimerConfig {
-        const newConfig: ITimerConfig = {
-            configChangedAt: event.timestamp,
-            clientId: event.clientId!,
-            duration: event.duration,
-            position: event.position,
-            running: false,
-        };
-        return newConfig;
+        if (local) {
+            return await this._synchronizer!.sendEvent(event.data);
+        }
     }
 
     private startTicking() {
-        function endTimeFromConfig(config: ITimerConfig): number {
-            return config.configChangedAt - config.position + config.duration;
+        function endTimeFromConfig(config: ITimerConfigEvent): number {
+            return (
+                config.timestamp - config.data.position + config.data.duration
+            );
         }
         const tickCallback = () => {
-            if (this._currentConfig.running) {
-                const timestamp = LiveShareClient.getTimestamp();
+            if (this._currentConfig.data.running) {
+                const timestamp = this.liveRuntime.getTimestamp();
                 const endTime = endTimeFromConfig(this._currentConfig);
                 if (timestamp >= endTime) {
-                    const newConfig: ITimerConfig = {
-                        configChangedAt: timestamp,
-                        clientId: this._scope!.clientId!,
-                        duration: this._currentConfig.duration,
-                        position: this._currentConfig.duration,
-                        running: false,
+                    const newConfig: ITimerConfigEvent = {
+                        timestamp,
+                        clientId: this._currentConfig.clientId,
+                        data: {
+                            duration: this._currentConfig.data.duration,
+                            position: this._currentConfig.data.duration,
+                            running: false,
+                        },
                     };
-                    this.updateConfig(newConfig, true);
+                    this.updateConfig(newConfig, true).catch((err) => {
+                        console.error(err);
+                    });
                 } else {
                     this.emit(LiveTimerEvents.onTick, endTime - timestamp);
                     this.scheduleAnimationFrame(tickCallback);

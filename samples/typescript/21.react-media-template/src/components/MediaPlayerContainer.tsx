@@ -30,6 +30,7 @@ import {
     Popover,
     PopoverTrigger,
     PopoverSurface,
+    tokens,
 } from "@fluentui/react-components";
 import {
     getFlexColumnStyles,
@@ -46,6 +47,7 @@ import { InkingControls } from "./InkingControls";
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
 import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
+import { FlexRow } from "./flex";
 
 const events = [
     "loadstart",
@@ -200,6 +202,9 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
 
     return (
         <div
+            style={{
+                color: tokens.colorNeutralForegroundStaticInverted,
+            }}
             className={mergeClasses(
                 flexColumnStyles.root,
                 playerControlStyles.root
@@ -277,6 +282,9 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
                         appearance="transparent"
                         title={playerState.isPlaying ? "Pause" : "Play"}
                         onClick={togglePlayPause}
+                        style={{
+                            color: tokens.colorNeutralForegroundStaticInverted,
+                        }}
                     />
                     {/* Next Track Button */}
                     {localUserIsPresenting && (
@@ -285,6 +293,9 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
                             appearance="transparent"
                             title={"Next track"}
                             onClick={nextTrack}
+                            style={{
+                                color: tokens.colorNeutralForegroundStaticInverted,
+                            }}
                         />
                     )}
                     {/* Mute Button */}
@@ -303,14 +314,11 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
                                 player.muted = !playerState.muted;
                             }
                         }}
+                        style={{
+                            color: tokens.colorNeutralForegroundStaticInverted,
+                        }}
                     />
-                    <div
-                        className={mergeClasses(
-                            flexRowStyles.root,
-                            flexRowStyles.vAlignCenter,
-                            flexRowStyles.fill
-                        )}
-                    >
+                    <FlexRow vAlignCenter fill>
                         <div
                             className={mergeClasses(
                                 flexItemStyles.noShrink,
@@ -365,13 +373,7 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
                                 </Button>
                             )}
                         </div>
-                        <div
-                            className={mergeClasses(
-                                flexRowStyles.root,
-                                flexRowStyles.vAlignCenter,
-                                flexRowStyles.hAlignEnd
-                            )}
-                        >
+                        <FlexRow vAlignCenter hAlignEnd>
                             {/* Take Control */}
                             <Button
                                 appearance="outline"
@@ -470,8 +472,8 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
                                     </div>
                                 </PopoverSurface>
                             </Popover>
-                        </div>
-                    </div>
+                        </FlexRow>
+                    </FlexRow>
                 </div>
             </div>
         </div>

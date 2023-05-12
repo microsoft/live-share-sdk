@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { IMediaPlayer } from "../IMediaPlayer";
 import { LimitLevelType, VolumeManager } from "../VolumeManager";
-import { Deferred } from "@microsoft/live-share/src/test/Deferred";
+import { Deferred } from "@microsoft/live-share/src/internals";
 
 describe("VolumeManager", () => {
     it("should ramp down volume", async () => {

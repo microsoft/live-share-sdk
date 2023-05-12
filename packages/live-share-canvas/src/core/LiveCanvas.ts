@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import { IValueChanged, SharedMap } from "@fluidframework/map";
 import { ISequencedDocumentMessage } from "@fluidframework/protocol-definitions";
@@ -33,19 +33,15 @@ import { IStroke, Stroke, StrokeType } from "./Stroke";
 import {
     LiveEventScope,
     LiveEventTarget,
-    ILiveEvent,
     UserMeetingRole,
     DynamicObjectRegistry,
-    LiveShareClient,
+    LiveDataObject,
+    LiveTelemetryLogger,
+    ILiveEvent,
 } from "@microsoft/live-share";
 import { IBrush } from "./Brush";
-import {
-    BasicColors,
-    darkenColor,
-    IColor,
-    lightenColor,
-    toCssRgbaColor,
-} from "./Colors";
+import { BasicColors, IColor, lightenColor, toCssRgbaColor } from "./Colors";
+import { TelemetryEvents } from "./internals";
 
 enum InkingEventNames {
     pointerMove = "PointerMove",
@@ -73,18 +69,17 @@ export interface IUserInfo extends IEventUserInfo {
     displayName?: string;
 }
 
-type IPointerMovedEvent = ILiveEvent & IPointerMovedEventArgs & IEventUserInfo;
+type IPointerMovedEvent = IPointerMovedEventArgs & IEventUserInfo;
 
 interface ISharedCursor {
     isCursorShared?: boolean;
 }
 
-type IBeginWetStrokeEvent = ILiveEvent &
-    IBeginStrokeEventArgs &
+type IBeginWetStrokeEvent = IBeginStrokeEventArgs &
     ISharedCursor &
     IEventUserInfo;
-type IAddWetStrokePointsEvent = ILiveEvent &
-    IAddPointsEventArgs &
+
+type IAddWetStrokePointsEvent = IAddPointsEventArgs &
     ISharedCursor &
     IEventUserInfo;
 
@@ -354,7 +349,8 @@ class BuiltInLiveCursor extends LiveCursor {
 /**
  * Enables live and collaborative inking.
  */
-export class LiveCanvas extends DataObject {
+export class LiveCanvas extends LiveDataObject {
+    private _logger?: LiveTelemetryLogger;
     private static readonly dryInkMapKey = "dryInk";
 
     /**
@@ -402,12 +398,6 @@ export class LiveCanvas extends DataObject {
     private _pointerMovedEventTarget!: LiveEventTarget<IPointerMovedEvent>;
     private _beginWetStrokeEventTarget!: LiveEventTarget<IBeginWetStrokeEvent>;
     private _addWetStrokePointEventTarget!: LiveEventTarget<IAddWetStrokePointsEvent>;
-    private _allowedRoles: UserMeetingRole[] = [
-        UserMeetingRole.guest,
-        UserMeetingRole.attendee,
-        UserMeetingRole.organizer,
-        UserMeetingRole.presenter,
-    ];
     private _pendingLiveStrokes: Map<string, LiveStroke> = new Map<
         string,
         LiveStroke
@@ -418,15 +408,22 @@ export class LiveCanvas extends DataObject {
     private _liveCursorSweepTimeout?: number;
 
     private liveStrokeProcessed = (liveStroke: LiveStroke) => {
-        this._addWetStrokePointEventTarget.sendEvent({
-            name: InkingEventNames.addWetStrokePoints,
-            isCursorShared: this.isCursorShared ? true : undefined,
-            strokeId: liveStroke.id,
-            points: liveStroke.points,
-            endState: liveStroke.endState,
+        this.onLocalUserAllowed(async () => {
+            try {
+                await this._addWetStrokePointEventTarget.sendEvent({
+                    isCursorShared: this.isCursorShared ? true : undefined,
+                    strokeId: liveStroke.id,
+                    points: liveStroke.points,
+                    endState: liveStroke.endState,
+                });
+            } catch (err) {
+                this._logger?.sendErrorEvent(
+                    TelemetryEvents.LiveCanvas.AddWetStrokeEventError,
+                    err
+                );
+            }
+            liveStroke.clear();
         });
-
-        liveStroke.clear();
     };
 
     private getLocalUserPictureUrl(): string | undefined {
@@ -442,9 +439,21 @@ export class LiveCanvas extends DataObject {
                 PointerMovedEvent,
                 (eventArgs: IPointerMovedEventArgs) => {
                     if (this.isCursorShared) {
-                        this._pointerMovedEventTarget.sendEvent({
-                            position: eventArgs.position,
-                            pictureUri: this.getLocalUserPictureUrl(),
+                        this.onLocalUserAllowed(async () => {
+                            try {
+                                // Send a pointer moved event with an undefined
+                                // point to indicated the cursor is not shared anymore
+                                this._pointerMovedEventTarget.sendEvent({
+                                    position: eventArgs.position,
+                                    pictureUri: this.getLocalUserPictureUrl(),
+                                });
+                            } catch (err) {
+                                this._logger?.sendErrorEvent(
+                                    TelemetryEvents.LiveCanvas
+                                        .PointerMovedEventError,
+                                    err
+                                );
+                            }
                         });
                     }
                 }
@@ -463,11 +472,22 @@ export class LiveCanvas extends DataObject {
 
                     this._pendingLiveStrokes.set(liveStroke.id, liveStroke);
 
-                    this._beginWetStrokeEventTarget.sendEvent({
-                        name: InkingEventNames.beginWetStroke,
-                        isCursorShared: this.isCursorShared ? true : undefined,
-                        pictureUri: this.getLocalUserPictureUrl(),
-                        ...eventArgs,
+                    this.onLocalUserAllowed(async () => {
+                        // Send the begin wet stroke event
+                        try {
+                            this._beginWetStrokeEventTarget.sendEvent({
+                                isCursorShared: this.isCursorShared
+                                    ? true
+                                    : undefined,
+                                pictureUri: this.getLocalUserPictureUrl(),
+                                ...eventArgs,
+                            });
+                        } catch (err) {
+                            this._logger?.sendErrorEvent(
+                                TelemetryEvents.LiveCanvas.BeginWetStrokeError,
+                                err
+                            );
+                        }
                     });
                 }
             );
@@ -503,19 +523,23 @@ export class LiveCanvas extends DataObject {
         }
 
         // Setup incoming events
-        const scope = new LiveEventScope(this.runtime, this.allowedRoles);
+        const scope = new LiveEventScope(
+            this.runtime,
+            this.liveRuntime,
+            this.allowedRoles
+        );
 
         this._pointerMovedEventTarget = new LiveEventTarget(
             scope,
             InkingEventNames.pointerMove,
-            (evt: IPointerMovedEvent, local: boolean) => {
+            (evt: ILiveEvent<IPointerMovedEvent>, local: boolean) => {
                 if (!local && evt.clientId) {
                     this.updateCursorPosition(
                         evt.clientId,
                         {
-                            pictureUri: evt.pictureUri,
+                            pictureUri: evt.data.pictureUri,
                         },
-                        evt.position
+                        evt.data.position
                     );
                 }
             }
@@ -524,35 +548,35 @@ export class LiveCanvas extends DataObject {
         this._beginWetStrokeEventTarget = new LiveEventTarget(
             scope,
             InkingEventNames.beginWetStroke,
-            (evt: IBeginWetStrokeEvent, local: boolean) => {
+            (evt: ILiveEvent<IBeginWetStrokeEvent>, local: boolean) => {
                 if (!local && this._inkingManager) {
                     const stroke = this._inkingManager.beginWetStroke(
-                        evt.type,
-                        evt.mode,
-                        evt.startPoint,
+                        evt.data.type,
+                        evt.data.mode,
+                        evt.data.startPoint,
                         {
-                            id: evt.strokeId,
+                            id: evt.data.strokeId,
                             clientId: evt.clientId,
                             timeStamp: evt.timestamp,
-                            brush: evt.brush,
+                            brush: evt.data.brush,
                         }
                     );
 
-                    this._wetStrokes.set(evt.strokeId, stroke);
+                    this._wetStrokes.set(evt.data.strokeId, stroke);
 
                     if (evt.clientId) {
                         if (
-                            evt.type !== StrokeType.persistent ||
-                            !evt.isCursorShared
+                            evt.data.type !== StrokeType.persistent ||
+                            !evt.data.isCursorShared
                         ) {
                             this.removeCursor(evt.clientId);
                         } else {
                             this.updateCursorPosition(
                                 evt.clientId,
                                 {
-                                    pictureUri: evt.pictureUri,
+                                    pictureUri: evt.data.pictureUri,
                                 },
-                                evt.startPoint
+                                evt.data.startPoint
                             );
                         }
                     }
@@ -563,22 +587,25 @@ export class LiveCanvas extends DataObject {
         this._addWetStrokePointEventTarget = new LiveEventTarget(
             scope,
             InkingEventNames.addWetStrokePoints,
-            (evt: IAddWetStrokePointsEvent, local: boolean) => {
+            (
+                evt: ILiveEvent<IAddWetStrokePointsEvent>,
+                local: boolean
+            ) => {
                 if (!local) {
-                    const stroke = this._wetStrokes.get(evt.strokeId);
+                    const stroke = this._wetStrokes.get(evt.data.strokeId);
 
                     if (stroke) {
-                        stroke.addPoints(...evt.points);
+                        stroke.addPoints(...evt.data.points);
 
                         // Unless the wet stroke is ephemeral or has been cancelled, leave it
                         // on the screen until it has been synchronized and we receive
                         // a valueChanged event. Removing it now would potentially lead to the
                         // stroke fully disappearing for a brief period of time before begin
                         // re-rendered in full fidelity.
-                        if (evt.endState === StrokeEndState.cancelled) {
+                        if (evt.data.endState === StrokeEndState.cancelled) {
                             stroke.cancel();
                         } else if (
-                            evt.endState === StrokeEndState.ended &&
+                            evt.data.endState === StrokeEndState.ended &&
                             stroke.type === StrokeType.ephemeral
                         ) {
                             stroke.end();
@@ -587,17 +614,17 @@ export class LiveCanvas extends DataObject {
                         if (evt.clientId) {
                             if (
                                 stroke.type !== StrokeType.persistent ||
-                                evt.endState ||
-                                !evt.isCursorShared
+                                evt.data.endState ||
+                                !evt.data.isCursorShared
                             ) {
                                 this.removeCursor(evt.clientId);
                             } else {
                                 this.updateCursorPosition(
                                     evt.clientId,
                                     {
-                                        pictureUri: evt.pictureUri,
+                                        pictureUri: evt.data.pictureUri,
                                     },
-                                    evt.points[evt.points.length - 1]
+                                    evt.data.points[evt.data.points.length - 1]
                                 );
                             }
                         }
@@ -776,7 +803,7 @@ export class LiveCanvas extends DataObject {
         position?: IPoint
     ) {
         if (position) {
-            LiveShareClient.getClientInfo(clientId).then((clientInfo) => {
+            this.liveRuntime.getClientInfo(clientId).then((clientInfo) => {
                 if (this._inkingManager) {
                     const userInfo: IUserInfo = {
                         displayName: clientInfo?.displayName,
@@ -837,8 +864,15 @@ export class LiveCanvas extends DataObject {
      * @param inkingManager The InkingManager instance providing the drawing and events
      * that will be synchronized across clients.
      */
-    async initialize(inkingManager: InkingManager) {
+    async initialize(
+        inkingManager: InkingManager,
+        allowedRoles?: UserMeetingRole[]
+    ) {
         this._inkingManager = inkingManager;
+        if (allowedRoles) {
+            this._allowedRoles = allowedRoles;
+        }
+        this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
         this.setupStorageProcessing();
         this.setupWetInkProcessing();
@@ -868,9 +902,18 @@ export class LiveCanvas extends DataObject {
             this._isCursorShared = value;
 
             if (!this._isCursorShared) {
-                // Send a pointer moved event with an undefined
-                // point to indicated the cursor is not shared anymore
-                this._pointerMovedEventTarget.sendEvent({});
+                this.onLocalUserAllowed(async () => {
+                    // Send a pointer moved event with an undefined
+                    // point to indicated the cursor is not shared anymore
+                    try {
+                        await this._pointerMovedEventTarget.sendEvent({});
+                    } catch (err) {
+                        this._logger?.sendErrorEvent(
+                            TelemetryEvents.LiveCanvas.PointerMovedEventError,
+                            err
+                        );
+                    }
+                });
             }
         }
     }

@@ -12,7 +12,7 @@ import {
     ISegment,
     getPressureAdjustedSize,
     toCssRgbaColor,
-} from ".";
+} from "..";
 
 /**
  * Pre-calculated Pi x 2.

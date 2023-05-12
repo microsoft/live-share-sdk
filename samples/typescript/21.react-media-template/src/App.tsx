@@ -31,7 +31,6 @@ export const App = () => {
                 await microsoftTeams.app.initialize();
                 microsoftTeams.app.notifyAppLoaded();
                 microsoftTeams.app.notifySuccess();
-                setInitialized(true);
                 const context = await microsoftTeams.app.getContext();
                 const curTheme = context.app.theme;
                 switch(curTheme) {
@@ -55,6 +54,7 @@ export const App = () => {
                         setTeamsTheme(teamsLightTheme);
                     }
                 });
+                setInitialized(true);
             } catch (error) {
                 console.error(error);
             }
@@ -69,7 +69,6 @@ export const App = () => {
     const appReady = (inTeams() && initialized) || !inTeams();
 
     if (appReady) {
-        console.log(teamsTheme);
         return (
             <FluentProvider
                 theme={teamsTheme}
@@ -93,7 +92,6 @@ export const App = () => {
                 </Router>
             </FluentProvider>
         );
-    } else {
-        return null;
     }
+    return null;
 };

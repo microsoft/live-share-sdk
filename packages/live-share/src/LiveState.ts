@@ -3,18 +3,16 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { assert } from "@fluidframework/common-utils";
 import { IEvent } from "@fluidframework/common-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { cloneValue, TelemetryEvents } from "./internals";
-import { LiveEventScope } from "./LiveEventScope";
-import { LiveEventTarget } from "./LiveEventTarget";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
-import { LiveShareClient } from "./LiveShareClient";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { LiveDataObject } from "./LiveDataObject";
 
 /**
  * Events supported by [LiveState` object.
@@ -37,12 +35,16 @@ export interface ILiveStateEvents<TState = any> extends IEvent {
      * @param listener Function called when event is triggered.
      * @param listener.state The new state. Can be the same as the previous state.
      * @param listener.local If true, a local state change occurred.
+     * @param listener.clientId clientId of sender.
+     * @param listener.timestamp timestamp the time message was sent, according to `LiveShareRuntime.getTimestamp()`
      */
     (
         event: "stateChanged",
         listener: (
             state: TState,
-            local: boolean
+            local: boolean,
+            clientId: string,
+            timestamp: number
         ) => void
     ): any;
 }
@@ -56,21 +58,13 @@ export interface ILiveStateEvents<TState = any> extends IEvent {
  * changes.
  * @template TState Optional data object that's synchronized with the state.
  */
-export class LiveState<TState = any> extends DataObject<{
+export class LiveState<TState = any> extends LiveDataObject<{
     Events: ILiveStateEvents<TState>;
 }> {
-    private _logger = new LiveTelemetryLogger(this.runtime);
-    private _allowedRoles: UserMeetingRole[] = [];
-    private _currentState?: IStateChangeEvent<TState>;
+    private _logger?: LiveTelemetryLogger;
+    private _latestEvent?: ILiveEvent<TState>;
 
-    private _scope?: LiveEventScope;
-    private _changeStateEvent?: LiveEventTarget<IStateChangeEvent<TState>>;
-    private _synchronizer?: LiveObjectSynchronizer<IStateChangeEvent<TState>>;
-
-    /**
-     * The objects initial state if not explicitly initialized.
-     */
-    public static readonly INITIAL_STATE = undefined;
+    private _synchronizer?: LiveObjectSynchronizer<TState>;
 
     /**
      * The objects fluid type/name.
@@ -91,7 +85,7 @@ export class LiveState<TState = any> extends DataObject<{
      * Returns true if the object has been initialized.
      */
     public get isInitialized(): boolean {
-        return !!this._scope;
+        return !!this._synchronizer;
     }
 
     /**
@@ -106,63 +100,70 @@ export class LiveState<TState = any> extends DataObject<{
      * The current state.
      */
     public get state(): TState {
-        return this.currentState.state;
+        return this.latestEvent.data;
     }
 
     /**
      * Starts the object.
      * @param initialState Initial state value
      * @param allowedRoles Optional. List of roles allowed to make state changes.
+     * @returns a void promise that resolves once complete
      */
     public async initialize(
         initialState: TState,
-        allowedRoles?: UserMeetingRole[],
+        allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
-        if (this._scope) {
+        if (this.isInitialized) {
             throw new Error(`LiveState already started.`);
         }
+        this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
         // Set initial state
-        this.currentState = {
+        this.latestEvent = {
+            clientId: "", // start as empty because the initial state is not user defined
             name: "ChangeState",
             timestamp: 0,
-            state: initialState,
+            data: initialState,
         };
 
         // Save off allowed roles
         this._allowedRoles = allowedRoles || [];
 
-        // Create event scope
-        this._scope = new LiveEventScope(this.runtime, allowedRoles);
-
-        // Listen for remote state changes
-        this._changeStateEvent = new LiveEventTarget(
-            this._scope,
-            "ChangeState",
-            (evt, local) => {
-                if (!local) {
-                    // Check for state change
-                    this.remoteStateReceived(evt, evt.clientId!);
+        // Create object synchronizer
+        this._synchronizer = new LiveObjectSynchronizer<TState>(
+            this.id,
+            this.runtime,
+            this.liveRuntime
+        );
+        await this._synchronizer.start(
+            initialState,
+            async (evt, sender, local) => {
+                // Check for state change.
+                // If it was valid, this will override the local user's previous value.
+                return await this.onReceivedStateEvent(evt, sender, local);
+            },
+            async (connecting) => {
+                if (connecting) return true;
+                // If user has eligible roles, allow the update to be sent
+                try {
+                    return await this.verifyLocalUserRoles();
+                } catch {
+                    return false;
                 }
             }
         );
-
-        // Create object synchronizer
-        this._synchronizer = new LiveObjectSynchronizer(
-            this.id,
-            this.runtime,
-            this.context.containerRuntime,
-            (connecting) => {
-                // Return current state
-                return this._currentState;
-            },
-            (connecting, state, sender) => {
-                // Check for state change
-                this.remoteStateReceived(state!, sender);
-            }
-        );
-
-        return Promise.resolve();
+        // Get the initial remote state, if there is any
+        const events = this._synchronizer.getEvents();
+        if (!events) return;
+        for (let eIndex = 0; eIndex < events.length; eIndex++) {
+            const event = events[eIndex];
+            const didApply = await this.onReceivedStateEvent(
+                event,
+                event.clientId,
+                event.clientId === await this.waitUntilConnected()
+            );
+            if (didApply) break;
+        }
     }
 
     /**
@@ -178,17 +179,16 @@ export class LiveState<TState = any> extends DataObject<{
     /**
      * Set a new state value
      * @param state New state name.
+     * @returns a void promise, and will throw if the user does not have the required roles
      */
-    public set(state: TState): void {
-        if (!this._scope) {
+    public async set(state: TState): Promise<void> {
+        if (!this.isInitialized) {
             throw new Error(`LiveState not started.`);
         }
 
         // Broadcast state change
         const clone = cloneValue(state);
-        const evt = this._changeStateEvent!.sendEvent({
-            state: clone,
-        });
+        const evt = await this._synchronizer!.sendEvent(clone);
 
         // Update local state immediately
         // - The _stateUpdatedEvent won't be triggered until the state change is actually sent. If
@@ -199,62 +199,60 @@ export class LiveState<TState = any> extends DataObject<{
     /**
      * The current state.
      */
-    private get currentState(): IStateChangeEvent<TState> {
-        assert(
-            this._currentState !== undefined,
-            "LiveState is not initialized"
-        );
-        return this._currentState;
+    private get latestEvent(): ILiveEvent<TState> {
+        assert(this._latestEvent !== undefined, "LiveState is not initialized");
+        return this._latestEvent;
     }
 
     /**
      * The current state.
      */
-    private set currentState(value: IStateChangeEvent<TState>) {
-        this._currentState = value;
+    private set latestEvent(value: ILiveEvent<TState>) {
+        this._latestEvent = value;
     }
 
-    private remoteStateReceived(
-        evt: IStateChangeEvent<TState>,
-        sender: string
-    ): void {
-        LiveShareClient.verifyRolesAllowed(sender, this._allowedRoles)
-            .then((allowed) => {
-                // Ensure that state is allowed, newer, and not the initial state.
-                if (
-                    allowed &&
-                    LiveEvent.isNewer(this.currentState, evt) &&
-                    evt.state !== LiveState.INITIAL_STATE
-                ) {
-                    this.updateState(evt, false);
-                }
-            })
-            .catch((err) => {
-                this._logger.sendErrorEvent(
-                    TelemetryEvents.LiveState.RoleVerificationError,
-                    err
-                );
-            });
+    // Returns true if the remote state was applied successfully
+    private async onReceivedStateEvent(
+        evt: ILiveEvent<TState>,
+        sender: string,
+        local: boolean
+    ): Promise<boolean> {
+        try {
+            const allowed = await this.liveRuntime.verifyRolesAllowed(
+                sender,
+                this._allowedRoles
+            );
+            // Ensure that state is allowed, newer, and not the initial state.
+            if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt))
+                return false;
+            console.log("applying change", evt);
+            this.updateState(evt, local);
+            return true;
+        } catch (err) {
+            this._logger?.sendErrorEvent(
+                TelemetryEvents.LiveState.RoleVerificationError,
+                err
+            );
+            return false;
+        }
     }
 
-    private updateState(evt: IStateChangeEvent<TState>, local: boolean) {
-        const oldState = this.currentState.state;
-        const newState = evt.state;
-        this.currentState = evt;
+    private updateState(evt: ILiveEvent<TState>, local: boolean) {
+        const oldState = this.latestEvent.data;
+        const newState = evt.data;
+        this.latestEvent = evt;
         this.emit(
             LiveStateEvents.stateChanged,
-            cloneValue(evt.state),
-            local
+            cloneValue(evt.data),
+            local,
+            evt.clientId,
+            evt.timestamp
         );
-        this._logger.sendTelemetryEvent(
+        this._logger?.sendTelemetryEvent(
             TelemetryEvents.LiveState.StateChanged,
             { oldState, newState }
         );
     }
-}
-
-interface IStateChangeEvent<T> extends ILiveEvent {
-    state: T;
 }
 
 /**

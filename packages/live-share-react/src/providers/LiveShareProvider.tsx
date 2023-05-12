@@ -5,18 +5,39 @@
 
 import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
 import React from "react";
-import { ILiveShareContainerResults } from "../types";
 import { useSharedStateRegistry } from "../internal-hooks";
-import { ILiveShareClientOptions, ILiveShareHost } from "@microsoft/live-share";
+import { ILiveShareClientOptions, ILiveShareHost, ILiveShareJoinResults, ITimestampProvider } from "@microsoft/live-share";
 import { FluidContext } from "./AzureProvider";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 
-interface ILiveShareContext {
-    created: boolean | undefined;
+export interface ILiveShareContext {
+    /**
+     * True if the local user created the Fluid container
+     */
+    created: boolean;
+    /**
+     * True if connected to the Live Share container
+     */
+    joined: boolean;
+    /**
+     * An error that will be defined if there was a problem joining the container, or undefined if not.
+     */
+    joinError: Error | undefined;
+    /**
+     * Live Share timestamp provider. Can be used to `.getTimestamp()` for a global clock value.
+     * This reference timestamp value should be fairly consistent for all users in the session.
+     */
+    timestampProvider: ITimestampProvider | undefined;
+    /**
+     * Join callback method
+     * @param initialObjects Optional. The initial objects for the Fluid container schema.
+     * @param onInitializeContainer Optional. Callback for when the container is first created.
+     * @returns `ILiveShareJoinResults`, which includes the Fluid container
+     */
     join: (
         initialObjects?: LoadableObjectClassRecord,
         onInitializeContainer?: (container: IFluidContainer) => void
-    ) => Promise<ILiveShareContainerResults>;
+    ) => Promise<ILiveShareJoinResults>;
 }
 
 export const LiveShareContext = React.createContext<ILiveShareContext>(
@@ -62,7 +83,7 @@ export const LiveShareProvider: React.FC<
         new LiveShareTurboClient(props.host, props.clientOptions)
     );
     const [results, setResults] = React.useState<
-        ILiveShareContainerResults | undefined
+        ILiveShareJoinResults | undefined
     >();
     const [joinError, setJoinError] = React.useState<Error | undefined>();
 
@@ -75,10 +96,9 @@ export const LiveShareProvider: React.FC<
         async (
             initialObjects?: LoadableObjectClassRecord,
             onInitializeContainer?: (container: IFluidContainer) => void
-        ): Promise<ILiveShareContainerResults> => {
+        ): Promise<ILiveShareJoinResults> => {
             startedRef.current = true;
-            const results: ILiveShareContainerResults =
-                await clientRef.current.join(initialObjects, onInitializeContainer);
+            const results = await clientRef.current.join(initialObjects, onInitializeContainer);
             setResults(results);
             return results;
         },
@@ -94,7 +114,7 @@ export const LiveShareProvider: React.FC<
         // We are not doing this here for backwards compatibility. View the README for more information.
         if (results !== undefined || startedRef.current || !props.joinOnLoad) return;
         join(props.initialObjects).catch((error) => {
-            console.log(error);
+            console.error(error);
             if (error instanceof Error) {
                 setJoinError(error);
             } else {
@@ -110,7 +130,10 @@ export const LiveShareProvider: React.FC<
     return (
         <LiveShareContext.Provider
             value={{
-                created: results?.created,
+                created: !!results?.created,
+                timestampProvider: results?.timestampProvider,
+                joined: !!results?.container,
+                joinError,
                 join,
             }}
         >

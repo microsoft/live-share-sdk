@@ -5,120 +5,124 @@
 
 import { strict as assert } from "assert";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
-import { MockContainerRuntimeSignaler } from "./MockContainerRuntimeSignaler";
 import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
-import { Deferred } from "./Deferred";
+import { Deferred } from "../internals";
+import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
-function createConnectedSignalers() {
-    const localContainer = new MockContainerRuntimeSignaler();
-    const remoteContainer = new MockContainerRuntimeSignaler();
-    MockContainerRuntimeSignaler.connectContainers([
-        localContainer,
-        remoteContainer,
-    ]);
-    return { localContainer, remoteContainer };
-}
+interface ITestState { client: "local" | "remote" };
 
 describe("LiveObjectSynchronizer", () => {
-    // Temporarily change update interval
-    before(() => (LiveObjectSynchronizer.updateInterval = 20));
-    after(() => (LiveObjectSynchronizer.updateInterval = 5000));
-
     it("Should send connecting state", async () => {
+        const localLiveRuntime = new MockLiveShareRuntime(true, 20);
+        const remoteLiveRuntime = new MockLiveShareRuntime(true, 20);
+        localLiveRuntime.connectToOtherRuntime(remoteLiveRuntime);
+        await localLiveRuntime.start();
+        await remoteLiveRuntime.start();
+
         const done = new Deferred();
-        const localRuntime = new MockRuntimeSignaler();
-        const signalers = createConnectedSignalers();
-        const localObject = new LiveObjectSynchronizer(
+        const localRuntime = new MockRuntimeSignaler();        
+        const localObject = new LiveObjectSynchronizer<ITestState>(
             "test",
             localRuntime,
-            signalers.localContainer,
-            (connecting) => {
-                return { client: "local" };
-            },
-            (connecting, state, sender) => {
+            localLiveRuntime
+        );
+        await localObject.start(
+            { client: "local" },
+            async (state, sender) => {
                 try {
                     assert(
-                        typeof state == "object",
+                        typeof state.data == "object",
                         `local: missing state received`
                     );
                     assert(
-                        state.client == "remote",
+                        state.data.client == "remote",
                         `local: invalid state received: ${state}`
                     );
                     assert(sender, `local: sender  ID not received`);
-                    if (connecting) {
-                        done.resolve();
-                    }
+                    done.resolve();
                 } catch (err) {
                     done.reject(err);
                 }
-            }
+                return true;
+            },
+            () => Promise.resolve(true)
         );
 
         const remoteRuntime = new MockRuntimeSignaler();
-        const remoteObject = new LiveObjectSynchronizer(
+        const remoteObject = new LiveObjectSynchronizer<ITestState>(
             "test",
             remoteRuntime,
-            signalers.remoteContainer,
-            (connecting) => {
-                return { client: "remote" };
-            },
-            (connecting, state, sender) => {}
+            remoteLiveRuntime
+        );
+        await remoteObject.start(
+            { client: "remote" },
+            (state, sender) => Promise.resolve(true),
+            () => Promise.resolve(true)
         );
 
         await done.promise;
         localObject.dispose();
         remoteObject.dispose();
+        localLiveRuntime.stop();
+        remoteLiveRuntime.stop();
     });
 
     it("Should delay send connecting state until connected", async () => {
+        const localLiveRuntime = new MockLiveShareRuntime(true, 20);
+        const remoteLiveRuntime = new MockLiveShareRuntime(true, 20);
+        localLiveRuntime.connectToOtherRuntime(remoteLiveRuntime);
+        await localLiveRuntime.start();
+        await remoteLiveRuntime.start();
+
         const done = new Deferred();
-        const localRuntime = new MockRuntimeSignaler(false, false);
-        const signalers = createConnectedSignalers();
-        const localObject = new LiveObjectSynchronizer(
+        const localRuntime = new MockRuntimeSignaler();
+        const localObject = new LiveObjectSynchronizer<ITestState>(
             "test",
             localRuntime,
-            signalers.localContainer,
-            (connecting) => {
-                assert(
-                    localRuntime.connected,
-                    `local: sending connect before connected`
-                );
-                return { client: "local" };
-            },
-            (connecting, state, sender) => {
+            localLiveRuntime
+        );
+        await localObject.start(
+            { client: "local" },
+            (state, sender) => {
                 try {
                     assert(
-                        typeof state == "object",
+                        typeof state.data == "object",
                         `local: missing state received`
                     );
                     assert(
-                        state.client == "remote",
+                        state.data.client == "remote",
                         `local: invalid state received: ${state}`
                     );
                     assert(sender, `local: sender  ID not received`);
-                    if (connecting) {
-                        done.resolve();
-                    }
+                    done.resolve();
                 } catch (err) {
                     done.reject(err);
                 }
+                return Promise.resolve(true);
+            },
+            () => {
+                return Promise.resolve(true);
             }
         );
 
-        const remoteRuntime = new MockRuntimeSignaler(false, false);
-        const remoteObject = new LiveObjectSynchronizer(
+        const remoteRuntime = new MockRuntimeSignaler();
+        const remoteObject = new LiveObjectSynchronizer<ITestState>(
             "test",
             remoteRuntime,
-            signalers.remoteContainer,
-            (connecting) => {
+            remoteLiveRuntime
+        );
+        await remoteObject.start(
+            { client: "remote" },
+            (state, sender) => {
+                return Promise.resolve(true);
+            },
+            () => {
                 assert(
                     remoteRuntime.connected,
                     `remote: sending connect before connected`
                 );
-                return { client: "remote" };
-            },
-            (connecting, state, sender) => {}
+                return Promise.resolve(true);
+            }
         );
 
         setTimeout(() => {
@@ -129,56 +133,75 @@ describe("LiveObjectSynchronizer", () => {
         await done.promise;
         localObject.dispose();
         remoteObject.dispose();
+        localLiveRuntime.stop();
+        remoteLiveRuntime.stop();
     });
 
     it("Should send periodic updates", async () => {
-        let received = 0;
+        const localLiveRuntime = new MockLiveShareRuntime(true, 20);
+        const remoteLiveRuntime = new MockLiveShareRuntime(true, 20);
+        localLiveRuntime.connectToOtherRuntime(remoteLiveRuntime);
+        await localLiveRuntime.start();
+        await remoteLiveRuntime.start();
+
+        let sent = 0;
+        let changesEmitted = 0;
         const done = new Deferred();
-        const signalers = createConnectedSignalers();
         const localRuntime = new MockRuntimeSignaler();
-        const localObject = new LiveObjectSynchronizer(
+        const localObject = new LiveObjectSynchronizer<ITestState>(
             "test",
             localRuntime,
-            signalers.localContainer,
-            (connecting) => {
-                return { client: "local" };
-            },
-            (connecting, state, sender) => {
+            localLiveRuntime
+        );
+        await localObject.start(
+            { client: "local" },
+            (state, sender) => {
                 try {
                     assert(
-                        typeof state == "object",
+                        typeof state.data == "object",
                         `local: missing state received`
                     );
                     assert(
-                        state.client == "remote",
+                        state.data.client == "remote",
                         `local: invalid state received: ${state}`
                     );
                     assert(sender, `local: sender  ID not received`);
-                    if (!connecting) {
-                        received++;
-                        if (received == 2) {
-                            done.resolve();
-                        }
-                    }
+                    // We event is only emitted when the timestamp of a value has changed
+                    changesEmitted++;
+                    assert(changesEmitted < 2, "received is >= 2")
                 } catch (err) {
                     done.reject(err);
                 }
+                return Promise.resolve(true);
+            },
+            () => {
+                sent++;
+                if (sent == 2) {
+                    done.resolve();
+                }
+                // If this is called, it will send out an update
+                return Promise.resolve(true)
             }
         );
 
         const remoteRuntime = new MockRuntimeSignaler();
-        const remoteObject = new LiveObjectSynchronizer(
+        const remoteObject = new LiveObjectSynchronizer<ITestState>(
             "test",
             remoteRuntime,
-            signalers.remoteContainer,
-            (connecting) => {
-                return { client: "remote" };
+            remoteLiveRuntime,
+        );
+        await remoteObject.start(
+            { client: "remote" },
+            (state, sender) => {
+                return Promise.resolve(true);
             },
-            (connecting, state, sender) => {}
+            () => Promise.resolve(true),
         );
 
         await done.promise;
         localObject.dispose();
         remoteObject.dispose();
+        localLiveRuntime.stop();
+        remoteLiveRuntime.stop();
     });
 });

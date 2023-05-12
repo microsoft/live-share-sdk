@@ -4,6 +4,7 @@ import { inTeams } from "./utils/inTeams";
 import { useRef, useEffect, useState } from "react";
 import { AzureAutoJoin, LiveShareAutoJoin, LiveShareManualJoin, TabConfig } from "./pages";
 import { AppRoutes } from "./constants";
+import { app } from "@microsoft/teams-js";
 
 const IN_TEAMS = inTeams();
 
@@ -42,7 +43,9 @@ export default function App() {
                 <Router window={window} basename="/">
                     <Routes>
                         {/* Default route. In Teams, this will save the tab configuration for one of the below routes. Otherwise, we redirect to selected route. */}
-                        <Route path={AppRoutes.TabConfig} element={<TabConfig />} />
+                        <Route exact path={AppRoutes.TabConfig} element={<TabConfig />} />
+                        {/* Alternate route for consistency with manifest */}
+                        <Route exact path={AppRoutes.TabConfigAlt} element={<TabConfig />} />
                         {/* Example for automatically joining Live Share container when this component is rendered */}
                         <Route path={AppRoutes.LiveShareAutoJoin} element={<LiveShareAutoJoin />} />
                         {/* Example for manually joining Live Share session based on a user action */}

@@ -69,8 +69,7 @@ export const usePresence = (presence, context) => {
             }
             // Update our local state
             const updatedUsers = presence
-                .toArray()
-                .filter((user) => user.state === PresenceState.online)
+                .getUsers(PresenceState.online)
                 .map((userPresence) => ({
                     userId: userPresence.userId,
                     state: userPresence.state,

@@ -1,27 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LivePresenceUser, LiveShareClient } from "@microsoft/live-share";
-// eslint-disable-next-line
+import { ITimestampProvider, LivePresenceUser } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework";
 import { IUserData } from "./usePresence";
 
-/**
- * @param {SharedMap} takeControlMap shared map
- * @param {string} localUserId local user ID
- * @param {boolean} localUserIsEligiblePresenter boolean that is true when local user is eligible presenter
- * @param {any[]} users user presence array
- * @param {string[]} acceptPlaybackChangesFrom accepted roles for playback control
- * @param {(text: string) => void} sendNotification Send notification callback from `useNotification` hook.
- * @returns `{takeControlStarted, presentingUser, localUserIsPresenting, takeControl}` where:
- * - `takeControlStarted` is a boolean indicating whether mediaSession.initialize() has been called.
- * - `presentingUser` is a callback method to play through the synchronizer.
- * - `localUserIsPresenting` is a callback method to pause through the synchronizer.
- * - `takeControl` is a callback method to seek a video to a given timestamp (in seconds).
- */
 export const useTakeControl = (
     localUserIsEligiblePresenter: boolean,
     users: LivePresenceUser<IUserData>[],
     takeControlMap?: SharedMap,
     localUserId?: string,
+    timestampProvider?: ITimestampProvider,
     sendNotification?: (text: string) => void
 ) => {
     const [history, setHistory] = useState(new Map<string, number>());
@@ -74,7 +61,7 @@ export const useTakeControl = (
     // Set the local user ID
     const takeControl = useCallback(() => {
         if (!!localUserId && localUserIsEligiblePresenter) {
-            takeControlMap?.set(localUserId, LiveShareClient.getTimestamp());
+            takeControlMap?.set(localUserId, timestampProvider?.getTimestamp());
             if (sendNotification) {
                 sendNotification("took control");
             }
@@ -83,6 +70,7 @@ export const useTakeControl = (
         takeControlMap,
         localUserId,
         localUserIsEligiblePresenter,
+        timestampProvider,
         sendNotification,
     ]);
 

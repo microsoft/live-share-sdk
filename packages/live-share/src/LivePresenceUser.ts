@@ -7,7 +7,8 @@ import { LiveEvent } from "./LiveEvent";
 import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
 import { cloneValue } from "./internals";
-import { LiveShareClient } from "./LiveShareClient";
+import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LivePresenceConnection } from "./LivePresenceConnection";
 
 /**
  * List of possible presence states.
@@ -33,29 +34,39 @@ export enum PresenceState {
 /**
  * @hidden
  */
-export interface ILivePresenceEvent<TData = object> extends ILiveEvent {
+export interface ILivePresenceEvent<TData = object> {
     state: PresenceState;
     data?: TData;
 }
 
 /**
- * A use that presence is being tracked for.
+ * @hidden
+ */
+export type LivePresenceReceivedEventData<TData = object> = ILiveEvent<
+    ILivePresenceEvent<TData>
+>;
+
+/**
+ * A user that presence is being tracked for.
  */
 export class LivePresenceUser<TData = object> {
     private _lastUpdateTime: number;
-    readonly _clients: string[] = [];
+    private _connections: Map<string, LivePresenceConnection<TData>> =
+        new Map();
+    private _isLocalUser: boolean = false;
 
     /**
      * @hidden
      */
     constructor(
         private _clientInfo: IClientInfo,
-        private _evt: ILivePresenceEvent<TData>,
+        private _evt: LivePresenceReceivedEventData<TData>,
         private _expirationPeriod: TimeInterval,
-        private _isLocalUser: boolean
+        private _liveRuntime: LiveShareRuntime,
+        _constructedFromLocalEvent: boolean
     ) {
-        this.updateClients(this._evt);
-        this._lastUpdateTime = LiveShareClient.getTimestamp();
+        this.updateClients(this._evt, _constructedFromLocalEvent);
+        this._lastUpdateTime = this._liveRuntime.getTimestamp();
     }
 
     /**
@@ -84,14 +95,15 @@ export class LivePresenceUser<TData = object> {
      * for a period of time.
      */
     public get state(): PresenceState {
-        return this.hasExpired() ? PresenceState.offline : this._evt.state;
+        return this.hasExpired() ? PresenceState.offline : this._evt.data.state;
     }
 
     /**
-     * Optional data shared by the user.
+     * Optional data shared by the user. Returns data from connection with most recent event.
+     * Client connection specific data is available from each connection.
      */
     public get data(): TData | undefined {
-        return cloneValue(this._evt.data);
+        return cloneValue(this._evt.data.data);
     }
 
     /**
@@ -102,52 +114,105 @@ export class LivePresenceUser<TData = object> {
     }
 
     /**
+     * Returns the user's connections.
+     */
+    public getConnections(
+        filter?: PresenceState
+    ): LivePresenceConnection<TData>[] {
+        const list: LivePresenceConnection<TData>[] = [];
+        this._connections.forEach((connection) => {
+            // Ensure connection matches filter
+            if (filter == undefined || connection.state == filter) {
+                list.push(connection);
+            }
+        });
+        return list;
+    }
+
+    public getConnection(
+        clientId: string
+    ): LivePresenceConnection<TData> | undefined {
+        return this._connections.get(clientId);
+    }
+
+    /**
      * Returns true if the presence object is from the specified client.
      * @param clientId The ID of the client to lookup.
      */
     public isFromClient(clientId: string): boolean {
-        return this._clients.indexOf(clientId) >= 0;
+        return this._connections.get(clientId) !== undefined;
     }
 
     /**
      * @hidden
      */
     public updateReceived(
-        evt: ILivePresenceEvent<TData>,
-        info: IClientInfo
+        evt: LivePresenceReceivedEventData<TData>,
+        info: IClientInfo,
+        localEvent: boolean
     ): boolean {
-        this.updateClients(evt);
+        this.updateClients(evt, localEvent);
         const currentEvent = this._evt;
         const currentClientInfo = this._clientInfo;
         if (LiveEvent.isNewer(currentEvent, evt)) {
             // Save updated event
             this._evt = evt;
             this._clientInfo = info;
-            this._lastUpdateTime = LiveShareClient.getTimestamp();
+            this._lastUpdateTime = this._liveRuntime.getTimestamp();
 
             // Has anything changed?
             return (
-                evt.state != currentEvent.state ||
+                evt.data.state != currentEvent.data.state ||
                 JSON.stringify(info) != JSON.stringify(currentClientInfo) ||
-                JSON.stringify(evt.data) != JSON.stringify(currentEvent.data)
+                JSON.stringify(evt.data.data) !=
+                    JSON.stringify(currentEvent.data.data)
             );
         }
 
         return false;
     }
 
+    /**
+     * @hidden
+     */
+    public set expirationPeriod(value: TimeInterval) {
+        this._expirationPeriod = value;
+        this._connections.forEach((connection) => {
+            connection.expirationPeriod = value;
+        });
+    }
+
     private hasExpired(): boolean {
-        const now = LiveShareClient.getTimestamp();
+        const now = this._liveRuntime.getTimestamp();
         const elapsed = now - this._lastUpdateTime;
         return (
             !this._isLocalUser && elapsed > this._expirationPeriod.milliseconds
         );
     }
 
-    private updateClients(evt: ILivePresenceEvent<TData>): void {
-        // The user can be logged into multiple clients so add client to list if missing.
-        if (evt.clientId && this._clients.indexOf(evt.clientId) < 0) {
-            this._clients.push(evt.clientId);
+    private updateClients(
+        evt: LivePresenceReceivedEventData<TData>,
+        localEvent: boolean
+    ): void {
+        // The user can be logged into multiple clients
+        const connection = this._connections.get(evt.clientId);
+        if (connection) {
+            connection.updateConnection(evt);
+        } else {
+            if (localEvent) {
+                // local user may have received event from non local connection first,
+                // resulting in local user being false, set to true
+                this._isLocalUser = localEvent;
+            }
+            this._connections.set(
+                evt.clientId,
+                new LivePresenceConnection(
+                    evt,
+                    localEvent,
+                    this._expirationPeriod,
+                    this._liveRuntime
+                )
+            );
         }
     }
 }

@@ -7,6 +7,9 @@ import { strict as assert } from "assert";
 import { LiveEventScope } from "../LiveEventScope";
 import { LiveEventSource } from "../LiveEventSource";
 import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
+import { LiveShareRuntime } from "../LiveShareRuntime";
+import { TestLiveShareHost } from "../TestLiveShareHost";
+import { LocalTimestampProvider } from "../LocalTimestampProvider";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
@@ -16,13 +19,40 @@ function createConnectedSignalers() {
 }
 
 describe("LiveEventSource", () => {
+    let localLiveRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let remoteLiveRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+
+    afterEach(async () => {
+        // restore defaults
+        localLiveRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
+        );
+        remoteLiveRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
+        );
+    });
+
     it("Should send events", (done) => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime
+        );
         localScope.onEvent("test", (evt, local) => triggered++);
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime
+        );
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
         const localSource = new LiveEventSource(localScope, "test");

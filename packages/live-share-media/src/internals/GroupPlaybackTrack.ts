@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent } from "@microsoft/live-share";
+import { ILiveEvent } from "@microsoft/live-share";
 import EventEmitter from "events";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
@@ -31,7 +31,7 @@ export enum GroupPlaybackTrackEvents {
 /**
  * @hidden
  */
-export interface IPlaybackTrackChangeEvent extends IEvent {
+export interface IPlaybackTrackChangeEvent extends ILiveEvent {
     metadata: ExtendedMediaMetadata | null;
 }
 

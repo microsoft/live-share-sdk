@@ -75,6 +75,8 @@ export interface IUseLiveEventResults<TEvent extends object = object> {
     allEvents: IReceiveLiveEvent<TEvent>[];
     /**
      * Callback method to send a new event to users in the session.
+     * @param TEvent to send.
+     * @returns void promise that will throw when user does not have required roles
      */
     sendEvent: SendLiveEventAction<TEvent>;
     /**
@@ -97,15 +99,19 @@ export interface IUseLiveTimerResults {
      */
     liveTimer: LiveTimer | undefined;
     /**
-     * Start timer callback.
+     * Callback to send event through `LiveTimer`
+     * @param duration the duration for the timer in milliseconds
+     * @returns void promise that will throw when user does not have required roles
      */
     start: OnStartTimerAction;
     /**
-     * Play timer callback.
+     * Callback to send event through `LiveTimer`
+     * @returns void promise that will throw when user does not have required roles
      */
     play: OnPlayTimerAction;
     /**
-     * Pause timer callback.
+     * Callback to send event through `LiveTimer`
+     * @returns void promise that will throw when user does not have required roles
      */
     pause: OnPauseTimerAction;
 }
@@ -129,6 +135,9 @@ export interface IUseLivePresenceResults<TData extends object = object> {
     livePresence: LivePresence<TData> | undefined;
     /**
      * Callback method to update the local user's presence.
+     * @param data Optional. TData to set for user.
+     * @param state Optional. PresenceState to set for user.
+     * @returns void promise that will throw when user does not have required roles
      */
     updatePresence: OnUpdateLivePresenceAction<TData>;
 }
@@ -140,23 +149,26 @@ export interface IUseMediaSynchronizerResults {
     suspended: boolean;
     /**
      * Callback to initiate a play action for the group media session.
+     * @returns void promise that will throw when user does not have required roles
      */
-    play: () => void;
+    play: () => Promise<void>;
     /**
      * Callback to initiate a pause action for the group media session.
+     * @returns void promise that will throw when user does not have required roles
      */
-    pause: () => void;
+    pause: () => Promise<void>;
     /**
      * Callback to initiate a seek action for the group media session.
-     *
      * @param time timestamp of the video in seconds to seek to
+     * @returns void promise that will throw when user does not have required roles
      */
-    seekTo: (time: number) => void;
+    seekTo: (time: number) => Promise<void>;
     /**
      * Callback to change the track for the group media session.
      * @param track media metadata object, track src string, or null
+     * @returns void promise that will throw when user does not have required roles
      */
-    setTrack: (track: Partial<ExtendedMediaMetadata> | string | null) => void;
+    setTrack: (track: Partial<ExtendedMediaMetadata> | string | null) => Promise<void>;
     /**
      * Begin a new suspension. If a wait point is not set, the suspension will only impact the
      * local user.

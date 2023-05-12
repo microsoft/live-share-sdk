@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IEvent } from "@microsoft/live-share";
+import { ILiveEvent } from "@microsoft/live-share";
 import EventEmitter from "events";
 import {
     GroupPlaybackTrack,
@@ -29,7 +29,7 @@ export enum PlaybackTrackDataEvents {
 /**
  * @hidden
  */
-export interface IPlaybackTrackDataChangeEvent extends IEvent {
+export interface IPlaybackTrackDataChangeEvent extends ILiveEvent {
     data: object | null;
 }
 

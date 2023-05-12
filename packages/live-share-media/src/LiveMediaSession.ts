@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
-import { DynamicObjectRegistry, LiveTelemetryLogger, UserMeetingRole } from "@microsoft/live-share";
+import { DataObjectFactory } from "@fluidframework/aqueduct";
+import { DynamicObjectRegistry, LiveDataObject, LiveTelemetryLogger, UserMeetingRole } from "@microsoft/live-share";
 import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer";
 import { ITriggerActionEvent, TelemetryEvents } from "./internals";
 import {
@@ -23,7 +23,7 @@ import { IMediaPlayer } from "./IMediaPlayer";
 /**
  * Live fluid object that synchronizes media playback across multiple clients.
  */
-export class LiveMediaSession extends DataObject {
+export class LiveMediaSession extends LiveDataObject {
     private _actionThrottler: MediaSessionActionThrottler =
         new RepeatedActionThrottler();
     private _logger?: LiveTelemetryLogger;
@@ -107,13 +107,17 @@ export class LiveMediaSession extends DataObject {
 
     /**
      * initialize the object.
-     * @param acceptTransportChangesFrom Optional. List of roles allowed to group transport
+     * @param allowedRoles Optional. List of roles allowed to group transport
      * operations like play/pause/seek/setTrack.
+     * @returns a void promise that resolves once complete
      */
     public initialize(
-        acceptTransportChangesFrom?: UserMeetingRole[]
+        allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
-        return this.coordinator.initialize(acceptTransportChangesFrom);
+        if (allowedRoles) {
+            this._allowedRoles = allowedRoles;
+        }
+        return this.coordinator.initialize(allowedRoles);
     }
 
     /**
@@ -184,10 +188,10 @@ export class LiveMediaSession extends DataObject {
     }
 
     protected async hasInitialized(): Promise<void> {
-        this._logger = new LiveTelemetryLogger(this.runtime);
+        this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
         // Create coordinator and listen for triggered actions
-        this._coordinator = new LiveMediaSessionCoordinator(this.runtime, () =>
+        this._coordinator = new LiveMediaSessionCoordinator(this.runtime, this.liveRuntime, () =>
             this.getCurrentPlayerState()
         );
         this._coordinator.on(

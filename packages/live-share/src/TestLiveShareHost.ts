@@ -45,7 +45,12 @@ export class TestLiveShareHost implements ILiveShareHost {
         private _setLocalTestContainerId?: (containerId: string) => void
     ) {}
 
-    public defaultRoles: UserMeetingRole[] = [
+    public defaultRemoteRoles: UserMeetingRole[] = [
+        UserMeetingRole.organizer,
+        UserMeetingRole.presenter,
+        UserMeetingRole.attendee,
+    ];
+    public defaultLocalRoles: UserMeetingRole[] = [
         UserMeetingRole.organizer,
         UserMeetingRole.presenter,
         UserMeetingRole.attendee,
@@ -96,8 +101,11 @@ export class TestLiveShareHost implements ILiveShareHost {
     }
 
     public registerClientId(clientId: string): Promise<UserMeetingRole[]> {
-        this.addClient(clientId, this.defaultRoles);
-        return Promise.resolve(this.defaultRoles);
+        if (this.roleCache.has(clientId)) {
+            throw new Error("Already registered clientId");
+        }
+        this.addClient(clientId, this.defaultLocalRoles);
+        return Promise.resolve(this.defaultLocalRoles);
     }
 
     // not part of LiveShareHost interface, but can be used to override roles for testing
@@ -126,7 +134,7 @@ export class TestLiveShareHost implements ILiveShareHost {
         if (this.roleCache.has(clientId)) {
             roles = this.roleCache.get(clientId)!;
         } else {
-            roles = this.defaultRoles;
+            roles = this.defaultRemoteRoles;
         }
 
         return Promise.resolve(roles);

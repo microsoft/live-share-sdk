@@ -8,8 +8,8 @@ import {
     LiveShareClient,
     ILiveShareClientOptions,
     ILiveShareHost,
+    ILiveShareJoinResults,
 } from "@microsoft/live-share";
-import { AzureContainerServices } from "@fluidframework/azure-client";
 import { FluidTurboClient, getContainerSchema } from "./internals";
 
 /**
@@ -19,11 +19,7 @@ import { FluidTurboClient, getContainerSchema } from "./internals";
 export class LiveShareTurboClient extends FluidTurboClient {
     private _client: LiveShareClient;
     private _results:
-        | {
-              container: IFluidContainer;
-              services: AzureContainerServices;
-              created: boolean;
-          }
+        | ILiveShareJoinResults
         | undefined;
 
     /**
@@ -63,11 +59,7 @@ export class LiveShareTurboClient extends FluidTurboClient {
      * Get the Fluid join container results
      */
     public override get results():
-        | {
-              container: IFluidContainer;
-              services: AzureContainerServices;
-              created: boolean;
-          }
+        | ILiveShareJoinResults
         | undefined {
         return this._results;
     }
@@ -86,11 +78,7 @@ export class LiveShareTurboClient extends FluidTurboClient {
     public async join(
         initialObjects?: LoadableObjectClassRecord,
         onContainerFirstCreated?: (container: IFluidContainer) => void
-    ): Promise<{
-        container: IFluidContainer;
-        services: AzureContainerServices;
-        created: boolean;
-    }> {
+    ): Promise<ILiveShareJoinResults> {
         const schema = getContainerSchema(initialObjects);
         this._results = await this._client.joinContainer(
             schema,

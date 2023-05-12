@@ -10,7 +10,7 @@ import {
     IBrush,
     toCssRgbaColor,
 } from "../core";
-import { computeQuadPath, IQuadPathSegment } from "../core/Internals";
+import { computeQuadPath, IQuadPathSegment } from "../core/internals";
 
 /**
  * Represents the base class from wet and dry canvases, implementing the common rendering logic.

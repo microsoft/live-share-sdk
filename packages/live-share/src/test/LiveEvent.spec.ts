@@ -8,26 +8,47 @@ import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveEvent } from "../LiveEvent";
-import { Deferred } from "./Deferred";
+import { Deferred } from "../internals";
 import { MockTimestampProvider } from "./MockTimestampProvider";
 import { MockRoleVerifier } from "./MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
-import { LiveShareClient } from "../LiveShareClient";
-import { RoleVerifier } from "../internals";
 import { TestLiveShareHost } from "../TestLiveShareHost";
+import { getLiveDataObjectClassProxy } from "../schema-injection-utils";
+import { LiveShareRuntime } from "../LiveShareRuntime";
+import { DataObjectClass } from "fluid-framework";
 
 describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
     let object1: LiveEvent;
     let object2: LiveEvent;
+    let liveRuntime1: LiveShareRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let LiveEventProxy1 = getLiveDataObjectClassProxy<LiveEvent>(
+        LiveEvent,
+        liveRuntime1
+    ) as DataObjectClass<LiveEvent>;
+    let liveRuntime2: LiveShareRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let LiveEventProxy2 = getLiveDataObjectClassProxy<LiveEvent>(
+        LiveEvent,
+        liveRuntime2
+    ) as DataObjectClass<LiveEvent>;
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
-        const container1 = await provider.createContainer(LiveEvent.factory);
+        const container1 = await provider.createContainer(
+            LiveEventProxy1.factory
+        );
         object1 = await requestFluidObject<LiveEvent>(container1, "default");
 
-        const container2 = await provider.loadContainer(LiveEvent.factory);
+        const container2 = await provider.loadContainer(
+            LiveEventProxy2.factory
+        );
         object2 = await requestFluidObject<LiveEvent>(container2, "default");
 
         // need to be connected to send signals
@@ -45,22 +66,20 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     afterEach(async () => {
         // restore defaults
-        LiveShareClient.setRoleVerifier(
-            new RoleVerifier(TestLiveShareHost.create(undefined, undefined))
-        );
-        LiveShareClient.setTimestampProvider(new LocalTimestampProvider());
+        liveRuntime1.setTimestampProvider(new LocalTimestampProvider());
+        liveRuntime2.setTimestampProvider(new LocalTimestampProvider());
     });
 
     it("Should raise local and remote events", async () => {
         const now = new Date().getTime();
         const object1done = new Deferred();
-        object1.on("received", (evt, local) => {
+        object1.on("received", (evt, local, clientId, timestamp) => {
             try {
                 assert(local == true, `Not a local event`);
                 assert(evt != null, `Null event arg`);
-                assert(evt.clientId != null, `Missing clientId`);
-                assert(typeof evt.timestamp == "number", `Missing timestamp`);
-                assert(evt.timestamp >= now, `Timestamp too old`);
+                assert(clientId != null, `Missing clientId`);
+                assert(typeof timestamp == "number", `Missing timestamp`);
+                assert(timestamp >= now, `Timestamp too old`);
                 object1done.resolve();
             } catch (err) {
                 object1done.reject(err);
@@ -69,13 +88,13 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         await object1.initialize();
 
         const object2done = new Deferred();
-        object2.on("received", (evt, local) => {
+        object2.on("received", (evt, local, clientId, timestamp) => {
             try {
                 assert(local == false, `Unexpected local event`);
                 assert(evt != null, `Null event arg`);
-                assert(evt.clientId != null, `Missing clientId`);
-                assert(typeof evt.timestamp == "number", `Missing timestamp`);
-                assert(evt.timestamp >= now, `Timestamp too old`);
+                assert(clientId != null, `Missing clientId`);
+                assert(typeof timestamp == "number", `Missing timestamp`);
+                assert(timestamp >= now, `Timestamp too old`);
                 object2done.resolve();
             } catch (err) {
                 object2done.reject(err);
@@ -83,7 +102,7 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
         });
         await object2.initialize();
 
-        object1.send();
+        object1.send({});
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -105,7 +124,7 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     it("Should throw error if sendEvent() called before start", async () => {
         try {
-            object1.send();
+            await object1.send({});
             assert(false, `exception not thrown`);
         } catch (err) {
             console.error("There was an error");
@@ -114,22 +133,25 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     it("Should getTimestamp() using local timestamp provider", () => {
         const now = new Date().getTime();
-        const timestamp = LiveShareClient.getTimestamp();
+        const timestamp = liveRuntime1.getTimestamp();
         assert(timestamp >= now);
     });
 
-    it("Should getTimestamp() using custom timestamp providers", () => {
+    it("Should getTimestamp() using custom timestamp providers", async () => {
         const mock = new MockTimestampProvider();
-        LiveShareClient.setTimestampProvider(mock);
+        const customRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            mock
+        );
 
         const now = new Date().getTime();
-        const timestamp = LiveShareClient.getTimestamp();
+        const timestamp = customRuntime.getTimestamp();
         assert(timestamp >= now, `Unexpected timestamp value`);
         assert(mock.called, `Mock not called`);
     });
 
     it("Should verifyRolesAllowed() using local role verifier", async () => {
-        const allowed = await LiveShareClient.verifyRolesAllowed("test", [
+        const allowed = await liveRuntime1.verifyRolesAllowed("test", [
             UserMeetingRole.presenter,
         ]);
         assert(allowed, `Role should be allowed`);
@@ -137,9 +159,13 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     it("Should verifyRolesAllowed() using custom role verifier", async () => {
         const mock = new MockRoleVerifier([UserMeetingRole.presenter]);
-        LiveShareClient.setRoleVerifier(mock);
+        const customRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            undefined,
+            mock
+        );
 
-        const allowed = await LiveShareClient.verifyRolesAllowed("test", [
+        const allowed = await customRuntime.verifyRolesAllowed("test", [
             UserMeetingRole.presenter,
         ]);
         assert(allowed, `Role should be allowed`);
@@ -148,16 +174,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should allow newer received events", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 1001,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -165,16 +193,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should block older received events", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 999,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -182,16 +212,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should block events with same timestamp from same client", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -199,16 +231,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should allow events with same timestamp and a different clientId that sorts lower", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -216,16 +250,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should block events with same timestamp and a different clientId that sorts higher", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 1000,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received);
@@ -233,16 +269,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should debounce newer events", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 1050,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received, 100);
@@ -250,16 +288,18 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     });
 
     it("Should allow older events that would have debounced the current event", () => {
-        const current: ILiveEvent = {
+        const current: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CA",
             timestamp: 1000,
+            data: undefined,
         };
 
-        const received: ILiveEvent = {
+        const received: ILiveEvent<undefined> = {
             name: "test",
             clientId: "CB",
             timestamp: 950,
+            data: undefined,
         };
 
         const allowed = LiveEvent.isNewer(current, received, 100);

@@ -1,5 +1,5 @@
-import { useLiveState } from "@microsoft/live-share-react";
-import { LiveShareClient, UserMeetingRole } from "@microsoft/live-share";
+import { useLiveShareContext, useLiveState } from "@microsoft/live-share-react";
+import { UserMeetingRole } from "@microsoft/live-share";
 
 const ExampleAppState = {
     WAITING: "WAITING",
@@ -18,6 +18,9 @@ export const ExampleLiveState = (props) => {
         ALLOWED_ROLES
     );
 
+    // timestampProvider a reference server-side timestamp, which is useful for sorting
+    const { timestampProvider } = useLiveShareContext();
+
     if (state.status === ExampleAppState.WAITING) {
         return (
             <div style={{ padding: "12px 12px" }}>
@@ -27,7 +30,7 @@ export const ExampleLiveState = (props) => {
                         onClick={() => {
                             setState({
                                 status: ExampleAppState.START,
-                                timeStarted: LiveShareClient.getTimestamp(),
+                                timeStarted: timestampProvider?.getTimestamp(),
                             });
                         }}
                     >

@@ -18,6 +18,7 @@ import { useDynamicDDS } from "../shared-hooks";
  * @param initialState Optional. the initial state value of type TState
  * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state
  * @returns ordered values: first value is the synchronized state value and the second is a setter to change the state value.
+ * The setter returns a void promise, which will throw if the user does not have the required roles to set.
  */
 export function useLiveState<
     TState = any,
@@ -37,9 +38,11 @@ export function useLiveState<
 
     /**
      * Change state callback that is user facing
+     * @param state TState to set
+     * @returns void promise, which will throw if the user does not have the required roles
      */
     const setState = React.useCallback(
-        (state: TState) => {
+        async (state: TState) => {
             if (!liveState) {
                 console.error(
                     new Error(
@@ -56,7 +59,7 @@ export function useLiveState<
                 );
                 return;
             }
-            liveState.set(state);
+            return await liveState.set(state);
         },
         [liveState]
     );

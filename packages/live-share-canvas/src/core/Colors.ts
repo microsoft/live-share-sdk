@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { forceIntoRange } from "./Internals";
+import { forceIntoRange } from "./internals";
 
 /**
  * Defines an RGB color

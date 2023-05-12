@@ -4,7 +4,7 @@
  */
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
-import { IContainerRuntimeSignaler } from "../LiveObjectSynchronizer";
+import { IContainerRuntimeSignaler } from "../interfaces";
 import { v4 } from "uuid";
 
 export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {
@@ -42,6 +42,14 @@ export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {
             }
             listener(message, local);
         });
+        return this;
+    }
+
+    public off(
+        event: "signal",
+        listener: (message: IInboundSignalMessage, local: boolean) => void
+    ): this {
+        // DO NOTHING FOR THIS MOCK
         return this;
     }
 

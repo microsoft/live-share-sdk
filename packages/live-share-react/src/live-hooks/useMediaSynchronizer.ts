@@ -52,28 +52,34 @@ export function useMediaSynchronizer(
     /**
      * User facing: dynamically load the LiveMediaSession DDS for the given unique key.
      */
-    const { dds: mediaSession } = useDynamicDDS<LiveMediaSession>(uniqueKey, LiveMediaSession);
+    const { dds: mediaSession } = useDynamicDDS<LiveMediaSession>(
+        uniqueKey,
+        LiveMediaSession
+    );
 
     /**
-     * User facing: play callback
+     * Play callback
      */
-    const play = React.useCallback((): void => {
-        mediaSynchronizer?.play();
+    const play = React.useCallback(async () => {
+        if (!mediaSynchronizer) return;
+        return await mediaSynchronizer.play();
     }, [mediaSynchronizer]);
 
     /**
-     * User facing: pause callback
+     * Pause callback
      */
-    const pause = React.useCallback((): void => {
-        mediaSynchronizer?.pause();
+    const pause = React.useCallback(async () => {
+        if (!mediaSynchronizer) return;
+        return await mediaSynchronizer.pause();
     }, [mediaSynchronizer]);
 
     /**
      * User facing: seek callback
      */
     const seekTo = React.useCallback(
-        (time: number): void => {
-            mediaSynchronizer?.seekTo(time);
+        async (time: number) => {
+            if (!mediaSynchronizer) return;
+            return await mediaSynchronizer.seekTo(time);
         },
         [mediaSynchronizer]
     );
@@ -82,12 +88,12 @@ export function useMediaSynchronizer(
      * User facing: set track callback
      */
     const setTrack = React.useCallback(
-        (track: Partial<ExtendedMediaMetadata> | string | null): void => {
-            // TODO: fix force unwrap once synchronizer uses correct types
+        async (track: Partial<ExtendedMediaMetadata> | string | null) => {
+            if (!mediaSynchronizer) return;
             if (isExtendedMediaMetadata(track)) {
-                mediaSynchronizer!.setTrack(track);
+                return await mediaSynchronizer.setTrack(track);
             } else if (typeof track === "string") {
-                mediaSynchronizer!.setTrack({
+                return await mediaSynchronizer.setTrack({
                     trackIdentifier: track,
                 } as ExtendedMediaMetadata);
             }
@@ -119,8 +125,8 @@ export function useMediaSynchronizer(
      * Setup change listeners and start `LiveMediaSession` if needed
      */
     React.useEffect(() => {
-        if (mediaSession === undefined || !mediaPlayerElementRef)
-            return;
+        if (mediaSession === undefined || !mediaPlayerElementRef) return;
+        let mounted = true;
         // Query the HTML5 media element from the document and set reference
         let mediaPlayer: IMediaPlayer | undefined;
         if (isRefObject<IMediaPlayer>(mediaPlayerElementRef)) {
@@ -152,25 +158,29 @@ export function useMediaSynchronizer(
             // Start synchronizing the media session
             mediaSession.initialize(allowedRoles ?? []);
         } else if (initialTrack) {
-            // If we have already started the media session, the synchronizer won't have initial track
-            // data now that we are remounting.
-            // TODO: if player is loaded twice in one app at once, then this has a chance to disrupt the
-            // group state by resetting the track. MediaPlayerSynchronizer does not currently have a way to
-            // get the current track, so to fix this we need a better solution.
-            if (isExtendedMediaMetadata(initialTrack)) {
-                synchronizer.setTrack(initialTrack);
-            } else if (typeof initialTrack === "string") {
-                synchronizer.setTrack({
-                    trackIdentifier: initialTrack,
-                } as ExtendedMediaMetadata);
-            }
+            mediaSession.onLocalUserAllowed(async () => {
+                if (!mounted) return;
+                try {
+                    if (isExtendedMediaMetadata(initialTrack)) {
+                        await synchronizer.setTrack(initialTrack);
+                    } else if (typeof initialTrack === "string") {
+                        await synchronizer.setTrack({
+                            trackIdentifier: initialTrack,
+                        } as ExtendedMediaMetadata);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            });
         }
         setMediaSynchronizer(synchronizer);
 
         return () => {
+            mounted = false;
             synchronizer.removeAllListeners();
             mediaSession.removeAllListeners();
             synchronizer?.end();
+            mediaSession?.dispose();
         };
     }, [mediaSession]);
 

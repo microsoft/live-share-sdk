@@ -3,12 +3,18 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
-import { ILiveEvent, UserMeetingRole, IClientTimestamp } from "./interfaces";
+import {
+    UserMeetingRole,
+    IClientTimestamp,
+    ILiveEvent,
+} from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { LiveDataObject } from "./LiveDataObject";
+import { cloneValue } from "./internals";
 
 /**
  * Events supported by `LiveEvent` object.
@@ -24,15 +30,25 @@ export enum LiveEventEvents {
  * Event typings for `LiveEvent` class.
  * @template TEvent Type of event to broadcast.
  */
-export interface ILiveEventEvents<TEvent extends ILiveEvent> extends IEvent {
+export interface ILiveEventEvents<TEvent> extends IEvent {
     /**
      * A remote event was received or a local event was sent.
      * @param event Name of event.
      * @param listener Function called when event is triggered.
      * @param listener.evt The event that was sent/received.
      * @param listener.local If true the `evt` is an event that was sent.
+     * @param listener.clientId clientId of sender.
+     * @param listener.timestamp timestamp the time message was sent, according to `LiveShareRuntime.getTimestamp()`
      */
-    (event: "received", listener: (evt: TEvent, local: boolean) => void): any;
+    (
+        event: "received",
+        listener: (
+            evt: TEvent,
+            local: boolean,
+            clientId: string,
+            timestamp: number
+        ) => void
+    ): any;
 }
 
 /**
@@ -46,9 +62,7 @@ export interface ILiveEventEvents<TEvent extends ILiveEvent> extends IEvent {
  * `LiveEvents`. Use something like the `LiveState` class when syncing state.
  * @template TEvent Type of event to broadcast.
  */
-export class LiveEvent<
-    TEvent extends ILiveEvent = ILiveEvent
-> extends DataObject<{
+export class LiveEvent<TEvent = any> extends LiveDataObject<{
     Events: ILiveEventEvents<TEvent>;
 }> {
     private _eventTarget?: LiveEventTarget<TEvent>;
@@ -92,12 +106,24 @@ export class LiveEvent<
             throw new Error(`LiveEvent already started.`);
         }
 
-        const scope = new LiveEventScope(this.runtime, allowedRoles);
+        this._allowedRoles = allowedRoles ?? [];
+
+        const scope = new LiveEventScope(
+            this.runtime,
+            this.liveRuntime,
+            allowedRoles
+        );
         this._eventTarget = new LiveEventTarget(
             scope,
             "event",
             (evt, local) => {
-                this.emit(LiveEventEvents.received, evt, local);
+                this.emit(
+                    LiveEventEvents.received,
+                    cloneValue(evt.data),
+                    local,
+                    evt.clientId,
+                    evt.timestamp
+                );
             }
         );
 
@@ -109,25 +135,18 @@ export class LiveEvent<
      *
      * #### remarks
      * The event will be queued for delivery if the client isn't currently connected.
-     * @param evt Optional. Event to send. If omitted, an event will still be sent but it won't
+     * @param evt Event to send. If omitted, an event will still be sent but it won't
      * include any custom event data.
-     * @returns The full event object that was sent, including the timestamp of when the event
+     * @returns A promise with the full event object that was sent, including the timestamp of when the event
      * was sent and the clientId if known. The clientId will be `undefined` if the client is
      * disconnected at time of delivery.
      */
-    public send(evt?: Partial<TEvent>): TEvent {
+    public async send(evt: TEvent): Promise<ILiveEvent<TEvent>> {
         if (!this._eventTarget) {
             throw new Error(`LiveEvent not started.`);
         }
 
-        return this._eventTarget.sendEvent(evt);
-    }
-
-    /**
-     * @deprecated use `send()` instead
-     */
-    public sendEvent(evt?: Partial<TEvent>): TEvent {
-        return this.send(evt);
+        return await this._eventTarget.sendEvent(evt);
     }
 
     /**

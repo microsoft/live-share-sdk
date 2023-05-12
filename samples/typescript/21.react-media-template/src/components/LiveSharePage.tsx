@@ -5,6 +5,7 @@ import { IFluidContainer } from "fluid-framework";
 import React from "react";
 import { FC, ReactNode, useMemo } from "react";
 import { FlexColumn } from "./flex";
+import { inTeams } from "../utils/inTeams";
 
 export const LiveSharePage: FC<{
     children: ReactNode;
@@ -38,7 +39,7 @@ export const LiveSharePage: FC<{
                         top: "0px",
                         bottom: "0px",
                         zIndex: 9999,
-                        backgroundColor: "#201F1F",
+                        backgroundColor: inTeams() ? "transparent" : "#202020",
                     }}
                 >
                     <Spinner />

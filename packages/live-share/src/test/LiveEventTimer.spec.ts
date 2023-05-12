@@ -8,6 +8,9 @@ import { LiveEventScope } from "../LiveEventScope";
 import { LiveEventTarget } from "../LiveEventTarget";
 import { LiveEventTimer } from "../LiveEventTimer";
 import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
+import { LiveShareRuntime } from "../LiveShareRuntime";
+import { TestLiveShareHost } from "../TestLiveShareHost";
+import { LocalTimestampProvider } from "../LocalTimestampProvider";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
@@ -17,11 +20,35 @@ function createConnectedSignalers() {
 }
 
 describe("LiveEventTimer", () => {
+    let localLiveRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let remoteLiveRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+
+    afterEach(async () => {
+        // restore defaults
+        localLiveRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
+        );
+        remoteLiveRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
+        );
+    });
+
     it("Should send a single event after a delay", (done) => {
         let created = 0;
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime
+        );
         const localTarget = new LiveEventTarget(
             localScope,
             "test",
@@ -36,7 +63,10 @@ describe("LiveEventTimer", () => {
             10
         );
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime
+        );
         const remoteTarget = new LiveEventTarget(
             remoteScope,
             "test",
@@ -60,7 +90,10 @@ describe("LiveEventTimer", () => {
         let created = 0;
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime
+        );
         const localTarget = new LiveEventTarget(
             localScope,
             "test",
@@ -76,7 +109,10 @@ describe("LiveEventTimer", () => {
             true
         );
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime
+        );
         const remoteTarget = new LiveEventTarget(
             remoteScope,
             "test",

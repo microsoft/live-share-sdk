@@ -55,6 +55,17 @@ export class MockRuntimeSignaler implements IRuntimeSignaler {
         }
         return this;
     }
+    public off(event: string, listener: any) {
+        switch (event) {
+            case "connected":
+                this._connectedListeners.find((cListener) => cListener !== listener);
+                break;
+            case "signal":
+                this._signalListeners.find((cListener) => cListener !== listener);
+                break;
+        }
+        return this;
+    }
 
     public submitSignal(type: string, content: any): void {
         const msg: IInboundSignalMessage = {

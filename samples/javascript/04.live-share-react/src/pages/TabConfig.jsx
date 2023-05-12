@@ -28,7 +28,7 @@ export const TabConfig = () => {
     useEffect(() => {
         if (!IN_TEAMS) return;
         pages.config.registerOnSaveHandler(function (saveEvent) {
-            microsoftTeams.pages.config.setConfig({
+            pages.config.setConfig({
                 suggestedDisplayName: "Live Share React",
                 contentUrl: `${window.location.origin}${selectedRoute}?inTeams=true`,
             });

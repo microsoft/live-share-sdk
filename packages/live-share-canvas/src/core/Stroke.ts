@@ -20,7 +20,7 @@ import {
     isRectangleInsideRectangle,
     segmentMayIntersectWithRectangle,
     generateUniqueId,
-} from "./Internals";
+} from "./internals";
 
 /**
  * Field names on this interface are intentionally short to minimize

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LiveShareClient } from "@microsoft/live-share";
+import { ITimestampProvider } from "@microsoft/live-share";
 // eslint-disable-next-line
 import { SharedMap } from "fluid-framework";
 
@@ -9,6 +9,7 @@ import { SharedMap } from "fluid-framework";
  * @param {boolean} localUserIsEligiblePresenter boolean that is true when local user is eligible presenter
  * @param {any[]} users user presence array
  * @param {string[]} acceptPlaybackChangesFrom accepted roles for playback control
+ * @param {ITimestampProvider} timestampProvider timestamp provider, used for getting things like server timestamp
  * @param {(text: string) => void} sendNotification Send notification callback from `useNotification` hook.
  * @returns `{takeControlStarted, presentingUser, localUserIsPresenting, takeControl}` where:
  * - `takeControlStarted` is a boolean indicating whether mediaSession.initialize() has been called.
@@ -21,6 +22,7 @@ export const useTakeControl = (
     localUserId,
     localUserIsEligiblePresenter,
     users,
+    timestampProvider,
     sendNotification
 ) => {
     const [history, setHistory] = useState({});
@@ -62,7 +64,7 @@ export const useTakeControl = (
     // Set the local user ID
     const takeControl = useCallback(() => {
         if (!!localUserId && localUserIsEligiblePresenter) {
-            takeControlMap?.set(localUserId, LiveShareClient.getTimestamp());
+            takeControlMap?.set(localUserId, timestampProvider?.getTimestamp());
             if (sendNotification) {
                 sendNotification("took control");
             }
@@ -71,6 +73,7 @@ export const useTakeControl = (
         takeControlMap,
         localUserId,
         localUserIsEligiblePresenter,
+        timestampProvider,
         sendNotification,
     ]);
 

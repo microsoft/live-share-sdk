@@ -10,9 +10,8 @@ import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
 import { MockRoleVerifier } from "./MockRoleVerifier";
 import { MockTimestampProvider } from "./MockTimestampProvider";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
-import { LiveShareClient } from "../LiveShareClient";
-import { RoleVerifier } from "../internals";
 import { TestLiveShareHost } from "../TestLiveShareHost";
+import { LiveShareRuntime } from "../LiveShareRuntime";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
@@ -22,19 +21,35 @@ function createConnectedSignalers() {
 }
 
 describe("LiveEventScope", () => {
+    let localLiveRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+    let remoteLiveRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(),
+        new LocalTimestampProvider()
+    );
+
     afterEach(async () => {
         // restore defaults
-        LiveShareClient.setRoleVerifier(
-            new RoleVerifier(TestLiveShareHost.create(undefined, undefined))
+        localLiveRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
         );
-        LiveShareClient.setTimestampProvider(new LocalTimestampProvider());
+        remoteLiveRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            new LocalTimestampProvider()
+        );
     });
 
-    it("Should raise local and remote events", (done) => {
+    it("Should raise local and remote events", async () => {
         let triggered = 0;
         const now = new Date().getTime();
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime
+        );
         localScope.onEvent("test", (evt, local) => {
             assert(local == true, `Not a local event`);
             assert(evt != null, `Null event arg`);
@@ -45,7 +60,10 @@ describe("LiveEventScope", () => {
             triggered++;
         });
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime
+        );
         remoteScope.onEvent("test", (evt, local) => {
             assert(local == false, `Unexpected local event`);
             assert(evt != null, `Null event arg`);
@@ -56,175 +74,186 @@ describe("LiveEventScope", () => {
             triggered++;
         });
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(triggered == 2, `triggered == ${triggered}`);
-            done();
-        }, 10);
+        assert(triggered == 2, `triggered == ${triggered}`);
     });
 
-    it("Should unsubscribe from events", (done) => {
+    it("Should unsubscribe from events", async () => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime
+        );
         const handler = (evt, local) => triggered++;
         localScope.onEvent("test", handler);
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime
+        );
         remoteScope.onEvent("test", handler);
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(triggered == 2);
+        assert(triggered == 2);
 
-            remoteScope.offEvent("test", handler);
-            localScope.sendEvent("test", {});
-            setTimeout(() => {
-                assert((triggered as any) == 3);
-                done();
-            }, 10);
-        }, 10);
+        remoteScope.offEvent("test", handler);
+        await localScope.sendEvent("test", {});
+        assert((triggered as any) == 3);
     });
 
-    it("Should verify senders role", (done) => {
+    it("Should verify senders role", async () => {
         const verifier = new MockRoleVerifier([UserMeetingRole.organizer]);
-        LiveShareClient.setRoleVerifier(verifier);
+        localLiveRuntime.setRoleVerifier(verifier);
+        remoteLiveRuntime.setRoleVerifier(verifier);
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime, [
-            UserMeetingRole.organizer,
-        ]);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime,
+            [UserMeetingRole.organizer]
+        );
         localScope.onEvent("test", (evt, local) => triggered++);
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [
-            UserMeetingRole.organizer,
-        ]);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime,
+            [UserMeetingRole.organizer]
+        );
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(verifier.called);
-            assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            done();
-        }, 10);
+        assert(verifier.called);
+        assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
     });
 
-    it("Should block invalid senders", (done) => {
+    it("Should block invalid senders", async () => {
         const verifier = new MockRoleVerifier([]);
-        LiveShareClient.setRoleVerifier(verifier);
+        localLiveRuntime.setRoleVerifier(verifier);
+        remoteLiveRuntime.setRoleVerifier(verifier);
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime, [
-            UserMeetingRole.organizer,
-        ]);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime,
+            [UserMeetingRole.organizer]
+        );
         localScope.onEvent("test", (evt, local) => triggered++);
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [
-            UserMeetingRole.organizer,
-        ]);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime,
+            [UserMeetingRole.organizer]
+        );
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        localScope.sendEvent("test", {});
+        try {
+            await localScope.sendEvent("test", {});
+            assert(false, "Event should not have been sent");
+        } catch (err) {
+            assert(
+                err?.message.includes(
+                    `The local user doesn't have a role of ["Organizer"]`
+                ),
+                "Unexpected error"
+            );
+        }
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(verifier.called);
-            assert(triggered == 0, `Unexpected trigger count of ${triggered}`);
-            done();
-        }, 10);
+        assert(verifier.called);
+        assert(triggered == 0, `Unexpected trigger count of ${triggered}`);
     });
 
-    it("Should support event scopes with multiple roles", (done) => {
+    it("Should support event scopes with multiple roles", async () => {
         const verifier = new MockRoleVerifier([UserMeetingRole.presenter]);
-        LiveShareClient.setRoleVerifier(verifier);
+        localLiveRuntime.setRoleVerifier(verifier);
+        remoteLiveRuntime.setRoleVerifier(verifier);
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime, [
-            UserMeetingRole.presenter,
-            UserMeetingRole.organizer,
-        ]);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime,
+            [UserMeetingRole.presenter, UserMeetingRole.organizer]
+        );
         localScope.onEvent("test", (evt, local) => triggered++);
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [
-            UserMeetingRole.presenter,
-            UserMeetingRole.organizer,
-        ]);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime,
+            [UserMeetingRole.presenter, UserMeetingRole.organizer]
+        );
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(verifier.called);
-            assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            done();
-        }, 10);
+        assert(verifier.called);
+        assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
     });
 
-    it("Should support senders with multiple roles", (done) => {
+    it("Should support senders with multiple roles", async () => {
         const verifier = new MockRoleVerifier([
             UserMeetingRole.organizer,
             UserMeetingRole.presenter,
         ]);
-        LiveShareClient.setRoleVerifier(verifier);
+        localLiveRuntime.setRoleVerifier(verifier);
+        remoteLiveRuntime.setRoleVerifier(verifier);
 
         let triggered = 0;
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime, [
-            UserMeetingRole.presenter,
-        ]);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime,
+            [UserMeetingRole.presenter]
+        );
         localScope.onEvent("test", (evt, local) => triggered++);
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime, [
-            UserMeetingRole.presenter,
-        ]);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime,
+            [UserMeetingRole.presenter]
+        );
         remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(verifier.called);
-            assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
-            done();
-        }, 10);
+        assert(verifier.called);
+        assert(triggered == 2, `Unexpected trigger count of ${triggered}`);
     });
 
-    it("Should support custom timestamp providers", (done) => {
+    it("Should support custom timestamp providers", async () => {
         const provider = new MockTimestampProvider();
-        LiveShareClient.setTimestampProvider(provider);
+        localLiveRuntime.setTimestampProvider(provider);
+        remoteLiveRuntime.setTimestampProvider(provider);
 
         let triggered = 0;
         const now = new Date().getTime();
         const signalers = createConnectedSignalers();
-        const localScope = new LiveEventScope(signalers.localRuntime);
+        const localScope = new LiveEventScope(
+            signalers.localRuntime,
+            localLiveRuntime
+        );
         localScope.onEvent("test", (evt, local) => {
             assert(evt.timestamp >= now);
             triggered++;
         });
 
-        const remoteScope = new LiveEventScope(signalers.remoteRuntime);
+        const remoteScope = new LiveEventScope(
+            signalers.remoteRuntime,
+            remoteLiveRuntime
+        );
         remoteScope.onEvent("test", (evt, local) => {
             assert(evt.timestamp >= now);
             triggered++;
         });
 
-        localScope.sendEvent("test", {});
+        await localScope.sendEvent("test", {});
 
-        // Verify is an async operation so wait some
-        setTimeout(() => {
-            assert(provider.called, `provider not called`);
-            assert(triggered == 2, `triggered == ${triggered}`);
-            done();
-        }, 10);
+        assert(provider.called, `provider not called`);
+        assert(triggered == 2, `triggered == ${triggered}`);
     });
 });

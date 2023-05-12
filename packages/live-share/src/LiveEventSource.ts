@@ -14,7 +14,7 @@ import { LiveEventScope } from "./LiveEventScope";
  * create an `LiveEventTarget` class, which can both send & receive events.
  * @template TEvent Type of event to broadcast.
  */
-export class LiveEventSource<TEvent extends ILiveEvent = ILiveEvent> {
+export class LiveEventSource<TEvent> {
     private _scope: LiveEventScope;
     private _eventName: string;
 
@@ -36,7 +36,7 @@ export class LiveEventSource<TEvent extends ILiveEvent = ILiveEvent> {
      * @returns The full event, including `ILiveEvent.name`,
      * `ILiveEvent.timestamp`, and `ILiveEvent.clientId` fields if known.
      */
-    public sendEvent(evt: Partial<TEvent> = {}): TEvent {
-        return this._scope.sendEvent(this._eventName, evt);
+    public async sendEvent(evt: TEvent): Promise<ILiveEvent<TEvent>> {
+        return await this._scope.sendEvent<TEvent>(this._eventName, evt);
     }
 }

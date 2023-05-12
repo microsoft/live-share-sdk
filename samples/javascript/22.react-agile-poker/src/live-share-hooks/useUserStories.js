@@ -4,11 +4,10 @@
  */
 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { LiveShareClient } from "@microsoft/live-share";
 import { v4 as uuid } from "uuid";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 
-export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
+export const useUserStories = (userStoriesMap, localUserId, userStoryId, timestampProvider) => {
     const [userStories, setUserStories] = useState([]);
     const [userStoriesStarted, setStarted] = useState(false);
     const initialUserStoryIdRef = useRef(getInitialUserStoryId());
@@ -23,11 +22,11 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId) => {
             const id = uuid();
             userStoriesMap?.set(id, {
                 text: userStoryText,
-                addedAt: LiveShareClient.getTimestamp(),
+                addedAt: timestampProvider.getTimestamp(),
                 addedBy: localUserId,
             });
         },
-        [userStoriesMap, localUserId]
+        [userStoriesMap, localUserId, timestampProvider]
     );
 
     const assignPoints = useCallback(

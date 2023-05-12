@@ -3,15 +3,16 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { IAudience } from "@fluidframework/container-definitions";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
+import { AzureContainerServices } from "@fluidframework/azure-client";
+import { IFluidContainer } from "fluid-framework";
+import { LiveShareRuntime } from "./LiveShareRuntime";
+
 /**
  * Base interface for all event objects.
  */
 export interface IEvent {
-    /**
-     * Additional event properties.
-     */
-    [key: string]: any;
-
     /**
      * Name of the event.
      */
@@ -23,9 +24,9 @@ export interface IEvent {
  */
 export interface IClientTimestamp {
     /**
-     * Current client ID, if known. The client ID will be `undefined` if the client is currently disconnected.
+     * Client ID for the active socket connection.
      */
-    clientId?: string;
+    clientId: string;
 
     /**
      * Global timestamp of when the event was sent.
@@ -34,18 +35,11 @@ export interface IClientTimestamp {
 }
 
 /**
- * Base interface for all live share events.
+ * Base type for all incoming live share events of a certain type
  */
-export interface ILiveEvent extends IEvent, IClientTimestamp {}
-
-/**
- * Removes the base properties from an event that derives from `ILiveEvent`.
- * @template TEvent Type of event.
- */
-export type OutgoingLiveEvent<TEvent extends ILiveEvent> = Omit<
-    TEvent,
-    "name" | "clientId" | "timestamp"
->;
+export interface ILiveEvent<TEvent = any> extends IEvent, IClientTimestamp {
+    data: TEvent;
+}
 
 /**
  * Allowed roles during a meeting.
@@ -277,9 +271,78 @@ export interface ILiveShareHost {
     getClientRoles(clientId: string): Promise<UserMeetingRole[] | undefined>;
 
     /**
-     * Queries the hosts `IUserInfo` for a given client ID.
+     * Queries the hosts `IClientInfo` for a given client ID.
      * @param clientId ID of the client to lookup.
-     * @returns `IUserInfo` for the queried client ID.
+     * @returns `IUserInfo` for the queried client ID, or undefined if the client hasn't yet been registered
      */
     getClientInfo(clientId: string): Promise<IClientInfo | undefined>;
 }
+
+/**
+ * Response object from `.joinContainer()` in `LiveShareClient`
+ */
+export interface ILiveShareJoinResults {
+    /**
+     * Fluid container
+     */
+    container: IFluidContainer;
+    /**
+     * Azure Container Services, which includes things like Fluid Audience
+     */
+    services: AzureContainerServices;
+    /**
+     * Live Share timestamp provider. Can be used to `.getTimestamp()` for a global clock value.
+     * This reference timestamp value should be fairly consistent for all users in the session.
+     */
+    timestampProvider: ITimestampProvider;
+    /**
+     * Whether the local user was the one to create the container
+     */
+    created: boolean;
+}
+
+/**
+ * Duck type of something that provides the expected signalling functionality at the container level.
+ *
+ * @remarks
+ * Simplifies the mocks needed to unit test the `LiveObjectSynchronizer`. Applications can
+ * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
+ */
+export interface IContainerRuntimeSignaler {
+    on(
+        event: "signal",
+        listener: (message: IInboundSignalMessage, local: boolean) => void
+    ): this;
+    off(
+        event: "signal",
+        listener: (message: IInboundSignalMessage, local: boolean) => void
+    ): this;
+    submitSignal(type: string, content: any): void;
+}
+
+/**
+ * Callback function used to the receive the state update sent by a remote live object.
+ * @template TState Type of state object being synchronized.
+ * @param state The remote object initial or current state.
+ * @param senderId The clientId of the sender provider for role verification purposes.
+ * @param local True if the client that sent this change is the local client.
+ * @return return true if this update is valid/desired to be applied for this user's state
+ *
+ * @remarks
+ * For `LivePresence`, we would always return false, since we don't want other user's presence to override our own.
+ * For `LiveState`, we return true if the event was sent by a user with valid roles & it is newer.
+ */
+export type UpdateSynchronizationState<TState> = (
+    state: ILiveEvent<TState>,
+    senderId: string,
+    local: boolean
+) => Promise<boolean>;
+
+/**
+ * Callback function used to validate whether or not the local user can send an update for this object.
+ *
+ * @template TState Type of state object being synchronized.
+ * @param connecting If true, the message type we are validating is to send the local user's "connect" message.
+ * @returns return true if the local user can send this update, or false if not.
+ */
+export type GetLocalUserCanSend = (connecting: boolean) => Promise<boolean>;

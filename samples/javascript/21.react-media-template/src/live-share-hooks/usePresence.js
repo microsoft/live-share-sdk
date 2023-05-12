@@ -3,11 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import {
-    LivePresence,
-    LiveShareClient,
-    UserMeetingRole,
-} from "@microsoft/live-share";
+import { LivePresence, UserMeetingRole, ITimestampProvider } from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { app } from "@microsoft/teams-js";
 
@@ -19,13 +15,14 @@ import { app } from "@microsoft/teams-js";
  * @param {LivePresence} presence presence object from Fluid container.
  * @param {UserMeetingRole[]} acceptPlaybackChangesFrom List of acceptable roles for playback transport commands.
  * @param {app.Context} context Teams context object
+ * @param {ITimestampProvider} timestampProvider The Live Share timestamp provider, used to get a server timestamp value for sorting
  * @returns `{started, localUser, users, presentingUser, localUserIsEligiblePresenter, localUserIsPresenting, takeControl}` where:
  * - `presenceStarted` is a boolean indicating whether `presence.initialize()` has been called.
  * - `localUser` is the local user's presence object.
  * - `users` is an array of user presence objects in the session.
  * - `localUserIsEligiblePresenter` is a boolean indicating whether the local user is an eligible presenter.
  */
-export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
+export const usePresence = (presence, acceptPlaybackChangesFrom, context, timestampProvider) => {
     const startedInitializingRef = useRef(false);
     const usersRef = useRef([]);
     const [users, setUsers] = useState(usersRef.current);
@@ -64,7 +61,7 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
                 setLocalUser(userPresence);
             }
             // Set users local state
-            const userArray = presence.toArray();
+            const userArray = presence.getUsers();
             setUsers(userArray);
         });
         const userPrincipalName =
@@ -79,7 +76,7 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
 
         const userData = {
             teamsUserId: context.user?.id,
-            joinedTimestamp: LiveShareClient.getTimestamp(),
+            joinedTimestamp: timestampProvider?.getTimestamp(),
             name,
         };
 
@@ -90,7 +87,7 @@ export const usePresence = (presence, acceptPlaybackChangesFrom, context) => {
                 setStarted(true);
             })
             .catch((error) => console.error(error));
-    }, [presence, context, setUsers, setLocalUser]);
+    }, [presence, context, timestampProvider, setUsers, setLocalUser]);
 
     return {
         presenceStarted,

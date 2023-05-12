@@ -7,6 +7,7 @@ import {
     IRuntimeSignaler,
     TimeInterval,
     LiveShareClient,
+    LiveShareRuntime,
 } from "@microsoft/live-share";
 import { GroupTransportState } from "./GroupTransportState";
 import { GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
@@ -34,16 +35,19 @@ export interface ICurrentPlaybackPosition {
 export class GroupPlaybackPosition {
     private _transportState: GroupTransportState;
     private _runtime: IRuntimeSignaler;
+    private _liveRuntime: LiveShareRuntime;
     private _updateInterval: TimeInterval;
     private _positions: Map<string, ICurrentPlaybackPosition>;
 
     constructor(
         transportState: GroupTransportState,
         runtime: IRuntimeSignaler,
+        liveRuntime: LiveShareRuntime,
         updateInterval: TimeInterval
     ) {
         this._transportState = transportState;
         this._runtime = runtime;
+        this._liveRuntime = liveRuntime;
         this._updateInterval = updateInterval;
         this._positions = new Map();
 
@@ -129,7 +133,7 @@ export class GroupPlaybackPosition {
      */
     public get maxPosition(): number {
         if (this._transportState.playbackState == "playing") {
-            const now = LiveShareClient.getTimestamp();
+            const now = this._liveRuntime.getTimestamp();
             const projected =
                 this._transportState.startPosition +
                 (now - this._transportState.timestamp) / 1000;
@@ -162,7 +166,7 @@ export class GroupPlaybackPosition {
             projectedPosition: number
         ) => void
     ): void {
-        const now = LiveShareClient.getTimestamp();
+        const now = this._liveRuntime.getTimestamp();
         const ignoreBefore = now - this._updateInterval.milliseconds * 2;
         const shouldProject = !this._transportState.track.metadata?.liveStream;
         this._positions.forEach((value, key) => {

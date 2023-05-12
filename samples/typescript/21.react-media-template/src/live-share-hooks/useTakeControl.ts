@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LivePresenceUser, LiveShareRuntime } from "@microsoft/live-share";
+import { ITimestampProvider, LivePresenceUser } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework";
 import { IUserData } from "./usePresence";
 
@@ -8,7 +8,7 @@ export const useTakeControl = (
     users: LivePresenceUser<IUserData>[],
     takeControlMap?: SharedMap,
     localUserId?: string,
-    liveRuntime?: LiveShareRuntime,
+    timestampProvider?: ITimestampProvider,
     sendNotification?: (text: string) => void
 ) => {
     const [history, setHistory] = useState(new Map<string, number>());
@@ -61,7 +61,7 @@ export const useTakeControl = (
     // Set the local user ID
     const takeControl = useCallback(() => {
         if (!!localUserId && localUserIsEligiblePresenter) {
-            takeControlMap?.set(localUserId, liveRuntime?.getTimestamp());
+            takeControlMap?.set(localUserId, timestampProvider?.getTimestamp());
             if (sendNotification) {
                 sendNotification("took control");
             }
@@ -70,7 +70,7 @@ export const useTakeControl = (
         takeControlMap,
         localUserId,
         localUserIsEligiblePresenter,
-        liveRuntime,
+        timestampProvider,
         sendNotification,
     ]);
 

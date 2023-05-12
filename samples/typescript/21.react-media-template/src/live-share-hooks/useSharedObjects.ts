@@ -134,6 +134,6 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         container,
         error,
         services: results?.services,
-        liveRuntime: results?.liveRuntime,
+        timestampProvider: results?.timestampProvider,
     };
 }

@@ -291,10 +291,10 @@ export interface ILiveShareJoinResults {
      */
     services: AzureContainerServices;
     /**
-     * Live Share Runtime, which is used by DDS's to validate roles, synchronize clock, etc.
-     * You can use this to get the server-side timestamp or stop the timestamp provider from running.
+     * Live Share timestamp provider. Can be used to `.getTimestamp()` for a global clock value.
+     * This reference timestamp value should be fairly consistent for all users in the session.
      */
-    liveRuntime: LiveShareRuntime;
+    timestampProvider: ITimestampProvider;
     /**
      * Whether the local user was the one to create the container
      */

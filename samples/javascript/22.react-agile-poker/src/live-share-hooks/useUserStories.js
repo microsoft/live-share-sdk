@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { v4 as uuid } from "uuid";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 
-export const useUserStories = (userStoriesMap, localUserId, userStoryId, liveRuntime) => {
+export const useUserStories = (userStoriesMap, localUserId, userStoryId, timestampProvider) => {
     const [userStories, setUserStories] = useState([]);
     const [userStoriesStarted, setStarted] = useState(false);
     const initialUserStoryIdRef = useRef(getInitialUserStoryId());
@@ -22,11 +22,11 @@ export const useUserStories = (userStoriesMap, localUserId, userStoryId, liveRun
             const id = uuid();
             userStoriesMap?.set(id, {
                 text: userStoryText,
-                addedAt: liveRuntime.getTimestamp(),
+                addedAt: timestampProvider.getTimestamp(),
                 addedBy: localUserId,
             });
         },
-        [userStoriesMap, localUserId, liveRuntime]
+        [userStoriesMap, localUserId, timestampProvider]
     );
 
     const assignPoints = useCallback(

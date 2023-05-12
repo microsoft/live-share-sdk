@@ -26,19 +26,17 @@ export abstract class LiveDataObject<
     private _liveRuntime: LiveShareRuntime | null = null;
 
     /**
-     * `ILiveShareHost` instance to inject
+     * @internal
+     * `LiveShareRuntime` instance
      * @remarks
      * You should usually not set this value to a DDS after calling `.initialize()`, but there is nothing preventing it.
      */
-    public get liveRuntime(): LiveShareRuntime {
+    protected get liveRuntime(): LiveShareRuntime {
         assert(
             this._liveRuntime !== null,
             "LiveShareRuntime not initialized. Ensure your Fluid `ContainerSchema` was first wrapped inside of `getLiveShareSchema`, or use `.joinContainer()` in `LiveShareClient`."
         );
         return this._liveRuntime;
-    }
-    public set liveRuntime(value: LiveShareRuntime) {
-        this._liveRuntime = value;
     }
 
     public constructor(props: IDataObjectProps<I>) {
@@ -62,6 +60,14 @@ export abstract class LiveDataObject<
         const clientId = await this.waitUntilConnected();
         return this.liveRuntime
             .verifyRolesAllowed(clientId, this._allowedRoles ?? [])
+    }
+
+    /**
+     * @hidden
+     * Dependency injection setter for `LiveShareRuntime`.
+     */
+    protected __dangerouslySetLiveRuntime(value: LiveShareRuntime) {
+        this._liveRuntime = value;
     }
 
     /**

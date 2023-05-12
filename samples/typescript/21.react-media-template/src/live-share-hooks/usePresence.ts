@@ -4,6 +4,7 @@
  */
 
 import {
+    ITimestampProvider,
     LivePresence,
     LivePresenceUser,
     UserMeetingRole,
@@ -25,6 +26,7 @@ export interface IUserData {
  * @param {LivePresence<IUserData>} presence presence object from Fluid container.
  * @param {UserMeetingRole[]} acceptPlaybackChangesFrom List of acceptable roles for playback transport commands.
  * @param {microsoftTeams.app.Context} context Teams context object
+ * @param {ITimestampProvider} timestampProvider The Live Share timestamp provider, used to get a server timestamp value for sorting
  * @returns `{started, localUser, users, presentingUser, localUserIsEligiblePresenter, localUserIsPresenting, takeControl}` where:
  * - `presenceStarted` is a boolean indicating whether `presence.initialize()` has been called.
  * - `localUser` is the local user's presence object.
@@ -34,7 +36,8 @@ export interface IUserData {
 export const usePresence = (
     acceptPlaybackChangesFrom: UserMeetingRole[],
     presence?: LivePresence<IUserData>,
-    context?: app.Context
+    context?: app.Context,
+    timestampProvider?: ITimestampProvider
 ) => {
     const startedInitializingRef = useRef(false);
     const usersRef = useRef<LivePresenceUser<IUserData>[]>([]);
@@ -63,6 +66,7 @@ export const usePresence = (
             !presence ||
             presence.isInitialized ||
             !context ||
+            !timestampProvider ||
             startedInitializingRef.current
         )
             return;
@@ -80,8 +84,7 @@ export const usePresence = (
                     setLocalUser(userPresence);
                 }
                 // Set users local state
-                const userArray =
-                    presence.getUsers();
+                const userArray = presence.getUsers();
                 setUsers(userArray);
             }
         );
@@ -97,7 +100,7 @@ export const usePresence = (
 
         const userData: IUserData = {
             teamsUserId: context.user?.id,
-            joinedTimestamp: presence.liveRuntime.getTimestamp(),
+            joinedTimestamp: timestampProvider?.getTimestamp(),
             name,
         };
 
@@ -108,7 +111,7 @@ export const usePresence = (
                 setStarted(true);
             })
             .catch((error) => console.error(error));
-    }, [presence, context, setUsers, setLocalUser]);
+    }, [presence, timestampProvider, context, setUsers, setLocalUser]);
 
     return {
         presenceStarted,

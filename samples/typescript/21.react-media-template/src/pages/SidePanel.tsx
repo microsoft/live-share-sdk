@@ -27,7 +27,7 @@ const SidePanel: FC = () => {
         notificationEvent,
         presence,
         takeControlMap,
-        liveRuntime,
+        timestampProvider,
     } = liveShareHooks.useSharedObjects();
 
     const { notificationStarted, sendNotification } =
@@ -45,7 +45,7 @@ const SidePanel: FC = () => {
         users,
         takeControlMap,
         localUser?.data?.teamsUserId,
-        liveRuntime
+        timestampProvider
     );
 
     const {

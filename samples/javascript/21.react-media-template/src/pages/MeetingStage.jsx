@@ -35,7 +35,7 @@ const MeetingStage = () => {
         liveCanvas, // LiveEvent Fluid object
         container, // Fluid container
         error, // Join container error
-        liveRuntime, // LiveShareRuntime instance, used for getting reference server timestamp
+        timestampProvider, // ITimestampProvider instance, used for getting reference server timestamp
     } = liveShareHooks.useSharedObjects();
 
     // Notification hook
@@ -54,7 +54,8 @@ const MeetingStage = () => {
     } = liveShareHooks.usePresence(
         presence,
         ACCEPT_PLAYBACK_CHANGES_FROM,
-        context
+        context,
+        timestampProvider
     );
 
     // Take control map
@@ -67,7 +68,7 @@ const MeetingStage = () => {
         localUser?.userId,
         localUserIsEligiblePresenter,
         users,
-        liveRuntime,
+        timestampProvider,
         sendNotification,
     );
 

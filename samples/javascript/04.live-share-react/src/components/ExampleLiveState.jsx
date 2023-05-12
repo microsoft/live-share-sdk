@@ -18,8 +18,8 @@ export const ExampleLiveState = (props) => {
         ALLOWED_ROLES
     );
 
-    // liveRuntime lets you access stuff like the server-side timestamp
-    const { liveRuntime } = useLiveShareContext();
+    // timestampProvider a reference server-side timestamp, which is useful for sorting
+    const { timestampProvider } = useLiveShareContext();
 
     if (state.status === ExampleAppState.WAITING) {
         return (
@@ -30,7 +30,7 @@ export const ExampleLiveState = (props) => {
                         onClick={() => {
                             setState({
                                 status: ExampleAppState.START,
-                                timeStarted: liveRuntime?.getTimestamp(),
+                                timeStarted: timestampProvider?.getTimestamp(),
                             });
                         }}
                     >

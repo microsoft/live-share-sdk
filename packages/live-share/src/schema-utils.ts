@@ -97,7 +97,7 @@ function getLiveDataObjectProxyClassInternal<I extends DataObjectTypes = DataObj
     ) => LiveDataObject<I>) {
         constructor(props: IDataObjectProps<I>) {
             super(props);
-            this["liveRuntime"] = runtime;
+            this.__dangerouslySetLiveRuntime(runtime);
             // Pass reference to the container runtime
             if (!this.context || !this.context.containerRuntime) {
                 throw Error("getLiveDataObjectProxyClassInternal: required dependencies unknown");

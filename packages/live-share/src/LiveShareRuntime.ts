@@ -69,6 +69,13 @@ export class LiveShareRuntime {
     }
 
     /**
+     * `ITimestampProvider` instance
+     */
+    public get timestampProvider(): ITimestampProvider {
+        return this._timestampProvider;
+    }
+
+    /**
      * Returns the current timestamp as the number of milliseconds sine the Unix Epoch.
      */
     public getTimestamp(): number {

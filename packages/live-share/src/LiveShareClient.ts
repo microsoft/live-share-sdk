@@ -235,7 +235,7 @@ export class LiveShareClient {
 
             return {
                 ...result[0],
-                liveRuntime: runtime,
+                timestampProvider: runtime.timestampProvider,
             };
         } catch (error: unknown) {
             throw error;

@@ -28,7 +28,7 @@ const SidePanel = () => {
         userStoriesMap,
         context?.user?.id,
         undefined,
-        timestampProvider,
+        timestampProvider
     );
 
     useEffect(() => {

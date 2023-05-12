@@ -504,7 +504,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @remarks
      * For proper operation apps should avoid calling `mediaSession.coordinator.play()` directly
      * and instead use the synchronizers `play()` method.
-     * 
+     *
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async play(): Promise<void> {
@@ -523,7 +523,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @remarks
      * For proper operation apps should avoid calling `mediaSession.coordinator.pause()` directly
      * and instead use the synchronizers `pause()` method.
-     * 
+     *
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async pause(): Promise<void> {
@@ -542,7 +542,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @remarks
      * For proper operation apps should avoid calling `mediaSession.coordinator.seekTo()` directly
      * and instead use the synchronizers `seekTo()` method.
-     * 
+     *
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async seekTo(time: number): Promise<void> {
@@ -567,7 +567,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @remarks
      * For proper operation apps should avoid calling `mediaSession.coordinator.setTrack()` directly
      * and instead use the synchronizers `setTrack()` method.
-     * 
+     *
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async setTrack(
@@ -588,7 +588,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * @remarks
      * For proper operation apps should avoid calling `mediaSession.coordinator.setTrackData()` directly
      * and instead use the synchronizers `setTrackData()` method.
-     * 
+     *
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async setTrackData(data: object | null): Promise<void> {

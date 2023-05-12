@@ -168,7 +168,9 @@ export interface IUseMediaSynchronizerResults {
      * @param track media metadata object, track src string, or null
      * @returns void promise that will throw when user does not have required roles
      */
-    setTrack: (track: Partial<ExtendedMediaMetadata> | string | null) => Promise<void>;
+    setTrack: (
+        track: Partial<ExtendedMediaMetadata> | string | null
+    ) => Promise<void>;
     /**
      * Begin a new suspension. If a wait point is not set, the suspension will only impact the
      * local user.

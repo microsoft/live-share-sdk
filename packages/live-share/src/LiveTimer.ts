@@ -4,12 +4,9 @@
  */
 
 import { DataObjectFactory } from "@fluidframework/aqueduct";
-import { LiveEventScope } from "./LiveEventScope";
-import { LiveEventTarget } from "./LiveEventTarget";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
 import { IClientTimestamp, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
-import { cloneValue } from "./internals/utils";
 import { LiveEvent } from "./LiveEvent";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import { LiveDataObject } from "./LiveDataObject";
@@ -92,18 +89,6 @@ export interface ILiveTimerEvents extends IEvent {
 
     (event: "onTick", listener: (milliRemaining: number) => void): any;
 }
-
-interface IPlayEvent {
-    duration: number;
-    position: number;
-}
-type PlayEventReceived = ILiveEvent<IPlayEvent>;
-
-interface IPauseEvent {
-    duration: number;
-    position: number;
-}
-type PauseEventReceived = ILiveEvent<IPauseEvent>;
 
 export class LiveTimer extends LiveDataObject<{
     Events: ILiveTimerEvents;
@@ -252,7 +237,7 @@ export class LiveTimer extends LiveDataObject<{
      * Resumes the timer.
      * @remarks
      * Playing an already playing timer does nothing.
-     * 
+     *
      * @returns a void promise, and will throw if the user does not have the required roles
      */
     public async play(): Promise<void> {
@@ -296,7 +281,7 @@ export class LiveTimer extends LiveDataObject<{
      *
      * @remarks
      * Pausing an already paused timer does nothing.
-     * 
+     *
      * @returns a void promise, and will throw if the user does not have the required roles
      */
     public async pause(): Promise<void> {

@@ -14,7 +14,7 @@ import {
 /**
  * @internal
  * @hidden
- * 
+ *
  * Synchronizes the underlying state of an live object with all of the other instances of the object connected to the same container.
  *
  * @remarks
@@ -22,7 +22,7 @@ import {
  * Each other client will then broadcast out their latest values for each `LiveObjectSynchronizer` instance they listen to.
  * These responses get cached internally, while waiting for a `LiveObjectSynchronizer` instance to register to receive & listen to them. `LiveObjectManger`
  * will continue listening for ongoing changes made as well, even if the user has not yet registered the corresponding `LiveObjectSynchronizer` id.
- * 
+ *
  * As mentioned, "connect" events are sent when the user first connects to a container, and not when first registering the object. This is because this ping-ping
  * algorithm is an N^2 burden on our servers, due to connect events leading to every client in the session broadcasting an event in response. Doing it once
  * up front allows us to limit this to a single N^2 message per connection, limiting the burden for larger meeting sizes.
@@ -33,15 +33,15 @@ import {
  * be applied locally for the user as well. For `LivePresence` for example, we never want another user's state to override their own.
  * For `LiveState` and `LiveTimer`, we always want valid events to overwrite that tracked by the local user, since the user that initiated
  * the change could leave the session at any point.
- * 
+ *
  * To ensure that potential conflicts or dropped socket events get resolved, background updates are sent periodically. This update includes
  * all of the local client's most recent state for each `LiveObjectSynchronizer` they have registered. These messages get sent automatically.
  * The rate at which these ping events are sent can be adjusted for a container by setting `this.liveRuntime.objectManager.updateInterval` property
  * through your `LiveDataObject` instance.
- * 
+ *
  * Updates sent in the background are by default sent using the timestamp from when the state was last updated for that client. To change this behavior,
  * set the `shouldUpdateTimestampPeriodically` in `.start()` to make those timestamps update automatically before sending "update" messages.
- * 
+ *
  * `LiveObjectSynchronizer` also exposes an `sendEvent` API, which will take an object matching `TState` and broadcast that out to other clients. Both this
  * API and the background updates both validate the validity of an outgoing message using `getLocalUserCanSend`, which is an asynchronous callback
  * that allows `LiveDataObject` instances to proactively determine when it is appropriate to send a message (e.g., has required roles). While these
@@ -50,7 +50,7 @@ import {
  *
  * Only a single synchronizer is allowed per live object. Attempting to create more than one synchronizer for the same live object will result in an exception
  * being raised.
- * 
+ *
  * @template TState Type of state object being synchronized. This object should be a simple JSON object that uses only serializable primitives.
  */
 export class LiveObjectSynchronizer<TState> {
@@ -111,7 +111,7 @@ export class LiveObjectSynchronizer<TState> {
      * This does not determine the validity of a message. For a sorted list of events sent by all clients,
      * use the `getEvents` API. You can then loop through that list and validate each message until you find
      * the most valid API.
-     * 
+     *
      * @param objectId the `LiveDataObject` id
      * @returns the latest event sent, or undefined if there is none.
      */

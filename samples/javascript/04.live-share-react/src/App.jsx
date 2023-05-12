@@ -1,7 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { inTeams } from "./utils/inTeams";
 import { useRef, useEffect, useState } from "react";
-import { AzureAutoJoin, LiveShareAutoJoin, LiveShareManualJoin, TabConfig } from "./pages";
+import {
+    AzureAutoJoin,
+    LiveShareAutoJoin,
+    LiveShareManualJoin,
+    TabConfig,
+} from "./pages";
 import { AppRoutes } from "./constants";
 import { app } from "@microsoft/teams-js";
 
@@ -42,15 +47,35 @@ export default function App() {
                 <Router window={window} basename="/">
                     <Routes>
                         {/* Default route. In Teams, this will save the tab configuration for one of the below routes. Otherwise, we redirect to selected route. */}
-                        <Route exact path={AppRoutes.TabConfig} element={<TabConfig />} />
+                        <Route
+                            exact
+                            path={AppRoutes.TabConfig}
+                            element={<TabConfig />}
+                        />
                         {/* Alternate route for consistency with manifest */}
-                        <Route exact path={AppRoutes.TabConfigAlt} element={<TabConfig />} />
+                        <Route
+                            exact
+                            path={AppRoutes.TabConfigAlt}
+                            element={<TabConfig />}
+                        />
                         {/* Example for automatically joining Live Share container when this component is rendered */}
-                        <Route exact path={AppRoutes.LiveShareAutoJoin} element={<LiveShareAutoJoin />} />
+                        <Route
+                            exact
+                            path={AppRoutes.LiveShareAutoJoin}
+                            element={<LiveShareAutoJoin />}
+                        />
                         {/* Example for manually joining Live Share session based on a user action */}
-                        <Route exact path={AppRoutes.LiveShareManualJoin} element={<LiveShareManualJoin />} />
+                        <Route
+                            exact
+                            path={AppRoutes.LiveShareManualJoin}
+                            element={<LiveShareManualJoin />}
+                        />
                         {/* Example for automatically creating or joining AzureClient container when this component is rendered */}
-                        <Route exact path={AppRoutes.AzureAutoJoin} element={<AzureAutoJoin />} />
+                        <Route
+                            exact
+                            path={AppRoutes.AzureAutoJoin}
+                            element={<AzureAutoJoin />}
+                        />
                     </Routes>
                 </Router>
             )}

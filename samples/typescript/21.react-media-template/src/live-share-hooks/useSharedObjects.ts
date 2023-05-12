@@ -19,16 +19,14 @@ import { LiveShareHost } from "@microsoft/teams-js";
 import { IUserData } from "./usePresence";
 
 interface IUseSharedObjectsResult extends Partial<ILiveShareJoinResults> {
-    presence: LivePresence<IUserData> | undefined,
-    mediaSession: LiveMediaSession
-        | undefined,
-    notificationEvent: LiveEvent
-        | undefined,
-    takeControlMap: SharedMap | undefined,
-    playlistMap: SharedMap | undefined,
-    inkEvent: LiveEvent | undefined,
-    liveCanvas: LiveCanvas | undefined,
-    error: Error | undefined,
+    presence: LivePresence<IUserData> | undefined;
+    mediaSession: LiveMediaSession | undefined;
+    notificationEvent: LiveEvent | undefined;
+    takeControlMap: SharedMap | undefined;
+    playlistMap: SharedMap | undefined;
+    inkEvent: LiveEvent | undefined;
+    liveCanvas: LiveCanvas | undefined;
+    error: Error | undefined;
 }
 
 /**
@@ -120,7 +118,9 @@ export function useSharedObjects(): IUseSharedObjectsResult {
     const container = results?.container;
     const initialObjects = container?.initialObjects;
     return {
-        presence: initialObjects?.presence as LivePresence<IUserData> | undefined,
+        presence: initialObjects?.presence as
+            | LivePresence<IUserData>
+            | undefined,
         mediaSession: initialObjects?.mediaSession as
             | LiveMediaSession
             | undefined,

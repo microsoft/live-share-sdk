@@ -14,7 +14,7 @@ const INITIAL_STATE = {
 };
 
 /**
- * 
+ *
  * @param {LiveState<object>} pokerState LiveState object
  * @returns pokerStateStarted, state, userStoryId, onStartWaiting, onStartCosting, onStartDiscussion
  */

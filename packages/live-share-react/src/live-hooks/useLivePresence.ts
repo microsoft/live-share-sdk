@@ -35,7 +35,7 @@ export function useLivePresence<TData extends object = object>(
     uniqueKey: string,
     initialData?: TData | undefined,
     initialPresenceState: PresenceState = PresenceState.online,
-    allowedRoles?: UserMeetingRole[],
+    allowedRoles?: UserMeetingRole[]
 ): IUseLivePresenceResults<TData> {
     /**
      * Stateful all user presence list and its non-user-facing setter method.

@@ -35,19 +35,26 @@ export function useSharedMap<TData extends object = object>(
         getInitialData<TData>(initialData)
     );
 
-    const onFirstInitialize = React.useCallback((newDDS: SharedMap): void => {
-        /**
-         * Callback method to set the `initialData` into the map when the `SharedMap` is first created.
-         * Only should be used as a prop to useDynamicDDS.
-         */
-        getInitialData(initialData).forEach((value, key) => {
-            newDDS.set(key, value);
-        });
-    }, [initialData]);
+    const onFirstInitialize = React.useCallback(
+        (newDDS: SharedMap): void => {
+            /**
+             * Callback method to set the `initialData` into the map when the `SharedMap` is first created.
+             * Only should be used as a prop to useDynamicDDS.
+             */
+            getInitialData(initialData).forEach((value, key) => {
+                newDDS.set(key, value);
+            });
+        },
+        [initialData]
+    );
     /**
      * User facing: dynamically load the SharedMap DDS for the given unique key.
      */
-    const { dds: sharedMap } = useDynamicDDS<SharedMap>(uniqueKey, SharedMap, onFirstInitialize);
+    const { dds: sharedMap } = useDynamicDDS<SharedMap>(
+        uniqueKey,
+        SharedMap,
+        onFirstInitialize
+    );
 
     /**
      * User facing: set a value to the Fluid `SharedMap`.

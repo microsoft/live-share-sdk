@@ -3,7 +3,12 @@
  * Licensed under the MIT License.
  */
 
-import { FluentProvider, teamsDarkTheme, teamsLightTheme, teamsHighContrastTheme } from "@fluentui/react-components";
+import {
+    FluentProvider,
+    teamsDarkTheme,
+    teamsLightTheme,
+    teamsHighContrastTheme,
+} from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -34,7 +39,7 @@ export default function App() {
                 setInitialized(true);
                 const context = await microsoftTeams.app.getContext();
                 const curTheme = context.app.theme;
-                switch(curTheme) {
+                switch (curTheme) {
                     case "dark":
                         setTeamsTheme(teamsDarkTheme);
                         break;
@@ -46,7 +51,9 @@ export default function App() {
                         setTeamsTheme(teamsLightTheme);
                         break;
                 }
-                microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
+                microsoftTeams.app.registerOnThemeChangeHandler(function (
+                    theme
+                ) {
                     if (theme == "dark") {
                         setTeamsTheme(teamsDarkTheme);
                     } else if (theme == "contrast") {

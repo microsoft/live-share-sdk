@@ -24,7 +24,7 @@ export const TeamsClientLoader = (props) => {
                     setError(error);
                 }
             }
-        }
+        };
         if (inTeams()) {
             initialize();
         } else {
@@ -32,14 +32,14 @@ export const TeamsClientLoader = (props) => {
         }
         return () => {
             mounted = false;
-        }
+        };
     }, []);
 
     if (!isInitialized) {
         return <div>{"Loading"}</div>;
     }
     if (error) {
-        return <div>{error.message}</div>
+        return <div>{error.message}</div>;
     }
     return props.children;
 };

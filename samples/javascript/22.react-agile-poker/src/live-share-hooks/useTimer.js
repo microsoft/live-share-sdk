@@ -21,7 +21,8 @@ export const useTimer = (timer, onTimerEnd) => {
     }, [timer]);
 
     useEffect(() => {
-        if (!timer || timer.isInitialized || initializeStartedRef.current) return;
+        if (!timer || timer.isInitialized || initializeStartedRef.current)
+            return;
         console.info("useTimer: initializing live timer");
         initializeStartedRef.current = true;
         timer.on("finished", (config) => {

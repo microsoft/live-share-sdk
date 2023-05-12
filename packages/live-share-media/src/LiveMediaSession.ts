@@ -4,7 +4,12 @@
  */
 
 import { DataObjectFactory } from "@fluidframework/aqueduct";
-import { DynamicObjectRegistry, LiveDataObject, LiveTelemetryLogger, UserMeetingRole } from "@microsoft/live-share";
+import {
+    DynamicObjectRegistry,
+    LiveDataObject,
+    LiveTelemetryLogger,
+    UserMeetingRole,
+} from "@microsoft/live-share";
 import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer";
 import { ITriggerActionEvent, TelemetryEvents } from "./internals";
 import {
@@ -111,9 +116,7 @@ export class LiveMediaSession extends LiveDataObject {
      * operations like play/pause/seek/setTrack.
      * @returns a void promise that resolves once complete
      */
-    public initialize(
-        allowedRoles?: UserMeetingRole[]
-    ): Promise<void> {
+    public initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
         if (allowedRoles) {
             this._allowedRoles = allowedRoles;
         }
@@ -191,8 +194,10 @@ export class LiveMediaSession extends LiveDataObject {
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
         // Create coordinator and listen for triggered actions
-        this._coordinator = new LiveMediaSessionCoordinator(this.runtime, this.liveRuntime, () =>
-            this.getCurrentPlayerState()
+        this._coordinator = new LiveMediaSessionCoordinator(
+            this.runtime,
+            this.liveRuntime,
+            () => this.getCurrentPlayerState()
         );
         this._coordinator.on(
             MediaSessionCoordinatorEvents.triggeraction,
@@ -306,4 +311,7 @@ export class LiveMediaSession extends LiveDataObject {
 /**
  * Register `LiveMediaSession` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
-DynamicObjectRegistry.registerObjectClass(LiveMediaSession, LiveMediaSession.TypeName);
+DynamicObjectRegistry.registerObjectClass(
+    LiveMediaSession,
+    LiveMediaSession.TypeName
+);

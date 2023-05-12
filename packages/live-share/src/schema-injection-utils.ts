@@ -120,6 +120,7 @@ function getLiveDataObjectProxyClassInternal<
         props: IDataObjectProps<I>
     ) => LiveDataObject<I>) {
         constructor(props: IDataObjectProps<I>) {
+            // eslint-disable-next-line constructor-super
             super(props);
             this.__dangerouslySetLiveRuntime(runtime);
             // Pass reference to the container runtime

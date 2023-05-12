@@ -3,7 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveEvent, LiveShareRuntime, LiveShareClient } from "@microsoft/live-share";
+import {
+    ILiveEvent,
+    LiveShareRuntime,
+    LiveShareClient,
+} from "@microsoft/live-share";
 import EventEmitter from "events";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
@@ -52,7 +56,7 @@ export class GroupTransportState extends EventEmitter {
     constructor(
         track: GroupPlaybackTrack,
         getMediaPlayerState: () => IMediaPlayerState,
-        liveRuntime: LiveShareRuntime,
+        liveRuntime: LiveShareRuntime
     ) {
         super();
         this._liveRuntime = liveRuntime;

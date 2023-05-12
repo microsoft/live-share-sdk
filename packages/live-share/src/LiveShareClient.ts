@@ -237,8 +237,6 @@ export class LiveShareClient {
                 ...result[0],
                 timestampProvider: runtime.timestampProvider,
             };
-        } catch (error: unknown) {
-            throw error;
         } finally {
             performance.measure(
                 `TeamsSync: container joined`,

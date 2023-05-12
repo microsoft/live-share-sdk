@@ -3,7 +3,12 @@
  * Licensed under the MIT License.
  */
 
-import { FluentProvider, teamsDarkTheme, teamsLightTheme, teamsHighContrastTheme } from "@fluentui/react-components";
+import {
+    FluentProvider,
+    teamsDarkTheme,
+    teamsLightTheme,
+    teamsHighContrastTheme,
+} from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { useEffect, useState, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -39,30 +44,32 @@ export default function App() {
                         setInitialized(true);
                     })
                     .catch((error) => console.error(error));
-                    microsoftTeams.app.getContext().then((context) => {
-                        const curTheme = context.app.theme;
-                        switch(curTheme) {
-                            case "dark":
-                                setTeamsTheme(teamsDarkTheme);
-                                break;
-                            case "contrast":
-                                setTeamsTheme(teamsHighContrastTheme);
-                                break;
-                            case "default":
-                            default:
-                                setTeamsTheme(teamsLightTheme);
-                                break;
-                        }
-                    });
-                    microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
-                        if (theme == "dark") {
+                microsoftTeams.app.getContext().then((context) => {
+                    const curTheme = context.app.theme;
+                    switch (curTheme) {
+                        case "dark":
                             setTeamsTheme(teamsDarkTheme);
-                        } else if (theme == "contrast") {
+                            break;
+                        case "contrast":
                             setTeamsTheme(teamsHighContrastTheme);
-                        } else {
+                            break;
+                        case "default":
+                        default:
                             setTeamsTheme(teamsLightTheme);
-                        }   
-                    });
+                            break;
+                    }
+                });
+                microsoftTeams.app.registerOnThemeChangeHandler(function (
+                    theme
+                ) {
+                    if (theme == "dark") {
+                        setTeamsTheme(teamsDarkTheme);
+                    } else if (theme == "contrast") {
+                        setTeamsTheme(teamsHighContrastTheme);
+                    } else {
+                        setTeamsTheme(teamsLightTheme);
+                    }
+                });
             } else {
                 setInitialized(true);
             }
@@ -72,7 +79,7 @@ export default function App() {
     if (!initialized) {
         return <div />;
     }
-    
+
     return (
         <FluentProvider
             theme={teamsTheme}

@@ -3,10 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    IFluidContainer,
-    LoadableObjectClassRecord,
-} from "fluid-framework";
+import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
 import React from "react";
 import {
     AzureClientProps,
@@ -58,9 +55,7 @@ interface IAzureProviderProps {
 /**
  * React Context provider component for using Fluid data objects & joining/creating a Fluid document `AzureClient`.
  */
-export const AzureProvider: React.FC<IAzureProviderProps> = (
-    props
-) => {
+export const AzureProvider: React.FC<IAzureProviderProps> = (props) => {
     const startedRef = React.useRef<boolean>(false);
     const clientRef = React.useRef<AzureTurboClient>(
         new AzureTurboClient(props.clientOptions)

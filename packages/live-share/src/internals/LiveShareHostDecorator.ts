@@ -33,8 +33,9 @@ export class LiveShareHostDecorator
 {
     private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
-    private readonly _userInfoRequestCache: RequestCache<IClientInfo | undefined> =
-        new RequestCache(CACHE_LIFETIME);
+    private readonly _userInfoRequestCache: RequestCache<
+        IClientInfo | undefined
+    > = new RequestCache(CACHE_LIFETIME);
 
     /**
      * @hidden
@@ -75,7 +76,7 @@ export class LiveShareHostDecorator
     public async getClientInfo(
         clientId: string,
         lateFinish?: () => void, // TODO: delete this and below (not a breaking change to remove, see InternalDontUseGetClientInfoRetryPolyfill)
-        retrySchedule?: number[], 
+        retrySchedule?: number[]
     ): Promise<IClientInfo | undefined> {
         if (!clientId) {
             throw new Error(
@@ -83,7 +84,10 @@ export class LiveShareHostDecorator
             );
         }
         return this._userInfoRequestCache.cacheRequest(clientId, () => {
-            return waitForResult<IClientInfo | undefined, IClientInfo | undefined>(
+            return waitForResult<
+                IClientInfo | undefined,
+                IClientInfo | undefined
+            >(
                 async () => {
                     try {
                         const info = await this._host.getClientInfo(clientId);

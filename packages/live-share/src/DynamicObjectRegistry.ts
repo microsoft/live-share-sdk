@@ -25,15 +25,25 @@ const GLOBAL_WINDOW_KEY = "@microsoft/live-share:DYNAMIC-LOADABLE-OBJECTS";
  * aware of what every DDS is.
  */
 export class DynamicObjectRegistry {
-    private static _dynamicLoadableObjects: Map<string, LoadableObjectClass<any>> = new Map<string, LoadableObjectClass<any>>();
+    private static _dynamicLoadableObjects: Map<
+        string,
+        LoadableObjectClass<any>
+    > = new Map<string, LoadableObjectClass<any>>();
     /**
      * Get all registered dynamic loadable objects
      */
-    public static get dynamicLoadableObjects(): Map<string, LoadableObjectClass<any>> {
+    public static get dynamicLoadableObjects(): Map<
+        string,
+        LoadableObjectClass<any>
+    > {
         if (typeof window === "undefined") {
             return this._dynamicLoadableObjects;
         }
-        return ((window as any)[GLOBAL_WINDOW_KEY] || this._dynamicLoadableObjects) as Map<string, LoadableObjectClass<any>>;
+        return ((window as any)[GLOBAL_WINDOW_KEY] ||
+            this._dynamicLoadableObjects) as Map<
+            string,
+            LoadableObjectClass<any>
+        >;
     }
 
     /**
@@ -46,13 +56,10 @@ export class DynamicObjectRegistry {
      */
     public static registerObjectClass(
         loadableObjectClass: LoadableObjectClass<any>,
-        typeName: string,
+        typeName: string
     ) {
         const loadableObjects = this.dynamicLoadableObjects;
-        if (
-            loadableObjects.has(typeName)
-        )
-            return;
+        if (loadableObjects.has(typeName)) return;
         loadableObjects.set(typeName, loadableObjectClass);
         if (typeof window !== "undefined") {
             (window as any)[GLOBAL_WINDOW_KEY] = loadableObjects;
@@ -64,6 +71,15 @@ export class DynamicObjectRegistry {
  * Register default Fluid packages. If we can someday contribute Fluid code to make this happen centrally within Fluid, we can remove this in
  * the future.
  */
-DynamicObjectRegistry.registerObjectClass(SharedMap, SharedMap.getFactory().type);
-DynamicObjectRegistry.registerObjectClass(SharedString, SharedString.getFactory().type);
-DynamicObjectRegistry.registerObjectClass(SharedDirectory, SharedDirectory.getFactory().type);
+DynamicObjectRegistry.registerObjectClass(
+    SharedMap,
+    SharedMap.getFactory().type
+);
+DynamicObjectRegistry.registerObjectClass(
+    SharedString,
+    SharedString.getFactory().type
+);
+DynamicObjectRegistry.registerObjectClass(
+    SharedDirectory,
+    SharedDirectory.getFactory().type
+);

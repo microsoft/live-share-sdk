@@ -80,8 +80,6 @@ export const usePresence = (presence, context) => {
             setUsers([...updatedUsers]);
         });
         const defaultAvatarInformation = getRandomAvatar();
-
-        presence.presenceUpdateInterval = 5;
         presence
             .initialize(
                 {

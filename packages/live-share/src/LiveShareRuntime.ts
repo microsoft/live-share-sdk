@@ -195,15 +195,22 @@ export class LiveShareRuntime {
 
     /**
      * @hidden
-     * Do not use this API unless you know what you are doing. Can cause the object synchronizer to stop working.
+     * Do not use this API unless you know what you are doing.
+     * Using it incorrectly could cause object synchronizers to stop working.
      */
     public __dangerouslySetContainerRuntime(
         cRuntime: IContainerRuntimeSignaler
     ) {
+        // Fluid normally will create new DDS instances with the same runtime, but during some instances they will re-instantiate it.
         if (this._containerRuntime === cRuntime) return;
+        // If we already have a _containerRuntime, we technically do not need to re-set it, despite them re-instantiating it.
+        // This is because for how we are using it (signals), this has no impact. We still swap out our reference and reset signal
+        // event listeners, both for future proofing and as a general good memory practice to avoid unintentionally create floating references.
         this._containerRuntime = cRuntime;
+        // If we already have a LiveObjectManager instance, we reset their reference to the container runtime as well
         if (this._objectManager) {
-            this._objectManager.stop();
+            this._objectManager.__dangerouslySetContainerRuntime(cRuntime);
+            return;
         }
         this._objectManager = new LiveObjectManager(
             this,

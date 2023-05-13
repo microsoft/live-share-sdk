@@ -3,15 +3,14 @@
  * Licensed under the MIT License.
  */
 
-import { TestLiveShareHost } from "@microsoft/live-share";
+import { TestLiveShareHost, LiveState } from "@microsoft/live-share";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
-import { SharedMap } from "fluid-framework";
 import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
 const searchParams = new URL(window.location).searchParams;
 const root = document.getElementById("content");
 
-// Define key for the diceMap TurboSharedMap
+// Define key for the diceMap TurboLiveState
 const diceMapKey = "dice-map-key";
 // Define key for storing the dice value to display
 const diceValueKey = "dice-value-key";
@@ -73,20 +72,51 @@ const stageTemplate = document.createElement("template");
 stageTemplate["innerHTML"] = `
   <style>
     .wrapper { text-align: center; color: white }
+    .dice-list { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; width: 100%; }
     .dice { font-size: 156px; }
     .roll { font-size: 36px; }
+    .add-dice { margin-bottom: 8px; font-size: 36px; }
   </style>
   <div class="wrapper">
+    <button id="add-dice">Add dice</button>
+    <div class="dice-list"></div>
   </div>
 `;
 
-function renderStage(client, elem) {
+async function renderStage(client, elem) {
     elem.appendChild(stageTemplate.content.cloneNode(true));
     const wrapper = elem.querySelector(".wrapper");
+    const diceListEl = wrapper.querySelector(".dice-list");
     try {
-        const numberOfDice = 3;
-        for (let diceIndex = 0; diceIndex < numberOfDice; diceIndex++) {
-            renderDiceElement(client, wrapper, diceIndex);
+
+        const numberOfDiceState = await client.getDDS(
+            "dynamicMapKey",
+            LiveState,
+        );
+        let numberOfDice = 1;
+        // track which dice we have already rendered, as a safety measure in case multiple people change the state to the same index
+        const diceShown = new Set();
+        function renderDiceIfNew() {
+            for (let diceIndex = diceShown.size; diceIndex < numberOfDice; diceIndex++) {
+                if (diceShown.has(diceIndex)) continue;
+                diceShown.add(diceIndex);
+                renderDiceElement(client, diceListEl, diceIndex);
+            }
+        }
+        // Listen for changes to the number of dice
+        numberOfDiceState.on("stateChanged", (state) => {
+            numberOfDice = state;
+            renderDiceIfNew();
+        });
+        await numberOfDiceState.initialize(numberOfDice);
+        // get initial value. will usually be what you passed in, but it depends how long you were connected to socket beforehand.
+        numberOfDice = numberOfDiceState.state;
+        renderDiceIfNew();
+
+        // Add onclick listener to "Add dice" button
+        const addDiceButton = document.getElementById("add-dice");
+        addDiceButton.onclick = () => {
+            numberOfDiceState.set(numberOfDice + 1);
         }
     } catch (error) {
         renderError(elem, error);
@@ -95,15 +125,9 @@ function renderStage(client, elem) {
 
 async function renderDiceElement(client, wrapper, diceIndex) {
     const dynamicMapKey = `${diceMapKey}-${diceIndex}`;
-    // Initialize diceMap for dynamicMapKey
-    const onDidFirstInitialize = (dds) => {
-        // Set initial state of the rolled dice to 1.
-        dds.set(diceValueKey, 1);
-    };
-    const diceMap = await client.getDDS(
+    const diceState = await client.getDDS(
         dynamicMapKey,
-        SharedMap,
-        onDidFirstInitialize
+        LiveState,
     );
     // Insert dice roller UI into wrapper element
     const diceTemplate = document.createElement("template");
@@ -121,19 +145,21 @@ async function renderDiceElement(client, wrapper, diceIndex) {
 
     // Set the value at our dataKey with a random number between 1 and 6.
     rollButton.onclick = () =>
-        diceMap.set(diceValueKey, Math.floor(Math.random() * 6) + 1);
+        diceState.set(Math.floor(Math.random() * 6) + 1);
 
-    // Get the current value of the shared data to update the view whenever it changes.
+    // Use the changed event to trigger the rerender whenever the value changes.
     const updateDice = () => {
-        const diceValue = diceMap.get(diceValueKey);
+        // Get the current value of the shared data to update the view whenever it changes.
+        const diceValue = diceState.state;
         // Unicode 0x2680-0x2685 are the sides of a dice (⚀⚁⚂⚃⚄⚅)
         dice.textContent = String.fromCodePoint(0x267f + diceValue);
         dice.style.color = `hsl(${diceValue * 60}, 70%, 30%)`;
     };
+    diceState.on("stateChanged", updateDice);
+    // Initialize dice state
+    await diceState.initialize(1);
+    // Update the UI with the initial value
     updateDice();
-
-    // Use the changed event to trigger the rerender whenever the value changes.
-    diceMap.on("valueChanged", updateDice);
 }
 
 // SIDEBAR VIEW

@@ -1,7 +1,7 @@
-import { useSharedState } from "@microsoft/live-share-react";
+import { useLiveState } from "@microsoft/live-share-react";
 
 export const SharedCounterCard = ({ card, onDelete }) => {
-    const [count, setCount, disposeCount] = useSharedState(
+    const [count, setCount] = useLiveState(
         `card-count:${card.id}`,
         0
     );
@@ -29,7 +29,6 @@ export const SharedCounterCard = ({ card, onDelete }) => {
             <button
                 onClick={() => {
                     onDelete(card.id);
-                    disposeCount();
                 }}
             >
                 {"Delete"}

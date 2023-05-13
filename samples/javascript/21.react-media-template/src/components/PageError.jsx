@@ -5,8 +5,8 @@ export const PageError = ({ error }) => {
     return (
         <FlexColumn
             fill
-            vAlignCenter
-            hAlignCenter
+            vAlign="center"
+            hAlign="center"
         >
             <Text align="center">{`${error}`}</Text>
         </FlexColumn>

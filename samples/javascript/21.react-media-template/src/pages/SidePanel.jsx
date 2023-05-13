@@ -26,6 +26,7 @@ const SidePanel = () => {
         notificationEvent,
         presence,
         takeControlMap,
+        timestampProvider,
     } = liveShareHooks.useSharedObjects();
 
     const { notificationStarted, sendNotification } =
@@ -38,11 +39,16 @@ const SidePanel = () => {
             context
         );
 
-    const { takeControlStarted, takeControl } = liveShareHooks.useTakeControl(
+    // Take control map
+    const {
+        takeControlStarted, // boolean that is true once takeControlMap.on() listener is registered
+        takeControl, // callback method to take control of playback
+    } = liveShareHooks.useTakeControl(
+        localUserIsEligiblePresenter,
+        users,
         takeControlMap,
         localUser?.userId,
-        localUserIsEligiblePresenter,
-        users
+        timestampProvider
     );
 
     const {

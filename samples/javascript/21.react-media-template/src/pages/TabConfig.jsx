@@ -7,6 +7,7 @@ import * as microsoftTeams from "@microsoft/teams-js";
 import { useEffect } from "react";
 import { getFlexColumnStyles } from "../styles/layouts";
 import { mergeClasses, Title2, Subtitle2 } from "@fluentui/react-components";
+import { FlexColumn } from "../components/flex";
 
 const TabConfig = () => {
     useEffect(() => {
@@ -23,14 +24,11 @@ const TabConfig = () => {
 
     const flexColumnStyles = getFlexColumnStyles();
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.hAlignCenter,
-                flexColumnStyles.vAlignCenter,
-                flexColumnStyles.fill,
-                flexColumnStyles.smallGap
-            )}
+        <FlexColumn
+            hAlign="center"
+            vAlign="center"
+            fill="both"
+            gap="small"
         >
             <Title2 block align="center">
                 Welcome to Contoso Media!
@@ -38,7 +36,7 @@ const TabConfig = () => {
             <Subtitle2 block align="center">
                 Press the save button to continue.
             </Subtitle2>
-        </div>
+        </FlexColumn>
     );
 };
 

@@ -45,7 +45,7 @@ export const LiveNotifications = ({ notificationToDisplay }) => {
 
     return (
         <FlexColumn
-            hAlignCenter
+            hAlign="center"
             className={mergeClasses(
                 liveNotifications.root
             )}

@@ -9,13 +9,12 @@ export const ListWrapper = ({ children }) => {
     return (
         <FlexColumn
             fill
-            vAlignStart
+            vAlign="start"
             scroll
         >
             <FlexColumn
                 fill
                 vAlignStart
-                smallGap
                 grow
             >
                 {children}

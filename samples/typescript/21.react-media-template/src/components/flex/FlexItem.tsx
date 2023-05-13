@@ -1,22 +1,26 @@
+import { FC, ReactNode } from "react";
 import { mergeClasses } from "@fluentui/react-components";
-import { CSSProperties, FC, ReactNode } from "react";
-import { getFlexItemStyles } from "./FlexStyles";
+import { getFlexItemStyles } from "./flex-styles";
 
-export const FlexItem: FC<{
-    children: ReactNode;
-    grow?: boolean;
-    noShrink?: boolean;
-    style?: CSSProperties;
-}> = ({ children, grow, noShrink, style }) => {
-    const flexItemStyles = getFlexItemStyles();
-    const mergedClasses = mergeClasses(
-        grow ? flexItemStyles.grow : "",
-        noShrink ? flexItemStyles.noShrink : ""
-    );
+export type FlexItemOptions = {
+  children: ReactNode;
+  className?: string;
+  grow?: boolean | number;
+  noShrink?: boolean;
+  style?: any;
+};
+export const FlexItem: FC<FlexItemOptions> = (props) => {
+  const { className, children, grow, noShrink, style } = props;
+  const flexItemStyles = getFlexItemStyles();
+  const mergedClasses = mergeClasses(
+    grow ? flexItemStyles.grow : "",
+    noShrink ? flexItemStyles.noShrink : "",
+    className ?? "",
+  );
 
-    return (
-        <div className={mergedClasses} style={style}>
-            {children}
-        </div>
-    );
+  return (
+    <div className={mergedClasses} style={style}>
+      {children}
+    </div>
+  );
 };

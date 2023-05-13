@@ -64,7 +64,7 @@ export const MediaCard = ({
                         minWidth: "0px",
                     }}
                 >
-                    <FlexRow vAlignCenter
+                    <FlexRow vAlign="center"
                         style={{
                             width: "100%",
                             paddingLeft: "0.8rem",

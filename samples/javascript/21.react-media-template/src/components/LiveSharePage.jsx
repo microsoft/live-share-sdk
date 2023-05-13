@@ -19,8 +19,8 @@ export const LiveSharePage = memo(({ children, context, container, started }) =>
         <>
             {!!loadText && (
                 <FlexColumn
-                    hAlignCenter
-                    vAlignCenter
+                    hAlign="center"
+                    vAlign="center"
                     style={{
                         position: "fixed",
                         left: "0px",

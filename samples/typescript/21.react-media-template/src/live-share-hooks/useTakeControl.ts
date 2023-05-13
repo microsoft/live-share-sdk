@@ -23,13 +23,12 @@ export const useTakeControl = (
             return null;
         }
         const mappedOnlineUsers = onlineUsers.map((user) => {
-            const teamsUserId = user.data?.teamsUserId;
             return {
                 userId: user.userId,
                 state: user.state,
                 data: user.data,
-                lastInControlTimestamp: teamsUserId
-                    ? history.get(teamsUserId)
+                lastInControlTimestamp: user.userId
+                    ? history.get(user.userId)
                     : 0,
             };
         });
@@ -55,7 +54,7 @@ export const useTakeControl = (
         if (!presentingUser || !localUserId) {
             return false;
         }
-        return localUserId === presentingUser?.data?.teamsUserId;
+        return localUserId === presentingUser.userId;
     }, [localUserId, presentingUser]);
 
     // Set the local user ID

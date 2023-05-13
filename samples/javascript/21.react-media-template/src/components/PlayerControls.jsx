@@ -33,8 +33,8 @@ export const PlayerControls = ({
 }) => {
     return (
         <FlexRow
-            vAlignCenter
-            smallGap
+            vAlign="center"
+            gap="small"
             spaceBetween
             style={{
                 paddingBottom: "12px",
@@ -44,7 +44,7 @@ export const PlayerControls = ({
                 minWidth: "0px",
             }}
         >
-            <FlexRow vAlignCenter smallGap>
+            <FlexRow vAlign="center" gap="smaller">
                 {/* Play Button */}
                 <Button
                     icon={
@@ -87,7 +87,7 @@ export const PlayerControls = ({
                     {formatTimeValue(playerState.duration)}
                 </Text>
             </FlexRow>
-            <FlexRow vAlignCenter>
+            <FlexRow vAlign="center">
                 {suspended && (
                     <Button
                         appearance="outline"
@@ -99,7 +99,7 @@ export const PlayerControls = ({
                             borderColor: "#6e0811",
                         }}
                     >
-                        <FlexRow vAlignCenter smallGap>
+                        <FlexRow vAlign="center" gap="smaller">
                             <FlexRow
                                 vAlignCenter
                                 style={{
@@ -117,7 +117,7 @@ export const PlayerControls = ({
                         </FlexRow>
                     </Button>
                 )}
-                <FlexRow vAlignCenter hAlignEnd>
+                <FlexRow vAlign="center" hAlign="end">
                     {/* Take Control */}
                     {!suspended && (
                         <Button

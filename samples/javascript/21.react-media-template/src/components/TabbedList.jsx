@@ -34,7 +34,7 @@ export const TabbedList = ({
         <>
             <FlexItem noShrink>
                 <FlexRow
-                    vAlignCenter
+                    vAlign="center"
                     style={{ width: "100%" }}
                 >
                     <TabList

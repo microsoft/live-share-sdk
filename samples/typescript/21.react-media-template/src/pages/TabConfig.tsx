@@ -22,12 +22,7 @@ const TabConfig: FC = () => {
     }, []);
 
     return (
-        <FlexColumn
-            vAlign="center"
-            hAlign="center"
-            fill="view"
-            gap="small"
-        >
+        <FlexColumn vAlign="center" hAlign="center" fill="view" gap="small">
             <Title2 as="h2" block align="center">
                 Welcome to Contoso Media!
             </Title2>

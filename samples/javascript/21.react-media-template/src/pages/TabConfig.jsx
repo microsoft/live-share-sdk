@@ -24,12 +24,7 @@ const TabConfig = () => {
 
     const flexColumnStyles = getFlexColumnStyles();
     return (
-        <FlexColumn
-            hAlign="center"
-            vAlign="center"
-            fill="both"
-            gap="small"
-        >
+        <FlexColumn hAlign="center" vAlign="center" fill="both" gap="small">
             <Title2 block align="center">
                 Welcome to Contoso Media!
             </Title2>

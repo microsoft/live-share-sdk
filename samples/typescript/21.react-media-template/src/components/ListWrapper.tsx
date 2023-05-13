@@ -8,16 +8,9 @@ import { FlexColumn, FlexItem } from "./flex";
 
 export const ListWrapper: FC<{ children: ReactNode }> = ({ children }) => {
     return (
-        <FlexColumn
-            fill="both"
-            vAlign="start"
-            scroll
-        >
+        <FlexColumn fill="both" vAlign="start" scroll>
             <FlexItem noShrink>
-                <FlexColumn
-                    vAlign="start"
-                    gap="small"
-                >
+                <FlexColumn vAlign="start" gap="small">
                     {children}
                 </FlexColumn>
             </FlexItem>

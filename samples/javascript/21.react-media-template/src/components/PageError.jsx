@@ -3,11 +3,7 @@ import { FlexColumn } from "./flex";
 
 export const PageError = ({ error }) => {
     return (
-        <FlexColumn
-            fill
-            vAlign="center"
-            hAlign="center"
-        >
+        <FlexColumn fill vAlign="center" hAlign="center">
             <Text align="center">{`${error}`}</Text>
         </FlexColumn>
     );

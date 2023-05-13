@@ -55,9 +55,7 @@ export const LiveNotifications: FC<{ notificationToDisplay?: string }> = ({
     return (
         <FlexColumn
             hAlign="center"
-            className={mergeClasses(
-                liveNotifications.root
-            )}
+            className={mergeClasses(liveNotifications.root)}
         >
             {notifications.map((notification) => {
                 return (

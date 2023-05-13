@@ -7,9 +7,7 @@ import { useEffect, useState, useCallback } from "react";
 import useResizeObserver from "use-resize-observer";
 import PlayerProgressBar from "./PlayerProgressBar";
 import { debounce } from "lodash";
-import {
-    mergeClasses,
-} from "@fluentui/react-components";
+import { mergeClasses } from "@fluentui/react-components";
 import {
     getPlayerControlStyles,
     getResizeReferenceStyles,
@@ -138,9 +136,7 @@ export const MediaPlayerContainer = ({
 
     return (
         <FlexColumn
-            className={mergeClasses(
-                playerControlStyles.root
-            )}
+            className={mergeClasses(playerControlStyles.root)}
             onMouseMove={() => {
                 setShowControls(true);
                 debouncedHideControls();

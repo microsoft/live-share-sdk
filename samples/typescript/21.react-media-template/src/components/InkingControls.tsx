@@ -1,4 +1,11 @@
-import { useState, useCallback, useEffect, FC, SetStateAction, Dispatch } from "react";
+import {
+    useState,
+    useCallback,
+    useEffect,
+    FC,
+    SetStateAction,
+    Dispatch,
+} from "react";
 import {
     InkingTool,
     fromCssColor,
@@ -58,7 +65,10 @@ export const InkingControls: FC<InkingControlsProps> = ({
     }, [liveCanvas]);
 
     return (
-        <FlexRow gap="smaller" style={{ marginLeft: "8px", marginRight: "4px" }}>
+        <FlexRow
+            gap="smaller"
+            style={{ marginLeft: "8px", marginRight: "4px" }}
+        >
             {/* TODO: (Corina) fix marginSpacer usage to gap="small" */}
             <InkingControlButton
                 tool={InkingTool.laserPointer}

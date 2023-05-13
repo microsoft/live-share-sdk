@@ -33,10 +33,7 @@ export const TabbedList = ({
     return (
         <>
             <FlexItem noShrink>
-                <FlexRow
-                    vAlign="center"
-                    style={{ width: "100%" }}
-                >
+                <FlexRow vAlign="center" style={{ width: "100%" }}>
                     <TabList
                         selectedValue={selectedValue}
                         onTabSelect={onTabSelect}

@@ -14,10 +14,7 @@ import {
 import useResizeObserver from "use-resize-observer";
 import PlayerProgressBar from "./PlayerProgressBar";
 import { debounce } from "lodash";
-import {
-    mergeClasses,
-    tokens,
-} from "@fluentui/react-components";
+import { mergeClasses, tokens } from "@fluentui/react-components";
 import {
     getFlexColumnStyles,
     getFlexItemStyles,

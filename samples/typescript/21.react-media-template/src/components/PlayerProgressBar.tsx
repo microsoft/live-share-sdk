@@ -13,10 +13,7 @@ import {
     ReactEventHandler,
     MutableRefObject,
 } from "react";
-import {
-    PositioningImperativeRef,
-    Slider,
-} from "@fluentui/react-components";
+import { PositioningImperativeRef, Slider } from "@fluentui/react-components";
 import { Tooltip } from "@fluentui/react-components";
 import { getProgressBarStyles } from "../styles/styles";
 import { debounce } from "lodash";

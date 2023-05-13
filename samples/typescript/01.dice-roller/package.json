@@ -1,6 +1,7 @@
 {
-    "name": "dice-roller-ts",
+    "name": "@microsoft/01.dice-roller-ts",
     "version": "1.0.0",
+    "private": true,
     "description": "Sample dice roller app.",
     "repository": "https://github.com/microsoft/live-share-sdk",
     "license": "Microsoft",

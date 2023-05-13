@@ -1,6 +1,7 @@
 {
-    "name": "live-canvas-demo-ts",
+    "name": "@microsoft/03.live-canvas-demo-ts",
     "version": "1.0.0",
+    "private": true,
     "description": "Collaborative inking demo powered by Live Share",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",

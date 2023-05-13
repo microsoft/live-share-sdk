@@ -1,6 +1,7 @@
 {
-    "name": "live-share-turbo",
+    "name": "@microsoft/05.dice-roller-turbo",
     "version": "1.0.0",
+    "private": true,
     "description": "Sample showing the Live Share Turbo SDK.",
     "repository": "https://github.com/microsoft/live-share-sdk",
     "license": "Microsoft",

@@ -72,27 +72,51 @@ const stageTemplate = document.createElement("template");
 stageTemplate["innerHTML"] = `
   <style>
     .wrapper { text-align: center; color: white }
+    .dice-list { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; width: 100%; }
     .dice { font-size: 156px; }
     .roll { font-size: 36px; }
-    .add-dice { margin-bottom: 4px; }
+    .add-dice { margin-bottom: 8px; font-size: 36px; }
   </style>
   <div class="wrapper">
     <button id="add-dice">Add dice</button>
+    <div class="dice-list"></div>
   </div>
 `;
 
-function renderStage(client, elem) {
+async function renderStage(client, elem) {
     elem.appendChild(stageTemplate.content.cloneNode(true));
     const wrapper = elem.querySelector(".wrapper");
+    const diceListEl = wrapper.querySelector(".dice-list");
     try {
+
+        const numberOfDiceState = await client.getDDS(
+            "dynamicMapKey",
+            LiveState,
+        );
         let numberOfDice = 1;
-        for (let diceIndex = 0; diceIndex < numberOfDice; diceIndex++) {
-            renderDiceElement(client, wrapper, diceIndex);
+        // track which dice we have already rendered, as a safety measure in case multiple people change the state to the same index
+        const diceShown = new Set();
+        function renderDiceIfNew() {
+            for (let diceIndex = diceShown.size; diceIndex < numberOfDice; diceIndex++) {
+                if (diceShown.has(diceIndex)) continue;
+                diceShown.add(diceIndex);
+                renderDiceElement(client, diceListEl, diceIndex);
+            }
         }
+        // Listen for changes to the number of dice
+        numberOfDiceState.on("stateChanged", (state) => {
+            numberOfDice = state;
+            renderDiceIfNew();
+        });
+        await numberOfDiceState.initialize(numberOfDice);
+        // get initial value. will usually be what you passed in, but it depends how long you were connected to socket beforehand.
+        numberOfDice = numberOfDiceState.state;
+        renderDiceIfNew();
+
+        // Add onclick listener to "Add dice" button
         const addDiceButton = document.getElementById("add-dice");
         addDiceButton.onclick = () => {
-            renderDiceElement(client, wrapper, numberOfDice);
-            numberOfDice++;
+            numberOfDiceState.set(numberOfDice + 1);
         }
     } catch (error) {
         renderError(elem, error);

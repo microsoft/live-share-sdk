@@ -9,7 +9,6 @@ import {
     TabConfig,
 } from "./pages";
 import { AppRoutes } from "./constants";
-import { app } from "@microsoft/teams-js";
 
 const IN_TEAMS = inTeams();
 

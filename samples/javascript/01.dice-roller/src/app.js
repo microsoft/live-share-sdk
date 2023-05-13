@@ -59,18 +59,20 @@ async function start() {
             break;
         }
         case "stage":
-        default:
+        default: {
             const { container } = await joinContainer();
             await renderMeetingStage(container, root, theme);
             break;
+        }
     }
 }
 
 async function joinContainer() {
     // Are we running in teams?
-    const host = searchParams.get("inTeams") === "true"
-        ? LiveShareHost.create()
-        : TestLiveShareHost.create();
+    const host =
+        searchParams.get("inTeams") === "true"
+            ? LiveShareHost.create()
+            : TestLiveShareHost.create();
 
     // Create client
     const client = new LiveShareClient(host);

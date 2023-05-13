@@ -86,4 +86,4 @@ export const ExampleLiveTimer: FC = () => {
             </div>
         </div>
     );
-}
+};

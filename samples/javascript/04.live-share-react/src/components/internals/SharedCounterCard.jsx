@@ -1,10 +1,7 @@
 import { useLiveState } from "@microsoft/live-share-react";
 
 export const SharedCounterCard = ({ card, onDelete }) => {
-    const [count, setCount] = useLiveState(
-        `card-count:${card.id}`,
-        0
-    );
+    const [count, setCount] = useLiveState(`card-count:${card.id}`, 0);
     return (
         <div className="card">
             <h3>{card.title}</h3>

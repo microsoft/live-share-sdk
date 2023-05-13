@@ -1,7 +1,10 @@
 import { UserMeetingRole } from "@microsoft/live-share";
 import { FC, useCallback, useEffect, useRef } from "react";
 import { useMediaSynchronizer } from "@microsoft/live-share-react";
-import { IMediaPlayerSynchronizerEvent, MediaPlayerSynchronizerEvents } from "@microsoft/live-share-media";
+import {
+    IMediaPlayerSynchronizerEvent,
+    MediaPlayerSynchronizerEvents,
+} from "@microsoft/live-share-media";
 
 const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter];
 

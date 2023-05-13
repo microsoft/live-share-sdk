@@ -5,7 +5,7 @@ import { FC, ReactNode } from "react";
 enum ExampleAppStatus {
     WAITING = "WAITING",
     START = "START",
-};
+}
 
 interface ILiveStateData {
     status: ExampleAppStatus;

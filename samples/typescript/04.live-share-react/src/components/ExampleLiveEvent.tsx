@@ -6,7 +6,8 @@ interface ILiveEventData {
 }
 
 export const ExampleLiveEvent: FC = () => {
-    const { latestEvent, allEvents, sendEvent } = useLiveEvent<ILiveEventData>("EVENT-ID");
+    const { latestEvent, allEvents, sendEvent } =
+        useLiveEvent<ILiveEventData>("EVENT-ID");
 
     return (
         <div style={{ marginTop: "12px" }}>

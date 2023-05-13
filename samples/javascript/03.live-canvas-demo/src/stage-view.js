@@ -158,9 +158,7 @@ export class StageView extends View {
 
         Utils.loadTemplate(appTemplate, document.body);
 
-        const backgroundImage = document.getElementById(
-            "backgroundImage"
-        );
+        const backgroundImage = document.getElementById("backgroundImage");
 
         if (backgroundImage) {
             const showBackgroundImage = () => {

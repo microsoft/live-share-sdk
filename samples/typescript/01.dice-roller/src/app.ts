@@ -60,10 +60,11 @@ async function start() {
             break;
         }
         case "stage":
-        default:
+        default: {
             const { container } = await joinContainer();
             await renderMeetingStage(container, root, theme);
             break;
+        }
     }
 }
 

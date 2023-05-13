@@ -47,5 +47,5 @@ export const TeamsClientLoader: FC<ITeamsClientLoaderProps> = ({
     if (error) {
         return <div>{error.message}</div>;
     }
-    return <>{ children }</>;
+    return <>{children}</>;
 };

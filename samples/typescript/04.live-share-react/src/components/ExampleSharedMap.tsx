@@ -7,7 +7,9 @@ import { FC } from "react";
 export const EXAMPLE_SHARED_MAP_KEY = "CUSTOM-CARDS-MAP";
 
 export const ExampleSharedMap: FC = () => {
-    const { map, setEntry, deleteEntry } = useSharedMap<ISharedCardValue>(EXAMPLE_SHARED_MAP_KEY);
+    const { map, setEntry, deleteEntry } = useSharedMap<ISharedCardValue>(
+        EXAMPLE_SHARED_MAP_KEY
+    );
 
     return (
         <div>

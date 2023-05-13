@@ -88,21 +88,24 @@ async function renderStage(client, elem) {
     const wrapper = elem.querySelector(".wrapper");
     const diceListEl = wrapper.querySelector(".dice-list");
     try {
-
         const numberOfDiceState = await client.getDDS(
             "dynamicMapKey",
-            LiveState,
+            LiveState
         );
         let numberOfDice = 1;
         // track which dice we have already rendered, as a safety measure in case multiple people change the state to the same index
         const diceShown = new Set();
-        function renderDiceIfNew() {
-            for (let diceIndex = diceShown.size; diceIndex < numberOfDice; diceIndex++) {
+        const renderDiceIfNew = () => {
+            for (
+                let diceIndex = diceShown.size;
+                diceIndex < numberOfDice;
+                diceIndex++
+            ) {
                 if (diceShown.has(diceIndex)) continue;
                 diceShown.add(diceIndex);
                 renderDiceElement(client, diceListEl, diceIndex);
             }
-        }
+        };
         // Listen for changes to the number of dice
         numberOfDiceState.on("stateChanged", (state) => {
             numberOfDice = state;
@@ -117,7 +120,7 @@ async function renderStage(client, elem) {
         const addDiceButton = document.getElementById("add-dice");
         addDiceButton.onclick = () => {
             numberOfDiceState.set(numberOfDice + 1);
-        }
+        };
     } catch (error) {
         renderError(elem, error);
     }
@@ -125,10 +128,7 @@ async function renderStage(client, elem) {
 
 async function renderDiceElement(client, wrapper, diceIndex) {
     const dynamicMapKey = `${diceMapKey}-${diceIndex}`;
-    const diceState = await client.getDDS(
-        dynamicMapKey,
-        LiveState,
-    );
+    const diceState = await client.getDDS(dynamicMapKey, LiveState);
     // Insert dice roller UI into wrapper element
     const diceTemplate = document.createElement("template");
     const diceContainerId = `dice-container-${diceIndex}`;
@@ -144,8 +144,7 @@ async function renderDiceElement(client, wrapper, diceIndex) {
     const dice = diceContainerElem.querySelector(".dice");
 
     // Set the value at our dataKey with a random number between 1 and 6.
-    rollButton.onclick = () =>
-        diceState.set(Math.floor(Math.random() * 6) + 1);
+    rollButton.onclick = () => diceState.set(Math.floor(Math.random() * 6) + 1);
 
     // Use the changed event to trigger the rerender whenever the value changes.
     const updateDice = () => {

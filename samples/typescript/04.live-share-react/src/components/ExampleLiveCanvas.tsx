@@ -17,11 +17,11 @@ export const ExampleLiveCanvas: FC = () => {
         undefined,
         undefined,
         undefined,
-        isCursorShared,
+        isCursorShared
     );
 
     return (
-        <div style={{ position: "absolute"}}>
+        <div style={{ position: "absolute" }}>
             <div
                 ref={liveCanvasRef}
                 style={{ width: "556px", height: "224px" }}

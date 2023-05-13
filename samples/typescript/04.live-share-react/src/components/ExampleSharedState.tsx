@@ -2,7 +2,10 @@ import { useSharedState } from "@microsoft/live-share-react";
 import { FC } from "react";
 
 export const ExampleSharedState: FC = () => {
-    const [counterValue, setCounterValue] = useSharedState<number>("counter-id", 0);
+    const [counterValue, setCounterValue] = useSharedState<number>(
+        "counter-id",
+        0
+    );
     const [checkboxValue, setCheckboxValue] = useSharedState<boolean>(
         "checkbox-id",
         false

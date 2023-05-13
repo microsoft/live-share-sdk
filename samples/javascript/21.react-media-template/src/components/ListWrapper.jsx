@@ -3,32 +3,23 @@
  * Licensed under the MIT License.
  */
 
-import { mergeClasses } from "@fluentui/react-components";
-import { getFlexColumnStyles, getFlexItemStyles } from "../styles/layouts";
+import { FlexColumn } from "./flex";
 
 export const ListWrapper = ({ children }) => {
-    const flexColumnStyles = getFlexColumnStyles();
-    const flexItemStyles = getFlexItemStyles();
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.fill,
-                flexColumnStyles.vAlignStart,
-                flexColumnStyles.scroll
-            )}
+        <FlexColumn
+            fill
+            vAlignStart
+            scroll
         >
-            <div
-                className={mergeClasses(
-                    flexColumnStyles.root,
-                    flexColumnStyles.fill,
-                    flexColumnStyles.vAlignStart,
-                    flexColumnStyles.smallGap,
-                    flexItemStyles.grow
-                )}
+            <FlexColumn
+                fill
+                vAlignStart
+                smallGap
+                grow
             >
                 {children}
-            </div>
-        </div>
+            </FlexColumn>
+        </FlexColumn>
     );
 };

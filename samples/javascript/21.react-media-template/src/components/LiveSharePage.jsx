@@ -1,25 +1,23 @@
 import { Text } from "@fluentui/react-components";
 import { Spinner } from "@fluentui/react-components";
-import { useMemo } from "react";
 import { FlexColumn } from "./flex";
+import { memo } from "react";
 
-export const LiveSharePage = ({ children, context, container, started }) => {
-    const loadText = useMemo(() => {
-        if (!context) {
-            return "Loading Teams Client SDK...";
-        }
-        if (!container) {
-            return "Joining Live Share session...";
-        }
-        if (!started) {
-            return "Starting sync...";
-        }
-        return undefined;
-    }, [context, container, started]);
+export const LiveSharePage = memo(({ children, context, container, started }) => {
+    let loadText = undefined;
+    if (!context) {
+        loadText = "Loading Teams Client SDK...";
+    }
+    if (!container) {
+        loadText = "Joining Live Share session...";
+    }
+    if (!started) {
+        loadText = "Starting sync...";
+    }
 
     return (
         <>
-            {loadText && (
+            {!!loadText && (
                 <FlexColumn
                     hAlignCenter
                     vAlignCenter
@@ -52,4 +50,4 @@ export const LiveSharePage = ({ children, context, container, started }) => {
             </div>
         </>
     );
-};
+});

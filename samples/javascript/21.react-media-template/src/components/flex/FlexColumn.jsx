@@ -5,6 +5,7 @@ import { getFlexColumnStyles } from "./FlexStyles";
 export const FlexColumn = (props) => {
     const {
         children,
+        className,
         fill,
         hAlignCenter,
         hAlignEnd,
@@ -16,6 +17,8 @@ export const FlexColumn = (props) => {
         vAlignCenter,
         vAlignEnd,
         vAlignStart,
+        onMouseMove,
+        onClick,
     } = props;
     const flexColumnStyles = getFlexColumnStyles();
     const mergedClasses = mergeClasses(
@@ -29,11 +32,17 @@ export const FlexColumn = (props) => {
         spaceBetween ? flexColumnStyles.spaceBetween : "",
         vAlignCenter ? flexColumnStyles.vAlignCenter : "",
         vAlignEnd ? flexColumnStyles.vAlignEnd : "",
-        vAlignStart ? flexColumnStyles.vAlignStart : ""
+        vAlignStart ? flexColumnStyles.vAlignStart : "",
+        className ?? ""
     );
 
     return (
-        <div className={mergedClasses} style={style}>
+        <div
+            className={mergedClasses}
+            style={style}
+            onMouseMove={onMouseMove}
+            onClick={onClick}
+        >
             {children}
         </div>
     );

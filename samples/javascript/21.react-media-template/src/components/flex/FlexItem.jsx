@@ -20,7 +20,7 @@ export const FlexItem = forwardRef((props, ref) => {
 });
 FlexItem.displayName = "FlexItem";
 
-FlexColumn.propTypes = {
+FlexItem.propTypes = {
     children: PropTypes.node,
     className: PropTypes.string,
     grow: PropTypes.bool,

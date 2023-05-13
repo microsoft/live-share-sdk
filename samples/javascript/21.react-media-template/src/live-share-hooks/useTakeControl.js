@@ -53,7 +53,7 @@ export const useTakeControl = (
                 (a.lastInControlTimestamp ?? 0)
             );
         });
-        return mappedOnlineUsers[0];
+        return mappedUsers[0];
     }, [history, users]);
 
     // Local user is the presenter

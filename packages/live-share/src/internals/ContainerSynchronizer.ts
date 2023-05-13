@@ -26,7 +26,7 @@ export class ContainerSynchronizer {
 
     constructor(
         private readonly _runtime: IRuntimeSignaler,
-        private readonly _containerRuntime: IContainerRuntimeSignaler,
+        private _containerRuntime: IContainerRuntimeSignaler,
         private readonly _liveRuntime: LiveShareRuntime,
         private readonly _objectStore: LiveObjectManager
     ) {
@@ -144,6 +144,19 @@ export class ContainerSynchronizer {
             data: updateEvents.data[objectId].data,
         };
         return valueSent;
+    }
+
+    /**
+     * @hidden
+     * Do not use this API unless you know what you are doing.
+     * Using it incorrectly could cause object synchronizers to stop working.
+     * @see LiveShareRuntime.__dangerouslySetContainerRuntime
+     */
+    public __dangerouslySetContainerRuntime(
+        cRuntime: IContainerRuntimeSignaler
+    ) {
+        if (this._containerRuntime === cRuntime) return;
+        this._containerRuntime = cRuntime;
     }
 
     private async onConnected(clientId: string) {

@@ -40,7 +40,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
      */
     public constructor(
         private readonly _liveRuntime: LiveShareRuntime,
-        private readonly _containerRuntime: IContainerRuntimeSignaler
+        private _containerRuntime: IContainerRuntimeSignaler
     ) {
         super();
     }
@@ -55,14 +55,14 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
      * Start listening for changes
      */
     public start() {
-        this._containerRuntime.on("signal", this.onReceivedSignal.bind(this));
+        this.startReceivingSignalUpdates();
     }
 
     /**
      * Stop listening for changes
      */
     public stop() {
-        this._containerRuntime.off("signal", this.onReceivedSignal.bind(this));
+        this.stopReceivingSignalUpdates();
         this.objectStoreMap.clear();
     }
 
@@ -165,13 +165,38 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         objectId: string,
         data: TState
     ): Promise<ILiveEvent<TState>> {
-        const valueSent = await this._synchronizer!.sendEventForObject(
+        if (!this._synchronizer) {
+            throw new Error("LiveObjectManager.sendEventForObject: cannot send the event");
+        }
+        const valueSent = await this._synchronizer.sendEventForObject(
             objectId,
             data
         );
         const didUpdate = this.updateEventLocallyInStore(objectId, valueSent);
         console.log("sendEventForObject didUpdate =", didUpdate);
         return valueSent;
+    }
+
+    /**
+     * @hidden
+     * Do not use this API unless you know what you are doing.
+     * Using it incorrectly could cause object synchronizers to stop working.
+     * @see LiveShareRuntime.__dangerouslySetContainerRuntime
+     */
+    public __dangerouslySetContainerRuntime(
+        cRuntime: IContainerRuntimeSignaler
+    ) {
+        // Fluid normally will create new DDS instances with the same runtime, but during some instances they will re-instantiate it.
+        if (this._containerRuntime === cRuntime) return;
+        // If we already have a _containerRuntime, we technically do not need to re-set it, despite them re-instantiating it.
+        // This is because for how we are using it (signals), this has no impact. We still swap out our reference and reset signal
+        // event listeners, both for future proofing and as a general good memory practice
+        this.stopReceivingSignalUpdates();
+        this._containerRuntime = cRuntime;
+        this.startReceivingSignalUpdates();
+        if (this._synchronizer) {
+            this._synchronizer.__dangerouslySetContainerRuntime(cRuntime);
+        }
     }
 
     /**
@@ -251,5 +276,13 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             this.objectStoreMap.set(objectId, clientMap);
         }
         return true;
+    }
+
+    private startReceivingSignalUpdates() {
+        this._containerRuntime.on("signal", this.onReceivedSignal.bind(this));
+    }
+
+    private stopReceivingSignalUpdates() {
+        this._containerRuntime.off("signal", this.onReceivedSignal.bind(this));
     }
 }

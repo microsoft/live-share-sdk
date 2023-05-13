@@ -3,15 +3,14 @@
  * Licensed under the MIT License.
  */
 
-import { TestLiveShareHost } from "@microsoft/live-share";
+import { TestLiveShareHost, LiveState } from "@microsoft/live-share";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
-import { SharedMap } from "fluid-framework";
 import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
 const searchParams = new URL(window.location).searchParams;
 const root = document.getElementById("content");
 
-// Define key for the diceMap TurboSharedMap
+// Define key for the diceMap TurboLiveState
 const diceMapKey = "dice-map-key";
 // Define key for storing the dice value to display
 const diceValueKey = "dice-value-key";
@@ -100,9 +99,9 @@ async function renderDiceElement(client, wrapper, diceIndex) {
         // Set initial state of the rolled dice to 1.
         dds.set(diceValueKey, 1);
     };
-    const diceMap = await client.getDDS(
+    const diceState = await client.getDDS(
         dynamicMapKey,
-        SharedMap,
+        LiveState,
         onDidFirstInitialize
     );
     // Insert dice roller UI into wrapper element
@@ -121,19 +120,20 @@ async function renderDiceElement(client, wrapper, diceIndex) {
 
     // Set the value at our dataKey with a random number between 1 and 6.
     rollButton.onclick = () =>
-        diceMap.set(diceValueKey, Math.floor(Math.random() * 6) + 1);
+        diceState.set(Math.floor(Math.random() * 6) + 1);
 
     // Get the current value of the shared data to update the view whenever it changes.
     const updateDice = () => {
-        const diceValue = diceMap.get(diceValueKey);
+        const diceValue = diceState.state;
         // Unicode 0x2680-0x2685 are the sides of a dice (⚀⚁⚂⚃⚄⚅)
         dice.textContent = String.fromCodePoint(0x267f + diceValue);
         dice.style.color = `hsl(${diceValue * 60}, 70%, 30%)`;
     };
+    await diceState.initialize(1);
     updateDice();
 
     // Use the changed event to trigger the rerender whenever the value changes.
-    diceMap.on("valueChanged", updateDice);
+    diceState.on("stateChanged", updateDice);
 }
 
 // SIDEBAR VIEW

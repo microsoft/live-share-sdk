@@ -21,7 +21,7 @@ export class ContainerSynchronizer {
     // private _unconnectedKeys: string[] = [];
     private _connectedKeys: string[] = [];
     private _refCount = 0;
-    private _hTimer: any;
+    private _hTimer: NodeJS.Timeout | undefined;
     private _connectSentForClientId?: string;
 
     constructor(
@@ -162,6 +162,9 @@ export class ContainerSynchronizer {
     private async onConnected(clientId: string) {
         if (clientId === this._connectSentForClientId) return;
 
+        if (this._connectSentForClientId) {
+            this._objectStore.clientIdDidChange(this._connectSentForClientId, clientId);
+        }
         this._connectSentForClientId = clientId;
         try {
             await this.sendGroupEvent(

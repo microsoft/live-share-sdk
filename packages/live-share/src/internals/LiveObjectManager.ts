@@ -179,6 +179,19 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
 
     /**
      * @hidden
+     * The local client was given a new clientId, move cached events to the new clientId
+     */
+    public clientIdDidChange(originalClientId: string, newClientId: string) {
+        this.objectStoreMap.forEach((objectStore) => {
+            const clientEvents = objectStore.get(originalClientId);
+            if (!clientEvents) return;
+            objectStore.set(newClientId, clientEvents);
+            objectStore.delete(originalClientId);
+        });
+    }
+
+    /**
+     * @hidden
      * Do not use this API unless you know what you are doing.
      * Using it incorrectly could cause object synchronizers to stop working.
      * @see LiveShareRuntime.__dangerouslySetContainerRuntime

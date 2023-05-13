@@ -18,9 +18,7 @@ import { FluidTurboClient, getContainerSchema } from "./internals";
  */
 export class LiveShareTurboClient extends FluidTurboClient {
     private _client: LiveShareClient;
-    private _results:
-        | ILiveShareJoinResults
-        | undefined;
+    private _results: ILiveShareJoinResults | undefined;
 
     /**
      * Creates a new `LiveShareTurbo` instance.
@@ -58,9 +56,7 @@ export class LiveShareTurboClient extends FluidTurboClient {
     /**
      * Get the Fluid join container results
      */
-    public override get results():
-        | ILiveShareJoinResults
-        | undefined {
+    public override get results(): ILiveShareJoinResults | undefined {
         return this._results;
     }
 

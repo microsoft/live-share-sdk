@@ -160,7 +160,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
             const didApply = await this.onReceivedStateEvent(
                 event,
                 event.clientId,
-                event.clientId === await this.waitUntilConnected()
+                event.clientId === (await this.waitUntilConnected())
             );
             if (didApply) break;
         }
@@ -225,7 +225,6 @@ export class LiveState<TState = any> extends LiveDataObject<{
             // Ensure that state is allowed, newer, and not the initial state.
             if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt))
                 return false;
-            console.log("applying change", evt);
             this.updateState(evt, local);
             return true;
         } catch (err) {

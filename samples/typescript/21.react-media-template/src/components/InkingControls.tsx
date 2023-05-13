@@ -37,10 +37,7 @@ export const InkingControls: FC<InkingControlsProps> = ({
                 inkingManager.tool = tool;
                 setSelectedTool(tool);
             }
-            if (
-                isEnabled &&
-                tool === selectedTool
-            ) {
+            if (isEnabled && tool === selectedTool) {
                 setIsEnabled(false);
             } else {
                 setIsEnabled(true);

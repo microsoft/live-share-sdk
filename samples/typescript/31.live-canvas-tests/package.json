@@ -15,8 +15,8 @@
     },
     "dependencies": {
         "@fluidframework/azure-client": "~1.0.3",
-        "@microsoft/live-share": "1.0.0-preview.12",
-        "@microsoft/live-share-canvas": "1.0.0-preview.12",
+        "@microsoft/live-share": "1.0.0-preview.15",
+        "@microsoft/live-share-canvas": "1.0.0-preview.15",
         "fluid-framework": "^1.3.6"
     },
     "devDependencies": {

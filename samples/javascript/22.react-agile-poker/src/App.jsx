@@ -3,7 +3,11 @@
  * Licensed under the MIT License.
  */
 
-import { FluentProvider, webDarkTheme, webLightTheme } from "@fluentui/react-components";
+import {
+    FluentProvider,
+    webDarkTheme,
+    webLightTheme,
+} from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
@@ -34,7 +38,7 @@ export default function App() {
                 setInitialized(true);
                 const context = await microsoftTeams.app.getContext();
                 const curTheme = context.app.theme;
-                switch(curTheme) {
+                switch (curTheme) {
                     case "dark":
                         setWebTheme(webDarkTheme);
                         break;
@@ -43,7 +47,9 @@ export default function App() {
                         setWebTheme(webLightTheme);
                         break;
                 }
-                microsoftTeams.app.registerOnThemeChangeHandler(function(theme) {
+                microsoftTeams.app.registerOnThemeChangeHandler(function (
+                    theme
+                ) {
                     if (theme == "dark") {
                         setWebTheme(webDarkTheme);
                     } else {

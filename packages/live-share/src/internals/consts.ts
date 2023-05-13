@@ -34,5 +34,5 @@ function transmit(eventName: string): string {
  */
 export const ObjectSynchronizerEvents = {
     update: "update",
-    connect: "connect"
-}
+    connect: "connect",
+};

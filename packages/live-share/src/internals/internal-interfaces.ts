@@ -48,7 +48,7 @@ export interface IContainerLiveObjectStoreEvents extends IEvent {
             objectId: string,
             event: ILiveEvent<any>,
             local: boolean,
-            processRelatedChange: ProcessRelatedChangeHandler,
+            processRelatedChange: ProcessRelatedChangeHandler
         ) => void
     ): void;
 }

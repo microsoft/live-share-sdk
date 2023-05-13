@@ -133,7 +133,7 @@ export class GroupCoordinatorState extends EventEmitter {
         this._transportState = new GroupTransportState(
             this._playbackTrack,
             getMediaPlayerState,
-            this._liveRuntime,
+            this._liveRuntime
         );
         this._playbackPosition = new GroupPlaybackPosition(
             this._transportState,
@@ -308,7 +308,10 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
-    public handleSetTrack(event: ILiveEvent<ISetTrackEvent>, local: boolean): void {
+    public handleSetTrack(
+        event: ILiveEvent<ISetTrackEvent>,
+        local: boolean
+    ): void {
         // Update shared track
         // - Will trigger 'trackChange' event to update media session
         const updated = this.playbackTrack.updateTrack({
@@ -332,7 +335,10 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
-    public handleSetTrackData(event: ILiveEvent<ISetTrackDataEvent>, local: boolean): void {
+    public handleSetTrackData(
+        event: ILiveEvent<ISetTrackDataEvent>,
+        local: boolean
+    ): void {
         // Update shared track data
         // - Will trigger 'dataChange' event to update media session
         const updated = this.playbackTrackData.updateData({
@@ -464,14 +470,18 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "none":
                         case "paused":
                         case "playing":
-                            if (event.data.playbackState != this._lastStateChange) {
+                            if (
+                                event.data.playbackState !=
+                                this._lastStateChange
+                            ) {
                                 this._logger.sendTelemetryEvent(
                                     TelemetryEvents.GroupCoordinator
                                         .BeginSoftSuspension,
                                     null,
                                     { playbackState: event.data.playbackState }
                                 );
-                                this._lastStateChange = event.data.playbackState;
+                                this._lastStateChange =
+                                    event.data.playbackState;
                                 this._lastStateChangeTime =
                                     this._liveRuntime.getTimestamp();
                             }

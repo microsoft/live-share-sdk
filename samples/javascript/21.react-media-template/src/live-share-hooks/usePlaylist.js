@@ -22,7 +22,9 @@ export const usePlaylist = (playlistMap, sendNotification) => {
     const [selectedId, setSelectedId] = useState();
     const [playlistStarted, setStarted] = useState(false);
 
-    const selectedMediaIndex = mediaItems.findIndex((item) => item.id === selectedId);
+    const selectedMediaIndex = mediaItems.findIndex(
+        (item) => item.id === selectedId
+    );
 
     const addMediaItem = useCallback(
         (id) => {

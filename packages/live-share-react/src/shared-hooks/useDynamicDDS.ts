@@ -16,10 +16,12 @@ import { LoadableObjectClass } from "fluid-framework";
  * @param onFirstInitialize Optional. Callback function for when the DDS is first loaded
  * @returns the DDS object, which is of type T when loaded and undefined while loading
  */
-export function useDynamicDDS<T extends IFluidLoadable = FluidObject<any> & IFluidLoadable>(
+export function useDynamicDDS<
+    T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
+>(
     uniqueKey: string,
     loadableObjectClass: LoadableObjectClass<T>,
-    onFirstInitialize?: (dds: T) => void,
+    onFirstInitialize?: (dds: T) => void
 ): {
     dds: T | undefined;
     error: Error | undefined;
@@ -29,10 +31,7 @@ export function useDynamicDDS<T extends IFluidLoadable = FluidObject<any> & IFlu
     /**
      * Import container and DDS object register callbacks from AzureProvider.
      */
-    const {
-        container,
-        clientRef,
-    } = useFluidObjectsContext();
+    const { container, clientRef } = useFluidObjectsContext();
 
     /**
      * Once container is available, this effect will register the setter method so that the DDS loaded
@@ -46,7 +45,11 @@ export function useDynamicDDS<T extends IFluidLoadable = FluidObject<any> & IFlu
         // Callback method to set the `initialData` into the map when the DDS is first created.
         const onGetDDS = async () => {
             try {
-                const dds = await clientRef.current.getDDS<T>(uniqueKey, loadableObjectClass, onFirstInitialize);
+                const dds = await clientRef.current.getDDS<T>(
+                    uniqueKey,
+                    loadableObjectClass,
+                    onFirstInitialize
+                );
                 if (mounted) {
                     setDDS(dds);
                 }
@@ -54,7 +57,11 @@ export function useDynamicDDS<T extends IFluidLoadable = FluidObject<any> & IFlu
                 if (error instanceof Error) {
                     setError(error);
                 } else {
-                    setError(new Error("useDynamicDDS: an unknown error occurred while getting the DDS"));
+                    setError(
+                        new Error(
+                            "useDynamicDDS: an unknown error occurred while getting the DDS"
+                        )
+                    );
                 }
             }
         };

@@ -101,9 +101,7 @@ describe("waitForResult", function () {
             result === "response" ? { response: "successful" } : null;
         const fnTimeout = (reason: unknown) => new Error("timeout");
         try {
-            await waitForResult(fnRequest, fnValidateResponse, fnTimeout, [
-                10,
-            ]);
+            await waitForResult(fnRequest, fnValidateResponse, fnTimeout, [10]);
             assert.fail("Expected an error to be thrown");
         } catch (error) {
             assert(error instanceof Error, "Expected an instance of Error");

@@ -49,7 +49,10 @@ export function useLiveEvent<TEvent extends object = object>(
     /**
      * User facing: dynamically load the DDS for the given unique key.
      */
-    const { dds: liveEvent } = useDynamicDDS<LiveEvent<TEvent>>(uniqueKey, LiveEvent<TEvent>);
+    const { dds: liveEvent } = useDynamicDDS<LiveEvent<TEvent>>(
+        uniqueKey,
+        LiveEvent<TEvent>
+    );
 
     /**
      * User facing: callback to send event through `LiveEvent`
@@ -75,8 +78,7 @@ export function useLiveEvent<TEvent extends object = object>(
      * Setup change listeners and start `LiveEvent` if needed
      */
     React.useEffect(() => {
-        if (liveEvent?.isInitialized === undefined)
-            return;
+        if (liveEvent?.isInitialized === undefined) return;
         // Register event listener
         const onEventReceived = (event: any, local: boolean) => {
             // If developer passed the optional onReceivedEvent callback, we

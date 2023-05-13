@@ -99,10 +99,9 @@ export class LiveEventTimer<T extends object = object> {
         this._timer = setTimeout(() => {
             this._timer = undefined;
             const startedAt = new Date().getTime();
-            this.sendEvent()
-                .catch((err) => {
-                    console.warn(err);
-                });
+            this.sendEvent().catch((err) => {
+                console.warn(err);
+            });
 
             // Auto-repeat
             if (this._isRunning && this.repeat) {

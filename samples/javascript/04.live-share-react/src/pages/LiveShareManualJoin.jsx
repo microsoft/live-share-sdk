@@ -1,5 +1,8 @@
 import { TestLiveShareHost, UserMeetingRole } from "@microsoft/live-share";
-import { LiveShareProvider, useLiveShareContext } from "@microsoft/live-share-react";
+import {
+    LiveShareProvider,
+    useLiveShareContext,
+} from "@microsoft/live-share-react";
 import { LiveShareHost } from "@microsoft/teams-js";
 import { useState } from "react";
 import {
@@ -22,13 +25,9 @@ const testHost = TestLiveShareHost.create();
 const url = new URL(window.location.href);
 const scopes = url.searchParams.get("scopes");
 if (scopes === "read") {
-    testHost.defaultLocalRoles = [
-        UserMeetingRole.attendee
-    ];
+    testHost.defaultLocalRoles = [UserMeetingRole.attendee];
 } else if (scopes === "write") {
-    testHost.defaultRemoteRoles = [
-        UserMeetingRole.attendee
-    ];
+    testHost.defaultRemoteRoles = [UserMeetingRole.attendee];
 }
 
 export const LiveShareManualJoin = () => {
@@ -46,7 +45,7 @@ const JOIN_STATE_OPTIONS = {
     loading: "Joining container...",
     done: "Joined!",
     error: "Error joining container: review console for more details",
-}
+};
 
 // Component that renders different states depending on the status of joining the Live Share session
 const RequireJoinWrapper = () => {
@@ -63,25 +62,19 @@ const RequireJoinWrapper = () => {
             console.error(e);
             setJoinState(JOIN_STATE_OPTIONS.error);
         }
-    }
+    };
 
     return (
         <>
             {joinState === JOIN_STATE_OPTIONS.waiting && (
                 <div>
-                    <h1>
-                        {joinState}
-                    </h1>
-                    <button onClick={onJoin}>
-                        {"Join session"}
-                    </button>
+                    <h1>{joinState}</h1>
+                    <button onClick={onJoin}>{"Join session"}</button>
                 </div>
             )}
             {joinState === JOIN_STATE_OPTIONS.loading && (
                 <div>
-                    <h1>
-                        {joinState}
-                    </h1>
+                    <h1>{joinState}</h1>
                 </div>
             )}
             {joinState === JOIN_STATE_OPTIONS.done && (
@@ -105,12 +98,10 @@ const RequireJoinWrapper = () => {
             )}
             {joinState === JOIN_STATE_OPTIONS.error && (
                 <div>
-                    <h1 style={{ color: "red" }}>
-                        {joinState}
-                    </h1>
+                    <h1 style={{ color: "red" }}>{joinState}</h1>
                     <button onClick={window.location.reload}>{"Reload"}</button>
                 </div>
             )}
         </>
     );
-}
+};

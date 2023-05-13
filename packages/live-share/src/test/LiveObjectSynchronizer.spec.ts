@@ -9,7 +9,9 @@ import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
 import { Deferred } from "../internals";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
-interface ITestState { client: "local" | "remote" };
+interface ITestState {
+    client: "local" | "remote";
+}
 
 describe("LiveObjectSynchronizer", () => {
     it("Should send connecting state", async () => {
@@ -20,7 +22,7 @@ describe("LiveObjectSynchronizer", () => {
         await remoteLiveRuntime.start();
 
         const done = new Deferred();
-        const localRuntime = new MockRuntimeSignaler();        
+        const localRuntime = new MockRuntimeSignaler();
         const localObject = new LiveObjectSynchronizer<ITestState>(
             "test",
             localRuntime,
@@ -168,7 +170,7 @@ describe("LiveObjectSynchronizer", () => {
                     assert(sender, `local: sender  ID not received`);
                     // We event is only emitted when the timestamp of a value has changed
                     changesEmitted++;
-                    assert(changesEmitted < 2, "received is >= 2")
+                    assert(changesEmitted < 2, "received is >= 2");
                 } catch (err) {
                     done.reject(err);
                 }
@@ -180,7 +182,7 @@ describe("LiveObjectSynchronizer", () => {
                     done.resolve();
                 }
                 // If this is called, it will send out an update
-                return Promise.resolve(true)
+                return Promise.resolve(true);
             }
         );
 
@@ -188,14 +190,14 @@ describe("LiveObjectSynchronizer", () => {
         const remoteObject = new LiveObjectSynchronizer<ITestState>(
             "test",
             remoteRuntime,
-            remoteLiveRuntime,
+            remoteLiveRuntime
         );
         await remoteObject.start(
             { client: "remote" },
             (state, sender) => {
                 return Promise.resolve(true);
             },
-            () => Promise.resolve(true),
+            () => Promise.resolve(true)
         );
 
         await done.promise;

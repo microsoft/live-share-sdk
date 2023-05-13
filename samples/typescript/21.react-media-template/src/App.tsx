@@ -3,7 +3,12 @@
  * Licensed under the MIT License.
  */
 
-import { FluentProvider, teamsDarkTheme, teamsHighContrastTheme, teamsLightTheme } from "@fluentui/react-components";
+import {
+    FluentProvider,
+    teamsDarkTheme,
+    teamsHighContrastTheme,
+    teamsLightTheme,
+} from "@fluentui/react-components";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -33,7 +38,7 @@ export const App = () => {
                 microsoftTeams.app.notifySuccess();
                 const context = await microsoftTeams.app.getContext();
                 const curTheme = context.app.theme;
-                switch(curTheme) {
+                switch (curTheme) {
                     case "dark":
                         setTeamsTheme(teamsDarkTheme);
                         break;
@@ -45,15 +50,17 @@ export const App = () => {
                         setTeamsTheme(teamsLightTheme);
                         break;
                 }
-                microsoftTeams.app.registerOnThemeChangeHandler((theme: string | undefined) => {
-                    if (theme == "dark") {
-                        setTeamsTheme(teamsDarkTheme);
-                    } else if (theme == "contrast") {
-                        setTeamsTheme(teamsHighContrastTheme);
-                    } else {
-                        setTeamsTheme(teamsLightTheme);
+                microsoftTeams.app.registerOnThemeChangeHandler(
+                    (theme: string | undefined) => {
+                        if (theme == "dark") {
+                            setTeamsTheme(teamsDarkTheme);
+                        } else if (theme == "contrast") {
+                            setTeamsTheme(teamsHighContrastTheme);
+                        } else {
+                            setTeamsTheme(teamsLightTheme);
+                        }
                     }
-                });
+                );
                 setInitialized(true);
             } catch (error) {
                 console.error(error);

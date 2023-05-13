@@ -13,7 +13,7 @@ export const TabConfig = () => {
     // Radio button change callback
     const onSelectedRouteChange = (e) => {
         setSelectedRoute(e.currentTarget.value);
-    }
+    };
 
     // When not in Teams, we show a "GO" button to navigate to the selected route
     const onNavigate = () => {
@@ -22,7 +22,7 @@ export const TabConfig = () => {
             pathname: selectedRoute,
             search: `?inTeams=false`,
         });
-    }
+    };
 
     // When selectedRoute is changed, update our registerOnSaveHandler while IN_TEAMS is true
     useEffect(() => {
@@ -40,9 +40,7 @@ export const TabConfig = () => {
 
     return (
         <div>
-            <h1>
-                {"Welcome to the Live Share React sample!"}
-            </h1>
+            <h1>{"Welcome to the Live Share React sample!"}</h1>
             <div>
                 <input
                     type="radio"
@@ -73,11 +71,7 @@ export const TabConfig = () => {
                 />
                 {"Azure Auto Join"}
             </div>
-            { !IN_TEAMS && (
-                <button onClick={onNavigate}>
-                    {"GO"}
-                </button>
-            )}
+            {!IN_TEAMS && <button onClick={onNavigate}>{"GO"}</button>}
         </div>
-    )
-}
+    );
+};

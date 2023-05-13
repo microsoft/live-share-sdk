@@ -79,7 +79,9 @@ export function ExampleLiveTimer() {
                     )} seconds`}</p>
                 )}
                 {milliRemaining === undefined && (
-                    <p>{`${Math.round(duration / 1000)} / ${Math.round(duration / 1000)} seconds`}</p>
+                    <p>{`${Math.round(duration / 1000)} / ${Math.round(
+                        duration / 1000
+                    )} seconds`}</p>
                 )}
             </div>
         </div>

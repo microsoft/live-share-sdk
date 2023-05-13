@@ -69,7 +69,8 @@ describe("LiveShareTurboClient", () => {
             "client1 results container or services are not defined"
         );
         assert(
-            !!client1.stateMap || !!client2.stateMap, "stateMap is not defined"
+            !!client1.stateMap || !!client2.stateMap,
+            "stateMap is not defined"
         );
     });
 

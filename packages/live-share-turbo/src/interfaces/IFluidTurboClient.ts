@@ -20,9 +20,7 @@ export interface IFluidTurboClient {
      * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created.
      * @returns DDS object corresponding to `objectKey`
      */
-    getDDS<
-        T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
-    >(
+    getDDS<T extends IFluidLoadable = FluidObject<any> & IFluidLoadable>(
         objectKey: string,
         objectClass: LoadableObjectClass<T>,
         onDidFirstInitialize?: (dds: T) => void

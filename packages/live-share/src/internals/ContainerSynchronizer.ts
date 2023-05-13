@@ -21,16 +21,17 @@ export class ContainerSynchronizer {
     // private _unconnectedKeys: string[] = [];
     private _connectedKeys: string[] = [];
     private _refCount = 0;
-    private _hTimer: any;
+    private _hTimer: NodeJS.Timeout | undefined;
     private _connectSentForClientId?: string;
+    private _onBoundConnectedListener?: (clientId: string) => Promise<void>;
 
     constructor(
         private readonly _runtime: IRuntimeSignaler,
-        private readonly _containerRuntime: IContainerRuntimeSignaler,
+        private _containerRuntime: IContainerRuntimeSignaler,
         private readonly _liveRuntime: LiveShareRuntime,
         private readonly _objectStore: LiveObjectManager
     ) {
-        this._runtime.on("connected", this.onConnected.bind(this));
+        this.startListeningForConnected();
     }
 
     public registerObject(
@@ -133,10 +134,6 @@ export class ContainerSynchronizer {
         if (!updateEvents) {
             throw new Error("Unable to send an event with empty updates");
         }
-        console.log(
-            "sendEventForObject: sent one-time event",
-            updateEvents.data[objectId]
-        );
         const valueSent = {
             clientId: updateEvents.clientId,
             timestamp: updateEvents.data[objectId].timestamp,
@@ -146,9 +143,25 @@ export class ContainerSynchronizer {
         return valueSent;
     }
 
+    /**
+     * @hidden
+     * Do not use this API unless you know what you are doing.
+     * Using it incorrectly could cause object synchronizers to stop working.
+     * @see LiveShareRuntime.__dangerouslySetContainerRuntime
+     */
+    public __dangerouslySetContainerRuntime(
+        cRuntime: IContainerRuntimeSignaler
+    ) {
+        if (this._containerRuntime === cRuntime) return;
+        this._containerRuntime = cRuntime;
+    }
+
     private async onConnected(clientId: string) {
         if (clientId === this._connectSentForClientId) return;
 
+        if (this._connectSentForClientId) {
+            this._objectStore.clientIdDidChange(this._connectSentForClientId, clientId);
+        }
         this._connectSentForClientId = clientId;
         try {
             await this.sendGroupEvent(
@@ -260,7 +273,6 @@ export class ContainerSynchronizer {
             local
         );
         if (!overwriteForLocal) return;
-        console.log("processRelatedChange", objectId);
         processRelatedChange(objectId, {
             ...event,
             clientId: await this.waitUntilConnected(),
@@ -273,5 +285,18 @@ export class ContainerSynchronizer {
      */
     protected waitUntilConnected(): Promise<string> {
         return waitUntilConnected(this._runtime);
+    }
+
+    private startListeningForConnected() {
+        if (this._onBoundConnectedListener) {
+            this.stopListeningForConnected();
+        }
+        this._onBoundConnectedListener = this.onConnected.bind(this);
+        this._runtime.on("connected", this._onBoundConnectedListener);
+    }
+
+    private stopListeningForConnected() {
+        if (!this._onBoundConnectedListener) return;
+        this._runtime.off("connected", this._onBoundConnectedListener);
     }
 }

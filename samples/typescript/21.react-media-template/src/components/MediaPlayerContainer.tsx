@@ -421,14 +421,16 @@ export const MediaPlayerContainer: FC<MediaPlayerContainerProps> = ({
                                 }}
                             />
                             {/* Ink Toggle */}
-                            {localUserIsPresenting && inkingManager && liveCanvas && (
-                                <InkingControls
-                                    liveCanvas={liveCanvas}
-                                    inkingManager={inkingManager}
-                                    isEnabled={inkActive}
-                                    setIsEnabled={setInkActive}
-                                />
-                            )}
+                            {localUserIsPresenting &&
+                                inkingManager &&
+                                liveCanvas && (
+                                    <InkingControls
+                                        liveCanvas={liveCanvas}
+                                        inkingManager={inkingManager}
+                                        isEnabled={inkActive}
+                                        setIsEnabled={setInkActive}
+                                    />
+                                )}
                             {/* Info Popover */}
                             <Popover>
                                 <PopoverTrigger>

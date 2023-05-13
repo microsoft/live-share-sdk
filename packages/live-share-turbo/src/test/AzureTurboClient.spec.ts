@@ -9,7 +9,10 @@ import {
     LoadableObjectClassRecord,
     SharedMap,
 } from "fluid-framework";
-import { AzureContainerServices, AzureLocalConnectionConfig } from "@fluidframework/azure-client";
+import {
+    AzureContainerServices,
+    AzureLocalConnectionConfig,
+} from "@fluidframework/azure-client";
 import { AzureTurboClient } from "../AzureTurboClient";
 import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { generateUser } from "@fluidframework/server-services-client";
@@ -24,10 +27,10 @@ describe("LiveShareTurboClient", () => {
     };
 
     const connectionProps: AzureLocalConnectionConfig = {
-		tokenProvider: new InsecureTokenProvider("fooBar", generateUser()),
-		endpoint: "http://localhost:7070",
-		type: "local",
-	};
+        tokenProvider: new InsecureTokenProvider("fooBar", generateUser()),
+        endpoint: "http://localhost:7070",
+        type: "local",
+    };
     const client1 = new AzureTurboClient({
         connection: connectionProps,
     });
@@ -65,7 +68,8 @@ describe("LiveShareTurboClient", () => {
             "client1 results container or services are not defined"
         );
         assert(
-            !!client1.stateMap || !!client2.stateMap, "stateMap is not defined"
+            !!client1.stateMap || !!client2.stateMap,
+            "stateMap is not defined"
         );
     });
 

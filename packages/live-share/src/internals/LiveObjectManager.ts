@@ -174,7 +174,6 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             data
         );
         const didUpdate = this.updateEventLocallyInStore(objectId, valueSent);
-        console.log("sendEventForObject didUpdate =", didUpdate);
         return valueSent;
     }
 
@@ -228,7 +227,6 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             typeof message.content.data !== "object"
         )
             return;
-        console.log("received remote update", message);
         this.dispatchUpdates(
             ObjectSynchronizerEvents.update,
             message.clientId,

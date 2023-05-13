@@ -134,10 +134,6 @@ export class ContainerSynchronizer {
         if (!updateEvents) {
             throw new Error("Unable to send an event with empty updates");
         }
-        console.log(
-            "sendEventForObject: sent one-time event",
-            updateEvents.data[objectId]
-        );
         const valueSent = {
             clientId: updateEvents.clientId,
             timestamp: updateEvents.data[objectId].timestamp,
@@ -277,7 +273,6 @@ export class ContainerSynchronizer {
             local
         );
         if (!overwriteForLocal) return;
-        console.log("processRelatedChange", objectId);
         processRelatedChange(objectId, {
             ...event,
             clientId: await this.waitUntilConnected(),

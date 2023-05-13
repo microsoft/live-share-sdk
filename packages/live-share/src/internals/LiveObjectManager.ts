@@ -173,7 +173,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             objectId,
             data
         );
-        const didUpdate = this.updateEventLocallyInStore(objectId, valueSent);
+        this.updateEventLocallyInStore(objectId, valueSent);
         return valueSent;
     }
 

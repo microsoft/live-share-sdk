@@ -5,8 +5,8 @@
     "author": "Microsoft",
     "license": "MIT",
     "dependencies": {
-        "@microsoft/live-share": "1.0.0-preview.14",
-        "@microsoft/live-share-canvas": "1.0.0-preview.14",
+        "@microsoft/live-share": "1.0.0-preview.15",
+        "@microsoft/live-share-canvas": "1.0.0-preview.15",
         "@microsoft/teams-js": "^2.11.0",
         "@fluidframework/azure-client": "~1.0.3",
         "@testing-library/jest-dom": "^5.16.5",

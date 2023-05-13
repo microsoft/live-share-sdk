@@ -23,6 +23,7 @@ export class ContainerSynchronizer {
     private _refCount = 0;
     private _hTimer: NodeJS.Timeout | undefined;
     private _connectSentForClientId?: string;
+    private _onBoundConnectedListener?: (clientId: string) => Promise<void>;
 
     constructor(
         private readonly _runtime: IRuntimeSignaler,
@@ -30,7 +31,7 @@ export class ContainerSynchronizer {
         private readonly _liveRuntime: LiveShareRuntime,
         private readonly _objectStore: LiveObjectManager
     ) {
-        this._runtime.on("connected", this.onConnected.bind(this));
+        this.startListeningForConnected();
     }
 
     public registerObject(
@@ -289,5 +290,18 @@ export class ContainerSynchronizer {
      */
     protected waitUntilConnected(): Promise<string> {
         return waitUntilConnected(this._runtime);
+    }
+
+    private startListeningForConnected() {
+        if (this._onBoundConnectedListener) {
+            this.stopListeningForConnected();
+        }
+        this._onBoundConnectedListener = this.onConnected.bind(this);
+        this._runtime.on("connected", this._onBoundConnectedListener);
+    }
+
+    private stopListeningForConnected() {
+        if (!this._onBoundConnectedListener) return;
+        this._runtime.off("connected", this._onBoundConnectedListener);
     }
 }

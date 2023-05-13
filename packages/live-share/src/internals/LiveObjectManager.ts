@@ -34,6 +34,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     private objectStoreMap: ILiveObjectStore = new Map();
 
     private _audience?: IAzureAudience;
+    private _onBoundReceivedSignalListener?: (message: IInboundSignalMessage, local: boolean) => void;
     /**
      * Create a new registry for all of the `LiveObjectSynchronizer` objects for a Live Share session.
      * @param _liveRuntime runtime for the Live Share session.
@@ -292,10 +293,15 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     }
 
     private startReceivingSignalUpdates() {
-        this._containerRuntime.on("signal", this.onReceivedSignal.bind(this));
+        if (this._onBoundReceivedSignalListener) {
+            this.stopReceivingSignalUpdates();
+        }
+        this._onBoundReceivedSignalListener = this.onReceivedSignal.bind(this);
+        this._containerRuntime.on("signal", this._onBoundReceivedSignalListener);
     }
 
     private stopReceivingSignalUpdates() {
-        this._containerRuntime.off("signal", this.onReceivedSignal.bind(this));
+        if (!this._onBoundReceivedSignalListener) return;
+        this._containerRuntime.off("signal", this._onBoundReceivedSignalListener);
     }
 }

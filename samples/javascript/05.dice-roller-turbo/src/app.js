@@ -74,8 +74,10 @@ stageTemplate["innerHTML"] = `
     .wrapper { text-align: center; color: white }
     .dice { font-size: 156px; }
     .roll { font-size: 36px; }
+    .add-dice { margin-bottom: 4px; }
   </style>
   <div class="wrapper">
+    <button id="add-dice">Add dice</button>
   </div>
 `;
 
@@ -83,9 +85,14 @@ function renderStage(client, elem) {
     elem.appendChild(stageTemplate.content.cloneNode(true));
     const wrapper = elem.querySelector(".wrapper");
     try {
-        const numberOfDice = 3;
+        let numberOfDice = 1;
         for (let diceIndex = 0; diceIndex < numberOfDice; diceIndex++) {
             renderDiceElement(client, wrapper, diceIndex);
+        }
+        const addDiceButton = document.getElementById("add-dice");
+        addDiceButton.onclick = () => {
+            renderDiceElement(client, wrapper, numberOfDice);
+            numberOfDice++;
         }
     } catch (error) {
         renderError(elem, error);
@@ -94,15 +101,9 @@ function renderStage(client, elem) {
 
 async function renderDiceElement(client, wrapper, diceIndex) {
     const dynamicMapKey = `${diceMapKey}-${diceIndex}`;
-    // Initialize diceMap for dynamicMapKey
-    const onDidFirstInitialize = (dds) => {
-        // Set initial state of the rolled dice to 1.
-        dds.set(diceValueKey, 1);
-    };
     const diceState = await client.getDDS(
         dynamicMapKey,
         LiveState,
-        onDidFirstInitialize
     );
     // Insert dice roller UI into wrapper element
     const diceTemplate = document.createElement("template");
@@ -122,18 +123,19 @@ async function renderDiceElement(client, wrapper, diceIndex) {
     rollButton.onclick = () =>
         diceState.set(Math.floor(Math.random() * 6) + 1);
 
-    // Get the current value of the shared data to update the view whenever it changes.
+    // Use the changed event to trigger the rerender whenever the value changes.
     const updateDice = () => {
+        // Get the current value of the shared data to update the view whenever it changes.
         const diceValue = diceState.state;
         // Unicode 0x2680-0x2685 are the sides of a dice (⚀⚁⚂⚃⚄⚅)
         dice.textContent = String.fromCodePoint(0x267f + diceValue);
         dice.style.color = `hsl(${diceValue * 60}, 70%, 30%)`;
     };
-    await diceState.initialize(1);
-    updateDice();
-
-    // Use the changed event to trigger the rerender whenever the value changes.
     diceState.on("stateChanged", updateDice);
+    // Initialize dice state
+    await diceState.initialize(1);
+    // Update the UI with the initial value
+    updateDice();
 }
 
 // SIDEBAR VIEW

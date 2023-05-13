@@ -55,7 +55,8 @@ const MeetingStage: FC = () => {
     } = liveShareHooks.usePresence(
         ACCEPT_PLAYBACK_CHANGES_FROM,
         presence,
-        context
+        context,
+        timestampProvider
     );
 
     // Take control map
@@ -67,7 +68,7 @@ const MeetingStage: FC = () => {
         localUserIsEligiblePresenter,
         users,
         takeControlMap,
-        localUser?.data?.teamsUserId,
+        localUser?.userId,
         timestampProvider,
         sendNotification
     );

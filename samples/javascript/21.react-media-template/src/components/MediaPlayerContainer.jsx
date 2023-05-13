@@ -6,23 +6,9 @@
 import { useEffect, useState, useCallback } from "react";
 import useResizeObserver from "use-resize-observer";
 import PlayerProgressBar from "./PlayerProgressBar";
-import { formatTimeValue } from "../utils/format";
-import {
-    Pause24Filled,
-    Play24Filled,
-    SpeakerMute20Filled,
-    Speaker220Filled,
-    Next20Filled,
-    Info24Regular,
-} from "@fluentui/react-icons";
 import { debounce } from "lodash";
 import {
     mergeClasses,
-    Button,
-    Text,
-    Popover,
-    PopoverTrigger,
-    PopoverSurface,
 } from "@fluentui/react-components";
 import {
     getPlayerControlStyles,
@@ -30,9 +16,8 @@ import {
     getVideoStyle,
 } from "../styles/styles";
 import { InkCanvas } from "./InkCanvas";
-import { InkingControls } from "./InkingControls";
 import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
-import { FlexColumn, FlexRow } from "./flex";
+import { FlexColumn } from "./flex";
 import { PlayerControls } from "./PlayerControls";
 
 const events = [

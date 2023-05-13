@@ -44,7 +44,7 @@ const SidePanel: FC = () => {
         localUserIsEligiblePresenter,
         users,
         takeControlMap,
-        localUser?.data?.teamsUserId,
+        localUser?.userId,
         timestampProvider
     );
 

@@ -16,13 +16,7 @@ export const useTakeControl = (
 
     // Computed presentingUser object based on most recent online user to take control
     const presentingUser = useMemo(() => {
-        const onlineUsers = users.filter((user) => {
-            return user.state === "online";
-        });
-        if (onlineUsers.length === 0) {
-            return null;
-        }
-        const mappedOnlineUsers = onlineUsers.map((user) => {
+        const mappedUsers = users.map((user) => {
             return {
                 userId: user.userId,
                 state: user.state,
@@ -32,7 +26,7 @@ export const useTakeControl = (
                     : 0,
             };
         });
-        mappedOnlineUsers.sort((a, b) => {
+        mappedUsers.sort((a, b) => {
             // Sort by joined timestamp in descending
             if (a.lastInControlTimestamp === b.lastInControlTimestamp) {
                 return (
@@ -46,7 +40,7 @@ export const useTakeControl = (
                 (a.lastInControlTimestamp ?? 0)
             );
         });
-        return mappedOnlineUsers[0];
+        return mappedUsers[0];
     }, [history, users]);
 
     // Local user is the presenter
@@ -84,7 +78,7 @@ export const useTakeControl = (
 
     // Hook to register event listener for takeControlMap
     useEffect(() => {
-        if (takeControlMap && !takeControlStarted) {
+        if (takeControlMap && !takeControlStarted && localUserId) {
             takeControlMap.on("valueChanged", refreshControlMap);
             refreshControlMap();
             console.log("useTakeControl: started take control");

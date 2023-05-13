@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, FC } from "react";
+import { useState, useCallback, useEffect, FC, SetStateAction, Dispatch } from "react";
 import {
     InkingTool,
     fromCssColor,
@@ -20,7 +20,7 @@ import EraserIcon from "../assets/eraser.svg";
 interface InkingControlsProps {
     liveCanvas: LiveCanvas;
     inkingManager: InkingManager;
-    setIsEnabled: (enabled: boolean) => void;
+    setIsEnabled: Dispatch<SetStateAction<boolean>>;
     isEnabled: boolean;
 }
 
@@ -58,7 +58,7 @@ export const InkingControls: FC<InkingControlsProps> = ({
     }, [liveCanvas]);
 
     return (
-        <FlexRow marginSpacer style={{ marginLeft: "8px", marginRight: "4px" }}>
+        <FlexRow gap="smaller" style={{ marginLeft: "8px", marginRight: "4px" }}>
             {/* TODO: (Corina) fix marginSpacer usage to gap="small" */}
             <InkingControlButton
                 tool={InkingTool.laserPointer}

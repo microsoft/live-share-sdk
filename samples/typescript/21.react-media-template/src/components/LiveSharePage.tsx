@@ -2,7 +2,6 @@ import { Text } from "@fluentui/react-components";
 import { Spinner } from "@fluentui/react-components";
 import { app } from "@microsoft/teams-js";
 import { IFluidContainer } from "fluid-framework";
-import React from "react";
 import { FC, ReactNode, useMemo } from "react";
 import { FlexColumn } from "./flex";
 import { inTeams } from "../utils/inTeams";
@@ -30,8 +29,8 @@ export const LiveSharePage: FC<{
         <>
             {loadText && (
                 <FlexColumn
-                    hAlignCenter
-                    vAlignCenter
+                    hAlign="center"
+                    vAlign="center"
                     style={{
                         position: "fixed",
                         left: "0px",

@@ -29,13 +29,7 @@ export const useTakeControl = (
 
     // Computed presentingUser object based on most recent online user to take control
     const presentingUser = useMemo(() => {
-        const onlineUsers = users.filter((user) => {
-            return user.state === "online";
-        });
-        if (onlineUsers.length === 0) {
-            return null;
-        }
-        const mappedOnlineUsers = onlineUsers.map((user) => {
+        const mappedUsers = users.map((user) => {
             return {
                 userId: user.userId,
                 state: user.state,
@@ -45,7 +39,7 @@ export const useTakeControl = (
                     : 0,
             };
         });
-        mappedOnlineUsers.sort((a, b) => {
+        mappedUsers.sort((a, b) => {
             // Sort by joined timestamp in descending
             if (a.lastInControlTimestamp === b.lastInControlTimestamp) {
                 return (

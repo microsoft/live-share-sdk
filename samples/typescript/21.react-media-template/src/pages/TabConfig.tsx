@@ -3,34 +3,30 @@
  * Licensed under the MIT License.
  */
 
-import * as microsoftTeams from "@microsoft/teams-js";
-import React, { FC, useEffect } from "react";
-import { getFlexColumnStyles } from "../styles/layouts";
-import { mergeClasses, Title2, Subtitle2 } from "@fluentui/react-components";
+import { pages } from "@microsoft/teams-js";
+import { FC, useEffect } from "react";
+import { Title2, Subtitle2 } from "@fluentui/react-components";
+import { FlexColumn } from "../components";
 
 const TabConfig: FC = () => {
     useEffect(() => {
-        microsoftTeams.pages.config.registerOnSaveHandler(function (saveEvent) {
-            microsoftTeams.pages.config.setConfig({
+        pages.config.registerOnSaveHandler(function (saveEvent) {
+            pages.config.setConfig({
                 suggestedDisplayName: "Contoso",
                 contentUrl: `${window.location.origin}/sidepanel?inTeams=true`,
             });
             saveEvent.notifySuccess();
         });
 
-        microsoftTeams.pages.config.setValidityState(true);
+        pages.config.setValidityState(true);
     }, []);
 
-    const flexColumnStyles = getFlexColumnStyles();
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.hAlignCenter,
-                flexColumnStyles.vAlignCenter,
-                flexColumnStyles.fill,
-                flexColumnStyles.smallGap
-            )}
+        <FlexColumn
+            vAlign="center"
+            hAlign="center"
+            fill="view"
+            gap="small"
         >
             <Title2 as="h2" block align="center">
                 Welcome to Contoso Media!
@@ -38,7 +34,7 @@ const TabConfig: FC = () => {
             <Subtitle2 as="p" block align="center">
                 Press the save button to continue.
             </Subtitle2>
-        </div>
+        </FlexColumn>
     );
 };
 

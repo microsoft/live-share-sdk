@@ -15,7 +15,7 @@ import { getFlexItemStyles, getFlexRowStyles } from "../styles/layouts";
 import { MediaCard } from "./MediaCard";
 import { FC, useMemo, useState } from "react";
 import { MediaItem } from "../utils/media-list";
-import React from "react";
+import { FlexItem, FlexRow } from "./flex";
 
 export const TabbedList: FC<{
     mediaItems: MediaItem[];
@@ -54,22 +54,25 @@ export const TabbedList: FC<{
     const flexItemStyles = getFlexItemStyles();
     return (
         <>
-            <div
-                style={{ width: "100%" }}
-                className={mergeClasses(
-                    flexRowStyles.root,
-                    flexRowStyles.vAlignCenter,
-                    flexItemStyles.noShrink
-                )}
-            >
-                <TabList
-                    selectedValue={selectedValue}
-                    onTabSelect={onTabSelect}
+            <FlexItem noShrink>
+                <FlexRow
+                    vAlign="center"
+                    style={{ width: "100%" }}
+                    className={mergeClasses(
+                        flexRowStyles.root,
+                        flexRowStyles.vAlignCenter,
+                        flexItemStyles.noShrink
+                    )}
                 >
-                    <Tab value="tab1">Playlist</Tab>
-                    <Tab value="tab2">Browse</Tab>
-                </TabList>
-            </div>
+                    <TabList
+                        selectedValue={selectedValue}
+                        onTabSelect={onTabSelect}
+                    >
+                        <Tab value="tab1">Playlist</Tab>
+                        <Tab value="tab2">Browse</Tab>
+                    </TabList>
+                </FlexRow>
+            </FlexItem>
             {selectedValue === "tab1" &&
                 mediaItems.map((mediaItem) => (
                     <MediaCard

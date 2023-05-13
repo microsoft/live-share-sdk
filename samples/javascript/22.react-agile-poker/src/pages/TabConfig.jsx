@@ -4,9 +4,7 @@
  */
 import { useEffect } from "react";
 import * as microsoftTeams from "@microsoft/teams-js";
-// UI imports:
-import { getFlexColumnStyles } from "../styles/layout";
-import { mergeClasses, Title2, Subtitle2 } from "@fluentui/react-components";
+import { Title2, Subtitle2 } from "@fluentui/react-components";
 
 const TabConfig = () => {
     useEffect(() => {
@@ -21,16 +19,12 @@ const TabConfig = () => {
         microsoftTeams.pages.config.setValidityState(true);
     }, []);
 
-    const flexColumnStyles = getFlexColumnStyles();
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.hAlignCenter,
-                flexColumnStyles.vAlignCenter,
-                flexColumnStyles.fill,
-                flexColumnStyles.smallGap
-            )}
+        <FlexColumn
+            vAlign="center"
+            hAlign="center"
+            fill="both"
+            gap="small"
         >
             <Title2 block align="center">
                 Welcome to Agile Poker!
@@ -38,7 +32,7 @@ const TabConfig = () => {
             <Subtitle2 block align="center">
                 Press the save button to continue.
             </Subtitle2>
-        </div>
+        </FlexColumn>
     );
 };
 

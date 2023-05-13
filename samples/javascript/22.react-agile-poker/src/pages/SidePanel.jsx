@@ -52,7 +52,7 @@ const SidePanel = () => {
                     <UI.AddUserStory addUserStory={addUserStory} />
                 </UI.SidePanelAccordion>
 
-                <UI.FlexColumn marginSpacer fill vAlignStart>
+                <UI.FlexColumn gap="small" fill="both" vAlign="start">
                     {/** UI list of User Stories */}
                     {userStories.map((userStory) => {
                         return (

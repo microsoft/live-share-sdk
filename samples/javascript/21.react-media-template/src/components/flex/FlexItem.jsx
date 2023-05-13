@@ -3,7 +3,7 @@ import { mergeClasses } from "@fluentui/react-components";
 import { getFlexItemStyles } from "./flex-styles";
 import { forwardRef } from "react";
 
-const FlexItem = forwardRef((props, ref) => {
+export const FlexItem = forwardRef((props, ref) => {
     const { className, children, grow, noShrink, style } = props;
     const flexItemStyles = getFlexItemStyles();
     const mergedClasses = mergeClasses(
@@ -27,5 +27,3 @@ FlexColumn.propTypes = {
     noShrink: PropTypes.bool,
     style: PropTypes.object,
 };
-
-export default FlexItem;

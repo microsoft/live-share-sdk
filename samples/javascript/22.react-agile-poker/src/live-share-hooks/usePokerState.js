@@ -6,11 +6,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useStateRef } from "../utils/useStateRef";
 import { LiveState } from "@microsoft/live-share";
+import { getInitialUserStoryId } from "./useUserStories";
 
 const AVAILABLE_STATES = ["waiting", "costing", "discussion"];
 const INITIAL_STATE = {
     state: "waiting",
-    value: null,
+    value: getInitialUserStoryId(),
 };
 
 /**

@@ -3,7 +3,7 @@ import { forwardRef } from "react";
 import { mergeClasses } from "@fluentui/react-components";
 import { getFlexRowStyles } from "./flex-styles";
 
-const FlexRow = forwardRef((props, ref) => {
+export const FlexRow = forwardRef((props, ref) => {
     const {
         children,
         // Merged classes from parent
@@ -71,21 +71,18 @@ FlexRow.displayName = "FlexColumn";
 FlexRow.propTypes = {
     children: PropTypes.node,
     className: PropTypes.string,
-    columnOnSmallScreen: PropTypes.boolean,
+    columnOnSmallScreen: PropTypes.bool,
     fill: PropTypes.oneOf(["both", "height", "width", "view"]),
-    gap: PropTypes.oneOf(["smaller" | "small" | "medium" | "large"]),
-    hAlign: PropTypes.oneOf(["start" | "center" | "end"]),
-    isHidden: PropTypes.boolean,
+    gap: PropTypes.oneOf(["smaller", "small", "medium", "large"]),
+    hAlign: PropTypes.oneOf(["start", "center", "end"]),
     name: PropTypes.string,
     onClick: PropTypes.func,
     onMouseMove: PropTypes.func,
     role: PropTypes.string,
-    scroll: PropTypes.boolean,
+    scroll: PropTypes.bool,
     spaceBetween: PropTypes.bool,
     style: PropTypes.object,
-    transparent: PropTypes.transparent,
-    vAlign: PropTypes.oneOf(["start" | "center" | "end"]),
+    transparent: PropTypes.bool,
+    vAlign: PropTypes.oneOf(["start", "center", "end"]),
     wrap: PropTypes.bool,
 };
-
-export default FlexRow;

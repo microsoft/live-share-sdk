@@ -20,7 +20,7 @@ export const useUserStories = (
     const userStory = useMemo(() => {
         let id = userStoryId ?? initialUserStoryIdRef.current;
         return userStories.find((story) => story.id === id);
-    }, [userStoryId, initialUserStoryIdRef, userStories]);
+    }, [userStoryId, userStories]);
 
     const addUserStory = useCallback(
         (userStoryText) => {
@@ -86,11 +86,10 @@ export const useUserStories = (
     };
 };
 
-function getInitialUserStoryId() {
+export function getInitialUserStoryId() {
     const url = window.location.href.includes("/#/")
         ? new URL(`${window.location.href.split("/#/").join("/")}`)
-        : new URL(window.location);
-    const params = url.searchParams;
+        : new URL(window.location.href);
     // If params doesn't have a user story, use the first one in our default list
-    return params.get("userStoryId") ?? getDefaultUserStories()[0].id;
+    return url.searchParams.get("userStoryId") ?? getDefaultUserStories()[0].id;
 }

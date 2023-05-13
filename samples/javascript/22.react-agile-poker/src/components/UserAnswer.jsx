@@ -3,39 +3,28 @@
  * Licensed under the MIT License.
  */
 
-import { mergeClasses, Subtitle2 } from "@fluentui/react-components";
-import { getFlexColumnStyles, getFlexRowStyles } from "../styles/layout";
+import { Subtitle2 } from "@fluentui/react-components";
 import { PlayerAvatar } from "./PlayerAvatar";
+import { FlexColumn, FlexRow } from "./flex";
 
 export const UserAnswer = ({ user, localUserId, index }) => {
-    const flexRowStyles = getFlexRowStyles();
-    const flexColumnStyles = getFlexColumnStyles();
     return (
-        <div
-            className={mergeClasses(
-                flexRowStyles.root,
-                flexRowStyles.vAlignCenter,
-                flexRowStyles.smallGap
-            )}
+        <FlexRow
+            vAlign="center"
+            gap="small"
         >
-            <div
-                className={mergeClasses(
-                    flexColumnStyles.root,
-                    flexColumnStyles.hAlignCenter
-                )}
+            <FlexColumn
+                hAlign="center"
             >
                 <PlayerAvatar
                     user={user}
                     localUserId={localUserId}
                     index={index}
                 />
-            </div>
-            <div
-                className={mergeClasses(
-                    flexColumnStyles.root,
-                    flexColumnStyles.vAlignCenter,
-                    flexColumnStyles.hAlignCenter
-                )}
+            </FlexColumn>
+            <FlexColumn
+                vAlign="center"
+                hAlign="center"
                 style={{
                     width: "4.4rem",
                     height: "5.6rem",
@@ -46,7 +35,7 @@ export const UserAnswer = ({ user, localUserId, index }) => {
                 }}
             >
                 <Subtitle2>{`${user.data?.answer ?? "N/A"}`}</Subtitle2>
-            </div>
-        </div>
+            </FlexColumn>
+        </FlexRow>
     );
 };

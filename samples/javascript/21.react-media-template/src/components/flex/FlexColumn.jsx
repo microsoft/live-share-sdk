@@ -3,7 +3,7 @@ import { forwardRef } from "react";
 import { mergeClasses } from "@fluentui/react-components";
 import { getFlexColumnStyles } from "./flex-styles";
 
-const FlexColumn = forwardRef((props, ref) => {
+export const FlexColumn = forwardRef((props, ref) => {
     const {
         children,
         className,
@@ -72,17 +72,15 @@ FlexColumn.propTypes = {
     children: PropTypes.node,
     className: PropTypes.string,
     fill: PropTypes.oneOf(["both", "height", "width", "view"]),
-    gap: PropTypes.oneOf(["smaller" | "small" | "medium" | "large"]),
-    hAlign: PropTypes.oneOf(["start" | "center" | "end"]),
+    gap: PropTypes.oneOf(["smaller", "small", "medium", "large"]),
+    hAlign: PropTypes.oneOf(["start", "center", "end"]),
     name: PropTypes.string,
     role: PropTypes.string,
     spaceBetween: PropTypes.bool,
-    scroll: PropTypes.boolean,
+    scroll: PropTypes.bool,
     style: PropTypes.object,
-    transparent: PropTypes.transparent,
-    vAlign: PropTypes.oneOf(["start" | "center" | "end"]),
+    transparent: PropTypes.bool,
+    vAlign: PropTypes.oneOf(["start", "center", "end"]),
     onClick: PropTypes.func,
     onMouseMove: PropTypes.func,
 };
-
-export default FlexColumn;

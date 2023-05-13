@@ -3,18 +3,14 @@
  * Licensed under the MIT License.
  */
 
-import { Subtitle2, mergeClasses } from "@fluentui/react-components";
-import { getFlexColumnStyles } from "../styles/layout";
+import { Subtitle2 } from "@fluentui/react-components";
+import { FlexColumn } from "./flex";
 
 export const StoryPointCard = ({ value, selectedValue }) => {
-    const flexColumnStyles = getFlexColumnStyles();
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.vAlignCenter,
-                flexColumnStyles.hAlignCenter
-            )}
+        <FlexColumn
+            vAlign="center"
+            hAlign="center"
             style={{
                 width: "5.5rem",
                 height: "7rem",
@@ -26,6 +22,6 @@ export const StoryPointCard = ({ value, selectedValue }) => {
             }}
         >
             <Subtitle2>{value}</Subtitle2>
-        </div>
+        </FlexColumn>
     );
 };

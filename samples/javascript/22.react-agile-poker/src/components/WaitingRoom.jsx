@@ -7,16 +7,11 @@ import {
     Button,
     Subtitle2,
     Image,
-    mergeClasses,
 } from "@fluentui/react-components";
-import {
-    getFlexColumnStyles,
-    getFlexItemStyles,
-    getFlexRowStyles,
-} from "../styles/layout";
 import logo from "../assets/agile-poker-logo-large.png";
 import { getPrimaryButtonStyles } from "../styles/components";
 import { PlayerAvatar } from "./PlayerAvatar";
+import { FlexColumn, FlexRow } from "./flex";
 
 export const WaitingRoom = ({
     localUserId,
@@ -24,35 +19,23 @@ export const WaitingRoom = ({
     users,
     userStory,
 }) => {
-    const flexRowStyles = getFlexRowStyles();
-    const flexColumnStyles = getFlexColumnStyles();
-    const flexItemStyles = getFlexItemStyles();
     const primaryButtonStyles = getPrimaryButtonStyles();
     return (
-        <div
-            className={mergeClasses(
-                flexRowStyles.root,
-                flexRowStyles.vAlignStart,
-                flexRowStyles.fill
-            )}
+        <FlexRow
+            vAlign="center"
+            fill="both"
         >
-            <div
-                className={mergeClasses(
-                    flexColumnStyles.root,
-                    flexColumnStyles.vAlignCenter,
-                    flexColumnStyles.fill
-                )}
+            <FlexColumn
+                vAlign="center"
+                fill="both"
                 style={{ maxWidth: "376px" }}
             >
                 <Image width={376} src={logo} />
-                <div
-                    className={mergeClasses(
-                        flexColumnStyles.root,
-                        flexColumnStyles.vAlignCenter,
-                        flexColumnStyles.hAlignCenter,
-                        flexColumnStyles.smallGap,
-                        flexItemStyles.grow
-                    )}
+                <FlexColumn
+                    fill="both"
+                    vAlign="center"
+                    hAlign="center"
+                    gap="small"
                 >
                     <Button
                         className={primaryButtonStyles.button}
@@ -72,14 +55,11 @@ export const WaitingRoom = ({
                     <Subtitle2 align="center">
                         {"When everyone's ready!"}
                     </Subtitle2>
-                </div>
-            </div>
-            <div
-                className={mergeClasses(
-                    flexRowStyles.root,
-                    flexRowStyles.vAlignStart,
-                    flexRowStyles.wrap
-                )}
+                </FlexColumn>
+            </FlexColumn>
+            <FlexRow
+                vAlign="start"
+                wrap
                 style={{
                     padding: "5rem 7rem",
                 }}
@@ -93,7 +73,7 @@ export const WaitingRoom = ({
                         />
                     </div>
                 ))}
-            </div>
-        </div>
+            </FlexRow>
+        </FlexRow>
     );
 };

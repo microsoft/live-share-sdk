@@ -3,16 +3,12 @@
  * Licensed under the MIT License.
  */
 
-import { Button, Text, Title1, mergeClasses } from "@fluentui/react-components";
+import { Button, Text, Title1 } from "@fluentui/react-components";
 import { getPrimaryButtonStyles } from "../styles/components";
-import {
-    getFlexColumnStyles,
-    getFlexItemStyles,
-    getFlexRowStyles,
-} from "../styles/layout";
 import { GameHeader } from "./GameHeader";
 import { GameTimer } from "./GameTimer";
 import { StoryPointCard } from "./StoryPointCard";
+import { FlexRow, FlexColumn, FlexItem } from "./flex";
 
 export const CostingGame = ({
     users,
@@ -23,91 +19,56 @@ export const CostingGame = ({
     setAnswer,
     changeReadyStatus,
 }) => {
-    const flexRowStyles = getFlexRowStyles();
-    const flexColumnStyles = getFlexColumnStyles();
-    const flexItemStyles = getFlexItemStyles();
     const primaryButtonStyles = getPrimaryButtonStyles();
 
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.fill,
-                flexColumnStyles.smallGap
-            )}
-        >
+        <FlexColumn fill="both" gap="medium">
             <GameHeader
                 timer={<GameTimer timerMilliRemaining={timerMilliRemaining} />}
             />
-            <div
-                className={mergeClasses(
-                    flexColumnStyles.root,
-                    flexColumnStyles.grow,
-                    flexColumnStyles.vAlignCenter,
-                    flexColumnStyles.hAlignCenter,
-                    flexItemStyles.grow
-                )}
-            >
+            <FlexColumn fill="both" vAlign="center" hAlign="center">
                 <Title1 align="center">{userStory.text}</Title1>
-            </div>
-            <div
-                className={mergeClasses(
-                    flexRowStyles.root,
-                    flexRowStyles.vAlignCenter,
-                    flexRowStyles.hAlignEnd,
-                    flexRowStyles.smallGap
-                )}
-            >
-                <div
-                    className={mergeClasses(
-                        flexItemStyles.grow,
-                        flexRowStyles.root,
-                        flexRowStyles.hAlignEnd
-                    )}
+            </FlexColumn>
+            <FlexRow vAlign="center" hAlign="end" gap="small" spaceBetween>
+                <Text
+                    align="end"
+                    weight="semibold"
+                    size={600}
+                >{`${readyUsersCount}/${users.length} people are ready`}</Text>
+                <Button
+                    disabled={!answer}
+                    className={primaryButtonStyles.button}
+                    onClick={() => {
+                        changeReadyStatus(true);
+                    }}
                 >
-                    <Text
-                        align="end"
-                        weight="semibold"
-                        size={600}
-                    >{`${readyUsersCount}/${users.length} people are ready`}</Text>
-                </div>
-                <div>
-                    <Button
-                        disabled={!answer}
-                        className={primaryButtonStyles.button}
-                        onClick={() => {
-                            changeReadyStatus(true);
-                        }}
-                    >
-                        Submit
-                    </Button>
-                </div>
-            </div>
-            <div
-                className={mergeClasses(
-                    flexRowStyles.root,
-                    flexRowStyles.vAlignCenter,
-                    flexRowStyles.hAlignCenter,
-                    flexRowStyles.wrap,
-                    flexRowStyles.smallGap
-                )}
-            >
-                {["0", "1", "2", "3", "5", "8", "13", "20"].map((value) => {
-                    return (
-                        <div
-                            key={`card${value}`}
-                            onClick={() => {
-                                setAnswer(value);
-                            }}
-                        >
-                            <StoryPointCard
-                                value={value}
-                                selectedValue={answer}
-                            />
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
+                    Submit
+                </Button>
+            </FlexRow>
+            <FlexItem noShrink>
+                <FlexRow
+                    vAlign="center"
+                    hAlign="center"
+                    wrap
+                    gap="small"
+                >
+                    {["0", "1", "2", "3", "5", "8", "13", "20"].map((value) => {
+                        return (
+                            <div
+                                key={`card${value}`}
+                                onClick={() => {
+                                    setAnswer(value);
+                                }}
+                            >
+                                <StoryPointCard
+                                    value={value}
+                                    selectedValue={answer}
+                                />
+                            </div>
+                        );
+                    })}
+                </FlexRow>
+            </FlexItem>
+        </FlexColumn>
     );
 };

@@ -3,15 +3,12 @@
  * Licensed under the MIT License.
  */
 
-import { mergeClasses } from "@fluentui/react-components";
-import { getFlexColumnStyles } from "../styles/layout";
 import background from "../assets/game-bg.png";
+import { FlexColumn } from "./flex";
 
 export const GameContainer = ({ children }) => {
-    const flexColumnStyles = getFlexColumnStyles();
     return (
-        <div
-            className={mergeClasses(flexColumnStyles.root)}
+        <FlexColumn
             style={{
                 padding: "2.8rem",
                 backgroundImage: `url(${background})`,
@@ -25,6 +22,6 @@ export const GameContainer = ({ children }) => {
             }}
         >
             {children}
-        </div>
+        </FlexColumn>
     );
 };

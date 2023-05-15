@@ -13,18 +13,13 @@ import {
     ReactEventHandler,
     MutableRefObject,
 } from "react";
-import {
-    PositioningImperativeRef,
-    Slider,
-    Slot,
-} from "@fluentui/react-components";
+import { PositioningImperativeRef, Slider } from "@fluentui/react-components";
 import { Tooltip } from "@fluentui/react-components";
 import { getProgressBarStyles } from "../styles/styles";
 import { debounce } from "lodash";
 import useResizeObserver from "use-resize-observer";
 import { getFlexItemStyles } from "../styles/layouts";
 import { formatTimeValue } from "../utils/format";
-import React from "react";
 
 const PlayerProgressBar: FC<{
     currentTime: number;

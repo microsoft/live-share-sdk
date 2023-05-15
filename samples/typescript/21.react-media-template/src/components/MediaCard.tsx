@@ -4,12 +4,11 @@
  */
 
 import { Card, CardPreview, CardFooter } from "@fluentui/react-components";
-import { Image, Text, Button, mergeClasses } from "@fluentui/react-components";
+import { Image, Text, Button } from "@fluentui/react-components";
 import { Delete20Regular } from "@fluentui/react-icons";
-import { getFlexRowStyles, getFlexItemStyles } from "../styles/layouts";
 import { FC } from "react";
 import { MediaItem } from "../utils/media-list";
-import React from "react";
+import { FlexItem, FlexRow } from "./flex";
 
 export const MediaCard: FC<{
     mediaItem: MediaItem;
@@ -26,10 +25,8 @@ export const MediaCard: FC<{
     selectMedia,
     removeMediaItem,
 }) => {
-    const flexRowStyle = getFlexRowStyles();
-    const flexItemStyles = getFlexItemStyles();
     return (
-        <div className={flexItemStyles.noShrink}>
+        <FlexItem noShrink>
             <Card
                 appearance="filled"
                 style={{
@@ -76,11 +73,8 @@ export const MediaCard: FC<{
                         minWidth: "0px",
                     }}
                 >
-                    <div
-                        className={mergeClasses(
-                            flexRowStyle.root,
-                            flexRowStyle.vAlignCenter
-                        )}
+                    <FlexRow
+                        vAlign="center"
                         style={{
                             width: "100%",
                             paddingLeft: "0.8rem",
@@ -89,7 +83,7 @@ export const MediaCard: FC<{
                             paddingTop: "0rem",
                         }}
                     >
-                        <div className={flexItemStyles.grow}>
+                        <FlexItem grow>
                             <Button
                                 appearance="outline"
                                 size="small"
@@ -103,7 +97,7 @@ export const MediaCard: FC<{
                             >
                                 {buttonText}
                             </Button>
-                        </div>
+                        </FlexItem>
                         {!!removeMediaItem && (
                             <Button
                                 appearance="subtle"
@@ -115,9 +109,9 @@ export const MediaCard: FC<{
                                 }}
                             />
                         )}
-                    </div>
+                    </FlexRow>
                 </CardFooter>
             </Card>
-        </div>
+        </FlexItem>
     );
 };

@@ -1,20 +1,11 @@
-import { Text, mergeClasses } from "@fluentui/react-components";
-import React from "react";
+import { Text } from "@fluentui/react-components";
 import { FC } from "react";
-import { getFlexColumnStyles } from "../styles/layouts";
+import { FlexColumn } from "./flex";
 
 export const PageError: FC<{ error: any }> = ({ error }) => {
-    const flexColumnStyles = getFlexColumnStyles();
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.fill,
-                flexColumnStyles.vAlignCenter,
-                flexColumnStyles.hAlignCenter
-            )}
-        >
+        <FlexColumn fill="both" vAlign="center" hAlign="center">
             <Text align="center">{`${error}`}</Text>
-        </div>
+        </FlexColumn>
     );
 };

@@ -4,25 +4,23 @@ import { useMemo } from "react";
 import { FlexColumn } from "./flex";
 
 export const LiveSharePage = ({ children, context, container, started }) => {
-    const loadText = useMemo(() => {
-        if (!context) {
-            return "Loading Teams Client SDK...";
-        }
-        if (!container) {
-            return "Joining Live Share session...";
-        }
-        if (!started) {
-            return "Starting sync...";
-        }
-        return undefined;
-    }, [context, container, started]);
+    let loadText = undefined;
+    if (!context) {
+        loadText = "Loading Teams Client SDK...";
+    }
+    if (!container) {
+        loadText = "Joining Live Share session...";
+    }
+    if (!started) {
+        loadText = "Starting sync...";
+    }
 
     return (
         <>
             {loadText && (
                 <FlexColumn
-                    hAlignCenter
-                    vAlignCenter
+                    hAlign="center"
+                    vAlign="center"
                     style={{
                         position: "fixed",
                         left: "0px",

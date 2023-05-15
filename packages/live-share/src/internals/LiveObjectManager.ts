@@ -34,7 +34,10 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     private objectStoreMap: ILiveObjectStore = new Map();
 
     private _audience?: IAzureAudience;
-    private _onBoundReceivedSignalListener?: (message: IInboundSignalMessage, local: boolean) => void;
+    private _onBoundReceivedSignalListener?: (
+        message: IInboundSignalMessage,
+        local: boolean
+    ) => void;
     /**
      * Create a new registry for all of the `LiveObjectSynchronizer` objects for a Live Share session.
      * @param _liveRuntime runtime for the Live Share session.
@@ -167,7 +170,9 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         data: TState
     ): Promise<ILiveEvent<TState>> {
         if (!this._synchronizer) {
-            throw new Error("LiveObjectManager.sendEventForObject: cannot send the event");
+            throw new Error(
+                "LiveObjectManager.sendEventForObject: cannot send the event"
+            );
         }
         const valueSent = await this._synchronizer.sendEventForObject(
             objectId,
@@ -295,11 +300,17 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             this.stopReceivingSignalUpdates();
         }
         this._onBoundReceivedSignalListener = this.onReceivedSignal.bind(this);
-        this._containerRuntime.on("signal", this._onBoundReceivedSignalListener);
+        this._containerRuntime.on(
+            "signal",
+            this._onBoundReceivedSignalListener
+        );
     }
 
     private stopReceivingSignalUpdates() {
         if (!this._onBoundReceivedSignalListener) return;
-        this._containerRuntime.off("signal", this._onBoundReceivedSignalListener);
+        this._containerRuntime.off(
+            "signal",
+            this._onBoundReceivedSignalListener
+        );
     }
 }

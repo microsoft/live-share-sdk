@@ -3,22 +3,18 @@
  * Licensed under the MIT License.
  */
 
-import { Title2, mergeClasses } from "@fluentui/react-components";
-import { getFlexColumnStyles } from "../styles/layout";
+import { Title2 } from "@fluentui/react-components";
+import { FlexColumn } from "./flex";
 
 export const ErrorPane = ({ error }) => {
-    const flexColumnStyles = getFlexColumnStyles();
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.smallGap,
-                flexColumnStyles.hAlignCenter,
-                flexColumnStyles.vAlignCenter
-            )}
+        <FlexColumn
+            gap="small"
+            hAlign="center"
+            vAlign="center"
             style={{ padding: "5rem" }}
         >
             <Title2>{`${error}`}</Title2>
-        </div>
+        </FlexColumn>
     );
 };

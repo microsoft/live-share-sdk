@@ -1,5 +1,6 @@
 {
   "name": "react-video",
+  "private": true,
   "version": "1.0.0",
   "description": "Sample video app using react.",
   "repository": "https://github.com/microsoft/live-share-sdk",

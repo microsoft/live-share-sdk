@@ -8,13 +8,10 @@ import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import {
     InkingManager,
     InkingTool,
-    IUserInfo,
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
-import { IFluidContainer } from "fluid-framework";
 import * as Utils from "./utils";
 import { View } from "./view";
-import { getRandomUserInfo } from "./random-userInfo";
 
 /**
  * Other images
@@ -69,10 +66,10 @@ const containerSchema = {
 };
 
 export class StageView extends View {
-    private _inkingManager!: InkingManager;
-    private _container!: IFluidContainer;
+    _inkingManager;
+    _container;
 
-    private offsetBy(x: number, y: number) {
+    offsetBy(x, y) {
         this._inkingManager.offset = {
             x: this._inkingManager.offset.x + x,
             y: this._inkingManager.offset.y + y,
@@ -81,14 +78,13 @@ export class StageView extends View {
         this.updateBackgroundImagePosition();
     }
 
-    private getLiveCanvas(): LiveCanvas {
-        return this._container.initialObjects.liveCanvas as LiveCanvas;
+    getLiveCanvas() {
+        return this._container.initialObjects.liveCanvas;
     }
 
-    private _hostResizeObserver!: ResizeObserver;
-    private _userInfo: IUserInfo;
+    _hostResizeObserver;
 
-    private async internalStart() {
+    async internalStart() {
         const host = Utils.runningInTeams()
             ? Teams.LiveShareHost.create()
             : TestLiveShareHost.create();
@@ -102,9 +98,6 @@ export class StageView extends View {
 
         if (inkingHost) {
             const liveCanvas = this.getLiveCanvas();
-            liveCanvas.onGetLocalUserInfo = () => {
-                return this._userInfo;
-            };
 
             this._inkingManager = new InkingManager(inkingHost);
 
@@ -126,10 +119,10 @@ export class StageView extends View {
         this.updateBackgroundImagePosition();
     }
 
-    private _backgroundImageWidth?: number;
-    private _backgroundImageHeight?: number;
+    _backgroundImageWidth;
+    _backgroundImageHeight;
 
-    private updateBackgroundImagePosition() {
+    updateBackgroundImagePosition() {
         const backgroundImage = document.getElementById("backgroundImage");
 
         if (
@@ -163,13 +156,9 @@ export class StageView extends View {
     constructor() {
         super();
 
-        this._userInfo = getRandomUserInfo();
-
         Utils.loadTemplate(appTemplate, document.body);
 
-        const backgroundImage = document.getElementById(
-            "backgroundImage"
-        ) as HTMLImageElement;
+        const backgroundImage = document.getElementById("backgroundImage");
 
         if (backgroundImage) {
             const showBackgroundImage = () => {
@@ -188,7 +177,7 @@ export class StageView extends View {
             }
         }
 
-        const setupButton = (buttonId: string, onClick: () => void) => {
+        const setupButton = (buttonId, onClick) => {
             const button = document.getElementById(buttonId);
 
             if (button) {
@@ -301,7 +290,7 @@ export class StageView extends View {
             try {
                 const strokes = await Utils.parseStrokesFromClipboard();
                 this._inkingManager.importRaw(strokes);
-            } catch (error: any) {
+            } catch (error) {
                 console.error(error);
                 alert(
                     "Unable to parse strokes from clipboard.\nError: " +

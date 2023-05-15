@@ -3,8 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { mergeClasses, Text } from "@fluentui/react-components";
-import { getFlexColumnStyles } from "../styles/layout";
+import { Text } from "@fluentui/react-components";
 import nameShape1 from "../assets/name-shape-1.png";
 import nameShape2 from "../assets/name-shape-2.png";
 import avatar1 from "../assets/avatar1.png";
@@ -19,6 +18,7 @@ import avatar9 from "../assets/avatar9.png";
 import avatar10 from "../assets/avatar10.png";
 import avatar11 from "../assets/avatar11.png";
 import avatar12 from "../assets/avatar12.png";
+import { FlexColumn } from "./flex";
 
 const avatars = [
     avatar1,
@@ -36,18 +36,14 @@ const avatars = [
 ];
 
 export const PlayerAvatar = ({ user, index }) => {
-    const flexColumnStyles = getFlexColumnStyles();
     const imageSrc = (index + 1) % 2 ? nameShape2 : nameShape1;
     const avatarIndex =
         user.data && user.data.avatarIndex >= 0 ? user.data.avatarIndex : 0;
     const avatarSrc = avatars[avatarIndex];
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.vAlignCenter,
-                flexColumnStyles.smallGap
-            )}
+        <FlexColumn
+            vAlign="center"
+            gap="small"
             style={{ padding: "12px" }}
         >
             <div
@@ -63,7 +59,9 @@ export const PlayerAvatar = ({ user, index }) => {
                     borderRadius: "50%",
                 }}
             />
-            <div
+            <FlexColumn
+                vAlign="center"
+                hAlign="center"
                 style={{
                     backgroundImage: `url(${imageSrc})`,
                     backgroundRepeat: "no-repeat",
@@ -72,11 +70,6 @@ export const PlayerAvatar = ({ user, index }) => {
                     width: "110px",
                     height: "40px",
                 }}
-                className={mergeClasses(
-                    flexColumnStyles.root,
-                    flexColumnStyles.hAlignCenter,
-                    flexColumnStyles.vAlignCenter
-                )}
             >
                 <Text
                     truncate
@@ -92,7 +85,7 @@ export const PlayerAvatar = ({ user, index }) => {
                 >
                     {`${user.name}`}
                 </Text>
-            </div>
-        </div>
+            </FlexColumn>
+        </FlexColumn>
     );
 };

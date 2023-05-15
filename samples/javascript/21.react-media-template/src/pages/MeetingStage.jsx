@@ -64,10 +64,10 @@ const MeetingStage = () => {
         localUserIsPresenting, // boolean that is true if local user is currently presenting
         takeControl, // callback method to take control of playback
     } = liveShareHooks.useTakeControl(
-        takeControlMap,
-        localUser?.userId,
         localUserIsEligiblePresenter,
         users,
+        takeControlMap,
+        localUser?.userId,
         timestampProvider,
         sendNotification
     );

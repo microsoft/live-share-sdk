@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-export interface IReceiveLiveEvent<TEvent extends object = object> {
-    event: TEvent;
+export interface IReceiveLiveEvent<TEvent = any> {
+    value: TEvent;
     local: boolean;
 }

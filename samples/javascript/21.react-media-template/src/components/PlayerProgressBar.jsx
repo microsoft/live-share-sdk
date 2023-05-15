@@ -9,8 +9,8 @@ import { Tooltip } from "@fluentui/react-components";
 import { getProgressBarStyles } from "../styles/styles";
 import { debounce } from "lodash";
 import useResizeObserver from "use-resize-observer";
-import { getFlexItemStyles } from "../styles/layouts";
 import { formatTimeValue } from "../utils/format";
+import { FlexItem } from "./flex";
 
 const PlayerProgressBar = ({
     currentTime,
@@ -29,7 +29,6 @@ const PlayerProgressBar = ({
     const [isSeeking, setIsSeeking] = useState(false);
 
     const styles = getProgressBarStyles();
-    const flexItemStyles = getFlexItemStyles();
 
     const onDidSeek = useCallback(() => {
         onSeek(localCurrentTime);
@@ -109,7 +108,7 @@ const PlayerProgressBar = ({
     const bufferLoadedPercent = 0;
 
     return (
-        <div className={flexItemStyles.noShrink} ref={resizeRef}>
+        <FlexItem noShrink ref={resizeRef}>
             <div className={styles.pageEl}>
                 <Tooltip
                     withArrow
@@ -168,7 +167,7 @@ const PlayerProgressBar = ({
                     />
                 </Tooltip>
             </div>
-        </div>
+        </FlexItem>
     );
 };
 

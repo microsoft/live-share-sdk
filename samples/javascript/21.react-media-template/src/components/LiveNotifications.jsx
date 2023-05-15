@@ -4,9 +4,9 @@
  */
 
 import React, { useEffect, useState, useRef } from "react";
-import { getFlexColumnStyles } from "../styles/layouts";
 import { mergeClasses } from "@fluentui/react-components";
 import { getLiveNotificationStyles, getPillStyles } from "../styles/styles";
+import { FlexColumn } from "./flex";
 
 export const LiveNotifications = ({ notificationToDisplay }) => {
     const notificationsRef = useRef([]);
@@ -38,19 +38,15 @@ export const LiveNotifications = ({ notificationToDisplay }) => {
                 }
             }, 1500);
         }
-    }, [notificationToDisplay, setNotifications]);
+    }, [notificationToDisplay]);
 
-    const flexColumnStyles = getFlexColumnStyles();
     const pillStyles = getPillStyles();
     const liveNotifications = getLiveNotificationStyles();
 
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.hAlignCenter,
-                liveNotifications.root
-            )}
+        <FlexColumn
+            hAlign="center"
+            className={mergeClasses(liveNotifications.root)}
         >
             {notifications.map((notification) => {
                 return (
@@ -62,6 +58,6 @@ export const LiveNotifications = ({ notificationToDisplay }) => {
                     </div>
                 );
             })}
-        </div>
+        </FlexColumn>
     );
 };

@@ -1,53 +1,73 @@
+import { forwardRef } from "react";
 import { mergeClasses } from "@fluentui/react-components";
-import { CSSProperties, FC, ReactNode } from "react";
-import { getFlexColumnStyles } from "./FlexStyles";
+import { FlexOptions, getFlexColumnStyles } from "./flex-styles";
 
-export const FlexColumn: FC<{
-    children: ReactNode;
-    fill?: boolean;
-    hAlignCenter?: boolean;
-    hAlignEnd?: boolean;
-    hAlignStart?: boolean;
-    marginSpacer?: boolean;
-    scroll?: boolean;
-    spaceBetween?: boolean;
-    style?: CSSProperties;
-    vAlignCenter?: boolean;
-    vAlignEnd?: boolean;
-    vAlignStart?: boolean;
-}> = (props) => {
-    const {
-        children,
-        fill,
-        hAlignCenter,
-        hAlignEnd,
-        hAlignStart,
-        marginSpacer,
-        scroll,
-        spaceBetween,
-        style,
-        vAlignCenter,
-        vAlignEnd,
-        vAlignStart,
-    } = props;
-    const flexColumnStyles = getFlexColumnStyles();
-    const mergedClasses = mergeClasses(
-        flexColumnStyles.root,
-        fill ? flexColumnStyles.fill : "",
-        hAlignCenter ? flexColumnStyles.hAlignCenter : "",
-        hAlignEnd ? flexColumnStyles.hAlignEnd : "",
-        hAlignStart ? flexColumnStyles.hAlignStart : "",
-        marginSpacer ? flexColumnStyles.marginSpacer : "",
-        scroll ? flexColumnStyles.scroll : "",
-        spaceBetween ? flexColumnStyles.spaceBetween : "",
-        vAlignCenter ? flexColumnStyles.vAlignCenter : "",
-        vAlignEnd ? flexColumnStyles.vAlignEnd : "",
-        vAlignStart ? flexColumnStyles.vAlignStart : ""
-    );
+export interface IFlexColumnOptions extends FlexOptions {
+    /** Unique property for styles for Side Panel or Tab content */
+    isSidePanel?: boolean;
+}
 
-    return (
-        <div className={mergedClasses} style={style}>
-            {children}
-        </div>
-    );
-};
+export const FlexColumn = forwardRef<HTMLDivElement, IFlexColumnOptions>(
+    (props, ref) => {
+        const {
+            children,
+            className,
+            fill,
+            gap,
+            hAlign,
+            name,
+            role,
+            scroll,
+            spaceBetween,
+            style,
+            transparent,
+            vAlign,
+            onClick,
+        } = props;
+        const flexColumnStyles = getFlexColumnStyles();
+
+        const isHidden = role === "presentation";
+
+        const mergedClasses = mergeClasses(
+            flexColumnStyles.root,
+            fill === "both" && flexColumnStyles.fill,
+            fill === "height" && flexColumnStyles.fillH,
+            fill === "view" && flexColumnStyles.fillV,
+            fill === "view-height" && flexColumnStyles.fillVH,
+            fill === "width" && flexColumnStyles.fillW,
+            gap && flexColumnStyles.gapReset,
+            gap === "smaller" && flexColumnStyles.gapSmaller,
+            gap === "small" && flexColumnStyles.gapSmall,
+            gap === "medium" && flexColumnStyles.gapMedium,
+            gap === "large" && flexColumnStyles.gapLarge,
+            hAlign === "center" && flexColumnStyles.hAlignCenter,
+            hAlign === "end" && flexColumnStyles.hAlignEnd,
+            hAlign === "start" && flexColumnStyles.hAlignStart,
+            isHidden && flexColumnStyles.defaultCursor,
+            isHidden && flexColumnStyles.pointerEvents,
+            scroll && flexColumnStyles.scroll,
+            spaceBetween && flexColumnStyles.spaceBetween,
+            transparent && flexColumnStyles.transparent,
+            vAlign === "center" && flexColumnStyles.vAlignCenter,
+            vAlign === "end" && flexColumnStyles.vAlignEnd,
+            vAlign === "start" && flexColumnStyles.vAlignStart,
+            className && className
+        );
+
+        return (
+            <div
+                ref={ref}
+                aria-hidden={isHidden}
+                data-name={name ? name : undefined}
+                className={mergedClasses}
+                role={role && role}
+                style={style}
+                tabIndex={isHidden ? -1 : 0}
+                onClick={onClick}
+            >
+                {children}
+            </div>
+        );
+    }
+);
+FlexColumn.displayName = "FlexColumn";

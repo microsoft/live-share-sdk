@@ -6,37 +6,17 @@
 import { useEffect, useState, useCallback } from "react";
 import useResizeObserver from "use-resize-observer";
 import PlayerProgressBar from "./PlayerProgressBar";
-import { formatTimeValue } from "../utils/format";
-import {
-    Pause24Filled,
-    Play24Filled,
-    SpeakerMute20Filled,
-    Speaker220Filled,
-    Next20Filled,
-    Info24Regular,
-} from "@fluentui/react-icons";
 import { debounce } from "lodash";
-import {
-    mergeClasses,
-    Button,
-    Text,
-    Popover,
-    PopoverTrigger,
-    PopoverSurface,
-} from "@fluentui/react-components";
-import {
-    getFlexColumnStyles,
-    getFlexItemStyles,
-    getFlexRowStyles,
-} from "../styles/layouts";
+import { mergeClasses } from "@fluentui/react-components";
 import {
     getPlayerControlStyles,
     getResizeReferenceStyles,
     getVideoStyle,
 } from "../styles/styles";
 import { InkCanvas } from "./InkCanvas";
-import { InkingControls } from "./InkingControls";
 import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
+import { FlexColumn } from "./flex";
+import { PlayerControls } from "./PlayerControls";
 
 const events = [
     "loadstart",
@@ -98,6 +78,10 @@ export const MediaPlayerContainer = ({
         }
     }, [play, pause]);
 
+    const toggleMute = useCallback(() => {
+        player.muted = !player.muted;
+    }, [player]);
+
     useEffect(() => {
         if (!localUserIsPresenting) {
             // Disable ink
@@ -146,19 +130,13 @@ export const MediaPlayerContainer = ({
         }
     }, [player, togglePlayPause]);
 
-    const flexRowStyles = getFlexRowStyles();
-    const flexColumnStyles = getFlexColumnStyles();
-    const flexItemStyles = getFlexItemStyles();
     const playerControlStyles = getPlayerControlStyles();
     const videoStyle = getVideoStyle();
     const resizeReferenceStyles = getResizeReferenceStyles();
 
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                playerControlStyles.root
-            )}
+        <FlexColumn
+            className={mergeClasses(playerControlStyles.root)}
             onMouseMove={() => {
                 setShowControls(true);
                 debouncedHideControls();
@@ -183,8 +161,7 @@ export const MediaPlayerContainer = ({
                 inkingManager={inkingManager}
                 videoSize={videoSize}
             />
-            <div
-                className={flexColumnStyles.root}
+            <FlexColumn
                 style={{
                     position: "absolute",
                     left: "0",
@@ -206,226 +183,21 @@ export const MediaPlayerContainer = ({
                     isPlaybackDisabled={!playerState.playbackStarted}
                     onSeek={seekTo}
                 />
-                <div
-                    className={mergeClasses(
-                        flexRowStyles.root,
-                        flexRowStyles.vAlignCenter,
-                        flexRowStyles.smallGap
-                    )}
-                    style={{
-                        paddingBottom: "12px",
-                        paddingLeft: "12px",
-                        paddingRight: "12px",
-                        paddingTop: "0px",
-                        minWidth: "0px",
-                    }}
-                >
-                    {/* Play Button */}
-                    <Button
-                        icon={
-                            playerState.isPlaying ? (
-                                <Pause24Filled />
-                            ) : (
-                                <Play24Filled />
-                            )
-                        }
-                        appearance="transparent"
-                        title={playerState.isPlaying ? "Pause" : "Play"}
-                        onClick={togglePlayPause}
-                    />
-                    {/* Next Track Button */}
-                    {localUserIsPresenting && (
-                        <Button
-                            icon={<Next20Filled />}
-                            appearance="transparent"
-                            title={"Next track"}
-                            onClick={nextTrack}
-                        />
-                    )}
-                    {/* Mute Button */}
-                    <Button
-                        icon={
-                            playerState.muted ? (
-                                <SpeakerMute20Filled />
-                            ) : (
-                                <Speaker220Filled />
-                            )
-                        }
-                        appearance="transparent"
-                        title={playerState.muted ? "Unmute" : "Mute"}
-                        onClick={() => {
-                            player.muted = !playerState.muted;
-                        }}
-                    />
-                    <div
-                        className={mergeClasses(
-                            flexRowStyles.root,
-                            flexRowStyles.vAlignCenter,
-                            flexRowStyles.fill
-                        )}
-                    >
-                        <div
-                            className={mergeClasses(
-                                flexItemStyles.noShrink,
-                                flexItemStyles.grow,
-                                flexRowStyles.root,
-                                flexRowStyles.vAlignCenter,
-                                flexRowStyles.smallGap
-                            )}
-                        >
-                            {/* Formatted Time Value */}
-                            <Text size={300} weight="medium">
-                                {formatTimeValue(playerState.currentTime)}
-                                {" / "}
-                                {formatTimeValue(playerState.duration)}
-                            </Text>
-                            {/* Suspended */}
-                            {suspended && (
-                                <Button
-                                    appearance="outline"
-                                    title={"Sync to Presenter"}
-                                    onClick={endSuspension}
-                                    style={{
-                                        marginLeft: "0.25rem",
-                                        borderColor: "#6e0811",
-                                    }}
-                                >
-                                    <div
-                                        className={mergeClasses(
-                                            flexRowStyles.root,
-                                            flexRowStyles.vAlignCenter,
-                                            flexRowStyles.smallGap
-                                        )}
-                                    >
-                                        <div
-                                            className={mergeClasses(
-                                                flexRowStyles.root,
-                                                flexRowStyles.vAlignCenter
-                                            )}
-                                            style={{
-                                                padding: "0.05rem 0.5rem",
-                                                backgroundColor: "#c50f1f",
-                                                borderRadius: "8px",
-                                                height: "auto",
-                                            }}
-                                        >
-                                            <Text size={100} weight="medium">
-                                                {`LIVE`}
-                                            </Text>
-                                        </div>
-                                        <div>{`Sync to Presenter`}</div>
-                                    </div>
-                                </Button>
-                            )}
-                        </div>
-                        <div
-                            className={mergeClasses(
-                                flexRowStyles.root,
-                                flexRowStyles.vAlignCenter,
-                                flexRowStyles.hAlignEnd
-                            )}
-                        >
-                            {/* Take Control */}
-                            <Button
-                                appearance="outline"
-                                aria-label={
-                                    localUserIsPresenting
-                                        ? `In control`
-                                        : `Take control`
-                                }
-                                disabled={
-                                    localUserIsPresenting ||
-                                    !localUserIsEligiblePresenter
-                                }
-                                onClick={() => {
-                                    takeControl();
-                                    if (suspended) {
-                                        endSuspension();
-                                    }
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        color: "white",
-                                        fontWeight: localUserIsPresenting
-                                            ? 300
-                                            : undefined,
-                                        opacity: localUserIsPresenting
-                                            ? "0.7"
-                                            : "1",
-                                    }}
-                                >
-                                    {localUserIsPresenting
-                                        ? `In control`
-                                        : `Take control`}
-                                </div>
-                            </Button>
-                            {/* Divider */}
-                            <div
-                                style={{
-                                    width: "1px",
-                                    height: "20px",
-                                    backgroundColor: "white",
-                                    opacity: "0.6",
-                                    marginLeft: "12px",
-                                    marginRight: "4px",
-                                }}
-                            />
-                            {/* Ink Toggle */}
-                            {localUserIsPresenting && (
-                                <InkingControls
-                                    inkingManager={inkingManager}
-                                    isEnabled={inkActive}
-                                    setIsEnabled={setInkActive}
-                                />
-                            )}
-                            {/* Info Popover */}
-                            <Popover>
-                                <PopoverTrigger>
-                                    <Button
-                                        icon={<Info24Regular />}
-                                        appearance="transparent"
-                                        title={"Info"}
-                                    />
-                                </PopoverTrigger>
-                                <PopoverSurface aria-label="video info">
-                                    <div
-                                        className={mergeClasses(
-                                            flexColumnStyles.root
-                                        )}
-                                    >
-                                        {playerState.currentPlaybackBitrate && (
-                                            <div>
-                                                <Text size={300}>
-                                                    {`Bitrate: ${
-                                                        playerState.currentPlaybackBitrate /
-                                                        1000
-                                                    }kbps`}
-                                                </Text>
-                                            </div>
-                                        )}
-                                        <div>
-                                            <Text size={300}>
-                                                {`Resolution: ${playerState.resolution}`}
-                                            </Text>
-                                        </div>
-                                        <div>
-                                            <Text size={300}>
-                                                {`Heuristic Profile: ${playerState.currentHeuristicProfile}`}
-                                            </Text>
-                                        </div>
-                                        <div>
-                                            <Text
-                                                size={300}
-                                            >{`Volume: ${playerState.volume}`}</Text>
-                                        </div>
-                                    </div>
-                                </PopoverSurface>
-                            </Popover>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                <PlayerControls
+                    endSuspension={endSuspension}
+                    inkActive={inkActive}
+                    inkingManager={inkingManager}
+                    localUserIsEligiblePresenter={localUserIsEligiblePresenter}
+                    localUserIsPresenting={localUserIsPresenting}
+                    nextTrack={nextTrack}
+                    playerState={playerState}
+                    setInkActive={setInkActive}
+                    suspended={suspended}
+                    takeControl={takeControl}
+                    toggleMute={toggleMute}
+                    togglePlayPause={togglePlayPause}
+                />
+            </FlexColumn>
+        </FlexColumn>
     );
 };

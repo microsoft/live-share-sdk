@@ -77,11 +77,9 @@ export const usePresence = (presence, context) => {
                     name: userPresence.displayName,
                     roles: userPresence.roles,
                 }));
-            setUsers(updatedUsers);
+            setUsers([...updatedUsers]);
         });
         const defaultAvatarInformation = getRandomAvatar();
-
-        presence.presenceUpdateInterval = 5;
         presence
             .initialize(
                 {

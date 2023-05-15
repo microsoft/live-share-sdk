@@ -4,11 +4,10 @@ import { ITimestampProvider } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework";
 
 /**
- * @param {SharedMap} takeControlMap shared map
- * @param {string} localUserId local user ID
  * @param {boolean} localUserIsEligiblePresenter boolean that is true when local user is eligible presenter
  * @param {any[]} users user presence array
- * @param {string[]} acceptPlaybackChangesFrom accepted roles for playback control
+ * @param {SharedMap} takeControlMap shared map
+ * @param {string} localUserId local user ID
  * @param {ITimestampProvider} timestampProvider timestamp provider, used for getting things like server timestamp
  * @param {(text: string) => void} sendNotification Send notification callback from `useNotification` hook.
  * @returns `{takeControlStarted, presentingUser, localUserIsPresenting, takeControl}` where:
@@ -18,39 +17,43 @@ import { SharedMap } from "fluid-framework";
  * - `takeControl` is a callback method to seek a video to a given timestamp (in seconds).
  */
 export const useTakeControl = (
-    takeControlMap,
-    localUserId,
     localUserIsEligiblePresenter,
     users,
+    takeControlMap,
+    localUserId,
     timestampProvider,
     sendNotification
 ) => {
-    const [history, setHistory] = useState({});
+    const [history, setHistory] = useState(new Map());
     const [takeControlStarted, setStarted] = useState(false);
 
     // Computed presentingUser object based on most recent online user to take control
     const presentingUser = useMemo(() => {
-        const onlineUsers = users.filter((user) => {
-            return user.state === "online";
+        const mappedUsers = users.map((user) => {
+            return {
+                userId: user.userId,
+                state: user.state,
+                data: user.data,
+                lastInControlTimestamp: user.userId
+                    ? history.get(user.userId)
+                    : 0,
+            };
         });
-        if (onlineUsers.length === 0) {
-            return null;
-        }
-        const mappedOnlineUsers = onlineUsers.map((user) => ({
-            userId: user.userId,
-            state: user.state,
-            data: user.data,
-            lastInControlTimestamp: history[user.userId] || 0,
-        }));
-        mappedOnlineUsers.sort((a, b) => {
+        mappedUsers.sort((a, b) => {
             // Sort by joined timestamp in descending
             if (a.lastInControlTimestamp === b.lastInControlTimestamp) {
-                return a.data?.joinedTimestamp - b.data?.joinedTimestamp;
+                return (
+                    (a.data?.joinedTimestamp ?? 0) -
+                    (b.data?.joinedTimestamp ?? 0)
+                );
             }
             // Sort by last in control time in ascending
-            return b.lastInControlTimestamp - a.lastInControlTimestamp;
+            return (
+                (b.lastInControlTimestamp ?? 0) -
+                (a.lastInControlTimestamp ?? 0)
+            );
         });
-        return mappedOnlineUsers[0];
+        return mappedUsers[0];
     }, [history, users]);
 
     // Local user is the presenter
@@ -58,7 +61,7 @@ export const useTakeControl = (
         if (!presentingUser || !localUserId) {
             return false;
         }
-        return localUserId === presentingUser?.userId;
+        return localUserId === presentingUser.userId;
     }, [localUserId, presentingUser]);
 
     // Set the local user ID
@@ -79,9 +82,9 @@ export const useTakeControl = (
 
     // Refresh local state with latest values from takeControlMap
     const refreshControlMap = useCallback(() => {
-        const values = {};
-        takeControlMap.forEach((value, key) => {
-            values[key] = value;
+        const values = new Map();
+        takeControlMap?.forEach((value, key) => {
+            values.set(key, value);
         });
         setHistory(values);
     }, [takeControlMap, setHistory]);

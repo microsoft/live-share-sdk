@@ -3,10 +3,10 @@
  * Licensed under the MIT License.
  */
 
-import { mergeClasses, TabList, Tab } from "@fluentui/react-components";
-import { getFlexItemStyles, getFlexRowStyles } from "../styles/layouts";
+import { TabList, Tab } from "@fluentui/react-components";
 import { MediaCard } from "./MediaCard";
 import { useMemo, useState } from "react";
+import { FlexItem, FlexRow } from "./flex";
 
 export const TabbedList = ({
     mediaItems,
@@ -30,26 +30,19 @@ export const TabbedList = ({
         );
     }, [browseItems, mediaItems]);
 
-    const flexRowStyles = getFlexRowStyles();
-    const flexItemStyles = getFlexItemStyles();
     return (
         <>
-            <div
-                style={{ width: "100%" }}
-                className={mergeClasses(
-                    flexRowStyles.root,
-                    flexRowStyles.vAlignCenter,
-                    flexItemStyles.noShrink
-                )}
-            >
-                <TabList
-                    selectedValue={selectedValue}
-                    onTabSelect={onTabSelect}
-                >
-                    <Tab value="tab1">Playlist</Tab>
-                    <Tab value="tab2">Browse</Tab>
-                </TabList>
-            </div>
+            <FlexItem noShrink>
+                <FlexRow vAlign="center" style={{ width: "100%" }}>
+                    <TabList
+                        selectedValue={selectedValue}
+                        onTabSelect={onTabSelect}
+                    >
+                        <Tab value="tab1">Playlist</Tab>
+                        <Tab value="tab2">Browse</Tab>
+                    </TabList>
+                </FlexRow>
+            </FlexItem>
             {selectedValue === "tab1" &&
                 mediaItems.map((mediaItem) => (
                     <MediaCard

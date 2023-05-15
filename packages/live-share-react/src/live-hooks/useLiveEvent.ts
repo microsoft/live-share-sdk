@@ -31,7 +31,7 @@ import { useDynamicDDS } from "../shared-hooks";
  * @param onReceivedEvent Optional. Callback method to be called when a new notification is received.
  * @returns stateful `latestEvent` & `allEvents` list, `sendEvent` callback, and the `liveEvent` object.
  */
-export function useLiveEvent<TEvent extends object = object>(
+export function useLiveEvent<TEvent = any>(
     uniqueKey: string,
     allowedRoles?: UserMeetingRole[],
     onReceivedEvent?: OnReceivedLiveEventAction<TEvent>
@@ -80,13 +80,13 @@ export function useLiveEvent<TEvent extends object = object>(
     React.useEffect(() => {
         if (liveEvent?.isInitialized === undefined) return;
         // Register event listener
-        const onEventReceived = (event: any, local: boolean) => {
+        const onEventReceived = (event: TEvent, local: boolean) => {
             // If developer passed the optional onReceivedEvent callback, we
             // call it.
-            onReceivedEvent?.(event as TEvent, local);
+            onReceivedEvent?.(event, local);
             // Set the received event to our local state
             const received: IReceiveLiveEvent<TEvent> = {
-                event: event as TEvent,
+                value: event,
                 local,
             };
             allEventsRef.current = [...allEventsRef.current, received];

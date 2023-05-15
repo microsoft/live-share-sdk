@@ -160,7 +160,10 @@ export class ContainerSynchronizer {
         if (clientId === this._connectSentForClientId) return;
 
         if (this._connectSentForClientId) {
-            this._objectStore.clientIdDidChange(this._connectSentForClientId, clientId);
+            this._objectStore.clientIdDidChange(
+                this._connectSentForClientId,
+                clientId
+            );
         }
         this._connectSentForClientId = clientId;
         try {

@@ -10,16 +10,15 @@ import {
 import { v4 as uuid } from "uuid";
 
 // Replace this with your connection options from the Azure Fluid Relay portal
-const localConnection = {
-    type: "local",
-    tokenProvider: new InsecureTokenProvider("", {
-        id: uuid(),
-        name: "Test User",
-    }),
-    endpoint: "http://localhost:7070",
-};
 const azureClientOptions = {
-    connection: localConnection,
+    connection: {
+        type: "local",
+        tokenProvider: new InsecureTokenProvider("", {
+            id: uuid(),
+            name: "Test User",
+        }),
+        endpoint: "http://localhost:7070",
+    },
 };
 
 export const AzureAutoJoin = () => {

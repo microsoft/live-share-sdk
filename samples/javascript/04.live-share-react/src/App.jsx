@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { app } from "@microsoft/teams-js";
 import { inTeams } from "./utils/inTeams";
 import { useRef, useEffect, useState } from "react";
 import {
@@ -8,7 +9,6 @@ import {
     TabConfig,
 } from "./pages";
 import { AppRoutes } from "./constants";
-import { app } from "@microsoft/teams-js";
 
 const IN_TEAMS = inTeams();
 

@@ -64,7 +64,7 @@ export interface IUseSharedMapResults<TData> {
     sharedMap: SharedMap | undefined;
 }
 
-export interface IUseLiveEventResults<TEvent extends object = object> {
+export interface IUseLiveEventResults<TEvent = any> {
     /**
      * The most recent event that has been received in the session.
      */

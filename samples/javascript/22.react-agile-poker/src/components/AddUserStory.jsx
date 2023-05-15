@@ -4,28 +4,22 @@
  */
 
 import { useState } from "react";
-
-// UI imports:
 import { mergeClasses, Button } from "@fluentui/react-components";
 import { Label } from "@fluentui/react-components";
-import { getFlexColumnStyles } from "../styles/layout";
+import { FlexColumn } from "./flex";
 
 export const AddUserStory = ({ addUserStory }) => {
     const [value, setValue] = useState("");
-    const flexColumnStyles = getFlexColumnStyles();
 
     const onChange = (event) => {
         setValue(event.target.value);
     };
 
     return (
-        <div
-            className={mergeClasses(
-                flexColumnStyles.root,
-                flexColumnStyles.smallGap,
-                flexColumnStyles.hAlignStart,
-                flexColumnStyles.vAlignStart
-            )}
+        <FlexColumn
+            gap="small"
+            hAlign="start"
+            vAlign="start"
             style={{ marginBottom: "1.5rem", padding: "0.25rem" }}
         >
             <Label htmlFor={"textarea611"} style={{ display: "block" }}>
@@ -46,6 +40,6 @@ export const AddUserStory = ({ addUserStory }) => {
             >
                 Add user story
             </Button>
-        </div>
+        </FlexColumn>
     );
 };

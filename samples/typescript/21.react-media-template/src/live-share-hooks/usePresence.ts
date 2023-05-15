@@ -7,15 +7,14 @@ import {
     ITimestampProvider,
     LivePresence,
     LivePresenceUser,
+    PresenceState,
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { app } from "@microsoft/teams-js";
 
 export interface IUserData {
-    teamsUserId?: string;
     joinedTimestamp: number;
-    name: string;
 }
 
 /**
@@ -84,24 +83,14 @@ export const usePresence = (
                     setLocalUser(userPresence);
                 }
                 // Set users local state
-                const userArray = presence.getUsers();
-                setUsers(userArray);
+                const userArray = presence.getUsers(PresenceState.online);
+                // Need to create new array so that React knows the user list changed.
+                setUsers([...userArray]);
             }
-        );
-        const userPrincipalName =
-            context?.user?.userPrincipalName ?? "someone@contoso.com";
-        const name = `@${userPrincipalName.split("@")[0]}`;
-        // Start presence tracking
-        console.log(
-            "usePresence: starting presence for userId",
-            context?.user?.id,
-            context?.user?.displayName
         );
 
         const userData: IUserData = {
-            teamsUserId: context.user?.id,
-            joinedTimestamp: timestampProvider?.getTimestamp(),
-            name,
+            joinedTimestamp: timestampProvider.getTimestamp(),
         };
 
         presence
@@ -111,7 +100,7 @@ export const usePresence = (
                 setStarted(true);
             })
             .catch((error) => console.error(error));
-    }, [presence, timestampProvider, context, setUsers, setLocalUser]);
+    }, [presence, timestampProvider, context]);
 
     return {
         presenceStarted,

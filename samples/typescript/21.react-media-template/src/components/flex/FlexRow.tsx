@@ -1,52 +1,75 @@
+import { FC, forwardRef } from "react";
 import { mergeClasses } from "@fluentui/react-components";
-import { CSSProperties, FC, ReactNode } from "react";
-import { getFlexRowStyles } from "./FlexStyles";
+import { FlexOptions, getFlexRowStyles } from "./flex-styles";
 
-export const FlexRow: FC<{
-    children: ReactNode;
-    fill?: boolean;
-    hAlignCenter?: boolean;
-    hAlignEnd?: boolean;
-    hAlignStart?: boolean;
-    marginSpacer?: boolean;
-    spaceBetween?: boolean;
-    style?: CSSProperties;
-    vAlignCenter?: boolean;
-    vAlignEnd?: boolean;
-    vAlignStart?: boolean;
+export interface IFlexRowOptions extends FlexOptions {
     wrap?: boolean;
-}> = (props) => {
-    const {
-        children,
-        fill,
-        hAlignCenter,
-        hAlignEnd,
-        hAlignStart,
-        marginSpacer,
-        spaceBetween,
-        style,
-        vAlignCenter,
-        vAlignEnd,
-        vAlignStart,
-        wrap,
-    } = props;
-    const flexRowStyles = getFlexRowStyles();
-    const mergedClasses = mergeClasses(
-        flexRowStyles.root,
-        fill ? flexRowStyles.fill : "",
-        hAlignCenter ? flexRowStyles.hAlignCenter : "",
-        hAlignEnd ? flexRowStyles.hAlignEnd : "",
-        hAlignStart ? flexRowStyles.hAlignStart : "",
-        marginSpacer ? flexRowStyles.marginSpacer : "",
-        spaceBetween ? flexRowStyles.spaceBetween : "",
-        vAlignCenter ? flexRowStyles.vAlignCenter : "",
-        vAlignEnd ? flexRowStyles.vAlignEnd : "",
-        vAlignStart ? flexRowStyles.vAlignStart : "",
-        wrap ? flexRowStyles.wrap : ""
-    );
-    return (
-        <div className={mergedClasses} style={style}>
-            {children}
-        </div>
-    );
-};
+    columnOnSmallScreen?: boolean;
+}
+
+export const FlexRow = forwardRef<HTMLDivElement, IFlexRowOptions>(
+    (props, ref) => {
+        const {
+            children,
+            // Merged classes from parent
+            className,
+            columnOnSmallScreen,
+            fill,
+            gap,
+            hAlign,
+            name,
+            role,
+            scroll,
+            spaceBetween,
+            style,
+            transparent,
+            vAlign,
+            wrap,
+        } = props;
+
+        const flexRowStyles = getFlexRowStyles();
+
+        const isHidden = role === "presentation";
+
+        const mergedClasses = mergeClasses(
+            flexRowStyles.root,
+            fill === "both" && flexRowStyles.fill,
+            fill === "height" && flexRowStyles.fillH,
+            fill === "view" && flexRowStyles.fillV,
+            fill === "view-height" && flexRowStyles.fillVH,
+            fill === "width" && flexRowStyles.fillW,
+            gap === "smaller" && flexRowStyles.gapSmaller,
+            gap === "small" && flexRowStyles.gapSmall,
+            gap === "medium" && flexRowStyles.gapMedium,
+            gap === "large" && flexRowStyles.gapLarge,
+            hAlign === "center" && flexRowStyles.hAlignCenter,
+            hAlign === "end" && flexRowStyles.hAlignEnd,
+            hAlign === "start" && flexRowStyles.hAlignStart,
+            isHidden && flexRowStyles.defaultCursor,
+            isHidden && flexRowStyles.pointerEvents,
+            scroll && flexRowStyles.scroll,
+            spaceBetween && flexRowStyles.spaceBetween,
+            transparent && flexRowStyles.transparent,
+            vAlign === "center" && flexRowStyles.vAlignCenter,
+            vAlign === "end" && flexRowStyles.vAlignEnd,
+            vAlign === "start" && flexRowStyles.vAlignStart,
+            wrap && flexRowStyles.wrap,
+            columnOnSmallScreen && flexRowStyles.columnOnSmallScreen,
+            className && className
+        );
+        return (
+            <div
+                aria-hidden={isHidden}
+                data-name={name ? name : undefined}
+                className={mergedClasses}
+                ref={ref}
+                role={role && role}
+                style={style}
+                tabIndex={isHidden ? -1 : 0}
+            >
+                {children}
+            </div>
+        );
+    }
+);
+FlexRow.displayName = "FlexRow";

@@ -6,7 +6,7 @@ const execSync = require("child_process").execSync;
 
 for (var i = 0; i < 50; i++) {
     console.log("starting run:", i);
-    const output = execSync("npm run test", { encoding: "utf-8" }); // the default is 'buffer'
+    const output = execSync("npm run test", { encoding: "utf-8" });
     console.log("Output was:\n", output);
     console.log("finished run:", i);
 }

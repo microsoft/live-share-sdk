@@ -1,13 +1,9 @@
 import { useLiveEvent } from "@microsoft/live-share-react";
 import { FC } from "react";
 
-interface ILiveEventData {
-    emoji: string;
-}
-
 export const ExampleLiveEvent: FC = () => {
     const { latestEvent, allEvents, sendEvent } =
-        useLiveEvent<ILiveEventData>("EVENT-ID");
+        useLiveEvent<string>("EVENT-ID");
 
     return (
         <div style={{ marginTop: "12px" }}>
@@ -22,28 +18,24 @@ export const ExampleLiveEvent: FC = () => {
             <div className="flex row hAlign wrap">
                 <button
                     onClick={() => {
-                        sendEvent({
-                            emoji: "❤️",
-                        });
+                        sendEvent("❤️");
                     }}
                 >
                     {"❤️"}
                 </button>
                 <button
                     onClick={() => {
-                        sendEvent({
-                            emoji: "😂",
-                        });
+                        sendEvent("😂");
                     }}
                 >
                     {"😂"}
                 </button>
                 {/* Show latest reaction */}
                 {latestEvent?.local === false && (
-                    <div>{`Received: ${latestEvent?.event.emoji}`}</div>
+                    <div>{`Received: ${latestEvent?.value}`}</div>
                 )}
                 {latestEvent?.local === true && (
-                    <div>{`Sent: ${latestEvent?.event.emoji}`}</div>
+                    <div>{`Sent: ${latestEvent?.value}`}</div>
                 )}
             </div>
         </div>

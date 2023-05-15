@@ -46,7 +46,6 @@
         "vite": "^4.0.4"
     },
     "scripts": {
-        "build:dev": "dotenv -e .env.development build",
         "build": "tsc && vite build",
         "clean": "npx shx rm -rf build",
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern",

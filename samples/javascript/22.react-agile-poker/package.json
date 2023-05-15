@@ -43,7 +43,6 @@
         "start:server": "npx tinylicious@latest",
         "start:https": "vite --config vite.https-config.js",
         "build": "vite build",
-        "build:dev": "dotenv -e .env.development build",
         "preview": "vite preview",
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },

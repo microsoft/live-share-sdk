@@ -42,7 +42,6 @@
         "vite": "^4.0.4"
     },
     "scripts": {
-        "build:dev": "dotenv -e .env.development build",
         "build": "vite build",
         "clean": "npx shx rm -rf dist",
         "preview": "vite preview",

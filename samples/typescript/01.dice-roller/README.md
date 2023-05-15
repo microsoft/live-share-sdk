@@ -17,8 +17,6 @@ npm run build # Production build
 npm start
 ```
 
-`npm runs build:dev` run build the app in dev mode
-
 ## Testing the app in Teams
 
 ### Create a ngrok tunnel to allow Teams to reach your tab app

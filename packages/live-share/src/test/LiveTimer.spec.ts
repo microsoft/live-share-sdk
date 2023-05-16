@@ -297,7 +297,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         let tickCounter = 0;
         object1.on("onTick", () => {
             tickCounter += 1;
-            console.log("tickCountert", tickCounter);
+            console.log("tickCounter", tickCounter);
         });
 
         object1.on("finished", (config) => {
@@ -309,7 +309,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
             }
         });
 
-        object1.initialize();
+        await object1.initialize();
         object1.start(1600);
 
         // initialized for test setup

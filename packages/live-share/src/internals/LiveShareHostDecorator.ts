@@ -89,30 +89,8 @@ export class LiveShareHostDecorator
                 IClientInfo | undefined
             >(
                 async () => {
-                    try {
-                        const info = await this._host.getClientInfo(clientId);
-                        return info;
-                    } catch (error: unknown) {
-                        // We do a check in BackwardsCompatibilityHostDecorator for fakeId.
-                        // If this ID, just throw that error rather than waste resources.
-                        if (clientId === "fakeId") {
-                            throw error;
-                        }
-                        // Error is thrown when client id is not registered
-                        // Assume Client Id is local and to be newly registered.
-                        // Our service is first writer wins, so we will not overwrite
-                        // if previous states exist.
-                        console.warn(
-                            `LiveShareHostDecorator.getClientInfo error: ${
-                                isErrorLike(error)
-                                    ? error.message
-                                    : "an unknown error occurred"
-                            }`
-                        );
-                        await this.registerClientId(clientId);
-                        const info = await this._host.getClientInfo(clientId);
-                        return info;
-                    }
+                    const info = await this._host.getClientInfo(clientId);
+                    return info;
                 },
                 (result) => {
                     if (isIClientInfo(result)) {

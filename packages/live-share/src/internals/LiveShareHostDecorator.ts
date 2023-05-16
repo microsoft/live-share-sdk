@@ -89,8 +89,7 @@ export class LiveShareHostDecorator
                 IClientInfo | undefined
             >(
                 async () => {
-                    const info = await this._host.getClientInfo(clientId);
-                    return info;
+                    return await this._host.getClientInfo(clientId);
                 },
                 (result) => {
                     if (isIClientInfo(result)) {

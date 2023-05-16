@@ -104,7 +104,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         });
         await object2.initialize();
 
-        object1.start(1);
+        await object1.start(1);
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -167,7 +167,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        object1.initialize();
+        await object1.initialize();
 
         const object2done = new Deferred();
         object2.on("played", (config, local) => {
@@ -182,9 +182,9 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        object2.initialize();
+        await object2.initialize();
 
-        object1.start(50);
+        await object1.start(50);
 
         setTimeout(() => {
             object1.pause();
@@ -259,7 +259,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        object1.initialize();
+        await object1.initialize();
 
         const object2done = new Deferred();
         object2.on("finished", (config) => {
@@ -278,9 +278,9 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        object2.initialize();
+        await object2.initialize();
 
-        object1.start(100);
+        await object1.start(100);
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -310,7 +310,7 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         });
 
         await object1.initialize();
-        object1.start(1600);
+        await object1.start(1600);
 
         // initialized for test setup
         object2.initialize();

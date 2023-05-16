@@ -1,4 +1,4 @@
-import { useLiveState } from "@microsoft/live-share-react";
+import { useLiveShareContext, useLiveState } from "@microsoft/live-share-react";
 import { LiveShareClient, UserMeetingRole } from "@microsoft/live-share";
 import { FC, ReactNode } from "react";
 
@@ -28,6 +28,7 @@ export const ExampleLiveState: FC<IExampleStateProps> = (props) => {
         INITIAL_STATE,
         ALLOWED_ROLES
     );
+    const { timestampProvider } = useLiveShareContext();
 
     if (state.status === ExampleAppStatus.WAITING) {
         return (
@@ -38,7 +39,7 @@ export const ExampleLiveState: FC<IExampleStateProps> = (props) => {
                         onClick={() => {
                             setState({
                                 status: ExampleAppStatus.START,
-                                timeStarted: LiveShareClient.getTimestamp(),
+                                timeStarted: timestampProvider?.getTimestamp(),
                             });
                         }}
                     >

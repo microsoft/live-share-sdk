@@ -40,10 +40,10 @@ export const ExampleLiveEvent = () => {
                 </button>
                 {/* Show latest reaction */}
                 {latestEvent?.local === false && (
-                    <div>{`Received: ${latestEvent?.event.emoji}`}</div>
+                    <div>{`Received: ${latestEvent?.value?.emoji}`}</div>
                 )}
                 {latestEvent?.local === true && (
-                    <div>{`Sent: ${latestEvent?.event.emoji}`}</div>
+                    <div>{`Sent: ${latestEvent?.value?.emoji}`}</div>
                 )}
             </div>
         </div>

@@ -23,7 +23,6 @@ import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveShareContainerSchemaProxy } from "./schema-injection-utils";
-import { RootDataObject } from "fluid-framework";
 
 /**
  * @hidden
@@ -204,34 +203,6 @@ export class LiveShareClient {
             runtime.setAudience(result[0].services.audience);
 
             performance.mark(`TeamsSync: container connecting`);
-
-            // Wait for containers socket to connect
-            let connected = false;
-            const { container, services } = result[0];
-            container.on("connected", async () => {
-                if (!connected) {
-                    connected = true;
-                    performance.measure(
-                        `TeamsSync: container connected`,
-                        `TeamsSync: container connecting`
-                    );
-                }
-
-                // Register any new clientId's
-                // - registerClientId() will only register a client on first use
-                const connections =
-                    services.audience.getMyself()?.connections ?? [];
-                for (let i = 0; i < connections.length; i++) {
-                    try {
-                        const clientId = connections[i]?.id;
-                        if (clientId) {
-                            await this._host.registerClientId(clientId);
-                        }
-                    } catch (err: any) {
-                        console.error(err.toString());
-                    }
-                }
-            });
 
             return {
                 ...result[0],

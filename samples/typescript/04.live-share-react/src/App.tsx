@@ -51,6 +51,11 @@ export default function App() {
                             path={AppRoutes.TabConfig}
                             element={<TabConfig />}
                         />
+                        {/* Alternate route for consistency with manifest */}
+                        <Route
+                            path={AppRoutes.TabConfigAlt}
+                            element={<TabConfig />}
+                        />
                         {/* Example for automatically joining Live Share container when this component is rendered */}
                         <Route
                             path={AppRoutes.LiveShareAutoJoin}

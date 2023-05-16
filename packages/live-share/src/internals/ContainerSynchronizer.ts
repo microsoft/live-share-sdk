@@ -165,6 +165,7 @@ export class ContainerSynchronizer {
                 clientId
             );
         }
+        await this._liveRuntime.host.registerClientId(clientId);
         this._connectSentForClientId = clientId;
         try {
             await this.sendGroupEvent(

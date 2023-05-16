@@ -76,6 +76,13 @@ export class LiveShareRuntime {
     }
 
     /**
+     * `ILiveShareHost` instance
+     */
+    public get host(): ILiveShareHost {
+        return this._host;
+    }
+
+    /**
      * Returns the current timestamp as the number of milliseconds sine the Unix Epoch.
      */
     public getTimestamp(): number {

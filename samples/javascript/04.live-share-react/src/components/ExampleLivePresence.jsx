@@ -21,7 +21,7 @@ export const ExampleLivePresence = () => {
                         style={{
                             color: user?.state === "offline" ? "red" : "green",
                         }}
-                    >{`${user.displayName}, isLocalUser: ${user.isLocalUser}`}</div>
+                    >{`${user.displayName}, isLocalUser: ${user.isLocalUser}, ${user.userId}`}</div>
                 ))}
             </div>
             <button

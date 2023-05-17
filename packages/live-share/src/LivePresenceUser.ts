@@ -170,7 +170,7 @@ export class LivePresenceUser<TData = object> {
             );
         }
 
-        return false;
+        return remoteUserConvertedToLocal;
     }
 
     /**

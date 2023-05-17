@@ -151,7 +151,7 @@ export class LivePresenceUser<TData = object> {
         info: IClientInfo,
         localEvent: boolean
     ): boolean {
-        this.updateClients(evt, localEvent);
+        const remoteUserConvertedToLocal = this.updateClients(evt, localEvent);
         const currentEvent = this._evt;
         const currentClientInfo = this._clientInfo;
         if (LiveEvent.isNewer(currentEvent, evt)) {
@@ -162,6 +162,7 @@ export class LivePresenceUser<TData = object> {
 
             // Has anything changed?
             return (
+                remoteUserConvertedToLocal ||
                 evt.data.state != currentEvent.data.state ||
                 JSON.stringify(info) != JSON.stringify(currentClientInfo) ||
                 JSON.stringify(evt.data.data) !=
@@ -190,20 +191,17 @@ export class LivePresenceUser<TData = object> {
         );
     }
 
+    // returns true if localUser set to true for the first time
     private updateClients(
         evt: LivePresenceReceivedEventData<TData>,
         localEvent: boolean
-    ): void {
+    ): boolean {
         // The user can be logged into multiple clients
         const connection = this._connections.get(evt.clientId);
         if (connection) {
             connection.updateConnection(evt);
+            return false;
         } else {
-            if (localEvent) {
-                // local user may have received event from non local connection first,
-                // resulting in local user being false, set to true
-                this._isLocalUser = localEvent;
-            }
             this._connections.set(
                 evt.clientId,
                 new LivePresenceConnection(
@@ -213,6 +211,13 @@ export class LivePresenceUser<TData = object> {
                     this._liveRuntime
                 )
             );
+            if (localEvent && !this._isLocalUser) {
+                // local user may have received event from non local connection first,
+                // resulting in local user being false, set to true
+                this._isLocalUser = localEvent;
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { timeoutRequest, Deferred, waitForResult } from "../internals";
+import { timeoutRequest, Deferred, waitForResult, TimeoutError } from "../internals";
 
 describe("timeoutRequest", function () {
     it("should return the result when request is successful within timeout", async () => {
@@ -29,8 +29,7 @@ describe("timeoutRequest", function () {
             await timeoutRequest(fnRequest, 10);
             assert.fail("Expected a timeout error to be thrown");
         } catch (error) {
-            assert(error instanceof Error, "Expected an instance of Error");
-            assert(error.message === "timeout", "unexpected error message");
+            assert(error instanceof TimeoutError, "expected error of TimeoutError");
         }
     });
 
@@ -60,7 +59,7 @@ describe("waitForResult", function () {
         const fnRequest = async () => "response";
         const fnValidateResponse = (result: string) =>
             result === "response" ? { response: expectedResult } : null;
-        const fnTimeout = (reason: unknown) => new Error("timeout");
+        const fnTimeout = (reason: unknown) => new TimeoutError();
         const result = await waitForResult(
             fnRequest,
             fnValidateResponse,
@@ -80,7 +79,7 @@ describe("waitForResult", function () {
             attempt++ === 1 ? "response" : "invalid";
         const fnValidateResponse = (result: string) =>
             result === "response" ? { response: expectedResult } : null;
-        const fnTimeout = (reason: unknown) => new Error("timeout");
+        const fnTimeout = (reason: unknown) => new TimeoutError();
         const result = await waitForResult(
             fnRequest,
             fnValidateResponse,
@@ -99,7 +98,7 @@ describe("waitForResult", function () {
             attempt++ === 2 ? "response" : "invalid";
         const fnValidateResponse = (result: string) =>
             result === "response" ? { response: "successful" } : null;
-        const fnTimeout = (reason: unknown) => new Error("timeout");
+        const fnTimeout = (reason: unknown) => new TimeoutError();
         try {
             await waitForResult(fnRequest, fnValidateResponse, fnTimeout, [10]);
             assert.fail("Expected an error to be thrown");
@@ -119,7 +118,7 @@ describe("waitForResult", function () {
         const fnValidateResponse = (result: string) => ({
             response: "successful",
         });
-        const fnTimeout = (reason: unknown) => new Error("timeout");
+        const fnTimeout = (reason: unknown) => new TimeoutError();
         const fnRequestError = (error: unknown) =>
             error instanceof Error ? error : null;
         try {
@@ -154,7 +153,7 @@ describe("waitForResult", function () {
         };
         const fnValidateResponse = (result: string) =>
             result === "response" ? { response: expectedResult } : null;
-        const fnTimeout = (reason: unknown) => new Error("timeout");
+        const fnTimeout = (reason: unknown) => new TimeoutError();
         const fnRequestError = (error: unknown) => null;
         const result = await waitForResult(
             fnRequest,
@@ -179,7 +178,7 @@ describe("waitForResult", function () {
         };
         const fnValidateResponse = (result: string) =>
             result === "response" ? { response: "successful" } : null;
-        const fnTimeout = (reason: unknown) => new Error("timeout");
+        const fnTimeout = (reason: unknown) => new TimeoutError();
         const fnRequestError = (error: unknown) =>
             error instanceof Error ? error : null;
         try {
@@ -213,7 +212,7 @@ describe("waitForResult", function () {
             );
         const fnValidateResponse = (result: string) =>
             result === "response" ? { response: "successful" } : null;
-        const fnTimeout = (reason: unknown) => new Error("timeout");
+        const fnTimeout = (reason: unknown) => new TimeoutError();
         try {
             await waitForResult(
                 fnRequest,

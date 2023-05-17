@@ -45,7 +45,10 @@ export function waitForDelay(delay: number): Promise<void> {
     });
 }
 
-class TimeoutError extends Error {
+/**
+ * @hidden
+ */
+export class TimeoutError extends Error {
     constructor() {
         super("timed out");
     }

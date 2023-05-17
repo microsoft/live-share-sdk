@@ -116,7 +116,7 @@ export function timeoutRequest<TResult>(
 ): Promise<TResult> {
     return new Promise<TResult>(async (resolve, reject) => {
         let hTimer: NodeJS.Timeout | null = setTimeout(() => {
-            reject(new Error("timeout"));
+            reject(new TimeoutError());
             hTimer = null;
         }, timeout);
         try {

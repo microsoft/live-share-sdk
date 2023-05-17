@@ -83,7 +83,12 @@ export class LiveShareHostDecorator
                 `LiveShareHostDecorator: called getClientInfo() without a clientId`
             );
         }
-        return this._userInfoRequestCache.cacheRequest(clientId, () => {
+
+        // backwards compat should not use same cache from LiveShareHostDecorator
+        const cacheKey = retrySchedule
+            ? `${clientId}backwardsCompat`
+            : clientId;
+        return this._userInfoRequestCache.cacheRequest(cacheKey, () => {
             return waitForResult<
                 IClientInfo | undefined,
                 IClientInfo | undefined

@@ -46,12 +46,7 @@ export const CostingGame = ({
                 </Button>
             </FlexRow>
             <FlexItem noShrink>
-                <FlexRow
-                    vAlign="center"
-                    hAlign="center"
-                    wrap
-                    gap="small"
-                >
+                <FlexRow vAlign="center" hAlign="center" wrap gap="small">
                     {["0", "1", "2", "3", "5", "8", "13", "20"].map((value) => {
                         return (
                             <div

@@ -158,7 +158,7 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
             const clientInfo = await this._host.getClientInfo(clientId, () => {
                 // The request initially timed out, but then it later was rejected/resolved for a legitimate reason
                 this._getClientInfoExists = true;
-            });
+            }, this.getRetrySchedule());
             this._getClientInfoExists = true;
             return clientInfo;
         } catch (error: unknown) {
@@ -176,6 +176,8 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
                     displayName: undefined,
                     roles: roles ?? [],
                 };
+            } else {
+                this._getClientInfoExists = true;
             }
         }
         return undefined;
@@ -216,5 +218,12 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
                     this._getClientInfoExists = true;
                 }
             });
+    }
+
+    // retry little bit longer when getting to end of retries remaining.
+    private getRetrySchedule(): number[] {
+        const retryAmount =
+            this._totalTries - Math.max(0, this._getClientInfoTriesRemaining);
+        return EXPONENTIAL_BACKOFF_SCHEDULE.slice(0, retryAmount);
     }
 }

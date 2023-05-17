@@ -24,6 +24,13 @@ export class ContainerSynchronizer {
     private _hTimer: NodeJS.Timeout | undefined;
     private _connectSentForClientId?: string;
     private _onBoundConnectedListener?: (clientId: string) => Promise<void>;
+    private _onReceiveObjectUpdateListener?: (
+        objectId: string,
+        event: ILiveEvent<any>,
+        local: boolean,
+        processRelatedChange: ProcessRelatedChangeHandler
+    ) => Promise<void>;
+    private _onSendUpdatesIntervalCallback?: () => Promise<void>;
 
     constructor(
         private readonly _runtime: IRuntimeSignaler,
@@ -57,13 +64,7 @@ export class ContainerSynchronizer {
 
         // Start update timer on first ref
         if (this._refCount++ == 0) {
-            this._objectStore.on(
-                ObjectSynchronizerEvents.update,
-                this.onReceiveUpdate.bind(this)
-            );
-            this._hTimer = setInterval(() => {
-                this.onSendUpdates();
-            }, this._liveRuntime.objectManager.updateInterval);
+            this.startBackgroundObjectUpdates();
         }
     }
 
@@ -74,12 +75,7 @@ export class ContainerSynchronizer {
 
             // Stop update timer on last de-ref
             if (--this._refCount == 0) {
-                clearInterval(this._hTimer);
-                this._hTimer = undefined;
-                this._objectStore.off(
-                    "update",
-                    this.onReceiveUpdate.bind(this)
-                );
+                this.stopBackgroundObjectUpdates();
                 return true;
             }
 
@@ -96,7 +92,8 @@ export class ContainerSynchronizer {
         await this.sendGroupEvent(
             this._connectedKeys,
             ObjectSynchronizerEvents.update
-        );
+        )
+            .catch((err) => console.error(err));
     }
 
     /**
@@ -165,8 +162,11 @@ export class ContainerSynchronizer {
                 clientId
             );
         }
-        await this._liveRuntime.host.registerClientId(clientId);
         this._connectSentForClientId = clientId;
+        // TODO: this is a fatal error if it doesn't succeed, so we should be careful
+        this._liveRuntime.host.registerClientId(clientId).catch((error) => {
+            console.error(error);
+        });
         try {
             await this.sendGroupEvent(
                 this._connectedKeys,
@@ -302,5 +302,33 @@ export class ContainerSynchronizer {
     private stopListeningForConnected() {
         if (!this._onBoundConnectedListener) return;
         this._runtime.off("connected", this._onBoundConnectedListener);
+    }
+
+    private startBackgroundObjectUpdates() {
+        // Stop existing background updates
+        this.stopBackgroundObjectUpdates();
+        // Start receiving object updates
+        this._onReceiveObjectUpdateListener = this.onReceiveUpdate.bind(this);
+        this._objectStore.on(
+            ObjectSynchronizerEvents.update,
+            this._onReceiveObjectUpdateListener
+        );
+        // Set background updates
+        this._onSendUpdatesIntervalCallback = this.onSendUpdates.bind(this);
+        this._hTimer = setInterval(
+            this._onSendUpdatesIntervalCallback,
+            this._liveRuntime.objectManager.updateInterval
+        );
+    }
+
+    private stopBackgroundObjectUpdates() {
+        if (this._hTimer) {
+            clearInterval(this._hTimer);
+            this._hTimer = undefined;
+            this._onSendUpdatesIntervalCallback = undefined;
+        }
+        if (!this._onReceiveObjectUpdateListener) return;
+        this._objectStore.off("update", this._onReceiveObjectUpdateListener);
+        this._onReceiveObjectUpdateListener = undefined;
     }
 }

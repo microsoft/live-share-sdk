@@ -130,6 +130,8 @@ function getLiveDataObjectProxyClassInternal<
                 );
             }
 
+            // when interactive is false, that means that this client is from the summarizer or some other system entity.
+            // we only want to set the container runtime for interactive clients, so we return.
             if (this.context.clientDetails.capabilities.interactive === false) {
                 return;
             }

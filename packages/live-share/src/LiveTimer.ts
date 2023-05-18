@@ -351,6 +351,12 @@ export class LiveTimer extends LiveDataObject<{
                 return true;
             }
 
+            if (
+                JSON.stringify(this._currentConfig.data) ===
+                JSON.stringify(config.data)
+            )
+                return false;
+
             if (allowed && isConfigNewer) {
                 this.updateConfig(config, false);
                 return true;

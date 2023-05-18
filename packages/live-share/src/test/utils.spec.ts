@@ -1,5 +1,10 @@
 import { strict as assert } from "assert";
-import { timeoutRequest, Deferred, waitForResult, TimeoutError } from "../internals";
+import {
+    timeoutRequest,
+    Deferred,
+    waitForResult,
+    TimeoutError,
+} from "../internals";
 
 describe("timeoutRequest", function () {
     it("should return the result when request is successful within timeout", async () => {
@@ -29,7 +34,10 @@ describe("timeoutRequest", function () {
             await timeoutRequest(fnRequest, 10);
             assert.fail("Expected a timeout error to be thrown");
         } catch (error) {
-            assert(error instanceof TimeoutError, "expected error of TimeoutError");
+            assert(
+                error instanceof TimeoutError,
+                "expected error of TimeoutError"
+            );
         }
     });
 

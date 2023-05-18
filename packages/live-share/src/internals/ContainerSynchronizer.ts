@@ -148,10 +148,7 @@ export class ContainerSynchronizer {
     public __dangerouslySetContainerRuntime(
         cRuntime: IContainerRuntimeSignaler
     ) {
-        // The first runtime we receive is when the `LiveDataObject` is first created/attached, which is the main runtime
-        // Later, Fluid's summarizer will create a copy of the container with a separate runtime, which in turn will construct new `LiveDataObject` instances.
-        // This summarizer runtime may be dropped at any time, and thus we only trust the original.
-        if (this._containerRuntime !== undefined) return;
+        if (this._containerRuntime === cRuntime) return;
         this._containerRuntime = cRuntime;
     }
 

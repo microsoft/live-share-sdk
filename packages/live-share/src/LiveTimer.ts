@@ -329,6 +329,27 @@ export class LiveTimer extends LiveDataObject<{
                 config
             );
 
+            const currentTime = this.liveRuntime.getTimestamp();
+            if (
+                allowed &&
+                this._currentConfig.timestamp === 0 &&
+                currentTime > this.endTimeFromConfig(config)
+            ) {
+                // Since finish config changes are not sent through the Synchronizer only the most recent config before finish is saved.
+                // For clients joining after the the timer has already finished, set the finish config without emitting events to the finish callback.
+                const finishedBeforeJoinConfig: ITimerConfigEvent = {
+                    timestamp: currentTime,
+                    clientId: config.clientId,
+                    data: {
+                        duration: config.data.duration,
+                        position: config.data.duration,
+                        running: false,
+                    },
+                };
+                this._currentConfig = finishedBeforeJoinConfig;
+                return true;
+            }
+
             if (allowed && isConfigNewer) {
                 this.updateConfig(config, false);
                 return true;
@@ -366,15 +387,10 @@ export class LiveTimer extends LiveDataObject<{
     }
 
     private startTicking() {
-        function endTimeFromConfig(config: ITimerConfigEvent): number {
-            return (
-                config.timestamp - config.data.position + config.data.duration
-            );
-        }
         const tickCallback = () => {
             if (this._currentConfig.data.running) {
                 const timestamp = this.liveRuntime.getTimestamp();
-                const endTime = endTimeFromConfig(this._currentConfig);
+                const endTime = this.endTimeFromConfig(this._currentConfig);
                 if (timestamp >= endTime) {
                     const newConfig: ITimerConfigEvent = {
                         timestamp,
@@ -385,7 +401,10 @@ export class LiveTimer extends LiveDataObject<{
                             running: false,
                         },
                     };
-                    this.updateConfig(newConfig, true).catch((err) => {
+                    // Set local to false for this config update.
+                    // Every client is expected to set the finish config locally for themselves at the same time.
+                    // We do not want a bunch of duplicate synchronizer finish events to go out at the exact same time for every client.
+                    this.updateConfig(newConfig, false).catch((err) => {
                         console.error(err);
                     });
                 } else {
@@ -406,6 +425,10 @@ export class LiveTimer extends LiveDataObject<{
         } else {
             setTimeout(callback, this._tickRate);
         }
+    }
+
+    private endTimeFromConfig(config: ITimerConfigEvent): number {
+        return config.timestamp - config.data.position + config.data.duration;
     }
 }
 

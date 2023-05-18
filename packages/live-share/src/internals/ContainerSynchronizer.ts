@@ -92,8 +92,7 @@ export class ContainerSynchronizer {
         await this.sendGroupEvent(
             this._connectedKeys,
             ObjectSynchronizerEvents.update
-        )
-            .catch((err) => console.error(err));
+        ).catch((err) => console.error(err));
     }
 
     /**

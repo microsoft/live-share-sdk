@@ -334,6 +334,8 @@ export class LiveTimer extends LiveDataObject<{
             if (
                 allowed &&
                 this._currentConfig.timestamp === 0 &&
+                this._currentConfig.data.duration !== 0 &&
+                this._currentConfig.data.position !== 0 &&
                 currentTime >= endTime
             ) {
                 // Since finish config changes are not sent through the Synchronizer only the most recent config before finish is saved.
@@ -353,7 +355,8 @@ export class LiveTimer extends LiveDataObject<{
 
             if (
                 JSON.stringify(this._currentConfig.data) ===
-                JSON.stringify(config.data)
+                    JSON.stringify(config.data) &&
+                this._currentConfig.timestamp === config.timestamp
             )
                 return false;
 
@@ -379,6 +382,7 @@ export class LiveTimer extends LiveDataObject<{
             this.emit(LiveTimerEvents.started, userExposedConfig, local);
         } else if (event.data.duration === event.data.position) {
             this.emit(LiveTimerEvents.finished, userExposedConfig);
+            return;
         } else if (event.data.running) {
             this.emit(LiveTimerEvents.played, userExposedConfig, local);
         } else {

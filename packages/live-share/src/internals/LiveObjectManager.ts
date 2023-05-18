@@ -212,9 +212,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         this.stopReceivingSignalUpdates();
         this._containerRuntime = cRuntime;
         this.startReceivingSignalUpdates();
-        if (this._synchronizer) {
-            this._synchronizer.__dangerouslySetContainerRuntime(cRuntime);
-        }
+        this._synchronizer?.__dangerouslySetContainerRuntime(cRuntime);
     }
 
     /**

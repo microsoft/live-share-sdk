@@ -129,6 +129,11 @@ function getLiveDataObjectProxyClassInternal<
                     "getLiveDataObjectProxyClassInternal: required dependencies unknown"
                 );
             }
+
+            if (this.context.clientDetails.capabilities.interactive === false) {
+                return;
+            }
+
             runtime.__dangerouslySetContainerRuntime(
                 this.context.containerRuntime
             );

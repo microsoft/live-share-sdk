@@ -225,6 +225,11 @@ export class LiveState<TState = any> extends LiveDataObject<{
             // Ensure that state is allowed, newer, and not the initial state.
             if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt))
                 return false;
+            if (
+                JSON.stringify(this.latestEvent.data) ===
+                JSON.stringify(evt.data)
+            )
+                return false;
             this.updateState(evt, local);
             return true;
         } catch (err) {

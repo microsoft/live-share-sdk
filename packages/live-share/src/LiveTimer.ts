@@ -291,15 +291,15 @@ export class LiveTimer extends LiveDataObject<{
 
         if (this._currentConfig.data.running) {
             // Broadcast state change
+            const currentTime = this.liveRuntime.getTimestamp();
             const event: ITimerConfigEvent = {
-                timestamp: this.liveRuntime.getTimestamp(),
+                timestamp: currentTime,
                 clientId: await this.waitUntilConnected(),
                 data: {
                     duration: this._currentConfig.data.duration,
                     position:
                         this._currentConfig.data.position +
-                        (this.liveRuntime.getTimestamp() -
-                            this._currentConfig.timestamp),
+                        (currentTime - this._currentConfig.timestamp),
                     running: false,
                 },
             };
@@ -334,8 +334,7 @@ export class LiveTimer extends LiveDataObject<{
             if (
                 allowed &&
                 this._currentConfig.timestamp === 0 &&
-                this._currentConfig.data.duration !== 0 &&
-                this._currentConfig.data.position !== 0 &&
+                config.data.running === true &&
                 currentTime >= endTime
             ) {
                 // Since finish config changes are not sent through the Synchronizer only the most recent config before finish is saved.
@@ -382,7 +381,6 @@ export class LiveTimer extends LiveDataObject<{
             this.emit(LiveTimerEvents.started, userExposedConfig, local);
         } else if (event.data.duration === event.data.position) {
             this.emit(LiveTimerEvents.finished, userExposedConfig);
-            return;
         } else if (event.data.running) {
             this.emit(LiveTimerEvents.played, userExposedConfig, local);
         } else {

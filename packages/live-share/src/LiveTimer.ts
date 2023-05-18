@@ -330,15 +330,16 @@ export class LiveTimer extends LiveDataObject<{
             );
 
             const currentTime = this.liveRuntime.getTimestamp();
+            const endTime = this.endTimeFromConfig(config);
             if (
                 allowed &&
                 this._currentConfig.timestamp === 0 &&
-                currentTime > this.endTimeFromConfig(config)
+                currentTime >= endTime
             ) {
                 // Since finish config changes are not sent through the Synchronizer only the most recent config before finish is saved.
-                // For clients joining after the the timer has already finished, set the finish config without emitting events to the finish callback.
+                // For clients joining after the the timer has already finished, set the finish config.
                 const finishedBeforeJoinConfig: ITimerConfigEvent = {
-                    timestamp: currentTime,
+                    timestamp: endTime,
                     clientId: config.clientId,
                     data: {
                         duration: config.data.duration,
@@ -346,7 +347,7 @@ export class LiveTimer extends LiveDataObject<{
                         running: false,
                     },
                 };
-                this._currentConfig = finishedBeforeJoinConfig;
+                this.updateConfig(finishedBeforeJoinConfig, false);
                 return true;
             }
 
@@ -393,7 +394,7 @@ export class LiveTimer extends LiveDataObject<{
                 const endTime = this.endTimeFromConfig(this._currentConfig);
                 if (timestamp >= endTime) {
                     const newConfig: ITimerConfigEvent = {
-                        timestamp,
+                        timestamp: endTime,
                         clientId: this._currentConfig.clientId,
                         data: {
                             duration: this._currentConfig.data.duration,

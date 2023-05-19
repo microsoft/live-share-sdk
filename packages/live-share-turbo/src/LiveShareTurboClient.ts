@@ -10,7 +10,7 @@ import {
     ILiveShareHost,
     ILiveShareJoinResults,
 } from "@microsoft/live-share";
-import { FluidTurboClient, getContainerSchema } from "./internals";
+import { FluidTurboClient } from "./FluidTurboClient";
 
 /**
  * The `FluidTurboClient` implementation for the `LiveShareClient`.
@@ -75,7 +75,7 @@ export class LiveShareTurboClient extends FluidTurboClient {
         initialObjects?: LoadableObjectClassRecord,
         onContainerFirstCreated?: (container: IFluidContainer) => void
     ): Promise<ILiveShareJoinResults> {
-        const schema = getContainerSchema(initialObjects);
+        const schema = this.getContainerSchema(initialObjects);
         this._results = await this._client.joinContainer(
             schema,
             onContainerFirstCreated

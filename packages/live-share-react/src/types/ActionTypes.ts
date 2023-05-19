@@ -10,7 +10,15 @@ import { ITimerConfig, ILiveEvent, PresenceState } from "@microsoft/live-share";
 
 // React actions
 
-export type SetSharedStateAction<T> = (state: T) => void;
+/**
+ * Callback to set shared state
+ */
+export type SetSharedStateAction<TState> = (
+    state: TState | ((prevState: TState) => TState)
+) => void;
+/**
+ * Callback to set local state
+ */
 export type SetLocalStateAction = React.Dispatch<React.SetStateAction<any>>;
 
 // Fluid actions
@@ -79,7 +87,7 @@ export type DisposeSharedStateAction = () => void;
  * (state: TState) => Promise<void>
  */
 export type SetLiveStateAction<TState = undefined> = (
-    state: TState
+    state: TState | ((prevState: TState) => TState)
 ) => Promise<void>;
 
 /**

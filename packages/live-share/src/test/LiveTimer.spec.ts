@@ -8,7 +8,7 @@ import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveTimer } from "../LiveTimer";
-import { Deferred } from "../internals";
+import { Deferred, waitForDelay } from "../internals";
 import { getLiveDataObjectClassProxy } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
@@ -185,13 +185,10 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         await object2.initialize();
 
         await object1.start(50);
-
-        setTimeout(() => {
-            object1.pause();
-            setTimeout(() => {
-                object2.play();
-            }, 20);
-        }, 20);
+        await waitForDelay(20);
+        await object1.pause();
+        await waitForDelay(20);
+        await object2.play();
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -218,16 +215,13 @@ describeNoCompat("LiveTimer", (getTestObjectProvider) => {
         let init2 = object2.initialize();
         await Promise.all([init1, init2]);
 
-        object1.start(40);
-        setTimeout(() => {
-            object1.start(40);
-            setTimeout(() => {
-                object1.start(20);
-                setTimeout(() => {
-                    testDone.resolve();
-                }, 30);
-            }, 10);
-        }, 10);
+        await object1.start(40);
+        await waitForDelay(10);
+        await object1.start(40);
+        await waitForDelay(10);
+        await object1.start(20);
+        await waitForDelay(40);
+        testDone.resolve();
 
         // Wait for events to trigger
         await testDone.promise;

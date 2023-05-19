@@ -16,6 +16,12 @@ import {
 } from "../types";
 import { IReceiveLiveEvent } from "../interfaces";
 import { useDynamicDDS } from "../shared-hooks";
+import {
+    ActionContainerNotJoinedError,
+    ActionLiveDataObjectInitializedError,
+    ActionLiveDataObjectUndefinedError,
+} from "../internal";
+import { useFluidObjectsContext } from "../providers";
 
 /**
  * React hook for using a Live Share `LiveEvent`.
@@ -54,24 +60,34 @@ export function useLiveEvent<TEvent = any>(
         LiveEvent<TEvent>
     );
 
+    const { container } = useFluidObjectsContext();
+
     /**
      * User facing: callback to send event through `LiveEvent`
      */
     const sendEvent: SendLiveEventAction<TEvent> = React.useCallback(
         async (event: TEvent) => {
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "liveEvent",
+                    "sendEvent"
+                );
+            }
             if (liveEvent === undefined) {
-                throw new Error(
-                    "Cannot call emitEvent when liveEvent is undefined"
+                throw new ActionLiveDataObjectUndefinedError(
+                    "liveEvent",
+                    "sendEvent"
                 );
             }
             if (!liveEvent.isInitialized) {
-                throw new Error(
-                    "Cannot call emitEvent while liveEvent is not started"
+                throw new ActionLiveDataObjectInitializedError(
+                    "liveEvent",
+                    "sendEvent"
                 );
             }
             return await liveEvent.send(event);
         },
-        [liveEvent]
+        [container, liveEvent]
     );
 
     /**

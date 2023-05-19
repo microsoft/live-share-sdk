@@ -1,5 +1,5 @@
 import { useLiveShareContext, useLiveState } from "@microsoft/live-share-react";
-import { LiveShareClient, UserMeetingRole } from "@microsoft/live-share";
+import { UserMeetingRole } from "@microsoft/live-share";
 import { FC, ReactNode } from "react";
 
 enum ExampleAppStatus {

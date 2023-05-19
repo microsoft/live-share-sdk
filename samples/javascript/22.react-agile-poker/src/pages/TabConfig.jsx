@@ -5,6 +5,7 @@
 import { useEffect } from "react";
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Title2, Subtitle2 } from "@fluentui/react-components";
+import { FlexColumn } from "../components";
 
 const TabConfig = () => {
     useEffect(() => {
@@ -20,12 +21,7 @@ const TabConfig = () => {
     }, []);
 
     return (
-        <FlexColumn
-            vAlign="center"
-            hAlign="center"
-            fill="both"
-            gap="small"
-        >
+        <FlexColumn vAlign="center" hAlign="center" fill="both" gap="small">
             <Title2 block align="center">
                 Welcome to Agile Poker!
             </Title2>

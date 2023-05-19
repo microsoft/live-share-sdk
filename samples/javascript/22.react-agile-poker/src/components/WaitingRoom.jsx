@@ -3,11 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import {
-    Button,
-    Subtitle2,
-    Image,
-} from "@fluentui/react-components";
+import { Button, Subtitle2, Image } from "@fluentui/react-components";
 import logo from "../assets/agile-poker-logo-large.png";
 import { getPrimaryButtonStyles } from "../styles/components";
 import { PlayerAvatar } from "./PlayerAvatar";
@@ -21,10 +17,7 @@ export const WaitingRoom = ({
 }) => {
     const primaryButtonStyles = getPrimaryButtonStyles();
     return (
-        <FlexRow
-            vAlign="center"
-            fill="both"
-        >
+        <FlexRow vAlign="center" fill="both">
             <FlexColumn
                 vAlign="center"
                 fill="both"

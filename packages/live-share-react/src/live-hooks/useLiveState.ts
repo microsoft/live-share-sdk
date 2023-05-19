@@ -7,6 +7,13 @@ import { LiveState, UserMeetingRole } from "@microsoft/live-share";
 import React from "react";
 import { SetLiveStateAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
+import { useFluidObjectsContext } from "../providers";
+import {
+    ActionContainerNotJoinedError,
+    ActionLiveDataObjectInitializedError,
+    ActionLiveDataObjectUndefinedError,
+    isPrevStateCallback,
+} from "../internal";
 
 /**
  * React hook for using a Live Share `LiveState`.
@@ -20,11 +27,11 @@ import { useDynamicDDS } from "../shared-hooks";
  * @returns ordered values: first value is the synchronized state value and the second is a setter to change the state value.
  * The setter returns a void promise, which will throw if the user does not have the required roles to set.
  */
-export function useLiveState<TState = any>(
+export function useLiveState<TState>(
     uniqueKey: string,
     initialState: TState,
     allowedRoles?: UserMeetingRole[]
-): [TState, SetLiveStateAction<TState>] {
+): [TState, SetLiveStateAction<TState>, LiveState<TState> | undefined] {
     const [currentState, setCurrentState] =
         React.useState<TState>(initialState);
     /**
@@ -35,32 +42,39 @@ export function useLiveState<TState = any>(
         LiveState<TState>
     );
 
+    const { container } = useFluidObjectsContext();
+
     /**
      * Change state callback that is user facing
      * @param state TState to set
      * @returns void promise, which will throw if the user does not have the required roles
      */
     const setState = React.useCallback(
-        async (state: TState) => {
-            if (!liveState) {
-                console.error(
-                    new Error(
-                        "Cannot call changeState when liveState is undefined"
-                    )
+        async (state: TState | ((prevState: TState) => TState)) => {
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "liveState",
+                    "setState"
                 );
-                return;
+            }
+            if (liveState === undefined) {
+                throw new ActionLiveDataObjectUndefinedError(
+                    "liveState",
+                    "setState"
+                );
             }
             if (!liveState.isInitialized) {
-                console.error(
-                    new Error(
-                        "Cannot call changeState while liveState is not started"
-                    )
+                throw new ActionLiveDataObjectInitializedError(
+                    "liveState",
+                    "setState"
                 );
-                return;
             }
-            return await liveState.set(state);
+            const valueToSet = isPrevStateCallback<TState>(state)
+                ? state(liveState.state)
+                : state;
+            return await liveState.set(valueToSet);
         },
-        [liveState]
+        [container, liveState]
     );
 
     /**
@@ -85,5 +99,5 @@ export function useLiveState<TState = any>(
         };
     }, [liveState]);
 
-    return [currentState, setState];
+    return [currentState, setState, liveState];
 }

@@ -12,6 +12,12 @@ import {
 import React from "react";
 import { IUseLivePresenceResults, OnUpdateLivePresenceAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
+import { useFluidObjectsContext } from "../providers";
+import {
+    ActionContainerNotJoinedError,
+    ActionLiveDataObjectInitializedError,
+    ActionLiveDataObjectUndefinedError,
+} from "../internal";
 
 /**
  * React hook for using a Live Share `LivePresence`.
@@ -24,7 +30,7 @@ import { useDynamicDDS } from "../shared-hooks";
  * @template TData Optional typing for the custom user presence data object. Default is `object` type.
  * @param uniqueKey The unique key for `LivePresence`. If one does not yet exist, a new one
  * @param userId Optional. The unique ID for a user. If none is provided, a random UUID will be generated.
- * @param initialData Optional. Initial presence data object for the user.
+ * @param initialData Optional. Initial presence data object for the user. Can be value or a function to get the value.
  * @param initialPresenceState Optional. Initial status of the user's presence. Default is online.
  * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state
  * will be created, otherwise it will use the existing one. Default value is ":<dds-default>"
@@ -33,7 +39,7 @@ import { useDynamicDDS } from "../shared-hooks";
  */
 export function useLivePresence<TData extends object = object>(
     uniqueKey: string,
-    initialData?: TData | undefined,
+    initialData?: TData | (() => TData) | undefined,
     initialPresenceState: PresenceState = PresenceState.online,
     allowedRoles?: UserMeetingRole[]
 ): IUseLivePresenceResults<TData> {
@@ -54,41 +60,41 @@ export function useLivePresence<TData extends object = object>(
     /**
      * User facing: list of non-local user's presence objects.
      */
-    const otherUsers = React.useMemo<LivePresenceUser<TData>[]>(() => {
-        return [...allUsers.filter((user) => !user.isLocalUser)];
-    }, [allUsers]);
+    const otherUsers = allUsers.filter((user) => !user.isLocalUser);
 
     /**
      * User facing: local user's presence object.
      */
-    const localUser = React.useMemo<LivePresenceUser<TData> | undefined>(() => {
-        return allUsers.find((user) => user.isLocalUser);
-    }, [allUsers]);
+    const localUser = allUsers.find((user) => user.isLocalUser);
+
+    const { container } = useFluidObjectsContext();
 
     /**
      * User facing: callback to update the local user's presence.
      */
     const updatePresence: OnUpdateLivePresenceAction<TData> = React.useCallback(
         async (data?: TData | undefined, state?: PresenceState | undefined) => {
-            if (!livePresence) {
-                console.error(
-                    new Error(
-                        "Cannot call updatePresence when presence is undefined"
-                    )
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "livePresence",
+                    "updatePresence"
                 );
-                return;
+            }
+            if (livePresence === undefined) {
+                throw new ActionLiveDataObjectUndefinedError(
+                    "livePresence",
+                    "updatePresence"
+                );
             }
             if (!livePresence.isInitialized) {
-                console.error(
-                    new Error(
-                        "Cannot call updatePresence while presence is not started"
-                    )
+                throw new ActionLiveDataObjectInitializedError(
+                    "livePresence",
+                    "updatePresence"
                 );
-                return;
             }
             return await livePresence.update(data, state);
         },
-        [livePresence]
+        [container, livePresence]
     );
 
     /**
@@ -108,7 +114,9 @@ export function useLivePresence<TData extends object = object>(
 
         if (!livePresence.isInitialized) {
             livePresence.initialize(
-                initialData,
+                isInitialDataCallback<TData>(initialData)
+                    ? initialData()
+                    : initialData,
                 initialPresenceState,
                 allowedRoles
             );
@@ -128,4 +136,8 @@ export function useLivePresence<TData extends object = object>(
         livePresence,
         updatePresence,
     };
+}
+
+function isInitialDataCallback<TData>(value: any): value is () => TData {
+    return typeof value === "function";
 }

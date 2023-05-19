@@ -9,13 +9,8 @@ import { FlexColumn, FlexRow } from "./flex";
 
 export const UserAnswer = ({ user, localUserId, index }) => {
     return (
-        <FlexRow
-            vAlign="center"
-            gap="small"
-        >
-            <FlexColumn
-                hAlign="center"
-            >
+        <FlexRow vAlign="center" gap="small">
+            <FlexColumn hAlign="center">
                 <PlayerAvatar
                     user={user}
                     localUserId={localUserId}

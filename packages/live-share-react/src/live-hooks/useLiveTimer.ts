@@ -22,6 +22,12 @@ import {
     OnTimerTickAction,
 } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
+import { useFluidObjectsContext } from "../providers";
+import {
+    ActionContainerNotJoinedError,
+    ActionLiveDataObjectInitializedError,
+    ActionLiveDataObjectUndefinedError,
+} from "../internal";
 
 export function useLiveTimer(
     uniqueKey: string,
@@ -46,6 +52,8 @@ export function useLiveTimer(
      */
     const { dds: liveTimer } = useDynamicDDS<LiveTimer>(uniqueKey, LiveTimer);
 
+    const { container } = useFluidObjectsContext();
+
     /**
      * Callback to send event through `LiveTimer`
      * @param duration the duration for the timer in milliseconds
@@ -53,23 +61,24 @@ export function useLiveTimer(
      */
     const start: OnStartTimerAction = React.useCallback(
         async (duration: number) => {
+            if (!container) {
+                throw new ActionContainerNotJoinedError("liveTimer", "start");
+            }
             if (liveTimer === undefined) {
-                console.error(
-                    new Error("Cannot call start when liveTimer is undefined")
+                throw new ActionLiveDataObjectUndefinedError(
+                    "liveTimer",
+                    "start"
                 );
-                return;
             }
             if (!liveTimer.isInitialized) {
-                console.error(
-                    new Error(
-                        "Cannot call start while liveTimer is not started"
-                    )
+                throw new ActionLiveDataObjectInitializedError(
+                    "liveTimer",
+                    "start"
                 );
-                return;
             }
             return await liveTimer.start(duration);
         },
-        [liveTimer]
+        [container, liveTimer]
     );
 
     /**
@@ -77,40 +86,37 @@ export function useLiveTimer(
      * @returns void promise that will throw when user does not have required roles
      */
     const play: OnPlayTimerAction = React.useCallback(async () => {
+        if (!container) {
+            throw new ActionContainerNotJoinedError("liveTimer", "play");
+        }
         if (liveTimer === undefined) {
-            console.error(
-                new Error("Cannot call play when liveTimer is undefined")
-            );
-            return;
+            throw new ActionLiveDataObjectUndefinedError("liveTimer", "play");
         }
         if (!liveTimer.isInitialized) {
-            console.error(
-                new Error("Cannot call play while liveTimer is not started")
-            );
-            return;
+            throw new ActionLiveDataObjectInitializedError("liveTimer", "play");
         }
         return await liveTimer.play();
-    }, [liveTimer]);
+    }, [container, liveTimer]);
 
     /**
      * Callback to send event through `LiveTimer`
      * @returns void promise that will throw when user does not have required roles
      */
     const pause: OnPauseTimerAction = React.useCallback(async () => {
+        if (!container) {
+            throw new ActionContainerNotJoinedError("liveTimer", "pause");
+        }
         if (liveTimer === undefined) {
-            console.error(
-                new Error("Cannot call pause when liveTimer is undefined")
-            );
-            return;
+            throw new ActionLiveDataObjectUndefinedError("liveTimer", "pause");
         }
         if (!liveTimer.isInitialized) {
-            console.error(
-                new Error("Cannot call pause while liveTimer is not started")
+            throw new ActionLiveDataObjectInitializedError(
+                "liveTimer",
+                "pause"
             );
-            return;
         }
         return await liveTimer.pause();
-    }, [liveTimer]);
+    }, [container, liveTimer]);
 
     /**
      * Setup change listeners and start `LiveTimer` if needed

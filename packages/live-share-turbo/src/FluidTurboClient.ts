@@ -6,12 +6,15 @@
 import {
     IFluidContainer,
     LoadableObjectClass,
+    LoadableObjectClassRecord,
     SharedMap,
 } from "fluid-framework";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
-import { IFluidTurboClient } from "../interfaces/IFluidTurboClient";
-import { DynamicObjectManager } from "../dds-objects";
+import { IFluidTurboClient } from "./interfaces/IFluidTurboClient";
+import { DynamicObjectManager } from "./dds-objects";
+import { DynamicObjectRegistry } from "@microsoft/live-share";
+import { BASE_CONTAINER_SCHEMA } from "./internals";
 
 /**
  * Base class for building Fluid Turbo clients.
@@ -62,7 +65,12 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
         onDidFirstInitialize?: (dds: T) => void
     ): Promise<T> {
         // The uniqueKey key makes the developer provided uniqueKey never conflict across different DDS objects
-        if (!this.results || !this.dynamicObjects) {
+        if (!this.results) {
+            throw new Error(
+                "FluidTurboClient getDDS: cannot call until successful get/create/join FluidContainer"
+            );
+        }
+        if (!this.dynamicObjects) {
             throw new Error(
                 "FluidTurboClient: getDDS must have valid dynamicObjects DynamicObjectManager"
             );
@@ -84,6 +92,25 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
             onDidFirstInitialize?.(response.dds);
         }
         return response.dds;
+    }
+
+    /**
+     * Get the container schema to use within a `FluidTurboClient` container.
+     *
+     * @param initialObjects Optional. Initial objects to add to the schema
+     * @returns a `ContainerSchema` record to use in a Fluid container
+     */
+    protected getContainerSchema(initialObjects?: LoadableObjectClassRecord) {
+        return {
+            initialObjects: {
+                ...BASE_CONTAINER_SCHEMA.initialObjects,
+                ...initialObjects,
+            },
+            // Get the static registry of LoadableObjectClass types.
+            dynamicObjectTypes: [
+                ...DynamicObjectRegistry.dynamicLoadableObjects.values(),
+            ],
+        };
     }
 
     private async waitUntilConnected(): Promise<void> {

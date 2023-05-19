@@ -86,14 +86,6 @@ export class LiveMediaSession extends LiveDataObject {
     }
 
     /**
-     * @deprecated isInitialized should be used instead
-     * Returns true if the object has been initialized.
-     */
-    public get isStarted(): boolean {
-        return this.isInitialized;
-    }
-
-    /**
      * The group coordinator for the session.
      */
     public get coordinator(): LiveMediaSessionCoordinator {

@@ -41,11 +41,7 @@ export const PlayerAvatar = ({ user, index }) => {
         user.data && user.data.avatarIndex >= 0 ? user.data.avatarIndex : 0;
     const avatarSrc = avatars[avatarIndex];
     return (
-        <FlexColumn
-            vAlign="center"
-            gap="small"
-            style={{ padding: "12px" }}
-        >
+        <FlexColumn vAlign="center" gap="small" style={{ padding: "12px" }}>
             <div
                 style={{
                     borderWidth: "5px",

@@ -135,7 +135,7 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
         // 4. if getClientInfo times out after multiple calls, start using only polyfill.
 
         if (this._getClientInfoExists) {
-            return this._host.getClientInfo(clientId);
+            return await this._host.getClientInfo(clientId);
         }
 
         if (this._getClientInfoTriesRemaining <= 0) {
@@ -155,10 +155,14 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
 
         const getClientRoles = this.getClientRoles(clientId);
         try {
-            const clientInfo = await this._host.getClientInfo(clientId, () => {
-                // The request initially timed out, but then it later was rejected/resolved for a legitimate reason
-                this._getClientInfoExists = true;
-            });
+            const clientInfo = await this._host.getClientInfo(
+                clientId,
+                () => {
+                    // The request initially timed out, but then it later was rejected/resolved for a legitimate reason
+                    this._getClientInfoExists = true;
+                },
+                this.getRetrySchedule()
+            );
             this._getClientInfoExists = true;
             return clientInfo;
         } catch (error: unknown) {
@@ -178,7 +182,15 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
                 };
             }
         }
-        return undefined;
+        this._getClientInfoExists = true;
+        // retry schedule gets longer as we lose confidence it exists.
+        // First call to this._host.getClientInfo may result in an error if the api exists, but without retries.
+        // If error we know the api exists. call the normal implementation again.
+        // this should only ever be hit one time at the start because this._getClientInfoExists will be true.
+        console.log(
+            "BackwardsCompatibilityHostDecorator: error, retryingWithActual"
+        );
+        return await this.getClientInfo(clientId);
     }
 
     public async registerClientId(
@@ -216,5 +228,12 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
                     this._getClientInfoExists = true;
                 }
             });
+    }
+
+    // retry little bit longer when getting to end of retries remaining.
+    private getRetrySchedule(): number[] {
+        const retryAmount =
+            this._totalTries - Math.max(0, this._getClientInfoTriesRemaining);
+        return EXPONENTIAL_BACKOFF_SCHEDULE.slice(0, retryAmount);
     }
 }

@@ -16,6 +16,12 @@ import {
 import { isExtendedMediaMetadata, isMediaElement, isRefObject } from "../utils";
 import { useDynamicDDS } from "../shared-hooks";
 import { IUseMediaSynchronizerResults } from "../types";
+import { useFluidObjectsContext } from "../providers";
+import {
+    ActionContainerNotJoinedError,
+    ActionLiveDataObjectInitializedError,
+    ActionLiveDataObjectUndefinedError,
+} from "../internal";
 
 /**
  * React hook for using a Live Share media `MediaPlayerSynchronizer`.
@@ -57,31 +63,66 @@ export function useMediaSynchronizer(
         LiveMediaSession
     );
 
+    const { container } = useFluidObjectsContext();
+
     /**
      * Play callback
      */
     const play = React.useCallback(async () => {
-        if (!mediaSynchronizer) return;
+        if (!container) {
+            throw new ActionContainerNotJoinedError(
+                "mediaSynchronizer",
+                "play"
+            );
+        }
+        if (mediaSynchronizer === undefined) {
+            throw new ActionLiveDataObjectUndefinedError(
+                "mediaSynchronizer",
+                "play"
+            );
+        }
         return await mediaSynchronizer.play();
-    }, [mediaSynchronizer]);
+    }, [container, mediaSynchronizer]);
 
     /**
      * Pause callback
      */
     const pause = React.useCallback(async () => {
-        if (!mediaSynchronizer) return;
+        if (!container) {
+            throw new ActionContainerNotJoinedError(
+                "mediaSynchronizer",
+                "pause"
+            );
+        }
+        if (mediaSynchronizer === undefined) {
+            throw new ActionLiveDataObjectUndefinedError(
+                "mediaSynchronizer",
+                "pause"
+            );
+        }
         return await mediaSynchronizer.pause();
-    }, [mediaSynchronizer]);
+    }, [container, mediaSynchronizer]);
 
     /**
      * User facing: seek callback
      */
     const seekTo = React.useCallback(
         async (time: number) => {
-            if (!mediaSynchronizer) return;
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "mediaSynchronizer",
+                    "seekTo"
+                );
+            }
+            if (mediaSynchronizer === undefined) {
+                throw new ActionLiveDataObjectUndefinedError(
+                    "mediaSynchronizer",
+                    "seekTo"
+                );
+            }
             return await mediaSynchronizer.seekTo(time);
         },
-        [mediaSynchronizer]
+        [container, mediaSynchronizer]
     );
 
     /**
@@ -89,7 +130,18 @@ export function useMediaSynchronizer(
      */
     const setTrack = React.useCallback(
         async (track: Partial<ExtendedMediaMetadata> | string | null) => {
-            if (!mediaSynchronizer) return;
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "mediaSynchronizer",
+                    "setTrack"
+                );
+            }
+            if (mediaSynchronizer === undefined) {
+                throw new ActionLiveDataObjectUndefinedError(
+                    "mediaSynchronizer",
+                    "setTrack"
+                );
+            }
             if (isExtendedMediaMetadata(track)) {
                 return await mediaSynchronizer.setTrack(track);
             } else if (typeof track === "string") {
@@ -98,7 +150,7 @@ export function useMediaSynchronizer(
                 } as ExtendedMediaMetadata);
             }
         },
-        [mediaSynchronizer]
+        [container, mediaSynchronizer]
     );
 
     /**

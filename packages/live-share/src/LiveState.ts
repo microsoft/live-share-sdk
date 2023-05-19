@@ -89,14 +89,6 @@ export class LiveState<TState = any> extends LiveDataObject<{
     }
 
     /**
-     * @deprecated isInitialized should be used instead
-     * Returns true if the object has been initialized.
-     */
-    public get isStarted(): boolean {
-        return this.isInitialized;
-    }
-
-    /**
      * The current state.
      */
     public get state(): TState {
@@ -224,6 +216,11 @@ export class LiveState<TState = any> extends LiveDataObject<{
             );
             // Ensure that state is allowed, newer, and not the initial state.
             if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt))
+                return false;
+            if (
+                JSON.stringify(this.latestEvent.data) ===
+                JSON.stringify(evt.data)
+            )
                 return false;
             this.updateState(evt, local);
             return true;

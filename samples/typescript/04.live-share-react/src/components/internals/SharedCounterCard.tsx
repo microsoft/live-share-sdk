@@ -1,4 +1,4 @@
-import { useSharedState } from "@microsoft/live-share-react";
+import { useLiveState, useSharedState } from "@microsoft/live-share-react";
 import { FC } from "react";
 import { ISharedCardValue } from "../../interfaces/interfaces";
 
@@ -11,8 +11,12 @@ export const SharedCounterCard: FC<ISharedCounterCardProps> = ({
     card,
     onDelete,
 }) => {
-    const [count, setCount, disposeCount] = useSharedState(
+    const [count, setCount, disposeCount] = useSharedState<number>(
         `card-count:${card.id}`,
+        0
+    );
+    const [liveCount, setLiveCount] = useLiveState<number>(
+        `live-card-count:${card.id}`,
         0
     );
     return (
@@ -23,18 +27,35 @@ export const SharedCounterCard: FC<ISharedCounterCardProps> = ({
                 <button
                     style={{ marginRight: "12px" }}
                     onClick={() => {
-                        setCount(count + 1);
+                        setCount((prevCount) => prevCount + 1);
                     }}
                 >
                     {"+1"}
                 </button>
                 <span
                     style={{
-                        fontWeight: 600,
-                        fontSize: "1.4em",
+                        fontWeight: 400,
+                        fontSize: "1.2em",
                         lineHeight: "1.1",
                     }}
-                >{`${count} `}</span>
+                >{`shared count: ${count}`}</span>
+            </div>
+            <div className="flex row vAlign" style={{ marginBottom: "12px" }}>
+                <button
+                    style={{ marginRight: "12px" }}
+                    onClick={() => {
+                        setLiveCount((prevCount) => prevCount + 1);
+                    }}
+                >
+                    {"+1"}
+                </button>
+                <span
+                    style={{
+                        fontWeight: 400,
+                        fontSize: "1.2em",
+                        lineHeight: "1.1",
+                    }}
+                >{`live count: ${liveCount}`}</span>
             </div>
             <button
                 onClick={() => {

@@ -13,7 +13,7 @@ import { IAzureContainerResults } from "../types";
 import {
     ISharedStateRegistryResponse,
     useSharedStateRegistry,
-} from "../internal-hooks";
+} from "../internal";
 import {
     AzureTurboClient,
     IFluidTurboClient,

@@ -8,6 +8,8 @@ import { isEntries, isJSON, isMap } from "../utils";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types";
 import { useDynamicDDS } from "./useDynamicDDS";
 import { SharedMap } from "fluid-framework";
+import { useFluidObjectsContext } from "../providers";
+import { ActionContainerNotJoinedError, ActionLiveDataObjectUndefinedError } from "../internal";
 
 /**
  * React hook for using a Fluid `SharedMap`.
@@ -56,20 +58,28 @@ export function useSharedMap<TData extends object = object>(
         onFirstInitialize
     );
 
+    const { container } = useFluidObjectsContext();
+
     /**
      * User facing: set a value to the Fluid `SharedMap`.
      */
     const setEntry = React.useCallback(
         (key: string, value: TData) => {
-            if (!sharedMap) {
-                console.error(
-                    new Error("Cannot call set when sharedMap is undefined")
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "sharedMap",
+                    "setEntry"
                 );
-                return;
+            }
+            if (sharedMap === undefined) {
+                throw new ActionLiveDataObjectUndefinedError(
+                    "sharedMap",
+                    "setEntry"
+                );
             }
             sharedMap.set(key, value);
         },
-        [sharedMap]
+        [container, sharedMap]
     );
 
     /**
@@ -77,15 +87,21 @@ export function useSharedMap<TData extends object = object>(
      */
     const deleteEntry = React.useCallback(
         (key: string) => {
-            if (!sharedMap) {
-                console.error(
-                    new Error("Cannot call remove when sharedMap is undefined")
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "sharedMap",
+                    "deleteEntry"
                 );
-                return;
+            }
+            if (sharedMap === undefined) {
+                throw new ActionLiveDataObjectUndefinedError(
+                    "sharedMap",
+                    "deleteEntry"
+                );
             }
             sharedMap.delete(key);
         },
-        [sharedMap]
+        [container, sharedMap]
     );
 
     // Setup change listeners, initial values, etc.

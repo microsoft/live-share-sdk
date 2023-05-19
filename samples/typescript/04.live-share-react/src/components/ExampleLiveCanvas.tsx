@@ -8,7 +8,7 @@ export const ExampleLiveCanvas: FC = () => {
     const [active, setActive] = useState(true);
     const [tool, setTool] = useState(InkingTool.pen);
     const [isCursorShared, setIsCursorShared] = useState(true);
-    const { liveCanvas } = useLiveCanvas(
+    const { inkingManager, liveCanvas } = useLiveCanvas(
         "CUSTOM-LIVE-CANVAS",
         liveCanvasRef,
         active,
@@ -33,14 +33,14 @@ export const ExampleLiveCanvas: FC = () => {
                             setActive(!active);
                         }}
                     >
-                        {"Toggle Active"}
+                        {active ? "Deactivate" : "Activate"}
                     </button>
                     <button
                         onClick={() => {
                             setIsCursorShared(!isCursorShared);
                         }}
                     >
-                        {"Toggle Cursor"}
+                        {isCursorShared ? "Disable cursors" : "Enable cursors"}
                     </button>
                     <button
                         onClick={() => {
@@ -51,10 +51,24 @@ export const ExampleLiveCanvas: FC = () => {
                     </button>
                     <button
                         onClick={() => {
+                            setTool(InkingTool.highlighter);
+                        }}
+                    >
+                        {"Highlighter"}
+                    </button>
+                    <button
+                        onClick={() => {
                             setTool(InkingTool.laserPointer);
                         }}
                     >
                         {"Laser pointer"}
+                    </button>
+                    <button
+                        onClick={() => {
+                            inkingManager?.clear();
+                        }}
+                    >
+                        {"Clear"}
                     </button>
                 </div>
             )}

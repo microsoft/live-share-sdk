@@ -7,6 +7,7 @@ import React from "react";
 import { useFluidObjectsContext } from "../providers";
 import { DisposeSharedStateAction, SetSharedStateAction } from "../types";
 import { v4 as uuid } from "uuid";
+import { isPrevStateCallback } from "../internal";
 
 /**
  * Inspired by React's `useState` hook, `useSharedState` makes it easy to synchronize state in your app.
@@ -48,9 +49,14 @@ export function useSharedState<S>(
      * User facing: callback to change the shared state.
      */
     const setSharedState: SetSharedStateAction<S> = React.useCallback(
-        (updatedState: S) => {
-            setLocalState(updatedState);
-            updateSharedState(uniqueKey, updatedState);
+        (state: S | ((prevState: S) => S)) => {
+            setLocalState((prevState) => {
+                const valueToSet = isPrevStateCallback<S>(state)
+                    ? state(prevState)
+                    : state;
+                updateSharedState(uniqueKey, valueToSet);
+                return valueToSet;
+            });
         },
         [uniqueKey, setLocalState, updateSharedState]
     );

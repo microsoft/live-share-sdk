@@ -5,7 +5,7 @@
 
 import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
 import React from "react";
-import { useSharedStateRegistry } from "../internal-hooks";
+import { useSharedStateRegistry } from "../internal";
 import {
     ILiveShareClientOptions,
     ILiveShareHost,

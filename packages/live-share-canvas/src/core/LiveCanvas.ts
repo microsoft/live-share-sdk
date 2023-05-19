@@ -157,6 +157,7 @@ class LiveStroke {
 export abstract class LiveCursor {
     private _renderedElement?: HTMLElement;
     private _lastUpdated = Date.now();
+    private _userInfo?: IUserInfo;
 
     protected abstract internalRender(): HTMLElement;
 
@@ -164,10 +165,9 @@ export abstract class LiveCursor {
      * Initializes a new instance of `LiveCursor`.
      * @param info The cursor info.
      */
-    constructor(
-        public readonly clientId: string,
-        public readonly userInfo?: IUserInfo
-    ) {}
+    constructor(public readonly clientId: string, _userInfo?: IUserInfo) {
+        this._userInfo = _userInfo;
+    }
 
     /**
      * Updates the position of the cursor.
@@ -180,6 +180,18 @@ export abstract class LiveCursor {
             this.renderedElement.style.left = position.x + "px";
             this.renderedElement.style.top = position.y + "px";
         }
+    }
+
+    /**
+     * Overwrite the user info used for rendering displayName.
+     * Normally should let LiveCanvas set this value, which comes from the host and is trusted.
+     */
+    public set userInfo(value: IUserInfo | undefined) {
+        this._userInfo = value;
+    }
+
+    public get userInfo(): IUserInfo | undefined {
+        return this._userInfo;
     }
 
     /**
@@ -329,8 +341,8 @@ class BuiltInLiveCursor extends LiveCursor {
         return element;
     }
 
-    constructor(public clientId: string, public readonly userInfo?: IUserInfo) {
-        super(clientId, userInfo);
+    constructor(public clientId: string, _userInfo?: IUserInfo) {
+        super(clientId, _userInfo);
 
         this._color =
             BuiltInLiveCursor.cursorColors[BuiltInLiveCursor.currentColorIndex];
@@ -770,6 +782,8 @@ export class LiveCanvas extends LiveDataObject {
                 : new BuiltInLiveCursor(clientId, userInfo);
 
             this._liveCursorsMap.set(clientId, liveCursor);
+        } else if (userInfo?.displayName) {
+            liveCursor.userInfo = userInfo;
         }
 
         if (!this._liveCursorsHost.contains(liveCursor.renderedElement)) {

@@ -183,8 +183,10 @@ export abstract class LiveCursor {
     }
 
     /**
+     * @hidden
      * Overwrite the user info used for rendering displayName.
      * Normally should let LiveCanvas set this value, which comes from the host and is trusted.
+     * Values set here will be overwritten by values from the host
      */
     public set userInfo(value: IUserInfo | undefined) {
         this._userInfo = value;

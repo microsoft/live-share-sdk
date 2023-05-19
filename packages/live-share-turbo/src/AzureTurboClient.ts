@@ -13,13 +13,13 @@ import {
     AzureClientProps,
     AzureContainerServices,
 } from "@fluidframework/azure-client";
-import { FluidTurboClient, getContainerSchema } from "./internals";
 import {
     AzureLiveShareHost,
     ILiveShareHost,
     LiveShareRuntime,
     getLiveShareContainerSchemaProxy,
 } from "@microsoft/live-share";
+import { FluidTurboClient } from "./FluidTurboClient";
 
 /**
  * The `FluidTurboClient` implementation for the `AzureClient`.
@@ -110,7 +110,7 @@ export class AzureTurboClient extends FluidTurboClient {
     } {
         const runtime = new LiveShareRuntime(this._host);
         const schema = getLiveShareContainerSchemaProxy(
-            getContainerSchema(initialObjects),
+            this.getContainerSchema(initialObjects),
             runtime
         );
         return {

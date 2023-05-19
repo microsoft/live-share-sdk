@@ -6,6 +6,7 @@ const directories = process.argv.slice(2);
 const optionsArray = directories.map((dir) => ["-w", dir]).flat();
 
 require("child_process").spawn("npm", ["run", "build"].concat(optionsArray), {
+    shell: true,
     cwd: process.cwd(),
     stdio: "inherit",
 });

@@ -20,7 +20,9 @@ import { inTeams } from "../utils/inTeams";
 const IN_TEAMS = inTeams();
 
 export const LiveShareManualJoin: FC = () => {
-    const [host] = useState(IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create());
+    const [host] = useState(
+        IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
+    );
     return (
         <LiveShareProvider host={host}>
             <RequireJoinWrapper />

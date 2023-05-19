@@ -13,7 +13,9 @@ import { ITimerConfig, ILiveEvent, PresenceState } from "@microsoft/live-share";
 /**
  * Callback to set shared state
  */
-export type SetSharedStateAction<TState> = (state: TState | ((prevState: TState) => TState)) => void;
+export type SetSharedStateAction<TState> = (
+    state: TState | ((prevState: TState) => TState)
+) => void;
 /**
  * Callback to set local state
  */

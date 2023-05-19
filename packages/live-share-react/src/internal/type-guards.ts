@@ -1,4 +1,3 @@
-
 /**
  * @hidden
  * Used for useLiveState and useSharedState for checking if a value is a prevState callback

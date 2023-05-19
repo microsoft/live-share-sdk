@@ -9,7 +9,10 @@ import { IUseSharedMapResults, SharedMapInitialData } from "../types";
 import { useDynamicDDS } from "./useDynamicDDS";
 import { SharedMap } from "fluid-framework";
 import { useFluidObjectsContext } from "../providers";
-import { ActionContainerNotJoinedError, ActionLiveDataObjectUndefinedError } from "../internal";
+import {
+    ActionContainerNotJoinedError,
+    ActionLiveDataObjectUndefinedError,
+} from "../internal";
 
 /**
  * React hook for using a Fluid `SharedMap`.

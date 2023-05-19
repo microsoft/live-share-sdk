@@ -17,7 +17,11 @@ import { isExtendedMediaMetadata, isMediaElement, isRefObject } from "../utils";
 import { useDynamicDDS } from "../shared-hooks";
 import { IUseMediaSynchronizerResults } from "../types";
 import { useFluidObjectsContext } from "../providers";
-import { ActionContainerNotJoinedError, ActionLiveDataObjectInitializedError, ActionLiveDataObjectUndefinedError } from "../internal";
+import {
+    ActionContainerNotJoinedError,
+    ActionLiveDataObjectInitializedError,
+    ActionLiveDataObjectUndefinedError,
+} from "../internal";
 
 /**
  * React hook for using a Live Share media `MediaPlayerSynchronizer`.

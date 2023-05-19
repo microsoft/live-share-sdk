@@ -16,7 +16,11 @@ import {
 } from "../types";
 import { IReceiveLiveEvent } from "../interfaces";
 import { useDynamicDDS } from "../shared-hooks";
-import { ActionContainerNotJoinedError, ActionLiveDataObjectInitializedError, ActionLiveDataObjectUndefinedError } from "../internal";
+import {
+    ActionContainerNotJoinedError,
+    ActionLiveDataObjectInitializedError,
+    ActionLiveDataObjectUndefinedError,
+} from "../internal";
 import { useFluidObjectsContext } from "../providers";
 
 /**
@@ -55,7 +59,7 @@ export function useLiveEvent<TEvent = any>(
         uniqueKey,
         LiveEvent<TEvent>
     );
-    
+
     const { container } = useFluidObjectsContext();
 
     /**

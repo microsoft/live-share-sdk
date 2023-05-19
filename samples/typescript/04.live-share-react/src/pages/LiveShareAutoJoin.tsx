@@ -17,7 +17,9 @@ import { FC, useState } from "react";
 const IN_TEAMS = inTeams();
 
 export const LiveShareAutoJoin: FC = () => {
-    const [host] = useState(IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create());
+    const [host] = useState(
+        IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
+    );
     return (
         <LiveShareProvider joinOnLoad host={host}>
             <ExampleLiveState

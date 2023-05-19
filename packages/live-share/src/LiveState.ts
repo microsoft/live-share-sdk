@@ -89,14 +89,6 @@ export class LiveState<TState = any> extends LiveDataObject<{
     }
 
     /**
-     * @deprecated isInitialized should be used instead
-     * Returns true if the object has been initialized.
-     */
-    public get isStarted(): boolean {
-        return this.isInitialized;
-    }
-
-    /**
      * The current state.
      */
     public get state(): TState {

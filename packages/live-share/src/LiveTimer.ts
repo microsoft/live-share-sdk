@@ -129,14 +129,6 @@ export class LiveTimer extends LiveDataObject<{
     }
 
     /**
-     * @deprecated isInitialized should be used instead
-     * Returns true if the object has been initialized.
-     */
-    public get isStarted(): boolean {
-        return this.isInitialized;
-    }
-
-    /**
      * Tick rate for timer in milliseconds. The default tick rate is 20 milliseconds
      *
      * @remarks

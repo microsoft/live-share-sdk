@@ -93,14 +93,6 @@ export class LivePresence<
     }
 
     /**
-     * @deprecated isInitialized should be used instead
-     * Returns true if the object has been initialized.
-     */
-    public get isStarted(): boolean {
-        return this.isInitialized;
-    }
-
-    /**
      * Number of seconds without a presence update before a remote user is considered offline.
      *
      * @remarks

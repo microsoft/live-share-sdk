@@ -86,14 +86,6 @@ export class LiveEvent<TEvent = any> extends LiveDataObject<{
     }
 
     /**
-     * @deprecated isInitialized should be used instead
-     * Returns true if the object has been initialized.
-     */
-    public get isStarted(): boolean {
-        return this.isInitialized;
-    }
-
-    /**
      * initialize the object.
      * @param allowedRoles Optional. List of roles allowed to send events.
      */

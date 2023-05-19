@@ -114,7 +114,9 @@ export function useLivePresence<TData extends object = object>(
 
         if (!livePresence.isInitialized) {
             livePresence.initialize(
-                typeof initialData === "function" ? initialData() : initialData,
+                isInitialDataCallback<TData>(initialData)
+                    ? initialData()
+                    : initialData,
                 initialPresenceState,
                 allowedRoles
             );
@@ -134,4 +136,8 @@ export function useLivePresence<TData extends object = object>(
         livePresence,
         updatePresence,
     };
+}
+
+function isInitialDataCallback<TData>(value: any): value is () => TData {
+    return typeof value === "function";
 }

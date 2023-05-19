@@ -16,7 +16,7 @@
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
-        "@fluidframework/azure-client": "~1.0.3",
+        "@fluidframework/azure-client": "~1.1.1",
         "@microsoft/live-share": "1.0.0-preview.23",
         "@microsoft/live-share-canvas": "1.0.0-preview.23",
         "@microsoft/teams-js": "^2.11.0",

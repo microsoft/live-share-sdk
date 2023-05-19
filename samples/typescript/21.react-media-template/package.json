@@ -8,7 +8,7 @@
         "@fluentui/react-components": "^9.18.6",
         "@fluentui/react-icons": "^2.0.194",
         "@fluentui/react-theme": "^9.1.5",
-        "@fluidframework/azure-client": "~1.0.3",
+        "@fluidframework/azure-client": "~1.1.1",
         "@microsoft/live-share": "1.0.0-preview.23",
         "@microsoft/live-share-canvas": "1.0.0-preview.23",
         "@microsoft/live-share-media": "1.0.0-preview.23",

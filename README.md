@@ -113,7 +113,7 @@ cd live-share-sdk
 
 ## Building Packages & Samples
 
-To build the projects packages (with symlinks to the locally built packages), we use Lerna to prevent dependency errors.
+To build the projects packages (with symlinks to the locally built packages), we use npm workspaces to prevent dependency errors.
 
 Install all developer dependencies:
 

@@ -1,34 +1,38 @@
 # React Media Template Sample
 
-This repository contains a simple app that enables all connected clients to watch videos together, build a shared playlist, transfer who is in control, and annotate over the video.\
+This repository contains a simple app that enables all connected clients to watch videos together, build a shared playlist, transfer who is in control, and annotate over the video.
+
 You can use this sample as a template to build a robust media synchronization feature into your app, or use it as an example.\
-Each `SharedObject` in our schema (as defined in the `/src/live-share-hooks/useSharedObjects.js` file) has a correlating hook in the live-share-hooks folder.\
+Each `SharedObject` in our schema (as defined in the `/src/live-share-hooks/useSharedObjects.js` file) has a correlating hook in the live-share-hooks folder.
+
 We have found this structure to be very useful in composing advanced applications with Live Share using Functional React components, but you can compose this differently for your app.
 
-## Testing Locally in Browser
+## Getting started
 
-In the project directory, you can run:
+After cloning the repository, you must first set up the npm workspace from the root of the project. Then, run the following commands from the command line:
 
-### `npm install`
+```bash
+npm install
+npm run build:packages # Build Live Share packages
+cd samples/j*/21*
+```
 
-Installs the latest node packages
+_Note:_ Do not start from sample directory unless you move it out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Testing locally in browser
 
 ### `npm run start`
 
-Runs the app in the development mode.\
+Runs the app in the development mode.
+
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.\
-You can copy this URL and paste it into new browser tabs to test Live Share using a local server.\
+The page will reload when you make changes.
+
+Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.
+
+You can copy this URL and paste it into new browser tabs to test Live Share using a local server.
+
 To test the side panel & video queue, you can replace your URL with `/sidepanel#{id}`.
 
 **Note:** if testing with HTTPS, such as when using a tunneling service like Ngrok, instead use the command `npm run start-https`.
@@ -71,7 +75,7 @@ Alternatively, you can use our ready-to-use [demo app package](../demo-manifests
 2. Join the meeting.
 3. In the meeting window, tap on **+ Apps** and tap on **Manage apps** in the flyout that opens.
 4. In the **Manage apps** pane, tap on **Upload a custom app**.
-    - _Don't see the option to **Upload a custom app?!** Follow [instructions here](https://docs.microsoft.com/en-us/microsoftteams/teams-custom-app-policies-and-settings) to enable custom-apps in your tenant._
+    - _Don't see the option to **Upload a custom app?!** Follow [instructions here](https://docs.microsoft.com/microsoftteams/teams-custom-app-policies-and-settings) to enable custom-apps in your tenant._
 5. Select the zip file you created earlier and upload it.
 6. In the dialog that shows up, tap **Add** to add your sample app into the meeting.
 7. Now, back in the meeting window, tap **+ Apps** again and type the name of your app in the _Find an app_ textbox.
@@ -84,3 +88,10 @@ Alternatively, you can use our ready-to-use [demo app package](../demo-manifests
 ### Make your own manifest
 
 To make a new app manifest, you can visit the [Teams Developer Portal](https://dev.teams.microsoft.com/).
+
+## `npm run build`
+
+Builds the app for production to the `dist` folder.
+
+The build is minified and the filenames include the hashes.
+Your app is ready to be deployed!

@@ -2,21 +2,19 @@
 
 This repository contains a simple example of how the `LiveMediaSession` object works with HTML5 `<video>`.
 
-## Testing Locally in Browser
+## Getting started
 
-In the project directory, you can run:
+After cloning the repository, you must first set up the npm workspace from the root of the project. Then, run the following commands from the command line:
 
-### `npm install`
+```bash
+npm install
+npm run build:packages # Build Live Share packages
+cd samples/j*/02*
+```
 
-Installs the latest node packages
+_Note:_ Do not run `npm start` before running `npm run build:packages` from the root of the project, unless you first move the sample out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Testing locally in browser
 
 ### `npm run start`
 
@@ -75,3 +73,10 @@ Tab configuration page doesn't do anything in browser.
 ### Make your own manifest
 
 To make a new app manifest, you can visit the [Teams Developer Portal](https://dev.teams.microsoft.com/).
+
+## `npm run build`
+
+Builds the app for production to the `dist` folder.
+
+The build is minified and the filenames include the hashes.
+Your app is ready to be deployed!

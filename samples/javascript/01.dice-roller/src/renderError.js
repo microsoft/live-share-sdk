@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-export function renderError(elem, error) {
+export function renderError(elem, error, theme) {
     const errorTemplate = document.createElement("template");
     errorTemplate["inner" + "HTML"] = `
     <div class="wrapper ${theme} error">

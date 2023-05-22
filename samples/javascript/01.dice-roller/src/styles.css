@@ -10,6 +10,12 @@
 .wrapper.dark {
     color: white;
 }
+.wrapper.dark {
+    color: white;
+}
+.wrapper.dark > button {
+    color: white;
+}
 .wrapper.stage {
     overflow-y: auto;
 }

@@ -2,24 +2,23 @@
 
 This repository contains a simple app that simulates the ritual of playing agile poker with user stories. Participants can load user stories, vote on the story point cost, and if they reach consensus before the timer runs out, the app will record the score and move to the next story. If not, the group is given the option to discuss the story again and attempt to reach consensus before another round of voting.
 
-Each `SharedObject` in our schema (as defined in the `/src/live-share-hooks/useSharedObjects.js` file) has a correlating hook in the live-share-hooks folder.\
+Each `SharedObject` in our schema (as defined in the `/src/live-share-hooks/useSharedObjects.js` file) has a correlating hook in the live-share-hooks folder.
+
 We have found this structure to be very useful in composing advanced applications with Live Share using Functional React components, but you can compose this differently for your app.
 
-## Testing Locally in Browser
+## Getting started
 
-In the project directory, you can run:
+After cloning the repository, you must first set up the npm workspace from the root of the project. Then, run the following commands from the command line:
 
-### `npm install`
+```bash
+npm install
+npm run build:packages # Build Live Share packages
+cd samples/j*/22*
+```
 
-Installs the latest node packages
+_Note:_ Do not run `npm start` before running `npm run build:packages` from the root of the project, unless you first move the sample out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Testing locally in browser
 
 ### `npm run start`
 
@@ -82,3 +81,10 @@ Alternatively, you can use our ready-to-use [demo app package](../demo-manifests
 ### Make your own manifest
 
 To make a new app manifest, you can visit the [Teams Developer Portal](https://dev.teams.microsoft.com/).
+
+## `npm run build`
+
+Builds the app for production to the `dist` folder.
+
+The build is minified and the filenames include the hashes.
+Your app is ready to be deployed!

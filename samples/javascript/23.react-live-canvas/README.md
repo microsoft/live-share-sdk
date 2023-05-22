@@ -4,28 +4,26 @@ This repository contains a simple app to demo Live Canvas with Inking capability
 Contains useLiveCanvas hook that provides easy way to add and start the Inking canvas.
 It takes in two paramters:
 
--   liveCanvas: Fluid LiveCanvas Data object from the container attached.
--   hostElement: HTML Element where the canvas needs to be attached.
+- `liveCanvas`: Fluid LiveCanvas Data object from the container attached.
+- `hostElement`: HTML Element where the canvas needs to be attached.
 
 useLiveCanvas hook will insert the canvas as a child of hosting element
 and starts the Live Inking session.It returns set of callbacks for clearing
 the canvas, changing Ink tool type, and brush colors.
 
-## Testing Locally in Browser
+## Getting started
 
-In the project directory, you can run:
+After cloning the repository, you must first set up the npm workspace from the root of the project. Then, run the following commands from the command line:
 
-### `npm install`
+```bash
+npm install
+npm run build:packages # Build Live Share packages
+cd samples/j*/22*
+```
 
-Installs the latest node packages
+_Note:_ Do not run `npm start` before running `npm run build:packages` from the root of the project, unless you first move the sample out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
 
-### `npm run build`
-
-Builds the app for production to the `dist` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Testing locally in browser
 
 ### `npm run start`
 
@@ -84,3 +82,10 @@ Tab configuration page doesn't do anything in browser.
 ### Make your own manifest
 
 To make a new app manifest, you can visit the [Teams Developer Portal](https://dev.teams.microsoft.com/).
+
+## `npm run build`
+
+Builds the app for production to the `dist` folder.
+
+The build is minified and the filenames include the hashes.
+Your app is ready to be deployed!

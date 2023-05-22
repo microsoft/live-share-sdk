@@ -29,7 +29,7 @@ npm install
 npm run build
 ```
 
-This will use lerna to hoist and build all dependencies.
+This will use npm workspaces to hoist and build all dependencies.
 
 ## How to use this extension
 

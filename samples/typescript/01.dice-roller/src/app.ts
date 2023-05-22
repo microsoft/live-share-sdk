@@ -80,4 +80,4 @@ async function joinContainer() {
     return await client.joinContainer(containerSchema);
 }
 
-start().catch((error) => renderError(root, error));
+start().catch((error) => renderError(root, error, theme));

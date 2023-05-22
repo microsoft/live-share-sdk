@@ -11,5 +11,5 @@
     "excludeInternal": true,
     "out": "docs",
     "name": "Microsoft Live Share SDK",
-    "listInvalidSymbolLinks": true
+    "validation": true
 }

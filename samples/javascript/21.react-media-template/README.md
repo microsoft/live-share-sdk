@@ -25,6 +25,8 @@ _Note:_ Do not run `npm start` before running `npm run build:packages` from the 
 
 Runs the app in the development mode.
 
+Running `npm run start`, it will do two things: start the `tinylicious` server and start the application using `vite`. If you have never used `tinylicious` before, you should see instead is a prompt saying `Ok to proceed? (y)`, after which you should type `y` and press the "enter" key. In rare cases you might not see the `Ok to proceed? (y)` prompt, in which case try running `npx tinylicious@latest` in your command line directly, and then try again.
+
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 The page will reload when you make changes.

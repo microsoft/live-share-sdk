@@ -2,29 +2,28 @@
 
 This repository contains a simple demo of how to use `LiveCanvas` and `InkingManager` to implement a collaborative inking surface.
 
-## Testing Locally in Browser
+## Getting started
 
-In the project directory, you can run:
+After cloning the repository, you must first set up the npm workspace from the root of the project. Then, run the following commands from the command line:
 
-### `npm install`
+```bash
+npm install
+npm run build:packages # Build Live Share packages
+cd samples/t*/03*
+```
 
-Installs the latest node packages
+_Note:_ Do not run `npm start` before running `npm run build:packages` from the root of the project, unless you first move the sample out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
 
-### `npm run build`
-
-Builds the app for production to the `dist` folder.\
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Testing locally in browser
 
 ### `npm run start`
 
-Runs the app in the development mode.\
+Runs the app in the development mode.
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.\
-You can copy this URL and paste it into new browser tabs to test Live Share using a local server.\
+The page will reload when you make changes.
+Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.
+You can copy this URL and paste it into new browser tabs to test Live Share using a local server.
 
 ## Testing the app in Teams
 
@@ -67,3 +66,10 @@ You can copy this URL and paste it into new browser tabs to test Live Share usin
 ### Make your own manifest
 
 To make a new app manifest, you can visit the [Teams Developer Portal](https://dev.teams.microsoft.com/).
+
+## `npm run build`
+
+Builds the app for production to the `dist` folder.
+
+The build is minified and the filenames include the hashes.
+Your app is ready to be deployed!

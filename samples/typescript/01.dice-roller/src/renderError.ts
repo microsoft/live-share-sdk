@@ -3,9 +3,9 @@
  * Licensed under the MIT License.
  */
 
-export function renderError(elem, error) {
+export function renderError(elem: HTMLElement, error: Error, theme: string) {
     const errorTemplate = document.createElement("template");
-    errorTemplate["inner" + "HTML"] = `
+    errorTemplate["innerHTML"] = `
     <div class="wrapper ${theme} error">
         <p class="error-title">Something went wrong</p>
         <p class="error-text"></p>
@@ -14,8 +14,8 @@ export function renderError(elem, error) {
     `;
 
     elem.appendChild(errorTemplate.content.cloneNode(true));
-    const refreshButton = elem.querySelector(".refresh");
-    const errorText = elem.querySelector(".error-text");
+    const refreshButton = elem.querySelector<HTMLButtonElement>(".refresh")!;
+    const errorText = elem.querySelector(".error-text")!;
 
     // Refresh the page on click
     refreshButton.onclick = () => {

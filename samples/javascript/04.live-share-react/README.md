@@ -14,7 +14,7 @@ npm run build:packages # Build Live Share packages
 cd samples/j*/04*
 ```
 
-_Note:_ Do not start from sample directory unless you move it out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
+_Note:_ Do not run `npm start` before running `npm run build:packages` from the root of the project, unless you first move the sample out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
 
 ## Testing locally in browser
 

@@ -4,7 +4,11 @@
     "description": "build file for Live Share SDK",
     "main": "index.js",
     "workspaces": [
-        "packages/*",
+        "packages/live-share",
+        "packages/live-share-canvas",
+        "packages/live-share-media",
+        "packages/live-share-turbo",
+        "packages/live-share-react",
         "samples/javascript/*",
         "samples/typescript/*"
     ],

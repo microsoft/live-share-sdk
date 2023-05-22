@@ -1,10 +1,9 @@
 {
-    "entryPointStrategy": "packages",
+    "entryPoints": ["./src/index.ts"],
     "excludeExternals": true,
     "excludePrivate": true,
     "excludeInternal": true,
-    "out": "docs",
-    "name": "Microsoft Live Share SDK",
+    "name": "_microsoft_live_share_turbo",
     "validation": {
         "invalidLink": true
     }

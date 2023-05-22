@@ -8,13 +8,27 @@ Node 12.17+
 
 ## Getting Started
 
-After cloning the repository, install dependencies and start the application
+After cloning the repository, you must first set up the npm workspace from the root of the project. Then, run the following commands from the command line:
 
 ```bash
 npm install
-npm run build # Production build
+npm run build:packages # Build Live Share packages
+cd samples/t*/05*
 npm start
 ```
+
+_Note:_ Do not run `npm start` before running `npm run build:packages` from the root of the project, unless you first move the sample out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
+
+## Testing locally in browser
+
+### `npm run start`
+
+Runs the app in the development mode.
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+The page will reload when you make changes.
+Upon loading, if there is no `/#{id}` in the URL, it will create one and insert it into the URL.
+You can copy this URL and paste it into new browser tabs to test Live Share using a local server.
 
 ## Testing the app in Teams
 
@@ -53,3 +67,10 @@ npm start
 10. In the side panel, tap the share icon to put your app on the main stage in the meeting.
 11. That's it! You should now see dice-roller on the meeting stage.
 12. Your friends/colleagues invited to the meeting should be able to see your app on stage when they join the meeting.
+
+## `npm run build`
+
+Builds the app for production to the `dist` folder.
+
+The build is minified and the filenames include the hashes.
+Your app is ready to be deployed!

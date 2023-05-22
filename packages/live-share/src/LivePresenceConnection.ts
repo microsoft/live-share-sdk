@@ -7,6 +7,9 @@ import {
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { TimeInterval } from "./TimeInterval";
 
+/**
+ * A connection that presence is being tracked for.
+ */
 export class LivePresenceConnection<TData = object> {
     /**
      * @hidden

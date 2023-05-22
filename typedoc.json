@@ -1,15 +1,11 @@
 {
-    "entryPoints": [
-        "packages/live-share/",
-        "packages/live-share-canvas/",
-        "packages/live-share-media/",
-        "packages/live-share-react/"
-    ],
     "entryPointStrategy": "packages",
     "excludeExternals": true,
     "excludePrivate": true,
     "excludeInternal": true,
     "out": "docs",
     "name": "Microsoft Live Share SDK",
-    "listInvalidSymbolLinks": true
+    "validation": {
+        "invalidLink": true
+    }
 }

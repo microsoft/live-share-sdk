@@ -17,6 +17,7 @@ import { renderError } from "./renderError";
 import { SharedMap } from "fluid-framework";
 
 const searchParams = new URL(window.location.href).searchParams;
+const IN_TEAMS = searchParams.get("inTeams") === "1";
 const root = document.getElementById("content");
 let theme = "light";
 
@@ -36,7 +37,7 @@ async function start() {
     let view = searchParams.get("view") || "stage";
 
     // Check if we are running on stage.
-    if (searchParams.get("inTeams")) {
+    if (IN_TEAMS) {
         // Initialize teams app
         await app.initialize();
         // Get Teams app context to get the initial theme
@@ -69,10 +70,7 @@ async function start() {
 
 async function joinContainer() {
     // Are we running in teams?
-    const host =
-        searchParams.get("inTeams") === "true"
-            ? LiveShareHost.create()
-            : TestLiveShareHost.create();
+    const host = IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create();
 
     // Create client
     const client = new LiveShareClient(host);
@@ -81,4 +79,4 @@ async function joinContainer() {
     return await client.joinContainer(containerSchema);
 }
 
-start().catch((error) => renderError(root, error));
+start().catch((error) => renderError(root, error, theme));

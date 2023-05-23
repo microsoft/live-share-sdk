@@ -137,4 +137,4 @@ Security issues and bugs should be reported privately, via email, to the Microso
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-Licensed under a special [Microsoft](../../LICENSE) License.
+Licensed under a special [Microsoft](./LICENSE) License.

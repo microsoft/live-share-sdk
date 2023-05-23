@@ -157,6 +157,8 @@ Security issues and bugs should be reported privately, via email, to the Microso
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-Live Share packages are licensed under a special [Microsoft Live Share SDK license](./LICENSE).
+Live Share, Live Share media, and Live Share canvas are licensed under a special [Microsoft Live Share SDK license](./LICENSE).
+
+Live Share Turbo and Live Share React are licensed under a special [Microsoft Live Share SDK - Pre-Release Version license](./packages/live-share-turbo/LICENSE).
 
 Code samples are licensed separately under [MIT license](./samples/LICENSE).

@@ -110,37 +110,13 @@ export class LivePresence<
     }
 
     /**
-     * Optional data object shared by the user.
+     * Local LivePresenceUser.
+     * Can be undefined before LivePresence is initialized.
      */
-    public get data(): TData | undefined {
-        if (!this._currentPresence) return undefined;
-        return cloneValue(this._currentPresence.data.data);
-    }
-
-    /**
-     * The users current presence state.
-     */
-    public get state(): PresenceState {
-        if (!this._currentPresence) return PresenceState.offline;
-        return this._currentPresence.data.state;
-    }
-
-    /**
-     * Returns the ID of the local user.
-     */
-    public get userId(): string | undefined {
+    public get localUser(): LivePresenceUser<TData> | undefined {
         const clientId = this._currentPresence?.clientId;
-        if (!clientId) {
-            return undefined;
-        }
-        return this.getUserForClient(clientId)?.userId;
-    }
-
-    /**
-     * Returns the client ID of the local connection.
-     */
-    public get clientId(): string | undefined {
-        return this._currentPresence?.clientId;
+        if (!clientId) return undefined;
+        return this.getUserForClient(clientId);
     }
 
     /**

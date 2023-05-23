@@ -23,6 +23,14 @@ import { TestLiveShareHost } from "../TestLiveShareHost";
 import { getLiveDataObjectClassProxy } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
+class TestLivePresence<
+    TData extends object = object
+> extends LivePresence<TData> {
+    public async clientId(): Promise<string> {
+        return await this.waitUntilConnected();
+    }
+}
+
 async function getObjects(
     getTestObjectProvider,
     updateInterval: number = 10000,
@@ -37,11 +45,11 @@ async function getObjects(
     }
 
     let ObjectProxy1: any = getLiveDataObjectClassProxy<
-        LivePresence<{ foo: string }>
-    >(LivePresence, liveRuntime1);
+        TestLivePresence<{ foo: string }>
+    >(TestLivePresence, liveRuntime1);
     let ObjectProxy2: any = getLiveDataObjectClassProxy<
-        LivePresence<{ foo: string }>
-    >(LivePresence, liveRuntime2);
+        TestLivePresence<{ foo: string }>
+    >(TestLivePresence, liveRuntime2);
 
     await liveRuntime1.start();
     await liveRuntime2.start();
@@ -49,13 +57,13 @@ async function getObjects(
     let provider: ITestObjectProvider = getTestObjectProvider();
 
     let container1 = await provider.createContainer(ObjectProxy1.factory);
-    let object1 = await requestFluidObject<LivePresence<{ foo: string }>>(
+    let object1 = await requestFluidObject<TestLivePresence<{ foo: string }>>(
         container1,
         "default"
     );
 
     let container2 = await provider.loadContainer(ObjectProxy2.factory);
-    let object2 = await requestFluidObject<LivePresence<{ foo: string }>>(
+    let object2 = await requestFluidObject<TestLivePresence<{ foo: string }>>(
         container2,
         "default"
     );
@@ -220,8 +228,8 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize({ foo: "bar" }, PresenceState.away);
-        assert(object1.state == PresenceState.away);
-        assert(object1.data?.foo == "bar");
+        assert(object1.localUser?.state == PresenceState.away);
+        assert(object1.localUser?.data?.foo == "bar");
 
         const object2done = new Deferred();
         object2.on("presenceChanged", (user, local) => {
@@ -511,10 +519,10 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         // Wait for ready and get client ID's
         await ready.promise;
 
-        assert(object1.clientId, "object1.clientId is undefined");
-        assert(object2.clientId, "object2.clientId is undefined");
+        assert(await object1.clientId(), "object1.clientId is undefined");
+        assert(await object2.clientId(), "object2.clientId is undefined");
         assert(
-            object1.clientId !== object2.clientId,
+            (await object1.clientId()) !== (await object2.clientId()),
             "objects should not have the same clientId"
         );
 
@@ -740,19 +748,23 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             "object2 data.foo should be cat"
         );
         assert(
-            object1User.getConnection(object1.clientId!)?.data?.foo == "cat",
+            object1User.getConnection(await object1.clientId())?.data?.foo ==
+                "cat",
             "object1.connection1 data.foo should be cat"
         );
         assert(
-            object1User.getConnection(object2.clientId!)?.data == undefined,
+            object1User.getConnection(await object2.clientId())?.data ==
+                undefined,
             "object1.connection2 data.foo should be undefined"
         );
         assert(
-            object2User.getConnection(object1.clientId!)?.data?.foo == "cat",
+            object2User.getConnection(await object1.clientId())?.data?.foo ==
+                "cat",
             "object2.connection1 data.foo should be cat"
         );
         assert(
-            object2User.getConnection(object2.clientId!)?.data == undefined,
+            object2User.getConnection(await object2.clientId())?.data ==
+                undefined,
             "object2.connection2 data.foo should be undefined"
         );
 
@@ -770,19 +782,23 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             "object2 data.foo should be dog"
         );
         assert(
-            object1User?.getConnection(object1.clientId!)?.data?.foo == "cat",
+            object1User?.getConnection(await object1.clientId())?.data?.foo ==
+                "cat",
             "object1.connection1.data.foo should STILL be cat"
         );
         assert(
-            object1User?.getConnection(object2.clientId!)?.data?.foo == "dog",
+            object1User?.getConnection(await object2.clientId())?.data?.foo ==
+                "dog",
             "object1.connection2 data.foo should be dog"
         );
         assert(
-            object2User?.getConnection(object1.clientId!)?.data?.foo == "cat",
+            object2User?.getConnection(await object1.clientId())?.data?.foo ==
+                "cat",
             "object2.connection1 data.foo should STILL be cat"
         );
         assert(
-            object2User?.getConnection(object2.clientId!)?.data?.foo == "dog",
+            object2User?.getConnection(await object2.clientId())?.data?.foo ==
+                "dog",
             "object2.connection2 data.foo should be dog"
         );
 
@@ -815,7 +831,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             "user should have two clients"
         );
 
-        const object2ClientId = object2.clientId!;
+        const object2ClientId = await object2.clientId();
 
         disposeObject2();
         object1.expirationPeriod = 0.1;

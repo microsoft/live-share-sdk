@@ -1,5 +1,7 @@
 # Live Share React
 
+**DISCLAIMER:** This package is in preview and experimental. We are not yet committed to maintaining this package and may make breaking changes at any time. Read this package's [license](./LICENSE) for more information.
+
 Live Share React is designed to make building collaborative apps in React simple and intuitive, all using familiar patterns from functional React.
 
 Here is a simple example of how to get started:
@@ -584,12 +586,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| 1.0.0-preview.23       | ^2.11.0              | ^1.2.3          | 1.0.0-preview.23 (optional) | ^1.0.0 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
-| 1.0.0-preview.10       | ^2.10.1              | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
-| 1.0.0-preview.8       | ^2.5.0               | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
-| 1.0.0-preview.3       | 2.0.0-experimental.1 | ~1.2.3          | 1.0.0-preview.3 (optional) | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
-| ~0.5.1                | 2.0.0-experimental.1 | ~1.2.3          | ~0.5.1 (optional)          | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
-| ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)          | ~0.59.0 (optional)           | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
+| ^1.0.0                  | ^2.11.0             | ^1.2.3          | ^1.0.0                      | ^1.0.0                       | ^2.5.0                        | ^2.5.0                          |
 
 ## Contributing
 

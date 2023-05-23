@@ -1,6 +1,6 @@
 # Microsoft Live Share Turbo
 
-**DISCLAIMER:** This package is in preview and experimental. We are not yet committed to maintaining this package and may make breaking changes at any time. We may decide to move some or all of these features into the main `live-share` package at a future date.
+**DISCLAIMER:** This package is in preview and experimental. We are not yet committed to maintaining this package and may make breaking changes at any time. We may decide to move some or all of these features into the main `live-share` package at a future date. Read this package's [license](./LICENSE) for more information.
 
 Easily create collaborative apps, powered by [Fluid Framework](https://fluidframework.com/). This package is an experimental, alternative approach to building Fluid & Live Share applications that attempts to make it simpler to use dynamic distributed-data structures. One of the main benefits of Fluid is the efficient, hierarchal, and ultra-fast remote synchronized application state. Vanilla Fluid is highly customizable, allowing you to nest references to DDS objects within other ones. This is powerful but can be cumbersome to work with. By taking a more opinionated stance, Live Share Turbo makes it easy to leverage dynamic objects more easily than ever before.
 
@@ -269,12 +269,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| 1.0.0-preview.23       | ^2.11.0              | ^1.2.3          | 1.0.0-preview.23 (optional) | ^1.0.0 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
-| 1.0.0-preview.10       | ^2.10.1              | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
-| 1.0.0-preview.8       | ^2.5.0               | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
-| 1.0.0-preview.3       | 2.0.0-experimental.1 | ~1.2.3          | 1.0.0-preview.3 (optional) | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
-| ~0.5.1                | 2.0.0-experimental.1 | ~1.2.3          | ~0.5.1 (optional)          | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
-| ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)          | ~0.59.0 (optional)           | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
+| ^1.0.0                  | ^2.11.0             | ^1.2.3          | ^1.0.0                      | ^1.0.0                       | ^2.5.0                        | ^2.5.0                          |
 
 ## Contributing
 

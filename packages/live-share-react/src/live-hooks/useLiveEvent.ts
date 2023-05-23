@@ -96,7 +96,12 @@ export function useLiveEvent<TEvent = any>(
     React.useEffect(() => {
         if (liveEvent?.isInitialized === undefined) return;
         // Register event listener
-        const onEventReceived = (event: TEvent, local: boolean) => {
+        const onEventReceived = (
+            event: TEvent,
+            local: boolean,
+            clientId: string,
+            timestamp: number
+        ) => {
             // If developer passed the optional onReceivedEvent callback, we
             // call it.
             onReceivedEvent?.(event, local);
@@ -104,6 +109,8 @@ export function useLiveEvent<TEvent = any>(
             const received: IReceiveLiveEvent<TEvent> = {
                 value: event,
                 local,
+                clientId,
+                timestamp,
             };
             allEventsRef.current = [...allEventsRef.current, received];
             setLatestReceived(received);

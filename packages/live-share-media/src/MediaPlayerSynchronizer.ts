@@ -301,6 +301,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                                         .SetTrackAction
                                 );
                                 this._expectedPlaybackState = "none";
+                                if (
+                                    this._player.src ===
+                                    details.metadata?.trackIdentifier
+                                ) {
+                                    // Don't set duplicate src and load again.
+                                    break;
+                                }
                                 this._player.src =
                                     details.metadata!.trackIdentifier;
                                 this._player.load();

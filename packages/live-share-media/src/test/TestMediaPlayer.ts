@@ -57,7 +57,6 @@ export class TestMediaPlayer implements IMediaPlayer {
         console.log("current time set from sync", value);
         this._currentTime = value;
 
-        // TODO: test seeking while not paused
         if (!this.paused) {
             this.playStartTime = Date.now() - this.currentTime;
         }
@@ -68,7 +67,9 @@ export class TestMediaPlayer implements IMediaPlayer {
     }
 
     load(): void {
-        throw new Error("Method not implemented.");
+        this._currentTime = 0;
+        this.paused = true;
+        this.done.resolve("load");
     }
     pause(): void {
         this.paused = true;

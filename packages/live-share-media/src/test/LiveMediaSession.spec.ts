@@ -562,6 +562,7 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
 
     // TODO: test one client being waited on when other have finished (maybe targetted ad that is longer than one shown for other users?)
     // TODO: test for playback rate
+    // TODO: test for catchup for client after suspending/ending suspension on different client
 });
 
 function isSynced(

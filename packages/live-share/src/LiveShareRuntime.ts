@@ -197,7 +197,8 @@ export class LiveShareRuntime {
         ) {
             this._timestampProvider.stop();
         }
-        this.objectManager.stop();
+        // should not assert undefined if stopping in a unit test context
+        this._objectManager?.stop();
     }
 
     /**

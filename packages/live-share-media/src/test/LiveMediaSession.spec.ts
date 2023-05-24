@@ -3,7 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { Deferred, TestMediaPlayer } from "./TestMediaPlayer";
+import { TestMediaPlayer } from "./TestMediaPlayer";
+import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
@@ -382,7 +383,7 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
                 await assertActionOccurred([testAdPlayer1], "play");
 
                 await waitForDelay(1000);
-                assert(isAtExpectedTime(testMediaPlayer1, 1000));
+                assert(isAtExpectedTime(testAdPlayer1, 1000));
                 adFinished1.resolve();
 
                 details.suspension!.end();
@@ -404,7 +405,7 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
                 await assertActionOccurred([testAdPlayer2], "play");
 
                 await waitForDelay(1000);
-                assert(isAtExpectedTime(testMediaPlayer2, 1000));
+                assert(isAtExpectedTime(testAdPlayer2, 1000));
                 adFinished2.resolve();
 
                 details.suspension!.end();
@@ -424,7 +425,6 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
         );
 
         // expect pause from waitpoint actionHandler
-        // TODO: Should a waitpoint automatically pause the player?
         await assertActionOccurred(
             [testMediaPlayer1, testMediaPlayer2],
             "pause"
@@ -436,6 +436,7 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
         assert(testMediaPlayer1.src === metadata.trackIdentifier);
         assert(testMediaPlayer2.src === metadata.trackIdentifier);
         assert(testMediaPlayer1.paused === true);
+        assert(testMediaPlayer2.paused === true);
 
         // sdk checks for waitpoints ever 500ms
         const waitPointVariance = 500;
@@ -550,8 +551,9 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
 
         // checked should be paused at waitpoint
         assert(testMediaPlayer1.paused === true);
+        assert(testMediaPlayer2.paused === true);
 
-        // sdk checks for waitpoints ever 500ms, but not specicying the variance here,
+        // sdk checks for waitpoints ever 500ms, but not specifying the variance here,
         // because video will roll back to waitpoint position (rewinding up to 500ms)
         assert(isSynced(testMediaPlayer1, testMediaPlayer2, 700));
 
@@ -604,7 +606,6 @@ async function assertActionOccurred(
     players: TestMediaPlayer[],
     expectedAction: string
 ) {
-    console.log("assertActionOccurred", expectedAction, players);
     const actions = await Promise.all(
         players.map((player) => player.waitForAction())
     );

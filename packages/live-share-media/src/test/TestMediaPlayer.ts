@@ -4,32 +4,7 @@
  */
 
 import { IMediaPlayer } from "../IMediaPlayer";
-
-// TODO: duplicated from live-share internal
-export class Deferred<T = void> {
-    private _promise: Promise<T>;
-    private _resolve?: (value: T | PromiseLike<T>) => void;
-    private _reject?: (reason?: any) => void;
-
-    constructor() {
-        this._promise = new Promise((resolve, reject) => {
-            this._resolve = resolve;
-            this._reject = reject;
-        });
-    }
-
-    public get promise(): Promise<T> {
-        return this._promise;
-    }
-
-    public get resolve(): (value: T | PromiseLike<T>) => void {
-        return this._resolve!;
-    }
-
-    public get reject(): (reason?: any) => void {
-        return this._reject!;
-    }
-}
+import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 
 export class TestMediaPlayer implements IMediaPlayer {
     private done = new Deferred<string>();

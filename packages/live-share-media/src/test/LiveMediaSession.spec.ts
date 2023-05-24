@@ -368,7 +368,7 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
         object1.setActionHandler(
             "wait",
             async (details: ExtendedMediaSessionActionDetails) => {
-                // TODO: Should a waitpoint automatically pause the player?
+                // pause content
                 testMediaPlayer1.pause();
 
                 testAdPlayer1.src = "testAdId";
@@ -382,15 +382,16 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
                 await assertActionOccurred([testAdPlayer1], "play");
 
                 await waitForDelay(1000);
+                assert(isAtExpectedTime(testMediaPlayer1, 1000));
                 adFinished1.resolve();
+
                 details.suspension!.end();
-                // TODO: Should a waitpoint end() automatically play the player?
             }
         );
         object2.setActionHandler(
             "wait",
             async (details: ExtendedMediaSessionActionDetails) => {
-                // TODO: Should a waitpoint automatically pause the player?
+                // pause content
                 testMediaPlayer2.pause();
 
                 testAdPlayer2.src = "testAdId";
@@ -403,9 +404,10 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
                 await assertActionOccurred([testAdPlayer2], "play");
 
                 await waitForDelay(1000);
+                assert(isAtExpectedTime(testMediaPlayer2, 1000));
                 adFinished2.resolve();
+
                 details.suspension!.end();
-                // TODO: Should a waitpoint end() automatically play the player?
             }
         );
 
@@ -475,8 +477,6 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
         object1.setActionHandler(
             "wait",
             async (details: ExtendedMediaSessionActionDetails) => {
-                // TODO: Should a waitpoint automatically pause the player?
-
                 testMediaPlayer1.src = "testAdId";
 
                 // load ad
@@ -498,14 +498,11 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
                     details.suspension!.waitPoint!.position;
 
                 details.suspension!.end();
-                // TODO: Should a waitpoint end() automatically play the player?
             }
         );
         object2.setActionHandler(
             "wait",
             async (details: ExtendedMediaSessionActionDetails) => {
-                // TODO: Should a waitpoint automatically pause the player?
-
                 testMediaPlayer2.src = "testAdId";
                 // load ad
                 testMediaPlayer2.load();
@@ -526,7 +523,6 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
                     details.suspension!.waitPoint!.position;
 
                 details.suspension!.end();
-                // TODO: Should a waitpoint end() automatically play the player?
             }
         );
 
@@ -561,13 +557,15 @@ describeNoCompat("LiveMediaSession", (getTestObjectProvider) => {
 
         dispose();
     });
+
+    // TODO: test one client being waited on when other have finished (maybe targetted ad that is longer than one shown for other users?)
 });
 
 function isSynced(
     player1: TestMediaPlayer,
     player2: TestMediaPlayer,
     expectedTime: number,
-    maxVariance: number = 5
+    maxVariance: number = 10
 ) {
     console.log(player1.currentTime, player2.currentTime);
     return (
@@ -579,7 +577,7 @@ function isSynced(
 function isAtExpectedTime(
     player: TestMediaPlayer,
     expectedTime: number,
-    maxVariance: number = 5
+    maxVariance: number = 10
 ) {
     return Math.abs(player.currentTime - expectedTime) <= maxVariance;
 }

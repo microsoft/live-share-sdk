@@ -19,7 +19,6 @@ import {
 } from "../internals";
 import {
     IRuntimeSignaler,
-    LiveShareRuntime,
     TestLiveShareHost,
     TimeInterval,
 } from "@microsoft/live-share";
@@ -110,10 +109,10 @@ async function getPlayBackPosition(
 
     const getMediaPlayerState: () => IMediaPlayerState = () => {
         return {
-            metadata: null,
+            metadata: track1,
             playbackState: "none",
             positionState: undefined,
-            trackData: track1,
+            trackData: null,
         };
     };
     const playbackTrack = new GroupPlaybackTrack(getMediaPlayerState);

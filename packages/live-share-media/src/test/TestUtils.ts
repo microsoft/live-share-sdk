@@ -5,6 +5,8 @@
 
 import { IMediaPlayer } from "../IMediaPlayer";
 import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
+import { LiveMediaSession } from "../LiveMediaSession";
+import { IRuntimeSignaler, LiveShareRuntime } from "@microsoft/live-share";
 
 export class TestMediaPlayer implements IMediaPlayer {
     private done = new Deferred<string>();
@@ -23,7 +25,7 @@ export class TestMediaPlayer implements IMediaPlayer {
     constructor() {
         setInterval(() => {
             if (!this.paused && this.playStartTime != 0) {
-                this._currentTime = Date.now() - this.playStartTime;
+                this._currentTime = Date.now() / 1000 - this.playStartTime;
             }
         });
     }
@@ -33,7 +35,7 @@ export class TestMediaPlayer implements IMediaPlayer {
         this._currentTime = value;
 
         if (!this.paused) {
-            this.playStartTime = Date.now() - this.currentTime;
+            this.playStartTime = Date.now() / 1000 - this.currentTime;
         }
     }
 
@@ -48,13 +50,13 @@ export class TestMediaPlayer implements IMediaPlayer {
     }
     pause(): void {
         this.paused = true;
-        this._currentTime = Date.now() - this.playStartTime;
+        this._currentTime = Date.now() / 1000 - this.playStartTime;
         this.playStartTime = 0;
         this.done.resolve("pause");
     }
     play(): Promise<void> {
         this.paused = false;
-        this.playStartTime = Date.now() - this.currentTime;
+        this.playStartTime = Date.now() / 1000 - this.currentTime;
         this.done.resolve("play");
         return Promise.resolve();
     }
@@ -75,5 +77,19 @@ export class TestMediaPlayer implements IMediaPlayer {
         const action = await this.done.promise;
         this.done = new Deferred<string>();
         return action;
+    }
+}
+
+export class TestLiveMediaSession extends LiveMediaSession {
+    public async clientId(): Promise<string> {
+        return await this.waitUntilConnected();
+    }
+
+    public runtimeForTesting(): IRuntimeSignaler {
+        return this.runtime;
+    }
+
+    public liveRuntimeForTesting(): LiveShareRuntime {
+        return this.liveRuntime;
     }
 }

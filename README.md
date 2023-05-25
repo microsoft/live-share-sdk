@@ -1,8 +1,6 @@
 # Live Share SDK
 
-The Live Share SDK is in preview. You will need to be part of the [Developer Preview Program](https://docs.microsoft.com/microsoftteams/platform/resources/dev-preview/developer-preview-intro) for Microsoft Teams to use this feature.
-
-The Live Share SDK builds on the [Fluid Framework](https://fluidframework.com/) to enable the creation of collaborative experiences for Microsoft Teams and Microsoft 365. This preview version focuses on building collaborative meeting applications for Microsoft Teams using Fluid. The SDK provides a `LiveShareClient` class for connecting to a special Fluid Container associated with each meeting. A collection of Live Share specific Distributed Data Structure (DDS) classes are also provided to simplify building applications for common meeting scenarios like shared media playback.
+The Live Share SDK builds on the [Fluid Framework](https://fluidframework.com/) to enable the creation of collaborative experiences for Microsoft Teams and Microsoft 365. This package focuses on building collaborative meeting applications for Microsoft Teams using Fluid. The SDK provides a `LiveShareClient` class for connecting to a special Fluid Container associated with each meeting. A collection of Live Share specific Distributed Data Structure (DDS) classes are also provided to simplify building applications for common meeting scenarios like shared media playback.
 
 To get started, we recommend first familiarizing yourself with the [Fluid Framework](https://fluidframework.com/docs/) and [Live Share overview](https://aka.ms/teamsliveshare). You can then follow our [Quick Start Guide](https://learn.microsoft.com/microsoftteams/platform/apps-in-teams-meetings/teams-live-share-quick-start) to build your first Teams Meeting App that uses Live Share.
 
@@ -16,12 +14,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| 1.0.0-preview.23       | ^2.11.0              | ^1.2.3          | 1.0.0-preview.23 (optional) | ^1.0.0 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
-| 1.0.0-preview.10       | ^2.10.1              | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
-| 1.0.0-preview.8       | ^2.5.0               | ~1.2.3          | 1.0.0-preview.10 (optional) | ~1.0.2 (optional)            | ^2.5.0 (optional)               | ^2.5.0 (optional)               |
-| 1.0.0-preview.3       | 2.0.0-experimental.1 | ~1.2.3          | 1.0.0-preview.3 (optional) | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
-| ~0.5.1                | 2.0.0-experimental.1 | ~1.2.3          | ~0.5.1 (optional)          | ~1.0.2 (optional)            | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
-| ~0.3.1                | 2.0.0-experimental.0 | ~0.59.0         | ~0.3.1 (optional)          | ~0.59.0 (optional)           | 2.0.0-experimental.0 (optional) | 2.0.0-experimental.0 (optional) |
+| ^1.0.0                  | ^2.11.0             | ^1.2.3          | ^1.0.0                      | ^1.0.0                       | ^2.5.0                        | ^2.5.0                          |
 
 ### Dev Dependencies
 

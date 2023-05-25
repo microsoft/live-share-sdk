@@ -562,12 +562,6 @@ describeNoCompat(
 
             dispose();
         });
-
-        // TODO: test one client being waited on when other have finished (maybe targetted ad that is longer than one shown for other users?)
-        // TODO: test for playback rate
-        // TODO: test for catchup for client after suspending/ending suspension on different client
-        // TODO: test for catchup for live stream
-        // TODO: test for catchup for normal
     }
 );
 

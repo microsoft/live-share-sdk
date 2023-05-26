@@ -6,7 +6,6 @@
 import {
     IRuntimeSignaler,
     TimeInterval,
-    LiveShareClient,
     LiveShareRuntime,
 } from "@microsoft/live-share";
 import { GroupTransportState } from "./GroupTransportState";
@@ -17,7 +16,7 @@ import {
 } from "../MediaSessionExtensions";
 
 /**
- *Per client position
+ * Per client position
  * @hidden
  */
 export interface ICurrentPlaybackPosition {

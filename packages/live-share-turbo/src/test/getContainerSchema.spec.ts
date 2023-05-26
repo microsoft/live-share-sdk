@@ -3,14 +3,28 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveEvent } from "@microsoft/live-share";
+import { LiveEvent, TestLiveShareHost } from "@microsoft/live-share";
 import { strict as assert } from "assert";
-import { SharedMap, SharedString } from "fluid-framework";
-import { getContainerSchema } from "../internals/getContainerSchema";
+import {
+    LoadableObjectClassRecord,
+    SharedMap,
+    SharedString,
+} from "fluid-framework";
+import { LiveShareTurboClient } from "../LiveShareTurboClient";
+
+class TestLiveShareTurboClient extends LiveShareTurboClient {
+    // exposes protected method as public
+    public getContainerSchema(initialObjects?: LoadableObjectClassRecord) {
+        return super.getContainerSchema(initialObjects);
+    }
+}
 
 describe("getContainerSpec", () => {
     it("Container schema should have expected initialObjects with no additional initialObjects defined", () => {
-        const schema1 = getContainerSchema();
+        const testLiveShareTurboClient = new TestLiveShareTurboClient(
+            TestLiveShareHost.create()
+        );
+        const schema1 = testLiveShareTurboClient.getContainerSchema();
         assert(
             schema1.initialObjects.TURBO_STATE_MAP !== undefined,
             "TURBO_STATE_MAP is undefined"
@@ -22,7 +36,10 @@ describe("getContainerSpec", () => {
     });
 
     it("Container schema should have expected initialObjects with no additional initialObjects defined", () => {
-        const schema1 = getContainerSchema({
+        const testLiveShareTurboClient = new TestLiveShareTurboClient(
+            TestLiveShareHost.create()
+        );
+        const schema1 = testLiveShareTurboClient.getContainerSchema({
             testMap1: SharedMap,
             sharedString1: SharedString,
             sharedEvent1: LiveEvent,

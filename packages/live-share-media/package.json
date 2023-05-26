@@ -11,7 +11,8 @@
         "build": "tsc -p tsconfig.build.json",
         "test": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --timeout 10000",
         "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
-        "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
+        "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
+        "test:race": "node ./../live-share/test-for-race-conditions.js"
     },
     "devDependencies": {
         "@microsoft/live-share": "1.0.0",

@@ -13,10 +13,11 @@
         "samples/typescript/*"
     ],
     "scripts": {
-        "build": "node build-util.js packages samples/javascript samples/typescript",
-        "build:packages": "node build-util.js packages",
-        "build:samples": "node build-util.js samples/javascript samples/typescript",
+        "build": "node workspace-cmd-util.js build packages samples/javascript samples/typescript",
+        "build:packages": "node workspace-cmd-util.js build packages",
+        "build:samples": "node workspace-cmd-util.js build samples/javascript samples/typescript",
         "build:docs": "typedoc packages/live-share packages/live-share-media packages/live-share-turbo packages/live-share-canvas",
+        "test:packages": "node workspace-cmd-util.js test packages",
         "doctor": "eslint **/src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "author": "",

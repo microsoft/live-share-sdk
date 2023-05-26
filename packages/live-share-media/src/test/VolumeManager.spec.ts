@@ -3,13 +3,16 @@ import { IMediaPlayer } from "../IMediaPlayer";
 import { LimitLevelType, VolumeManager } from "../VolumeManager";
 import { Deferred, waitForDelay } from "@microsoft/live-share/src/internals";
 
-const milliTollerance = 25;
+// 1ms more than max timeout callback in scheduleAnimationFrame
+const milliTollerance = 21;
+const volumeChangeDuration = 0.1;
 
 describe("VolumeManager", () => {
     it("should ramp down volume", async () => {
         const player = new TestMediaPlayer();
         player.volume = 1.0;
         const volumeManager = new VolumeManager(player);
+        volumeManager.volumeChangeDuration = volumeChangeDuration;
 
         assert(player.volume == 1.0);
         volumeManager.startLimiting();
@@ -31,6 +34,7 @@ describe("VolumeManager", () => {
         const player = new TestMediaPlayer();
         player.volume = 1.0;
         const volumeManager = new VolumeManager(player);
+        volumeManager.volumeChangeDuration = volumeChangeDuration;
 
         // limit at start
         volumeManager.startLimiting();
@@ -61,6 +65,7 @@ describe("VolumeManager", () => {
         player.volume = 1.0;
 
         const volumeManager = new VolumeManager(player);
+        volumeManager.volumeChangeDuration = volumeChangeDuration;
 
         volumeManager.startLimiting();
         await waitForDelay((volumeManager.volumeChangeDuration * 1000) / 2);
@@ -81,6 +86,7 @@ describe("VolumeManager", () => {
         player.volume = 1.0;
 
         const volumeManager = new VolumeManager(player);
+        volumeManager.volumeChangeDuration = volumeChangeDuration;
 
         volumeManager.volume = 0.3;
         setTimeout(() => {
@@ -100,6 +106,7 @@ describe("VolumeManager", () => {
         const player = new TestMediaPlayer();
         player.volume = 1.0;
         const volumeManager = new VolumeManager(player);
+        volumeManager.volumeChangeDuration = volumeChangeDuration;
 
         volumeManager.startLimiting();
         await waitForDelay((volumeManager.volumeChangeDuration * 1000) / 2);
@@ -122,6 +129,7 @@ describe("VolumeManager", () => {
         player.volume = 1.0;
 
         const volumeManager = new VolumeManager(player);
+        volumeManager.volumeChangeDuration = volumeChangeDuration;
         volumeManager.volume = 0.3;
 
         await waitForDelay((volumeManager.volumeChangeDuration * 1000) / 2);
@@ -143,6 +151,7 @@ describe("VolumeManager", () => {
         player.volume = 1.0;
 
         const volumeManager = new VolumeManager(player);
+        volumeManager.volumeChangeDuration = volumeChangeDuration;
         volumeManager.limitLevelType = LimitLevelType.percentage;
         volumeManager.limitLevel = 0.5;
 

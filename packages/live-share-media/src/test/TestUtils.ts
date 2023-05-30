@@ -13,13 +13,13 @@ export class TestMediaPlayer implements IMediaPlayer {
     private playStartTime = 0;
     private _currentTime: number = 0;
 
-    currentSrc: string = "test";
     duration: number;
     ended: boolean;
     muted: boolean;
     paused: boolean = true;
     playbackRate: number;
     src: string = "test";
+    currentSrc: string = this.src;
     volume: number;
 
     constructor() {

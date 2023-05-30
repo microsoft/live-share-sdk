@@ -127,4 +127,65 @@ describe("GroupPlaybackTrack", () => {
         });
         assert(cnt == 1, `called trackChange event ${cnt} times`);
     });
+
+    it("should insert waitpoint if no existing waitpoints", async () => {
+        const playbackTrack = new GroupPlaybackTrack(() => {
+            return {
+                metadata: null,
+                playbackState: "none",
+                positionState: undefined,
+                trackData: null,
+            };
+        });
+        playbackTrack.addWaitPoint({ position: 10 });
+        assert(playbackTrack.findNextWaitPoint(undefined)?.position === 10);
+    });
+
+    it("should insert waitpoints in correct order", async () => {
+        const playbackTrack = new GroupPlaybackTrack(() => {
+            return {
+                metadata: null,
+                playbackState: "none",
+                positionState: undefined,
+                trackData: null,
+            };
+        });
+
+        await playbackTrack.updateTrack({
+            metadata: track1,
+            waitPoints: [{ position: 30 }],
+            timestamp: 1,
+            clientId: "a",
+        });
+        playbackTrack.addWaitPoint({ position: 10 });
+        assert(playbackTrack.findNextWaitPoint(undefined)?.position === 10);
+    });
+
+    it("updateTrack should return false for events that are the same time, but clientId is higher sort", async () => {
+        const done = new Deferred();
+        const playbackTrack = new GroupPlaybackTrack(() => {
+            return {
+                metadata: { trackIdentifier: "src" } as ExtendedMediaMetadata,
+                playbackState: "none",
+                positionState: undefined,
+                trackData: null,
+            };
+        });
+
+        playbackTrack.updateTrack({
+            metadata: track1,
+            waitPoints: [],
+            timestamp: 3,
+            clientId: "a",
+        });
+
+        assert(
+            !playbackTrack.updateTrack({
+                metadata: track1,
+                waitPoints: [],
+                timestamp: 3,
+                clientId: "b",
+            })
+        );
+    });
 });

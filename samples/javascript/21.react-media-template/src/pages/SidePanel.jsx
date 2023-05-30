@@ -36,7 +36,8 @@ const SidePanel = () => {
         liveShareHooks.usePresence(
             presence,
             ACCEPT_PLAYBACK_CHANGES_FROM,
-            context
+            context,
+            timestampProvider,
         );
 
     // Take control map
@@ -61,7 +62,7 @@ const SidePanel = () => {
     } = liveShareHooks.usePlaylist(playlistMap, sendNotification);
 
     useEffect(() => {
-        if (context && playlistStarted) {
+        if (context && playlistStarted && inTeams()) {
             if (context.page?.frameContext === "meetingStage") {
                 // User shared the app directly to stage, redirect automatically
                 selectMediaId(mediaList[0].id);

@@ -4,7 +4,7 @@ import { LimitLevelType, VolumeManager } from "../VolumeManager";
 import { Deferred, waitForDelay } from "@microsoft/live-share/src/internals";
 
 // 1ms more than max timeout callback in scheduleAnimationFrame
-const milliTollerance = 21;
+const milliTolerance = 21;
 const volumeChangeDuration = 0.1;
 
 describe("VolumeManager", () => {
@@ -22,9 +22,9 @@ describe("VolumeManager", () => {
         assert(player.volume > 0.4);
         assert(player.volume < 0.6);
 
-        // check volume at end with milliTollerance of leeway
+        // check volume at end with milliTolerance of leeway
         await waitForDelay(
-            volumeManager.volumeChangeDuration * 1000 + milliTollerance
+            volumeManager.volumeChangeDuration * 1000 + milliTolerance
         );
         assert(player.volume == volumeManager.limitLevel);
     });
@@ -41,7 +41,7 @@ describe("VolumeManager", () => {
 
         // when limited all the way, test ramp up
         await waitForDelay(
-            volumeManager.volumeChangeDuration * 1000 + milliTollerance
+            volumeManager.volumeChangeDuration * 1000 + milliTolerance
         );
 
         assert(player.volume == volumeManager.limitLevel);
@@ -55,7 +55,7 @@ describe("VolumeManager", () => {
 
         // check volume at end with milliTollerance of leeway
         await waitForDelay(
-            volumeManager.volumeChangeDuration * 1000 + milliTollerance
+            volumeManager.volumeChangeDuration * 1000 + milliTolerance
         );
         assert(player.volume == volumeManager.volume);
     });
@@ -75,9 +75,9 @@ describe("VolumeManager", () => {
         volumeManager.stopLimiting();
 
         await waitForDelay(
-            volumeManager.volumeChangeDuration * 1000 + milliTollerance
+            volumeManager.volumeChangeDuration * 1000 + milliTolerance
         );
-        // check volume at end with milliTollerance of leeway
+        // check volume at end with milliTolerance of leeway
         assert(player.volume == volumeManager.volume);
     });
 
@@ -96,9 +96,9 @@ describe("VolumeManager", () => {
         }, (volumeManager.volumeChangeDuration * 1000) / 2);
 
         await waitForDelay(
-            volumeManager.volumeChangeDuration * 1000 + milliTollerance
+            volumeManager.volumeChangeDuration * 1000 + milliTolerance
         );
-        // check volume at end with milliTollerance of leeway
+        // check volume at end with milliTolerance of leeway
         assert(player.volume == volumeManager.volume);
     });
 
@@ -118,9 +118,9 @@ describe("VolumeManager", () => {
         volumeManager.stopLimiting();
 
         await waitForDelay(
-            volumeManager.volumeChangeDuration * 1000 + milliTollerance
+            volumeManager.volumeChangeDuration * 1000 + milliTolerance
         );
-        // check volume at end with milliTollerance of leeway
+        // check volume at end with milliTolerance of leeway
         assert(player.volume == volumeManager.volume);
     });
 
@@ -139,9 +139,9 @@ describe("VolumeManager", () => {
         assert(player.volume < 0.7);
         volumeManager.volume = 0.8;
 
-        // check volume at end with milliTollerance of leeway
+        // check volume at end with milliTolerance of leeway
         await waitForDelay(
-            volumeManager.volumeChangeDuration * 1000 + milliTollerance
+            volumeManager.volumeChangeDuration * 1000 + milliTolerance
         );
         assert(player.volume == volumeManager.volume);
     });
@@ -163,9 +163,9 @@ describe("VolumeManager", () => {
             assert(player.volume < 0.8);
         }, (volumeManager.volumeChangeDuration * 1000) / 2);
 
-        // check volume at end with milliTollerance of leeway
+        // check volume at end with milliTolerance of leeway
         await waitForDelay(
-            volumeManager.volumeChangeDuration * 1000 + milliTollerance
+            volumeManager.volumeChangeDuration * 1000 + milliTolerance
         );
         assert(
             player.volume == volumeManager.limitLevel * volumeManager.volume

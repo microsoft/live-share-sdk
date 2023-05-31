@@ -6,27 +6,14 @@
 import "mocha";
 import { strict as assert } from "assert";
 import {
-    IParticipant,
-    ParticipantRole,
-    Deferred,
-} from "@microsoft/teams-collaboration";
-import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
-    ITrackChangeEvent,
+    IPlaybackTrackChangeEvent,
 } from "../internals/GroupPlaybackTrack";
 import { ExtendedMediaMetadata } from "../MediaSessionExtensions";
+import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 
 describe("GroupPlaybackTrack", () => {
-    const user1: IParticipant = {
-        participantId: "user1",
-        role: ParticipantRole.organizer,
-    };
-    const user2: IParticipant = {
-        participantId: "user2",
-        role: ParticipantRole.participant,
-    };
-
     const track1 = {
         trackIdentifier: "track1",
         title: "Test Track 1",
@@ -38,10 +25,17 @@ describe("GroupPlaybackTrack", () => {
 
     it('should fire "trackChange" event when no media', async () => {
         const done = new Deferred();
-        const playbackTrack = new GroupPlaybackTrack(() => null);
-        playbackTrack.addEventListener(
+        const playbackTrack = new GroupPlaybackTrack(() => {
+            return {
+                metadata: { trackIdentifier: "src" } as ExtendedMediaMetadata,
+                playbackState: "none",
+                positionState: undefined,
+                trackData: null,
+            };
+        });
+        playbackTrack.on(
             GroupPlaybackTrackEvents.trackChange,
-            (event: ITrackChangeEvent) => {
+            (event: IPlaybackTrackChangeEvent) => {
                 try {
                     assert(event.metadata, `no metadata`);
                     assert(
@@ -59,7 +53,7 @@ describe("GroupPlaybackTrack", () => {
             metadata: track1,
             waitPoints: [],
             timestamp: 1,
-            socketId: "a",
+            clientId: "a",
         });
 
         await done.promise;
@@ -67,11 +61,18 @@ describe("GroupPlaybackTrack", () => {
 
     it("should switch tracks", async () => {
         let cnt = 0;
-        let metadata: ExtendedMediaMetadata = null;
-        const playbackTrack = new GroupPlaybackTrack(() => metadata);
-        playbackTrack.addEventListener(
+        let metadata: ExtendedMediaMetadata | null = null;
+        const playbackTrack = new GroupPlaybackTrack(() => {
+            return {
+                metadata: null,
+                playbackState: "none",
+                positionState: undefined,
+                trackData: null,
+            };
+        });
+        playbackTrack.on(
             GroupPlaybackTrackEvents.trackChange,
-            (event: ITrackChangeEvent) => {
+            (event: IPlaybackTrackChangeEvent) => {
                 cnt++;
                 metadata = event.metadata;
             }
@@ -81,25 +82,32 @@ describe("GroupPlaybackTrack", () => {
             metadata: track1,
             waitPoints: [],
             timestamp: 1,
-            socketId: "a",
+            clientId: "a",
         });
         await playbackTrack.updateTrack({
             metadata: track2,
             waitPoints: [],
             timestamp: 2,
-            socketId: "b",
+            clientId: "b",
         });
         assert(cnt == 2, `called trackChange event ${cnt} times`);
-        assert(metadata.trackIdentifier == "track2", `wrong track set`);
+        assert(metadata!.trackIdentifier == "track2", `wrong track set`);
     });
 
     it("should ignore track changes with older timestamps", async () => {
         let cnt = 0;
-        let metadata: ExtendedMediaMetadata = null;
-        const playbackTrack = new GroupPlaybackTrack(() => metadata);
-        playbackTrack.addEventListener(
+        let metadata: ExtendedMediaMetadata | null = null;
+        const playbackTrack = new GroupPlaybackTrack(() => {
+            return {
+                metadata: null,
+                playbackState: "none",
+                positionState: undefined,
+                trackData: null,
+            };
+        });
+        playbackTrack.on(
             GroupPlaybackTrackEvents.trackChange,
-            (event: ITrackChangeEvent) => {
+            (event: IPlaybackTrackChangeEvent) => {
                 cnt++;
                 metadata = event.metadata;
             }
@@ -109,14 +117,75 @@ describe("GroupPlaybackTrack", () => {
             metadata: track1,
             waitPoints: [],
             timestamp: 3,
-            socketId: "a",
+            clientId: "a",
         });
         await playbackTrack.updateTrack({
             metadata: track2,
             waitPoints: [],
             timestamp: 2,
-            socketId: "b",
+            clientId: "b",
         });
         assert(cnt == 1, `called trackChange event ${cnt} times`);
+    });
+
+    it("should insert waitpoint if no existing waitpoints", async () => {
+        const playbackTrack = new GroupPlaybackTrack(() => {
+            return {
+                metadata: null,
+                playbackState: "none",
+                positionState: undefined,
+                trackData: null,
+            };
+        });
+        playbackTrack.addWaitPoint({ position: 10 });
+        assert(playbackTrack.findNextWaitPoint(undefined)?.position === 10);
+    });
+
+    it("should insert waitpoints in correct order", async () => {
+        const playbackTrack = new GroupPlaybackTrack(() => {
+            return {
+                metadata: null,
+                playbackState: "none",
+                positionState: undefined,
+                trackData: null,
+            };
+        });
+
+        await playbackTrack.updateTrack({
+            metadata: track1,
+            waitPoints: [{ position: 30 }],
+            timestamp: 1,
+            clientId: "a",
+        });
+        playbackTrack.addWaitPoint({ position: 10 });
+        assert(playbackTrack.findNextWaitPoint(undefined)?.position === 10);
+    });
+
+    it("updateTrack should return false for events that are the same time, but clientId is higher sort", async () => {
+        const done = new Deferred();
+        const playbackTrack = new GroupPlaybackTrack(() => {
+            return {
+                metadata: { trackIdentifier: "src" } as ExtendedMediaMetadata,
+                playbackState: "none",
+                positionState: undefined,
+                trackData: null,
+            };
+        });
+
+        playbackTrack.updateTrack({
+            metadata: track1,
+            waitPoints: [],
+            timestamp: 3,
+            clientId: "a",
+        });
+
+        assert(
+            !playbackTrack.updateTrack({
+                metadata: track1,
+                waitPoints: [],
+                timestamp: 3,
+                clientId: "b",
+            })
+        );
     });
 });

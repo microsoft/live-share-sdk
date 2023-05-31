@@ -161,7 +161,10 @@ export class VolumeManager {
         if (typeof requestAnimationFrame == "function") {
             requestAnimationFrame(callback);
         } else {
-            setTimeout(callback, 20);
+            setTimeout(
+                callback,
+                Math.min(this._volumeChangeDuration.milliseconds / 25, 20)
+            );
         }
     }
 

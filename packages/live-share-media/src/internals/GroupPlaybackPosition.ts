@@ -6,7 +6,6 @@
 import {
     IRuntimeSignaler,
     TimeInterval,
-    LiveShareClient,
     LiveShareRuntime,
 } from "@microsoft/live-share";
 import { GroupTransportState } from "./GroupTransportState";
@@ -17,7 +16,7 @@ import {
 } from "../MediaSessionExtensions";
 
 /**
- *Per client position
+ * Per client position
  * @hidden
  */
 export interface ICurrentPlaybackPosition {
@@ -169,9 +168,7 @@ export class GroupPlaybackPosition {
         const now = this._liveRuntime.getTimestamp();
         const ignoreBefore = now - this._updateInterval.milliseconds * 2;
         const shouldProject = !this._transportState.track.metadata?.liveStream;
-        this._positions.forEach((value, key) => {
-            const position = this._positions.get(key)!;
-
+        this._positions.forEach((position, _) => {
             // Ignore any old updates
             if (position.timestamp > ignoreBefore) {
                 // Compute projected playback position

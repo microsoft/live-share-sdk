@@ -61,4 +61,16 @@ extends:
 
         - script: "npm run test"
           workingDirectory: "${{ variables.sdk_packages_directory }}/live-share"
-          displayName: "npm run test"
+          displayName: "test live-share"
+        
+        - script: "npm run test"
+          workingDirectory: "${{ variables.sdk_packages_directory }}/live-share-media"
+          displayName: "test live-share-media"
+
+        - script: "npm run test"
+          workingDirectory: "${{ variables.sdk_packages_directory }}/live-share-canvas"
+          displayName: "test live-share-canvas"
+        
+        - script: "npm run test"
+          workingDirectory: "${{ variables.sdk_packages_directory }}/live-share-turbo"
+          displayName: "test live-share-turbo"

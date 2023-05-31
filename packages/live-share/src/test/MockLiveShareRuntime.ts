@@ -8,9 +8,9 @@ import { LocalTimestampProvider } from "../LocalTimestampProvider";
 export class MockLiveShareRuntime extends LiveShareRuntime {
     constructor(
         shouldCreateMockContainer = false,
-        private readonly updateInterval = 10000
+        private readonly updateInterval = 10000,
+        host = TestLiveShareHost.create()
     ) {
-        const host = TestLiveShareHost.create();
         super(host, new LocalTimestampProvider());
         if (shouldCreateMockContainer) {
             const localContainer = new MockContainerRuntimeSignaler();

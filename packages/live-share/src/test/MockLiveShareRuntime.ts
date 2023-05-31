@@ -1,17 +1,17 @@
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { IContainerRuntimeSignaler } from "../interfaces";
+import { IContainerRuntimeSignaler, ITimestampProvider } from "../interfaces";
 import { MockContainerRuntimeSignaler } from "./MockContainerRuntimeSignaler";
-import { MockTimestampProvider } from "./MockTimestampProvider";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 
 export class MockLiveShareRuntime extends LiveShareRuntime {
     constructor(
         shouldCreateMockContainer = false,
         private readonly updateInterval = 10000,
-        host = TestLiveShareHost.create()
+        host = TestLiveShareHost.create(),
+        timestampProvider: ITimestampProvider = new LocalTimestampProvider()
     ) {
-        super(host, new LocalTimestampProvider());
+        super(host, timestampProvider);
         if (shouldCreateMockContainer) {
             const localContainer = new MockContainerRuntimeSignaler();
             this.__dangerouslySetContainerRuntime(localContainer);

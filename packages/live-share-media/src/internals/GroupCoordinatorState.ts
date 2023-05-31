@@ -463,7 +463,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 // Ensure local media session is in sync with group
                 if (local && !this.isSuspended) {
                     // Begin a "soft suspension" on select state changes
-                    // - This is needed because the catchup logic can try to sink the client with
+                    // - This is needed because the catchup logic can try to sync the client with
                     //  the rest of the group while the local player is trying to to seek to a
                     //  new position.
                     switch (event.data.playbackState) {

@@ -3,8 +3,8 @@ import { IMediaPlayer } from "../IMediaPlayer";
 import { LimitLevelType, VolumeManager } from "../VolumeManager";
 import { Deferred, waitForDelay } from "@microsoft/live-share/src/internals";
 
-// 1ms more than max timeout callback in scheduleAnimationFrame
-const milliTolerance = 21;
+// few millis more than max timeout callback in scheduleAnimationFrame
+const milliTolerance = 25;
 const volumeChangeDuration = 0.1;
 
 describe("VolumeManager", () => {

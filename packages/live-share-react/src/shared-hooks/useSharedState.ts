@@ -23,7 +23,7 @@ import { isPrevStateCallback } from "../internal";
  *
  * @returns a stateful value, the function to update it, and an optional dispose method to delete it from the `SharedMap`.
  */
-export function useSharedState<S>(
+export function useSharedState<S = any>(
     uniqueKey: string,
     initialState: S
 ): [S, SetSharedStateAction<S>, DisposeSharedStateAction] {

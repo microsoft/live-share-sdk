@@ -22,14 +22,14 @@ import {
  * directly is that it integrates nicely with React state and automates repetitive tasks.
  * If you want to use `SharedMap` this hook creates directly, you can do that as well.
  *
- * @template TData Optional typing for objects stored in the SharedMap. Default is `object` type.
+ * @template TData Optional typing for objects stored in the SharedMap. Default is `any` type.
  * @param uniqueKey the unique key for the `SharedMap`. If one does not yet exist, a new `SharedMap`
  * will be created, otherwise it will use the existing one.
  * @param initialData a JS Map, entries array, or JSON object to insert into the `SharedMap` when creating
  * the DDS for the first time.
  * @returns stateful `map` entries, `setEntry` callback, `deleteEntry` callback, and the Fluid `sharedMap`.
  */
-export function useSharedMap<TData extends object = object>(
+export function useSharedMap<TData = any>(
     uniqueKey: string,
     initialData?: SharedMapInitialData<TData>
 ): IUseSharedMapResults<TData> {

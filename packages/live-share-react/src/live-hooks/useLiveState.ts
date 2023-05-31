@@ -27,7 +27,7 @@ import {
  * @returns ordered values: first value is the synchronized state value and the second is a setter to change the state value.
  * The setter returns a void promise, which will throw if the user does not have the required roles to set.
  */
-export function useLiveState<TState>(
+export function useLiveState<TState = any>(
     uniqueKey: string,
     initialState: TState,
     allowedRoles?: UserMeetingRole[]

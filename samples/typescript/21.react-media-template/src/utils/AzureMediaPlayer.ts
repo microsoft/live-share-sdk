@@ -220,7 +220,7 @@ export class AzureMediaPlayer extends EventTarget {
     //---------------------------------------------------------------------------------------------
 
     load(): void {
-        this._player.src(this._track.src);
+        this._player.src({ src: this._track.src });
     }
 
     async play(): Promise<void> {

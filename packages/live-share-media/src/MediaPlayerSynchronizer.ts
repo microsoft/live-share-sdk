@@ -82,6 +82,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private _seekSuspension?: MediaSessionCoordinatorSuspension;
     private _viewOnly = false;
     private _expectedPlaybackState: ExtendedMediaSessionPlaybackState = "none";
+    private _metadata: ExtendedMediaMetadata | null = null;
     private _trackData: object | null = null;
 
     /**
@@ -120,8 +121,15 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                 playbackState = "playing";
             }
 
+            // Metadata equality check in `GroupPlaybackTrack` would return false if only providing src.
+            // Use full metadata if this._metadata has same src
+            const metadata =
+                this._metadata && this._metadata.trackIdentifier === src
+                    ? this._metadata
+                    : ({ trackIdentifier: src } as ExtendedMediaMetadata);
+
             const state = {
-                metadata: { trackIdentifier: src } as ExtendedMediaMetadata,
+                metadata: metadata,
                 playbackState: playbackState,
                 positionState: {
                     position: this._player.currentTime,
@@ -301,6 +309,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                                         .SetTrackAction
                                 );
                                 this._expectedPlaybackState = "none";
+                                this._metadata = details.metadata ?? null;
                                 if (
                                     this._player.src ===
                                     details.metadata?.trackIdentifier

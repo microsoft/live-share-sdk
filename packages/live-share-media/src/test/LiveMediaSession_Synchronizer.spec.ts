@@ -3,13 +3,21 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TestLiveMediaSession, TestMediaPlayer } from "./TestUtils";
+import {
+    TestLiveMediaSession,
+    TestMediaPlayer,
+    TestMediaTimeStampProvider,
+} from "./TestUtils";
 import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
-import { UserMeetingRole } from "@microsoft/live-share";
+import {
+    ITimestampProvider,
+    LocalTimestampProvider,
+    UserMeetingRole,
+} from "@microsoft/live-share";
 import { TestLiveShareHost } from "@microsoft/live-share";
 import { getLiveDataObjectClassProxy } from "@microsoft/live-share";
 import { waitForDelay } from "@microsoft/live-share/src/internals";
@@ -22,11 +30,22 @@ import {
 
 async function getObjects(
     getTestObjectProvider,
-    updateInterval: number = 10000
+    updateInterval: number = 10000,
+    timestampProvider: ITimestampProvider = new LocalTimestampProvider()
 ) {
     const host = TestLiveShareHost.create();
-    let liveRuntime1 = new MockLiveShareRuntime(false, updateInterval, host);
-    let liveRuntime2 = new MockLiveShareRuntime(false, updateInterval, host);
+    let liveRuntime1 = new MockLiveShareRuntime(
+        false,
+        updateInterval,
+        host,
+        timestampProvider
+    );
+    let liveRuntime2 = new MockLiveShareRuntime(
+        false,
+        updateInterval,
+        host,
+        timestampProvider
+    );
 
     let ObjectProxy1: any = getLiveDataObjectClassProxy<TestLiveMediaSession>(
         TestLiveMediaSession,
@@ -560,6 +579,57 @@ describeNoCompat(
             // because video will roll back to waitpoint position (rewinding up to 500ms)
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 0.7));
 
+            dispose();
+        });
+
+        it("client should catchup to leader", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider,
+                10000,
+                new TestMediaTimeStampProvider()
+            );
+            const catchupTriggered = new Deferred();
+            const metadata: ExtendedMediaMetadata = {
+                trackIdentifier: "testTrackId",
+                liveStream: false,
+                album: "",
+                artist: "",
+                artwork: [],
+                title: "",
+            };
+            const testMediaPlayer1 = new TestMediaPlayer();
+            const testMediaPlayer2 = new TestMediaPlayer((currentTime) => {
+                console.log("currentTime", currentTime);
+                if (
+                    isSynced(
+                        testMediaPlayer1,
+                        testMediaPlayer2,
+                        testMediaPlayer1.currentTime
+                    ) &&
+                    currentTime >= 1
+                ) {
+                    catchupTriggered.resolve();
+                }
+            });
+
+            await object1.initialize();
+            await object2.initialize();
+            const sync1 = object1.synchronize(testMediaPlayer1);
+            object2.synchronize(testMediaPlayer2);
+
+            await sync1.setTrack(metadata);
+            await assertActionOccurred(
+                [testMediaPlayer1, testMediaPlayer2],
+                "load"
+            );
+            await sync1.play();
+
+            // simulate testMediaPlayer2 getting behind
+            setInterval(() => {
+                testMediaPlayer2.pause();
+            }, 100);
+
+            await catchupTriggered.promise;
             dispose();
         });
     }

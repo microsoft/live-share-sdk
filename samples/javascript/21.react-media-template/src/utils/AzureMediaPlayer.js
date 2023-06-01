@@ -205,7 +205,7 @@ export class AzureMediaPlayer extends EventTarget {
     //---------------------------------------------------------------------------------------------
 
     load() {
-        this._player.src(this._track.src);
+        this._player.src({ src: this._track.src });
     }
 
     async play() {

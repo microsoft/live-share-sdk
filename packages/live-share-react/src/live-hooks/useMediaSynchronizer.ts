@@ -19,7 +19,6 @@ import { IUseMediaSynchronizerResults } from "../types";
 import { useFluidObjectsContext } from "../providers";
 import {
     ActionContainerNotJoinedError,
-    ActionLiveDataObjectInitializedError,
     ActionLiveDataObjectUndefinedError,
 } from "../internal";
 
@@ -30,7 +29,7 @@ import {
  * Use this hook if you want to synchronize the playback position of a video or audio element during a Live Share session.
  *
  * @param uniqueKey uniqueKey value for the `LiveMediaSession` DDS object used by `MediaPlayerSynchronizer`.
- * @param mediaPlayerElementRef React RefObject containing object/element conforming to IMediaPlayer interface or string id for <video> / <audio> element.
+ * @param mediaPlayerElement React RefObject containing object/element conforming to IMediaPlayer interface, `IMediaPlayer` object, or string id for <video> / <audio> element.
  * @param initialTrack initial track to load. Either ExtendedMediaMetadata, trackId string, or null.
  * @param allowedRoles Optional. Array of user roles that are eligible to modify group playback state.
  * @param viewOnly Optional. Flag for whether or not the media synchronizer should be in viewOnly mode.
@@ -38,7 +37,11 @@ import {
  */
 export function useMediaSynchronizer(
     uniqueKey: string,
-    mediaPlayerElementRef: React.RefObject<IMediaPlayer> | string,
+    mediaPlayerElement:
+        | React.RefObject<IMediaPlayer>
+        | IMediaPlayer
+        | string
+        | null,
     initialTrack: Partial<ExtendedMediaMetadata> | string | null,
     allowedRoles?: UserMeetingRole[],
     viewOnly?: boolean
@@ -177,18 +180,20 @@ export function useMediaSynchronizer(
      * Setup change listeners and start `LiveMediaSession` if needed
      */
     React.useEffect(() => {
-        if (mediaSession === undefined || !mediaPlayerElementRef) return;
+        if (mediaSession === undefined || !mediaPlayerElement) return;
         let mounted = true;
         // Query the HTML5 media element from the document and set reference
         let mediaPlayer: IMediaPlayer | undefined;
-        if (isRefObject<IMediaPlayer>(mediaPlayerElementRef)) {
-            if (!mediaPlayerElementRef.current) return;
-            mediaPlayer = mediaPlayerElementRef.current;
-        } else {
-            const mediaPlayerElement = document.getElementById(
-                mediaPlayerElementRef
+        if (isRefObject<IMediaPlayer>(mediaPlayerElement)) {
+            if (!mediaPlayerElement.current) return;
+            mediaPlayer = mediaPlayerElement.current;
+        } else if (typeof mediaPlayerElement === "string") {
+            const mediaElement = document.getElementById(
+                mediaPlayerElement
             ) as any;
-            if (!isMediaElement(mediaPlayerElement)) return;
+            if (!isMediaElement(mediaElement)) return;
+            mediaPlayer = mediaElement;
+        } else {
             mediaPlayer = mediaPlayerElement;
         }
         if (initialTrack) {
@@ -234,7 +239,7 @@ export function useMediaSynchronizer(
             synchronizer?.end();
             mediaSession?.dispose();
         };
-    }, [mediaSession]);
+    }, [mediaSession, mediaPlayerElement]);
 
     /**
      * Change view in media synchronizer only if prop changes

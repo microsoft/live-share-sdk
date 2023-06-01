@@ -38,7 +38,7 @@ const SidePanel: FC = () => {
             ACCEPT_PLAYBACK_CHANGES_FROM,
             presence,
             context,
-            timestampProvider,
+            timestampProvider
         );
 
     const { takeControlStarted, takeControl } = liveShareHooks.useTakeControl(

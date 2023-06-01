@@ -37,7 +37,7 @@ const SidePanel = () => {
             presence,
             ACCEPT_PLAYBACK_CHANGES_FROM,
             context,
-            timestampProvider,
+            timestampProvider
         );
 
     // Take control map

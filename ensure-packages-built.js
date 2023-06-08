@@ -7,16 +7,21 @@ const childProcess = require("child_process");
 const fs = require("fs");
 
 ensurePackagesBuilt();
-
+/**
+ * if packages are not built or if they are old builds then:
+ * 
+ * 1. run npm install from "packages/live-share-react".
+ *    live-share-react uses all other live-share packages as dependencies, hence will install all packages needed to build live-share packages.
+ * 2. run npm run build:packages from root
+ */
 async function ensurePackagesBuilt() {
     const rootFolderPath = await getRootFolder();
     const currentGitHash = await getGitHash()
 
-    if (!fs.existsSync(`${rootFolderPath}/node_modules/@microsoft/live-share-react/bin`)) {
+    const packagesNotBuilt = !fs.existsSync(`${rootFolderPath}/node_modules/@microsoft/live-share-react/bin`);
+    const isOldBuild = currentGitHash !== getBuildData()?.lastGitHashBuilt;
+    if (packagesNotBuilt || isOldBuild) {
         await npmInstallFromLiveShareReact();
-        build();
-    } else if (currentGitHash !== getBuildData()?.lastGitHashBuilt) {
-        // don't install again here, just rebuild
         build();
     }
 

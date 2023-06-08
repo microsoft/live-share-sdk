@@ -14,10 +14,10 @@ async function ensurePackagesBuilt() {
 
     if (!fs.existsSync(`${rootFolderPath}/node_modules/@microsoft/live-share-react/bin`)) {
         await npmInstallFromLiveShareReact();
-        build(rootFolderPath);
+        build();
     } else if (currentGitHash !== getBuildData()?.lastGitHashBuilt) {
         // don't install again here, just rebuild
-        build(rootFolderPath);
+        build();
     }
 
     async function getGitHash() {
@@ -76,17 +76,17 @@ async function ensurePackagesBuilt() {
         })
     }
 
-    function build(path) {
+    function build() {
         const buildProcess = childProcess.spawn("npm", ["run", "build:packages"], {
             shell: true,
-            cwd: path,
+            cwd: rootFolderPath,
             stdio: "inherit",
         });
         
         buildProcess.on("close", (code) => {
             if (code === 0) {
                 fs.writeFileSync(
-                    `${path}/build-data.json`,
+                    `${rootFolderPath}/build-data.json`,
                     JSON.stringify({
                         lastGitHashBuilt: currentGitHash,
                     })

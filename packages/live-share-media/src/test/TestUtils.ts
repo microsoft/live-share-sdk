@@ -6,7 +6,11 @@
 import { IMediaPlayer } from "../IMediaPlayer";
 import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { LiveMediaSession } from "../LiveMediaSession";
-import { IRuntimeSignaler, LiveShareRuntime } from "@microsoft/live-share";
+import {
+    IRuntimeSignaler,
+    ITimestampProvider,
+    LiveShareRuntime,
+} from "@microsoft/live-share";
 
 export class TestMediaPlayer implements IMediaPlayer {
     private done = new Deferred<string>();
@@ -19,10 +23,10 @@ export class TestMediaPlayer implements IMediaPlayer {
     paused: boolean = true;
     playbackRate: number;
     src: string = "test";
-    currentSrc: string = this.src;
+    currentSrc: string;
     volume: number;
 
-    constructor() {
+    constructor(public onCurrentTimeSet?: (number) => void) {
         setInterval(() => {
             if (!this.paused && this.playStartTime != 0) {
                 this._currentTime = Date.now() / 1000 - this.playStartTime;
@@ -37,6 +41,7 @@ export class TestMediaPlayer implements IMediaPlayer {
         if (!this.paused) {
             this.playStartTime = Date.now() / 1000 - this.currentTime;
         }
+        this.onCurrentTimeSet?.(this._currentTime);
     }
 
     public get currentTime(): number {
@@ -91,5 +96,16 @@ export class TestLiveMediaSession extends LiveMediaSession {
 
     public liveRuntimeForTesting(): LiveShareRuntime {
         return this.liveRuntime;
+    }
+}
+
+// not using default local timestamp provider, need to be able to get timestamp of same millisecond for some tests
+export class TestMediaTimeStampProvider implements ITimestampProvider {
+    constructor() {}
+    getTimestamp(): number {
+        return new Date().getTime();
+    }
+    getMaxTimestampError(): number {
+        return 0;
     }
 }

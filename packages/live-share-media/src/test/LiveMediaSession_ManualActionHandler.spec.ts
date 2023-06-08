@@ -3,15 +3,17 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TestLiveMediaSession, TestMediaPlayer } from "./TestUtils";
+import { TestLiveMediaSession, TestMediaTimeStampProvider } from "./TestUtils";
 import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import {
+    ITimestampProvider,
     LiveEventScope,
     LiveEventTarget,
+    LocalTimestampProvider,
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { TestLiveShareHost } from "@microsoft/live-share";
@@ -26,11 +28,22 @@ import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 
 async function getObjects(
     getTestObjectProvider,
-    updateInterval: number = 10000
+    updateInterval: number = 10000,
+    timestampProvider: ITimestampProvider = new LocalTimestampProvider()
 ) {
     const host = TestLiveShareHost.create();
-    let liveRuntime1 = new MockLiveShareRuntime(false, updateInterval, host);
-    let liveRuntime2 = new MockLiveShareRuntime(false, updateInterval, host);
+    let liveRuntime1 = new MockLiveShareRuntime(
+        false,
+        updateInterval,
+        host,
+        timestampProvider
+    );
+    let liveRuntime2 = new MockLiveShareRuntime(
+        false,
+        updateInterval,
+        host,
+        timestampProvider
+    );
 
     let ObjectProxy1: any = getLiveDataObjectClassProxy<TestLiveMediaSession>(
         TestLiveMediaSession,
@@ -311,7 +324,9 @@ describeNoCompat(
 
         it("should broadcast 'catchup' transport command.", async () => {
             const { object1, object2, dispose } = await getObjects(
-                getTestObjectProvider
+                getTestObjectProvider,
+                10000,
+                new TestMediaTimeStampProvider()
             );
 
             const done = new Deferred();

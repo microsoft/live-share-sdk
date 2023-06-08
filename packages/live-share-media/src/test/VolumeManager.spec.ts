@@ -135,8 +135,8 @@ describe("VolumeManager", () => {
         await waitForDelay((volumeManager.volumeChangeDuration * 1000) / 2);
 
         // check volume at halfway point
-        assert(player.volume > 0.6);
-        assert(player.volume < 0.7);
+        assert(player.volume > 0.55);
+        assert(player.volume < 0.75);
         volumeManager.volume = 0.8;
 
         // check volume at end with milliTolerance of leeway

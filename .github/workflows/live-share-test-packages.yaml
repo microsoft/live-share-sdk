@@ -1,0 +1,41 @@
+name: Test Live Share SDK packages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x, 20.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: npm run build:packages
+
+      - name: "test live-share"
+        run: npm run test
+        working-directory: packages/live-share
+
+      - name: "test live-share-canvas"
+        run: npm run test
+        working-directory: packages/live-share-canvas
+
+      - name: "test live-share-media"
+        run: npm run test
+        working-directory: packages/live-share-media
+
+      - name: "test live-share-turbo"
+        run: npm run test
+        working-directory: packages/live-share-turbo

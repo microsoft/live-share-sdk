@@ -2,7 +2,7 @@ name: Test Live Share SDK packages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main jameshunt/ci-test-gitub-actions ]
   pull_request:
     branches: [ main ]
 

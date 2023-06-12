@@ -2,7 +2,7 @@ name: Build Live Share SDK samples
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main jameshunt/ci-test-gitub-actions ]
   pull_request:
     branches: [ main ]
 

@@ -1,5 +1,5 @@
 {
-    "name": "@mcirosoft/04.live-share-react-sample",
+    "name": "@microsoft/04.live-share-react-sample",
     "version": "0.4.0",
     "private": true,
     "author": "Microsoft",
@@ -49,7 +49,8 @@
         "start-https": "start-server-and-test start:server 7070 start:https",
         "start:client": "vite",
         "start:https": "vite --config vite.https-config.js",
-        "start:server": "npx tinylicious@latest"
+        "start:server": "npx tinylicious@latest",
+        "postinstall":"node ../../../ensure-packages-built.js"
     },
     "browserslist": {
         "production": [

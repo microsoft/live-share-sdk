@@ -366,3 +366,4 @@ docs/assets/main.js
 # Testing files
 coverage/
 .nyc_output/
+build-data.json

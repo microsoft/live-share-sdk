@@ -534,13 +534,12 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
 
         // Send position update event
         const evt = this._groupState!.createPositionUpdateEvent(state);
-        this._positionUpdateEvent?.sendEvent(evt)
-            .catch((err) => {
-                this._logger.sendErrorEvent(
-                    TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
-                    err
-                );
-            });
+        this._positionUpdateEvent?.sendEvent(evt).catch((err) => {
+            this._logger.sendErrorEvent(
+                TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
+                err
+            );
+        });
     }
 
     protected async createChildren(
@@ -625,13 +624,12 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             }
         );
         // Send initial joined event
-        this._joinedEvent?.sendEvent(undefined)
-            .catch((err) => {
-                this._logger.sendErrorEvent(
-                    TelemetryEvents.SessionCoordinator.SendJoinedEventError,
-                    err
-                );
-            });
+        this._joinedEvent?.sendEvent(undefined).catch((err) => {
+            this._logger.sendErrorEvent(
+                TelemetryEvents.SessionCoordinator.SendJoinedEventError,
+                err
+            );
+        });
     }
 
     private getPlayerPosition(): number {

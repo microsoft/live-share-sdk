@@ -29,6 +29,7 @@ import {
 } from "./internals";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
 import EventEmitter from "events";
+import { isErrorLike } from "@microsoft/live-share/bin/internals";
 
 /**
  * Most recent state of the media session.
@@ -619,8 +620,20 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                         ),
                     }
                 );
-                const state = this._getPlayerState();
-                this.sendPositionUpdate(state);
+                try {
+                    const state = this._getPlayerState();
+                    this.sendPositionUpdate(state);
+                } catch (err: any) {
+                    // if player is not setup yet, local client might have also just joined and can't send its position.
+                    const playerNotSetup =
+                        isErrorLike(err) &&
+                        err.message.includes(
+                            "LiveMediaSession: no getPlayerState callback configured."
+                        );
+                    if (!playerNotSetup) {
+                        throw err;
+                    }
+                }
             }
         );
         // Send initial joined event

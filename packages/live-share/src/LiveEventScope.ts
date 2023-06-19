@@ -62,6 +62,12 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
     private _allowedRoles: UserMeetingRole[];
 
     /**
+     * Only throw role validation failed errors for events that are associated with this scope.
+     * Useful for dataObjects that use multiple scopes, like LiveMediaSession.
+     */
+    private throwForEvents: string[] = [];
+
+    /**
      * Creates a new `LiveEventScope` instance.
      * @param runtime A Fluid objects runtime instance, typically `this.runtime`.
      * @param allowedRoles Optional. List of roles allowed to send events using this scope.
@@ -95,7 +101,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
                 .then((value) => {
                     if (value) {
                         this.emitter.emit(message.type, message.content, local);
-                    } else {
+                    } else if (this.throwForEvents.includes(message.type)) {
                         this._runtime.logger.sendErrorEvent(
                             { eventName: "LiveEvent:invalidRole" },
                             new Error(
@@ -143,6 +149,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
         eventName: string,
         listener: LiveEventListener<TEvent>
     ): this {
+        this.throwForEvents.push(eventName);
         this.emitter.on(eventName, listener);
         return this;
     }
@@ -158,6 +165,10 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
         listener: LiveEventListener<TEvent>
     ): this {
         this.emitter.off(eventName, listener);
+        const removeIndex = this.throwForEvents.indexOf(eventName);
+        if (removeIndex >= 0) {
+            this.throwForEvents.splice(removeIndex, 1);
+        }
         return this;
     }
 

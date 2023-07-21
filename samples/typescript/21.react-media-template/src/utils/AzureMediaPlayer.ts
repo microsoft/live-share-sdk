@@ -178,7 +178,8 @@ export class AzureMediaPlayer extends EventTarget {
     }
 
     get ended(): boolean {
-        // it is important that ended is reported properly. Some players like to reset at the end of playback and set ended to false
+        // It is important that ended is reported properly.
+        // Some players like to reset at the end of playback and set ended to false.
         return this._player.ended() || this._track.ended;
     }
 

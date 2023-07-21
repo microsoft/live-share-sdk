@@ -205,7 +205,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     if (
                         this._expectedPlaybackState === "playing" &&
                         !this._mediaSession.coordinator.isSuspended &&
-                        // some players have ended, but emit a pause event immediately before ended event. Do no play is ended
+                        // some players have ended, but emit a pause event immediately before ended event. Do not play if ended
                         !this._player.ended
                     ) {
                         this._player.play();

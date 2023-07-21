@@ -7,6 +7,7 @@ export interface IMediaPlayer {
     readonly currentSrc: string;
     currentTime: number;
     readonly duration: number;
+    // it is important that ended is reported properly. Some players like to reset at the end of playback and set ended to false
     readonly ended: boolean;
     muted: boolean;
     readonly paused: boolean;

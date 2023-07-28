@@ -893,7 +893,7 @@ export class LiveCanvas extends LiveDataObject {
         }
         this._inkingManager.inputProvider = new LivePointerInputProvider(
             this._inkingManager.inputProvider,
-            this.verifyLocalUserRoles
+            () => this.verifyLocalUserRoles()
         );
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
@@ -960,7 +960,8 @@ export class LiveCanvas extends LiveDataObject {
 
 /**
  * @hidden
- * Decorator for InputProvider that ensures user has local roles before activating delegate input provider.
+ * Decorator for InputProvider that ensures local user has correct
+ * roles before activating delegate input provider.
  */
 class LivePointerInputProvider extends InputProvider {
     constructor(
@@ -968,10 +969,6 @@ class LivePointerInputProvider extends InputProvider {
         private verifyLocalUserRoles: () => Promise<boolean>
     ) {
         super();
-        // if already active before passed into constructor, verify local user roles.
-        if (this.delegate.isActive) {
-            this.activate();
-        }
     }
     activate() {
         this.verifyLocalUserRoles().then((allowed) => {

@@ -5,7 +5,7 @@ import { Deferred, waitForDelay } from "@microsoft/live-share/src/internals";
 
 // few millis more than max timeout callback in scheduleAnimationFrame
 const milliTolerance = 25;
-const volumeChangeDuration = 0.1;
+const volumeChangeDuration = 0.5;
 
 describe("VolumeManager", () => {
     it("should ramp down volume", async () => {

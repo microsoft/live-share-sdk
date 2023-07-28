@@ -42,6 +42,12 @@ import {
 import { IBrush } from "./Brush";
 import { BasicColors, IColor, lightenColor, toCssRgbaColor } from "./Colors";
 import { TelemetryEvents } from "./internals";
+import {
+    IMulticastEvent,
+    IPointerEvent,
+    IPointerMoveEvent,
+    InputProvider,
+} from "../input";
 
 enum InkingEventNames {
     pointerMove = "PointerMove",
@@ -885,6 +891,10 @@ export class LiveCanvas extends LiveDataObject {
         if (allowedRoles) {
             this._allowedRoles = allowedRoles;
         }
+        this._inkingManager.inputProvider = new LivePointerInputProvider(
+            this._inkingManager.inputProvider,
+            this.verifyLocalUserRoles
+        );
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
         this.setupStorageProcessing();
@@ -945,6 +955,60 @@ export class LiveCanvas extends LiveDataObject {
         this._allowedRoles = value;
 
         this.setupWetInkProcessing();
+    }
+}
+
+/**
+ * @hidden
+ * Decorator for InputProvider that ensures user has local roles before activating delegate input provider.
+ */
+class LivePointerInputProvider extends InputProvider {
+    constructor(
+        private delegate: InputProvider,
+        private verifyLocalUserRoles: () => Promise<boolean>
+    ) {
+        super();
+        // if already active before passed into constructor, verify local user roles.
+        if (this.delegate.isActive) {
+            this.activate();
+        }
+    }
+    activate() {
+        this.verifyLocalUserRoles().then((allowed) => {
+            if (allowed) {
+                this.delegate.activate();
+            } else {
+                this.delegate.deactivate();
+            }
+        });
+    }
+
+    deactivate() {
+        this.delegate.deactivate();
+    }
+
+    get isActive(): boolean {
+        return this.delegate.isActive;
+    }
+
+    get pointerDown(): IMulticastEvent<IPointerEvent> {
+        return this.delegate.pointerDown;
+    }
+
+    get pointerMove(): IMulticastEvent<IPointerMoveEvent> {
+        return this.delegate.pointerMove;
+    }
+
+    get pointerUp(): IMulticastEvent<IPointerEvent> {
+        return this.delegate.pointerUp;
+    }
+
+    get pointerEnter(): IMulticastEvent<IPointerEvent> {
+        return this.delegate.pointerEnter;
+    }
+
+    get pointerLeave(): IMulticastEvent<IPointerEvent> {
+        return this.delegate.pointerLeave;
     }
 }
 

@@ -18,7 +18,7 @@ import {
     isPointInsideRectangle,
     isRectangleInsideRectangle,
     segmentsMayIntersect,
-} from "../core/Internals";
+} from "../core/internals";
 
 const testColor: IColor = { r: 193, g: 221, b: 202 };
 const serializedTestColor = "#C1DDCA";

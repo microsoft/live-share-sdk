@@ -178,7 +178,9 @@ export class AzureMediaPlayer extends EventTarget {
     }
 
     get ended(): boolean {
-        return this._player.ended();
+        // It is important that ended is reported properly.
+        // Some players like to reset at the end of playback and set ended to false.
+        return this._player.ended() || this._track.ended;
     }
 
     get autoplay(): boolean {
@@ -372,9 +374,6 @@ export class AzureMediaPlayer extends EventTarget {
                 // this._applySkipTo(false);
                 break;
             case PlayerEvent.ended:
-                this.load();
-                this.play();
-                this.pause();
                 this._stopPositionTracker();
                 this._track.ended = true;
                 this._track.playing = false;

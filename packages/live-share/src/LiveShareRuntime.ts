@@ -14,6 +14,7 @@ import {
     RoleVerifier,
     isTimestampProvider,
     LiveObjectManager,
+    FormatFixHostDecorator,
 } from "./internals";
 import { IAzureAudience } from "@fluidframework/azure-client";
 
@@ -46,7 +47,7 @@ export class LiveShareRuntime {
         // LiveShareHostDecorator is used as a thin caching layer for some host APIs.
         this._host = decorate
             ? new BackwardsCompatibilityHostDecorator(
-                  new LiveShareHostDecorator(host)
+                  new LiveShareHostDecorator(new FormatFixHostDecorator(host))
               )
             : host;
         this._timestampProvider = timestampProvider

@@ -3,14 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    ILiveShareHost,
-    IFluidTenantInfo,
-    IFluidContainerInfo,
-    INtpTimeInfo,
-    UserMeetingRole,
-    IClientInfo,
-} from "../interfaces";
+import { ILiveShareHost, UserMeetingRole, IClientInfo } from "../interfaces";
+import { BaseHostDecorator } from "./BaseHostDecorator";
 import { RequestCache } from "./RequestCache";
 import {
     isErrorLike,
@@ -43,7 +37,7 @@ export interface BackwardsCompatibilityGetClientInfoRetrySchedule {
  *
  * For internal use only. Will be deleted.
  */
-export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
+export class BackwardsCompatibilityHostDecorator extends BaseHostDecorator {
     private readonly _userRolesRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
 
@@ -57,32 +51,11 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
      * _host would be `BackwardsCompatibilityHostDecorator` decorator: `new BackwardsCompatibilityHostDecorator(new LiveShareHostDecorator(teamsJsHost))`
      */
     constructor(
-        private readonly _host: ILiveShareHost &
+        readonly _host: ILiveShareHost &
             BackwardsCompatibilityGetClientInfoRetrySchedule
     ) {
+        super(_host);
         this.warmupCheckGetClientInfoExists();
-    }
-
-    public getFluidTenantInfo(): Promise<IFluidTenantInfo> {
-        return this._host.getFluidTenantInfo();
-    }
-
-    public getFluidToken(containerId?: string): Promise<string> {
-        return this._host.getFluidToken(containerId);
-    }
-
-    public getFluidContainerId(): Promise<IFluidContainerInfo> {
-        return this._host.getFluidContainerId();
-    }
-
-    public setFluidContainerId(
-        containerId: string
-    ): Promise<IFluidContainerInfo> {
-        return this._host.setFluidContainerId(containerId);
-    }
-
-    public getNtpTime(): Promise<INtpTimeInfo> {
-        return this._host.getNtpTime();
     }
 
     /**
@@ -191,12 +164,6 @@ export class BackwardsCompatibilityHostDecorator implements ILiveShareHost {
             "BackwardsCompatibilityHostDecorator: error, retryingWithActual"
         );
         return await this.getClientInfo(clientId);
-    }
-
-    public async registerClientId(
-        clientId: string
-    ): Promise<UserMeetingRole[]> {
-        return this._host.registerClientId(clientId);
     }
 
     private warmupCheckGetClientInfoExists() {

@@ -3,15 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    ILiveShareHost,
-    IFluidTenantInfo,
-    IFluidContainerInfo,
-    INtpTimeInfo,
-    UserMeetingRole,
-    IClientInfo,
-} from "../interfaces";
+import { UserMeetingRole, IClientInfo } from "../interfaces";
 import { BackwardsCompatibilityGetClientInfoRetrySchedule } from "./BackwardsCompatibilityHostDecorator";
+import { BaseHostDecorator } from "./BaseHostDecorator";
 import { RequestCache } from "./RequestCache";
 import {
     isErrorLike,
@@ -29,49 +23,14 @@ const CACHE_LIFETIME = 4 * 1000;
  * Live Share Host decorator used to reduce rapid duplicate requests.
  */
 export class LiveShareHostDecorator
-    implements ILiveShareHost, BackwardsCompatibilityGetClientInfoRetrySchedule
+    extends BaseHostDecorator
+    implements BackwardsCompatibilityGetClientInfoRetrySchedule
 {
     private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
     private readonly _userInfoRequestCache: RequestCache<
         IClientInfo | undefined
     > = new RequestCache(CACHE_LIFETIME);
-
-    /**
-     * @hidden
-     */
-    constructor(private readonly _host: ILiveShareHost) {}
-
-    public getFluidTenantInfo(): Promise<IFluidTenantInfo> {
-        return this._host.getFluidTenantInfo();
-    }
-
-    public getFluidToken(containerId?: string): Promise<string> {
-        return this._host.getFluidToken(containerId);
-    }
-
-    public getFluidContainerId(): Promise<IFluidContainerInfo> {
-        return this._host.getFluidContainerId();
-    }
-
-    public setFluidContainerId(
-        containerId: string
-    ): Promise<IFluidContainerInfo> {
-        return this._host.setFluidContainerId(containerId);
-    }
-
-    public getNtpTime(): Promise<INtpTimeInfo> {
-        return this._host.getNtpTime();
-    }
-
-    /**
-     * @deprecated
-     */
-    public async getClientRoles(
-        clientId: string
-    ): Promise<UserMeetingRole[] | undefined> {
-        return this._host.getClientRoles(clientId);
-    }
 
     public async getClientInfo(
         clientId: string,

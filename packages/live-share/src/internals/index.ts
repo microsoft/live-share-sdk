@@ -15,3 +15,4 @@ export * from "./type-guards";
 export * from "./internal-interfaces";
 export * from "./LiveObjectManager";
 export * from "./ContainerSynchronizer";
+export * from "./FormatFixHostDecorator";

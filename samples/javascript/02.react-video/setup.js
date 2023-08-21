@@ -1,3 +1,4 @@
+const chalk = require("chalk");
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const mkdirp = require("mkdirp");
@@ -7,7 +8,7 @@ const path = require("path");
 const DIR = path.join(os.tmpdir(), "jest_puppeteer_global_setup");
 
 module.exports = async function () {
-    console.log("Setup Puppeteer");
+    console.log(chalk.green("Setup Puppeteer"));
     const browser = await puppeteer.launch({
         headless: false,
         executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",

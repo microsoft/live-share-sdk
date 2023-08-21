@@ -1,4 +1,5 @@
 const timeout = 4 * 60 * 1000; // adjust this time out as per number of windows you need to test
+const chalk = require("chalk");
 
 // functions to test for a particular player event
 const isPlay = (log) => log && log.indexOf("MediaPlayerSynchronizer:SeekingPlayerToStartPosition") != -1;
@@ -95,7 +96,7 @@ const seekVideo = async (page, seekTo) => {
     console.log(`seekTo ${seekTo} duration ${duration}`);
     const seekRatio = Math.min(1, seekTo / duration);
 
-    const element = await page.$("#slider-r5");
+    const element = await page.$("#slider-6");
     const box = await element.boundingBox();
     console.log(box);
     // move mouse to slider start
@@ -128,7 +129,7 @@ describe("/ (Home Page)", () => {
         logsWatcher.startTracking(eventMatcher);
         await performAction();
         expect(logsWatcher.getEventCount()).toBe(numberOfWindows);
-        console.log(`Successfully verified ${eventName}`);
+        console.log(chalk.green(`Successfully verified ${eventName}`));
     };
 
     it(

@@ -283,7 +283,7 @@ export class LiveMediaSession extends LiveDataObject {
     private getCurrentPlayerState(): IMediaPlayerState {
         if (!this._requestPlayerStateHandler) {
             throw new Error(
-                `SharedMediaSession: no getPlayerState callback configured.`
+                `LiveMediaSession: no getPlayerState callback configured.`
             );
         }
 

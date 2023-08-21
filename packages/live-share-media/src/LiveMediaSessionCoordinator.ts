@@ -29,6 +29,7 @@ import {
 } from "./internals";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
 import EventEmitter from "events";
+import { isErrorLike } from "@microsoft/live-share/bin/internals";
 
 /**
  * Most recent state of the media session.
@@ -533,30 +534,13 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         }
 
         // Send position update event
-        this.verifyLocalUserRoles()
-            .then((valid) => {
-                const evt = this._groupState!.createPositionUpdateEvent(state);
-                if (!valid) {
-                    // We still need to update _groupState with the local user's position.
-                    // So we do this here rather than on the receiving end.
-                    this._groupState!.handlePositionUpdate(
-                        {
-                            clientId: this._runtime.clientId ?? "",
-                            timestamp: this._liveRuntime.getTimestamp(),
-                            data: evt,
-                        },
-                        true
-                    );
-                    return;
-                }
-                return this._positionUpdateEvent?.sendEvent(evt);
-            })
-            .catch((err) => {
-                this._logger.sendErrorEvent(
-                    TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
-                    err
-                );
-            });
+        const evt = this._groupState!.createPositionUpdateEvent(state);
+        this._positionUpdateEvent?.sendEvent(evt).catch((err) => {
+            this._logger.sendErrorEvent(
+                TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
+                err
+            );
+        });
     }
 
     protected async createChildren(
@@ -636,23 +620,29 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                         ),
                     }
                 );
-                const state = this._getPlayerState();
-                this.sendPositionUpdate(state);
+                try {
+                    const state = this._getPlayerState();
+                    this.sendPositionUpdate(state);
+                } catch (err: any) {
+                    // if player is not setup yet, local client might have also just joined and can't send its position.
+                    const playerNotSetup =
+                        isErrorLike(err) &&
+                        err.message.includes(
+                            "LiveMediaSession: no getPlayerState callback configured."
+                        );
+                    if (!playerNotSetup) {
+                        throw err;
+                    }
+                }
             }
         );
-
-        this.verifyLocalUserRoles()
-            .then((verified) => {
-                if (!verified) return;
-                // Send initial joined event
-                return this._joinedEvent?.sendEvent(undefined);
-            })
-            .catch((err) => {
-                this._logger.sendErrorEvent(
-                    TelemetryEvents.SessionCoordinator.SendJoinedEventError,
-                    err
-                );
-            });
+        // Send initial joined event
+        this._joinedEvent?.sendEvent(undefined).catch((err) => {
+            this._logger.sendErrorEvent(
+                TelemetryEvents.SessionCoordinator.SendJoinedEventError,
+                err
+            );
+        });
     }
 
     private getPlayerPosition(): number {

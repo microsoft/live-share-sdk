@@ -431,7 +431,7 @@ export class GroupCoordinatorState extends EventEmitter {
     }
 
     public handlePositionUpdate(
-        event: Omit<ILiveEvent<IPositionUpdateEvent>, "name">,
+        event: ILiveEvent<IPositionUpdateEvent>,
         local: boolean
     ): void {
         // Ensure change is for current track

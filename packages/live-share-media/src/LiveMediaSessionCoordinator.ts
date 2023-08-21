@@ -86,8 +86,6 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     // Distributed state
     private _groupState?: GroupCoordinatorState;
 
-    private _allowedRoles?: UserMeetingRole[];
-
     /**
      * @hidden
      * Applications shouldn't directly create new coordinator instances.
@@ -157,6 +155,15 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * policies.
      */
     public canSetTrackData: boolean = true;
+
+    /**
+     * Controls whether or not the local client is allowed to send position updates to the group.
+     *
+     * @remarks
+     * This flag largely meant to limit the number of signals sent to the group for performance reasons.
+     * It does not provide any security in itself.
+     */
+    public canSendPositionUpdates: boolean = true;
 
     /**
      * Returns true if the local client is in a suspended state.
@@ -533,20 +540,24 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             );
         }
 
-        // Send position update event
-        const evt = this._groupState!.createPositionUpdateEvent(state);
-        this._positionUpdateEvent?.sendEvent(evt).catch((err) => {
-            this._logger.sendErrorEvent(
-                TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
-                err
-            );
-        });
+        if (this.canSendPositionUpdates) {
+            // Send position update event
+            const evt = this._groupState!.createPositionUpdateEvent(state);
+            this._positionUpdateEvent?.sendEvent(evt).catch((err) => {
+                this._logger.sendErrorEvent(
+                    TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
+                    err
+                );
+            });
+        } else {
+            // make sure position is synced to position of clients who can send position updates
+            this._groupState!.syncLocalMediaSession();
+        }
     }
 
     protected async createChildren(
         acceptTransportChangesFrom?: UserMeetingRole[]
     ): Promise<void> {
-        this._allowedRoles = acceptTransportChangesFrom;
         // Create event scopes
         const scope = new LiveEventScope(
             this._runtime,
@@ -620,6 +631,9 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                         ),
                     }
                 );
+                if (!this.canSendPositionUpdates) {
+                    return;
+                }
                 try {
                     const state = this._getPlayerState();
                     this.sendPositionUpdate(state);
@@ -656,28 +670,5 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                     ? positionState.position
                     : 0.0;
         }
-    }
-
-    private async verifyLocalUserRoles(): Promise<boolean> {
-        const clientId = await this.waitUntilConnected();
-        return this._liveRuntime.verifyRolesAllowed(
-            clientId,
-            this._allowedRoles ?? []
-        );
-    }
-
-    private waitUntilConnected(): Promise<string> {
-        return new Promise((resolve) => {
-            const onConnected = (clientId: string) => {
-                this._runtime.off("connected", onConnected);
-                resolve(clientId);
-            };
-
-            if (this._runtime.clientId && this._runtime.connected) {
-                resolve(this._runtime.clientId);
-            } else {
-                this._runtime.on("connected", onConnected);
-            }
-        });
     }
 }

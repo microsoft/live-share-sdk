@@ -631,9 +631,6 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                         ),
                     }
                 );
-                if (!this.canSendPositionUpdates) {
-                    return;
-                }
                 try {
                     const state = this._getPlayerState();
                     this.sendPositionUpdate(state);

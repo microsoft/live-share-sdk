@@ -27,6 +27,10 @@ import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionDetails,
 } from "../MediaSessionExtensions";
+import {
+    IMediaPlayerSynchronizerEvent,
+    MediaPlayerSynchronizerEvents,
+} from "../MediaPlayerSynchronizer";
 
 async function getObjects(
     getTestObjectProvider,
@@ -131,9 +135,56 @@ describeNoCompat(
                 "pause"
             );
 
-            console.log(testMediaPlayer1);
-            console.log(testMediaPlayer2);
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 0.1));
+            dispose();
+        });
+
+        it("should emit group actions with clientId who sent the event", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            const testMediaPlayer1 = new TestMediaPlayer();
+            const testMediaPlayer2 = new TestMediaPlayer();
+            await object1.initialize();
+            await object2.initialize();
+            const object1ClientId = await object1.clientId();
+            const object2ClientId = await object2.clientId();
+            const sync1 = object1.synchronize(testMediaPlayer1);
+            const sync2 = object2.synchronize(testMediaPlayer2);
+            let playOrPauseEventCount = 0;
+
+            sync2.addEventListener(
+                MediaPlayerSynchronizerEvents.groupaction,
+                (evt: IMediaPlayerSynchronizerEvent) => {
+                    const details = evt.details;
+                    assert(evt.error === undefined);
+
+                    if (details.action === "play") {
+                        playOrPauseEventCount += 1;
+                        assert(details.clientId === object1ClientId);
+                    } else if (details.action === "pause") {
+                        playOrPauseEventCount += 1;
+                        assert(details.clientId === object2ClientId);
+                    }
+                }
+            );
+
+            await sync1.play();
+            await assertActionOccurred(
+                [testMediaPlayer1, testMediaPlayer2],
+                "play"
+            );
+
+            await waitForDelay(100);
+
+            await sync2.pause();
+            await assertActionOccurred(
+                [testMediaPlayer1, testMediaPlayer2],
+                "pause"
+            );
+
+            assert(isSynced(testMediaPlayer1, testMediaPlayer2, 0.1));
+            assert(playOrPauseEventCount == 2);
             dispose();
         });
 

@@ -42,6 +42,7 @@ export interface CoordinationWaitPoint {
 
 export interface ExtendedMediaSessionActionDetails {
     action: ExtendedMediaSessionAction;
+    clientId: string;
     fastSeek?: boolean | null;
     seekOffset?: number | null;
     seekTime?: number | null;
@@ -49,4 +50,8 @@ export interface ExtendedMediaSessionActionDetails {
     suspension?: MediaSessionCoordinatorSuspension | null;
     data?: object | null;
     blocked?: ExtendedMediaSessionAction | null;
+}
+
+export interface ExtendedMediaSessionActionHandler {
+    (details: ExtendedMediaSessionActionDetails): void;
 }

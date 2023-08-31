@@ -36,6 +36,7 @@ import {
     IPlaybackTrackData,
 } from "./GroupPlaybackTrackData";
 import { TelemetryEvents } from "./consts";
+import { waitUntilConnected } from "@microsoft/live-share/bin/internals";
 
 /**
  * @hidden
@@ -149,7 +150,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 this._logger.sendTelemetryEvent(
                     TelemetryEvents.GroupCoordinator.TrackChanged
                 );
-                this.emitSetTrack(evt.metadata!);
+                this.emitSetTrack(evt.clientId, evt.metadata!);
             } else {
                 this._logger.sendTelemetryEvent(
                     TelemetryEvents.GroupCoordinator.TrackChangeDelayed
@@ -168,6 +169,7 @@ export class GroupCoordinatorState extends EventEmitter {
                     this.emitTriggerAction({
                         action: "datachange",
                         data: evt.data,
+                        clientId: evt.clientId,
                     });
                 } else {
                     this._logger.sendTelemetryEvent(
@@ -196,6 +198,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "play":
                             this.emitTriggerAction({
                                 action: "play",
+                                clientId: evt.clientId,
                                 seekTime: evt.seekTime,
                             });
                             break;
@@ -203,6 +206,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "pause":
                             this.emitTriggerAction({
                                 action: "pause",
+                                clientId: evt.clientId,
                                 seekTime: evt.seekTime,
                             });
                             break;
@@ -210,6 +214,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "seekto":
                             this.emitTriggerAction({
                                 action: "seekto",
+                                clientId: evt.clientId,
                                 seekTime: evt.seekTime,
                             });
                             break;
@@ -522,7 +527,10 @@ export class GroupCoordinatorState extends EventEmitter {
                 this._logger.sendTelemetryEvent(
                     TelemetryEvents.GroupCoordinator.TrackOutOfSync
                 );
-                this.emitSetTrack(this.playbackTrack.metadata!);
+                this.emitSetTrack(
+                    this.playbackTrack.current.clientId,
+                    this.playbackTrack.metadata!
+                );
                 return;
             }
 
@@ -560,6 +568,7 @@ export class GroupCoordinatorState extends EventEmitter {
                     );
                     await this.emitTriggerAction({
                         action: "catchup",
+                        clientId: await waitUntilConnected(this._runtime),
                         seekTime: target,
                     });
                 }
@@ -576,10 +585,16 @@ export class GroupCoordinatorState extends EventEmitter {
                     );
                     switch (this.transportState.playbackState) {
                         case "playing":
-                            await this.emitTriggerAction({ action: "play" });
+                            await this.emitTriggerAction({
+                                action: "play",
+                                clientId: this.transportState.current.clientId,
+                            });
                             break;
                         case "paused":
-                            await this.emitTriggerAction({ action: "pause" });
+                            await this.emitTriggerAction({
+                                action: "pause",
+                                clientId: this.transportState.current.clientId,
+                            });
                             break;
                     }
                 }
@@ -594,6 +609,7 @@ export class GroupCoordinatorState extends EventEmitter {
                     );
                     await this.emitTriggerAction({
                         action: "datachange",
+                        clientId: this.playbackTrackData.current.clientId,
                         data: this.playbackTrackData.data,
                     });
                 }
@@ -601,12 +617,19 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
-    private emitSetTrack(metadata: ExtendedMediaMetadata): void {
+    private emitSetTrack(
+        clientId: string,
+        metadata: ExtendedMediaMetadata
+    ): void {
         // Reset tracking states
         this._waitPoint = undefined;
 
         // Trigger settrack action
-        this.emitTriggerAction({ action: "settrack", metadata: metadata });
+        this.emitTriggerAction({
+            action: "settrack",
+            clientId,
+            metadata,
+        });
     }
 
     private emitTriggerAction(

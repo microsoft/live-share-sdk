@@ -33,7 +33,7 @@ export class RepeatedActionThrottler extends MediaSessionActionThrottler {
     }
 
     public throttled(
-        details: ExtendedMediaSessionActionDetails,
+        details: MediaSessionActionDetails | ExtendedMediaSessionActionDetails,
         handler?: MediaSessionActionHandler
     ): void {
         if (handler) {
@@ -63,7 +63,9 @@ export class RepeatedActionThrottler extends MediaSessionActionThrottler {
         }
     }
 
-    private getChangeKey(details: ExtendedMediaSessionActionDetails): string {
+    private getChangeKey(
+        details: MediaSessionActionDetails | ExtendedMediaSessionActionDetails
+    ): string {
         switch (details.action) {
             case "seekto":
                 return `seekto:${details.seekTime}`;

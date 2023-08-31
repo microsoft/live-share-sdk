@@ -2,7 +2,11 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the Microsoft Live Share SDK License.
  */
-import { LiveTelemetryLogger, ILiveEvent } from "@microsoft/live-share";
+import {
+    LiveTelemetryLogger,
+    ILiveEvent,
+    IRuntimeSignaler,
+} from "@microsoft/live-share";
 import EventEmitter from "events";
 import {
     ExtendedMediaSessionAction,
@@ -17,6 +21,7 @@ import { VolumeManager } from "./VolumeManager";
 import { LiveMediaSession } from "./LiveMediaSession";
 import { IMediaPlayer } from "./IMediaPlayer";
 import { TelemetryEvents } from "./internals";
+import { waitUntilConnected } from "@microsoft/live-share/bin/internals";
 
 /**
  * Event data returned by `MediaPlayerSynchronizer` object.
@@ -76,6 +81,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private _logger: LiveTelemetryLogger;
     private _player: IMediaPlayer;
     private _mediaSession: LiveMediaSession;
+    private _runtime: IRuntimeSignaler;
     private _volumeManager: VolumeManager;
     private _onEnd?: () => void;
     private _onPlayerEvent: EventListener;
@@ -94,11 +100,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     constructor(
         player: IMediaPlayer,
         mediaSession: LiveMediaSession,
+        runtime: IRuntimeSignaler,
         onEnd: () => void
     ) {
         super();
         this._player = player;
         this._mediaSession = mediaSession;
+        this._runtime = runtime;
         this._logger = mediaSession.logger;
         this._volumeManager = new VolumeManager(player);
         this._onEnd = onEnd;
@@ -513,7 +521,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         );
         suspension.end(seekTo);
 
-        this.dispatchUserAction({ action: "seekto", seekTime: seekTo });
+        waitUntilConnected(this._runtime).then((clientId: string) => {
+            this.dispatchUserAction({
+                action: "seekto",
+                clientId,
+                seekTime: seekTo,
+            });
+        });
     }
 
     /**
@@ -532,7 +546,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this._expectedPlaybackState = "playing";
         await this._mediaSession.coordinator.play();
 
-        this.dispatchUserAction({ action: "play" });
+        this.dispatchUserAction({
+            action: "play",
+            clientId: await waitUntilConnected(this._runtime),
+        });
     }
 
     /**
@@ -551,7 +568,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this._expectedPlaybackState = "paused";
         await this._mediaSession.coordinator.pause();
 
-        this.dispatchUserAction({ action: "pause" });
+        this.dispatchUserAction({
+            action: "pause",
+            clientId: await waitUntilConnected(this._runtime),
+        });
     }
 
     /**
@@ -576,7 +596,11 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         );
         await this._mediaSession.coordinator.seekTo(time);
 
-        this.dispatchUserAction({ action: "seekto", seekTime: time });
+        this.dispatchUserAction({
+            action: "seekto",
+            clientId: await waitUntilConnected(this._runtime),
+            seekTime: time,
+        });
     }
 
     /**
@@ -597,7 +621,11 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         );
         await this._mediaSession.coordinator.setTrack(track, waitPoints);
 
-        this.dispatchUserAction({ action: "settrack", metadata: track });
+        this.dispatchUserAction({
+            action: "settrack",
+            clientId: await waitUntilConnected(this._runtime),
+            metadata: track,
+        });
     }
 
     /**
@@ -616,9 +644,14 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this._trackData = data;
         await this._mediaSession.coordinator.setTrackData(data);
 
-        this.dispatchUserAction({ action: "datachange", data: data });
+        this.dispatchUserAction({
+            action: "datachange",
+            clientId: await waitUntilConnected(this._runtime),
+            data: data,
+        });
     }
 
+    // TODO: what is delay useful for? we do not use, delete?
     private dispatchGroupAction(
         details: ExtendedMediaSessionActionDetails,
         delay = false,
@@ -630,7 +663,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     this.emit(MediaPlayerSynchronizerEvents.groupaction, {
                         type: MediaPlayerSynchronizerEvents.groupaction,
                         details: details,
-                        playerError: error,
+                        error,
                     }),
                 50
             );
@@ -643,6 +676,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         }
     }
 
+    // TODO: what is delay useful for? we do not use, delete?
     private dispatchUserAction(
         details: ExtendedMediaSessionActionDetails,
         delay = false

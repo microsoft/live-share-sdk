@@ -29,6 +29,7 @@ import {
 } from "../MediaSessionExtensions";
 import {
     IMediaPlayerSynchronizerEvent,
+    MediaPlayerSynchronizer,
     MediaPlayerSynchronizerEvents,
 } from "../MediaPlayerSynchronizer";
 
@@ -118,55 +119,21 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize();
             await object2.initialize();
+            const expectedEventOrder = [
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "pause",
+                    clientId: await object2.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
-
-            await sync1.play();
-            await assertActionOccurred(
-                [testMediaPlayer1, testMediaPlayer2],
-                "play"
-            );
-
-            await waitForDelay(100);
-
-            await sync2.pause();
-            await assertActionOccurred(
-                [testMediaPlayer1, testMediaPlayer2],
-                "pause"
-            );
-
-            assert(isSynced(testMediaPlayer1, testMediaPlayer2, 0.1));
-            dispose();
-        });
-
-        it("should emit group actions with clientId who sent the event", async () => {
-            const { object1, object2, dispose } = await getObjects(
-                getTestObjectProvider
-            );
-            const testMediaPlayer1 = new TestMediaPlayer();
-            const testMediaPlayer2 = new TestMediaPlayer();
-            await object1.initialize();
-            await object2.initialize();
-            const object1ClientId = await object1.clientId();
-            const object2ClientId = await object2.clientId();
-            const sync1 = object1.synchronize(testMediaPlayer1);
-            const sync2 = object2.synchronize(testMediaPlayer2);
-            let playOrPauseEventCount = 0;
-
-            sync2.addEventListener(
-                MediaPlayerSynchronizerEvents.groupaction,
-                (evt: IMediaPlayerSynchronizerEvent) => {
-                    const details = evt.details;
-                    assert(evt.error === undefined);
-
-                    if (details.action === "play") {
-                        playOrPauseEventCount += 1;
-                        assert(details.clientId === object1ClientId);
-                    } else if (details.action === "pause") {
-                        playOrPauseEventCount += 1;
-                        assert(details.clientId === object2ClientId);
-                    }
-                }
+            const eventAssertPromise = assertExpectedEvents(
+                sync2,
+                expectedEventOrder
             );
 
             await sync1.play();
@@ -184,7 +151,7 @@ describeNoCompat(
             );
 
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 0.1));
-            assert(playOrPauseEventCount == 2);
+            await eventAssertPromise;
             dispose();
         });
 
@@ -196,8 +163,26 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize();
             await object2.initialize();
+            const expectedEventOrder = [
+                {
+                    action: "seekto",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "pause",
+                    clientId: await object2.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
+            const eventAssertPromise = assertExpectedEvents(
+                sync2,
+                expectedEventOrder
+            );
 
             await sync1.seekTo(2);
 
@@ -215,6 +200,7 @@ describeNoCompat(
             );
 
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 2.1));
+            await eventAssertPromise;
             dispose();
         });
 
@@ -226,8 +212,26 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize();
             await object2.initialize();
+            const expectedEventOrder = [
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "seekto",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "pause",
+                    clientId: await object2.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
+            const eventAssertPromise = assertExpectedEvents(
+                sync2,
+                expectedEventOrder
+            );
 
             await sync1.play();
             await assertActionOccurred(
@@ -247,6 +251,7 @@ describeNoCompat(
             );
 
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 2.1));
+            await eventAssertPromise;
             dispose();
         });
 
@@ -325,8 +330,22 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize([UserMeetingRole.organizer]);
             await object2.initialize([UserMeetingRole.organizer]);
+            const expectedEventOrder = [
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "settrack",
+                    clientId: await object1.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
+            const eventAssertPromise = assertExpectedEvents(
+                sync2,
+                expectedEventOrder
+            );
 
             await sync1.play();
             await assertActionOccurred(
@@ -351,6 +370,7 @@ describeNoCompat(
                 [testMediaPlayer1, testMediaPlayer2],
                 "load"
             );
+            await eventAssertPromise;
             dispose();
         });
 
@@ -362,8 +382,33 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize([UserMeetingRole.organizer]);
             await object2.initialize([UserMeetingRole.organizer]);
+            const object1ExpectedEventOrder = [
+                {
+                    action: "seekto",
+                    clientId: await object1.clientId(),
+                },
+            ];
+            const object2ExpectedEventOrder = [
+                {
+                    action: "play",
+                    clientId: await object2.clientId(),
+                },
+                {
+                    action: "seekto",
+                    clientId: await object1.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
+
+            const eventAssertPromise1 = assertExpectedEvents(
+                sync1,
+                object1ExpectedEventOrder
+            );
+            const eventAssertPromise2 = assertExpectedEvents(
+                sync2,
+                object2ExpectedEventOrder
+            );
 
             await sync1.beginSeek();
             await sync2.play();
@@ -380,6 +425,8 @@ describeNoCompat(
             await waitForDelay(1);
 
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 0.4));
+            await eventAssertPromise1;
+            await eventAssertPromise2;
             dispose();
         });
 
@@ -389,8 +436,21 @@ describeNoCompat(
             );
             const testMediaPlayer1 = new TestMediaPlayer();
             await object1.initialize([UserMeetingRole.organizer]);
+            const expectedEventOrder = [
+                {
+                    action: "settrack",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
-
+            const eventAssertPromise = assertExpectedEvents(
+                sync1,
+                expectedEventOrder
+            );
             const metadata: ExtendedMediaMetadata = {
                 trackIdentifier: "testTrackId",
                 liveStream: false,
@@ -404,6 +464,7 @@ describeNoCompat(
 
             await sync1.play();
             await assertActionOccurred([testMediaPlayer1], "play");
+            await eventAssertPromise;
 
             dispose();
         });
@@ -735,4 +796,30 @@ async function assertActionOccurred(
     actions.forEach((action) => {
         assert(action === expectedAction);
     });
+}
+
+async function assertExpectedEvents(
+    synchronizer: MediaPlayerSynchronizer,
+    expectedEventOrder: { action: string; clientId: string }[]
+): Promise<void> {
+    let deferred = new Deferred();
+    let eventCount = 0;
+    synchronizer.addEventListener(
+        MediaPlayerSynchronizerEvents.groupaction,
+        (evt: IMediaPlayerSynchronizerEvent) => {
+            const details = evt.details;
+            assert(evt.error === undefined);
+            assert(details.action === expectedEventOrder[eventCount].action);
+            assert(
+                details.clientId === expectedEventOrder[eventCount].clientId
+            );
+            eventCount += 1;
+
+            if (eventCount === expectedEventOrder.length) {
+                deferred.resolve();
+            }
+        }
+    );
+
+    return deferred.promise;
 }

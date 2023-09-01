@@ -360,7 +360,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                         }
                     }
 
-                    this.dispatchGroupAction(details, false, error);
+                    this.dispatchGroupAction(details, error);
                 }
             );
         }
@@ -654,48 +654,22 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     // TODO: what is delay useful for? we do not use, delete?
     private dispatchGroupAction(
         details: ExtendedMediaSessionActionDetails,
-        delay = false,
         error: Error | undefined
     ): void {
-        if (delay) {
-            setTimeout(
-                () =>
-                    this.emit(MediaPlayerSynchronizerEvents.groupaction, {
-                        type: MediaPlayerSynchronizerEvents.groupaction,
-                        details: details,
-                        error,
-                    }),
-                50
-            );
-        } else {
-            this.emit(MediaPlayerSynchronizerEvents.groupaction, {
-                type: MediaPlayerSynchronizerEvents.groupaction,
-                details: details,
-                error,
-            });
-        }
+        this.emit(MediaPlayerSynchronizerEvents.groupaction, {
+            type: MediaPlayerSynchronizerEvents.groupaction,
+            details: details,
+            error,
+        });
     }
 
-    // TODO: what is delay useful for? we do not use, delete?
     private dispatchUserAction(
-        details: ExtendedMediaSessionActionDetails,
-        delay = false
+        details: ExtendedMediaSessionActionDetails
     ): void {
-        if (delay) {
-            setTimeout(
-                () =>
-                    this.emit(MediaPlayerSynchronizerEvents.useraction, {
-                        type: MediaPlayerSynchronizerEvents.useraction,
-                        details: details,
-                    }),
-                50
-            );
-        } else {
-            this.emit(MediaPlayerSynchronizerEvents.useraction, {
-                type: MediaPlayerSynchronizerEvents.useraction,
-                details: details,
-            });
-        }
+        this.emit(MediaPlayerSynchronizerEvents.useraction, {
+            type: MediaPlayerSynchronizerEvents.useraction,
+            details: details,
+        });
     }
 
     private async catchupPlayer(time: number): Promise<void> {

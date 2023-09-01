@@ -10,7 +10,7 @@
         "clean": "npx shx rm -rf bin",
         "build": "tsc -p tsconfig.build.json",
         "test": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --timeout 10000",
-        "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
+        "test:debug": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
         "test:race": "node ./../live-share/test-for-race-conditions.js"
     },

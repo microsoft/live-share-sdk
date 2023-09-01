@@ -726,8 +726,45 @@ describeNoCompat(
 
             await object1.initialize();
             await object2.initialize();
+            const object1ExpectedEventOrder = [
+                {
+                    action: "settrack",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+            ];
+            const object2ExpectedEventOrder = [
+                {
+                    action: "settrack",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "catchup",
+                    clientId: await object2.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
-            object2.synchronize(testMediaPlayer2);
+            const sync2 = object2.synchronize(testMediaPlayer2);
+
+            const eventAssertPromise1 = assertExpectedEvents(
+                sync1,
+                object1ExpectedEventOrder
+            );
+            const eventAssertPromise2 = assertExpectedEvents(
+                sync2,
+                object2ExpectedEventOrder
+            );
 
             await sync1.setTrack(metadata);
             await assertActionOccurred(
@@ -742,6 +779,8 @@ describeNoCompat(
             }, 100);
 
             await catchupTriggered.promise;
+            await eventAssertPromise1;
+            await eventAssertPromise2;
             dispose();
         });
     }
@@ -804,19 +843,39 @@ async function assertExpectedEvents(
 ): Promise<void> {
     let deferred = new Deferred();
     let eventCount = 0;
+    let timeout;
     synchronizer.addEventListener(
         MediaPlayerSynchronizerEvents.groupaction,
         (evt: IMediaPlayerSynchronizerEvent) => {
-            const details = evt.details;
-            assert(evt.error === undefined);
-            assert(details.action === expectedEventOrder[eventCount].action);
-            assert(
-                details.clientId === expectedEventOrder[eventCount].clientId
-            );
-            eventCount += 1;
+            try {
+                const details = evt.details;
+                assert(evt.error === undefined, evt.error);
+                assert(
+                    details.action === expectedEventOrder[eventCount].action,
+                    "unexpected action"
+                );
+                assert(
+                    details.clientId ===
+                        expectedEventOrder[eventCount].clientId,
+                    "unexpected sender clientId"
+                );
+                eventCount += 1;
+            } catch (error: any) {
+                deferred.reject(
+                    new Error(
+                        `error for event: ${JSON.stringify(
+                            evt
+                        )}, eventCount ${eventCount}, ${error}`
+                    )
+                );
+            }
 
             if (eventCount === expectedEventOrder.length) {
-                deferred.resolve();
+                timeout = setTimeout(() => {
+                    deferred.resolve();
+                }, 200);
+            } else if (eventCount > expectedEventOrder.length) {
+                deferred.reject(new Error(`more events than expected, ${evt}`));
             }
         }
     );

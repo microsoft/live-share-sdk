@@ -5,6 +5,8 @@ import { isClientRolesResponse, isIClientInfo } from "./type-guards";
 
 /**
  * @hidden
+ * Temporary fix for android bug which causes IClientInfo to come back with the keys modified
+ * Delete in November 2023
  */
 export class FormatFixHostDecorator extends BaseHostDecorator {
     public async getClientInfo(

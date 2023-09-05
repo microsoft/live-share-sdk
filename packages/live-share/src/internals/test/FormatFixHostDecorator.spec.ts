@@ -12,7 +12,7 @@ class HostWithAndroidBug {
 }
 
 describe("FormatFixHostDecorator tests", function () {
-    it("should map android bug format to expected format", async () => {
+    it("should map android bug format to expected format 1", async () => {
         const hostResponse = {
             lock: "972ea631-abc8-4056-ae0e-f4dc7427c4ef",
             _loadStates: [UserMeetingRole.organizer],
@@ -34,9 +34,30 @@ describe("FormatFixHostDecorator tests", function () {
         );
     });
 
+    it("should map android bug format to expected format 2", async () => {
+        const hostResponse = {
+            sup: "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF",
+            blah: [UserMeetingRole.organizer],
+        };
+        const host = new HostWithAndroidBug(
+            hostResponse
+        ) as unknown as ILiveShareHost;
+        const hostWithMapper = new FormatFixHostDecorator(host);
+        const expectedResult = {
+            userId: "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF",
+            roles: [UserMeetingRole.organizer],
+            displayName: undefined,
+        };
+        const result = await hostWithMapper.getClientInfo("test");
+        assert(
+            JSON.stringify(result) === JSON.stringify(expectedResult),
+            `unexpected result: ${JSON.stringify(result)}`
+        );
+    });
+
     it("should not map if already expected format", async () => {
         const hostResponse = {
-            userId: "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF",
+            userId: "userId",
             roles: [UserMeetingRole.organizer],
             displayName: "displayName",
         };

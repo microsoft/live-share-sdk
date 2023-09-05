@@ -1,7 +1,7 @@
 import { UserMeetingRole, IClientInfo } from "../interfaces";
 import { BaseHostDecorator } from "./BaseHostDecorator";
 
-import { isClientRolesResponse } from "./type-guards";
+import { isClientRolesResponse, isIClientInfo } from "./type-guards";
 
 /**
  * @hidden
@@ -11,12 +11,13 @@ export class FormatFixHostDecorator extends BaseHostDecorator {
         clientId: string
     ): Promise<IClientInfo | undefined> {
         const clientInfo = await this._host.getClientInfo(clientId);
-        if (isAndroidClientInfoBugFormat(clientInfo)) {
-            return {
-                userId: clientInfo.lock,
-                roles: clientInfo._loadStates,
-                displayName: clientInfo.internalState,
-            };
+        if (isIClientInfo(clientId)) {
+            return clientInfo;
+        }
+
+        const androidBugToClientInfo = androidBugFormatToClientInfo(clientInfo);
+        if (androidBugToClientInfo) {
+            return androidBugToClientInfo;
         }
         return clientInfo;
     }
@@ -25,31 +26,41 @@ export class FormatFixHostDecorator extends BaseHostDecorator {
 /**
  * @hidden
  */
-function isAndroidClientInfoBugFormat(
-    value: any
-): value is AndroidClientInfoBugFormat {
-    return (
-        typeof value?.lock === "string" &&
-        isClientRolesResponse(value?._loadStates) &&
-        (typeof value?.internalState === "string" ||
-            value?.internalState === undefined)
-    );
+function androidBugFormatToClientInfo(value: any): IClientInfo | undefined {
+    if (value instanceof Object) {
+        let userId: string | undefined;
+        let roles: UserMeetingRole[] | undefined;
+        let displayName: string | undefined;
+        Object.keys(value)
+            .map((key) => value[key])
+            .forEach((objectValue) => {
+                if (isClientRolesResponse(objectValue)) {
+                    roles = objectValue;
+                } else if (isGuid(objectValue)) {
+                    userId = objectValue;
+                } else if (typeof objectValue === "string") {
+                    displayName = objectValue;
+                }
+            });
+
+        if (userId && roles) {
+            return {
+                userId,
+                roles,
+                displayName,
+            };
+        }
+    }
+
+    return undefined;
 }
 
-/**
- * @hidden
- */
-interface AndroidClientInfoBugFormat {
-    /**
-     * The user identifier that corresponds to the provided client identifier.
-     */
-    lock: string;
-    /**
-     * List of roles of the user.
-     */
-    _loadStates: UserMeetingRole[];
-    /**
-     * Optional. The display name for the user.
-     */
-    internalState?: string;
+function isGuid(value: any) {
+    if (typeof value === "string") {
+        let regex: RegExp =
+            /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+        return regex.test(value);
+    }
+
+    return false;
 }

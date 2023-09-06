@@ -151,6 +151,76 @@ describeNoCompat(
             dispose();
         });
 
+        it("should send 'positionUpdate' event when someone joins.", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+
+            await object1.initialize();
+            // wait for next event loop, simulate existing user waiting for other people to join.
+            // otherwise joined event will fire for both users
+            await waitForDelay(1);
+
+            // create a duplicate scope/target with same event name as one declared in coordinator
+            const scope2 = new LiveEventScope(
+                object2.runtimeForTesting(),
+                object2.liveRuntimeForTesting()
+            );
+            let positionUpdateCount = 0;
+            new LiveEventTarget(scope2, "positionUpdate", (event, local) => {
+                // assert(!local, JSON.stringify(event));
+                positionUpdateCount += 1;
+            });
+
+            await object2.initialize();
+            // wait for next event loop
+            await waitForDelay(1);
+
+            // expected 2
+            // case 1: object2 joins, listens for itself, and sends a position update
+            // case 2: object2 joins, object1 listens for it, and sends a position update
+            assert(
+                positionUpdateCount == 2,
+                `positionUpdate event not sent, ${positionUpdateCount}`
+            );
+            dispose();
+        });
+
+        it("should not send 'positionUpdate' event if object has canSendPositionUpdates set to false", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+
+            await object1.initialize();
+            // wait for next event loop, simulate existing user waiting for other people to join.
+            // otherwise joined event will fire for both users
+            await waitForDelay(1);
+
+            // create a duplicate scope/target with same event name as one declared in coordinator
+            const scope2 = new LiveEventScope(
+                object2.runtimeForTesting(),
+                object2.liveRuntimeForTesting()
+            );
+            let positionUpdateCount = 0;
+            new LiveEventTarget(scope2, "positionUpdate", (event, local) => {
+                // assert(!local, JSON.stringify(event));
+                positionUpdateCount += 1;
+            });
+
+            object2.coordinator.canSendPositionUpdates = false;
+            await object2.initialize();
+            // wait for next event loop
+            await waitForDelay(1);
+
+            // expected 1: object2 joins, object1 listens for it, and sends a position update
+            // object2 should not send a position update for its own joined event
+            assert(
+                positionUpdateCount == 1,
+                `positionUpdate event not sent, ${positionUpdateCount}`
+            );
+            dispose();
+        });
+
         it("should send 'positionUpdate' event regularly.", async () => {
             const { object1, object2, dispose } = await getObjects(
                 getTestObjectProvider

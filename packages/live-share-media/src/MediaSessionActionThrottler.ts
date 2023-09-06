@@ -3,14 +3,17 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ExtendedMediaSessionActionDetails } from "./MediaSessionExtensions";
+import {
+    ExtendedMediaSessionActionDetails,
+    ExtendedMediaSessionActionHandler,
+} from "./MediaSessionExtensions";
 
 /**
  * Base class for action throttlers.
  */
 export abstract class MediaSessionActionThrottler {
     public abstract throttled(
-        details: ExtendedMediaSessionActionDetails,
-        handler?: MediaSessionActionHandler
+        details: MediaSessionActionDetails | ExtendedMediaSessionActionDetails,
+        handler?: MediaSessionActionHandler | ExtendedMediaSessionActionHandler
     ): void;
 }

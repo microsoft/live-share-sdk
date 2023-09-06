@@ -27,6 +27,11 @@ import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionDetails,
 } from "../MediaSessionExtensions";
+import {
+    IMediaPlayerSynchronizerEvent,
+    MediaPlayerSynchronizer,
+    MediaPlayerSynchronizerEvents,
+} from "../MediaPlayerSynchronizer";
 
 async function getObjects(
     getTestObjectProvider,
@@ -114,8 +119,22 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize();
             await object2.initialize();
+            const expectedEventOrder = [
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "pause",
+                    clientId: await object2.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
+            const eventAssertPromise = assertExpectedEvents(
+                sync2,
+                expectedEventOrder
+            );
 
             await sync1.play();
             await assertActionOccurred(
@@ -131,9 +150,8 @@ describeNoCompat(
                 "pause"
             );
 
-            console.log(testMediaPlayer1);
-            console.log(testMediaPlayer2);
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 0.1));
+            await eventAssertPromise;
             dispose();
         });
 
@@ -145,8 +163,26 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize();
             await object2.initialize();
+            const expectedEventOrder = [
+                {
+                    action: "seekto",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "pause",
+                    clientId: await object2.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
+            const eventAssertPromise = assertExpectedEvents(
+                sync2,
+                expectedEventOrder
+            );
 
             await sync1.seekTo(2);
 
@@ -164,6 +200,7 @@ describeNoCompat(
             );
 
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 2.1));
+            await eventAssertPromise;
             dispose();
         });
 
@@ -175,8 +212,26 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize();
             await object2.initialize();
+            const expectedEventOrder = [
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "seekto",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "pause",
+                    clientId: await object2.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
+            const eventAssertPromise = assertExpectedEvents(
+                sync2,
+                expectedEventOrder
+            );
 
             await sync1.play();
             await assertActionOccurred(
@@ -196,6 +251,7 @@ describeNoCompat(
             );
 
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 2.1));
+            await eventAssertPromise;
             dispose();
         });
 
@@ -274,8 +330,22 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize([UserMeetingRole.organizer]);
             await object2.initialize([UserMeetingRole.organizer]);
+            const expectedEventOrder = [
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "settrack",
+                    clientId: await object1.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
+            const eventAssertPromise = assertExpectedEvents(
+                sync2,
+                expectedEventOrder
+            );
 
             await sync1.play();
             await assertActionOccurred(
@@ -300,6 +370,7 @@ describeNoCompat(
                 [testMediaPlayer1, testMediaPlayer2],
                 "load"
             );
+            await eventAssertPromise;
             dispose();
         });
 
@@ -311,8 +382,33 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize([UserMeetingRole.organizer]);
             await object2.initialize([UserMeetingRole.organizer]);
+            const object1ExpectedEventOrder = [
+                {
+                    action: "seekto",
+                    clientId: await object1.clientId(),
+                },
+            ];
+            const object2ExpectedEventOrder = [
+                {
+                    action: "play",
+                    clientId: await object2.clientId(),
+                },
+                {
+                    action: "seekto",
+                    clientId: await object1.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
             const sync2 = object2.synchronize(testMediaPlayer2);
+
+            const eventAssertPromise1 = assertExpectedEvents(
+                sync1,
+                object1ExpectedEventOrder
+            );
+            const eventAssertPromise2 = assertExpectedEvents(
+                sync2,
+                object2ExpectedEventOrder
+            );
 
             await sync1.beginSeek();
             await sync2.play();
@@ -329,6 +425,8 @@ describeNoCompat(
             await waitForDelay(1);
 
             assert(isSynced(testMediaPlayer1, testMediaPlayer2, 0.4));
+            await eventAssertPromise1;
+            await eventAssertPromise2;
             dispose();
         });
 
@@ -338,8 +436,21 @@ describeNoCompat(
             );
             const testMediaPlayer1 = new TestMediaPlayer();
             await object1.initialize([UserMeetingRole.organizer]);
+            const expectedEventOrder = [
+                {
+                    action: "settrack",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
-
+            const eventAssertPromise = assertExpectedEvents(
+                sync1,
+                expectedEventOrder
+            );
             const metadata: ExtendedMediaMetadata = {
                 trackIdentifier: "testTrackId",
                 liveStream: false,
@@ -353,6 +464,7 @@ describeNoCompat(
 
             await sync1.play();
             await assertActionOccurred([testMediaPlayer1], "play");
+            await eventAssertPromise;
 
             dispose();
         });
@@ -614,8 +726,45 @@ describeNoCompat(
 
             await object1.initialize();
             await object2.initialize();
+            const object1ExpectedEventOrder = [
+                {
+                    action: "settrack",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+            ];
+            const object2ExpectedEventOrder = [
+                {
+                    action: "settrack",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+                {
+                    action: "catchup",
+                    clientId: await object2.clientId(),
+                },
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                },
+            ];
             const sync1 = object1.synchronize(testMediaPlayer1);
-            object2.synchronize(testMediaPlayer2);
+            const sync2 = object2.synchronize(testMediaPlayer2);
+
+            const eventAssertPromise1 = assertExpectedEvents(
+                sync1,
+                object1ExpectedEventOrder
+            );
+            const eventAssertPromise2 = assertExpectedEvents(
+                sync2,
+                object2ExpectedEventOrder
+            );
 
             await sync1.setTrack(metadata);
             await assertActionOccurred(
@@ -630,6 +779,8 @@ describeNoCompat(
             }, 100);
 
             await catchupTriggered.promise;
+            await eventAssertPromise1;
+            await eventAssertPromise2;
             dispose();
         });
     }
@@ -684,4 +835,50 @@ async function assertActionOccurred(
     actions.forEach((action) => {
         assert(action === expectedAction);
     });
+}
+
+async function assertExpectedEvents(
+    synchronizer: MediaPlayerSynchronizer,
+    expectedEventOrder: { action: string; clientId: string }[]
+): Promise<void> {
+    let deferred = new Deferred();
+    let eventCount = 0;
+    let timeout;
+    synchronizer.addEventListener(
+        MediaPlayerSynchronizerEvents.groupaction,
+        (evt: IMediaPlayerSynchronizerEvent) => {
+            try {
+                const details = evt.details;
+                assert(evt.error === undefined, evt.error);
+                assert(
+                    details.action === expectedEventOrder[eventCount].action,
+                    "unexpected action"
+                );
+                assert(
+                    details.clientId ===
+                        expectedEventOrder[eventCount].clientId,
+                    "unexpected sender clientId"
+                );
+                eventCount += 1;
+            } catch (error: any) {
+                deferred.reject(
+                    new Error(
+                        `error for event: ${JSON.stringify(
+                            evt
+                        )}, eventCount ${eventCount}, ${error}`
+                    )
+                );
+            }
+
+            if (eventCount === expectedEventOrder.length) {
+                timeout = setTimeout(() => {
+                    deferred.resolve();
+                }, 200);
+            } else if (eventCount > expectedEventOrder.length) {
+                deferred.reject(new Error(`more events than expected, ${evt}`));
+            }
+        }
+    );
+
+    return deferred.promise;
 }

@@ -3,11 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    ILiveEvent,
-    LiveShareRuntime,
-    LiveShareClient,
-} from "@microsoft/live-share";
+import { ILiveEvent, LiveShareRuntime } from "@microsoft/live-share";
 import EventEmitter from "events";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
@@ -140,6 +136,7 @@ export class GroupTransportState extends EventEmitter {
             this.emit(GroupTransportStateEvents.transportStateChange, {
                 type: GroupTransportStateEvents.transportStateChange,
                 action: "seekto",
+                clientId: state.clientId,
                 seekTime: state.startPosition,
             });
         } else if (state.playbackState == "playing") {
@@ -149,12 +146,14 @@ export class GroupTransportState extends EventEmitter {
             this.emit(GroupTransportStateEvents.transportStateChange, {
                 type: GroupTransportStateEvents.transportStateChange,
                 action: "play",
+                clientId: state.clientId,
                 seekTime: projectedPosition,
             });
         } else {
             this.emit(GroupTransportStateEvents.transportStateChange, {
                 type: GroupTransportStateEvents.transportStateChange,
                 action: "pause",
+                clientId: state.clientId,
                 seekTime: state.startPosition,
             });
         }

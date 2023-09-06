@@ -147,6 +147,7 @@ export class GroupPlaybackTrack extends EventEmitter {
         // Notify listeners
         this.emit(GroupPlaybackTrackEvents.trackChange, {
             name: GroupPlaybackTrackEvents.trackChange,
+            clientId: track.clientId,
             metadata: track.metadata,
         });
 

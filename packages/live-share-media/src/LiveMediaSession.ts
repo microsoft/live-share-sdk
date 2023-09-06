@@ -16,6 +16,7 @@ import {
     MediaSessionCoordinatorEvents,
     ExtendedMediaSessionAction,
     ExtendedMediaSessionActionDetails,
+    ExtendedMediaSessionActionHandler,
 } from "./MediaSessionExtensions";
 import {
     LiveMediaSessionCoordinator,
@@ -34,8 +35,10 @@ export class LiveMediaSession extends LiveDataObject {
     private _logger?: LiveTelemetryLogger;
     private _requestPlayerStateHandler?: () => IMediaPlayerState;
     private _coordinator?: LiveMediaSessionCoordinator;
-    private readonly _actionHandlers: Map<string, MediaSessionActionHandler> =
-        new Map();
+    private readonly _actionHandlers: Map<
+        string,
+        MediaSessionActionHandler | ExtendedMediaSessionActionHandler
+    > = new Map();
     private _synchronizing?: MediaPlayerSynchronizer;
 
     // Position update timer
@@ -122,7 +125,10 @@ export class LiveMediaSession extends LiveDataObject {
      */
     public setActionHandler(
         action: ExtendedMediaSessionAction,
-        handler: MediaSessionActionHandler | null
+        handler:
+            | ExtendedMediaSessionActionHandler
+            | MediaSessionActionHandler
+            | null
     ): void {
         if (handler) {
             // add handler
@@ -177,7 +183,7 @@ export class LiveMediaSession extends LiveDataObject {
             }, 500);
         }
 
-        return new MediaPlayerSynchronizer(player, this, () => {
+        return new MediaPlayerSynchronizer(player, this, this.runtime, () => {
             this._synchronizing = undefined;
         });
     }
@@ -274,8 +280,15 @@ export class LiveMediaSession extends LiveDataObject {
                 }
 
                 // Begin suspension for wait point
-                const suspension = this.coordinator.beginSuspension(waitPoint);
-                this.dispatchAction({ action: "wait", suspension: suspension });
+                this.waitUntilConnected().then((clientId: string) => {
+                    const suspension =
+                        this.coordinator.beginSuspension(waitPoint);
+                    this.dispatchAction({
+                        action: "wait",
+                        clientId,
+                        suspension,
+                    });
+                });
             }
         }
     }

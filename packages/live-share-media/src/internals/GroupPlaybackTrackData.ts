@@ -90,6 +90,7 @@ export class GroupPlaybackTrackData extends EventEmitter {
         // Notify listeners
         this.emit(PlaybackTrackDataEvents.dataChange, {
             type: PlaybackTrackDataEvents.dataChange,
+            clientId: event.clientId,
             data: event.data,
         });
 

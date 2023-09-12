@@ -7,6 +7,7 @@ import { DataObjectFactory } from "@fluidframework/aqueduct";
 import {
     DynamicObjectRegistry,
     LiveDataObject,
+    LiveDataObjectInitializeState,
     LiveTelemetryLogger,
     UserMeetingRole,
 } from "@microsoft/live-share";
@@ -82,13 +83,6 @@ export class LiveMediaSession extends LiveDataObject {
     }
 
     /**
-     * Returns true if the object has been initialized.
-     */
-    public get isInitialized(): boolean {
-        return this.coordinator.isInitialized;
-    }
-
-    /**
      * The group coordinator for the session.
      */
     public get coordinator(): LiveMediaSessionCoordinator {
@@ -106,16 +100,32 @@ export class LiveMediaSession extends LiveDataObject {
     }
 
     /**
-     * initialize the object.
-     * @param allowedRoles Optional. List of roles allowed to group transport
-     * operations like play/pause/seek/setTrack.
-     * @returns a void promise that resolves once complete
+     * Initialize the object to begin sending/receiving group playback updates through this DDS.
+     * 
+     * @param allowedRoles Optional. List of roles allowed to group transport operations like play/pause/seek/setTrack.
+     * 
+     * @returns a void promise that resolves once complete.
+     * 
+     * @throws error when `.initialize()` has already been called for this class instance.
      */
-    public initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
+    public async initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
+        if (this.initializeState !== LiveDataObjectInitializeState.needed) {
+            throw new Error(`LiveMediaSession already started.`);
+        }
+        // Update initialize state as pending
+        this.initializeState = LiveDataObjectInitializeState.pending;
         if (allowedRoles) {
             this._allowedRoles = allowedRoles;
         }
-        return this.coordinator.initialize(allowedRoles);
+        try {
+            await this.coordinator.initialize(allowedRoles);
+        } catch (error: unknown) {
+            this.initializeState = LiveDataObjectInitializeState.needed;
+            throw error;
+        }
+
+        // Update initialize state as succeeded
+        this.initializeState = LiveDataObjectInitializeState.succeeded;
     }
 
     /**

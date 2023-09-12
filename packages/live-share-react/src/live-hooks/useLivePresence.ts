@@ -8,6 +8,7 @@ import {
     PresenceState,
     LivePresence,
     UserMeetingRole,
+    LiveDataObjectInitializeState,
 } from "@microsoft/live-share";
 import React from "react";
 import { IUseLivePresenceResults, OnUpdateLivePresenceAction } from "../types";
@@ -112,7 +113,7 @@ export function useLivePresence<TData extends object = object>(
         };
         livePresence.on("presenceChanged", onPresenceChanged);
 
-        if (!livePresence.isInitialized) {
+        if (livePresence.initializeState === LiveDataObjectInitializeState.needed) {
             livePresence.initialize(
                 isInitialDataCallback<TData>(initialData)
                     ? initialData()

@@ -344,3 +344,25 @@ export type UpdateSynchronizationState<TState> = (
  * @returns return true if the local user can send this update, or false if not.
  */
 export type GetLocalUserCanSend = (connecting: boolean) => Promise<boolean>;
+
+/**
+ * The initialization state for the `LiveDataObject` class.
+ */
+export enum LiveDataObjectInitializeState {
+    /**
+     * The default state when `.initialize()` has not been called and/or a previous call to `.initialize()` failed
+     */
+    needed = "needed",
+    /**
+     * The state when `.initialize()` has been called but has not yet succeeded
+     */
+    pending = "pending",
+    /**
+     * The state when `.initialize()` has succeeded
+     */
+    succeeded = "succeeded",
+    /**
+     * The state when `.initialize()` has a fatal error and `.initialize()` is never expected to succeed
+     */
+    fatalError = "fatalError",
+}

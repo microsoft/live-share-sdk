@@ -51,6 +51,12 @@ export abstract class LiveDataObject<
         return this._liveRuntime;
     }
 
+    /**
+     * Flag that indicates whether initialization has succeeded or not.
+     * 
+     * @remarks
+     * This field is true when {@link initializeState} is `succeeded`, or false when {@link initializeState} is any other value.
+     */
     public get isInitialized(): boolean {
         return this.initializeState === LiveDataObjectInitializeState.succeeded;
     }

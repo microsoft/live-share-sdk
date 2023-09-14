@@ -274,18 +274,17 @@ export class ContainerSynchronizer {
         local: boolean,
     ): Promise<void> {
         const handler = this._objects.get(objectId);
-        if (handler) {
-            const overwriteForLocal = await handler.updateState(
-                event,
-                event.clientId,
-                local
-            );
-            if (!overwriteForLocal) return;
-            this._objectStore.updateEventLocallyInStore.bind(this._objectStore)(objectId, {
-                ...event,
-                clientId: await this.waitUntilConnected(),
-            });
-        }
+        if (!handler) return;
+        const overwriteForLocal = await handler.updateState(
+            event,
+            event.clientId,
+            local
+        );
+        if (!overwriteForLocal) return;
+        this._objectStore.updateEventLocallyInStore.bind(this._objectStore)(objectId, {
+            ...event,
+            clientId: await this.waitUntilConnected(),
+        });
     }
 
     /**

@@ -107,10 +107,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             name: ObjectSynchronizerEvents.update,
         };
 
-        // const event = this.getLatestEventForObject(id) ?? initialEvent;
-        // event.clientId = await waitUntilConnected(runtime);
-
-        const didUpdate = this.updateEventLocallyInStore(id, initialEvent);
+        this.updateEventLocallyInStore(id, initialEvent);
     }
 
     /**

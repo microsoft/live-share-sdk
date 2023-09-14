@@ -88,7 +88,6 @@ export function useLiveState<TState = any>(
         if (liveState === undefined) return;
 
         const onStateChanged = (state: TState) => {
-            console.log(state);
             setCurrentState(state);
         };
         liveState.on("stateChanged", onStateChanged);

@@ -86,8 +86,11 @@ export class LiveShareClient {
      */
     constructor(host: ILiveShareHost, options?: ILiveShareClientOptions) {
         // Validate host passed in
-        if (!host || typeof host.getFluidTenantInfo != "function") {
-            throw new Error(`LiveShareClient: host not passed in`);
+        if (!host) {
+            throw new Error(`LiveShareClient: prop \`host\` is \`${host}\` when it is expected to be a non-optional value of type \`ILiveShareHost\`. Please ensure \`host\` is defined before initializing \`LiveShareClient\`.`);
+        }
+        if (typeof host.getFluidTenantInfo != "function") {
+            throw new Error(`LiveShareClient: \`host.getFluidTenantInfo\` is of type \`${typeof host.getFluidTenantInfo}\` when it is expected to be a type of \`function\`. For more information, review the \`ILiveShareHost\` interface.`);
         }
         this._host = host;
         // Save options

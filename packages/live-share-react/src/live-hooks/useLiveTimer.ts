@@ -8,6 +8,7 @@ import {
     LiveTimerEvents,
     UserMeetingRole,
     LiveTimer,
+    LiveDataObjectInitializeState,
 } from "@microsoft/live-share";
 import React from "react";
 import {
@@ -154,7 +155,7 @@ export function useLiveTimer(
         liveTimer.on(LiveTimerEvents.played, onDidPlay);
         liveTimer.on(LiveTimerEvents.paused, onDidPause);
         liveTimer.on(LiveTimerEvents.onTick, onDidTick);
-        if (!liveTimer.isInitialized) {
+        if (liveTimer.initializeState === LiveDataObjectInitializeState.needed) {
             // Start live event
             liveTimer.initialize(allowedRoles);
         }

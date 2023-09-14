@@ -6,7 +6,7 @@
 import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { assert } from "@fluidframework/common-utils";
 import { IEvent } from "@fluidframework/common-definitions";
-import { ILiveEvent, UserMeetingRole } from "./interfaces";
+import { ILiveEvent, LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
 import { cloneValue, TelemetryEvents } from "./internals";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
@@ -82,13 +82,6 @@ export class LiveState<TState = any> extends LiveDataObject<{
     );
 
     /**
-     * Returns true if the object has been initialized.
-     */
-    public get isInitialized(): boolean {
-        return !!this._synchronizer;
-    }
-
-    /**
      * The current state.
      */
     public get state(): TState {
@@ -96,18 +89,30 @@ export class LiveState<TState = any> extends LiveDataObject<{
     }
 
     /**
-     * Starts the object.
+     * Initialize the object to begin sending/receiving state updates through this DDS.
+     * 
      * @param initialState Initial state value
      * @param allowedRoles Optional. List of roles allowed to make state changes.
+     * 
      * @returns a void promise that resolves once complete
+     * 
+     * @throws error when `.initialize()` has already been called for this class instance.
+     * @throws fatal error when `.initialize()` has already been called for an object of same id but with a different class instance.
+     * This is most common when using dynamic objects through Fluid.
      */
     public async initialize(
         initialState: TState,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
-        if (this.isInitialized) {
+        if (this.initializeState !== LiveDataObjectInitializeState.needed) {
             throw new Error(`LiveState already started.`);
         }
+        // This error should not happen due to `initializeState` enum, but if it is somehow defined at this point, errors will occur.
+        if (this._synchronizer) {
+            throw new Error(`LiveState: _synchronizer already set, which is an unexpected error. Please report this issue at https://aka.ms/teamsliveshare/issue.`);
+        }
+        // Update initialize state as pending
+        this.initializeState = LiveDataObjectInitializeState.pending;
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
         // Set initial state
@@ -127,23 +132,29 @@ export class LiveState<TState = any> extends LiveDataObject<{
             this.runtime,
             this.liveRuntime
         );
-        await this._synchronizer.start(
-            initialState,
-            async (evt, sender, local) => {
-                // Check for state change.
-                // If it was valid, this will override the local user's previous value.
-                return await this.onReceivedStateEvent(evt, sender, local);
-            },
-            async (connecting) => {
-                if (connecting) return true;
-                // If user has eligible roles, allow the update to be sent
-                try {
-                    return await this.verifyLocalUserRoles();
-                } catch {
-                    return false;
+        try {
+            await this._synchronizer.start(
+                initialState,
+                async (evt, sender, local) => {
+                    // Check for state change.
+                    // If it was valid, this will override the local user's previous value.
+                    return await this.onReceivedStateEvent(evt, sender, local);
+                },
+                async (connecting) => {
+                    if (connecting) return true;
+                    // If user has eligible roles, allow the update to be sent
+                    try {
+                        return await this.verifyLocalUserRoles();
+                    } catch {
+                        return false;
+                    }
                 }
-            }
-        );
+            );
+        } catch (error: unknown) {
+            // Update initialize state as fatal error
+            this.initializeState = LiveDataObjectInitializeState.fatalError;
+            throw error;
+        }
         // Get the initial remote state, if there is any
         const events = this._synchronizer.getEvents();
         if (!events) return;
@@ -156,6 +167,9 @@ export class LiveState<TState = any> extends LiveDataObject<{
             );
             if (didApply) break;
         }
+
+        // Update initialize state as succeeded
+        this.initializeState = LiveDataObjectInitializeState.succeeded;
     }
 
     /**
@@ -170,12 +184,17 @@ export class LiveState<TState = any> extends LiveDataObject<{
 
     /**
      * Set a new state value
-     * @param state New state name.
-     * @returns a void promise, and will throw if the user does not have the required roles
+     * 
+     * @param state New state value.
+     * 
+     * @returns a void promise that resolves once the set event has been sent to the server.
+     * 
+     * @throws error if initialization has not yet succeeded.
+     * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async set(state: TState): Promise<void> {
-        if (!this.isInitialized) {
-            throw new Error(`LiveState not started.`);
+        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
+            throw new Error(`LiveState: not initialized prior to calling \`.set()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
         }
 
         // Broadcast state change

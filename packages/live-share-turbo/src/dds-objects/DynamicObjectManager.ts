@@ -29,7 +29,14 @@ const dynamicObjectsCollectionKey = "<<consensusRegisterCollectionKey>>";
  * If a DDS does not yet exist for a given key, a new one is created. Fluid `ConsensusRegisterCollection` is used to ensure that only one person will create the DDS.
  */
 export class DynamicObjectManager extends LiveDataObject {
+    /**
+     * ConsensusRegisterCollection instance that stores handles for a given key using FWW.
+     */
     private _dynamicObjectsCollection: DynamicObjectsCollection | undefined;
+    /**
+     * Local memory store for DDS's loaded dynamically.
+     */
+    private _dynamicObjectsMap: Map<string, Promise<FluidObject<any>>> = new Map();
 
     /**
      * The objects fluid type/name.
@@ -131,8 +138,20 @@ export class DynamicObjectManager extends LiveDataObject {
     private async internalGetDDS<
         T extends FluidObject<any> = FluidObject<any> & IFluidLoadable
     >(key: string): Promise<T | undefined> {
+        // Check if we already have the DDS / get DDS promise in memory
+        const ddsInMemory = this._dynamicObjectsMap.get(key);
+        if (ddsInMemory) {
+            // Since already in memory, we return the existing one so that we never return two different DDS class instances per key
+            return ddsInMemory as Promise<T>;
+        }
         const ddsHandle = this.dynamicObjectsCollection.read(key);
-        return ddsHandle?.get();
+        if (!ddsHandle) {
+            return undefined;
+        }
+        const getPromise = ddsHandle?.get();
+        // Cache the promise in memory for the key so that we never return two different DDS class instances per key
+        this._dynamicObjectsMap.set(key, getPromise);
+        return getPromise;
     }
 
     /**
@@ -167,6 +186,8 @@ export class DynamicObjectManager extends LiveDataObject {
         );
         // If we successfully write, return the local DDS
         if (acknowledged) {
+            // Cache the DDS in memory for the key so that we never return two different DDS class instances per key
+            this._dynamicObjectsMap.set(key, Promise.resolve(localDDS));
             return {
                 dds: localDDS,
                 created: true,

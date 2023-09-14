@@ -128,6 +128,8 @@ describeNoCompat(
             );
 
             await object1.initialize();
+            assert(object1.isInitialized, "LiveMediaSession objects not initialized");
+            assert(object1.coordinator.isInitialized, "LiveMediaSessionCoordinator objects not initialized");
             // wait for next event loop, simulate existing user waiting for other people to join.
             // otherwise joined event will fire for both users
             await waitForDelay(1);
@@ -226,9 +228,6 @@ describeNoCompat(
                 getTestObjectProvider
             );
 
-            await object1.initialize();
-            await object2.initialize();
-
             // create a duplicate scope/target with same event name as one declared in coordinator
             const scope1 = new LiveEventScope(
                 object1.runtimeForTesting(),
@@ -246,9 +245,13 @@ describeNoCompat(
                 }
             });
 
+            await object1.initialize();
+            await object2.initialize();
+
             await waitForDelay(1);
             await object2.coordinator.play();
             await done.promise;
+            assert(posUpdateCount > 1, `pos update should be > 1, instead is ${posUpdateCount}`);
 
             dispose();
         });

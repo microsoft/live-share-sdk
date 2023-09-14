@@ -5,7 +5,7 @@
 
 import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
-import { IClientTimestamp, ILiveEvent, UserMeetingRole } from "./interfaces";
+import { IClientTimestamp, ILiveEvent, LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
 import { LiveEvent } from "./LiveEvent";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
@@ -122,13 +122,6 @@ export class LiveTimer extends LiveDataObject<{
     );
 
     /**
-     * Returns true if the object has been initialized.
-     */
-    public get isInitialized(): boolean {
-        return !!this._synchronizer;
-    }
-
-    /**
      * Tick rate for timer in milliseconds. The default tick rate is 20 milliseconds
      *
      * @remarks
@@ -148,14 +141,28 @@ export class LiveTimer extends LiveDataObject<{
     }
 
     /**
-     * Initializes the object and starts listening for remote changes
+     * Initialize the object to begin sending/receiving timer updates through this DDS.
+     * 
      * @param allowedRoles Optional. List of roles allowed to make state changes.
-     * @returns a void promise
+     * 
+     * @returns a void promise that resolves once complete.
+     * 
+     * @throws error when `.initialize()` has already been called for this class instance.
+     * @throws fatal error when `.initialize()` has already been called for an object of same id but with a different class instance.
+     * This is most common when using dynamic objects through Fluid.
      */
     public async initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
-        if (this.isInitialized) {
+        if (this.initializeState !== LiveDataObjectInitializeState.needed) {
             throw new Error(`LiveTimer already started.`);
         }
+        // This error should not happen due to `initializeState` enum, but if it is somehow defined at this point, errors will occur.
+        if (this._synchronizer) {
+            throw new Error(
+                `LiveTimer: _synchronizer already set, which is an unexpected error. Please report this issue at https://aka.ms/teamsliveshare/issue.`
+            );
+        }
+        // Update initialize state as pending
+        this.initializeState = LiveDataObjectInitializeState.pending;
 
         // Save off allowed roles
         this._allowedRoles = allowedRoles || [];
@@ -166,23 +173,32 @@ export class LiveTimer extends LiveDataObject<{
             this.runtime,
             this.liveRuntime
         );
-        await this._synchronizer.start(
-            this._currentConfig.data,
-            async (state, sender) => {
-                // Check for state change.
-                // If it was valid, this will override the local user's previous value.
-                return await this.remoteConfigReceived(state, sender);
-            },
-            async (connecting) => {
-                if (connecting) return true;
-                // If user has eligible roles, allow the update to be sent
-                try {
-                    return await this.verifyLocalUserRoles();
-                } catch {
-                    return false;
+        try {
+            await this._synchronizer.start(
+                this._currentConfig.data,
+                async (state, sender) => {
+                    // Check for state change.
+                    // If it was valid, this will override the local user's previous value.
+                    return await this.remoteConfigReceived(state, sender);
+                },
+                async (connecting) => {
+                    if (connecting) return true;
+                    // If user has eligible roles, allow the update to be sent
+                    try {
+                        return await this.verifyLocalUserRoles();
+                    } catch {
+                        return false;
+                    }
                 }
-            }
-        );
+            );
+        } catch (error: unknown) {
+            // Update initialize state as fatal error
+            this.initializeState = LiveDataObjectInitializeState.fatalError;
+            throw error;
+        }
+
+        // Update initialize state as succeeded
+        this.initializeState = LiveDataObjectInitializeState.succeeded;
     }
 
     /**
@@ -200,12 +216,17 @@ export class LiveTimer extends LiveDataObject<{
      *
      * @remarks
      * Starting an already started timer will restart the timer with a new duration.
+     * 
      * @param duration in Milliseconds
-     * @returns a void promise, and will throw if the user does not have the required roles
+     * 
+     * @returns a void promise that resolves once the start event has been sent to the server
+     * 
+     * @throws error if initialization has not yet succeeded.
+     * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async start(duration: number): Promise<void> {
-        if (!this.isInitialized) {
-            throw new Error(`LiveTimer not started.`);
+        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
+            throw new Error(`LiveTimer: not initialized prior to calling \`.start()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
         }
 
         await this.playInternal(duration, 0);
@@ -213,14 +234,18 @@ export class LiveTimer extends LiveDataObject<{
 
     /**
      * Resumes the timer.
+     * 
      * @remarks
      * Playing an already playing timer does nothing.
      *
-     * @returns a void promise, and will throw if the user does not have the required roles
+     * @returns a void promise that resolves once the play event has been sent to the server
+     * 
+     * @throws error if initialization has not yet succeeded.
+     * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async play(): Promise<void> {
-        if (!this.isInitialized) {
-            throw new Error(`LiveTimer not started.`);
+        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
+            throw new Error(`LiveTimer: not initialized prior to calling \`.play()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
         }
 
         if (
@@ -260,11 +285,14 @@ export class LiveTimer extends LiveDataObject<{
      * @remarks
      * Pausing an already paused timer does nothing.
      *
-     * @returns a void promise, and will throw if the user does not have the required roles
+     * @returns a void promise that resolves once the pause event has been sent to the server
+     * 
+     * @throws error if initialization has not yet succeeded.
+     * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async pause(): Promise<void> {
-        if (!this.isInitialized) {
-            throw new Error(`LiveTimer not started.`);
+        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
+            throw new Error(`LiveTimer: not initialized prior to calling \`.pause()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
         }
 
         if (this._currentConfig.data.running) {

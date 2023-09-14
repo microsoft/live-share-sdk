@@ -5,7 +5,7 @@ import {
 } from "@fluidframework/aqueduct";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { assert } from "@fluidframework/common-utils";
-import { UserMeetingRole } from "./interfaces";
+import { LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
 import { waitUntilConnected } from "./internals";
 
 /**
@@ -18,6 +18,9 @@ export abstract class LiveDataObject<
      * @hidden
      */
     public static LiveEnabled = true;
+
+    
+    private _initializeState: LiveDataObjectInitializeState = LiveDataObjectInitializeState.needed;
 
     /**
      * @hidden
@@ -41,6 +44,30 @@ export abstract class LiveDataObject<
             "LiveShareRuntime not initialized. Ensure your Fluid `ContainerSchema` was first wrapped inside of `getLiveShareSchema`, or use `.joinContainer()` in `LiveShareClient`."
         );
         return this._liveRuntime;
+    }
+
+    /**
+     * Flag that indicates whether initialization has succeeded or not.
+     * 
+     * @remarks
+     * This field is true when {@link initializeState} is `succeeded`, or false when {@link initializeState} is any other value.
+     */
+    public get isInitialized(): boolean {
+        return this.initializeState === LiveDataObjectInitializeState.succeeded;
+    }
+
+    /**
+     * The initialization status of the data object.
+     * 
+     * @remarks
+     * Used to know whether it is safe to call `.initialize()`
+     */
+    public get initializeState(): LiveDataObjectInitializeState {
+        return this._initializeState;
+    }
+
+    protected set initializeState(value: LiveDataObjectInitializeState) {
+        this._initializeState = value;
     }
 
     public constructor(props: IDataObjectProps<I>) {

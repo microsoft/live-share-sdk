@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { UserMeetingRole } from "@microsoft/live-share";
+import { LiveDataObjectInitializeState, UserMeetingRole } from "@microsoft/live-share";
 import React from "react";
 import {
     CoordinationWaitPoint,
@@ -211,7 +211,7 @@ export function useMediaSynchronizer(
             synchronizer.viewOnly = viewOnly;
         }
 
-        if (!mediaSession.isInitialized) {
+        if (mediaSession.initializeState === LiveDataObjectInitializeState.needed) {
             // Start synchronizing the media session
             mediaSession.initialize(allowedRoles ?? []);
         } else if (initialTrack) {

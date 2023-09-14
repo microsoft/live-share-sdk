@@ -38,6 +38,7 @@ import {
     LiveDataObject,
     LiveTelemetryLogger,
     ILiveEvent,
+    LiveDataObjectInitializeState,
 } from "@microsoft/live-share";
 import { IBrush } from "./Brush";
 import { BasicColors, IColor, lightenColor, toCssRgbaColor } from "./Colors";
@@ -880,13 +881,18 @@ export class LiveCanvas extends LiveDataObject {
 
     /**
      * Initializes the live inking session.
-     * @param inkingManager The InkingManager instance providing the drawing and events
-     * that will be synchronized across clients.
+     * 
+     * @param inkingManager The InkingManager instance providing the drawing and events that will be synchronized across clients.
+     * 
+     * @returns a void promise that resolves once complete.
      */
     async initialize(
         inkingManager: InkingManager,
         allowedRoles?: UserMeetingRole[]
     ) {
+        // Update initialize state as pending
+        this.initializeState = LiveDataObjectInitializeState.pending;
+
         this._inkingManager = inkingManager;
         if (allowedRoles) {
             this._allowedRoles = allowedRoles;
@@ -908,6 +914,9 @@ export class LiveCanvas extends LiveDataObject {
         this._liveCursorsHost.style.overflow = "hidden";
 
         inkingManager.hostElement.appendChild(this._liveCursorsHost);
+
+        // Update initialize state as succeeded
+        this.initializeState = LiveDataObjectInitializeState.succeeded;
     }
 
     /**

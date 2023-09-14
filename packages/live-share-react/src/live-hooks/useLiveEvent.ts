@@ -7,6 +7,7 @@ import {
     LiveEventEvents,
     UserMeetingRole,
     LiveEvent,
+    LiveDataObjectInitializeState,
 } from "@microsoft/live-share";
 import React from "react";
 import {
@@ -116,7 +117,7 @@ export function useLiveEvent<TEvent = any>(
             setLatestReceived(received);
         };
         liveEvent.on(LiveEventEvents.received, onEventReceived);
-        if (!liveEvent.isInitialized) {
+        if (liveEvent.initializeState === LiveDataObjectInitializeState.needed) {
             // Start live event
             liveEvent.initialize(allowedRoles);
         }

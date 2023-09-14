@@ -881,9 +881,9 @@ export class LiveCanvas extends LiveDataObject {
 
     /**
      * Initializes the live inking session.
-     * 
+     *
      * @param inkingManager The InkingManager instance providing the drawing and events that will be synchronized across clients.
-     * 
+     *
      * @returns a void promise that resolves once complete.
      */
     async initialize(

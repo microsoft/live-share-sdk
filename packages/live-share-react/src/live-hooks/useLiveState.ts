@@ -3,7 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveDataObjectInitializeState, LiveState, UserMeetingRole } from "@microsoft/live-share";
+import {
+    LiveDataObjectInitializeState,
+    LiveState,
+    UserMeetingRole,
+} from "@microsoft/live-share";
 import React from "react";
 import { SetLiveStateAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
@@ -88,7 +92,9 @@ export function useLiveState<TState = any>(
             setCurrentState(state);
         };
         liveState.on("stateChanged", onStateChanged);
-        if (liveState.initializeState === LiveDataObjectInitializeState.needed) {
+        if (
+            liveState.initializeState === LiveDataObjectInitializeState.needed
+        ) {
             liveState.initialize(initialState, allowedRoles);
         }
         if (JSON.stringify(liveState.state) !== JSON.stringify(initialState)) {

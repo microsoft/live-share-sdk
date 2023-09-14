@@ -10,6 +10,10 @@ import { LiveObjectManager } from "./LiveObjectManager";
 import { ObjectSynchronizerEvents } from "./consts";
 import { waitUntilConnected } from "./utils";
 
+interface Blah {
+    (): Promise<void>;
+}
+
 /**
  * @hidden
  */
@@ -18,6 +22,7 @@ export class ContainerSynchronizer {
         string,
         GetAndUpdateStateHandlers<any>
     >();
+    _deferredHandler = new Map<string, Blah[]>();
     // private _unconnectedKeys: string[] = [];
     private _connectedKeys: string[] = [];
     private _refCount = 0;
@@ -61,6 +66,27 @@ export class ContainerSynchronizer {
         ) {
             this.onConnected(this._runtime.clientId);
         }
+
+        const events = this._objectStore.getEventsForObject(id);
+        console.log("events", events);
+        events?.forEach((event) => {
+            this.onReceiveUpdate(
+                id,
+                event,
+                event.clientId === this._runtime.clientId,
+                this._objectStore.updateEventLocallyInStore
+            );
+        });
+        // const blah = this._deferredHandler.get(id);
+        // if (blah) {
+        //     blah()
+        //         .then(() => {
+        //             this._deferredHandler.delete(id);
+        //         })
+        //         .catch((err: any) => {
+        //             console.error(err);
+        //         });
+        // }
 
         // Start update timer on first ref
         if (this._refCount++ == 0) {
@@ -269,17 +295,28 @@ export class ContainerSynchronizer {
         processRelatedChange: ProcessRelatedChangeHandler
     ): Promise<void> {
         const handler = this._objects.get(objectId);
-        if (!handler) return;
-        const overwriteForLocal = await handler.updateState(
-            event,
-            event.clientId,
-            local
-        );
-        if (!overwriteForLocal) return;
-        processRelatedChange(objectId, {
-            ...event,
-            clientId: await this.waitUntilConnected(),
-        });
+        if (handler) {
+            const overwriteForLocal = await handler.updateState(
+                event,
+                event.clientId,
+                local
+            );
+            if (!overwriteForLocal) return;
+            processRelatedChange(objectId, {
+                ...event,
+                clientId: await this.waitUntilConnected(),
+            });
+        } else {
+            processRelatedChange(objectId, event);
+            // this._deferredHandler.set(objectId, async () => {
+            //     await this.onReceiveUpdate(
+            //         objectId,
+            //         event,
+            //         local,
+            //         processRelatedChange
+            //     );
+            // });
+        }
     }
 
     /**
@@ -314,10 +351,10 @@ export class ContainerSynchronizer {
         );
         // Set background updates
         this._onSendUpdatesIntervalCallback = this.onSendUpdates.bind(this);
-        this._hTimer = setInterval(
-            this._onSendUpdatesIntervalCallback,
-            this._liveRuntime.objectManager.updateInterval
-        );
+        // this._hTimer = setInterval(
+        //     this._onSendUpdatesIntervalCallback,
+        //     this._liveRuntime.objectManager.updateInterval
+        // );
     }
 
     private stopBackgroundObjectUpdates() {

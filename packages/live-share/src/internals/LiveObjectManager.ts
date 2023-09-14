@@ -106,6 +106,10 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             data: initialState,
             name: ObjectSynchronizerEvents.update,
         };
+
+        // const event = this.getLatestEventForObject(id) ?? initialEvent;
+        // event.clientId = await waitUntilConnected(runtime);
+
         this.updateEventLocallyInStore(id, initialEvent);
     }
 
@@ -272,7 +276,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     /**
      * @returns true if it was inserted, or false if it was skipped because the event is older
      */
-    private updateEventLocallyInStore(
+    public updateEventLocallyInStore(
         objectId: string,
         event: ILiveEvent<any>
     ): boolean {

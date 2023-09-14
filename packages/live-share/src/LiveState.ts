@@ -144,18 +144,6 @@ export class LiveState<TState = any> extends LiveDataObject<{
                 }
             }
         );
-        // Get the initial remote state, if there is any
-        const events = this._synchronizer.getEvents();
-        if (!events) return;
-        for (let eIndex = 0; eIndex < events.length; eIndex++) {
-            const event = events[eIndex];
-            const didApply = await this.onReceivedStateEvent(
-                event,
-                event.clientId,
-                event.clientId === (await this.waitUntilConnected())
-            );
-            if (didApply) break;
-        }
     }
 
     /**

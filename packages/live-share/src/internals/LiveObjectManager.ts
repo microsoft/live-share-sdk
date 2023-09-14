@@ -110,7 +110,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         // const event = this.getLatestEventForObject(id) ?? initialEvent;
         // event.clientId = await waitUntilConnected(runtime);
 
-        this.updateEventLocallyInStore(id, initialEvent);
+        const didUpdate = this.updateEventLocallyInStore(id, initialEvent);
     }
 
     /**
@@ -268,12 +268,14 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
                 id,
                 cloneValue(receivedEvent),
                 local,
-                this.updateEventLocallyInStore.bind(this)
             );
         }
     }
 
     /**
+     * @hidden
+     * Updates the local event in memory for a given clientId
+     * 
      * @returns true if it was inserted, or false if it was skipped because the event is older
      */
     public updateEventLocallyInStore(

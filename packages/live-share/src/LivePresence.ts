@@ -176,12 +176,6 @@ export class LivePresence<
             this._currentPresence!.data.data,
             this._currentPresence!.data.state
         ).catch(() => {});
-        // Update remote user initial presence for existing values
-        this._synchronizer!.getEvents()?.forEach((evt) => {
-            if (evt.clientId === this._currentPresence!.clientId) return;
-            // Add user to list or silently fail trying
-            this.updateMembersList(evt, false).catch(() => {});
-        });
     }
 
     /**

@@ -3,16 +3,11 @@ import { LiveShareRuntime } from "../LiveShareRuntime";
 import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";
 import {
     GetAndUpdateStateHandlers,
-    ProcessRelatedChangeHandler,
     StateSyncEventContent,
 } from "./internal-interfaces";
 import { LiveObjectManager } from "./LiveObjectManager";
 import { ObjectSynchronizerEvents } from "./consts";
 import { waitUntilConnected } from "./utils";
-
-interface Blah {
-    (): Promise<void>;
-}
 
 /**
  * @hidden
@@ -22,8 +17,6 @@ export class ContainerSynchronizer {
         string,
         GetAndUpdateStateHandlers<any>
     >();
-    _deferredHandler = new Map<string, Blah[]>();
-    // private _unconnectedKeys: string[] = [];
     private _connectedKeys: string[] = [];
     private _refCount = 0;
     private _hTimer: NodeJS.Timeout | undefined;
@@ -33,7 +26,6 @@ export class ContainerSynchronizer {
         objectId: string,
         event: ILiveEvent<any>,
         local: boolean,
-        processRelatedChange: ProcessRelatedChangeHandler
     ) => Promise<void>;
     private _onSendUpdatesIntervalCallback?: () => Promise<void>;
 
@@ -67,26 +59,14 @@ export class ContainerSynchronizer {
             this.onConnected(this._runtime.clientId);
         }
 
-        const events = this._objectStore.getEventsForObject(id);
-        console.log("events", events);
-        events?.forEach((event) => {
+        // Play back the most recent cached event for each clientId to get the initial remote state
+        this._objectStore.getEventsForObject(id)?.forEach((event) => {
             this.onReceiveUpdate(
                 id,
                 event,
                 event.clientId === this._runtime.clientId,
-                this._objectStore.updateEventLocallyInStore
             );
         });
-        // const blah = this._deferredHandler.get(id);
-        // if (blah) {
-        //     blah()
-        //         .then(() => {
-        //             this._deferredHandler.delete(id);
-        //         })
-        //         .catch((err: any) => {
-        //             console.error(err);
-        //         });
-        // }
 
         // Start update timer on first ref
         if (this._refCount++ == 0) {
@@ -292,7 +272,6 @@ export class ContainerSynchronizer {
         objectId: string,
         event: ILiveEvent<any>,
         local: boolean,
-        processRelatedChange: ProcessRelatedChangeHandler
     ): Promise<void> {
         const handler = this._objects.get(objectId);
         if (handler) {
@@ -302,20 +281,10 @@ export class ContainerSynchronizer {
                 local
             );
             if (!overwriteForLocal) return;
-            processRelatedChange(objectId, {
+            this._objectStore.updateEventLocallyInStore.bind(this._objectStore)(objectId, {
                 ...event,
                 clientId: await this.waitUntilConnected(),
             });
-        } else {
-            processRelatedChange(objectId, event);
-            // this._deferredHandler.set(objectId, async () => {
-            //     await this.onReceiveUpdate(
-            //         objectId,
-            //         event,
-            //         local,
-            //         processRelatedChange
-            //     );
-            // });
         }
     }
 
@@ -351,10 +320,10 @@ export class ContainerSynchronizer {
         );
         // Set background updates
         this._onSendUpdatesIntervalCallback = this.onSendUpdates.bind(this);
-        // this._hTimer = setInterval(
-        //     this._onSendUpdatesIntervalCallback,
-        //     this._liveRuntime.objectManager.updateInterval
-        // );
+        this._hTimer = setInterval(
+            this._onSendUpdatesIntervalCallback,
+            this._liveRuntime.objectManager.updateInterval
+        );
     }
 
     private stopBackgroundObjectUpdates() {

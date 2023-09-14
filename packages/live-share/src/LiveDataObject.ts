@@ -19,13 +19,8 @@ export abstract class LiveDataObject<
      */
     public static LiveEnabled = true;
 
-    /**
-     * The initialization status of the data object.
-     * 
-     * @remarks
-     * Used to know whether it is safe to call `.initialize()`
-     */
-    public initializeState: LiveDataObjectInitializeState = LiveDataObjectInitializeState.needed;
+    
+    private _initializeState: LiveDataObjectInitializeState = LiveDataObjectInitializeState.needed;
 
     /**
      * @hidden
@@ -59,6 +54,16 @@ export abstract class LiveDataObject<
      */
     public get isInitialized(): boolean {
         return this.initializeState === LiveDataObjectInitializeState.succeeded;
+    }
+
+    /**
+     * The initialization status of the data object.
+     * 
+     * @remarks
+     * Used to know whether it is safe to call `.initialize()`
+     */
+    public get initializeState(): LiveDataObjectInitializeState {
+        return this._initializeState;
     }
 
     public constructor(props: IDataObjectProps<I>) {

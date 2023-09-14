@@ -66,6 +66,10 @@ export abstract class LiveDataObject<
         return this._initializeState;
     }
 
+    protected set initializeState(value: LiveDataObjectInitializeState) {
+        this._initializeState = value;
+    }
+
     public constructor(props: IDataObjectProps<I>) {
         super(props);
     }

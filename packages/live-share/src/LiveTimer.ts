@@ -5,7 +5,12 @@
 
 import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
-import { IClientTimestamp, ILiveEvent, LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
+import {
+    IClientTimestamp,
+    ILiveEvent,
+    LiveDataObjectInitializeState,
+    UserMeetingRole,
+} from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
 import { LiveEvent } from "./LiveEvent";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
@@ -142,11 +147,11 @@ export class LiveTimer extends LiveDataObject<{
 
     /**
      * Initialize the object to begin sending/receiving timer updates through this DDS.
-     * 
+     *
      * @param allowedRoles Optional. List of roles allowed to make state changes.
-     * 
+     *
      * @returns a void promise that resolves once complete.
-     * 
+     *
      * @throws error when `.initialize()` has already been called for this class instance.
      * @throws fatal error when `.initialize()` has already been called for an object of same id but with a different class instance.
      * This is most common when using dynamic objects through Fluid.
@@ -216,17 +221,19 @@ export class LiveTimer extends LiveDataObject<{
      *
      * @remarks
      * Starting an already started timer will restart the timer with a new duration.
-     * 
+     *
      * @param duration in Milliseconds
-     * 
+     *
      * @returns a void promise that resolves once the start event has been sent to the server
-     * 
+     *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async start(duration: number): Promise<void> {
         if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(`LiveTimer: not initialized prior to calling \`.start()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
+            throw new Error(
+                `LiveTimer: not initialized prior to calling \`.start()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
+            );
         }
 
         await this.playInternal(duration, 0);
@@ -234,18 +241,20 @@ export class LiveTimer extends LiveDataObject<{
 
     /**
      * Resumes the timer.
-     * 
+     *
      * @remarks
      * Playing an already playing timer does nothing.
      *
      * @returns a void promise that resolves once the play event has been sent to the server
-     * 
+     *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async play(): Promise<void> {
         if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(`LiveTimer: not initialized prior to calling \`.play()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
+            throw new Error(
+                `LiveTimer: not initialized prior to calling \`.play()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
+            );
         }
 
         if (
@@ -286,13 +295,15 @@ export class LiveTimer extends LiveDataObject<{
      * Pausing an already paused timer does nothing.
      *
      * @returns a void promise that resolves once the pause event has been sent to the server
-     * 
+     *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async pause(): Promise<void> {
         if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(`LiveTimer: not initialized prior to calling \`.pause()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
+            throw new Error(
+                `LiveTimer: not initialized prior to calling \`.pause()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
+            );
         }
 
         if (this._currentConfig.data.running) {

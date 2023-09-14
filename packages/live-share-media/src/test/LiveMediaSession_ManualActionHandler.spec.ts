@@ -128,8 +128,14 @@ describeNoCompat(
             );
 
             await object1.initialize();
-            assert(object1.isInitialized, "LiveMediaSession objects not initialized");
-            assert(object1.coordinator.isInitialized, "LiveMediaSessionCoordinator objects not initialized");
+            assert(
+                object1.isInitialized,
+                "LiveMediaSession objects not initialized"
+            );
+            assert(
+                object1.coordinator.isInitialized,
+                "LiveMediaSessionCoordinator objects not initialized"
+            );
             // wait for next event loop, simulate existing user waiting for other people to join.
             // otherwise joined event will fire for both users
             await waitForDelay(1);
@@ -228,6 +234,16 @@ describeNoCompat(
                 getTestObjectProvider
             );
 
+            let startOfTest = Date.now();
+            const positionState: () => IMediaPlayerState = () => ({
+                metadata: null,
+                playbackState: "playing",
+                positionState: {
+                    position: (Date.now() - startOfTest) / 1000,
+                },
+                trackData: null,
+            });
+
             // create a duplicate scope/target with same event name as one declared in coordinator
             const scope1 = new LiveEventScope(
                 object1.runtimeForTesting(),
@@ -240,7 +256,7 @@ describeNoCompat(
                 if (!local) return;
 
                 posUpdateCount += 1;
-                if (posUpdateCount > 1) {
+                if (posUpdateCount > 6) {
                     done.resolve();
                 }
             });
@@ -250,8 +266,15 @@ describeNoCompat(
 
             await waitForDelay(1);
             await object2.coordinator.play();
+            setInterval(async () => {
+                object1.coordinator.sendPositionUpdate(positionState());
+                object2.coordinator.sendPositionUpdate(positionState());
+            }, 100);
             await done.promise;
-            assert(posUpdateCount > 1, `pos update should be > 1, instead is ${posUpdateCount}`);
+            assert(
+                posUpdateCount >= 6,
+                `pos update should be >= 6, instead is ${posUpdateCount}`
+            );
 
             dispose();
         });

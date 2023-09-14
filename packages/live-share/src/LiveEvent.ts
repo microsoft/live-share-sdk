@@ -5,7 +5,12 @@
 
 import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { IEvent } from "@fluidframework/common-definitions";
-import { UserMeetingRole, IClientTimestamp, ILiveEvent, LiveDataObjectInitializeState } from "./interfaces";
+import {
+    UserMeetingRole,
+    IClientTimestamp,
+    ILiveEvent,
+    LiveDataObjectInitializeState,
+} from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
@@ -80,15 +85,15 @@ export class LiveEvent<TEvent = any> extends LiveDataObject<{
 
     /**
      * Initialize the object to begin sending/receiving events through this DDS.
-     * 
+     *
      * @remarks
      * You should register `received` event listeners before calling this function to ensure no incoming events are missed.
      * `received` events will not be emitted until after this function is called.
-     * 
+     *
      * @param allowedRoles Optional. List of roles allowed to send events.
-     * 
+     *
      * @returns a void promise that resolves once complete.
-     * 
+     *
      * @throws error when `.initialize()` has already been called for this class instance.
      */
     public initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
@@ -127,21 +132,25 @@ export class LiveEvent<TEvent = any> extends LiveDataObject<{
      *
      * @remarks
      * The event will be queued for delivery if the client isn't currently connected.
-     * 
+     *
      * @param evt Event to send. If omitted, an event will still be sent but it won't include any custom event data.
-     * 
+     *
      * @returns A promise with the full event object that was sent, including the timestamp of when the event was sent and the clientId if known.
      * The clientId will be `undefined` if the client is disconnected at time of delivery.
-     * 
+     *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async send(evt: TEvent): Promise<ILiveEvent<TEvent>> {
         if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(`LiveEvent: not initialized prior to calling \`.send()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
+            throw new Error(
+                `LiveEvent: not initialized prior to calling \`.send()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
+            );
         }
         if (!this._eventTarget) {
-            throw new Error(`LiveEvent: this._eventTarget is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`)
+            throw new Error(
+                `LiveEvent: this._eventTarget is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
+            );
         }
 
         return await this._eventTarget.sendEvent(evt);

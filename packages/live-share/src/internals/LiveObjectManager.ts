@@ -264,7 +264,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
                 ObjectSynchronizerEvents.update,
                 id,
                 cloneValue(receivedEvent),
-                local,
+                local
             );
         }
     }
@@ -272,7 +272,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     /**
      * @hidden
      * Updates the local event in memory for a given clientId
-     * 
+     *
      * @returns true if it was inserted, or false if it was skipped because the event is older
      */
     public updateEventLocallyInStore(

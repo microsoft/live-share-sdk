@@ -25,7 +25,7 @@ export class ContainerSynchronizer {
     private _onReceiveObjectUpdateListener?: (
         objectId: string,
         event: ILiveEvent<any>,
-        local: boolean,
+        local: boolean
     ) => Promise<void>;
     private _onSendUpdatesIntervalCallback?: () => Promise<void>;
 
@@ -64,7 +64,7 @@ export class ContainerSynchronizer {
             this.onReceiveUpdate(
                 id,
                 event,
-                event.clientId === this._runtime.clientId,
+                event.clientId === this._runtime.clientId
             );
         });
 
@@ -271,7 +271,7 @@ export class ContainerSynchronizer {
     private async onReceiveUpdate(
         objectId: string,
         event: ILiveEvent<any>,
-        local: boolean,
+        local: boolean
     ): Promise<void> {
         const handler = this._objects.get(objectId);
         if (!handler) return;
@@ -281,10 +281,13 @@ export class ContainerSynchronizer {
             local
         );
         if (!overwriteForLocal) return;
-        this._objectStore.updateEventLocallyInStore.bind(this._objectStore)(objectId, {
-            ...event,
-            clientId: await this.waitUntilConnected(),
-        });
+        this._objectStore.updateEventLocallyInStore.bind(this._objectStore)(
+            objectId,
+            {
+                ...event,
+                clientId: await this.waitUntilConnected(),
+            }
+        );
     }
 
     /**

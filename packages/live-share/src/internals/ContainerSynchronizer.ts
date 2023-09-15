@@ -3,7 +3,6 @@ import { LiveShareRuntime } from "../LiveShareRuntime";
 import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";
 import {
     GetAndUpdateStateHandlers,
-    ProcessRelatedChangeHandler,
     StateSyncEventContent,
 } from "./internal-interfaces";
 import { LiveObjectManager } from "./LiveObjectManager";
@@ -18,7 +17,6 @@ export class ContainerSynchronizer {
         string,
         GetAndUpdateStateHandlers<any>
     >();
-    // private _unconnectedKeys: string[] = [];
     private _connectedKeys: string[] = [];
     private _refCount = 0;
     private _hTimer: NodeJS.Timeout | undefined;
@@ -27,8 +25,7 @@ export class ContainerSynchronizer {
     private _onReceiveObjectUpdateListener?: (
         objectId: string,
         event: ILiveEvent<any>,
-        local: boolean,
-        processRelatedChange: ProcessRelatedChangeHandler
+        local: boolean
     ) => Promise<void>;
     private _onSendUpdatesIntervalCallback?: () => Promise<void>;
 
@@ -61,6 +58,15 @@ export class ContainerSynchronizer {
         ) {
             this.onConnected(this._runtime.clientId);
         }
+
+        // Play back the most recent cached event for each clientId to get the initial remote state
+        this._objectStore.getEventsForObject(id)?.forEach((event) => {
+            this.onReceiveUpdate(
+                id,
+                event,
+                event.clientId === this._runtime.clientId
+            );
+        });
 
         // Start update timer on first ref
         if (this._refCount++ == 0) {
@@ -265,8 +271,7 @@ export class ContainerSynchronizer {
     private async onReceiveUpdate(
         objectId: string,
         event: ILiveEvent<any>,
-        local: boolean,
-        processRelatedChange: ProcessRelatedChangeHandler
+        local: boolean
     ): Promise<void> {
         const handler = this._objects.get(objectId);
         if (!handler) return;
@@ -276,10 +281,13 @@ export class ContainerSynchronizer {
             local
         );
         if (!overwriteForLocal) return;
-        processRelatedChange(objectId, {
-            ...event,
-            clientId: await this.waitUntilConnected(),
-        });
+        this._objectStore.updateEventLocallyInStore.bind(this._objectStore)(
+            objectId,
+            {
+                ...event,
+                clientId: await this.waitUntilConnected(),
+            }
+        );
     }
 
     /**

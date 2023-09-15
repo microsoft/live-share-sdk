@@ -19,8 +19,8 @@ export abstract class LiveDataObject<
      */
     public static LiveEnabled = true;
 
-    
-    private _initializeState: LiveDataObjectInitializeState = LiveDataObjectInitializeState.needed;
+    private _initializeState: LiveDataObjectInitializeState =
+        LiveDataObjectInitializeState.needed;
 
     /**
      * @hidden
@@ -48,7 +48,7 @@ export abstract class LiveDataObject<
 
     /**
      * Flag that indicates whether initialization has succeeded or not.
-     * 
+     *
      * @remarks
      * This field is true when {@link initializeState} is `succeeded`, or false when {@link initializeState} is any other value.
      */
@@ -58,7 +58,7 @@ export abstract class LiveDataObject<
 
     /**
      * The initialization status of the data object.
-     * 
+     *
      * @remarks
      * Used to know whether it is safe to call `.initialize()`
      */

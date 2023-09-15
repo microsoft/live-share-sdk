@@ -117,7 +117,9 @@ export function useLiveEvent<TEvent = any>(
             setLatestReceived(received);
         };
         liveEvent.on(LiveEventEvents.received, onEventReceived);
-        if (liveEvent.initializeState === LiveDataObjectInitializeState.needed) {
+        if (
+            liveEvent.initializeState === LiveDataObjectInitializeState.needed
+        ) {
             // Start live event
             liveEvent.initialize(allowedRoles);
         }

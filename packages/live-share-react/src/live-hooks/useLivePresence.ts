@@ -113,7 +113,10 @@ export function useLivePresence<TData extends object = object>(
         };
         livePresence.on("presenceChanged", onPresenceChanged);
 
-        if (livePresence.initializeState === LiveDataObjectInitializeState.needed) {
+        if (
+            livePresence.initializeState ===
+            LiveDataObjectInitializeState.needed
+        ) {
             livePresence.initialize(
                 isInitialDataCallback<TData>(initialData)
                     ? initialData()

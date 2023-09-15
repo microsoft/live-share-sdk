@@ -155,7 +155,9 @@ export function useLiveTimer(
         liveTimer.on(LiveTimerEvents.played, onDidPlay);
         liveTimer.on(LiveTimerEvents.paused, onDidPause);
         liveTimer.on(LiveTimerEvents.onTick, onDidTick);
-        if (liveTimer.initializeState === LiveDataObjectInitializeState.needed) {
+        if (
+            liveTimer.initializeState === LiveDataObjectInitializeState.needed
+        ) {
             // Start live event
             liveTimer.initialize(allowedRoles);
         }

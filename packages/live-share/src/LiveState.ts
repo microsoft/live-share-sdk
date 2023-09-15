@@ -6,7 +6,11 @@
 import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { assert } from "@fluidframework/common-utils";
 import { IEvent } from "@fluidframework/common-definitions";
-import { ILiveEvent, LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
+import {
+    ILiveEvent,
+    LiveDataObjectInitializeState,
+    UserMeetingRole,
+} from "./interfaces";
 import { cloneValue, TelemetryEvents } from "./internals";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
@@ -90,12 +94,12 @@ export class LiveState<TState = any> extends LiveDataObject<{
 
     /**
      * Initialize the object to begin sending/receiving state updates through this DDS.
-     * 
+     *
      * @param initialState Initial state value
      * @param allowedRoles Optional. List of roles allowed to make state changes.
-     * 
+     *
      * @returns a void promise that resolves once complete
-     * 
+     *
      * @throws error when `.initialize()` has already been called for this class instance.
      * @throws fatal error when `.initialize()` has already been called for an object of same id but with a different class instance.
      * This is most common when using dynamic objects through Fluid.
@@ -109,7 +113,9 @@ export class LiveState<TState = any> extends LiveDataObject<{
         }
         // This error should not happen due to `initializeState` enum, but if it is somehow defined at this point, errors will occur.
         if (this._synchronizer) {
-            throw new Error(`LiveState: _synchronizer already set, which is an unexpected error. Please report this issue at https://aka.ms/teamsliveshare/issue.`);
+            throw new Error(
+                `LiveState: _synchronizer already set, which is an unexpected error. Please report this issue at https://aka.ms/teamsliveshare/issue.`
+            );
         }
         // Update initialize state as pending
         this.initializeState = LiveDataObjectInitializeState.pending;
@@ -155,18 +161,6 @@ export class LiveState<TState = any> extends LiveDataObject<{
             this.initializeState = LiveDataObjectInitializeState.fatalError;
             throw error;
         }
-        // Get the initial remote state, if there is any
-        const events = this._synchronizer.getEvents();
-        if (!events) return;
-        for (let eIndex = 0; eIndex < events.length; eIndex++) {
-            const event = events[eIndex];
-            const didApply = await this.onReceivedStateEvent(
-                event,
-                event.clientId,
-                event.clientId === (await this.waitUntilConnected())
-            );
-            if (didApply) break;
-        }
 
         // Update initialize state as succeeded
         this.initializeState = LiveDataObjectInitializeState.succeeded;
@@ -184,17 +178,19 @@ export class LiveState<TState = any> extends LiveDataObject<{
 
     /**
      * Set a new state value
-     * 
+     *
      * @param state New state value.
-     * 
+     *
      * @returns a void promise that resolves once the set event has been sent to the server.
-     * 
+     *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async set(state: TState): Promise<void> {
         if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(`LiveState: not initialized prior to calling \`.set()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
+            throw new Error(
+                `LiveState: not initialized prior to calling \`.set()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
+            );
         }
 
         // Broadcast state change

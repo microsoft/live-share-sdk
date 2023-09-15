@@ -101,11 +101,11 @@ export class LiveMediaSession extends LiveDataObject {
 
     /**
      * Initialize the object to begin sending/receiving group playback updates through this DDS.
-     * 
+     *
      * @param allowedRoles Optional. List of roles allowed to group transport operations like play/pause/seek/setTrack.
-     * 
+     *
      * @returns a void promise that resolves once complete.
-     * 
+     *
      * @throws error when `.initialize()` has already been called for this class instance.
      */
     public async initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {

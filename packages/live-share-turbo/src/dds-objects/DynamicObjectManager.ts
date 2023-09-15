@@ -36,7 +36,8 @@ export class DynamicObjectManager extends LiveDataObject {
     /**
      * Local memory store for DDS's loaded dynamically.
      */
-    private _dynamicObjectsMap: Map<string, Promise<FluidObject<any>>> = new Map();
+    private _dynamicObjectsMap: Map<string, Promise<FluidObject<any>>> =
+        new Map();
 
     /**
      * The objects fluid type/name.

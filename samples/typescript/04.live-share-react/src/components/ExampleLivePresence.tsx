@@ -3,7 +3,12 @@ import { useLivePresence } from "@microsoft/live-share-react";
 import { FC } from "react";
 
 export const ExampleLivePresence: FC = () => {
-    const { localUser, allUsers, updatePresence, livePresence: v1 } = useLivePresence(
+    const {
+        localUser,
+        allUsers,
+        updatePresence,
+        livePresence: v1,
+    } = useLivePresence(
         "CUSTOM-PRESENCE-KEY",
         { toggleCount: 0 } // optional
     );

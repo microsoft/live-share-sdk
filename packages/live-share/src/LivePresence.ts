@@ -16,7 +16,11 @@ import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { cloneValue, TelemetryEvents } from "./internals";
 import { TimeInterval } from "./TimeInterval";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { IClientInfo, ILiveEvent, LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
+import {
+    IClientInfo,
+    LiveDataObjectInitializeState,
+    UserMeetingRole,
+} from "./interfaces";
 import { LiveDataObject } from "./LiveDataObject";
 
 /**
@@ -114,13 +118,13 @@ export class LivePresence<
 
     /**
      * Initialize the object to begin sending/receiving presence updates through this DDS.
-     * 
+     *
      * @param data Optional. Custom data object to share. A deep copy of the data object is saved to avoid any accidental modifications.
      * @param state Optional. Initial presence state. Defaults to `PresenceState.online`.
      * @param allowedRoles Optional. List of roles allowed to emit presence changes.
-     * 
+     *
      * @returns a void promise that resolves once complete.
-     * 
+     *
      * @throws error when `.initialize()` has already been called for this class instance.
      * @throws fatal error when `.initialize()` has already been called for an object of same id but with a different class instance.
      * This is most common when using dynamic objects through Fluid.
@@ -135,7 +139,9 @@ export class LivePresence<
         }
         // This error should not happen due to `initializeState` enum, but if it is somehow defined at this point, errors will occur.
         if (this._synchronizer) {
-            throw new Error(`LivePresence: _synchronizer already set, which is an unexpected error. Please report this issue at https://aka.ms/teamsliveshare/issue.`);
+            throw new Error(
+                `LivePresence: _synchronizer already set, which is an unexpected error. Please report this issue at https://aka.ms/teamsliveshare/issue.`
+            );
         }
         // Update initialize state as pending
         this.initializeState = LiveDataObjectInitializeState.pending;
@@ -192,12 +198,6 @@ export class LivePresence<
             this._currentPresence!.data.data,
             this._currentPresence!.data.state
         ).catch(() => {});
-        // Update remote user initial presence for existing values
-        this._synchronizer!.getEvents()?.forEach((evt) => {
-            if (evt.clientId === this._currentPresence!.clientId) return;
-            // Add user to list or silently fail trying
-            this.updateMembersList(evt, false).catch(() => {});
-        });
     }
 
     /**
@@ -225,24 +225,30 @@ export class LivePresence<
      *
      * @remarks
      * This will trigger the immediate broadcast of the users presence to all other clients.
-     * 
+     *
      * @param data Optional. Data object to change. A deep copy of the data object is saved to avoid any future changes.
      * @param state Optional. Presence state to change.
-     * 
+     *
      * @returns a void promise that resolves once the update event has been sent to the server.
-     * 
+     *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async update(data?: TData, state?: PresenceState): Promise<void> {
         if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(`LivePresence: not initialized prior to calling \`.update()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`);
+            throw new Error(
+                `LivePresence: not initialized prior to calling \`.update()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
+            );
         }
         if (!this._synchronizer) {
-            throw new Error(`LivePresence: this._synchronizer is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`);
+            throw new Error(
+                `LivePresence: this._synchronizer is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
+            );
         }
         if (!this._currentPresence) {
-            throw new Error(`LivePresence: this._currentPresence is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`);
+            throw new Error(
+                `LivePresence: this._currentPresence is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
+            );
         }
 
         // Broadcast state change

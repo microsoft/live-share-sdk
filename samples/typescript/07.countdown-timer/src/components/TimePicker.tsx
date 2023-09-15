@@ -105,6 +105,7 @@ export const TimePicker: FC<{
                 value={hours}
                 displayValue={unitToDisplayValue(hours)}
                 size="medium"
+                min={0}
                 max={99}
                 onChange={onHoursSpinButtonChange}
             />
@@ -114,6 +115,7 @@ export const TimePicker: FC<{
                 value={minutes}
                 displayValue={unitToDisplayValue(minutes)}
                 size="medium"
+                min={0}
                 max={59}
                 onChange={onMinutesSpinButtonChange}
             />
@@ -123,6 +125,7 @@ export const TimePicker: FC<{
                 value={seconds}
                 displayValue={unitToDisplayValue(seconds)}
                 size="medium"
+                min={0}
                 max={59}
                 onChange={onSecondsSpinButtonChange}
             />

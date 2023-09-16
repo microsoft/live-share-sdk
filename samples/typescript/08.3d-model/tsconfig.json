@@ -1,0 +1,9 @@
+{
+  "extends": "../../../packages/live-share/tsconfig.json",
+  "include": ["./src"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "outDir": "/tmp"
+  },
+  "files": ["src/main.tsx"]
+}

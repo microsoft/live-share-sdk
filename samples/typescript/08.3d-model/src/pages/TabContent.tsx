@@ -52,8 +52,11 @@ const BabylonScene: FC = () => {
     /**
      * Synchronized SharedMap for the color values that correspond to a material in the loaded .glb file
      */
-    const { map: colorsMap, setEntry: setMaterialColor } =
-        useSharedMap("COLORS");
+    const {
+        map: colorsMap,
+        setEntry: setMaterialColor,
+        sharedMap: sharedColorsMap,
+    } = useSharedMap("COLORS");
     /**
      * Selected material for the color picker UI
      */
@@ -309,7 +312,7 @@ const BabylonScene: FC = () => {
                     </ErrorBoundary>
                 </Scene>
             </Engine>
-            {selectedMaterialName && (
+            {!!sharedColorsMap && !!selectedMaterialName && (
                 <div
                     style={{
                         position: "absolute",
@@ -325,15 +328,22 @@ const BabylonScene: FC = () => {
                         }
                         onChange={(value) => {
                             if (!selectedMaterialName) return;
-                            setMaterialColor(selectedMaterialName, value);
-                            if (!sceneRef.current) return;
-                            const material =
-                                sceneRef.current.getMaterialByName(
-                                    selectedMaterialName
-                                );
-                            if (material && material instanceof PBRMaterial) {
-                                const color = Color3.FromHexString(value);
-                                material.albedoColor = color;
+                            try {
+                                setMaterialColor(selectedMaterialName, value);
+                                if (!sceneRef.current) return;
+                                const material =
+                                    sceneRef.current.getMaterialByName(
+                                        selectedMaterialName
+                                    );
+                                if (
+                                    material &&
+                                    material instanceof PBRMaterial
+                                ) {
+                                    const color = Color3.FromHexString(value);
+                                    material.albedoColor = color;
+                                }
+                            } catch (err: any) {
+                                console.error(err);
                             }
                         }}
                     />

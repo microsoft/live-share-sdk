@@ -29,7 +29,8 @@
             "configurationUrl": "https://{YOUR_NGROK_ORIGIN}?inTeams=true",
             "canUpdateConfiguration": false,
             "scopes": [
-                "groupchat"
+                "groupchat",
+                "team"
             ],
             "context": [
                 "meetingSidePanel",

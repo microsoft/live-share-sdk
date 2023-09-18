@@ -26,10 +26,11 @@
     "accentColor": "#38a2ff",
     "configurableTabs": [
         {
-            "configurationUrl": "https://{YOUR_NGROK_ORIGIN}?inTeams=true",
+            "configurationUrl": "https://{YOUR_NGROK_ORIGIN}?/config?inTeams=true",
             "canUpdateConfiguration": false,
             "scopes": [
-                "groupchat"
+                "groupchat",
+                "team"
             ],
             "context": [
                 "meetingSidePanel",

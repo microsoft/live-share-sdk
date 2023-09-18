@@ -50,14 +50,14 @@ const CountdownTimer: FC = () => {
     const [milliDuration, setMilliDuration] = useLiveState<number>(
         TIMER_DURATION_KEY,
         DEFAULT_TIMER_DURATION,
-        ALLOWED_ROLES
+        undefined
     );
     const onFinish = useCallback(() => {
         // If you wanted to play a sound or alert the user when the timer expires, you could do so here.
     }, []);
     const { milliRemaining, timerConfig, start, pause, play } = useLiveTimer(
         COUNTDOWN_TIMER_KEY,
-        ALLOWED_ROLES,
+        undefined,
         TICK_RATE_MILLISECONDS,
         undefined, // optional on tick callback
         undefined, // optional on pause callback

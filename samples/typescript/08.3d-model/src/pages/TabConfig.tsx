@@ -12,7 +12,7 @@ export const TabConfig: FC = () => {
     useEffect(() => {
         pages.config.registerOnSaveHandler(function (saveEvent) {
             pages.config.setConfig({
-                suggestedDisplayName: "Timer",
+                suggestedDisplayName: "3D Viewer",
                 contentUrl: `${window.location.origin}/?inTeams=true`,
             });
             saveEvent.notifySuccess();
@@ -24,7 +24,7 @@ export const TabConfig: FC = () => {
     return (
         <FlexColumn vAlign="center" hAlign="center" fill="view" gap="small">
             <Title2 as="h2" block align="center">
-                Welcome to Countdown Timer!
+                Welcome to 3D Viewer!
             </Title2>
             <Subtitle2 as="p" block align="center">
                 Press the save button to continue.

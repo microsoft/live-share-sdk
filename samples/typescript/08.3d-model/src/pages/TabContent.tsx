@@ -12,7 +12,6 @@ import { FC, useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { Engine, Scene, Model } from "react-babylonjs";
 import { Vector3, Color3, Color4 } from "@babylonjs/core/Maths/math";
 import "@babylonjs/loaders/glTF";
-import plane from "../assets/plane.glb";
 import ErrorBoundary from "../components/ErrorBoundary";
 import {
     Nullable,
@@ -305,7 +304,7 @@ const BabylonScene: FC = () => {
                         <Suspense fallback={<></>}>
                             <Model
                                 name="plane.glb"
-                                rootUrl={plane.replace("plane.glb", "")}
+                                rootUrl={"/public/"}
                                 sceneFilename={"plane.glb"}
                             />
                         </Suspense>

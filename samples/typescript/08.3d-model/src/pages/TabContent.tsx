@@ -25,6 +25,7 @@ import { IPointerEvent } from "@babylonjs/core/Events";
 import { HexColorPicker } from "react-colorful";
 import { debounce } from "lodash";
 import { Button, tokens } from "@fluentui/react-components";
+import { FlexRow } from "../components";
 const IN_TEAMS = inTeams();
 
 export const TabContent: FC = () => {
@@ -71,8 +72,19 @@ const BabylonScene: FC = () => {
         "FOLLOWING-USER-ID",
         null
     );
+    /**
+     * Flag for whether local user should be following the presenter.
+     * Set to false when user panned the camera while another user is being followed.
+     * When false and following a user, a "Sync to presenter" button will be displayed.
+     */
+    const [followPresenter, setFollowPresenter] = useState<boolean>(true);
     const sceneRef = useRef<Nullable<BabyScene>>(null);
     const cameraRef = useRef<ArcRotateCamera>(null);
+    /**
+     * Expected remote positions from following user (queue).
+     * Used to help determine when a camera position update in `onViewMatrixChangedObservable` was triggered via remote update.
+     */
+    const expectedPositionUpdatesRef = useRef<Vector3[]>([]);
 
     /**
      * Callback for when the user clicks on the scene
@@ -146,7 +158,6 @@ const BabylonScene: FC = () => {
                 z: cameraPosition.z,
             },
         });
-        console.log(cameraRef.current.position);
     }, [updatePresence]);
 
     const debouncedSendCameraPos = useCallback(
@@ -162,21 +173,31 @@ const BabylonScene: FC = () => {
         return debouncedSendCameraPos.cancel;
     }, [debouncedSendCameraPos]);
 
-    const snapCameraIfFollowingUser = useCallback(() => {
-        if (!followingUserId) return;
+    /**
+     * Get the user who is currently presenting's current camera position, or null if N/A.
+     */
+    const getFollowingUserPosition = useCallback((): Vector3 | null => {
+        if (!followingUserId) return null;
         const followingUser = otherUsers.find(
             (user) => user.userId === followingUserId
         );
-        if (!followingUser || !followingUser.data) return;
-        if (!cameraRef.current) return;
-        cameraRef.current.setPosition(
-            new Vector3(
-                followingUser.data.cameraPosition.x,
-                followingUser.data.cameraPosition.y,
-                followingUser.data.cameraPosition.z
-            )
+        if (!followingUser || !followingUser.data) return null;
+        return new Vector3(
+            followingUser.data.cameraPosition.x,
+            followingUser.data.cameraPosition.y,
+            followingUser.data.cameraPosition.z
         );
     }, [followingUserId, otherUsers]);
+
+    const snapCameraIfFollowingUser = useCallback(() => {
+        if (!followPresenter) return;
+        const followingUserPos = getFollowingUserPosition();
+        if (!followingUserPos) return;
+        if (!cameraRef.current) return;
+        if (cameraRef.current.position.equals(followingUserPos)) return;
+        expectedPositionUpdatesRef.current.push(followingUserPos);
+        cameraRef.current.setPosition(followingUserPos);
+    }, [followPresenter, getFollowingUserPosition]);
 
     /**
      * Update camera position when following user's presence changes
@@ -198,6 +219,16 @@ const BabylonScene: FC = () => {
         // Local user takes control by setting the follow user ID to their own
         setFollowingUserId(localUser.userId);
     };
+
+    /**
+     * Whenever the followingUserId changes, we reset followPresenter to true
+     */
+    useEffect(() => {
+        setFollowPresenter(true);
+    }, [followingUserId]);
+
+    const localUserIsPresenter =
+        !!localUser && followingUserId === localUser.userId;
 
     return (
         <>
@@ -226,6 +257,39 @@ const BabylonScene: FC = () => {
                         panningSensibility={100} // Adjust this to make panning faster/slower
                         onViewMatrixChangedObservable={(evt: any) => {
                             debouncedSendCameraPos();
+                            // Check if the value is from remote value
+                            const isFromRemoteValue =
+                                expectedPositionUpdatesRef.current.length > 0
+                                    ? vectorsAreRoughlyEqual(
+                                          expectedPositionUpdatesRef.current[0],
+                                          evt.position
+                                      )
+                                    : false;
+                            if (isFromRemoteValue) {
+                                // Validated position was from `LivePresence` for presenting user, remove expected position from queue
+                                expectedPositionUpdatesRef.current =
+                                    expectedPositionUpdatesRef.current.slice(1);
+                                return;
+                            }
+                            if (
+                                !followingUserId ||
+                                localUser?.userId === followingUserId ||
+                                !followPresenter
+                            ) {
+                                return;
+                            }
+                            const currentRemotePos = getFollowingUserPosition();
+                            if (
+                                !currentRemotePos ||
+                                vectorsAreRoughlyEqual(
+                                    currentRemotePos,
+                                    evt.position
+                                )
+                            ) {
+                                return;
+                            }
+                            // Update state so that "Sync to presenter" button is shown
+                            setFollowPresenter(false);
                         }}
                         ref={cameraRef}
                     />
@@ -275,21 +339,50 @@ const BabylonScene: FC = () => {
                     />
                 </div>
             )}
-            {!!localUser && (
-                <Button
-                    appearance="primary"
-                    onClick={onClickToggleControl}
+            {/* Presenter control bar */}
+            {localUser && (
+                <FlexRow
+                    hAlign="end"
+                    gap="small"
                     style={{
                         position: "absolute",
                         bottom: "24px",
                         right: "24px",
                     }}
                 >
-                    {localUser && followingUserId !== localUser.userId
-                        ? "Take control"
-                        : "Release control"}
-                </Button>
+                    {!!followingUserId &&
+                        !followPresenter &&
+                        !localUserIsPresenter && (
+                            <Button
+                                onClick={() => {
+                                    setFollowPresenter(true);
+                                }}
+                            >
+                                {"Sync to presenter"}
+                            </Button>
+                        )}
+                    <Button appearance="primary" onClick={onClickToggleControl}>
+                        {followingUserId !== localUser.userId
+                            ? "Take control"
+                            : "Release control"}
+                    </Button>
+                </FlexRow>
             )}
         </>
     );
 };
+
+const ROUNDING_ERROR_TOLERANCE = 0.000000000001;
+function vectorsAreRoughlyEqual(v1: Vector3, v2: Vector3): boolean {
+    console.log(Math.abs(v1.x - v2.x));
+    if (Math.abs(v1.x - v2.x) >= ROUNDING_ERROR_TOLERANCE) {
+        return false;
+    }
+    if (Math.abs(v1.y - v2.y) >= ROUNDING_ERROR_TOLERANCE) {
+        return false;
+    }
+    if (Math.abs(v1.z - v2.z) >= ROUNDING_ERROR_TOLERANCE) {
+        return false;
+    }
+    return true;
+}

@@ -101,10 +101,14 @@ const LiveAvatars: FC = () => {
                                     </FlexRow>
                                     <Divider />
                                     <FlexRow>
-                                        <Text weight="semibold" size={200}>Favorite food:</Text>
+                                        <Text weight="semibold" size={200}>
+                                            Favorite food:
+                                        </Text>
                                     </FlexRow>
                                     <FlexRow>
-                                        <Text>{user.data?.favoriteFood ?? "N/A"}</Text>
+                                        <Text>
+                                            {user.data?.favoriteFood ?? "N/A"}
+                                        </Text>
                                     </FlexRow>
                                 </FlexColumn>
                             </PopoverSurface>

@@ -1,12 +1,11 @@
 /* eslint-disable react/no-unknown-property */
-import { TestLiveShareHost } from "@microsoft/live-share";
+import { FollowModeType, TestLiveShareHost } from "@microsoft/live-share";
 import {
     LiveShareProvider,
-    useLivePresence,
-    useLiveState,
+    useLiveFollowMode,
     useSharedMap,
 } from "@microsoft/live-share-react";
-import { LiveShareHost } from "@microsoft/teams-js";
+import { LiveShareHost, UserMeetingRole } from "@microsoft/teams-js";
 import { inTeams } from "../utils/inTeams";
 import { FC, useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { Engine, Scene, Model } from "react-babylonjs";
@@ -23,8 +22,16 @@ import { PBRMaterial } from "@babylonjs/core/Materials";
 import { IPointerEvent } from "@babylonjs/core/Events";
 import { HexColorPicker } from "react-colorful";
 import { debounce } from "lodash";
-import { Button, tokens } from "@fluentui/react-components";
-import { FlexRow } from "../components";
+import { Button, Text, tokens } from "@fluentui/react-components";
+import {
+    DecorativeOutline,
+    FlexColumn,
+    FlexRow,
+    LiveAvatars,
+    FollowModeInfoText,
+    FollowModeSmallButton,
+} from "../components";
+import { vectorsAreRoughlyEqual } from "../utils/vector-utils";
 const IN_TEAMS = inTeams();
 
 export const TabContent: FC = () => {
@@ -39,13 +46,18 @@ export const TabContent: FC = () => {
 };
 
 const DEBOUNCE_SEND_CAMERA_UPDATES_INTERVAL = 100;
-interface ICustomPresenceData {
+export interface ICustomFollowData {
     cameraPosition: {
         x: number;
         y: number;
         z: number;
     };
 }
+
+export const ALLOWED_ROLES = [
+    UserMeetingRole.organizer,
+    UserMeetingRole.presenter,
+];
 
 const BabylonScene: FC = () => {
     /**
@@ -63,23 +75,24 @@ const BabylonScene: FC = () => {
         string | null
     >(null);
     /**
-     * Presence is used to track the current camera positions of each user in the session
+     * Following state to track which camera position to display
      */
-    const { localUser, otherUsers, updatePresence } =
-        useLivePresence<ICustomPresenceData>("PRESENCE");
-    /**
-     * User being followed, which defaults to null
-     */
-    const [followingUserId, setFollowingUserId] = useLiveState<string | null>(
-        "FOLLOWING-USER-ID",
-        null
+    const {
+        allUsers,
+        state: remoteCameraState,
+        update: updateUserCameraState,
+        startPresenting,
+        stopPresenting,
+        followUser,
+        stopFollowing,
+        beginSuspension,
+        endSuspension,
+    } = useLiveFollowMode<ICustomFollowData | undefined>(
+        "FOLLOW_MODE",
+        undefined,
+        ALLOWED_ROLES
     );
-    /**
-     * Flag for whether local user should be following the presenter.
-     * Set to false when user panned the camera while another user is being followed.
-     * When false and following a user, a "Sync to presenter" button will be displayed.
-     */
-    const [followPresenter, setFollowPresenter] = useState<boolean>(true);
+
     const sceneRef = useRef<Nullable<BabyScene>>(null);
     const cameraRef = useRef<ArcRotateCamera>(null);
     /**
@@ -135,7 +148,6 @@ const BabylonScene: FC = () => {
         colorsMap.forEach((value, key) => {
             if (!sceneRef.current) return;
             const material = sceneRef.current.getMaterialByName(key);
-            console.log(material);
             if (material && material instanceof PBRMaterial) {
                 const color = Color3.FromHexString(value);
                 material.albedoColor = color;
@@ -150,25 +162,31 @@ const BabylonScene: FC = () => {
         applyRemoteColors();
     }, [applyRemoteColors]);
 
+    /**
+     * Send camera position for local user to remote
+     */
     const sendCameraPos = useCallback(() => {
         if (!cameraRef.current) return;
         const cameraPosition = cameraRef.current.position;
-        updatePresence({
+        updateUserCameraState({
             cameraPosition: {
                 x: cameraPosition.x,
                 y: cameraPosition.y,
                 z: cameraPosition.z,
             },
         });
-    }, [updatePresence]);
+    }, [updateUserCameraState]);
 
+    /**
+     * Debounce sending camera position for optimal performance
+     */
     const debouncedSendCameraPos = useCallback(
         debounce(sendCameraPos, DEBOUNCE_SEND_CAMERA_UPDATES_INTERVAL),
         [sendCameraPos]
     );
 
     /**
-     * Cancel debounce on unmount
+     * debouncedSendCameraPos cleanup
      */
     useEffect(() => {
         // Cancel previous debounce calls during useEffect cleanup.
@@ -176,30 +194,31 @@ const BabylonScene: FC = () => {
     }, [debouncedSendCameraPos]);
 
     /**
-     * Get the user who is currently presenting's current camera position, or null if N/A.
+     * Callback to snap camera position to presenting user when the remote value changes
      */
-    const getFollowingUserPosition = useCallback((): Vector3 | null => {
-        if (!followingUserId) return null;
-        const followingUser = otherUsers.find(
-            (user) => user.userId === followingUserId
-        );
-        if (!followingUser || !followingUser.data) return null;
-        return new Vector3(
-            followingUser.data.cameraPosition.x,
-            followingUser.data.cameraPosition.y,
-            followingUser.data.cameraPosition.z
-        );
-    }, [followingUserId, otherUsers]);
-
     const snapCameraIfFollowingUser = useCallback(() => {
-        if (!followPresenter) return;
-        const followingUserPos = getFollowingUserPosition();
-        if (!followingUserPos) return;
+        if (!remoteCameraState) return;
+        if (
+            [
+                FollowModeType.local,
+                FollowModeType.activePresenter,
+                FollowModeType.suspendFollowPresenter,
+                FollowModeType.suspendFollowUser,
+            ].includes(remoteCameraState.type)
+        )
+            return;
+        if (!remoteCameraState.value) return;
         if (!cameraRef.current) return;
-        if (cameraRef.current.position.equals(followingUserPos)) return;
-        expectedPositionUpdatesRef.current.push(followingUserPos);
-        cameraRef.current.setPosition(followingUserPos);
-    }, [followPresenter, getFollowingUserPosition]);
+        const remoteCameraPos = new Vector3(
+            remoteCameraState.value.cameraPosition.x,
+            remoteCameraState.value.cameraPosition.y,
+            remoteCameraState.value.cameraPosition.z
+        );
+        if (vectorsAreRoughlyEqual(cameraRef.current.position, remoteCameraPos))
+            return;
+        expectedPositionUpdatesRef.current.push(remoteCameraPos);
+        cameraRef.current.setPosition(remoteCameraPos);
+    }, [remoteCameraState]);
 
     /**
      * Update camera position when following user's presence changes
@@ -209,31 +228,146 @@ const BabylonScene: FC = () => {
     }, [snapCameraIfFollowingUser]);
 
     /**
-     * Take control of presenting, causing all other user's camera positions to update to match the local user's
+     * Callback when the arcLightCamera position changes
      */
-    const onClickToggleControl = () => {
-        if (!localUser) return;
-        if (localUser.userId === followingUserId) {
-            // Cancel take control if the user is already in control
-            setFollowingUserId(null);
-            return;
-        }
-        // Local user takes control by setting the follow user ID to their own
-        setFollowingUserId(localUser.userId);
-    };
+    const onCameraViewMatrixChanged = useCallback(
+        (evt: any) => {
+            debouncedSendCameraPos();
+            // Check if the value is from remote value
+            const isFromRemoteValue =
+                expectedPositionUpdatesRef.current.length > 0
+                    ? vectorsAreRoughlyEqual(
+                          expectedPositionUpdatesRef.current[0],
+                          evt.position
+                      )
+                    : false;
+            if (isFromRemoteValue) {
+                // Validated position was from `LivePresence` for presenting user, remove expected position from queue
+                expectedPositionUpdatesRef.current =
+                    expectedPositionUpdatesRef.current.slice(1);
+                return;
+            }
+
+            if (
+                !remoteCameraState ||
+                [
+                    FollowModeType.local,
+                    FollowModeType.activePresenter,
+                    FollowModeType.suspendFollowPresenter,
+                    FollowModeType.suspendFollowUser,
+                ].includes(remoteCameraState.type)
+            )
+                return;
+            const currentRemotePos = remoteCameraState.value
+                ? new Vector3(
+                      remoteCameraState.value.cameraPosition.x,
+                      remoteCameraState.value.cameraPosition.y,
+                      remoteCameraState.value.cameraPosition.z
+                  )
+                : undefined;
+            if (
+                !currentRemotePos ||
+                vectorsAreRoughlyEqual(currentRemotePos, evt.position)
+            )
+                return;
+            beginSuspension();
+        },
+        [debouncedSendCameraPos, remoteCameraState, beginSuspension]
+    );
 
     /**
-     * Whenever the followingUserId changes, we reset followPresenter to true
+     * Set/update the camera view matrix change listener
      */
     useEffect(() => {
-        setFollowPresenter(true);
-    }, [followingUserId]);
-
-    const localUserIsPresenter =
-        !!localUser && followingUserId === localUser.userId;
+        if (!cameraRef.current) return;
+        // Add an observable
+        cameraRef.current.onViewMatrixChangedObservable.add(
+            onCameraViewMatrixChanged
+        );
+        // Clear observables on unmount
+        return () => {
+            cameraRef.current?.onViewMatrixChangedObservable.clear();
+        };
+    }, [onCameraViewMatrixChanged]);
 
     return (
         <>
+            {!!remoteCameraState && (
+                <FlexRow
+                    spaceBetween
+                    vAlign="center"
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        paddingTop: "12px",
+                        paddingLeft: "20px",
+                        paddingRight: "20px",
+                        paddingBottom: "12px",
+                        backgroundColor: tokens.colorNeutralBackground4,
+                    }}
+                >
+                    <FlexRow
+                        style={{
+                            width: "132px",
+                        }}
+                    />
+                    <LiveAvatars
+                        allUsers={allUsers}
+                        remoteCameraState={remoteCameraState}
+                        onFollowUser={followUser}
+                    />
+                    <FlexRow
+                        gap="small"
+                        vAlign="center"
+                        hAlign="end"
+                        style={{
+                            width: "132px",
+                        }}
+                    >
+                        {remoteCameraState.type === FollowModeType.local && (
+                            <Button
+                                appearance="primary"
+                                onClick={startPresenting}
+                            >
+                                {"Start presenting"}
+                            </Button>
+                        )}
+                        {remoteCameraState.type ===
+                            FollowModeType.activePresenter && (
+                            <Button
+                                appearance="primary"
+                                onClick={stopPresenting}
+                            >
+                                {"Stop presenting"}
+                            </Button>
+                        )}
+                        {(remoteCameraState.type ===
+                            FollowModeType.suspendFollowUser ||
+                            remoteCameraState.type ===
+                                FollowModeType.followUser) && (
+                            <Button
+                                appearance="primary"
+                                onClick={stopFollowing}
+                            >
+                                {"Stop following"}
+                            </Button>
+                        )}
+                        {(remoteCameraState.type ===
+                            FollowModeType.followPresenter ||
+                            remoteCameraState.type ===
+                                FollowModeType.suspendFollowPresenter) && (
+                            <Button
+                                appearance="secondary"
+                                onClick={startPresenting}
+                            >
+                                {"Take control"}
+                            </Button>
+                        )}
+                    </FlexRow>
+                </FlexRow>
+            )}
             <Engine antialias adaptToDeviceRatio canvasId="babylonJS">
                 <Scene
                     clearColor={Color4.FromHexString(
@@ -257,42 +391,6 @@ const BabylonScene: FC = () => {
                         radius={150}
                         wheelPrecision={50} // Adjust this to make zoom faster/slower
                         panningSensibility={100} // Adjust this to make panning faster/slower
-                        onViewMatrixChangedObservable={(evt: any) => {
-                            debouncedSendCameraPos();
-                            // Check if the value is from remote value
-                            const isFromRemoteValue =
-                                expectedPositionUpdatesRef.current.length > 0
-                                    ? vectorsAreRoughlyEqual(
-                                          expectedPositionUpdatesRef.current[0],
-                                          evt.position
-                                      )
-                                    : false;
-                            if (isFromRemoteValue) {
-                                // Validated position was from `LivePresence` for presenting user, remove expected position from queue
-                                expectedPositionUpdatesRef.current =
-                                    expectedPositionUpdatesRef.current.slice(1);
-                                return;
-                            }
-                            if (
-                                !followingUserId ||
-                                localUser?.userId === followingUserId ||
-                                !followPresenter
-                            ) {
-                                return;
-                            }
-                            const currentRemotePos = getFollowingUserPosition();
-                            if (
-                                !currentRemotePos ||
-                                vectorsAreRoughlyEqual(
-                                    currentRemotePos,
-                                    evt.position
-                                )
-                            ) {
-                                return;
-                            }
-                            // Update state so that "Sync to presenter" button is shown
-                            setFollowPresenter(false);
-                        }}
                         ref={cameraRef}
                     />
                     <hemisphericLight
@@ -304,18 +402,95 @@ const BabylonScene: FC = () => {
                         <Suspense fallback={<></>}>
                             <Model
                                 name="plane.glb"
-                                rootUrl={"/public/"}
+                                rootUrl={"/"}
                                 sceneFilename={"plane.glb"}
                             />
                         </Suspense>
                     </ErrorBoundary>
                 </Scene>
             </Engine>
+            {/* Follow mode information / actions */}
+            {!!remoteCameraState &&
+                (remoteCameraState.type !== FollowModeType.local ||
+                    remoteCameraState.otherUsersCount > 0) && (
+                    <FlexRow
+                        hAlign="center"
+                        vAlign="center"
+                        style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: "50%",
+                            transform: "translate(-50% , 0%)",
+                            "-webkit-transform": "translate(-50%, 0%)",
+                            paddingBottom: "4px",
+                            paddingTop: "4px",
+                            paddingLeft: "16px",
+                            paddingRight: "4px",
+                            borderRadius: "4px",
+                            minHeight: "24px",
+                            backgroundColor:
+                                remoteCameraState.type ===
+                                    FollowModeType.activePresenter ||
+                                (remoteCameraState.type ===
+                                    FollowModeType.local &&
+                                    remoteCameraState.otherUsersCount > 0)
+                                    ? tokens.colorPaletteRedBackground3
+                                    : tokens.colorPaletteBlueBorderActive,
+                        }}
+                    >
+                        <FollowModeInfoText />
+                        {remoteCameraState.type ===
+                            FollowModeType.activePresenter && (
+                            <FollowModeSmallButton onClick={stopPresenting}>
+                                {"STOP"}
+                            </FollowModeSmallButton>
+                        )}
+                        {remoteCameraState.type ===
+                            FollowModeType.followUser && (
+                            <FollowModeSmallButton onClick={stopFollowing}>
+                                {"STOP"}
+                            </FollowModeSmallButton>
+                        )}
+                        {remoteCameraState.type ===
+                            FollowModeType.suspendFollowPresenter && (
+                            <FollowModeSmallButton onClick={endSuspension}>
+                                {"FOLLOW"}
+                            </FollowModeSmallButton>
+                        )}
+                        {remoteCameraState.type ===
+                            FollowModeType.suspendFollowUser && (
+                            <FollowModeSmallButton onClick={endSuspension}>
+                                {"RESUME"}
+                            </FollowModeSmallButton>
+                        )}
+                    </FlexRow>
+                )}
+            {/* Decorative border while following / presenting */}
+            {((!!remoteCameraState &&
+                [
+                    FollowModeType.activePresenter,
+                    FollowModeType.followPresenter,
+                    FollowModeType.followUser,
+                ].includes(remoteCameraState.type)) ||
+                (remoteCameraState &&
+                    remoteCameraState.type === FollowModeType.local &&
+                    remoteCameraState.otherUsersCount > 0)) && (
+                <DecorativeOutline
+                    borderColor={
+                        remoteCameraState.type ===
+                            FollowModeType.activePresenter ||
+                        (remoteCameraState.type === FollowModeType.local &&
+                            remoteCameraState.otherUsersCount > 0)
+                            ? tokens.colorPaletteRedBackground3
+                            : tokens.colorPaletteBlueBorderActive
+                    }
+                />
+            )}
             {!!sharedColorsMap && !!selectedMaterialName && (
                 <div
                     style={{
                         position: "absolute",
-                        top: "24px",
+                        top: "72px",
                         right: "24px",
                     }}
                 >
@@ -348,50 +523,6 @@ const BabylonScene: FC = () => {
                     />
                 </div>
             )}
-            {/* Presenter control bar */}
-            {localUser && (
-                <FlexRow
-                    hAlign="end"
-                    gap="small"
-                    style={{
-                        position: "absolute",
-                        bottom: "24px",
-                        right: "24px",
-                    }}
-                >
-                    {!!followingUserId &&
-                        !followPresenter &&
-                        !localUserIsPresenter && (
-                            <Button
-                                onClick={() => {
-                                    setFollowPresenter(true);
-                                }}
-                            >
-                                {"Sync to presenter"}
-                            </Button>
-                        )}
-                    <Button appearance="primary" onClick={onClickToggleControl}>
-                        {followingUserId !== localUser.userId
-                            ? "Take control"
-                            : "Release control"}
-                    </Button>
-                </FlexRow>
-            )}
         </>
     );
 };
-
-const ROUNDING_ERROR_TOLERANCE = 0.000000000001;
-function vectorsAreRoughlyEqual(v1: Vector3, v2: Vector3): boolean {
-    console.log(Math.abs(v1.x - v2.x));
-    if (Math.abs(v1.x - v2.x) >= ROUNDING_ERROR_TOLERANCE) {
-        return false;
-    }
-    if (Math.abs(v1.y - v2.y) >= ROUNDING_ERROR_TOLERANCE) {
-        return false;
-    }
-    if (Math.abs(v1.z - v2.z) >= ROUNDING_ERROR_TOLERANCE) {
-        return false;
-    }
-    return true;
-}

@@ -98,7 +98,7 @@ export abstract class LiveDataObject<
      * @hidden
      * Dependency injection setter for `LiveShareRuntime`.
      */
-    protected __dangerouslySetLiveRuntime(value: LiveShareRuntime) {
+    public __dangerouslySetLiveRuntime(value: LiveShareRuntime) {
         this._liveRuntime = value;
     }
 

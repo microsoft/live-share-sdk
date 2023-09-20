@@ -32,6 +32,8 @@ import {
     FollowModeSmallButton,
 } from "../components";
 import { vectorsAreRoughlyEqual } from "../utils/vector-utils";
+import { LiveCanvasOverlay } from "../components/LiveCanvasOverlay";
+import { LiveSessionControls } from "../components/LiveSessionControls";
 const IN_TEAMS = inTeams();
 
 export const TabContent: FC = () => {
@@ -95,6 +97,7 @@ const BabylonScene: FC = () => {
 
     const sceneRef = useRef<Nullable<BabyScene>>(null);
     const cameraRef = useRef<ArcRotateCamera>(null);
+    const pointerElementRef = useRef<HTMLDivElement>(null);
     /**
      * Expected remote positions from following user (queue).
      * Used to help determine when a camera position update in `onViewMatrixChangedObservable` was triggered via remote update.
@@ -290,6 +293,16 @@ const BabylonScene: FC = () => {
         };
     }, [onCameraViewMatrixChanged]);
 
+    const liveCanvasActive = remoteCameraState
+        ? [
+              FollowModeType.followPresenter,
+              FollowModeType.followUser,
+              FollowModeType.activePresenter,
+          ].includes(remoteCameraState.type) ||
+          (remoteCameraState.type === FollowModeType.local &&
+              remoteCameraState.otherUsersCount > 0)
+        : false;
+
     return (
         <>
             {!!remoteCameraState && (
@@ -368,103 +381,53 @@ const BabylonScene: FC = () => {
                     </FlexRow>
                 </FlexRow>
             )}
-            <Engine antialias adaptToDeviceRatio canvasId="babylonJS">
-                <Scene
-                    clearColor={Color4.FromHexString(
-                        tokens.colorNeutralBackground2
-                    )}
-                    onReadyObservable={(scene: any) => {
-                        sceneRef.current = scene;
-                        if (sceneRef.current) {
-                            sceneRef.current.onPointerDown = handlePointerDown;
-                            applyRemoteColors();
-                            snapCameraIfFollowingUser();
-                        }
-                    }}
-                >
-                    <pointLight name="omni" position={new Vector3(0, 50, 0)} />
-                    <arcRotateCamera
-                        name="arc"
-                        target={new Vector3(0, 0, 0)}
-                        alpha={Math.PI / 2}
-                        beta={Math.PI / 2}
-                        radius={150}
-                        wheelPrecision={50} // Adjust this to make zoom faster/slower
-                        panningSensibility={100} // Adjust this to make panning faster/slower
-                        ref={cameraRef}
-                    />
-                    <hemisphericLight
-                        name="light1"
-                        intensity={0.7}
-                        direction={Vector3.Up()}
-                    />
-                    <ErrorBoundary fallback={<></>}>
-                        <Suspense fallback={<></>}>
-                            <Model
-                                name="plane.glb"
-                                rootUrl={"/"}
-                                sceneFilename={"plane.glb"}
-                            />
-                        </Suspense>
-                    </ErrorBoundary>
-                </Scene>
-            </Engine>
-            {/* Follow mode information / actions */}
-            {!!remoteCameraState &&
-                (remoteCameraState.type !== FollowModeType.local ||
-                    remoteCameraState.otherUsersCount > 0) && (
-                    <FlexRow
-                        hAlign="center"
-                        vAlign="center"
-                        style={{
-                            position: "absolute",
-                            bottom: 0,
-                            left: "50%",
-                            transform: "translate(-50% , 0%)",
-                            "-webkit-transform": "translate(-50%, 0%)",
-                            paddingBottom: "4px",
-                            paddingTop: "4px",
-                            paddingLeft: "16px",
-                            paddingRight: "4px",
-                            borderRadius: "4px",
-                            minHeight: "24px",
-                            backgroundColor:
-                                remoteCameraState.type ===
-                                    FollowModeType.activePresenter ||
-                                (remoteCameraState.type ===
-                                    FollowModeType.local &&
-                                    remoteCameraState.otherUsersCount > 0)
-                                    ? tokens.colorPaletteRedBackground3
-                                    : tokens.colorPaletteBlueBorderActive,
+            <FlexColumn fill="view" ref={pointerElementRef}>
+                <Engine antialias adaptToDeviceRatio canvasId="babylonJS">
+                    <Scene
+                        clearColor={Color4.FromHexString(
+                            tokens.colorNeutralBackground2
+                        )}
+                        onReadyObservable={(scene: any) => {
+                            sceneRef.current = scene;
+                            if (sceneRef.current) {
+                                sceneRef.current.onPointerDown =
+                                    handlePointerDown;
+                                applyRemoteColors();
+                                snapCameraIfFollowingUser();
+                            }
                         }}
                     >
-                        <FollowModeInfoText />
-                        {remoteCameraState.type ===
-                            FollowModeType.activePresenter && (
-                            <FollowModeSmallButton onClick={stopPresenting}>
-                                {"STOP"}
-                            </FollowModeSmallButton>
-                        )}
-                        {remoteCameraState.type ===
-                            FollowModeType.followUser && (
-                            <FollowModeSmallButton onClick={stopFollowing}>
-                                {"STOP"}
-                            </FollowModeSmallButton>
-                        )}
-                        {remoteCameraState.type ===
-                            FollowModeType.suspendFollowPresenter && (
-                            <FollowModeSmallButton onClick={endSuspension}>
-                                {"FOLLOW"}
-                            </FollowModeSmallButton>
-                        )}
-                        {remoteCameraState.type ===
-                            FollowModeType.suspendFollowUser && (
-                            <FollowModeSmallButton onClick={endSuspension}>
-                                {"RESUME"}
-                            </FollowModeSmallButton>
-                        )}
-                    </FlexRow>
-                )}
+                        <pointLight
+                            name="omni"
+                            position={new Vector3(0, 50, 0)}
+                        />
+                        <arcRotateCamera
+                            name="arc"
+                            target={new Vector3(0, 0, 0)}
+                            alpha={Math.PI / 2}
+                            beta={Math.PI / 2}
+                            radius={150}
+                            wheelPrecision={50} // Adjust this to make zoom faster/slower
+                            panningSensibility={100} // Adjust this to make panning faster/slower
+                            ref={cameraRef}
+                        />
+                        <hemisphericLight
+                            name="light1"
+                            intensity={0.7}
+                            direction={Vector3.Up()}
+                        />
+                        <ErrorBoundary fallback={<></>}>
+                            <Suspense fallback={<></>}>
+                                <Model
+                                    name="plane.glb"
+                                    rootUrl={"/"}
+                                    sceneFilename={"plane.glb"}
+                                />
+                            </Suspense>
+                        </ErrorBoundary>
+                    </Scene>
+                </Engine>
+            </FlexColumn>
             {/* Decorative border while following / presenting */}
             {((!!remoteCameraState &&
                 [
@@ -523,6 +486,72 @@ const BabylonScene: FC = () => {
                     />
                 </div>
             )}
+            {/* LiveCanvas for inking */}
+            {remoteCameraState?.followingUserId &&
+                remoteCameraState.value &&
+                liveCanvasActive && (
+                    <LiveCanvasOverlay
+                        pointerElementRef={pointerElementRef}
+                        followingUserId={remoteCameraState.followingUserId}
+                        zPosition={remoteCameraState.value.cameraPosition.z}
+                    />
+                )}
+            {/* Follow mode information / actions */}
+            {!!remoteCameraState &&
+                (remoteCameraState.type !== FollowModeType.local ||
+                    remoteCameraState.otherUsersCount > 0) && (
+                    <FlexRow
+                        hAlign="center"
+                        vAlign="center"
+                        style={{
+                            position: "absolute",
+                            top: 72,
+                            left: "50%",
+                            transform: "translate(-50% , 0%)",
+                            "-webkit-transform": "translate(-50%, 0%)",
+                            paddingBottom: "4px",
+                            paddingTop: "4px",
+                            paddingLeft: "16px",
+                            paddingRight: "4px",
+                            borderRadius: "4px",
+                            minHeight: "24px",
+                            backgroundColor:
+                                remoteCameraState.type ===
+                                    FollowModeType.activePresenter ||
+                                (remoteCameraState.type ===
+                                    FollowModeType.local &&
+                                    remoteCameraState.otherUsersCount > 0)
+                                    ? tokens.colorPaletteRedBackground3
+                                    : tokens.colorPaletteBlueBorderActive,
+                        }}
+                    >
+                        <FollowModeInfoText />
+                        {remoteCameraState.type ===
+                            FollowModeType.activePresenter && (
+                            <FollowModeSmallButton onClick={stopPresenting}>
+                                {"STOP"}
+                            </FollowModeSmallButton>
+                        )}
+                        {remoteCameraState.type ===
+                            FollowModeType.followUser && (
+                            <FollowModeSmallButton onClick={stopFollowing}>
+                                {"STOP"}
+                            </FollowModeSmallButton>
+                        )}
+                        {remoteCameraState.type ===
+                            FollowModeType.suspendFollowPresenter && (
+                            <FollowModeSmallButton onClick={endSuspension}>
+                                {"FOLLOW"}
+                            </FollowModeSmallButton>
+                        )}
+                        {remoteCameraState.type ===
+                            FollowModeType.suspendFollowUser && (
+                            <FollowModeSmallButton onClick={endSuspension}>
+                                {"RESUME"}
+                            </FollowModeSmallButton>
+                        )}
+                    </FlexRow>
+                )}
         </>
     );
 };

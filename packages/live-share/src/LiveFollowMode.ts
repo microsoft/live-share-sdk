@@ -45,9 +45,13 @@ export interface ILiveFollowModeEvents<TData = any>
 
 export enum FollowModeType {
     /**
-     * Local user is not following anyone and there is no presenter.
+     * Local user is not following anyone, there is no presenter, and nobody is following them.
      */
     local = "local",
+    /**
+     * Local user is being followed by other remote users.
+     */
+    activeFollowers = "activeFollowers",
     /**
      * Local user is actively presenting to other users.
      */
@@ -255,6 +259,19 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
             };
         }
 
+        const userCountFollowingLocalUser = this.getUserFollowers(
+            localUser.userId,
+            PresenceState.online
+        ).length;
+        if (userCountFollowingLocalUser > 0) {
+            // User is being followed by other users
+            return {
+                value: localUser.data.stateValue,
+                followingUserId: localUser.userId,
+                type: FollowModeType.activeFollowers,
+                otherUsersCount: userCountFollowingLocalUser,
+            };
+        }
         // User is not following anyone and nobody is presenting
         return {
             value: localUser.data.stateValue,

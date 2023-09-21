@@ -26,7 +26,7 @@ export const FollowModeInfoText: FC = () => {
     const localFollowers =
         liveFollowMode &&
         localUser &&
-        remoteCameraState?.type === FollowModeType.local
+        remoteCameraState?.type === FollowModeType.activeFollowers
             ? liveFollowMode.getUserFollowers(localUser.userId)
             : [];
     const followingUser = remoteCameraState?.followingUserId
@@ -42,10 +42,10 @@ export const FollowModeInfoText: FC = () => {
         >
             {remoteCameraState?.type === FollowModeType.activePresenter &&
                 `Presenting to ${allUsers.length - 1} others`}
-            {remoteCameraState?.type === FollowModeType.local &&
+            {remoteCameraState?.type === FollowModeType.activeFollowers &&
                 localFollowers.length === 1 &&
                 `${localFollowers[0].displayName} is following you`}
-            {remoteCameraState?.type === FollowModeType.local &&
+            {remoteCameraState?.type === FollowModeType.activeFollowers &&
                 localFollowers.length > 1 &&
                 `${localFollowers.length} others are following you`}
             {remoteCameraState?.type === FollowModeType.followPresenter &&

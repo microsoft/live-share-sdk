@@ -3,11 +3,20 @@ import { FollowModeType, TestLiveShareHost } from "@microsoft/live-share";
 import {
     LiveShareProvider,
     useLiveFollowMode,
+    useLiveShareContext,
     useSharedMap,
 } from "@microsoft/live-share-react";
 import { LiveShareHost, UserMeetingRole } from "@microsoft/teams-js";
 import { inTeams } from "../utils/inTeams";
-import { FC, useState, useEffect, useRef, Suspense, useCallback } from "react";
+import {
+    FC,
+    useState,
+    useEffect,
+    useRef,
+    Suspense,
+    useCallback,
+    ReactNode,
+} from "react";
 import { Engine, Scene, Model } from "react-babylonjs";
 import { Vector3, Color3, Color4 } from "@babylonjs/core/Maths/math";
 import "@babylonjs/loaders/glTF";
@@ -22,7 +31,7 @@ import { PBRMaterial } from "@babylonjs/core/Materials";
 import { IPointerEvent } from "@babylonjs/core/Events";
 import { HexColorPicker } from "react-colorful";
 import { debounce } from "lodash";
-import { Button, Text, tokens } from "@fluentui/react-components";
+import { Button, Spinner, Text, tokens } from "@fluentui/react-components";
 import {
     DecorativeOutline,
     FlexColumn,
@@ -33,7 +42,7 @@ import {
 } from "../components";
 import { vectorsAreRoughlyEqual } from "../utils/vector-utils";
 import { LiveCanvasOverlay } from "../components/LiveCanvasOverlay";
-import { LiveSessionControls } from "../components/LiveSessionControls";
+
 const IN_TEAMS = inTeams();
 
 export const TabContent: FC = () => {
@@ -42,9 +51,24 @@ export const TabContent: FC = () => {
     );
     return (
         <LiveShareProvider joinOnLoad host={host}>
-            <BabylonScene />
+            <LoadingErrorWrapper>
+                <LiveObjectViewer />
+            </LoadingErrorWrapper>
         </LiveShareProvider>
     );
+};
+
+export const LoadingErrorWrapper: FC<{
+    children?: ReactNode;
+}> = ({ children }) => {
+    const { joined, joinError } = useLiveShareContext();
+    if (joinError) {
+        return <Text>{joinError?.message}</Text>;
+    }
+    if (!joined) {
+        return <Spinner />;
+    }
+    return <>{children}</>;
 };
 
 const DEBOUNCE_SEND_CAMERA_UPDATES_INTERVAL = 100;
@@ -61,7 +85,7 @@ export const ALLOWED_ROLES = [
     UserMeetingRole.presenter,
 ];
 
-const BabylonScene: FC = () => {
+const LiveObjectViewer: FC = () => {
     /**
      * Synchronized SharedMap for the color values that correspond to a material in the loaded .glb file
      */
@@ -76,23 +100,24 @@ const BabylonScene: FC = () => {
     const [selectedMaterialName, setSelectedMaterialName] = useState<
         string | null
     >(null);
+
     /**
      * Following state to track which camera position to display
      */
     const {
-        allUsers,
-        state: remoteCameraState,
-        update: updateUserCameraState,
-        startPresenting,
-        stopPresenting,
-        followUser,
-        stopFollowing,
-        beginSuspension,
-        endSuspension,
+        allUsers, // List of users with info about who they are following and their custom state value.
+        state: remoteCameraState, // The relevant state based on who is presenting / the user is following
+        update: updateUserCameraState, // Update the local user's state value
+        startPresenting, // Start presenting / take control
+        stopPresenting, // Release control
+        followUser, // Start following a specific user
+        stopFollowing, // Stop following the currently followed user
+        beginSuspension, // Temporarily suspend following the presenter / followed user
+        endSuspension, // Resume following the presenter / followed user
     } = useLiveFollowMode<ICustomFollowData | undefined>(
-        "FOLLOW_MODE",
-        undefined,
-        ALLOWED_ROLES
+        "FOLLOW_MODE", // unique key for DDS
+        undefined, // default value
+        ALLOWED_ROLES // roles who can "take control" of presenting
     );
 
     const sceneRef = useRef<Nullable<BabyScene>>(null);
@@ -204,6 +229,7 @@ const BabylonScene: FC = () => {
         if (
             [
                 FollowModeType.local,
+                FollowModeType.activeFollowers,
                 FollowModeType.activePresenter,
                 FollowModeType.suspendFollowPresenter,
                 FollowModeType.suspendFollowUser,
@@ -255,6 +281,7 @@ const BabylonScene: FC = () => {
                 !remoteCameraState ||
                 [
                     FollowModeType.local,
+                    FollowModeType.activeFollowers,
                     FollowModeType.activePresenter,
                     FollowModeType.suspendFollowPresenter,
                     FollowModeType.suspendFollowUser,
@@ -298,9 +325,8 @@ const BabylonScene: FC = () => {
               FollowModeType.followPresenter,
               FollowModeType.followUser,
               FollowModeType.activePresenter,
-          ].includes(remoteCameraState.type) ||
-          (remoteCameraState.type === FollowModeType.local &&
-              remoteCameraState.otherUsersCount > 0)
+              FollowModeType.activeFollowers,
+          ].includes(remoteCameraState.type)
         : false;
 
     return (
@@ -339,12 +365,14 @@ const BabylonScene: FC = () => {
                             width: "132px",
                         }}
                     >
-                        {remoteCameraState.type === FollowModeType.local && (
+                        {(remoteCameraState.type === FollowModeType.local ||
+                            remoteCameraState.type ===
+                                FollowModeType.activeFollowers) && (
                             <Button
                                 appearance="primary"
                                 onClick={startPresenting}
                             >
-                                {"Start presenting"}
+                                {"Spotlight me"}
                             </Button>
                         )}
                         {remoteCameraState.type ===
@@ -353,7 +381,7 @@ const BabylonScene: FC = () => {
                                 appearance="primary"
                                 onClick={stopPresenting}
                             >
-                                {"Stop presenting"}
+                                {"Stop spotlight"}
                             </Button>
                         )}
                         {(remoteCameraState.type ===
@@ -429,26 +457,24 @@ const BabylonScene: FC = () => {
                 </Engine>
             </FlexColumn>
             {/* Decorative border while following / presenting */}
-            {((!!remoteCameraState &&
+            {!!remoteCameraState &&
                 [
                     FollowModeType.activePresenter,
+                    FollowModeType.activeFollowers,
                     FollowModeType.followPresenter,
                     FollowModeType.followUser,
-                ].includes(remoteCameraState.type)) ||
-                (remoteCameraState &&
-                    remoteCameraState.type === FollowModeType.local &&
-                    remoteCameraState.otherUsersCount > 0)) && (
-                <DecorativeOutline
-                    borderColor={
-                        remoteCameraState.type ===
-                            FollowModeType.activePresenter ||
-                        (remoteCameraState.type === FollowModeType.local &&
-                            remoteCameraState.otherUsersCount > 0)
-                            ? tokens.colorPaletteRedBackground3
-                            : tokens.colorPaletteBlueBorderActive
-                    }
-                />
-            )}
+                ].includes(remoteCameraState.type) && (
+                    <DecorativeOutline
+                        borderColor={
+                            remoteCameraState.type ===
+                                FollowModeType.activePresenter ||
+                            remoteCameraState.type ===
+                                FollowModeType.activeFollowers
+                                ? tokens.colorPaletteRedBackground3
+                                : tokens.colorPaletteBlueBorderActive
+                        }
+                    />
+                )}
             {!!sharedColorsMap && !!selectedMaterialName && (
                 <div
                     style={{
@@ -498,8 +524,7 @@ const BabylonScene: FC = () => {
                 )}
             {/* Follow mode information / actions */}
             {!!remoteCameraState &&
-                (remoteCameraState.type !== FollowModeType.local ||
-                    remoteCameraState.otherUsersCount > 0) && (
+                remoteCameraState.type !== FollowModeType.local && (
                     <FlexRow
                         hAlign="center"
                         vAlign="center"
@@ -518,9 +543,8 @@ const BabylonScene: FC = () => {
                             backgroundColor:
                                 remoteCameraState.type ===
                                     FollowModeType.activePresenter ||
-                                (remoteCameraState.type ===
-                                    FollowModeType.local &&
-                                    remoteCameraState.otherUsersCount > 0)
+                                remoteCameraState.type ===
+                                    FollowModeType.activeFollowers
                                     ? tokens.colorPaletteRedBackground3
                                     : tokens.colorPaletteBlueBorderActive,
                         }}

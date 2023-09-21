@@ -6,7 +6,9 @@ import { FollowModeType } from "@microsoft/live-share";
 
 export const FollowModeInfoText: FC = () => {
     /**
-     * Following state to track which camera position to display
+     * Following state to track which camera position to display.
+     * We could pass this as a prop to FollowModeInfoText, but showing here to show that it is optional.
+     * As long as the unique key is the same in components using this hook, the values will be in sync.
      */
     const {
         localUser,

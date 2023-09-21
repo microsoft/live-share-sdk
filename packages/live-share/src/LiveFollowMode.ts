@@ -111,6 +111,13 @@ export interface IFollowModeState<TData = any> {
      * Number of other non-local users following along with this current state value
      */
     otherUsersCount: number;
+    /**
+     * Indicates that is true when the {@link value} is referencing the local user's {@link IFollowModePresenceUserData["stateValue"]}.
+     *
+     * @remarks
+     * When true, {@link followingUserId} may not be the local user's id when {@link type} is `suspendFollowUser` or `suspendFollowPresenter`.
+     */
+    isLocalValue: boolean;
 }
 
 /**
@@ -213,15 +220,17 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
                     followingUserId: presentingUser.userId,
                     type: FollowModeType.activePresenter,
                     otherUsersCount,
+                    isLocalValue: true,
                 };
             }
             if (this._suspended) {
-                // There is a presenting user but the local user is out of sync
+                // There is a presenting user but the local user is suspended
                 return {
                     value: localUser.data.stateValue,
                     followingUserId: presentingUser.userId,
                     type: FollowModeType.suspendFollowPresenter,
                     otherUsersCount,
+                    isLocalValue: true,
                 };
             }
             // There is a presenting user and the local user is in sync
@@ -230,6 +239,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
                 followingUserId: presentingUser.userId,
                 type: FollowModeType.followPresenter,
                 otherUsersCount,
+                isLocalValue: false,
             };
         }
         const followingUser = localUser.data.followingUserId
@@ -242,12 +252,13 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
                     PresenceState.online
                 ).length - 1;
             if (this._suspended) {
-                // Local user is following specific user but is out of sync
+                // Local user is following specific user but is suspended
                 return {
                     value: localUser.data.stateValue,
                     followingUserId: followingUser.userId,
                     type: FollowModeType.suspendFollowUser,
                     otherUsersCount,
+                    isLocalValue: true,
                 };
             }
             // Local user is following a specific user and is in sync
@@ -256,6 +267,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
                 followingUserId: followingUser.userId,
                 type: FollowModeType.followUser,
                 otherUsersCount,
+                isLocalValue: false,
             };
         }
 
@@ -270,6 +282,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
                 followingUserId: localUser.userId,
                 type: FollowModeType.activeFollowers,
                 otherUsersCount: userCountFollowingLocalUser,
+                isLocalValue: true,
             };
         }
         // User is not following anyone and nobody is presenting
@@ -281,6 +294,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
                 localUser.userId,
                 PresenceState.online
             ).length,
+            isLocalValue: true,
         };
     }
 
@@ -311,57 +325,6 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
     private get presence() {
         assert(this._presence !== undefined, "_presence not initialized");
         return this._presence;
-    }
-
-    /**
-     * initializingFirstTime is run only once by the first client to create the DataObject. Here we use it to
-     * initialize the state of the DataObject.
-     */
-    protected async initializingFirstTime() {
-        // We create the live state instance
-        const presentingUserIdLiveStatePromise =
-            LiveState.factory.createChildInstance(this.context);
-        // We create the live state instance
-        const livePresencePromise = LivePresence.factory.createChildInstance(
-            this.context
-        );
-        try {
-            const [presentingUserLiveState, livePresence] = await Promise.all([
-                presentingUserIdLiveStatePromise,
-                livePresencePromise,
-            ]);
-            // Set object(s) to root
-            this.root.set(
-                presentingUserIdLiveStateKey,
-                presentingUserLiveState.handle
-            );
-            this.root.set(livePresenceKey, livePresence.handle);
-        } catch (err: unknown) {
-            console.log(err);
-        }
-    }
-
-    /**
-     * hasInitialized is run by each client as they load the DataObject.  Here we use it to initialize the
-     * task manager, listen for task assignments, and listen for changes to the dynamic objects map.
-     */
-    protected async hasInitialized() {
-        // Get object handles
-        const presentingUserIdLiveStateHandle = this.root.get<
-            IFluidHandle<LiveState>
-        >(presentingUserIdLiveStateKey);
-        const presenceHandle =
-            this.root.get<IFluidHandle<LivePresence>>(livePresenceKey);
-        const [liveState, livePresence] = await Promise.all([
-            presentingUserIdLiveStateHandle?.get(),
-            presenceHandle?.get(),
-        ]);
-        liveState?.__dangerouslySetLiveRuntime(this.liveRuntime);
-        livePresence?.__dangerouslySetLiveRuntime(this.liveRuntime);
-        this._presentingUserIdState = liveState;
-        this._presence = livePresence as LivePresence<
-            IFollowModePresenceUserData<TData>
-        >;
     }
 
     /**
@@ -682,6 +645,57 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
         super.dispose();
         this.presence.dispose();
         this.presentingUserIdState.dispose();
+    }
+
+    /**
+     * initializingFirstTime is run only once by the first client to create the DataObject. Here we use it to
+     * initialize the state of the DataObject.
+     */
+    protected async initializingFirstTime() {
+        // We create the live state instance
+        const presentingUserIdLiveStatePromise =
+            LiveState.factory.createChildInstance(this.context);
+        // We create the live state instance
+        const livePresencePromise = LivePresence.factory.createChildInstance(
+            this.context
+        );
+        try {
+            const [presentingUserLiveState, livePresence] = await Promise.all([
+                presentingUserIdLiveStatePromise,
+                livePresencePromise,
+            ]);
+            // Set object(s) to root
+            this.root.set(
+                presentingUserIdLiveStateKey,
+                presentingUserLiveState.handle
+            );
+            this.root.set(livePresenceKey, livePresence.handle);
+        } catch (err: unknown) {
+            console.log(err);
+        }
+    }
+
+    /**
+     * hasInitialized is run by each client as they load the DataObject.  Here we use it to initialize the
+     * task manager, listen for task assignments, and listen for changes to the dynamic objects map.
+     */
+    protected async hasInitialized() {
+        // Get object handles
+        const presentingUserIdLiveStateHandle = this.root.get<
+            IFluidHandle<LiveState>
+        >(presentingUserIdLiveStateKey);
+        const presenceHandle =
+            this.root.get<IFluidHandle<LivePresence>>(livePresenceKey);
+        const [liveState, livePresence] = await Promise.all([
+            presentingUserIdLiveStateHandle?.get(),
+            presenceHandle?.get(),
+        ]);
+        liveState?.__dangerouslySetLiveRuntime(this.liveRuntime);
+        livePresence?.__dangerouslySetLiveRuntime(this.liveRuntime);
+        this._presentingUserIdState = liveState;
+        this._presence = livePresence as LivePresence<
+            IFollowModePresenceUserData<TData>
+        >;
     }
 
     /**

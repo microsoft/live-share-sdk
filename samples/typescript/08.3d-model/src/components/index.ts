@@ -1,17 +1,23 @@
-import { FlexRow, FlexColumn, FlexItem } from "./flex";
-import { LiveAvatars } from "./LiveAvatars";
 import { DecorativeOutline } from "./DecorativeOutline";
+import ErrorBoundary from "./ErrorBoundary";
+import { FlexRow, FlexColumn, FlexItem } from "./flex";
+import { FollowModeInfoBar } from "./FollowModeInfoBar";
 import { FollowModeInfoText } from "./FollowModeInfoText";
 import { FollowModeSmallButton } from "./FollowModeSmallButton";
-import ErrorBoundary from "./ErrorBoundary";
+import { LiveAvatars } from "./LiveAvatars";
+import { ModelViewerScene } from "./ModelViewerScene";
+import { TopHeaderBar } from "./TopHeaderBar";
 
 export {
-    FlexRow,
+    DecorativeOutline,
+    ErrorBoundary,
     FlexColumn,
     FlexItem,
-    ErrorBoundary,
-    LiveAvatars,
+    FlexRow,
+    FollowModeInfoBar,
     FollowModeInfoText,
     FollowModeSmallButton,
-    DecorativeOutline,
+    LiveAvatars,
+    ModelViewerScene,
+    TopHeaderBar,
 };

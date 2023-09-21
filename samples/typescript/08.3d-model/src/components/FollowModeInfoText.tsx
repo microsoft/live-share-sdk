@@ -34,6 +34,49 @@ export const FollowModeInfoText: FC = () => {
     const followingUser = remoteCameraState?.followingUserId
         ? liveFollowMode?.getUser(remoteCameraState.followingUserId)
         : undefined;
+    function getTextToDisplay(): string {
+        if (!remoteCameraState) {
+            throw new Error(
+                "FollowModeInfoText getTextInfoDisplay(): this function should not be called if remoteCameraState is null"
+            );
+        }
+        switch (remoteCameraState.type) {
+            case FollowModeType.activePresenter: {
+                if (allUsers.length > 2) {
+                    return `Presenting to ${allUsers.length - 1} others`;
+                }
+                const nonLocalUser = allUsers.filter(
+                    (user) => !user.isLocalUser
+                )[0];
+                return `Presenting to ${nonLocalUser.displayName}`;
+            }
+            case FollowModeType.activeFollowers: {
+                if (localFollowers.length === 1) {
+                    return `${localFollowers[0].displayName} is following you`;
+                }
+                return `${localFollowers.length} others are following you`;
+            }
+            case FollowModeType.followPresenter:
+            case FollowModeType.suspendFollowPresenter: {
+                return `${followingUser?.displayName} is presenting`;
+            }
+            case FollowModeType.followUser: {
+                if (followers.length > 1) {
+                    `You + ${followers.length - 1} others are following ${
+                        followingUser?.displayName
+                    }`;
+                }
+                return `You are following ${followingUser?.displayName}`;
+            }
+            case FollowModeType.suspendFollowUser: {
+                return `Paused following ${followingUser?.displayName}`;
+            }
+            default:
+                return "Invalid FollowModeType";
+        }
+    }
+    if (!remoteCameraState) return null;
+
     return (
         <Text
             align="center"
@@ -42,29 +85,7 @@ export const FollowModeInfoText: FC = () => {
                 marginRight: "12px",
             }}
         >
-            {remoteCameraState?.type === FollowModeType.activePresenter &&
-                `Presenting to ${allUsers.length - 1} others`}
-            {remoteCameraState?.type === FollowModeType.activeFollowers &&
-                localFollowers.length === 1 &&
-                `${localFollowers[0].displayName} is following you`}
-            {remoteCameraState?.type === FollowModeType.activeFollowers &&
-                localFollowers.length > 1 &&
-                `${localFollowers.length} others are following you`}
-            {remoteCameraState?.type === FollowModeType.followPresenter &&
-                `${followingUser?.displayName} is presenting`}
-            {remoteCameraState?.type === FollowModeType.followUser &&
-                followers.length <= 1 &&
-                `You are following ${followingUser?.displayName}`}
-            {remoteCameraState?.type === FollowModeType.followUser &&
-                followers.length > 1 &&
-                `You + ${followers.length - 1} others are following ${
-                    followingUser?.displayName
-                }`}
-            {remoteCameraState?.type ===
-                FollowModeType.suspendFollowPresenter &&
-                `${followingUser?.displayName} is presenting`}
-            {remoteCameraState?.type === FollowModeType.suspendFollowUser &&
-                `Paused following ${followingUser?.displayName}`}
+            {getTextToDisplay()}
         </Text>
     );
 };

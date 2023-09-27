@@ -184,6 +184,26 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     }
 
     /**
+     * Sends a throttled one-time event for the purposes of consolidating multiple signals into a single one.
+     */
+    public async sendThrottledEventForObject<TState = any>(
+        objectId: string,
+        data: TState
+    ): Promise<ILiveEvent<TState>> {
+        if (!this._synchronizer) {
+            throw new Error(
+                "LiveObjectManager.sendEventForObject: cannot send the event"
+            );
+        }
+        const valueSent = await this._synchronizer.sendThrottledEventForObject(
+            objectId,
+            data
+        );
+        this.updateEventLocallyInStore(objectId, valueSent);
+        return valueSent;
+    }
+
+    /**
      * @hidden
      * The local client was given a new clientId, move cached events to the new clientId
      */

@@ -5,6 +5,7 @@ import {
     GetAndUpdateStateHandlers,
     StateSyncEventContent,
 } from "./internal-interfaces";
+import { ThrottledEventQueue } from "./ThrottledEventQueue";
 import { LiveObjectManager } from "./LiveObjectManager";
 import { ObjectSynchronizerEvents } from "./consts";
 import { waitUntilConnected } from "./utils";
@@ -17,6 +18,8 @@ export class ContainerSynchronizer {
         string,
         GetAndUpdateStateHandlers<any>
     >();
+    private _throttledEventsQueue: ThrottledEventQueue =
+        new ThrottledEventQueue(this);
     private _connectedKeys: string[] = [];
     private _refCount = 0;
     private _hTimer: NodeJS.Timeout | undefined;
@@ -146,6 +149,63 @@ export class ContainerSynchronizer {
     }
 
     /**
+     * Sends a one-time event that is throttled for the purposes of consolidating multiple signals into a single one.
+     * @param objectId the `LiveDataObject` id
+     * @param data the date for the event to send
+     * @returns the latest events sent, or undefined if there are none
+     */
+    public async sendThrottledEventForObject<TState = any>(
+        objectId: string,
+        data: TState
+    ): Promise<ILiveEvent<TState>> {
+        const handlers = this._objects.get(objectId);
+        if (!handlers) {
+            throw new Error(
+                "ContainerSynchronizer.sendEventForObject(): cannot send an event for an object that is not registered"
+            );
+        }
+        const canSend = await handlers.getLocalUserCanSend(false);
+        if (!canSend) {
+            throw new Error(
+                "The local user doesn't meet the app requirements to send a message for this object"
+            );
+        }
+        return await this._throttledEventsQueue.sendWithQueue(objectId, {
+            data,
+            timestamp: this._liveRuntime.getTimestamp(),
+        });
+    }
+
+    /**
+     * @hidden
+     * Send a batch of events
+     * @param updates updates to send
+     * @param evtType type of event
+     * @returns event where data is then StateSyncEventContent containing the batched events that were sent.
+     */
+    public async sendEventUpdates(
+        updates: StateSyncEventContent,
+        evtType: string
+    ): Promise<ILiveEvent<StateSyncEventContent> | undefined> {
+        const updateKeys = Object.keys(updates);
+        // Send event if we have any updates to broadcast
+        // - `send` is only set if at least one component returns an update.
+        if (updateKeys.length > 0) {
+            const content: ILiveEvent<StateSyncEventContent> = {
+                clientId: await this.waitUntilConnected(),
+                data: updates,
+                timestamp:
+                    evtType === ObjectSynchronizerEvents.connect
+                        ? 0 // use zero for connect events because we are sending initial states
+                        : this._liveRuntime.getTimestamp(),
+                name: evtType,
+            };
+            this._containerRuntime.submitSignal(evtType, content);
+            return content;
+        }
+    }
+
+    /**
      * @hidden
      * Do not use this API unless you know what you are doing.
      * Using it incorrectly could cause object synchronizers to stop working.
@@ -181,28 +241,6 @@ export class ContainerSynchronizer {
             console.error(
                 `LiveObjectSynchronizer: error sending update - ${err.toString()}`
             );
-        }
-    }
-
-    private async sendEventUpdates(
-        updates: StateSyncEventContent,
-        evtType: string
-    ): Promise<ILiveEvent<StateSyncEventContent> | undefined> {
-        const updateKeys = Object.keys(updates);
-        // Send event if we have any updates to broadcast
-        // - `send` is only set if at least one component returns an update.
-        if (updateKeys.length > 0) {
-            const content: ILiveEvent<StateSyncEventContent> = {
-                clientId: await this.waitUntilConnected(),
-                data: updates,
-                timestamp:
-                    evtType === ObjectSynchronizerEvents.connect
-                        ? 0 // use zero for connect events because we are sending initial states
-                        : this._liveRuntime.getTimestamp(),
-                name: evtType,
-            };
-            this._containerRuntime.submitSignal(evtType, content);
-            return content;
         }
     }
 

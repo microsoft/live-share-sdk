@@ -193,10 +193,12 @@ export class LivePresence<
         // We do before sending initial update, since that requires this to happen first.
         this.initializeState = LiveDataObjectInitializeState.succeeded;
 
-        // Broadcast initial presence, or silently fail trying
-        await this.update(
+        // Broadcast initial presence, or silently fail trying.
+        // Throttled so that a developer can have multiple presence instances in their app in a performant manner.
+        await this.updateInternal(
             this._currentPresence!.data.data,
-            this._currentPresence!.data.state
+            this._currentPresence!.data.state,
+            true
         ).catch(() => {});
     }
 
@@ -235,28 +237,7 @@ export class LivePresence<
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async update(data?: TData, state?: PresenceState): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LivePresence: not initialized prior to calling \`.update()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this._synchronizer) {
-            throw new Error(
-                `LivePresence: this._synchronizer is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
-        if (!this._currentPresence) {
-            throw new Error(
-                `LivePresence: this._currentPresence is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
-
-        // Broadcast state change
-        const evt = await this._synchronizer!.sendEvent({
-            state: state ?? this._currentPresence.data.state,
-            data: cloneValue(data) ?? this._currentPresence.data.data,
-        });
-        await this.updateMembersList(evt, true);
+        return await this.updateInternal(data, state);
     }
 
     /**
@@ -277,6 +258,41 @@ export class LivePresence<
      */
     public getUser(userId: string): LivePresenceUser<TData> | undefined {
         return this._users.find((user) => user.userId == userId);
+    }
+
+    /**
+     * Internal method to send an update, with optional ability to throttle.
+     */
+    private async updateInternal(
+        data?: TData,
+        state?: PresenceState,
+        throttle: boolean = false
+    ): Promise<void> {
+        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
+            throw new Error(
+                `LivePresence: not initialized prior to calling \`.update()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
+            );
+        }
+        if (!this._synchronizer) {
+            throw new Error(
+                `LivePresence: this._synchronizer is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
+            );
+        }
+        if (!this._currentPresence) {
+            throw new Error(
+                `LivePresence: this._currentPresence is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
+            );
+        }
+
+        // Broadcast state change
+        const evtToSend = {
+            state: state ?? this._currentPresence.data.state,
+            data: cloneValue(data) ?? this._currentPresence.data.data,
+        };
+        const evt = throttle
+            ? await this._synchronizer!.sendThrottledEvent(evtToSend)
+            : await this._synchronizer!.sendEvent(evtToSend);
+        await this.updateMembersList(evt, true);
     }
 
     /**

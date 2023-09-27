@@ -153,4 +153,19 @@ export class LiveObjectSynchronizer<TState> {
     public sendEvent<TState = any>(data: TState): Promise<ILiveEvent<TState>> {
         return this.liveRuntime.objectManager.sendEventForObject(this.id, data);
     }
+
+    /**
+     * @hidden
+     * Sends a throttled one-time event for the purposes of consolidating multiple signals into a single one.
+     * @param data the date for the event to send
+     * @returns the event that was sent
+     */
+    public sendThrottledEvent<TState = any>(
+        data: TState
+    ): Promise<ILiveEvent<TState>> {
+        return this.liveRuntime.objectManager.sendThrottledEventForObject(
+            this.id,
+            data
+        );
+    }
 }

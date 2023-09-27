@@ -623,7 +623,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 );
                 // If not local, we expect that isLocalUser will become true once we receive a message from the other client
                 if (!local && !user.isLocalUser) {
-                    await waitForDelay(10);
+                    await waitForDelay(50);
                 }
                 assert(user.isLocalUser == true, `user1: should be local`);
                 object1done.resolve();
@@ -646,7 +646,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
                 );
                 // If not local, we expect that isLocalUser will become true once we receive a message from the other client
                 if (!local && !user.isLocalUser) {
-                    await waitForDelay(10);
+                    await waitForDelay(50);
                 }
                 assert(user.isLocalUser == true, `user1: should be local`);
                 object2done.resolve();
@@ -741,11 +741,11 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         );
         assert(
             object1User.data?.foo == "cat",
-            "object1 data.foo should be cat"
+            `object1 data.foo should be cat, instead is ${object1User.data?.foo}`
         );
         assert(
             object2User.data?.foo == "cat",
-            "object2 data.foo should be cat"
+            `object2 data.foo should be cat, instead is ${object1User.data?.foo}`
         );
         assert(
             object1User.getConnection(await object1.clientId())?.data?.foo ==
@@ -769,17 +769,19 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         );
 
         await object2.update({ foo: "dog" });
+        // Wait for one event loop for remote object1 to receive the change from object2
+        await waitForDelay(0);
         // redeclare to supress incorrect lint warning, delete to see
         object1User = object1.getUser("user1")!;
         object2User = object2.getUser("user1")!;
 
         assert(
             object1User.data?.foo == "dog",
-            "object1 data.foo should be dog"
+            `object1 data.foo should be dog, instead is ${object1User.data?.foo}`
         );
         assert(
             object2User.data?.foo == "dog",
-            "object2 data.foo should be dog"
+            `object2 data.foo should be dog, instead is ${object1User.data?.foo}`
         );
         assert(
             object1User?.getConnection(await object1.clientId())?.data?.foo ==

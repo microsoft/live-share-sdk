@@ -3,7 +3,6 @@ import { FollowModeType, TestLiveShareHost } from "@microsoft/live-share";
 import {
     LiveShareProvider,
     useLiveFollowMode,
-    useLivePresence,
     useLiveShareContext,
     useSharedMap,
 } from "@microsoft/live-share-react";

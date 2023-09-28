@@ -181,14 +181,13 @@ const LiveObjectViewer: FC = () => {
 
             if (pickResult && pickResult.hit && pickResult.pickedMesh) {
                 const mesh = pickResult.pickedMesh;
-                if (mesh.material) {
-                    // When the user clicks on a specific material in our object, we set it as selected to show the color picker
-                    setSelectedMaterialName(mesh.material.name);
-                }
-            } else {
-                if (!selectedMaterialName) return;
-                setSelectedMaterialName(null);
+                if (!mesh.material) return;
+                // When the user clicks on a specific material in our object, we set it as selected to show the color picker
+                setSelectedMaterialName(mesh.material.name);
+                return;
             }
+            if (!selectedMaterialName) return;
+            setSelectedMaterialName(null);
         },
         [selectedMaterialName]
     );

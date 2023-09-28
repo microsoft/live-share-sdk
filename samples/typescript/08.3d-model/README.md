@@ -1,6 +1,6 @@
 # Countdown Timer sample
 
-![GIF showing the sample functionality](./assets/06-readme-preview-image.gif)
+![GIF showing the sample functionality](./assets/08-readme-preview-image.gif)
 
 This sample shows how to use [Live Share React](../../../packages/live-share-react) and Fluent UI to create a synchronized countdown timer for users in the Live Share session.
 

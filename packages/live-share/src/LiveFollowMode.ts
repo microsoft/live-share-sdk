@@ -39,7 +39,11 @@ export interface ILiveFollowModeEvents<TData = any>
      */
     (
         event: "stateChanged",
-        listener: (state: TData, local: boolean, clientId: string) => void
+        listener: (
+            state: IFollowModeState<TData>,
+            local: boolean,
+            clientId: string
+        ) => void
     ): any;
 }
 
@@ -211,6 +215,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
             ? this.presence.getUser(this.presentingUserIdState.state)
             : undefined;
         if (presentingUser && presentingUser.data) {
+            // Count is all online users minus the presenting user
             const otherUsersCount =
                 this.getUsers(PresenceState.online).length - 1;
             if (presentingUser.isLocalUser) {
@@ -229,7 +234,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
                     value: localUser.data.stateValue,
                     followingUserId: presentingUser.userId,
                     type: FollowModeType.suspendFollowPresenter,
-                    otherUsersCount,
+                    otherUsersCount: otherUsersCount - 1,
                     isLocalValue: true,
                 };
             }
@@ -238,7 +243,8 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
                 value: presentingUser.data.stateValue,
                 followingUserId: presentingUser.userId,
                 type: FollowModeType.followPresenter,
-                otherUsersCount,
+                // don't want to count the local user in otherUsersCount
+                otherUsersCount: otherUsersCount - 1,
                 isLocalValue: false,
             };
         }

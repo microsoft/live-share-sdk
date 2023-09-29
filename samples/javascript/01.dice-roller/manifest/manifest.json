@@ -29,7 +29,8 @@
             "configurationUrl": "https://ryanbliss.ngrok.io/?view=config&inTeams=1&load=1",
             "canUpdateConfiguration": false,
             "scopes": [
-                "groupchat"
+                "groupchat",
+                "team"
             ],
             "context": [
                 "meetingSidePanel",

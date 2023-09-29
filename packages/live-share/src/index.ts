@@ -13,6 +13,7 @@ export * from "./LiveEventTarget";
 export * from "./LiveEventTimer";
 export * from "./LivePresence";
 export * from "./LivePresenceUser";
+export * from "./LiveFollowMode";
 export * from "./LiveShareClient";
 export * from "./LiveState";
 export * from "./LiveTelemetryLogger";

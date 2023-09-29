@@ -60,6 +60,17 @@ const { container } = await client.joinContainer(schema);
 ...
 ```
 
+## Features
+
+Live Share has several features that make building collaborative apps easier than ever, including:
+
+- `LiveShareClient`: Connect to a Fluid container associated with a Microsoft Teams meeting.
+- `LivePresence`: Track who is using your app during a meeting and associate custom metadata for each user (e.g., camera position).
+- `LiveState`: Synchronize a JSON-serializable value for maintaining consistent application state across clients.
+- `LiveTimer`: Build a collaborative countdown timer.
+- `LiveEvent`: Send one-time, stateless JSON-serializable values to each user in the session.
+- `LiveFollowMode` (beta): Easily integrate features to present to all, follow specific users, and suspend/resume following.
+
 ## Code samples
 
 | Sample name | Description                                                            | Javascript                                  |

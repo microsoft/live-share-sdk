@@ -1,4 +1,5 @@
 export * from "./useLivePresence";
+export * from "./useLiveFollowMode";
 export * from "./useLiveState";
 export * from "./useMediaSynchronizer";
 export * from "./useLiveEvent";

@@ -29,7 +29,8 @@
             "configurationUrl": "https://<<BASE_URI_DOMAIN>>/config?inTeams=true",
             "canUpdateConfiguration": false,
             "scopes": [
-                "groupchat"
+                "groupchat",
+                "team"
             ],
             "context": [
                 "meetingSidePanel",

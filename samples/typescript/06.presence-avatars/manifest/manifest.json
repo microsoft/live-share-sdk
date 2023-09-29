@@ -1,0 +1,68 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.12/MicrosoftTeams.schema.json",
+    "version": "1.0.1",
+    "manifestVersion": "1.12",
+    "id": "a1aff73f-adec-4d10-b016-8280de6ca2c1",
+    "packageName": "com.microsoft.teams.presence",
+    "name": {
+        "short": "Presence",
+        "full": "Presence Avatars"
+    },
+    "developer": {
+        "name": "Your name here",
+        "mpnId": "",
+        "websiteUrl": "https://www.example.com",
+        "privacyUrl": "https://www.example.com/PrivacyStatement",
+        "termsOfUseUrl": "https://www.example.com/TermsOfUse"
+    },
+    "description": {
+        "short": "See who is using your app during the meeting!",
+        "full": "Have you ever loved react so much that you made an SDK optimized for it? Us to!"
+    },
+    "icons": {
+        "outline": "outline.png",
+        "color": "color.png"
+    },
+    "accentColor": "#38a2ff",
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://{YOUR_NGROK_ORIGIN}?/config?inTeams=true",
+            "canUpdateConfiguration": false,
+            "scopes": [
+                "groupchat",
+                "team"
+            ],
+            "context": [
+                "meetingSidePanel",
+                "meetingStage"
+            ]
+        }
+    ],
+    "validDomains": [
+        "*.ngrok.io"
+    ],
+    "showLoadingIndicator": true,
+    "authorization": {
+        "permissions": {
+            "orgWide": [],
+            "resourceSpecific": [
+                {
+                    "name": "MeetingStage.Write.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "ChannelMeetingStage.Write.Group",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "LiveShareSession.ReadWrite.Chat",
+                    "type": "Delegated"
+                },
+                {
+                    "name": "LiveShareSession.ReadWrite.Group",
+                    "type": "Delegated"
+                }
+            ]
+        }
+    }
+}

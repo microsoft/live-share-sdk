@@ -26,10 +26,11 @@
     "accentColor": "#FFFFFF",
     "configurableTabs": [
         {            
-            "configurationUrl": "https://<<BASE_URI_DOMAIN>>/?config=true",
+            "configurationUrl": "https://<<BASE_URI_DOMAIN>>/?view=config&inTeams=1",
             "canUpdateConfiguration": false,
             "scopes": [
-                "groupchat"
+                "groupchat",
+                "team"
             ],
             "context": [
                 "meetingSidePanel",

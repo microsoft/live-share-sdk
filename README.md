@@ -6,6 +6,35 @@ To get started, we recommend first familiarizing yourself with the [Fluid Framew
 
 You can find our detailed API reference documentation at [Live Share reference docs](https://docs.microsoft.com/javascript/api/@microsoft/live-share/) and [Live Share Media reference docs](https://docs.microsoft.com/javascript/api/@microsoft/live-share-media/).
 
+## Collaborative features
+
+[Live Share](/packages/live-share/README.md) has several features that make building collaborative apps easier than ever, including:
+
+- `LiveShareClient`: Connect to a Fluid container associated with a Microsoft Teams meeting.
+- `LivePresence`: Track who is using your app during a meeting and associate custom metadata for each user (e.g., camera position).
+- `LiveState`: Synchronize a JSON-serializable value for maintaining consistent application state across clients.
+- `LiveTimer`: Build a collaborative countdown timer.
+- `LiveEvent`: Send one-time, stateless JSON-serializable values to each user in the session.
+- `LiveFollowMode` (beta): Easily integrate features to present to all, follow specific users, and suspend/resume following.
+
+[Live Share Canvas](/packages/live-share-canvas/README.md) is an optional extension that allows any app to add a collaborative whiteboard as an app overlay. Key classes include:
+
+- `InkingManager`: Utilizes the HTML `<canvas>` element for turn-key pen, highlighter, laser pointer, and eraser tools.
+- `LiveCanvas`: Synchronizes the `InkingManager` strokes and adds remote cursors for users in the session.
+
+[Live Share Media](/packages/live-share-media/README.md) is an optional extension that makes it easy to add co-watch support to any video or audio player. Key classes include:
+
+- `LiveMediaSession`: Synchronizes player state for everyone in the session.
+- `MediaPlayerSynchronizer`: Delegate interface used with `LiveMediaSession` to execute playback commands against a media player; matches the HTML5 `IMediaPlayer` interface for `<video>` or `<audio>` elements.
+
+[Live Share React](/packages/live-share-react/README.md) (beta) is an optional integration for React, providing a `<LiveShareProvider>` context provider component and a series of custom React hooks that correspond with each Live Share and Fluid DDS.
+
+[Fluid Framework](https://fluidframework.com/) also offers some useful collaborative features, each of which is compatible with Live Share, including:
+
+- `SharedMap`: The DDS equivalent to a JavaScript `Map`, which is useful for synchronizing a collection of objects.
+- `SharedString`: Synchronize a string text value, useful for building real-time text editors.
+- `SharedTree` (alpha): Synchronize a complex tree of intersecting nodes.
+
 ## Package Compatibility
 
 The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.npmjs.com/package/@microsoft/teams-js) and [fluid-framework](https://www.npmjs.com/package/fluid-framework) packages among others. Both of these packages are sensitive to the package version your app any libraries use. You will likely run into issues if the package version your app uses doesn't match the version other libraries you depend on use.
@@ -15,8 +44,6 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 | @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
 | --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
 | ^1.0.0                  | ^2.11.0             | ^1.2.3          | ^1.0.0                      | ^1.0.0                       | ^2.5.0                        | ^2.5.0                          |
-
-### Dev Dependencies
 
 ## Installing
 

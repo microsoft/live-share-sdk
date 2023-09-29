@@ -10,6 +10,8 @@ import { LivePresenceUser, PresenceState } from "./LivePresenceUser";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 
 /**
+ * @beta
+ *
  * Events supported by `LiveFollowMode` object.
  */
 export enum LiveFollowModeEvents {
@@ -24,6 +26,8 @@ export enum LiveFollowModeEvents {
 }
 
 /**
+ * @beta
+ *
  * Event typings for `LiveFollowMode` class.
  * @template TData Type of data object to share with clients.
  */
@@ -47,6 +51,16 @@ export interface ILiveFollowModeEvents<TData = any>
     ): any;
 }
 
+/**
+ * @beta
+ *
+ * The follow mode type.
+ *
+ * @remarks
+ * Determines which user's `stateValue` is being referenced by `LiveFollowMode`'s `state.value` field.
+ * Use to tell the user the current state of follow mode (e.g., "You are actively presenting").
+ * Use to determine any relevant button(s) to show to the user (e.g., "Stop presenting").
+ */
 export enum FollowModeType {
     /**
      * Local user is not following anyone, there is no presenter, and nobody is following them.
@@ -79,9 +93,11 @@ export enum FollowModeType {
 }
 
 /**
+ * @beta
+ *
  * Information about the state of the local user's follow mode.
  *
- * @remark
+ * @remarks
  * This includes information such as whether there is a presenting user and which user's state is relevant to the local user.
  */
 export interface IFollowModeState<TData = any> {
@@ -125,6 +141,8 @@ export interface IFollowModeState<TData = any> {
 }
 
 /**
+ * @beta
+ *
  * The presence data for a user's personal follow mode state.
  */
 export interface IFollowModePresenceUserData<TData = any> {
@@ -142,6 +160,8 @@ export interface IFollowModePresenceUserData<TData = any> {
 }
 
 /**
+ * @beta
+ *
  * Convenience type for a LivePresenceUser in LiveFollowMode
  */
 export type FollowModePresenceUser<TData = any> = LivePresenceUser<

@@ -10,6 +10,9 @@ import {
     LiveEvent,
     LivePresence,
     LiveTimer,
+    IFollowModeState,
+    FollowModePresenceUser,
+    LiveFollowMode,
 } from "@microsoft/live-share";
 import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import {
@@ -45,6 +48,9 @@ export interface ILiveShareContainerResults extends IAzureContainerResults {
     created: boolean;
 }
 
+/**
+ * Return type of `useSharedMap` hook.
+ */
 export interface IUseSharedMapResults<TData> {
     /**
      * Stateful map of most recent values from `SharedMap`.
@@ -64,6 +70,9 @@ export interface IUseSharedMapResults<TData> {
     sharedMap: SharedMap | undefined;
 }
 
+/**
+ * Return type of `useLiveEvent` hook.
+ */
 export interface IUseLiveEventResults<TEvent = any> {
     /**
      * The most recent event that has been received in the session.
@@ -85,6 +94,9 @@ export interface IUseLiveEventResults<TEvent = any> {
     liveEvent: LiveEvent | undefined;
 }
 
+/**
+ * Return type of `useLiveTimer` hook.
+ */
 export interface IUseLiveTimerResults {
     /**
      * The current timer configuration.
@@ -116,6 +128,9 @@ export interface IUseLiveTimerResults {
     pause: OnPauseTimerAction;
 }
 
+/**
+ * Return type of `useLivePresence` hook.
+ */
 export interface IUseLivePresenceResults<TData extends object = object> {
     /**
      * The local user's presence object.
@@ -142,6 +157,9 @@ export interface IUseLivePresenceResults<TData extends object = object> {
     updatePresence: OnUpdateLivePresenceAction<TData>;
 }
 
+/**
+ * Return type of `useMediaSynchronizer` hook.
+ */
 export interface IUseMediaSynchronizerResults {
     /**
      * Stateful boolean on whether the session has an active suspension.
@@ -189,6 +207,9 @@ export interface IUseMediaSynchronizerResults {
     mediaSynchronizer: MediaPlayerSynchronizer | undefined;
 }
 
+/**
+ * Return type of `useLiveCanvas` hook.
+ */
 export interface IUseLiveCanvasResults {
     /**
      * Inking manager for the canvas, which is synchronized by `liveCanvas`. It is set when loaded and undefined while loading.
@@ -198,4 +219,114 @@ export interface IUseLiveCanvasResults {
      * Live Canvas data object which synchronizes inking & cursors in the session. It is set when loaded and undefined while loading.
      */
     liveCanvas: LiveCanvas | undefined;
+}
+
+/**
+ * Return type of `useLiveFollowMode` hook.
+ */
+export interface IUseLiveFollowModeResults<TData = any> {
+    /**
+     * Gets the current follow mode state.
+     */
+    state: IFollowModeState<TData> | undefined;
+    /**
+     * Local LivePresenceUser.
+     */
+    localUser: FollowModePresenceUser<TData> | undefined;
+    /**
+     * List of non-local user's presence objects.
+     */
+    otherUsers: FollowModePresenceUser<TData>[];
+    /**
+     * List of all user's presence objects.
+     */
+    allUsers: FollowModePresenceUser<TData>[];
+    /**
+     * LiveFollowMode DDS
+     */
+    liveFollowMode: LiveFollowMode<TData> | undefined;
+    /**
+     * Broadcast a new custom data value for the local user's current state.
+     *
+     * @remarks
+     * Each user has their own state value, though it will differ from what is shown in {@link state} depending on the value of {@link FollowModeType}.
+     * Will cause the user to become out of sync if another user is presenting or the local user is following another user.
+     * To see each user's state, use the {@link getUsers} API, or listen to "presenceChanged" updates.
+     *
+     * @param newValue the state value for the local user's presence record.
+     *
+     * @returns a void promise that resolves once the update event has been sent to the server.
+     *
+     * @throws error if initialization has not yet succeeded.
+     */
+    update: (stateValue: TData) => Promise<void>;
+    /**
+     * Start presenting the local user's state.
+     *
+     * @remarks
+     * If another user is already presenting, the local user will take control of presenting from the previous presenter.
+     * To update the local user's state that both the local and remote users will reference, use the {@link update} function.
+     * This API will override any `followingUserId` value that was set through {@link followUser} until presenting has stopped.
+     * To stop presenting, use the {@link stopPresenting} API.
+     *
+     * @returns a void promise that resolves once the event has been sent to the server.
+     *
+     * @throws error if initialization has not yet succeeded.
+     * @throws error if the local user is already the presenter.
+     * @throws error if the local user does not have the required roles to present.
+     */
+    startPresenting: () => Promise<void>;
+    /**
+     * Stop presenting the presenting user's current state.
+     *
+     * @remarks
+     * This API allows any user with valid roles to cancel presenting, though we generally recommend only allowing the active presenter to do so.
+     * To start presenting, use the {@link startPresenting} API.
+     *
+     * @returns a void promise that resolves once the event has been sent to the server.
+     *
+     * @throws error if initialization has not yet succeeded.
+     * @throws error if the local user does not have the required roles to stop presenting.
+     */
+    stopPresenting: () => Promise<void>;
+    /**
+     * Temporarily stop following presenter/follower.
+     *
+     * @returns a void promise once the operation succeeds.
+     *
+     * @throws error if initialization has not yet succeeded.
+     */
+    beginSuspension: () => Promise<void>;
+    /**
+     * Resume following presenter/follower.
+     *
+     * @returns a void promise once the operation succeeds.
+     *
+     * @throws error if initialization has not yet succeeded.
+     */
+    endSuspension: () => Promise<void>;
+    /**
+     * Follows another user in the session.
+     *
+     * @remarks
+     * If another user is presenting, {@link state} will not reflect following this user until there is no longer a presenter.
+     *
+     * @param userId the userId for the user to follow.
+     *
+     * @returns a void promise that resolves once the event has been sent to the server.
+     *
+     * @throws error if initialization has not yet succeeded.
+     * @throws error if attempting to follow a user that is not recognized by this object's `LivePresence` instance.
+     * @throws error if the `userId` provided is equal to the local user's `userId`.
+     */
+    followUser: (userId: string) => Promise<void>;
+    /**
+     * Stop following the currently following user.
+     *
+     * @returns a void promise that resolves once the event has been sent to the server.
+     *
+     * @throws error if initialization has not yet succeeded.
+     * @throws error if the user is not already following another user.
+     */
+    stopFollowing: () => Promise<void>;
 }

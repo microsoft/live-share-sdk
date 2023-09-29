@@ -306,7 +306,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
 
     /**
      * Local LivePresenceUser.
-     * Can be undefined before LivePresence is initialized.
+     * Can be undefined before LiveFollowMode is initialized.
      */
     public get localUser(): FollowModePresenceUser<TData> | undefined {
         return this.presence.localUser;

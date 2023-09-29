@@ -5,8 +5,6 @@
 
 import {
     LivePresenceUser,
-    PresenceState,
-    LivePresence,
     UserMeetingRole,
     LiveDataObjectInitializeState,
     LiveFollowMode,
@@ -14,7 +12,6 @@ import {
     IFollowModeState,
 } from "@microsoft/live-share";
 import React from "react";
-import { IUseLivePresenceResults, OnUpdateLivePresenceAction } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
 import { useFluidObjectsContext } from "../providers";
 import {
@@ -22,15 +19,28 @@ import {
     ActionLiveDataObjectInitializedError,
     ActionLiveDataObjectUndefinedError,
 } from "../internal";
+import { IUseLiveFollowModeResults } from "../types";
 
 /**
  * React hook for using a Live Share `LiveFollowMode`.
+ *
+ * @remarks
+ * Use this hook if you want to add the ability to follow specific users or let a user present to everyone in the session.
+ * Each user has their own `stateValue`, which is the value other users will reference when that user is presenting or being followed.
+ * The `state` response includes the user's `value` that the local user is "following", whether it be their own or someone else's.
+ *
+ * @template TData Optional typing for the custom user presence data object. Default is `object` type.
+ *
+ * @param uniqueKey The unique key for `LiveFollowMode`. If one does not yet exist, a new one will be created.
+ * @param initialData The initial value for the local user's `stateValue`.
+ * @param allowedRoles Optional. The user roles that are allowed to present to use `startPresenting()` or `stopPresenting()`.
+ * @returns `IUseLiveFollowModeResults` results, which contains React stateful objects and callbacks.
  */
 export function useLiveFollowMode<TData = any>(
     uniqueKey: string,
     initialData: TData | (() => TData),
     allowedRoles?: UserMeetingRole[]
-) {
+): IUseLiveFollowModeResults<TData> {
     /**
      * Stateful follow state.
      */

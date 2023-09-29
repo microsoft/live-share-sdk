@@ -29,7 +29,7 @@ import {
  * user data. This is useful for rendering a list of users, profile pictures, cursor positions, and more.
  *
  * @template TData Optional typing for the custom user presence data object. Default is `object` type.
- * @param uniqueKey The unique key for `LivePresence`. If one does not yet exist, a new one
+ * @param uniqueKey The unique key for `LivePresence`. If one does not yet exist, a new one will be created.
  * @param initialData Optional. Initial presence data object for the user. Can be value or a function to get the value.
  * @param initialPresenceState Optional. Initial status of the user's presence. Default is online.
  * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state

@@ -5,7 +5,11 @@ import {
 } from "@fluidframework/aqueduct";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { assert } from "@fluidframework/common-utils";
-import { LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
+import {
+    IClientInfo,
+    LiveDataObjectInitializeState,
+    UserMeetingRole,
+} from "./interfaces";
 import { waitUntilConnected } from "./internals";
 
 /**
@@ -72,6 +76,15 @@ export abstract class LiveDataObject<
 
     public constructor(props: IDataObjectProps<I>) {
         super(props);
+    }
+
+    /**
+     * Get the client info for a given clientId
+     * @param clientId Fluid clientId we are requesting user info for
+     * @returns IClientInfo object if the user is known, otherwise it will return undefined
+     */
+    public getClientInfo(clientId: string): Promise<IClientInfo | undefined> {
+        return this.liveRuntime.getClientInfo(clientId);
     }
 
     /**

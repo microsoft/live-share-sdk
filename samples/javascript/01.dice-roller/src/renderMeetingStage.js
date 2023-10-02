@@ -11,6 +11,7 @@ export async function renderMeetingStage(container, elem, theme) {
     stageTemplate["innerHTML"] = `
     <div class="wrapper ${theme} stage">
         <div class="dice"></div>
+        <p class="lastChangedBy"></p>
         <button class="roll">Roll</button>
         <div class="divider"></div>
         <h2>Users:</h2>
@@ -27,14 +28,21 @@ export async function renderMeetingStage(container, elem, theme) {
 async function renderSharedDice(diceState, wrapperElem) {
     const rollButton = wrapperElem.querySelector(".roll");
     const diceElem = wrapperElem.querySelector(".dice");
+    const lastChangedByText = wrapperElem.querySelector(".lastChangedBy");
 
     // Set the value at our dataKey with a random number between 1 and 6.
     rollButton.onclick = () => diceState.set(getRandomDiceValue());
 
     // Get the current value of the shared data to update the view whenever it changes.
-    const updateDice = () => {
-        const diceValue = diceState.state;
-        stylizeDiceElem(diceElem, diceValue);
+    const updateDice = (data, local, clientId) => {
+        stylizeDiceElem(diceElem, data);
+        if (local) {
+            lastChangedByText.textContent = `Last changed by: You`;
+        } else {
+            diceState.getClientInfo(clientId).then((clientInfo) => {
+                lastChangedByText.textContent = `Last changed by: ${clientInfo?.displayName}`;
+            });
+        }
     };
 
     // Use the changed event to trigger the rerender whenever the value changes.
@@ -45,7 +53,8 @@ async function renderSharedDice(diceState, wrapperElem) {
     await diceState.initialize(1, allowedRoles);
 
     // Render initial dice value
-    updateDice();
+    const diceValue = diceState.state;
+    stylizeDiceElem(diceElem, diceValue);
 }
 
 async function renderPresenceDiceList(presence, wrapperElem) {

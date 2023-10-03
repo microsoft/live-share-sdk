@@ -109,7 +109,6 @@ describeNoCompat("LiveState", (getTestObjectProvider) => {
         });
 
         const object2done = new Deferred();
-        let object2ConnectReceived = false;
         object2.on("stateChanged", (state, local) => {
             try {
                 if (!local) {

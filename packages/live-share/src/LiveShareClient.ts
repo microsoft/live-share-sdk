@@ -78,6 +78,9 @@ export class LiveShareClient {
         undefined
     );
     private readonly _options: ILiveShareClientOptions;
+    private _results: ILiveShareJoinResults | undefined;
+    private _runtime: LiveShareRuntime | undefined;
+    private _canSendBackgroundUpdates: boolean = true;
 
     /**
      * Creates a new `LiveShareClient` instance.
@@ -118,6 +121,28 @@ export class LiveShareClient {
     public maxContainerLookupTries = 3;
 
     /**
+     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
+     * Default value is `true`.
+     *
+     * @remarks
+     * This is useful for scenarios where there are a large number of participants in a session, since service performance degrades as more socket connections are opened.
+     * Intended for use when a small number of users are intended to be "in control", such as the `LiveFollowMode` class's `startPresenting()` feature.
+     * Set to true when the user is eligible to send background updates (e.g., "in control"), or false when that user is not in control.
+     * This setting will not prevent the local user from explicitly changing the state of objects using `LiveObjectSynchronizer`, such as `.set()` in `LiveState`.
+     * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
+     */
+    public get canSendBackgroundUpdates(): boolean {
+        return this._canSendBackgroundUpdates;
+    }
+
+    public set canSendBackgroundUpdates(value: boolean) {
+        this._canSendBackgroundUpdates = value;
+        if (!this._runtime) return;
+        this._runtime.objectManager.canSendBackgroundUpdates =
+            this._canSendBackgroundUpdates;
+    }
+
+    /**
      * Connects to the fluid container for the current teams context.
      *
      * @remarks
@@ -138,17 +163,17 @@ export class LiveShareClient {
             const timestampProvider = this.isTesting
                 ? new LocalTimestampProvider()
                 : this._options?.timestampProvider;
-            const runtime = new LiveShareRuntime(
+            this._runtime = new LiveShareRuntime(
                 this._host,
                 timestampProvider,
                 this._options.roleVerifier
             );
             // Start runtime if needed
-            const pStartRuntime = runtime.start();
+            const pStartRuntime = this._runtime.start();
 
             const schema = getLiveShareContainerSchemaProxy(
                 fluidContainerSchema,
-                runtime
+                this._runtime
             );
 
             // Initialize FRS connection config
@@ -207,14 +232,19 @@ export class LiveShareClient {
 
             // Wait in parallel for everything to finish initializing.
             const result = await Promise.all([pContainer, pStartRuntime]);
-            runtime.setAudience(result[0].services.audience);
+            this._runtime.setAudience(result[0].services.audience);
+            // TODO: ensure this value is set when LiveShareRuntime["__dangerouslySetContainerRuntime"] is called...
+            // objectManager might be null until then.
+            this._runtime.objectManager.canSendBackgroundUpdates =
+                this._canSendBackgroundUpdates;
 
             performance.mark(`TeamsSync: container connecting`);
 
-            return {
+            this._results = {
                 ...result[0],
-                timestampProvider: runtime.timestampProvider,
+                timestampProvider: this._runtime.timestampProvider,
             };
+            return this._results;
         } finally {
             performance.measure(
                 `TeamsSync: container joined`,

@@ -34,6 +34,9 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     private objectStoreMap: ILiveObjectStore = new Map();
 
     private _audience?: IAzureAudience;
+    private _synchronizer?: ContainerSynchronizer;
+    private _canSendBackgroundUpdates = true;
+
     private _onBoundReceivedSignalListener?: (
         message: IInboundSignalMessage,
         local: boolean
@@ -53,7 +56,20 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
      */
     public updateInterval = 10000;
 
-    private _synchronizer?: ContainerSynchronizer;
+    /**
+     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
+     * Default value is `true`.
+     *
+     * @remarks
+     * This should only be set from `LiveShareClient`.
+     */
+    public get canSendBackgroundUpdates(): boolean {
+        return this._canSendBackgroundUpdates;
+    }
+
+    public set canSendBackgroundUpdates(value: boolean) {
+        this._canSendBackgroundUpdates = value;
+    }
 
     /**
      * Start listening for changes

@@ -43,11 +43,11 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     /**
      * Create a new registry for all of the `LiveObjectSynchronizer` objects for a Live Share session.
      * @param _liveRuntime runtime for the Live Share session.
+     * @param _containerRuntime signal runtime.
      */
     public constructor(
         private readonly _liveRuntime: LiveShareRuntime,
-        private _containerRuntime: IContainerRuntimeSignaler,
-        private _canSendBackgroundUpdates: boolean
+        private _containerRuntime: IContainerRuntimeSignaler
     ) {
         super();
     }
@@ -55,26 +55,6 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
      * The update interval in milliseconds
      */
     public updateInterval = 10000;
-
-    /**
-     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
-     * Default value is `true`.
-     *
-     * @remarks
-     * This should only be set from `LiveShareRuntime`.
-     */
-    public get canSendBackgroundUpdates(): boolean {
-        if (this._synchronizer) {
-            return this._synchronizer.canSendBackgroundUpdates;
-        }
-        return this._canSendBackgroundUpdates;
-    }
-
-    public set canSendBackgroundUpdates(value: boolean) {
-        this._canSendBackgroundUpdates = value;
-        if (!this._synchronizer) return;
-        this._synchronizer.canSendBackgroundUpdates = value;
-    }
 
     /**
      * Start listening for changes
@@ -111,8 +91,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
                 runtime,
                 this._containerRuntime,
                 this._liveRuntime,
-                this,
-                this.canSendBackgroundUpdates
+                this
             );
         }
 

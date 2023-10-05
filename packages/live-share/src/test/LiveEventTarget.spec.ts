@@ -19,25 +19,21 @@ function createConnectedSignalers() {
 }
 
 describe("LiveEventTarget", () => {
-    let localLiveRuntime = new LiveShareRuntime(
-        TestLiveShareHost.create(),
-        new LocalTimestampProvider()
-    );
-    let remoteLiveRuntime = new LiveShareRuntime(
-        TestLiveShareHost.create(),
-        new LocalTimestampProvider()
-    );
+    let localLiveRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
+        timestampProvider: new LocalTimestampProvider(),
+    });
+    let remoteLiveRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
+        timestampProvider: new LocalTimestampProvider(),
+    });
 
     afterEach(async () => {
         // restore defaults
-        localLiveRuntime = new LiveShareRuntime(
-            TestLiveShareHost.create(),
-            new LocalTimestampProvider()
-        );
-        remoteLiveRuntime = new LiveShareRuntime(
-            TestLiveShareHost.create(),
-            new LocalTimestampProvider()
-        );
+        localLiveRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
+            timestampProvider: new LocalTimestampProvider(),
+        });
+        remoteLiveRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
+            timestampProvider: new LocalTimestampProvider(),
+        });
     });
 
     it("Should receive events", (done) => {

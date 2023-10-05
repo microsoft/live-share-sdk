@@ -17,6 +17,7 @@ import {
     FormatFixHostDecorator,
 } from "./internals";
 import { IAzureAudience } from "@fluidframework/azure-client";
+import { ILiveShareClientOptions } from "./LiveShareClient";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp
@@ -26,26 +27,22 @@ export class LiveShareRuntime {
     private _host: ILiveShareHost;
     private _timestampProvider: ITimestampProvider;
     private _roleVerifier: IRoleVerifier;
+    private _canSendBackgroundUpdates: boolean;
     protected _containerRuntime?: IContainerRuntimeSignaler;
     private _objectManager: LiveObjectManager | null = null;
-    private _canSendBackgroundUpdates: boolean = true;
     private _audience?: IAzureAudience;
 
     /**
      * Runtime for `LiveDataObject`.
      *
      * @param host Host for the current Live Share session.
-     * @param customTimestampProvider Optional. Custom timestamp provider to use.
-     * @param customRoleVerifier Optional. Custom role verifier to use.
+     * @param options Optional. Options used for initializing `LiveShareClient`.
      * @param decorate choose whether or not to automatically decorate host with `BackwardsCompatibilityHostDecorator` and `LiveShareHostDecorator`
-     * @param sendBackgroundUpdates default value for {@link canSendBackgroundUpdates}
      */
     constructor(
         host: ILiveShareHost,
-        timestampProvider?: ITimestampProvider,
-        roleVerifier?: IRoleVerifier,
-        decorate: boolean = true,
-        sendBackgroundUpdates: boolean = true
+        options?: ILiveShareClientOptions,
+        decorate: boolean = true
     ) {
         // BackwardsCompatibilityHostDecorator is used for backwards compatibility with older versions of the Teams client.
         // LiveShareHostDecorator is used as a thin caching layer for some host APIs.
@@ -54,13 +51,12 @@ export class LiveShareRuntime {
                   new LiveShareHostDecorator(new FormatFixHostDecorator(host))
               )
             : host;
-        this._timestampProvider = timestampProvider
-            ? timestampProvider
-            : new HostTimestampProvider(this._host);
-        this._roleVerifier = roleVerifier
-            ? roleVerifier
-            : new RoleVerifier(this._host);
-        this.canSendBackgroundUpdates = sendBackgroundUpdates;
+        this._timestampProvider =
+            options?.timestampProvider ?? new HostTimestampProvider(this._host);
+        this._roleVerifier =
+            options?.roleVerifier ?? new RoleVerifier(this._host);
+        this._canSendBackgroundUpdates =
+            options?.canSendBackgroundUpdates ?? true;
     }
 
     /**
@@ -100,16 +96,11 @@ export class LiveShareRuntime {
      * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
      */
     public get canSendBackgroundUpdates(): boolean {
-        if (this._objectManager) {
-            return this._objectManager.canSendBackgroundUpdates;
-        }
         return this._canSendBackgroundUpdates;
     }
 
     public set canSendBackgroundUpdates(value: boolean) {
         this._canSendBackgroundUpdates = value;
-        if (!this._objectManager) return;
-        this._objectManager.canSendBackgroundUpdates = value;
     }
 
     /**
@@ -142,6 +133,7 @@ export class LiveShareRuntime {
     }
 
     /**
+     * @hidden
      * Set the timestamp provider for the runtime
      * @param timestampProvider timestamp provider to set
      */
@@ -150,6 +142,7 @@ export class LiveShareRuntime {
     }
 
     /**
+     * @hidden
      * Set the role verifier for the runtime
      * @param roleVerifier role verifier to set
      */
@@ -252,8 +245,7 @@ export class LiveShareRuntime {
         }
         this._objectManager = new LiveObjectManager(
             this,
-            this._containerRuntime,
-            this._canSendBackgroundUpdates
+            this._containerRuntime
         );
         this.startObjectSynchronizerManager();
     }

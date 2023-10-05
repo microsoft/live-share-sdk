@@ -67,6 +67,19 @@ export interface ILiveShareClientOptions {
      * Optional. Custom role verifier to use.
      */
     readonly roleVerifier?: IRoleVerifier;
+
+    /**
+     * Optional. Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
+     * Default value is `true`.
+     *
+     * @remarks
+     * This is useful for scenarios where there are a large number of participants in a session, since service performance degrades as more socket connections are opened.
+     * Intended for use when a small number of users are intended to be "in control", such as the `LiveFollowMode` class's `startPresenting()` feature.
+     * Set to true when the user is eligible to send background updates (e.g., "in control"), or false when that user is not in control.
+     * This setting will not prevent the local user from explicitly changing the state of objects using `LiveObjectSynchronizer`, such as `.set()` in `LiveState`.
+     * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
+     */
+    canSendBackgroundUpdates?: boolean;
 }
 
 /**
@@ -78,9 +91,8 @@ export class LiveShareClient {
         undefined
     );
     private readonly _options: ILiveShareClientOptions;
+    private readonly _runtime: LiveShareRuntime;
     private _results: ILiveShareJoinResults | undefined;
-    private _runtime: LiveShareRuntime | undefined;
-    private _canSendBackgroundUpdates: boolean = true;
 
     /**
      * Creates a new `LiveShareClient` instance.
@@ -101,17 +113,20 @@ export class LiveShareClient {
         }
         this._host = host;
         // Save options
-        this._options = Object.assign({} as ILiveShareClientOptions, options);
+        this._options = {
+            ...options,
+            timestampProvider: getIsTestClient(host, options)
+                ? new LocalTimestampProvider()
+                : options?.timestampProvider,
+        };
+        this._runtime = new LiveShareRuntime(this._host, this._options, true);
     }
 
     /**
      * If true the client is configured to use a local test server.
      */
     public get isTesting(): boolean {
-        return (
-            this._options.connection?.type == "local" ||
-            this._host instanceof TestLiveShareHost
-        );
+        return getIsTestClient(this._host, this._options);
     }
 
     /**
@@ -132,18 +147,11 @@ export class LiveShareClient {
      * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
      */
     public get canSendBackgroundUpdates(): boolean {
-        if (this._runtime) {
-            return this._runtime.canSendBackgroundUpdates;
-        }
-        // Use locally tracked flag, since we haven't yet initialized the runtime.
-        // this._canSendBackgroundUpdates will be used as the initial value for this._runtime.canSendBackgroundUpdates.
-        return this._canSendBackgroundUpdates;
+        return this._runtime.canSendBackgroundUpdates;
     }
 
     public set canSendBackgroundUpdates(value: boolean) {
-        this._canSendBackgroundUpdates = value;
-        if (!this._runtime) return;
-        this._runtime.canSendBackgroundUpdates = this._canSendBackgroundUpdates;
+        this._runtime.canSendBackgroundUpdates = value;
     }
 
     /**
@@ -163,20 +171,10 @@ export class LiveShareClient {
     ): Promise<ILiveShareJoinResults> {
         performance.mark(`TeamsSync: join container`);
         try {
-            // Configure LiveShareRuntime and apply to ContainerSchema
-            const timestampProvider = this.isTesting
-                ? new LocalTimestampProvider()
-                : this._options?.timestampProvider;
-            this._runtime = new LiveShareRuntime(
-                this._host,
-                timestampProvider,
-                this._options.roleVerifier,
-                true,
-                this._canSendBackgroundUpdates
-            );
             // Start runtime if needed
             const pStartRuntime = this._runtime.start();
 
+            // Apply runtime to ContainerSchema
             const schema = getLiveShareContainerSchemaProxy(
                 fluidContainerSchema,
                 this._runtime
@@ -349,4 +347,14 @@ export class LiveShareClient {
             setTimeout(() => resolve(), delay);
         });
     }
+}
+
+function getIsTestClient(
+    host: ILiveShareHost,
+    options?: ILiveShareClientOptions
+) {
+    return (
+        options?.connection?.type == "local" ||
+        host instanceof TestLiveShareHost
+    );
 }

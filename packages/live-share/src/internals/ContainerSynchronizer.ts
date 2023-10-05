@@ -32,27 +32,11 @@ export class ContainerSynchronizer {
     ) => Promise<void>;
     private _onSendUpdatesIntervalCallback?: () => Promise<void>;
 
-    /**
-     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
-     * Default value is `true`.
-     *
-     * @remarks
-     * This should only be set from `LiveObjectManager`, which should only be set through `LiveShareRuntime`.
-     */
-    public get canSendBackgroundUpdates(): boolean {
-        return this._canSendBackgroundUpdates;
-    }
-
-    public set canSendBackgroundUpdates(value: boolean) {
-        this._canSendBackgroundUpdates = value;
-    }
-
     constructor(
         private readonly _runtime: IRuntimeSignaler,
         private _containerRuntime: IContainerRuntimeSignaler,
         private readonly _liveRuntime: LiveShareRuntime,
-        private readonly _objectStore: LiveObjectManager,
-        private _canSendBackgroundUpdates: boolean
+        private readonly _objectStore: LiveObjectManager
     ) {
         this.startListeningForConnected();
     }
@@ -366,7 +350,7 @@ export class ContainerSynchronizer {
     }
 
     private async sendBackgroundUpdates(): Promise<void> {
-        if (!this.canSendBackgroundUpdates) return;
+        if (!this._liveRuntime.canSendBackgroundUpdates) return;
         return await this.onSendUpdates();
     }
 

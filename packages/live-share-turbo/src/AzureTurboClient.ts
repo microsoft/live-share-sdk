@@ -34,8 +34,7 @@ export class AzureTurboClient extends FluidTurboClient {
               services: AzureContainerServices;
           }
         | undefined;
-    private _runtime: LiveShareRuntime | null = null;
-    protected _canSendBackgroundUpdates: boolean = true;
+    private _runtime: LiveShareRuntime;
 
     /**
      * Creates a new client instance using configuration parameters.
@@ -48,6 +47,7 @@ export class AzureTurboClient extends FluidTurboClient {
         super();
         this._client = new AzureClient(props);
         this._host = host;
+        this._runtime = new LiveShareRuntime(this._host);
     }
 
     /**
@@ -74,15 +74,10 @@ export class AzureTurboClient extends FluidTurboClient {
      * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
      */
     public get canSendBackgroundUpdates(): boolean {
-        if (this._runtime) {
-            return this._runtime.canSendBackgroundUpdates;
-        }
-        return this._canSendBackgroundUpdates;
+        return this._runtime.canSendBackgroundUpdates;
     }
 
     public set canSendBackgroundUpdates(value: boolean) {
-        this._canSendBackgroundUpdates = value;
-        if (!this._runtime) return;
         this._runtime.canSendBackgroundUpdates = value;
     }
 
@@ -98,12 +93,12 @@ export class AzureTurboClient extends FluidTurboClient {
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const { runtime, schema } = this.getContainerSetup(initialObjects);
+        const schema = this.getInjectedContainerSchema(initialObjects);
         this._results = await this._client.createContainer(schema);
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }
-        await runtime.start();
+        await this._runtime.start();
         return this._results;
     }
 
@@ -121,30 +116,21 @@ export class AzureTurboClient extends FluidTurboClient {
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const { runtime, schema } = this.getContainerSetup(initialObjects);
+        const schema = this.getInjectedContainerSchema(initialObjects);
         this._results = await this._client.getContainer(id, schema);
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }
-        await runtime.start();
+        await this._runtime.start();
         return this._results;
     }
 
-    private getContainerSetup(initialObjects?: LoadableObjectClassRecord): {
-        schema: ContainerSchema;
-        runtime: LiveShareRuntime;
-    } {
-        const runtime = new LiveShareRuntime(this._host);
-        runtime.canSendBackgroundUpdates = this._canSendBackgroundUpdates;
-        // Store reference in client to runtime
-        this._runtime = runtime;
-        const schema = getLiveShareContainerSchemaProxy(
+    private getInjectedContainerSchema(
+        initialObjects?: LoadableObjectClassRecord
+    ): ContainerSchema {
+        return getLiveShareContainerSchemaProxy(
             this.getContainerSchema(initialObjects),
-            runtime
+            this._runtime
         );
-        return {
-            schema,
-            runtime,
-        };
     }
 }

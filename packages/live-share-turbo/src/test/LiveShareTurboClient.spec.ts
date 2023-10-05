@@ -29,8 +29,8 @@ describe("LiveShareTurboClient", () => {
         containerId = newContainerId;
     };
     const host = TestLiveShareHost.create(getContainerId, setContainerId);
-    const client1 = new LiveShareTurboClient(host);
-    const client2 = new LiveShareTurboClient(host);
+    let client1: LiveShareTurboClient;
+    let client2: LiveShareTurboClient;
 
     const testMapKey = "TEST-MAP-KEY";
     const testLiveEventKey = "TEST-LIVE-EVENT-KEY";
@@ -46,6 +46,8 @@ describe("LiveShareTurboClient", () => {
     };
 
     beforeEach(async () => {
+        client1 = new LiveShareTurboClient(host);
+        client2 = new LiveShareTurboClient(host);
         const initialObjects: LoadableObjectClassRecord = {
             [testLiveEventKey]: LiveEvent,
         };

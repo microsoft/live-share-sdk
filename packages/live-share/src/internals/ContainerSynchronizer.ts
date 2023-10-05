@@ -97,7 +97,13 @@ export class ContainerSynchronizer {
         return false;
     }
 
-    public async onSendUpdates(): Promise<void> {
+    /**
+     * On send background updates handler
+     *
+     * @returns void promise once the events were sent (unless skipped)
+     */
+    public async onSendBackgroundUpdates(): Promise<void> {
+        if (!this._liveRuntime.canSendBackgroundUpdates) return;
         await this.sendGroupEvent(
             this._connectedKeys,
             ObjectSynchronizerEvents.update
@@ -161,7 +167,7 @@ export class ContainerSynchronizer {
         const handlers = this._objects.get(objectId);
         if (!handlers) {
             throw new Error(
-                "ContainerSynchronizer.sendEventForObject(): cannot send an event for an object that is not registered"
+                "ContainerSynchronizer.sendThrottledEventForObject(): cannot send an event for an object that is not registered"
             );
         }
         const canSend = await handlers.getLocalUserCanSend(false);
@@ -349,11 +355,6 @@ export class ContainerSynchronizer {
         this._runtime.off("connected", this._onBoundConnectedListener);
     }
 
-    private async sendBackgroundUpdates(): Promise<void> {
-        if (!this._liveRuntime.canSendBackgroundUpdates) return;
-        return await this.onSendUpdates();
-    }
-
     private startBackgroundObjectUpdates() {
         // Stop existing background updates
         this.stopBackgroundObjectUpdates();
@@ -365,7 +366,7 @@ export class ContainerSynchronizer {
         );
         // Set background updates
         this._onSendUpdatesIntervalCallback =
-            this.sendBackgroundUpdates.bind(this);
+            this.onSendBackgroundUpdates.bind(this);
         this._hTimer = setInterval(
             this._onSendUpdatesIntervalCallback,
             this._liveRuntime.objectManager.updateInterval

@@ -46,6 +46,21 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
         return undefined;
     }
 
+    /**
+     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
+     * Default value is `true`.
+     *
+     * @remarks
+     * This is useful for scenarios where there are a large number of participants in a session, since service performance degrades as more socket connections are opened.
+     * Intended for use when a small number of users are intended to be "in control", such as the `LiveFollowMode` class's `startPresenting()` feature.
+     * Set to true when the user is eligible to send background updates (e.g., "in control"), or false when that user is not in control.
+     * This setting will not prevent the local user from explicitly changing the state of objects using `LiveObjectSynchronizer`, such as `.set()` in `LiveState`.
+     * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
+     */
+    public abstract get canSendBackgroundUpdates(): boolean;
+
+    public abstract set canSendBackgroundUpdates(value: boolean);
+
     private get dynamicObjects(): DynamicObjectManager | undefined {
         if (this.results) {
             return this.results.container.initialObjects

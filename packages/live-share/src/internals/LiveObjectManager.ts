@@ -35,7 +35,6 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
 
     private _audience?: IAzureAudience;
     private _synchronizer?: ContainerSynchronizer;
-    private _canSendBackgroundUpdates = true;
 
     private _onBoundReceivedSignalListener?: (
         message: IInboundSignalMessage,
@@ -47,7 +46,8 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
      */
     public constructor(
         private readonly _liveRuntime: LiveShareRuntime,
-        private _containerRuntime: IContainerRuntimeSignaler
+        private _containerRuntime: IContainerRuntimeSignaler,
+        private _canSendBackgroundUpdates: boolean
     ) {
         super();
     }
@@ -61,14 +61,19 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
      * Default value is `true`.
      *
      * @remarks
-     * This should only be set from `LiveShareClient`.
+     * This should only be set from `LiveShareRuntime`.
      */
     public get canSendBackgroundUpdates(): boolean {
+        if (this._synchronizer) {
+            return this._synchronizer.canSendBackgroundUpdates;
+        }
         return this._canSendBackgroundUpdates;
     }
 
     public set canSendBackgroundUpdates(value: boolean) {
         this._canSendBackgroundUpdates = value;
+        if (!this._synchronizer) return;
+        this._synchronizer.canSendBackgroundUpdates = value;
     }
 
     /**
@@ -106,15 +111,13 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
                 runtime,
                 this._containerRuntime,
                 this._liveRuntime,
-                this
+                this,
+                this.canSendBackgroundUpdates
             );
         }
 
         // Register object
-        this._synchronizer.registerObject(
-            id,
-            handlers as unknown as GetAndUpdateStateHandlers<TState>
-        );
+        this._synchronizer.registerObject(id, handlers);
 
         const initialEvent: ILiveEvent<TState> = {
             clientId: await waitUntilConnected(runtime),

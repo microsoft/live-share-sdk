@@ -132,14 +132,18 @@ export class LiveShareClient {
      * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
      */
     public get canSendBackgroundUpdates(): boolean {
+        if (this._runtime) {
+            return this._runtime.canSendBackgroundUpdates;
+        }
+        // Use locally tracked flag, since we haven't yet initialized the runtime.
+        // this._canSendBackgroundUpdates will be used as the initial value for this._runtime.canSendBackgroundUpdates.
         return this._canSendBackgroundUpdates;
     }
 
     public set canSendBackgroundUpdates(value: boolean) {
         this._canSendBackgroundUpdates = value;
         if (!this._runtime) return;
-        this._runtime.objectManager.canSendBackgroundUpdates =
-            this._canSendBackgroundUpdates;
+        this._runtime.canSendBackgroundUpdates = this._canSendBackgroundUpdates;
     }
 
     /**
@@ -166,7 +170,9 @@ export class LiveShareClient {
             this._runtime = new LiveShareRuntime(
                 this._host,
                 timestampProvider,
-                this._options.roleVerifier
+                this._options.roleVerifier,
+                true,
+                this._canSendBackgroundUpdates
             );
             // Start runtime if needed
             const pStartRuntime = this._runtime.start();
@@ -233,10 +239,6 @@ export class LiveShareClient {
             // Wait in parallel for everything to finish initializing.
             const result = await Promise.all([pContainer, pStartRuntime]);
             this._runtime.setAudience(result[0].services.audience);
-            // TODO: ensure this value is set when LiveShareRuntime["__dangerouslySetContainerRuntime"] is called...
-            // objectManager might be null until then.
-            this._runtime.objectManager.canSendBackgroundUpdates =
-                this._canSendBackgroundUpdates;
 
             performance.mark(`TeamsSync: container connecting`);
 

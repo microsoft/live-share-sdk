@@ -34,6 +34,8 @@ export class AzureTurboClient extends FluidTurboClient {
               services: AzureContainerServices;
           }
         | undefined;
+    private _runtime: LiveShareRuntime | null = null;
+    protected _canSendBackgroundUpdates: boolean = true;
 
     /**
      * Creates a new client instance using configuration parameters.
@@ -58,6 +60,30 @@ export class AzureTurboClient extends FluidTurboClient {
           }
         | undefined {
         return this._results;
+    }
+
+    /**
+     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
+     * Default value is `true`.
+     *
+     * @remarks
+     * This is useful for scenarios where there are a large number of participants in a session, since service performance degrades as more socket connections are opened.
+     * Intended for use when a small number of users are intended to be "in control", such as the `LiveFollowMode` class's `startPresenting()` feature.
+     * Set to true when the user is eligible to send background updates (e.g., "in control"), or false when that user is not in control.
+     * This setting will not prevent the local user from explicitly changing the state of objects using `LiveObjectSynchronizer`, such as `.set()` in `LiveState`.
+     * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
+     */
+    public get canSendBackgroundUpdates(): boolean {
+        if (this._runtime) {
+            return this._runtime.canSendBackgroundUpdates;
+        }
+        return this._canSendBackgroundUpdates;
+    }
+
+    public set canSendBackgroundUpdates(value: boolean) {
+        this._canSendBackgroundUpdates = value;
+        if (!this._runtime) return;
+        this._runtime.canSendBackgroundUpdates = value;
     }
 
     /**
@@ -109,6 +135,9 @@ export class AzureTurboClient extends FluidTurboClient {
         runtime: LiveShareRuntime;
     } {
         const runtime = new LiveShareRuntime(this._host);
+        runtime.canSendBackgroundUpdates = this._canSendBackgroundUpdates;
+        // Store reference in client to runtime
+        this._runtime = runtime;
         const schema = getLiveShareContainerSchemaProxy(
             this.getContainerSchema(initialObjects),
             runtime

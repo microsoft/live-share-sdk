@@ -1,6 +1,10 @@
-import { useLiveShareContext, useLiveState } from "@microsoft/live-share-react";
-import { UserMeetingRole } from "@microsoft/live-share";
-import { FC, ReactNode } from "react";
+import {
+    useFluidObjectsContext,
+    useLiveShareContext,
+    useLiveState,
+} from "@microsoft/live-share-react";
+import { UserMeetingRole, LiveShareClient } from "@microsoft/live-share";
+import { FC, ReactNode, useState } from "react";
 
 enum ExampleAppStatus {
     WAITING = "WAITING",
@@ -45,6 +49,7 @@ export const ExampleLiveState: FC<IExampleStateProps> = (props) => {
                     >
                         {"Start"}
                     </button>
+                    <BackgroundUpdates />
                 </div>
                 <h1>{"Welcome to Fluid React!"}</h1>
                 {props.waitingContent}
@@ -64,8 +69,40 @@ export const ExampleLiveState: FC<IExampleStateProps> = (props) => {
                 >
                     {"End"}
                 </button>
+                <BackgroundUpdates />
             </div>
             {props.startContent}
+        </div>
+    );
+};
+
+/**
+ * Background updates are sent periodically for all `LiveDataObject` instances that use `LiveObjectSynchronizer`.
+ * `LiveState` is one such data object. Setting `canSendBackgroundUpdates` will impact all other data objects as well.
+ * Read the reference docs for `LiveShareClient.canSendBackgroundUpdates` for more information.
+ */
+const BackgroundUpdates: FC = () => {
+    const { clientRef } = useFluidObjectsContext();
+    const [checked, setChecked] = useState<boolean>(
+        clientRef.current.canSendBackgroundUpdates
+    );
+    return (
+        <div
+            className="flex row vAlign"
+            style={{
+                paddingLeft: "20px",
+            }}
+        >
+            <input
+                type="checkbox"
+                checked={checked}
+                onChange={(ev) => {
+                    clientRef.current.canSendBackgroundUpdates =
+                        ev.target.checked;
+                    setChecked(ev.target.checked);
+                }}
+            />
+            <div>{"Can send background updates"}</div>
         </div>
     );
 };

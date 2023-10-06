@@ -34,6 +34,8 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     private objectStoreMap: ILiveObjectStore = new Map();
 
     private _audience?: IAzureAudience;
+    private _synchronizer?: ContainerSynchronizer;
+
     private _onBoundReceivedSignalListener?: (
         message: IInboundSignalMessage,
         local: boolean
@@ -41,6 +43,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
     /**
      * Create a new registry for all of the `LiveObjectSynchronizer` objects for a Live Share session.
      * @param _liveRuntime runtime for the Live Share session.
+     * @param _containerRuntime signal runtime.
      */
     public constructor(
         private readonly _liveRuntime: LiveShareRuntime,
@@ -52,8 +55,6 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
      * The update interval in milliseconds
      */
     public updateInterval = 10000;
-
-    private _synchronizer?: ContainerSynchronizer;
 
     /**
      * Start listening for changes
@@ -95,10 +96,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         }
 
         // Register object
-        this._synchronizer.registerObject(
-            id,
-            handlers as unknown as GetAndUpdateStateHandlers<TState>
-        );
+        this._synchronizer.registerObject(id, handlers);
 
         const initialEvent: ILiveEvent<TState> = {
             clientId: await waitUntilConnected(runtime),
@@ -259,7 +257,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         );
         // If the non-local user is connecting for the first time
         if (message.type === ObjectSynchronizerEvents.connect) {
-            this._synchronizer?.onSendUpdates();
+            this._synchronizer?.onSendBackgroundUpdates();
         }
     }
 

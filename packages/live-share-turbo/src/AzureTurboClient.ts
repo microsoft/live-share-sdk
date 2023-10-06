@@ -34,6 +34,7 @@ export class AzureTurboClient extends FluidTurboClient {
               services: AzureContainerServices;
           }
         | undefined;
+    private _runtime: LiveShareRuntime;
 
     /**
      * Creates a new client instance using configuration parameters.
@@ -46,6 +47,7 @@ export class AzureTurboClient extends FluidTurboClient {
         super();
         this._client = new AzureClient(props);
         this._host = host;
+        this._runtime = new LiveShareRuntime(this._host);
     }
 
     /**
@@ -61,6 +63,25 @@ export class AzureTurboClient extends FluidTurboClient {
     }
 
     /**
+     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
+     * Default value is `true`.
+     *
+     * @remarks
+     * This is useful for scenarios where there are a large number of participants in a session, since service performance degrades as more socket connections are opened.
+     * Intended for use when a small number of users are intended to be "in control", such as the `LiveFollowMode` class's `startPresenting()` feature.
+     * Set to true when the user is eligible to send background updates (e.g., "in control"), or false when that user is not in control.
+     * This setting will not prevent the local user from explicitly changing the state of objects using `LiveObjectSynchronizer`, such as `.set()` in `LiveState`.
+     * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
+     */
+    public get canSendBackgroundUpdates(): boolean {
+        return this._runtime.canSendBackgroundUpdates;
+    }
+
+    public set canSendBackgroundUpdates(value: boolean) {
+        this._runtime.canSendBackgroundUpdates = value;
+    }
+
+    /**
      * Creates a new detached container instance in the Azure Fluid Relay.
      * @param initialObjects Optional. Fluid ContainerSchema initialObjects.
      * @param host Optional. ILiveShareHost implementation to use when using Live Share DDS's.
@@ -72,12 +93,12 @@ export class AzureTurboClient extends FluidTurboClient {
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const { runtime, schema } = this.getContainerSetup(initialObjects);
+        const schema = this.getInjectedContainerSchema(initialObjects);
         this._results = await this._client.createContainer(schema);
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }
-        await runtime.start();
+        await this._runtime.start();
         return this._results;
     }
 
@@ -95,27 +116,21 @@ export class AzureTurboClient extends FluidTurboClient {
         container: IFluidContainer;
         services: AzureContainerServices;
     }> {
-        const { runtime, schema } = this.getContainerSetup(initialObjects);
+        const schema = this.getInjectedContainerSchema(initialObjects);
         this._results = await this._client.getContainer(id, schema);
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }
-        await runtime.start();
+        await this._runtime.start();
         return this._results;
     }
 
-    private getContainerSetup(initialObjects?: LoadableObjectClassRecord): {
-        schema: ContainerSchema;
-        runtime: LiveShareRuntime;
-    } {
-        const runtime = new LiveShareRuntime(this._host);
-        const schema = getLiveShareContainerSchemaProxy(
+    private getInjectedContainerSchema(
+        initialObjects?: LoadableObjectClassRecord
+    ): ContainerSchema {
+        return getLiveShareContainerSchemaProxy(
             this.getContainerSchema(initialObjects),
-            runtime
+            this._runtime
         );
-        return {
-            schema,
-            runtime,
-        };
     }
 }

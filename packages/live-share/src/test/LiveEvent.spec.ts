@@ -24,7 +24,9 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     let object2: LiveEvent;
     let liveRuntime1: LiveShareRuntime = new LiveShareRuntime(
         TestLiveShareHost.create(),
-        new LocalTimestampProvider()
+        {
+            timestampProvider: new LocalTimestampProvider(),
+        }
     );
     let LiveEventProxy1 = getLiveDataObjectClassProxy<LiveEvent>(
         LiveEvent,
@@ -32,7 +34,9 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
     ) as DataObjectClass<LiveEvent>;
     let liveRuntime2: LiveShareRuntime = new LiveShareRuntime(
         TestLiveShareHost.create(),
-        new LocalTimestampProvider()
+        {
+            timestampProvider: new LocalTimestampProvider(),
+        }
     );
     let LiveEventProxy2 = getLiveDataObjectClassProxy<LiveEvent>(
         LiveEvent,
@@ -139,10 +143,9 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     it("Should getTimestamp() using custom timestamp providers", async () => {
         const mock = new MockTimestampProvider();
-        const customRuntime = new LiveShareRuntime(
-            TestLiveShareHost.create(),
-            mock
-        );
+        const customRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
+            timestampProvider: mock,
+        });
 
         const now = new Date().getTime();
         const timestamp = customRuntime.getTimestamp();
@@ -159,11 +162,9 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     it("Should verifyRolesAllowed() using custom role verifier", async () => {
         const mock = new MockRoleVerifier([UserMeetingRole.presenter]);
-        const customRuntime = new LiveShareRuntime(
-            TestLiveShareHost.create(),
-            undefined,
-            mock
-        );
+        const customRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
+            roleVerifier: mock,
+        });
 
         const allowed = await customRuntime.verifyRolesAllowed("test", [
             UserMeetingRole.presenter,

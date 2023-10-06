@@ -11,7 +11,9 @@ export class MockLiveShareRuntime extends LiveShareRuntime {
         host = TestLiveShareHost.create(),
         timestampProvider: ITimestampProvider = new LocalTimestampProvider()
     ) {
-        super(host, timestampProvider);
+        super(host, {
+            timestampProvider,
+        });
         if (shouldCreateMockContainer) {
             const localContainer = new MockContainerRuntimeSignaler();
             this.__dangerouslySetContainerRuntime(localContainer);

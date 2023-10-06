@@ -168,7 +168,7 @@ describe("LiveObjectSynchronizer", () => {
                         `local: invalid state received: ${state}`
                     );
                     assert(sender, `local: sender  ID not received`);
-                    // We event is only emitted when the timestamp of a value has changed
+                    // The event is only emitted when the timestamp of a value has changed
                     changesEmitted++;
                     assert(changesEmitted < 2, "received is >= 2");
                 } catch (err) {
@@ -198,6 +198,71 @@ describe("LiveObjectSynchronizer", () => {
                 return Promise.resolve(true);
             },
             () => Promise.resolve(true)
+        );
+
+        await done.promise;
+        localObject.dispose();
+        remoteObject.dispose();
+        localLiveRuntime.stop();
+        remoteLiveRuntime.stop();
+    });
+
+    it("Should not send periodic updates when canSendBackgroundUpdates is false", async () => {
+        const localLiveRuntime = new MockLiveShareRuntime(true, 5);
+        localLiveRuntime.canSendBackgroundUpdates = false;
+        const remoteLiveRuntime = new MockLiveShareRuntime(true, 5);
+        localLiveRuntime.connectToOtherRuntime(remoteLiveRuntime);
+        await localLiveRuntime.start();
+        await remoteLiveRuntime.start();
+
+        let localSent = 0;
+        let remoteSent = 0;
+        const done = new Deferred();
+        const localRuntime = new MockRuntimeSignaler();
+        const localObject = new LiveObjectSynchronizer<ITestState>(
+            "test",
+            localRuntime,
+            localLiveRuntime
+        );
+        await localObject.start(
+            { client: "local" },
+            (state, sender) => {
+                return Promise.resolve(true);
+            },
+            async (connecting) => {
+                localSent++;
+                if (connecting) {
+                    return true;
+                }
+                // Should not send any events besides connect
+                done.reject(
+                    new Error(
+                        `Should only send max of 1 message (connect) when canSendBackgroundUpdates == false, instead sent ${localSent}`
+                    )
+                );
+                // If this is called, it will send out an update
+                return true;
+            }
+        );
+
+        const remoteRuntime = new MockRuntimeSignaler();
+        const remoteObject = new LiveObjectSynchronizer<ITestState>(
+            "test",
+            remoteRuntime,
+            remoteLiveRuntime
+        );
+        await remoteObject.start(
+            { client: "remote" },
+            (state, sender) => {
+                return Promise.resolve(true);
+            },
+            () => {
+                remoteSent++;
+                if (remoteSent == 6) {
+                    done.resolve();
+                }
+                return Promise.resolve(true);
+            }
         );
 
         await done.promise;

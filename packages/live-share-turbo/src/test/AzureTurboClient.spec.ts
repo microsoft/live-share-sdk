@@ -18,7 +18,7 @@ import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { generateUser } from "@fluidframework/server-services-client";
 import { LiveEvent } from "@microsoft/live-share";
 
-describe("LiveShareTurboClient", () => {
+describe("AzureTurboClient", () => {
     (window.performance as any).mark = () => {
         return {};
     };
@@ -31,12 +31,8 @@ describe("LiveShareTurboClient", () => {
         endpoint: "http://localhost:7070",
         type: "local",
     };
-    const client1 = new AzureTurboClient({
-        connection: connectionProps,
-    });
-    const client2 = new AzureTurboClient({
-        connection: connectionProps,
-    });
+    let client1: AzureTurboClient;
+    let client2: AzureTurboClient;
 
     const testMapKey = "TEST-MAP-KEY";
     const testLiveEventKey = "TEST-LIVE-EVENT-KEY";
@@ -50,6 +46,12 @@ describe("LiveShareTurboClient", () => {
     };
 
     beforeEach(async () => {
+        client1 = new AzureTurboClient({
+            connection: connectionProps,
+        });
+        client2 = new AzureTurboClient({
+            connection: connectionProps,
+        });
         const initialObjects: LoadableObjectClassRecord = {
             [testLiveEventKey]: LiveEvent,
         };

@@ -17,6 +17,7 @@ import {
     FormatFixHostDecorator,
 } from "./internals";
 import { IAzureAudience } from "@fluidframework/azure-client";
+import { ILiveShareClientOptions } from "./LiveShareClient";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp
@@ -26,21 +27,21 @@ export class LiveShareRuntime {
     private _host: ILiveShareHost;
     private _timestampProvider: ITimestampProvider;
     private _roleVerifier: IRoleVerifier;
+    private _canSendBackgroundUpdates: boolean;
     protected _containerRuntime?: IContainerRuntimeSignaler;
     private _objectManager: LiveObjectManager | null = null;
     private _audience?: IAzureAudience;
 
     /**
+     * Runtime for `LiveDataObject`.
      *
      * @param host Host for the current Live Share session.
-     * @param customTimestampProvider Optional. Custom timestamp provider to use.
-     * @param customRoleVerifier Optional. Custom role verifier to use.
+     * @param options Optional. Options used for initializing `LiveShareClient`.
      * @param decorate choose whether or not to automatically decorate host with `BackwardsCompatibilityHostDecorator` and `LiveShareHostDecorator`
      */
     constructor(
         host: ILiveShareHost,
-        timestampProvider?: ITimestampProvider,
-        roleVerifier?: IRoleVerifier,
+        options?: ILiveShareClientOptions,
         decorate: boolean = true
     ) {
         // BackwardsCompatibilityHostDecorator is used for backwards compatibility with older versions of the Teams client.
@@ -50,12 +51,12 @@ export class LiveShareRuntime {
                   new LiveShareHostDecorator(new FormatFixHostDecorator(host))
               )
             : host;
-        this._timestampProvider = timestampProvider
-            ? timestampProvider
-            : new HostTimestampProvider(this._host);
-        this._roleVerifier = roleVerifier
-            ? roleVerifier
-            : new RoleVerifier(this._host);
+        this._timestampProvider =
+            options?.timestampProvider ?? new HostTimestampProvider(this._host);
+        this._roleVerifier =
+            options?.roleVerifier ?? new RoleVerifier(this._host);
+        this._canSendBackgroundUpdates =
+            options?.canSendBackgroundUpdates ?? true;
     }
 
     /**
@@ -81,6 +82,26 @@ export class LiveShareRuntime {
      */
     public get host(): ILiveShareHost {
         return this._host;
+    }
+
+    /**
+     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
+     * Default value is `true`.
+     *
+     * @remarks
+     * This is useful for scenarios where there are a large number of participants in a session, since service performance degrades as more socket connections are opened.
+     * Intended for use when a small number of users are intended to be "in control", such as the `LiveFollowMode` class's `startPresenting()` feature.
+     * There should always be at least one user in the session that has `canSendBackgroundUpdates` set to true.
+     * Set to true when the user is eligible to send background updates (e.g., "in control"), or false when that user is not in control.
+     * This setting will not prevent the local user from explicitly changing the state of objects using `LiveObjectSynchronizer`, such as `.set()` in `LiveState`.
+     * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
+     */
+    public get canSendBackgroundUpdates(): boolean {
+        return this._canSendBackgroundUpdates;
+    }
+
+    public set canSendBackgroundUpdates(value: boolean) {
+        this._canSendBackgroundUpdates = value;
     }
 
     /**
@@ -113,6 +134,7 @@ export class LiveShareRuntime {
     }
 
     /**
+     * @hidden
      * Set the timestamp provider for the runtime
      * @param timestampProvider timestamp provider to set
      */
@@ -121,6 +143,7 @@ export class LiveShareRuntime {
     }
 
     /**
+     * @hidden
      * Set the role verifier for the runtime
      * @param roleVerifier role verifier to set
      */

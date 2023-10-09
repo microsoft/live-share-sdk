@@ -36,6 +36,7 @@ import {
  * @param initialTrack initial track to load. Either ExtendedMediaMetadata, trackId string, or null.
  * @param allowedRoles Optional. Array of user roles that are eligible to modify group playback state.
  * @param viewOnly Optional. Flag for whether or not the media synchronizer should be in viewOnly mode.
+ * @param canSendPositionUpdates Optional. Controls whether or not the local client is allowed to send position updates to the group.
  * @returns IUseMediaSynchronizerResults object.
  */
 export function useMediaSynchronizer(
@@ -47,7 +48,8 @@ export function useMediaSynchronizer(
         | null,
     initialTrack: Partial<ExtendedMediaMetadata> | string | null,
     allowedRoles?: UserMeetingRole[],
-    viewOnly?: boolean
+    viewOnly?: boolean,
+    canSendPositionUpdates?: boolean
 ): IUseMediaSynchronizerResults {
     /**
      * User facing media synchronizer and non-user facing setter
@@ -213,6 +215,10 @@ export function useMediaSynchronizer(
             // Set synchronizer to view only mode provided by developer
             synchronizer.viewOnly = viewOnly;
         }
+        if (canSendPositionUpdates !== undefined) {
+            synchronizer.mediaSession.coordinator.canSendPositionUpdates =
+                canSendPositionUpdates;
+        }
 
         if (
             mediaSession.initializeState ===
@@ -251,14 +257,29 @@ export function useMediaSynchronizer(
      * Change view in media synchronizer only if prop changes
      */
     React.useEffect(() => {
-        if (
-            mediaSynchronizer?.viewOnly !== undefined &&
-            viewOnly !== undefined &&
-            mediaSynchronizer.viewOnly !== viewOnly
-        ) {
-            mediaSynchronizer.viewOnly = !!viewOnly;
-        }
+        if (!mediaSynchronizer) return;
+        if (viewOnly === undefined) return;
+        if (mediaSynchronizer.viewOnly === viewOnly) return;
+        mediaSynchronizer.viewOnly = viewOnly;
     }, [viewOnly, mediaSynchronizer?.viewOnly]);
+
+    /**
+     * Change canSendPositionUpdates when prop changes
+     */
+    React.useEffect(() => {
+        if (!mediaSynchronizer) return;
+        if (canSendPositionUpdates === undefined) return;
+        if (
+            mediaSynchronizer.mediaSession.coordinator
+                .canSendPositionUpdates === canSendPositionUpdates
+        )
+            return;
+        mediaSynchronizer.mediaSession.coordinator.canSendPositionUpdates =
+            canSendPositionUpdates;
+    }, [
+        canSendPositionUpdates,
+        mediaSynchronizer?.mediaSession.coordinator.canSendPositionUpdates,
+    ]);
 
     return {
         suspended: !!suspension,

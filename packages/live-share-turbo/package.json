@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-turbo",
-    "version": "1.2.0-preview.0",
+    "version": "1.2.0-preview.1",
     "description": "Alternative & lightweight way to build collaborative apps using Microsoft's Fluid Framework & Live Share.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",

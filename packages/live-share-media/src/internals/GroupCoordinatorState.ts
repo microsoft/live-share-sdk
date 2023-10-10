@@ -17,6 +17,7 @@ import {
     CoordinationWaitPoint,
     ExtendedMediaSessionPlaybackState,
     ExtendedMediaSessionActionDetails,
+    ExtendedMediaSessionActionSource,
 } from "../MediaSessionExtensions";
 import {
     GroupPlaybackTrack,
@@ -150,7 +151,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 this._logger.sendTelemetryEvent(
                     TelemetryEvents.GroupCoordinator.TrackChanged
                 );
-                this.emitSetTrack(evt.clientId, evt.metadata!);
+                this.emitSetTrack(evt.clientId, evt.metadata!, evt.source);
             } else {
                 this._logger.sendTelemetryEvent(
                     TelemetryEvents.GroupCoordinator.TrackChangeDelayed
@@ -169,6 +170,7 @@ export class GroupCoordinatorState extends EventEmitter {
                     const clientId = await waitUntilConnected(this._runtime);
                     this.emitTriggerAction({
                         action: "datachange",
+                        source: evt.source,
                         data: evt.data,
                         clientId: evt.clientId,
                         local: evt.clientId === clientId,
@@ -204,6 +206,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "play":
                             this.emitTriggerAction({
                                 action: "play",
+                                source: evt.source,
                                 clientId: evt.clientId,
                                 local,
                                 seekTime: evt.seekTime,
@@ -213,6 +216,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "pause":
                             this.emitTriggerAction({
                                 action: "pause",
+                                source: evt.source,
                                 clientId: evt.clientId,
                                 local,
                                 seekTime: evt.seekTime,
@@ -222,6 +226,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "seekto":
                             this.emitTriggerAction({
                                 action: "seekto",
+                                source: evt.source,
                                 clientId: evt.clientId,
                                 local,
                                 seekTime: evt.seekTime,
@@ -328,12 +333,15 @@ export class GroupCoordinatorState extends EventEmitter {
     ): void {
         // Update shared track
         // - Will trigger 'trackChange' event to update media session
-        const updated = this.playbackTrack.updateTrack({
-            metadata: event.data.metadata,
-            waitPoints: event.data.waitPoints,
-            timestamp: event.timestamp,
-            clientId: event.clientId || "",
-        });
+        const updated = this.playbackTrack.updateTrack(
+            {
+                metadata: event.data.metadata,
+                waitPoints: event.data.waitPoints,
+                timestamp: event.timestamp,
+                clientId: event.clientId || "",
+            },
+            "user"
+        );
 
         if (updated) {
             this._logger.sendTelemetryEvent(
@@ -355,11 +363,14 @@ export class GroupCoordinatorState extends EventEmitter {
     ): void {
         // Update shared track data
         // - Will trigger 'dataChange' event to update media session
-        const updated = this.playbackTrackData.updateData({
-            data: event.data.data,
-            timestamp: event.timestamp,
-            clientId: event.clientId || "",
-        });
+        const updated = this.playbackTrackData.updateData(
+            {
+                data: event.data.data,
+                timestamp: event.timestamp,
+                clientId: event.clientId || "",
+            },
+            "user"
+        );
 
         if (updated) {
             this._logger.sendTelemetryEvent(
@@ -381,7 +392,7 @@ export class GroupCoordinatorState extends EventEmitter {
     ): void {
         // Ensure change is for current track
         // - Will trigger a 'trackChange' event if newer track.
-        this.playbackTrack.updateTrack(event.data.track);
+        this.playbackTrack.updateTrack(event.data.track, "system");
         if (this.playbackTrack.compare(event.data.track.metadata)) {
             // Update playback state
             let playbackState = this.transportState.playbackState;
@@ -401,7 +412,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 timestamp: event.timestamp,
                 clientId: event.clientId || "",
             };
-            const updated = this.transportState.updateState(newState);
+            const updated = this.transportState.updateState(newState, "user");
 
             if (updated) {
                 const correlationId = LiveTelemetryLogger.formatCorrelationId(
@@ -450,16 +461,16 @@ export class GroupCoordinatorState extends EventEmitter {
     ): void {
         // Ensure change is for current track
         // - Will trigger a 'trackChange' event if newer track.
-        this.playbackTrack.updateTrack(event.data.track);
+        this.playbackTrack.updateTrack(event.data.track, "system");
         if (this.playbackTrack.compare(event.data.track.metadata)) {
             // Ensure we have the latest track data
-            this.playbackTrackData.updateData(event.data.trackData);
+            this.playbackTrackData.updateData(event.data.trackData, "system");
 
             // Update transport state if needed
             // - Ignore transport state changes if the client has ended as this will cause the local
             //   player to start playback even though the video may have ended for everyone.
             if (event.data.playbackState != "ended") {
-                this.transportState.updateState(event.data.transport);
+                this.transportState.updateState(event.data.transport, "system");
             }
 
             // Ensure change is for current transport state
@@ -538,7 +549,8 @@ export class GroupCoordinatorState extends EventEmitter {
                 );
                 this.emitSetTrack(
                     this.playbackTrack.current.clientId,
-                    this.playbackTrack.metadata!
+                    this.playbackTrack.metadata!,
+                    "system"
                 );
                 return;
             }
@@ -577,6 +589,7 @@ export class GroupCoordinatorState extends EventEmitter {
                     );
                     await this.emitTriggerAction({
                         action: "catchup",
+                        source: "system",
                         clientId: await waitUntilConnected(this._runtime),
                         local: true,
                         seekTime: target,
@@ -600,6 +613,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "playing":
                             await this.emitTriggerAction({
                                 action: "play",
+                                source: "system",
                                 clientId: this.transportState.current.clientId,
                                 local,
                             });
@@ -607,6 +621,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         case "paused":
                             await this.emitTriggerAction({
                                 action: "pause",
+                                source: "system",
                                 clientId: this.transportState.current.clientId,
                                 local,
                             });
@@ -627,6 +642,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         this.playbackTrackData.current.clientId;
                     await this.emitTriggerAction({
                         action: "datachange",
+                        source: "system",
                         clientId: this.playbackTrackData.current.clientId,
                         local,
                         data: this.playbackTrackData.data,
@@ -638,7 +654,8 @@ export class GroupCoordinatorState extends EventEmitter {
 
     private async emitSetTrack(
         clientId: string,
-        metadata: ExtendedMediaMetadata
+        metadata: ExtendedMediaMetadata,
+        source: ExtendedMediaSessionActionSource
     ): Promise<void> {
         // Reset tracking states
         this._waitPoint = undefined;
@@ -647,6 +664,7 @@ export class GroupCoordinatorState extends EventEmitter {
         // Trigger settrack action
         this.emitTriggerAction({
             action: "settrack",
+            source,
             clientId,
             local: localClientId === clientId,
             metadata,

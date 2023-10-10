@@ -95,6 +95,15 @@ export type ExtendedMediaSessionPlaybackState =
     | "ended";
 
 /**
+ * The source of the action for `LiveMediaSession`.
+ *
+ * @remarks
+ * Is `user` when the action was explicitly invoked via the `LiveMediaSessionCoordinator`.
+ * Is `system` when the action was invoked via `GroupCoordinatorState` when the local client is out of sync.
+ */
+export type ExtendedMediaSessionActionSource = "user" | "system";
+
+/**
  * Metadata for `LiveMediaSession`.
  *
  * @remarks
@@ -124,6 +133,14 @@ export interface ExtendedMediaSessionActionDetails {
      * The action type of this event.
      */
     action: ExtendedMediaSessionAction;
+    /**
+     * The source of the action.
+     *
+     * @remarks
+     * Is `user` when the action was explicitly invoked via the `LiveMediaSessionCoordinator`.
+     * Is `system` when the action was invoked via `GroupCoordinatorState` when the local client is out of sync.
+     */
+    source: ExtendedMediaSessionActionSource;
     /**
      * Unique identifier of the client that triggered this action.
      */

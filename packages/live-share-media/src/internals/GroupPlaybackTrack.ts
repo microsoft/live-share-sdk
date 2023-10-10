@@ -9,6 +9,7 @@ import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
+    ExtendedMediaSessionActionSource,
 } from "../MediaSessionExtensions";
 
 /**
@@ -99,7 +100,10 @@ export class GroupPlaybackTrack extends EventEmitter {
         return undefined;
     }
 
-    public updateTrack(track: IPlaybackTrack): boolean {
+    public updateTrack(
+        track: IPlaybackTrack,
+        source: ExtendedMediaSessionActionSource
+    ): boolean {
         // Guard against missing waitPoints collection
         if (!Array.isArray(track.waitPoints)) {
             track.waitPoints = [];
@@ -149,6 +153,7 @@ export class GroupPlaybackTrack extends EventEmitter {
             name: GroupPlaybackTrackEvents.trackChange,
             clientId: track.clientId,
             metadata: track.metadata,
+            source,
         });
 
         return true;

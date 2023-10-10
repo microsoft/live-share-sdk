@@ -9,6 +9,7 @@ import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
     ExtendedMediaSessionPlaybackState,
     ExtendedMediaSessionAction,
+    ExtendedMediaSessionActionSource,
 } from "../MediaSessionExtensions";
 import {
     GroupPlaybackTrack,
@@ -104,7 +105,10 @@ export class GroupTransportState extends EventEmitter {
         );
     }
 
-    public updateState(state: ITransportState): boolean {
+    public updateState(
+        state: ITransportState,
+        source: ExtendedMediaSessionActionSource
+    ): boolean {
         // Ignore if same playback state and start position
         if (this.compare(state)) {
             return false;
@@ -138,6 +142,7 @@ export class GroupTransportState extends EventEmitter {
                 action: "seekto",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
+                source,
             });
         } else if (state.playbackState == "playing") {
             const now = this._liveRuntime.getTimestamp();
@@ -148,6 +153,7 @@ export class GroupTransportState extends EventEmitter {
                 action: "play",
                 clientId: state.clientId,
                 seekTime: projectedPosition,
+                source,
             });
         } else {
             this.emit(GroupTransportStateEvents.transportStateChange, {
@@ -155,6 +161,7 @@ export class GroupTransportState extends EventEmitter {
                 action: "pause",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
+                source,
             });
         }
 

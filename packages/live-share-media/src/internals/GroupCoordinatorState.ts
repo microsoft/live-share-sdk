@@ -161,15 +161,17 @@ export class GroupCoordinatorState extends EventEmitter {
         // Listen for track data changes
         this._playbackTrackData.on(
             PlaybackTrackDataEvents.dataChange,
-            (evt) => {
+            async (evt) => {
                 if (!this.isSuspended && !this.isWaiting) {
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.GroupCoordinator.TrackDataChanged
                     );
+                    const clientId = await waitUntilConnected(this._runtime);
                     this.emitTriggerAction({
                         action: "datachange",
                         data: evt.data,
                         clientId: evt.clientId,
+                        local: evt.clientId === clientId,
                     });
                 } else {
                     this._logger.sendTelemetryEvent(
@@ -182,7 +184,7 @@ export class GroupCoordinatorState extends EventEmitter {
         // Listen to transport related events
         this._transportState.on(
             GroupTransportStateEvents.transportStateChange,
-            (evt) => {
+            async (evt) => {
                 if (!this.isSuspended && !this.isWaiting) {
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.GroupCoordinator.TransportStateChanged,
@@ -193,12 +195,17 @@ export class GroupCoordinatorState extends EventEmitter {
                         }
                     );
 
+                    const localClientId = await waitUntilConnected(
+                        this._runtime
+                    );
+                    const local = evt.clientId === localClientId;
                     // Trigger action
                     switch (evt.action) {
                         case "play":
                             this.emitTriggerAction({
                                 action: "play",
                                 clientId: evt.clientId,
+                                local,
                                 seekTime: evt.seekTime,
                             });
                             break;
@@ -207,6 +214,7 @@ export class GroupCoordinatorState extends EventEmitter {
                             this.emitTriggerAction({
                                 action: "pause",
                                 clientId: evt.clientId,
+                                local,
                                 seekTime: evt.seekTime,
                             });
                             break;
@@ -215,6 +223,7 @@ export class GroupCoordinatorState extends EventEmitter {
                             this.emitTriggerAction({
                                 action: "seekto",
                                 clientId: evt.clientId,
+                                local,
                                 seekTime: evt.seekTime,
                             });
                             break;
@@ -569,10 +578,12 @@ export class GroupCoordinatorState extends EventEmitter {
                     await this.emitTriggerAction({
                         action: "catchup",
                         clientId: await waitUntilConnected(this._runtime),
+                        local: true,
                         seekTime: target,
                     });
                 }
 
+                const localClientId = await waitUntilConnected(this._runtime);
                 // Sync transport state
                 if (this.transportState.playbackState != playbackState) {
                     this._logger.sendTelemetryEvent(
@@ -583,17 +594,21 @@ export class GroupCoordinatorState extends EventEmitter {
                             target: this.transportState.playbackState,
                         }
                     );
+                    const local =
+                        localClientId === this.transportState.current.clientId;
                     switch (this.transportState.playbackState) {
                         case "playing":
                             await this.emitTriggerAction({
                                 action: "play",
                                 clientId: this.transportState.current.clientId,
+                                local,
                             });
                             break;
                         case "paused":
                             await this.emitTriggerAction({
                                 action: "pause",
                                 clientId: this.transportState.current.clientId,
+                                local,
                             });
                             break;
                     }
@@ -607,9 +622,13 @@ export class GroupCoordinatorState extends EventEmitter {
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.GroupCoordinator.TrackDataOutOfSync
                     );
+                    const local =
+                        localClientId ===
+                        this.playbackTrackData.current.clientId;
                     await this.emitTriggerAction({
                         action: "datachange",
                         clientId: this.playbackTrackData.current.clientId,
+                        local,
                         data: this.playbackTrackData.data,
                     });
                 }
@@ -617,17 +636,19 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
-    private emitSetTrack(
+    private async emitSetTrack(
         clientId: string,
         metadata: ExtendedMediaMetadata
-    ): void {
+    ): Promise<void> {
         // Reset tracking states
         this._waitPoint = undefined;
 
+        const localClientId = await waitUntilConnected(this._runtime);
         // Trigger settrack action
         this.emitTriggerAction({
             action: "settrack",
             clientId,
+            local: localClientId === clientId,
             metadata,
         });
     }

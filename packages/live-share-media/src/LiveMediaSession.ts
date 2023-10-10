@@ -296,6 +296,7 @@ export class LiveMediaSession extends LiveDataObject {
                     this.dispatchAction({
                         action: "wait",
                         clientId,
+                        local: true,
                         suspension,
                     });
                 });

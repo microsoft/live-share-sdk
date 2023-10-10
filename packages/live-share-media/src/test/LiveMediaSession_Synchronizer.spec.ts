@@ -123,10 +123,12 @@ describeNoCompat(
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
                 {
                     action: "pause",
                     clientId: await object2.clientId(),
+                    local: true,
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -167,14 +169,17 @@ describeNoCompat(
                 {
                     action: "seekto",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
                 {
                     action: "pause",
                     clientId: await object2.clientId(),
+                    local: true,
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -216,14 +221,17 @@ describeNoCompat(
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
                 {
                     action: "seekto",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
                 {
                     action: "pause",
                     clientId: await object2.clientId(),
+                    local: true,
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -334,10 +342,12 @@ describeNoCompat(
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
                 {
                     action: "settrack",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -386,16 +396,19 @@ describeNoCompat(
                 {
                     action: "seekto",
                     clientId: await object1.clientId(),
+                    local: true,
                 },
             ];
             const object2ExpectedEventOrder = [
                 {
                     action: "play",
                     clientId: await object2.clientId(),
+                    local: true,
                 },
                 {
                     action: "seekto",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -440,10 +453,12 @@ describeNoCompat(
                 {
                     action: "settrack",
                     clientId: await object1.clientId(),
+                    local: true,
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: true,
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -730,28 +745,34 @@ describeNoCompat(
                 {
                     action: "settrack",
                     clientId: await object1.clientId(),
+                    local: true,
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: true,
                 },
             ];
             const object2ExpectedEventOrder = [
                 {
                     action: "settrack",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
                 {
                     action: "catchup",
                     clientId: await object2.clientId(),
+                    local: true,
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -839,7 +860,7 @@ async function assertActionOccurred(
 
 async function assertExpectedEvents(
     synchronizer: MediaPlayerSynchronizer,
-    expectedEventOrder: { action: string; clientId: string }[]
+    expectedEventOrder: { action: string; clientId: string; local: boolean }[]
 ): Promise<void> {
     let deferred = new Deferred();
     let eventCount = 0;
@@ -858,6 +879,10 @@ async function assertExpectedEvents(
                     details.clientId ===
                         expectedEventOrder[eventCount].clientId,
                     "unexpected sender clientId"
+                );
+                assert(
+                    details.local === expectedEventOrder[eventCount].local,
+                    "unexpected locality"
                 );
                 eventCount += 1;
             } catch (error: any) {

@@ -524,7 +524,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         waitUntilConnected(this._runtime).then((clientId: string) => {
             this.dispatchUserAction({
                 action: "seekto",
+                source: "user",
                 clientId,
+                local: true,
                 seekTime: seekTo,
             });
         });
@@ -548,7 +550,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
         this.dispatchUserAction({
             action: "play",
+            source: "user",
             clientId: await waitUntilConnected(this._runtime),
+            local: true,
         });
     }
 
@@ -570,7 +574,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
         this.dispatchUserAction({
             action: "pause",
+            source: "user",
             clientId: await waitUntilConnected(this._runtime),
+            local: true,
         });
     }
 
@@ -598,8 +604,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
         this.dispatchUserAction({
             action: "seekto",
+            source: "user",
             clientId: await waitUntilConnected(this._runtime),
             seekTime: time,
+            local: true,
         });
     }
 
@@ -623,8 +631,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
         this.dispatchUserAction({
             action: "settrack",
+            source: "user",
             clientId: await waitUntilConnected(this._runtime),
             metadata: track,
+            local: true,
         });
     }
 
@@ -646,7 +656,9 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
         this.dispatchUserAction({
             action: "datachange",
+            source: "user",
             clientId: await waitUntilConnected(this._runtime),
+            local: true,
             data: data,
         });
     }

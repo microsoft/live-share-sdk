@@ -295,7 +295,9 @@ export class LiveMediaSession extends LiveDataObject {
                         this.coordinator.beginSuspension(waitPoint);
                     this.dispatchAction({
                         action: "wait",
+                        source: "system",
                         clientId,
+                        local: true,
                         suspension,
                     });
                 });

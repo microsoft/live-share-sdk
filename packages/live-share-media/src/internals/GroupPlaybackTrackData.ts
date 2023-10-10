@@ -9,6 +9,7 @@ import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
 } from "./GroupPlaybackTrack";
+import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions";
 
 /**
  * @hidden
@@ -64,7 +65,10 @@ export class GroupPlaybackTrackData extends EventEmitter {
         return this.current.data;
     }
 
-    public updateData(event: IPlaybackTrackData): boolean {
+    public updateData(
+        event: IPlaybackTrackData,
+        source: ExtendedMediaSessionActionSource
+    ): boolean {
         // Ignore state changes that are older
         const current = this.current;
         if (event.timestamp < current.timestamp) {
@@ -92,6 +96,7 @@ export class GroupPlaybackTrackData extends EventEmitter {
             type: PlaybackTrackDataEvents.dataChange,
             clientId: event.clientId,
             data: event.data,
+            source,
         });
 
         return true;

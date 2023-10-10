@@ -26,6 +26,7 @@ import { isErrorLike } from "@microsoft/live-share/bin/internals";
 import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionDetails,
+    ExtendedMediaSessionActionSource,
 } from "../MediaSessionExtensions";
 import {
     IMediaPlayerSynchronizerEvent,
@@ -119,14 +120,18 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize();
             await object2.initialize();
-            const expectedEventOrder = [
+            const expectedEventOrder: IExpectedEvent[] = [
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
                 {
                     action: "pause",
                     clientId: await object2.clientId(),
+                    local: true,
+                    source: "user",
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -163,18 +168,24 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize();
             await object2.initialize();
-            const expectedEventOrder = [
+            const expectedEventOrder: IExpectedEvent[] = [
                 {
                     action: "seekto",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
                 {
                     action: "pause",
                     clientId: await object2.clientId(),
+                    local: true,
+                    source: "user",
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -212,18 +223,24 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize();
             await object2.initialize();
-            const expectedEventOrder = [
+            const expectedEventOrder: IExpectedEvent[] = [
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
                 {
                     action: "seekto",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
                 {
                     action: "pause",
                     clientId: await object2.clientId(),
+                    local: true,
+                    source: "user",
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -330,14 +347,18 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize([UserMeetingRole.organizer]);
             await object2.initialize([UserMeetingRole.organizer]);
-            const expectedEventOrder = [
+            const expectedEventOrder: IExpectedEvent[] = [
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
                 {
                     action: "settrack",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -382,20 +403,26 @@ describeNoCompat(
             const testMediaPlayer2 = new TestMediaPlayer();
             await object1.initialize([UserMeetingRole.organizer]);
             await object2.initialize([UserMeetingRole.organizer]);
-            const object1ExpectedEventOrder = [
+            const object1ExpectedEventOrder: IExpectedEvent[] = [
                 {
                     action: "seekto",
                     clientId: await object1.clientId(),
+                    local: true,
+                    source: "user",
                 },
             ];
-            const object2ExpectedEventOrder = [
+            const object2ExpectedEventOrder: IExpectedEvent[] = [
                 {
                     action: "play",
                     clientId: await object2.clientId(),
+                    local: true,
+                    source: "user",
                 },
                 {
                     action: "seekto",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -436,14 +463,18 @@ describeNoCompat(
             );
             const testMediaPlayer1 = new TestMediaPlayer();
             await object1.initialize([UserMeetingRole.organizer]);
-            const expectedEventOrder = [
+            const expectedEventOrder: IExpectedEvent[] = [
                 {
                     action: "settrack",
                     clientId: await object1.clientId(),
+                    local: true,
+                    source: "user",
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: true,
+                    source: "user",
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -726,32 +757,44 @@ describeNoCompat(
 
             await object1.initialize();
             await object2.initialize();
-            const object1ExpectedEventOrder = [
+            const object1ExpectedEventOrder: IExpectedEvent[] = [
                 {
                     action: "settrack",
                     clientId: await object1.clientId(),
+                    local: true,
+                    source: "user",
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: true,
+                    source: "user",
                 },
             ];
-            const object2ExpectedEventOrder = [
+            const object2ExpectedEventOrder: IExpectedEvent[] = [
                 {
                     action: "settrack",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
                 },
                 {
                     action: "catchup",
                     clientId: await object2.clientId(),
+                    local: true,
+                    source: "system",
                 },
                 {
                     action: "play",
                     clientId: await object1.clientId(),
+                    local: false,
+                    source: "system",
                 },
             ];
             const sync1 = object1.synchronize(testMediaPlayer1);
@@ -837,9 +880,16 @@ async function assertActionOccurred(
     });
 }
 
+interface IExpectedEvent {
+    action: string;
+    clientId: string;
+    local: boolean;
+    source: ExtendedMediaSessionActionSource;
+}
+
 async function assertExpectedEvents(
     synchronizer: MediaPlayerSynchronizer,
-    expectedEventOrder: { action: string; clientId: string }[]
+    expectedEventOrder: IExpectedEvent[]
 ): Promise<void> {
     let deferred = new Deferred();
     let eventCount = 0;
@@ -850,14 +900,23 @@ async function assertExpectedEvents(
             try {
                 const details = evt.details;
                 assert(evt.error === undefined, evt.error);
+                const expectedEvent = expectedEventOrder[eventCount];
                 assert(
-                    details.action === expectedEventOrder[eventCount].action,
-                    "unexpected action"
+                    details.action === expectedEvent.action,
+                    `unexpected action: should be ${expectedEvent.action}, instead is ${details.action}`
                 );
                 assert(
                     details.clientId ===
                         expectedEventOrder[eventCount].clientId,
-                    "unexpected sender clientId"
+                    `unexpected sender clientId: should be ${expectedEvent.clientId}, instead is ${details.clientId}`
+                );
+                assert(
+                    details.local === expectedEventOrder[eventCount].local,
+                    `unexpected locality: should be ${expectedEvent.local}, instead is ${details.local}`
+                );
+                assert(
+                    details.source === expectedEventOrder[eventCount].source,
+                    `unexpected source: should be ${expectedEvent.source}, instead is ${details.source}`
                 );
                 eventCount += 1;
             } catch (error: any) {

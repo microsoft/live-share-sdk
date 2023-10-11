@@ -30,6 +30,7 @@ import { useFluidObjectsContext } from "../providers";
  * @remarks
  * Use this hook if you want to send transient JSON objects to everyone connected to the Fluid container,
  * such as when sending push notifications or reactions.
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
  * @template TEvent Optional typing for events sent & received. Default is `object` type.
  * @param uniqueKey the unique key for the `LiveEvent`. If one does not yet exist, a new one

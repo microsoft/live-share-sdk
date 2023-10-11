@@ -22,6 +22,7 @@ import { isRefObject } from "../utils";
  * @remarks
  * Use this hook to set up an `LiveCanvas` object, which is used for collaborative inking. It takes several input parameters, including a unique key,
  * a reference to a canvas element, and various settings for the inking tool, brush, and canvas offset and scale.
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
  * @param uniqueKey the unique key for the `LiveCanvas`. If one does not yet exist, a new one.
  * @param canvasElementRef the HTML div element ref or document ID that `InkingManager` will use for canvas-based collaboration.

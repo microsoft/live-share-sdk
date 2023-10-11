@@ -10,6 +10,10 @@ import { LoadableObjectClass } from "fluid-framework";
 
 /**
  * Hook to gets or creates a DDS that corresponds to a given uniqueKey string.
+ *
+ * @remarks
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
+ *
  * @template T Type of Fluid LoadableObjectClass type to load. Must conform to IFluidLoadable interface.
  * @param uniqueKey uniqueKey value for the data object
  * @param loadableObjectClass Fluid LoadableObjectClass<T> to create/load.

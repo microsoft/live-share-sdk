@@ -21,6 +21,7 @@ import {
  * The primary benefit of using the `useSharedMap` hook rather than the Fluid `SharedMap`
  * directly is that it integrates nicely with React state and automates repetitive tasks.
  * If you want to use `SharedMap` this hook creates directly, you can do that as well.
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
  * @template TData Optional typing for objects stored in the SharedMap. Default is `any` type.
  * @param uniqueKey the unique key for the `SharedMap`. If one does not yet exist, a new `SharedMap`

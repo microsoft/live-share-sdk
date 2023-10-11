@@ -45,12 +45,29 @@ export interface ILiveShareContext {
     ) => Promise<ILiveShareJoinResults>;
 }
 
+/**
+ * @hidden
+ */
 export const LiveShareContext = React.createContext<ILiveShareContext>(
     {} as ILiveShareContext
 );
 
+/**
+ * Hook to get the latest React context state for `LiveShareContext`.
+ *
+ * @remarks
+ * This hook can only be used in a child component of `<LiveShareProvider>`.
+ * See `useFluidObjectsContext` for other information related to the Live Share session, such as the `container`.
+ *
+ * @returns current state of `LiveShareContext`
+ */
 export const useLiveShareContext = (): ILiveShareContext => {
     const context = React.useContext(LiveShareContext);
+    if (!isLiveShareContext(context)) {
+        throw new Error(
+            "@microsoft/live-share-react: attempting to use `useLiveShareContext()` from a component that is not a child of `<LiveShareProvider>`.\nTo fix this error, ensure that you are only using Live Share hooks (e.g., `useLiveState`) from a child component of `<LiveShareProvider>`."
+        );
+    }
     return context;
 };
 
@@ -168,3 +185,9 @@ export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
         </LiveShareContext.Provider>
     );
 };
+
+function isLiveShareContext(value: any): value is ILiveShareContext {
+    return (
+        typeof value?.created === "boolean" && typeof value?.join === "function"
+    );
+}

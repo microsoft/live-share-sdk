@@ -34,12 +34,28 @@ interface IFluidContext extends ISharedStateRegistryResponse {
     ) => Promise<IAzureContainerResults>;
 }
 
+/**
+ * @hidden
+ */
 export const FluidContext = React.createContext<IFluidContext>(
     {} as IFluidContext
 );
 
+/**
+ * Hook to get the latest React context state for `FluidContext`.
+ *
+ * @remarks
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
+ *
+ * @returns current state of `LiveShareContext`
+ */
 export const useFluidObjectsContext = (): IFluidContext => {
     const context = React.useContext(FluidContext);
+    if (!isFluidObjectsContext(context)) {
+        throw new Error(
+            "@microsoft/live-share-react: attempting to use `useFluidObjectsContext()` from a component that is not a child of `<LiveShareProvider>` or `<AzureProvider>`.\nTo fix this error, ensure that you are only using Live Share hooks (e.g., `useLiveState`) from a child component of `<LiveShareProvider>` or `<AzureProvider>`."
+        );
+    }
     return context;
 };
 
@@ -170,3 +186,7 @@ export const AzureProvider: React.FC<IAzureProviderProps> = (props) => {
         </FluidContext.Provider>
     );
 };
+
+function isFluidObjectsContext(value: any): value is IFluidContext {
+    return !!value?.clientRef;
+}

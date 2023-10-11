@@ -28,6 +28,7 @@ import { IUseLiveFollowModeResults } from "../types";
  * Use this hook if you want to add the ability to follow specific users or let a user present to everyone in the session.
  * Each user has their own `stateValue`, which is the value other users will reference when that user is presenting or being followed.
  * The `state` response includes the user's `value` that the local user is "following", whether it be their own or someone else's.
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
  * @template TData Optional typing for the custom user presence data object. Default is `object` type.
  *
@@ -79,19 +80,19 @@ export function useLiveFollowMode<TData = any>(
             if (!container) {
                 throw new ActionContainerNotJoinedError(
                     "liveFollowMode",
-                    "updateState"
+                    "update"
                 );
             }
             if (liveFollowMode === undefined) {
                 throw new ActionLiveDataObjectUndefinedError(
                     "liveFollowMode",
-                    "updateState"
+                    "update"
                 );
             }
             if (!liveFollowMode.isInitialized) {
                 throw new ActionLiveDataObjectInitializedError(
                     "liveFollowMode",
-                    "updateState"
+                    "update"
                 );
             }
             return await liveFollowMode.update(stateValue);
@@ -106,19 +107,19 @@ export function useLiveFollowMode<TData = any>(
         if (!container) {
             throw new ActionContainerNotJoinedError(
                 "liveFollowMode",
-                "updateState"
+                "startPresenting"
             );
         }
         if (liveFollowMode === undefined) {
             throw new ActionLiveDataObjectUndefinedError(
                 "liveFollowMode",
-                "updateState"
+                "startPresenting"
             );
         }
         if (!liveFollowMode.isInitialized) {
             throw new ActionLiveDataObjectInitializedError(
                 "liveFollowMode",
-                "updateState"
+                "startPresenting"
             );
         }
         return await liveFollowMode.startPresenting();

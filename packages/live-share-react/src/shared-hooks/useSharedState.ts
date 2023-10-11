@@ -16,6 +16,7 @@ import { isPrevStateCallback } from "../internal";
  * Values set through this state is automatically attached to a `SharedMap` that the `AzureProvider`
  * creates. If you are synchronizing complex data structures that multiple users will be setting simultaneously,
  * consider using an optimized hook for your data structure (e.g., `useSharedMap`, `useSharedString`, etc.).
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
  * @template S Typing for objects stored associated with the `uniqueKey`.
  * @param uniqueKey the unique key for a `SharedMap`. If you use the same key for multiple components, those components will reference the same state.

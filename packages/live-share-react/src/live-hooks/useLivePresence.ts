@@ -27,6 +27,7 @@ import {
  * Use this hook if you want to track presence for who is currently using this component, such as
  * who is online or who is viewing a specific document. With presence, you can sent along any custom
  * user data. This is useful for rendering a list of users, profile pictures, cursor positions, and more.
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
  * @template TData Optional typing for the custom user presence data object. Default is `object` type.
  * @param uniqueKey The unique key for `LivePresence`. If one does not yet exist, a new one will be created.

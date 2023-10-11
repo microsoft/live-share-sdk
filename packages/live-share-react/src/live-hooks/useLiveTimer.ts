@@ -30,6 +30,23 @@ import {
     ActionLiveDataObjectUndefinedError,
 } from "../internal";
 
+/**
+ * React hook for using Live Share's `LiveTimer` DDS.
+ *
+ * @remarks
+ * Use this hook to create a synchronized countdown timer in your app or to schedule synchronized tasks.
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
+ *
+ * @param uniqueKey the unique key for the `LiveTimer`. If one does not yet exist, a new one will be created, otherwise it will use the existing one.
+ * @param allowedRoles Optional. the user roles that are allowed to start/stop/pause the timer.
+ * @param tickRate Optional. the interval in which the `milliRemaining` state should be updated and the `onTick` callback will trigger.
+ * @param onTick Optional. event handler callback for when an active timer ticks.
+ * @param onStart Optional. event handler callback for when the timer is started.
+ * @param onPause Optional. event handler callback for when the timer is paused.
+ * @param onPlay Optional. event handler callback for when the timer is resumed.
+ * @param onFinish Optional. event handler callback for when the timer finishes.
+ * @returns results and callbacks exposed via the hook.
+ */
 export function useLiveTimer(
     uniqueKey: string,
     allowedRoles?: UserMeetingRole[],

@@ -30,6 +30,7 @@ import {
  *
  * @remarks
  * Use this hook if you want to synchronize the playback position of a video or audio element during a Live Share session.
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
  * @param uniqueKey uniqueKey value for the `LiveMediaSession` DDS object used by `MediaPlayerSynchronizer`.
  * @param mediaPlayerElement React RefObject containing object/element conforming to IMediaPlayer interface, `IMediaPlayer` object, or string id for <video> / <audio> element.

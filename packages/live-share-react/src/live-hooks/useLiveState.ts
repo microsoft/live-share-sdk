@@ -24,6 +24,7 @@ import {
  *
  * @remarks
  * Use this hook if you want to synchronize app state that will reset when all users leave the session.
+ * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
  * @param uniqueKey the unique key for the `LiveEvent`. If one does not yet exist, a new one will be created, otherwise it will use the existing one.
  * @param initialState Optional. the initial state value of type TState

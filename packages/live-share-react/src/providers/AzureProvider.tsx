@@ -19,15 +19,53 @@ import {
     IFluidTurboClient,
 } from "@microsoft/live-share-turbo";
 
-interface IFluidContext extends ISharedStateRegistryResponse {
+/**
+ * React Context provider values for `<AzureProvider>` and `<LiveShareProvider>`.
+ *
+ * @remarks
+ * To get the latest values, use the {@link useFluidObjectsContext} hook.
+ */
+export interface IFluidContext extends ISharedStateRegistryResponse {
+    /**
+     * The Fluid Turbo client used for connecting to the Fluid container.
+     */
     clientRef: React.MutableRefObject<IFluidTurboClient>;
+    /**
+     * Stateful Fluid container.
+     */
     container: IFluidContainer | undefined;
+    /**
+     * The Azure container services (e.g., audience).
+     */
     services: AzureContainerServices | undefined;
+    /**
+     * A stateful error object that is set if there was an error connecting to the Fluid container.
+     */
     joinError: Error | undefined;
+    /**
+     * React callback function to connect to an existing Fluid container.
+     *
+     * @remarks
+     * The results will also be set to their stateful counterparts for `container` and `services`.
+     *
+     * @param containerId the containerId to connect to.
+     * @param initialObjects Optional. initial object schema, which should match that passed to `createContainer()`.
+     * @returns promise that returns a results object once complete (e.g., container, services, etc.)
+     */
     getContainer: (
         containerId: string,
         initialObjects?: LoadableObjectClassRecord
     ) => Promise<IAzureContainerResults>;
+    /**
+     * React callback function to create and connect to a new Fluid container.
+     *
+     * @remarks
+     * The results will also be set to their stateful counterparts for `container` and `services`.
+     *
+     * @param initialObjects Optional. The initial object schema to apply to the container.
+     * @param onInitializeContainer Optional. A callback for when the container is first initialized, which is useful for setting default values to objects in `initialObjects`.
+     * @returns promise that returns a results object once complete (e.g., container, services, etc.)
+     */
     createContainer: (
         initialObjects?: LoadableObjectClassRecord,
         onInitializeContainer?: (container: IFluidContainer) => void
@@ -59,12 +97,43 @@ export const useFluidObjectsContext = (): IFluidContext => {
     return context;
 };
 
-interface IAzureProviderProps {
+/**
+ * Prop types for {@link AzureProvider} component.
+ */
+export interface IAzureProviderProps {
+    /**
+     * Optional. React children node for the React Context Provider.
+     */
     children?: React.ReactNode;
+    /**
+     * Props for initializing a new `AzureClient` instance.
+     */
     clientOptions: AzureClientProps;
+    /**
+     * The `containerId` to connect to when {@link joinOnLoad} is true.
+     *
+     * @remarks
+     * If you pass in an `undefined` value when {@link createOnLoad} is true, a new container will be created.
+     */
     containerId?: string;
+    /**
+     * Flag to control whether or not a new container should be created on first mount.
+     *
+     * @remarks
+     * If no {@link containerId} is set when the component first mounts, setting this to `true` will automatically create a new container.
+     * This prop does not do anything if you are using `<LiveShareProvider>` instead of `<AzureProvider>`.
+     */
     createOnLoad?: boolean;
+    /**
+     * The initial object schema to use when {@link joinOnLoad} or {@link createOnLoad} is true.
+     */
     initialObjects?: LoadableObjectClassRecord;
+    /**
+     * Flag to control whether or not to connect to an existing container on first mount.
+     *
+     * @remarks
+     * Setting this to true will connect to the container if {@link containerId} is provided as a prop.
+     */
     joinOnLoad?: boolean;
 }
 

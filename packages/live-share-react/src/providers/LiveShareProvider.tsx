@@ -12,9 +12,16 @@ import {
     ILiveShareJoinResults,
     ITimestampProvider,
 } from "@microsoft/live-share";
-import { FluidContext } from "./AzureProvider";
+import { FluidContext, useFluidObjectsContext } from "./AzureProvider";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 
+/**
+ * React Context provider values for `<LiveShareProvider>`.
+ *
+ * @remarks
+ * To get the latest values, use the {@link useLiveShareContext} hook.
+ * Use the {@link useFluidObjectsContext} hook for other relevant context values.
+ */
 export interface ILiveShareContext {
     /**
      * True if the local user created the Fluid container
@@ -34,10 +41,14 @@ export interface ILiveShareContext {
      */
     timestampProvider: ITimestampProvider | undefined;
     /**
-     * Join callback method
+     * Join callback method for manually connecting to the Fluid container.
+     *
+     * @remarks
+     * Use this callback if `joinOnLoad` is `false` or `undefined` in {@link ILiveShareProviderProps}.
+     *
      * @param initialObjects Optional. The initial objects for the Fluid container schema.
      * @param onInitializeContainer Optional. Callback for when the container is first created.
-     * @returns `ILiveShareJoinResults`, which includes the Fluid container
+     * @returns Promise with `ILiveShareJoinResults`, which includes the Fluid container
      */
     join: (
         initialObjects?: LoadableObjectClassRecord,
@@ -71,25 +82,31 @@ export const useLiveShareContext = (): ILiveShareContext => {
     return context;
 };
 
-interface ILiveShareProviderProps {
+/**
+ * Prop types for {@link LiveShareProvider} component.
+ */
+export interface ILiveShareProviderProps {
     /**
      * Optional. React children node for the React Context Provider
      */
     children?: React.ReactNode;
     /**
-     * Optional. Options to pass into LiveShareClient initializer
+     * Optional. Options for initializing `LiveShareClient`.
      */
     clientOptions?: ILiveShareClientOptions;
     /**
-     * Host to initialize LiveShareClient with
+     * Host to initialize `LiveShareClient` with.
+     *
+     * @remarks
+     * If using the `LiveShareClient` class from `@microsoft/teams-js`, you must ensure that you have first called `teamsJs.app.initialize()` before calling `LiveShareClient.create()`.
      */
     host: ILiveShareHost;
     /**
-     * Optional. Initial Fluid objects to load when the container is first created
+     * The initial object schema to use when {@link joinOnLoad} is true.
      */
     initialObjects?: LoadableObjectClassRecord;
     /**
-     * Optional. Flag to determine whether to join Fluid container on load
+     * Optional. Flag to determine whether to join Fluid container on load.
      */
     joinOnLoad?: boolean;
 }

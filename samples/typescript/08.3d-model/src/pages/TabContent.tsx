@@ -1,12 +1,17 @@
 /* eslint-disable react/no-unknown-property */
-import { FollowModeType, TestLiveShareHost } from "@microsoft/live-share";
+import {
+    FollowModeType,
+    LiveDataObjectInitializeState,
+    TestLiveShareHost,
+    UserMeetingRole,
+} from "@microsoft/live-share";
 import {
     LiveShareProvider,
     useLiveFollowMode,
     useLiveShareContext,
     useSharedMap,
 } from "@microsoft/live-share-react";
-import { LiveShareHost, UserMeetingRole } from "@microsoft/teams-js";
+import { LiveShareHost } from "@microsoft/teams-js";
 import { inTeams } from "../utils/inTeams";
 import { FC, useState, useEffect, useRef, useCallback, ReactNode } from "react";
 import { Vector3, Color3 } from "@babylonjs/core/Maths/math";
@@ -34,30 +39,45 @@ import {
 } from "../components";
 import { vectorsAreRoughlyEqual } from "../utils/vector-utils";
 import { LiveCanvasOverlay } from "../components/LiveCanvasOverlay";
+import { isLiveShareSupported } from "../utils/teams-utils";
+import { ISharingStatus, useSharingStatus } from "../hooks/useSharingStatus";
 
 const IN_TEAMS = inTeams();
 
 export const TabContent: FC = () => {
+    const [isSupported] = useState(IN_TEAMS ? isLiveShareSupported() : true);
+
+    if (!isSupported) {
+        // In production, your app must have some base utility if you are using a scope/hub that is not supported.
+        // A better implementation for this app would be to allow the user to navigate the 3D model offline.
+        return <Text>{"Live Share not supported"}</Text>;
+    }
+    return <LiveShareContentWrapper />;
+};
+
+const LiveShareContentWrapper: FC = () => {
     const [host] = useState(
         IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
     );
+    const sharingStatus = useSharingStatus();
     return (
         <LiveShareProvider joinOnLoad host={host}>
-            <LoadingErrorWrapper>
-                <LiveObjectViewer />
+            <LoadingErrorWrapper sharingStatus={sharingStatus}>
+                <LiveObjectViewer sharingStatus={sharingStatus} />
             </LoadingErrorWrapper>
         </LiveShareProvider>
     );
 };
 
-export const LoadingErrorWrapper: FC<{
+const LoadingErrorWrapper: FC<{
     children?: ReactNode;
-}> = ({ children }) => {
+    sharingStatus?: ISharingStatus;
+}> = ({ children, sharingStatus }) => {
     const { joined, joinError } = useLiveShareContext();
     if (joinError) {
         return <Text>{joinError?.message}</Text>;
     }
-    if (!joined) {
+    if (!joined || !sharingStatus) {
         return (
             <FlexColumn fill="view" vAlign="center" hAlign="center">
                 <Spinner />
@@ -87,7 +107,9 @@ export const ALLOWED_ROLES = [
  * useLiveFollowMode is used to enable following/presenting.
  * useLiveCanvas is used to enable synchronized pen/highlighter/cursors atop the model when in follow mode.
  */
-const LiveObjectViewer: FC = () => {
+const LiveObjectViewer: FC<{
+    sharingStatus: ISharingStatus | undefined;
+}> = ({ sharingStatus }) => {
     // Babylon scene reference
     const sceneRef = useRef<Nullable<BabyScene>>(null);
     // Babylon arc rotation camera reference
@@ -117,6 +139,7 @@ const LiveObjectViewer: FC = () => {
         allUsers, // List of users with info about who they are following and their custom state value.
         state: remoteCameraState, // The relevant state based on who is presenting / the user is following
         update: updateUserCameraState, // Update the local user's state value
+        liveFollowMode,
         startPresenting, // Start presenting / take control
         stopPresenting, // Release control
         followUser, // Start following a specific user
@@ -343,6 +366,27 @@ const LiveObjectViewer: FC = () => {
             cameraRef.current?.onViewMatrixChangedObservable.clear();
         };
     }, [onCameraViewMatrixChanged]);
+
+    // Start presenting if nobody is in control and local user isShareInitiator (meetings only)
+    const hasInitiallyPresentedRef = useRef<boolean>(false);
+    useEffect(() => {
+        if (
+            liveFollowMode?.initializeState !==
+            LiveDataObjectInitializeState.succeeded
+        )
+            return;
+        if (!sharingStatus?.isShareInitiator) return;
+        if (!remoteCameraState) return;
+        if (remoteCameraState.type !== FollowModeType.local) return;
+        if (hasInitiallyPresentedRef.current) return;
+        hasInitiallyPresentedRef.current = true;
+        startPresenting();
+    }, [
+        sharingStatus?.isShareInitiator,
+        remoteCameraState?.type,
+        liveFollowMode?.initializeState,
+        startPresenting,
+    ]);
 
     // Show LiveCanvas overlay and/or decorative overlay while in follow mode
     const followModeActive = remoteCameraState

@@ -26,7 +26,7 @@
     "accentColor": "#38a2ff",
     "configurableTabs": [
         {
-            "configurationUrl": "https://ryanbliss.ngrok.io/config?inTeams=true",
+            "configurationUrl": "https://{YOUR_NGROK_ORIGIN}/config?inTeams=true",
             "canUpdateConfiguration": false,
             "scopes": [
                 "groupchat",

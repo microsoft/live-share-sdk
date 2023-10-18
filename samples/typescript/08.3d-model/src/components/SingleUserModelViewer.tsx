@@ -12,7 +12,7 @@ import { Color3 } from "@babylonjs/core/Maths/math";
 import { PBRMaterial } from "@babylonjs/core/Materials";
 import { FlexColumn } from "./flex";
 
-export const OfflineModelViewer: FC = () => {
+export const SingleUserModelViewer: FC = () => {
     // Babylon scene reference
     const sceneRef = useRef<Nullable<BabyScene>>(null);
     // Babylon arc rotation camera reference

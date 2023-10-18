@@ -36,7 +36,7 @@ import {
     FollowModeInfoBar,
     TopHeaderBar,
     ModelViewerScene,
-    OfflineModelViewer,
+    SingleUserModelViewer,
 } from "../components";
 import { vectorsAreRoughlyEqual } from "../utils/vector-utils";
 import { LiveCanvasOverlay } from "../components/LiveCanvasOverlay";
@@ -49,7 +49,7 @@ export const TabContent: FC = () => {
     const [isSupported] = useState(IN_TEAMS ? isLiveShareSupported() : true);
 
     if (!isSupported) {
-        return <OfflineModelViewer />;
+        return <SingleUserModelViewer />;
     }
     return <LiveShareContentWrapper />;
 };

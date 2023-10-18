@@ -36,6 +36,7 @@ import {
     FollowModeInfoBar,
     TopHeaderBar,
     ModelViewerScene,
+    OfflineModelViewer,
 } from "../components";
 import { vectorsAreRoughlyEqual } from "../utils/vector-utils";
 import { LiveCanvasOverlay } from "../components/LiveCanvasOverlay";
@@ -48,9 +49,7 @@ export const TabContent: FC = () => {
     const [isSupported] = useState(IN_TEAMS ? isLiveShareSupported() : true);
 
     if (!isSupported) {
-        // In production, your app must have some base utility if you are using a scope/hub that is not supported.
-        // A better implementation for this app would be to allow the user to navigate the 3D model offline.
-        return <Text>{"Live Share not supported"}</Text>;
+        return <OfflineModelViewer />;
     }
     return <LiveShareContentWrapper />;
 };

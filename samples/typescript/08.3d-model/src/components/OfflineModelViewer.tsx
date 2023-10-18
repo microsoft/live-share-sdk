@@ -10,6 +10,7 @@ import { IPointerEvent } from "@babylonjs/core/Events";
 import { HexColorPicker } from "react-colorful";
 import { Color3 } from "@babylonjs/core/Maths/math";
 import { PBRMaterial } from "@babylonjs/core/Materials";
+import { FlexColumn } from "./flex";
 
 export const OfflineModelViewer: FC = () => {
     // Babylon scene reference
@@ -88,14 +89,21 @@ export const OfflineModelViewer: FC = () => {
         };
     }, [handlePointerDown]);
 
+    const onReady = useCallback(
+        (scene: any) => {
+            sceneRef.current = scene;
+            if (!scene) return;
+            scene.onPointerDown = handlePointerDown;
+        },
+        [handlePointerDown]
+    );
+
     return (
-        <>
+        <FlexColumn fill="view">
             <ModelViewerScene
                 cameraRef={cameraRef}
                 modelFileName="plane.glb"
-                onReadyObservable={(scene: any) => {
-                    sceneRef.current = scene;
-                }}
+                onReadyObservable={onReady}
             />
             {!!selectedMaterialName && (
                 <HexColorPicker
@@ -113,6 +121,6 @@ export const OfflineModelViewer: FC = () => {
                     }}
                 />
             )}
-        </>
+        </FlexColumn>
     );
 };

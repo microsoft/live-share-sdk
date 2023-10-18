@@ -13,7 +13,7 @@
         "@microsoft/live-share-media": "1.2.1",
         "@microsoft/live-share-canvas": "1.2.1",
         "@microsoft/live-share-react": "1.2.1-preview.0",
-        "@microsoft/teams-js": "^2.11.0",
+        "@microsoft/teams-js": "^2.16.0",
         "fluid-framework": "^1.3.6",
         "lodash": "^4.17.21",
         "prop-types": "^15.8.1",

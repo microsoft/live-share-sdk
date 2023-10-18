@@ -7,6 +7,7 @@ import { FollowModeSmallButton } from "./FollowModeSmallButton";
 import { LiveAvatars } from "./LiveAvatars";
 import { ModelViewerScene } from "./ModelViewerScene";
 import { TopHeaderBar } from "./TopHeaderBar";
+import { SingleUserModelViewer } from "./SingleUserModelViewer";
 
 export {
     DecorativeOutline,
@@ -20,4 +21,5 @@ export {
     LiveAvatars,
     ModelViewerScene,
     TopHeaderBar,
+    SingleUserModelViewer,
 };

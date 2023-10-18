@@ -41,7 +41,7 @@ import {
 import { vectorsAreRoughlyEqual } from "../utils/vector-utils";
 import { LiveCanvasOverlay } from "../components/LiveCanvasOverlay";
 import { isLiveShareSupported } from "../utils/teams-utils";
-import { ISharingStatus, useSharingStatus } from "../hooks/useSharingStatus";
+import { useSharingStatus } from "../hooks/useSharingStatus";
 
 const IN_TEAMS = inTeams();
 

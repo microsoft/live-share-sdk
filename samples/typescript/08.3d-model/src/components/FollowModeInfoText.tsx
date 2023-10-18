@@ -42,7 +42,7 @@ export const FollowModeInfoText: FC = () => {
         }
         switch (remoteCameraState.type) {
             case FollowModeType.activePresenter: {
-                if (allUsers.length !== 1) {
+                if (allUsers.length !== 2) {
                     return `Presenting to ${allUsers.length - 1} others`;
                 }
                 const nonLocalUser = allUsers.filter(

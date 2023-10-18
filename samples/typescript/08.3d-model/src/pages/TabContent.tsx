@@ -63,7 +63,7 @@ const LiveShareContentWrapper: FC = () => {
     const sharingStatus = useSharingStatus(FrameContexts.meetingStage);
     return (
         <LiveShareProvider joinOnLoad host={host}>
-            <LoadingErrorWrapper sharingStatus={sharingStatus}>
+            <LoadingErrorWrapper>
                 <LiveObjectViewer sharingStatus={sharingStatus} />
             </LoadingErrorWrapper>
         </LiveShareProvider>
@@ -72,8 +72,7 @@ const LiveShareContentWrapper: FC = () => {
 
 const LoadingErrorWrapper: FC<{
     children?: ReactNode;
-    sharingStatus?: ISharingStatus;
-}> = ({ children, sharingStatus }) => {
+}> = ({ children }) => {
     const { joined, joinError } = useLiveShareContext();
     if (joinError) {
         return <Text>{joinError?.message}</Text>;

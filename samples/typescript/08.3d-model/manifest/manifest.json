@@ -34,7 +34,10 @@
             ],
             "context": [
                 "meetingSidePanel",
-                "meetingStage"
+                "meetingStage",
+                "privateChatTab",
+                "channelTab",
+                "meetingChatTab"
             ]
         }
     ],

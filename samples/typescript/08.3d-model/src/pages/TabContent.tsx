@@ -11,7 +11,7 @@ import {
     useLiveShareContext,
     useSharedMap,
 } from "@microsoft/live-share-react";
-import { LiveShareHost } from "@microsoft/teams-js";
+import { FrameContexts, LiveShareHost } from "@microsoft/teams-js";
 import { inTeams } from "../utils/inTeams";
 import { FC, useState, useEffect, useRef, useCallback, ReactNode } from "react";
 import { Vector3, Color3 } from "@babylonjs/core/Maths/math";
@@ -58,7 +58,9 @@ const LiveShareContentWrapper: FC = () => {
     const [host] = useState(
         IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
     );
-    const sharingStatus = useSharingStatus();
+    // Choose to only get sharing status in meetingStage.
+    // We use this to take control on meeting stage if isShareInitiator == true on first load.
+    const sharingStatus = useSharingStatus(FrameContexts.meetingStage);
     return (
         <LiveShareProvider joinOnLoad host={host}>
             <LoadingErrorWrapper sharingStatus={sharingStatus}>
@@ -76,7 +78,7 @@ const LoadingErrorWrapper: FC<{
     if (joinError) {
         return <Text>{joinError?.message}</Text>;
     }
-    if (!joined || !sharingStatus) {
+    if (!joined) {
         return (
             <FlexColumn fill="view" vAlign="center" hAlign="center">
                 <Spinner />

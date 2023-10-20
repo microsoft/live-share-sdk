@@ -261,7 +261,11 @@ export class LiveState<TState = any> extends LiveDataObject<{
         );
         this._logger?.sendTelemetryEvent(
             TelemetryEvents.LiveState.StateChanged,
-            { oldState, newState }
+            null,
+            {
+                oldState: JSON.stringify(oldState),
+                newState: JSON.stringify(newState),
+            }
         );
     }
 }

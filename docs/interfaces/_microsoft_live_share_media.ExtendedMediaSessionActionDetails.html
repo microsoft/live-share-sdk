@@ -16,12 +16,18 @@
 <li><a href="../modules/_microsoft_live_share_media.html">_microsoft_live_share_media</a></li>
 <li><a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html">ExtendedMediaSessionActionDetails</a></li></ul>
 <h1>Interface ExtendedMediaSessionActionDetails</h1></div>
+<section class="tsd-panel tsd-comment">
+<div class="tsd-comment tsd-typography"><p>Details for emitted actions from <code>LiveMediaSession</code>.</p>
+
+<h3>Remarks</h3><p>These types extend the default event details supported by the <code>MediaSession</code> specification in browsers.
+These additional types help with group synchronization.</p>
+</div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li><span class="target">ExtendedMediaSessionActionDetails</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/864286d/packages/live-share-media/src/MediaSessionExtensions.ts#L43">live-share-media/src/MediaSessionExtensions.ts:43</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L131">live-share-media/src/MediaSessionExtensions.ts:131</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -31,55 +37,98 @@
 <h3 class="tsd-index-heading">Properties</h3>
 <div class="tsd-index-list"><a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#action" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-1024-path"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)" id="icon-1024-text"></path></svg><span>action</span></a>
 <a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#blocked" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>blocked?</span></a>
+<a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#clientId" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>client<wbr/>Id</span></a>
 <a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#data" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>data?</span></a>
 <a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#fastSeek" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>fast<wbr/>Seek?</span></a>
+<a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#local" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>local</span></a>
 <a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#metadata" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>metadata?</span></a>
 <a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#seekOffset" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>seek<wbr/>Offset?</span></a>
 <a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#seekTime" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>seek<wbr/>Time?</span></a>
+<a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#source" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>source</span></a>
 <a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html#suspension" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>suspension?</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member"><a id="action" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>action</span><a href="#action" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">action</span><span class="tsd-signature-symbol">:</span> <a href="../types/_microsoft_live_share_media.ExtendedMediaSessionAction.html" class="tsd-signature-type tsd-kind-type-alias">ExtendedMediaSessionAction</a></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">action</span><span class="tsd-signature-symbol">:</span> <a href="../types/_microsoft_live_share_media.ExtendedMediaSessionAction.html" class="tsd-signature-type tsd-kind-type-alias">ExtendedMediaSessionAction</a></div>
+<div class="tsd-comment tsd-typography"><p>The action type of this event.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/864286d/packages/live-share-media/src/MediaSessionExtensions.ts#L44">live-share-media/src/MediaSessionExtensions.ts:44</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L135">live-share-media/src/MediaSessionExtensions.ts:135</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="blocked" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>blocked</span><a href="#blocked" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">blocked</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/_microsoft_live_share_media.ExtendedMediaSessionAction.html" class="tsd-signature-type tsd-kind-type-alias">ExtendedMediaSessionAction</a></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">blocked</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../types/_microsoft_live_share_media.ExtendedMediaSessionAction.html" class="tsd-signature-type tsd-kind-type-alias">ExtendedMediaSessionAction</a></div>
+<div class="tsd-comment tsd-typography"><p>Action type that was blocked.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/864286d/packages/live-share-media/src/MediaSessionExtensions.ts#L51">live-share-media/src/MediaSessionExtensions.ts:51</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L179">live-share-media/src/MediaSessionExtensions.ts:179</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="clientId" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>client<wbr/>Id</span><a href="#clientId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">client<wbr/>Id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>Unique identifier of the client that triggered this action.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L147">live-share-media/src/MediaSessionExtensions.ts:147</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="data" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>data</span><a href="#data" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">data</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">object</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">data</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">object</span></div>
+<div class="tsd-comment tsd-typography"><p>Custom data associated with this action.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/864286d/packages/live-share-media/src/MediaSessionExtensions.ts#L50">live-share-media/src/MediaSessionExtensions.ts:50</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L175">live-share-media/src/MediaSessionExtensions.ts:175</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="fastSeek" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>fast<wbr/>Seek</span><a href="#fastSeek" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">fast<wbr/>Seek</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">fast<wbr/>Seek</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Flag indicating whether or not this was a fast seek action.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/864286d/packages/live-share-media/src/MediaSessionExtensions.ts#L45">live-share-media/src/MediaSessionExtensions.ts:45</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L155">live-share-media/src/MediaSessionExtensions.ts:155</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="local" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>local</span><a href="#local" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">local</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Flag indicating whether or not the action was triggered by the local client.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L151">live-share-media/src/MediaSessionExtensions.ts:151</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="metadata" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>metadata</span><a href="#metadata" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">metadata</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="_microsoft_live_share_media.ExtendedMediaMetadata.html" class="tsd-signature-type tsd-kind-interface">ExtendedMediaMetadata</a></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">metadata</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="_microsoft_live_share_media.ExtendedMediaMetadata.html" class="tsd-signature-type tsd-kind-interface">ExtendedMediaMetadata</a></div>
+<div class="tsd-comment tsd-typography"><p>Updated session metadata that was changed via this action.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/864286d/packages/live-share-media/src/MediaSessionExtensions.ts#L48">live-share-media/src/MediaSessionExtensions.ts:48</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L167">live-share-media/src/MediaSessionExtensions.ts:167</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="seekOffset" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>seek<wbr/>Offset</span><a href="#seekOffset" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">seek<wbr/>Offset</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">seek<wbr/>Offset</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>The offset of the seek.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/864286d/packages/live-share-media/src/MediaSessionExtensions.ts#L46">live-share-media/src/MediaSessionExtensions.ts:46</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L159">live-share-media/src/MediaSessionExtensions.ts:159</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="seekTime" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>seek<wbr/>Time</span><a href="#seekTime" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">seek<wbr/>Time</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">seek<wbr/>Time</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Timestamp of the seek event.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/864286d/packages/live-share-media/src/MediaSessionExtensions.ts#L47">live-share-media/src/MediaSessionExtensions.ts:47</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L163">live-share-media/src/MediaSessionExtensions.ts:163</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="source" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>source</span><a href="#source" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">source</span><span class="tsd-signature-symbol">:</span> <a href="../types/_microsoft_live_share_media.ExtendedMediaSessionActionSource.html" class="tsd-signature-type tsd-kind-type-alias">ExtendedMediaSessionActionSource</a></div>
+<div class="tsd-comment tsd-typography"><p>The source of the action.</p>
+
+<h3>Remarks</h3><p>Is <code>user</code> when the action was explicitly invoked via the <code>LiveMediaSessionCoordinator</code>.
+Is <code>system</code> when the action was invoked via <code>GroupCoordinatorState</code> when the local client is out of sync.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L143">live-share-media/src/MediaSessionExtensions.ts:143</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="suspension" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>suspension</span><a href="#suspension" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">suspension</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="_microsoft_live_share_media.MediaSessionCoordinatorSuspension.html" class="tsd-signature-type tsd-kind-interface">MediaSessionCoordinatorSuspension</a></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">suspension</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="_microsoft_live_share_media.MediaSessionCoordinatorSuspension.html" class="tsd-signature-type tsd-kind-interface">MediaSessionCoordinatorSuspension</a></div>
+<div class="tsd-comment tsd-typography"><p>Suspension associated with this action.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/864286d/packages/live-share-media/src/MediaSessionExtensions.ts#L49">live-share-media/src/MediaSessionExtensions.ts:49</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/microsoft/live-share-sdk/blob/09de348/packages/live-share-media/src/MediaSessionExtensions.ts#L171">live-share-media/src/MediaSessionExtensions.ts:171</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -99,11 +148,14 @@
 <ul>
 <li><a href="#action" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>action</span></a></li>
 <li><a href="#blocked" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>blocked</span></a></li>
+<li><a href="#clientId" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>client<wbr/>Id</span></a></li>
 <li><a href="#data" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>data</span></a></li>
 <li><a href="#fastSeek" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>fast<wbr/>Seek</span></a></li>
+<li><a href="#local" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>local</span></a></li>
 <li><a href="#metadata" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>metadata</span></a></li>
 <li><a href="#seekOffset" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>seek<wbr/>Offset</span></a></li>
 <li><a href="#seekTime" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>seek<wbr/>Time</span></a></li>
+<li><a href="#source" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>source</span></a></li>
 <li><a href="#suspension" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>suspension</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../index.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4-path"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)" id="icon-4-text"></path></svg><span>Microsoft <wbr/>Live <wbr/>Share SDK</span></a>
@@ -113,7 +165,10 @@
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
 <li><a href="../enums/_microsoft_live_share.ContainerState.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-enum)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-8-path"></rect><path d="M9.45 16V7.24H14.49V8.224H10.518V10.936H14.07V11.908H10.518V15.016H14.49V16H9.45Z" fill="var(--color-text)" id="icon-8-text"></path></svg><span>Container<wbr/>State</span></a></li>
+<li><a href="../enums/_microsoft_live_share.FollowModeType.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-8-path"></use><use href="#icon-8-text"></use></svg><span>Follow<wbr/>Mode<wbr/>Type</span></a></li>
+<li><a href="../enums/_microsoft_live_share.LiveDataObjectInitializeState.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-8-path"></use><use href="#icon-8-text"></use></svg><span>Live<wbr/>Data<wbr/>Object<wbr/>Initialize<wbr/>State</span></a></li>
 <li><a href="../enums/_microsoft_live_share.LiveEventEvents.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-8-path"></use><use href="#icon-8-text"></use></svg><span>Live<wbr/>Event<wbr/>Events</span></a></li>
+<li><a href="../enums/_microsoft_live_share.LiveFollowModeEvents.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-8-path"></use><use href="#icon-8-text"></use></svg><span>Live<wbr/>Follow<wbr/>Mode<wbr/>Events</span></a></li>
 <li><a href="../enums/_microsoft_live_share.LivePresenceEvents.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-8-path"></use><use href="#icon-8-text"></use></svg><span>Live<wbr/>Presence<wbr/>Events</span></a></li>
 <li><a href="../enums/_microsoft_live_share.LiveStateEvents.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-8-path"></use><use href="#icon-8-text"></use></svg><span>Live<wbr/>State<wbr/>Events</span></a></li>
 <li><a href="../enums/_microsoft_live_share.LiveTimerEvents.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-8-path"></use><use href="#icon-8-text"></use></svg><span>Live<wbr/>Timer<wbr/>Events</span></a></li>
@@ -128,6 +183,7 @@
 <li><a href="../classes/_microsoft_live_share.LiveEventSource.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Live<wbr/>Event<wbr/>Source</span></a></li>
 <li><a href="../classes/_microsoft_live_share.LiveEventTarget.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Live<wbr/>Event<wbr/>Target</span></a></li>
 <li><a href="../classes/_microsoft_live_share.LiveEventTimer.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Live<wbr/>Event<wbr/>Timer</span></a></li>
+<li><a href="../classes/_microsoft_live_share.LiveFollowMode.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Live<wbr/>Follow<wbr/>Mode</span></a></li>
 <li><a href="../classes/_microsoft_live_share.LivePresence.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Live<wbr/>Presence</span></a></li>
 <li><a href="../classes/_microsoft_live_share.LivePresenceUser.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Live<wbr/>Presence<wbr/>User</span></a></li>
 <li><a href="../classes/_microsoft_live_share.LiveShareClient.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Live<wbr/>Share<wbr/>Client</span></a></li>
@@ -144,8 +200,11 @@
 <li><a href="_microsoft_live_share.IEvent.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>IEvent</span></a></li>
 <li><a href="_microsoft_live_share.IFluidContainerInfo.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>IFluid<wbr/>Container<wbr/>Info</span></a></li>
 <li><a href="_microsoft_live_share.IFluidTenantInfo.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>IFluid<wbr/>Tenant<wbr/>Info</span></a></li>
+<li><a href="_microsoft_live_share.IFollowModePresenceUserData.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>IFollow<wbr/>Mode<wbr/>Presence<wbr/>User<wbr/>Data</span></a></li>
+<li><a href="_microsoft_live_share.IFollowModeState.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>IFollow<wbr/>Mode<wbr/>State</span></a></li>
 <li><a href="_microsoft_live_share.ILiveEvent.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>ILive<wbr/>Event</span></a></li>
 <li><a href="_microsoft_live_share.ILiveEventEvents.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>ILive<wbr/>Event<wbr/>Events</span></a></li>
+<li><a href="_microsoft_live_share.ILiveFollowModeEvents.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>ILive<wbr/>Follow<wbr/>Mode<wbr/>Events</span></a></li>
 <li><a href="_microsoft_live_share.ILivePresenceEvents.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>ILive<wbr/>Presence<wbr/>Events</span></a></li>
 <li><a href="_microsoft_live_share.ILiveShareClientOptions.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>ILive<wbr/>Share<wbr/>Client<wbr/>Options</span></a></li>
 <li><a href="_microsoft_live_share.ILiveShareHost.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>ILive<wbr/>Share<wbr/>Host</span></a></li>
@@ -157,7 +216,8 @@
 <li><a href="_microsoft_live_share.IRuntimeSignaler.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>IRuntime<wbr/>Signaler</span></a></li>
 <li><a href="_microsoft_live_share.ITimerConfig.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>ITimer<wbr/>Config</span></a></li>
 <li><a href="_microsoft_live_share.ITimerConfigData.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>ITimer<wbr/>Config<wbr/>Data</span></a></li>
-<li><a href="../types/_microsoft_live_share.GetLocalUserCanSend.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-type-alias)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4194304-path"></rect><path d="M11.31 16V8.224H8.91V7.24H14.79V8.224H12.39V16H11.31Z" fill="var(--color-text)" id="icon-4194304-text"></path></svg><span>Get<wbr/>Local<wbr/>User<wbr/>Can<wbr/>Send</span></a></li>
+<li><a href="../types/_microsoft_live_share.FollowModePresenceUser.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-type-alias)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4194304-path"></rect><path d="M11.31 16V8.224H8.91V7.24H14.79V8.224H12.39V16H11.31Z" fill="var(--color-text)" id="icon-4194304-text"></path></svg><span>Follow<wbr/>Mode<wbr/>Presence<wbr/>User</span></a></li>
+<li><a href="../types/_microsoft_live_share.GetLocalUserCanSend.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Get<wbr/>Local<wbr/>User<wbr/>Can<wbr/>Send</span></a></li>
 <li><a href="../types/_microsoft_live_share.LiveEventListener.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Live<wbr/>Event<wbr/>Listener</span></a></li>
 <li><a href="../types/_microsoft_live_share.UpdateSynchronizationState.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Update<wbr/>Synchronization<wbr/>State</span></a></li>
 <li><a href="../functions/_microsoft_live_share.getLiveShareContainerSchemaProxy.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-function)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-64-path"></rect><path d="M9.39 16V7.24H14.55V8.224H10.446V11.128H14.238V12.112H10.47V16H9.39Z" fill="var(--color-text)" id="icon-64-text"></path></svg><span>get<wbr/>Live<wbr/>Share<wbr/>Container<wbr/>Schema<wbr/>Proxy</span></a></li></ul></div></details></li>
@@ -178,11 +238,13 @@
 <li><a href="_microsoft_live_share_media.CoordinationWaitPoint.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Coordination<wbr/>Wait<wbr/>Point</span></a></li>
 <li><a href="_microsoft_live_share_media.ExtendedMediaMetadata.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Extended<wbr/>Media<wbr/>Metadata</span></a></li>
 <li><a href="_microsoft_live_share_media.ExtendedMediaSessionActionDetails.html" class="current"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Extended<wbr/>Media<wbr/>Session<wbr/>Action<wbr/>Details</span></a></li>
+<li><a href="_microsoft_live_share_media.ExtendedMediaSessionActionHandler.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Extended<wbr/>Media<wbr/>Session<wbr/>Action<wbr/>Handler</span></a></li>
 <li><a href="_microsoft_live_share_media.IMediaPlayer.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>IMedia<wbr/>Player</span></a></li>
 <li><a href="_microsoft_live_share_media.IMediaPlayerState.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>IMedia<wbr/>Player<wbr/>State</span></a></li>
 <li><a href="_microsoft_live_share_media.IMediaPlayerSynchronizerEvent.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>IMedia<wbr/>Player<wbr/>Synchronizer<wbr/>Event</span></a></li>
 <li><a href="_microsoft_live_share_media.MediaSessionCoordinatorSuspension.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg><span>Media<wbr/>Session<wbr/>Coordinator<wbr/>Suspension</span></a></li>
 <li><a href="../types/_microsoft_live_share_media.ExtendedMediaSessionAction.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Extended<wbr/>Media<wbr/>Session<wbr/>Action</span></a></li>
+<li><a href="../types/_microsoft_live_share_media.ExtendedMediaSessionActionSource.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Extended<wbr/>Media<wbr/>Session<wbr/>Action<wbr/>Source</span></a></li>
 <li><a href="../types/_microsoft_live_share_media.ExtendedMediaSessionPlaybackState.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Extended<wbr/>Media<wbr/>Session<wbr/>Playback<wbr/>State</span></a></li>
 <li><a href="../types/_microsoft_live_share_media.MediaSessionCoordinatorState.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-4194304-path"></use><use href="#icon-4194304-text"></use></svg><span>Media<wbr/>Session<wbr/>Coordinator<wbr/>State</span></a></li></ul></div></details></li>
 <li>

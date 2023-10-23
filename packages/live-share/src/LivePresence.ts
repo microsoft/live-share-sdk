@@ -393,12 +393,14 @@ export class LivePresence<
             if (localEvent) {
                 this._logger?.sendTelemetryEvent(
                     TelemetryEvents.LivePresence.LocalPresenceChanged,
-                    { user: evt }
+                    null,
+                    { user: JSON.stringify(evt) }
                 );
             } else {
                 this._logger?.sendTelemetryEvent(
                     TelemetryEvents.LivePresence.RemotePresenceChanged,
-                    { user: evt }
+                    null,
+                    { user: JSON.stringify(evt) }
                 );
             }
         };

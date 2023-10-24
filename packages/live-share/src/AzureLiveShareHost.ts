@@ -16,7 +16,7 @@ import { Deferred } from "./internals";
  * We provide no SLA guarantees on this implementation while it is in alpha.
  *
  * @remarks
- * To use this API, first pass your `ContainerSchema` through the `getLiveShareContainerSchemaProxy` function.
+ * To use this API, first pass your `ContainerSchema` through the `getLiveContainerSchema` function.
  * This should be done before calling `.getContainer()` or `createContainer()`.
  * Then, call `setAudience()` with the `IAzureAudience` object (in `AzureContainerServices`) returned by the `AzureClient`.
  */

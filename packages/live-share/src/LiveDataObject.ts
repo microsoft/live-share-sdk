@@ -45,7 +45,7 @@ export abstract class LiveDataObject<
     protected get liveRuntime(): LiveShareRuntime {
         assert(
             this._liveRuntime !== null,
-            "LiveShareRuntime not initialized. Ensure your Fluid `ContainerSchema` was first wrapped inside of `getLiveShareSchema`, or use `.joinContainer()` in `LiveShareClient`."
+            "LiveShareRuntime not initialized. Ensure your Fluid `ContainerSchema` was first wrapped inside of `getLiveContainerSchema()` before calling `client.getContainer()` / `client.createContainer()` from your `AzureClient` (or equivalent) instance.\nAlternatively, you can use the `.joinContainer()` in `LiveShareClient`, which does this for you.\nIf you are using `LiveShareClient` and are still encountering this issue, please report this issue at https://aka.ms/teamsliveshare/issue."
         );
         return this._liveRuntime;
     }

@@ -17,7 +17,7 @@ import {
     AzureLiveShareHost,
     ILiveShareHost,
     LiveShareRuntime,
-    getLiveShareContainerSchemaProxy,
+    getLiveContainerSchema,
 } from "@microsoft/live-share";
 import { FluidTurboClient } from "./FluidTurboClient";
 
@@ -128,7 +128,7 @@ export class AzureTurboClient extends FluidTurboClient {
     private getInjectedContainerSchema(
         initialObjects?: LoadableObjectClassRecord
     ): ContainerSchema {
-        return getLiveShareContainerSchemaProxy(
+        return getLiveContainerSchema(
             this.getContainerSchema(initialObjects),
             this._runtime
         );

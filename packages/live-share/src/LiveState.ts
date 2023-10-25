@@ -119,7 +119,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
         );
         // This error should not happen due to prior assertion, but if it is somehow defined at this point, errors will occur.
         UnexpectedError.assert(
-            !!this._synchronizer,
+            !this._synchronizer,
             "LiveState:initialize",
             "_synchronizer already set, which implies there was an error during initialization that should not occur."
         );

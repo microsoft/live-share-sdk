@@ -17,7 +17,7 @@ export class UnexpectedError extends Error {
         prefix: string,
         message: string
     ): asserts condition {
-        if (!condition) return;
+        if (condition) return;
         throw new UnexpectedError(prefix, message);
     }
 }

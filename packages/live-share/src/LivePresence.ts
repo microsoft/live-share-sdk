@@ -145,7 +145,7 @@ export class LivePresence<
         );
         // This error should not happen due to `initializeState` enum, but if it is somehow defined at this point, errors will occur.
         UnexpectedError.assert(
-            !!this._synchronizer,
+            !this._synchronizer,
             "LivePresence:initialize",
             "_synchronizer already set, which is an unexpected error."
         );

@@ -8,6 +8,11 @@ import { LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LivePresenceUser, PresenceState } from "./LivePresenceUser";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import {
+    LiveDataObjectInitializeNotNeededError,
+    LiveDataObjectNotInitializedError,
+    UnexpectedError,
+} from "./errors";
 
 /**
  * @beta
@@ -337,9 +342,10 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * never be undefined after `initializingFirstTime`.
      */
     private get presentingUserIdState() {
-        assert(
+        UnexpectedError.assert(
             this._presentingUserIdState !== undefined,
-            "_presentingUserIdState not initialized"
+            "LiveFollowMode:presentingUserIdState",
+            "This happens when `hasInitialized()` has not yet resolved, which should not happen."
         );
         return this._presentingUserIdState;
     }
@@ -369,9 +375,10 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
         initialState: TData,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.needed) {
-            throw new Error(`LiveFollowMode already started.`);
-        }
+        LiveDataObjectInitializeNotNeededError.assert(
+            "LiveFollowMode:initialize",
+            this.initializeState
+        );
         // Update initialize state as pending
         this.initializeState = LiveDataObjectInitializeState.pending;
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
@@ -422,16 +429,16 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error if initialization has not yet succeeded.
      */
     public async update(newValue: TData): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LiveFollowMode: not initialized prior to calling \`.update()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this.presence.localUser?.data) {
-            throw new Error(
-                `LiveFollowMode: invalid local user's current state value when calling \`.followUser()\`, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveFollowMode:update",
+            "update",
+            this.initializeState
+        );
+        UnexpectedError.assert(
+            !!this.presence.localUser?.data,
+            "LiveFollowMode:update",
+            "invalid local user's current state value when calling `.update()`, implying there was an error during initialization that should not occur."
+        );
         // Send the new stateValue through presence
         await this.presence.update({
             stateValue: newValue,
@@ -455,21 +462,21 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error if the local user does not have the required roles to present.
      */
     public async startPresenting(): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LiveFollowMode: not initialized prior to calling \`.followUser()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this.presence.localUser?.data) {
-            throw new Error(
-                `LiveFollowMode: invalid local user's current state value when calling \`.followUser()\`, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveFollowMode:startPresenting",
+            "startPresenting",
+            this.initializeState
+        );
+        UnexpectedError.assert(
+            !!this.presence.localUser?.data,
+            "LiveFollowMode:startPresenting",
+            "invalid local user's current state value when calling `.startPresenting()`, implying there was an error during initialization that should not occur."
+        );
         if (
             this.presence.localUser.userId === this.presentingUserIdState.state
         ) {
             throw new Error(
-                `LiveFollowMode: the local user is already the active presenter. To stop presenting, use the \`.stopPresenting()\` function.`
+                `LiveFollowMode:startPresenting - the local user is already the active presenter. To stop presenting, use the \`.stopPresenting()\` function.`
             );
         }
         // Set presentingUserIdState to the local user's userId
@@ -489,16 +496,16 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error if the local user does not have the required roles to stop presenting.
      */
     public async stopPresenting(): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LiveFollowMode: not initialized prior to calling \`.followUser()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this.presence.localUser?.data) {
-            throw new Error(
-                `LiveFollowMode: invalid local user's current state value when calling \`.followUser()\`, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveFollowMode:stopPresenting",
+            "stopPresenting",
+            this.initializeState
+        );
+        UnexpectedError.assert(
+            !!this.presence.localUser?.data,
+            "LiveFollowMode:stopPresenting",
+            "invalid local user's current state value when calling `.stopPresenting()`, implying there was an error during initialization that should not occur."
+        );
         // Set presentingUserIdState to undefined
         await this.presentingUserIdState.set(undefined);
     }
@@ -511,16 +518,16 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error if initialization has not yet succeeded.
      */
     public async beginSuspension(): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LiveFollowMode: not initialized prior to calling \`.followUser()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this.presence.localUser?.data) {
-            throw new Error(
-                `LiveFollowMode: invalid local user's current state value when calling \`.followUser()\`, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveFollowMode:beginSuspension",
+            "beginSuspension",
+            this.initializeState
+        );
+        UnexpectedError.assert(
+            !!this.presence.localUser?.data,
+            "LiveFollowMode:beginSuspension",
+            "invalid local user's current state value when calling `.beginSuspension()`, implying there was an error during initialization that should not occur."
+        );
         this._suspended = true;
         this.handlePotentialStateChange(true, await this.waitUntilConnected());
     }
@@ -533,16 +540,16 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error if initialization has not yet succeeded.
      */
     public async endSuspension(): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LiveFollowMode: not initialized prior to calling \`.followUser()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this.presence.localUser?.data) {
-            throw new Error(
-                `LiveFollowMode: invalid local user's current state value when calling \`.followUser()\`, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveFollowMode:endSuspension",
+            "endSuspension",
+            this.initializeState
+        );
+        UnexpectedError.assert(
+            !!this.presence.localUser?.data,
+            "LiveFollowMode:endSuspension",
+            "invalid local user's current state value when calling `.endSuspension()`, implying there was an error during initialization that should not occur."
+        );
         this._suspended = false;
         this.handlePotentialStateChange(true, await this.waitUntilConnected());
     }
@@ -562,25 +569,25 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error if the `userId` provided is equal to the local user's `userId`.
      */
     public async followUser(userId: string): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LiveFollowMode: not initialized prior to calling \`.followUser()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this.presence.localUser?.data) {
-            throw new Error(
-                `LiveFollowMode: invalid local user's current state value when calling \`.followUser()\`, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveFollowMode:followUser",
+            "followUser",
+            this.initializeState
+        );
+        UnexpectedError.assert(
+            !!this.presence.localUser?.data,
+            "LiveFollowMode:followUser",
+            "invalid local user's current state value when calling `.followUser()`, implying there was an error during initialization that should not occur."
+        );
         const user = this.presence.getUser(userId);
         if (!user) {
             throw new Error(
-                `LiveFollowMode: cannot find user for provided \`userId\` of ${userId}. Ensure remote user for this userId has also called \`.initialize()\`.`
+                `LiveFollowMode:followUser - cannot find user for provided \`userId\` of ${userId}. Ensure remote user for this userId has also called \`.initialize()\`.`
             );
         }
         if (user.isLocalUser) {
             throw new Error(
-                "LiveFollowMode: local user cannot follow themselves. If you are trying to stop following another user, instead use the `.stopFollowing()` function."
+                "LiveFollowMode:followUser - local user cannot follow themselves. If you are trying to stop following another user, instead use the `.stopFollowing()` function."
             );
         }
         // Update followingUserId for presence
@@ -599,19 +606,19 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error if the user is not already following another user.
      */
     public async stopFollowing(): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LiveFollowMode: not initialized prior to calling \`.stopFollowing()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this.presence.localUser?.data) {
-            throw new Error(
-                `LiveFollowMode: invalid local user's current state value when calling \`.stopFollowing()\`, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveFollowMode:stopFollowing",
+            "stopFollowing",
+            this.initializeState
+        );
+        UnexpectedError.assert(
+            !!this.presence.localUser?.data,
+            "LiveFollowMode:stopFollowing",
+            "invalid local user's current state value when calling `.stopFollowing()`, implying there was an error during initialization that should not occur."
+        );
         if (!this.presence.localUser.data.followingUserId) {
             throw new Error(
-                `LiveFollowMode: the local user is not following another user.\nTo fix this error, ensure that \`.followUser()\` has resolved before calling this function.`
+                `LiveFollowMode:stopFollowing - the local user is not following another user.\nTo fix this error, ensure that \`.followUser()\` has resolved before calling this function.`
             );
         }
         // Update followingUserId for presence

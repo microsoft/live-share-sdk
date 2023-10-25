@@ -200,7 +200,7 @@ export class LiveShareClient {
                         );
                     } else {
                         throw new Error(
-                            `LiveShareClient: Unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
+                            `LiveShareClient:joinContainer - unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
                         );
                     }
                 }

@@ -27,3 +27,4 @@ export * from "./LiveDataObject";
 export * from "./LiveShareRuntime";
 export * from "./AzureLiveShareHost";
 export * from "./LiveObjectSynchronizer";
+export * from "./errors";

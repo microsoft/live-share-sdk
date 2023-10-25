@@ -12,6 +12,11 @@ import {
     UserMeetingRole,
 } from "./interfaces";
 import { cloneValue, TelemetryEvents } from "./internals";
+import {
+    LiveDataObjectInitializeNotNeededError,
+    LiveDataObjectNotInitializedError,
+    UnexpectedError,
+} from "./errors";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
@@ -108,15 +113,16 @@ export class LiveState<TState = any> extends LiveDataObject<{
         initialState: TState,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.needed) {
-            throw new Error(`LiveState already started.`);
-        }
-        // This error should not happen due to `initializeState` enum, but if it is somehow defined at this point, errors will occur.
-        if (this._synchronizer) {
-            throw new Error(
-                `LiveState: _synchronizer already set, which is an unexpected error. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectInitializeNotNeededError.assert(
+            "LiveState:initialize",
+            this.initializeState
+        );
+        // This error should not happen due to prior assertion, but if it is somehow defined at this point, errors will occur.
+        UnexpectedError.assert(
+            !!this._synchronizer,
+            "LiveState:initialize",
+            "_synchronizer already set, which implies there was an error during initialization that should not occur."
+        );
         // Update initialize state as pending
         this.initializeState = LiveDataObjectInitializeState.pending;
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
@@ -187,11 +193,11 @@ export class LiveState<TState = any> extends LiveDataObject<{
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async set(state: TState): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LiveState: not initialized prior to calling \`.set()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveState:set",
+            "set",
+            this.initializeState
+        );
 
         // Broadcast state change
         const clone = cloneValue(state);

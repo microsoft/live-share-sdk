@@ -7,6 +7,7 @@ import { DataObjectFactory } from "@fluidframework/aqueduct";
 import {
     DynamicObjectRegistry,
     LiveDataObject,
+    LiveDataObjectInitializeNotNeededError,
     LiveDataObjectInitializeState,
     LiveTelemetryLogger,
     UserMeetingRole,
@@ -109,9 +110,10 @@ export class LiveMediaSession extends LiveDataObject {
      * @throws error when `.initialize()` has already been called for this class instance.
      */
     public async initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.needed) {
-            throw new Error(`LiveMediaSession already started.`);
-        }
+        LiveDataObjectInitializeNotNeededError.assert(
+            "LiveMediaSession:initialize",
+            this.initializeState
+        );
         // Update initialize state as pending
         this.initializeState = LiveDataObjectInitializeState.pending;
         if (allowedRoles) {
@@ -285,7 +287,7 @@ export class LiveMediaSession extends LiveDataObject {
                 // Ensure handler registered
                 if (!this._actionHandlers.has("wait")) {
                     throw new Error(
-                        `SharedMediaSession: wait point hit but no 'wait' action registered.`
+                        `LiveMediaSession:checkWaitPointHit - wait point hit but no 'wait' action registered.\nTo fix this error, set a \`wait\` action using the \`setActionHandler()\` function.`
                     );
                 }
 
@@ -308,7 +310,7 @@ export class LiveMediaSession extends LiveDataObject {
     private getCurrentPlayerState(): IMediaPlayerState {
         if (!this._requestPlayerStateHandler) {
             throw new Error(
-                `LiveMediaSession: no getPlayerState callback configured.`
+                "LiveMediaSession:getCurrentPlayerState - no getPlayerState callback configured.\nTo fix this error, ensure `setRequestPlayerStateHandler()` has been set with a delegate to retrieve your player's state, or use the `synchronize()` function to create a new `MediaPlayerSynchronizer` instance tied to your `IMediaPlayer` instance."
             );
         }
 

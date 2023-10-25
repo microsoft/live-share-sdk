@@ -14,6 +14,11 @@ import {
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { cloneValue, TelemetryEvents } from "./internals";
+import {
+    LiveDataObjectInitializeNotNeededError,
+    LiveDataObjectNotInitializedError,
+    UnexpectedError,
+} from "./errors";
 import { TimeInterval } from "./TimeInterval";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import {
@@ -134,15 +139,16 @@ export class LivePresence<
         state = PresenceState.online,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.needed) {
-            throw new Error(`LivePresence already started.`);
-        }
+        LiveDataObjectInitializeNotNeededError.assert(
+            "LivePresence:initialize",
+            this.initializeState
+        );
         // This error should not happen due to `initializeState` enum, but if it is somehow defined at this point, errors will occur.
-        if (this._synchronizer) {
-            throw new Error(
-                `LivePresence: _synchronizer already set, which is an unexpected error. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        UnexpectedError.assert(
+            !!this._synchronizer,
+            "LivePresence:initialize",
+            "_synchronizer already set, which is an unexpected error."
+        );
         // Update initialize state as pending
         this.initializeState = LiveDataObjectInitializeState.pending;
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
@@ -268,21 +274,21 @@ export class LivePresence<
         state?: PresenceState,
         throttle: boolean = false
     ): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LivePresence: not initialized prior to calling \`.update()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this._synchronizer) {
-            throw new Error(
-                `LivePresence: this._synchronizer is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
-        if (!this._currentPresence) {
-            throw new Error(
-                `LivePresence: this._currentPresence is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LivePresence:updateInternal",
+            "update", // this is used to tell developer info about error / how to fix, so we use public signature
+            this.initializeState
+        );
+        UnexpectedError.assert(
+            !!this._synchronizer,
+            "LivePresence:updateInternal",
+            "this._synchronizer is undefined, implying there was an error during initialization that should not occur."
+        );
+        UnexpectedError.assert(
+            !!this._currentPresence,
+            "LivePresence:updateInternal",
+            "this._currentPresence is undefined, implying there was an error during initialization that should not occur."
+        );
 
         // Broadcast state change
         const evtToSend = {

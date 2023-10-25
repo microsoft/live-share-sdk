@@ -16,6 +16,11 @@ import { LiveEventTarget } from "./LiveEventTarget";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import { LiveDataObject } from "./LiveDataObject";
 import { cloneValue } from "./internals";
+import {
+    LiveDataObjectInitializeNotNeededError,
+    LiveDataObjectNotInitializedError,
+    UnexpectedError,
+} from "./errors";
 
 /**
  * Events supported by `LiveEvent` object.
@@ -97,9 +102,10 @@ export class LiveEvent<TEvent = any> extends LiveDataObject<{
      * @throws error when `.initialize()` has already been called for this class instance.
      */
     public initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
-        if (this.initializeState !== LiveDataObjectInitializeState.needed) {
-            throw new Error(`LiveEvent already started.`);
-        }
+        LiveDataObjectInitializeNotNeededError.assert(
+            "LiveEvent:initialize",
+            this.initializeState
+        );
         this.initializeState = LiveDataObjectInitializeState.pending;
 
         this._allowedRoles = allowedRoles ?? [];
@@ -142,16 +148,16 @@ export class LiveEvent<TEvent = any> extends LiveDataObject<{
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
     public async send(evt: TEvent): Promise<ILiveEvent<TEvent>> {
-        if (this.initializeState !== LiveDataObjectInitializeState.succeeded) {
-            throw new Error(
-                `LiveEvent: not initialized prior to calling \`.send()\`. \`initializeState\` is \`${this.initializeState}\` but should be \`succeeded\`.\nTo fix this error, ensure \`.initialize()\` has resolved before calling this function.`
-            );
-        }
-        if (!this._eventTarget) {
-            throw new Error(
-                `LiveEvent: this._eventTarget is undefined, implying there was an error during initialization that should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveEvent:send",
+            "send",
+            this.initializeState
+        );
+        UnexpectedError.assert(
+            !!this._eventTarget,
+            "LiveEvent:send",
+            "`this._eventTarget` is undefined, implying there was an error during initialization that should not occur."
+        );
 
         return await this._eventTarget.sendEvent(evt);
     }

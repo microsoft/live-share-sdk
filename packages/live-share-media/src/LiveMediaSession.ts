@@ -310,7 +310,7 @@ export class LiveMediaSession extends LiveDataObject {
     private getCurrentPlayerState(): IMediaPlayerState {
         if (!this._requestPlayerStateHandler) {
             throw new Error(
-                "LiveMediaSession:getCurrentPlayerState - no getPlayerState callback configured.\nTo fix this error, ensure `setRequestPlayerStateHandler()` has been set with a delegate to retrieve your player's state, or use the `synchronize()` function to create a new `MediaPlayerSynchronizer` instance tied to your `IMediaPlayer` instance."
+                "LiveMediaSession:getCurrentPlayerState - no `requestPlayerStateHandler` callback configured.\nTo fix this error, ensure `setRequestPlayerStateHandler()` has been set with a delegate to retrieve your player's state, or use the `synchronize()` function to create a new `MediaPlayerSynchronizer` instance tied to your `IMediaPlayer` instance."
             );
         }
 

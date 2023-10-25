@@ -646,7 +646,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                     const playerNotSetup =
                         isErrorLike(err) &&
                         err.message.includes(
-                            "LiveMediaSession: no getPlayerState callback configured."
+                            "LiveMediaSession:getCurrentPlayerState"
                         );
                     if (!playerNotSetup) {
                         throw err;

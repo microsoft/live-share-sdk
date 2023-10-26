@@ -14,6 +14,9 @@ import {
     UpdateSharedStateAction,
 } from "../types";
 
+/**
+ * Response for the {@link useSharedStateRegistry} hook.
+ */
 export interface ISharedStateRegistryResponse {
     /**
      * Register a set state action callback
@@ -35,6 +38,9 @@ export interface ISharedStateRegistryResponse {
 
 /**
  * Hook used internally to keep track of the SharedSetStateActionMap for each unique key. It sets state values for provided keys and updates components listening to the values.
+ *
+ * @remarks
+ * Use this if you are building a custom `LiveShareProvider` or `AzureProvider` implementation in your app.
  *
  * @param results IAzureContainerResults response or undefined
  * @returns ISharedStateRegistryResponse object

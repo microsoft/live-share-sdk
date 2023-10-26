@@ -26,6 +26,7 @@ type LiveObjectClass<T extends IFluidLoadable> = {
  * Inject Live Share dependencies into your Fluid container schema.
  * This should only be done once, right before connecting to a container.
  * @remarks
+ * Needed because Fluid uses static factories to construct data objects internally, and `LiveDataObject` instances require access to the `LiveShareRuntime` before use.
  * Users should not use this method if you are connecting to a container using `LiveShareClient`.
  * This is intended to be used when you are using another Fluid client, such as `AzureClient`.
  *
@@ -33,22 +34,22 @@ type LiveObjectClass<T extends IFluidLoadable> = {
  * @param liveRuntime LiveShareRuntime instance
  * @returns ContainerSchema with injected dependencies
  */
-export function getLiveShareContainerSchemaProxy(
+export function getLiveContainerSchema(
     schema: ContainerSchema,
     liveRuntime: LiveShareRuntime
 ): ContainerSchema {
     // Each container must proxy LiveDataObject classes separately.
     // This map is used to de-duplicate proxies for each class.
-    const existingProxyRegistries = new Map<string, LoadableObjectClass<any>>();
+    const injectedClasses = new Map<string, LoadableObjectClass<any>>();
 
     const initialObjectEntries = Object.entries(schema.initialObjects).map(
         ([key, ObjectClass]) => {
             return [
                 key,
-                getLiveDataObjectClassProxy(
+                getLiveDataObjectClass(
                     ObjectClass,
                     liveRuntime,
-                    existingProxyRegistries
+                    injectedClasses
                 ),
             ];
         }
@@ -59,24 +60,38 @@ export function getLiveShareContainerSchemaProxy(
     return {
         initialObjects: newInitialObjects,
         dynamicObjectTypes: schema.dynamicObjectTypes?.map((ObjectClass) =>
-            getLiveDataObjectClassProxy(
-                ObjectClass,
-                liveRuntime,
-                existingProxyRegistries
-            )
+            getLiveDataObjectClass(ObjectClass, liveRuntime, injectedClasses)
         ),
     };
 }
 
 /**
- * @hidden
- * Inject Live Share dependencies to relevant `LiveDataObject` derived classes.
- * Regular `DataObject` classes are not proxied.
+ * @deprecated
+ * Use {@link getLiveContainerSchema} instead.
  */
-export function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
+export function getLiveContainerSchemaProxy(
+    schema: ContainerSchema,
+    liveRuntime: LiveShareRuntime
+): ContainerSchema {
+    return getLiveContainerSchema(schema, liveRuntime);
+}
+
+/**
+ * Inject Live Share dependencies to relevant `LiveDataObject` derived classes.
+ * Regular `DataObject` classes are not injected.
+ *
+ * @remarks
+ * Can be used to follow the pattern of this package's unit tests for custom `LiveDataObject` implementations.
+ *
+ * @param ObjectClass a `LoadableObjectClass` instance to inject with the `liveRuntime` provided, if needed.
+ * @param liveRuntime the `LiveShareRuntime` instance to inject into provided `LiveDataObject` instances.
+ * @param injectedClasses Optional. Map of classes that have already been injected. Default value is an empty map.
+ * @returns the new `LoadableObjectClass` if injected, or the same `ObjectClass` passed in if not.
+ */
+export function getLiveDataObjectClass<TClass extends IFluidLoadable>(
     ObjectClass: LoadableObjectClass<any>,
     liveRuntime: LiveShareRuntime,
-    existingProxyRegistries: Map<string, LoadableObjectClass<any>> = new Map()
+    injectedClasses: Map<string, LoadableObjectClass<any>> = new Map()
 ): LoadableObjectClass<TClass> {
     if (isLiveDataObject(ObjectClass)) {
         // We should only be proxying one Live Share DDS per type.
@@ -84,7 +99,7 @@ export function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
         // They then enforce this de-duplication using the factory type name, throwing an error in `parseDataObjectsFromSharedObjects`.
         // So, we ensure that we only create the proxy once per container.
         const typeName = (ObjectClass as any).TypeName;
-        const CheckExisting = existingProxyRegistries.get(typeName);
+        const CheckExisting = injectedClasses.get(typeName);
         if (CheckExisting !== undefined) {
             return CheckExisting;
         }
@@ -93,7 +108,7 @@ export function getLiveDataObjectClassProxy<TClass extends IFluidLoadable>(
             ObjectClass,
             liveRuntime
         );
-        existingProxyRegistries.set(typeName, NewProxy);
+        injectedClasses.set(typeName, NewProxy);
         return NewProxy;
     }
     return ObjectClass;

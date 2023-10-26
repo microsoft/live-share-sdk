@@ -483,7 +483,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     public beginSeek(): void {
         if (this._seekSuspension) {
             throw new Error(
-                `MediaPlayerSynchronizer: cannot begin seek. A seek is already in progress.`
+                "MediaPlayerSynchronizer:beginSeek - cannot begin seek since a seek is already in progress.\nTo prevent this error, ensure you first call `endSeek()` before calling `beginSeek()` again."
             );
         }
 
@@ -500,7 +500,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     public endSeek(seekTo: number): void {
         if (!this._seekSuspension) {
             throw new Error(
-                `MediaPlayerSynchronizer: cannot end seek. No seek is in progress.`
+                "MediaPlayerSynchronizer:endSeek - cannot end seek while no seek is in progress.\nTo prevent this error, ensure you first call `beginSeek()`."
             );
         }
 

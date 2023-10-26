@@ -2,6 +2,7 @@ import { ILiveEvent } from "../interfaces";
 import { ContainerSynchronizer } from "./ContainerSynchronizer";
 import { Deferred } from "./Deferred";
 import { ObjectSynchronizerEvents } from "./consts";
+import { UnexpectedError } from "../errors";
 import { StateSyncEventContent } from "./internal-interfaces";
 
 /**
@@ -50,11 +51,11 @@ export class ThrottledEventQueue {
                             this._events,
                             ObjectSynchronizerEvents.update
                         );
-                    if (!response) {
-                        throw new Error(
-                            "ThrottledEventQueue: unable to send empty set of updates, which should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue."
-                        );
-                    }
+                    UnexpectedError.assert(
+                        !!response,
+                        "ThrottledEventQueue",
+                        "unable to send empty set of updates, which should not occur."
+                    );
                     this._deferred?.resolve(response);
                 } catch (error: unknown) {
                     this._deferred?.reject(error);
@@ -64,11 +65,11 @@ export class ThrottledEventQueue {
                 }
             }, this._throttleIntervalMilli);
         }
-        if (!this._deferred) {
-            throw new Error(
-                "ThrottledEventQueue: no deferred set, which should not occur. Please report this issue at https://aka.ms/teamsliveshare/issue."
-            );
-        }
+        UnexpectedError.assert(
+            !!this._deferred,
+            "ThrottledEventQueue",
+            "no deferred set, which should not occur."
+        );
         const response = await this._deferred.promise;
         return {
             clientId: response.clientId,

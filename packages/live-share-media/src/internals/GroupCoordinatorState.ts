@@ -290,7 +290,9 @@ export class GroupCoordinatorState extends EventEmitter {
 
     public endSuspension(syncState: boolean): void {
         if (this._suspensionCnt == 0) {
-            throw new Error(`Too many suspensions.`);
+            throw new Error(
+                `GroupCoordinatorState:endSuspension - cannot end suspension when there are no active suspensions. The expected value is > 0 but the actual count is ${this._suspensionCnt}`
+            );
         }
 
         this._suspensionCnt--;

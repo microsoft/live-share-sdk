@@ -20,7 +20,7 @@ import {
     UserMeetingRole,
 } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { getLiveDataObjectClassProxy } from "../schema-injection-utils";
+import { getLiveDataObjectClass } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
 class TestLivePresence<
@@ -44,10 +44,10 @@ async function getObjects(
         liveRuntime2.setHost(customHost);
     }
 
-    let ObjectProxy1: any = getLiveDataObjectClassProxy<
+    let ObjectProxy1: any = getLiveDataObjectClass<
         TestLivePresence<{ foo: string }>
     >(TestLivePresence, liveRuntime1);
-    let ObjectProxy2: any = getLiveDataObjectClassProxy<
+    let ObjectProxy2: any = getLiveDataObjectClass<
         TestLivePresence<{ foo: string }>
     >(TestLivePresence, liveRuntime2);
 

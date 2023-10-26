@@ -11,6 +11,9 @@ import {
     TimeInterval,
     UserMeetingRole,
     LiveShareRuntime,
+    LiveDataObjectInitializeState,
+    LiveDataObjectInitializeNotNeededError,
+    LiveDataObjectNotInitializedError,
 } from "@microsoft/live-share";
 import {
     CoordinationWaitPoint,
@@ -26,6 +29,8 @@ import {
     GroupCoordinatorState,
     GroupCoordinatorStateEvents,
     ISetTrackDataEvent,
+    TrackMetadataNotSetError,
+    ActionBlockedError,
 } from "./internals";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
 import EventEmitter from "events";
@@ -72,7 +77,8 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     private _positionUpdateInterval = new TimeInterval(2000);
     private _maxPlaybackDrift = new TimeInterval(1000);
     private _lastWaitPoint?: CoordinationWaitPoint;
-    private _hasInitialized = false;
+    private initializeState: LiveDataObjectInitializeState =
+        LiveDataObjectInitializeState.needed;
 
     // Broadcast events
     private _playEvent?: LiveEventTarget<ITransportCommandEvent>;
@@ -214,23 +220,22 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async play(): Promise<void> {
-        if (!this._hasInitialized) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.play() called before initialize() called.`
-            );
-        }
-
-        if (!this._groupState?.playbackTrack.current.metadata) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.play() called before MediaSession.metadata assigned.`
-            );
-        }
-
-        if (!this.canPlayPause) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.play() operation blocked.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveMediaSessionCoordinator:play",
+            "play",
+            this.initializeState
+        );
+        TrackMetadataNotSetError.assert(
+            !!this._groupState?.playbackTrack.current.metadata,
+            "LiveMediaSessionCoordinator:play",
+            "play"
+        );
+        ActionBlockedError.assert(
+            this.canPlayPause,
+            "LiveMediaSessionCoordinator:play",
+            "play",
+            "canPlayPause"
+        );
 
         // Get projected position
         const position = this.getPlayerPosition();
@@ -257,23 +262,22 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async pause(): Promise<void> {
-        if (!this._hasInitialized) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.pause() called before initialize() called.`
-            );
-        }
-
-        if (!this._groupState?.playbackTrack.current.metadata) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.pause() called before MediaSession.metadata assigned.`
-            );
-        }
-
-        if (!this.canPlayPause) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.pause() operation blocked.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveMediaSessionCoordinator:pause",
+            "pause",
+            this.initializeState
+        );
+        TrackMetadataNotSetError.assert(
+            !!this._groupState?.playbackTrack.current.metadata,
+            "LiveMediaSessionCoordinator:pause",
+            "pause"
+        );
+        ActionBlockedError.assert(
+            this.canPlayPause,
+            "LiveMediaSessionCoordinator:pause",
+            "pause",
+            "canPlayPause"
+        );
 
         // Get projected position
         const position = this.getPlayerPosition();
@@ -300,23 +304,22 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async seekTo(time: number): Promise<void> {
-        if (!this._hasInitialized) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.seekTo() called before initialize() called.`
-            );
-        }
-
-        if (!this._groupState?.playbackTrack.current.metadata) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.seekTo() called before MediaSession.metadata assigned.`
-            );
-        }
-
-        if (!this.canSeek) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.seekTo() operation blocked.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveMediaSessionCoordinator:seekTo",
+            "seekTo",
+            this.initializeState
+        );
+        TrackMetadataNotSetError.assert(
+            !!this._groupState?.playbackTrack.current.metadata,
+            "LiveMediaSessionCoordinator:seekTo",
+            "seekTo"
+        );
+        ActionBlockedError.assert(
+            this.canSeek,
+            "LiveMediaSessionCoordinator:seekTo",
+            "seekTo",
+            "canSeek"
+        );
 
         // Send transport command
         this._logger.sendTelemetryEvent(
@@ -349,17 +352,17 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         metadata: ExtendedMediaMetadata | null,
         waitPoints?: CoordinationWaitPoint[]
     ): Promise<void> {
-        if (!this._hasInitialized) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.setTrack() called before initialize() called.`
-            );
-        }
-
-        if (!this.canSetTrack) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.setTrack() operation blocked.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveMediaSessionCoordinator:setTrack",
+            "setTrack",
+            this.initializeState
+        );
+        ActionBlockedError.assert(
+            this.canSetTrack,
+            "LiveMediaSessionCoordinator:setTrack",
+            "setTrack",
+            "canSetTrack"
+        );
 
         // Send transport command
         this._logger.sendTelemetryEvent(
@@ -384,17 +387,17 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @returns a void promise that resolves once complete, throws if user does not have proper roles
      */
     public async setTrackData(data: object | null): Promise<void> {
-        if (!this._hasInitialized) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.setTrackData() called before initialize() called.`
-            );
-        }
-
-        if (!this.canSetTrackData) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.setTrackData() operation blocked.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveMediaSessionCoordinator:setTrackData",
+            "setTrackData",
+            this.initializeState
+        );
+        ActionBlockedError.assert(
+            this.canSetTrackData,
+            "LiveMediaSessionCoordinator:setTrackData",
+            "setTrackData",
+            "canSetTrackData"
+        );
 
         // Send transport command
         this._logger.sendTelemetryEvent(
@@ -432,17 +435,16 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     public beginSuspension(
         waitPoint?: CoordinationWaitPoint
     ): MediaSessionCoordinatorSuspension {
-        if (!this._hasInitialized) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.beginSuspension() called before initialize() called.`
-            );
-        }
-
-        if (!this._groupState?.playbackTrack.current.metadata) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.beginSuspension() called before MediaSession.metadata assigned.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveMediaSessionCoordinator:beginSuspension",
+            "beginSuspension",
+            this.initializeState
+        );
+        TrackMetadataNotSetError.assert(
+            !!this._groupState?.playbackTrack.current.metadata,
+            "LiveMediaSessionCoordinator:beginSuspension",
+            "beginSuspension"
+        );
 
         // Tell group state that suspension is started
         if (waitPoint) {
@@ -496,7 +498,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * Called by MediaSession to verify the coordinator has been initialized.
      */
     public get isInitialized(): boolean {
-        return this._hasInitialized;
+        return this.initializeState === LiveDataObjectInitializeState.succeeded;
     }
 
     /**
@@ -506,15 +508,20 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     public async initialize(
         acceptTransportChangesFrom?: UserMeetingRole[]
     ): Promise<void> {
-        if (this._hasInitialized) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.initialize() already initialized.`
-            );
-        }
+        LiveDataObjectInitializeNotNeededError.assert(
+            "LiveMediaSessionCoordinator:initialize",
+            this.initializeState
+        );
+        this.initializeState = LiveDataObjectInitializeState.pending;
 
-        // Create children
-        await this.createChildren(acceptTransportChangesFrom);
-        this._hasInitialized = true;
+        try {
+            // Create children
+            await this.createChildren(acceptTransportChangesFrom);
+        } catch (error: unknown) {
+            this.initializeState = LiveDataObjectInitializeState.needed;
+            throw error;
+        }
+        this.initializeState = LiveDataObjectInitializeState.succeeded;
     }
 
     /**
@@ -534,11 +541,11 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * Called by MediaSession to trigger the sending of a position update.
      */
     public sendPositionUpdate(state: IMediaPlayerState): void {
-        if (!this._hasInitialized) {
-            throw new Error(
-                `LiveMediaSessionCoordinator.sendPositionUpdate() called before initialize() called.`
-            );
-        }
+        LiveDataObjectNotInitializedError.assert(
+            "LiveMediaSessionCoordinator:sendPositionUpdate",
+            "sendPositionUpdate",
+            this.initializeState
+        );
 
         if (this.canSendPositionUpdates) {
             // Send position update event
@@ -639,7 +646,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                     const playerNotSetup =
                         isErrorLike(err) &&
                         err.message.includes(
-                            "LiveMediaSession: no getPlayerState callback configured."
+                            "LiveMediaSession:getCurrentPlayerState"
                         );
                     if (!playerNotSetup) {
                         throw err;

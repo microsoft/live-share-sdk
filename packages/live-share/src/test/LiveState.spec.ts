@@ -9,7 +9,7 @@ import { ITestObjectProvider } from "@fluidframework/test-utils";
 import { describeNoCompat } from "@fluidframework/test-version-utils";
 import { LiveState } from "../LiveState";
 import { Deferred } from "../internals";
-import { getLiveDataObjectClassProxy } from "../schema-injection-utils";
+import { getLiveDataObjectClass } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
 interface TestStateData {
@@ -22,10 +22,10 @@ async function getObjects(getTestObjectProvider) {
     let liveRuntime1 = new MockLiveShareRuntime(false);
     let liveRuntime2 = new MockLiveShareRuntime(false);
 
-    let ObjectProxy1: any = getLiveDataObjectClassProxy<
+    let ObjectProxy1: any = getLiveDataObjectClass<
         LiveState<TestStateData>
     >(LiveState, liveRuntime1);
-    let ObjectProxy2: any = getLiveDataObjectClassProxy<
+    let ObjectProxy2: any = getLiveDataObjectClass<
         LiveState<TestStateData>
     >(LiveState, liveRuntime2);
 

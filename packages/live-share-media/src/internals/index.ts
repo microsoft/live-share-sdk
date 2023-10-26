@@ -9,3 +9,4 @@ export * from "./GroupPlaybackPosition";
 export * from "./GroupPlaybackTrack";
 export * from "./GroupPlaybackTrackData";
 export * from "./GroupTransportState";
+export * from "./errors";

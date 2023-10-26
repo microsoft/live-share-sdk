@@ -36,3 +36,8 @@ export const ObjectSynchronizerEvents = {
     update: "update",
     connect: "connect",
 };
+
+/**
+ * @hidden
+ */
+export const LiveShareReportIssueLink = "https://aka.ms/teamsliveshare/issue";

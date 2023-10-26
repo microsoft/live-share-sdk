@@ -22,7 +22,7 @@ import {
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { getLiveShareContainerSchemaProxy } from "./schema-injection-utils";
+import { getLiveContainerSchema } from "./schema-injection-utils";
 
 /**
  * @hidden
@@ -177,7 +177,7 @@ export class LiveShareClient {
             const pStartRuntime = this._runtime.start();
 
             // Apply runtime to ContainerSchema
-            const schema = getLiveShareContainerSchemaProxy(
+            const schema = getLiveContainerSchema(
                 fluidContainerSchema,
                 this._runtime
             );
@@ -200,7 +200,7 @@ export class LiveShareClient {
                         );
                     } else {
                         throw new Error(
-                            `LiveShareClient: Unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
+                            `LiveShareClient:joinContainer - unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
                         );
                     }
                 }

@@ -14,7 +14,7 @@ import { MockRoleVerifier } from "./MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { getLiveDataObjectClassProxy } from "../schema-injection-utils";
+import { getLiveDataObjectClass } from "../schema-injection-utils";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import { DataObjectClass } from "fluid-framework";
 
@@ -28,7 +28,7 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
             timestampProvider: new LocalTimestampProvider(),
         }
     );
-    let LiveEventProxy1 = getLiveDataObjectClassProxy<LiveEvent>(
+    let LiveEventProxy1 = getLiveDataObjectClass<LiveEvent>(
         LiveEvent,
         liveRuntime1
     ) as DataObjectClass<LiveEvent>;
@@ -38,7 +38,7 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
             timestampProvider: new LocalTimestampProvider(),
         }
     );
-    let LiveEventProxy2 = getLiveDataObjectClassProxy<LiveEvent>(
+    let LiveEventProxy2 = getLiveDataObjectClass<LiveEvent>(
         LiveEvent,
         liveRuntime2
     ) as DataObjectClass<LiveEvent>;

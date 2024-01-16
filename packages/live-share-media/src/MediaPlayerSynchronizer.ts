@@ -87,6 +87,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private _onPlayerEvent: EventListener;
     private _seekSuspension?: MediaSessionCoordinatorSuspension;
     private _viewOnly = false;
+    private _blockUnexpectedPlayerEvents = true;
     private _expectedPlaybackState: ExtendedMediaSessionPlaybackState = "none";
     private _metadata: ExtendedMediaMetadata | null = null;
     private _trackData: object | null = null;
@@ -171,7 +172,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                 case "playing":
                     // Handle case for YouTube player where user can pause/play video by clicking on it.
                     // - Videos don't always start at 0.0 seconds.
-                    if (this._expectedPlaybackState != "playing") {
+                    if (
+                        this._blockUnexpectedPlayerEvents &&
+                        this._expectedPlaybackState != "playing"
+                    ) {
                         if (
                             this._mediaSession.coordinator.canPlayPause &&
                             this._player.currentTime < 1.0
@@ -192,6 +196,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     // block play if player state is playing when expected synced state is paused and coordinator is not suspended.
                     // needed because cannot tell if its a user initiated event, so disallow play
                     if (
+                        this._blockUnexpectedPlayerEvents &&
                         this._expectedPlaybackState === "paused" &&
                         !this._mediaSession.coordinator.isSuspended
                     ) {
@@ -201,6 +206,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     // block play if player state is playing when expected synced state is none and coordinator is not suspended.
                     // needed because user who is not in control should not be able to start, so disallow play
                     if (
+                        this._blockUnexpectedPlayerEvents &&
                         this._expectedPlaybackState === "none" &&
                         !this._mediaSession.coordinator.isSuspended
                     ) {
@@ -211,6 +217,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     // block pause if player state is paused when expected synced state is playing and coordinator is not suspended.
                     // needed because cannot tell if its a user initiated event, so disallow pause
                     if (
+                        this._blockUnexpectedPlayerEvents &&
                         this._expectedPlaybackState === "playing" &&
                         !this._mediaSession.coordinator.isSuspended &&
                         // some players have ended, but emit a pause event immediately before ended event. Do not play if ended
@@ -409,6 +416,23 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.mediaSession.coordinator.canSeek = !value;
         this.mediaSession.coordinator.canSetTrack = !value;
         this.mediaSession.coordinator.canSetTrackData = !value;
+    }
+
+    /**
+     * @beta
+     * If true, pause and play actions will be ignored unless explicitly invoked from the corresponding play() and pause() functions.
+     *
+     * @remarks
+     * True is considered non-beta. If you set to false, this is an experimental beta behavior.
+     * Setting it to false may cause unintended side effects, such as local buffer events sending a pause event to remote clients.
+     * While setting this to false may prevent the need to add custom media controls for frameworks like video.js, we encourage you to be mindful of this and test thoroughly before using this setting.
+     */
+    public get blockUnexpectedPlayerEvents(): boolean {
+        return this._blockUnexpectedPlayerEvents;
+    }
+
+    public set blockUnexpectedPlayerEvents(value: boolean) {
+        this._blockUnexpectedPlayerEvents = value;
     }
 
     /**

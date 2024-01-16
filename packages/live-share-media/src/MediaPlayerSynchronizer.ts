@@ -87,7 +87,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private _onPlayerEvent: EventListener;
     private _seekSuspension?: MediaSessionCoordinatorSuspension;
     private _viewOnly = false;
-    private _blockNonExplicitPlayerEvents = true;
+    private _blockUnexpectedPlayerEvents = true;
     private _expectedPlaybackState: ExtendedMediaSessionPlaybackState = "none";
     private _metadata: ExtendedMediaMetadata | null = null;
     private _trackData: object | null = null;
@@ -173,7 +173,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     // Handle case for YouTube player where user can pause/play video by clicking on it.
                     // - Videos don't always start at 0.0 seconds.
                     if (
-                        this._blockNonExplicitPlayerEvents &&
+                        this._blockUnexpectedPlayerEvents &&
                         this._expectedPlaybackState != "playing"
                     ) {
                         if (
@@ -196,7 +196,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     // block play if player state is playing when expected synced state is paused and coordinator is not suspended.
                     // needed because cannot tell if its a user initiated event, so disallow play
                     if (
-                        this._blockNonExplicitPlayerEvents &&
+                        this._blockUnexpectedPlayerEvents &&
                         this._expectedPlaybackState === "paused" &&
                         !this._mediaSession.coordinator.isSuspended
                     ) {
@@ -206,7 +206,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     // block play if player state is playing when expected synced state is none and coordinator is not suspended.
                     // needed because user who is not in control should not be able to start, so disallow play
                     if (
-                        this._blockNonExplicitPlayerEvents &&
+                        this._blockUnexpectedPlayerEvents &&
                         this._expectedPlaybackState === "none" &&
                         !this._mediaSession.coordinator.isSuspended
                     ) {
@@ -217,7 +217,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     // block pause if player state is paused when expected synced state is playing and coordinator is not suspended.
                     // needed because cannot tell if its a user initiated event, so disallow pause
                     if (
-                        this._blockNonExplicitPlayerEvents &&
+                        this._blockUnexpectedPlayerEvents &&
                         this._expectedPlaybackState === "playing" &&
                         !this._mediaSession.coordinator.isSuspended &&
                         // some players have ended, but emit a pause event immediately before ended event. Do not play if ended
@@ -427,12 +427,12 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * Setting it to false may cause unintended side effects, such as local buffer events sending a pause event to remote clients.
      * While setting this to false may prevent the need to add custom media controls for frameworks like video.js, we encourage you to be mindful of this and test thoroughly before using this setting.
      */
-    public get blockNonExplicitPlayerEvents(): boolean {
-        return this._blockNonExplicitPlayerEvents;
+    public get blockUnexpectedPlayerEvents(): boolean {
+        return this._blockUnexpectedPlayerEvents;
     }
 
-    public set blockNonExplicitPlayerEvents(value: boolean) {
-        this._blockNonExplicitPlayerEvents = value;
+    public set blockUnexpectedPlayerEvents(value: boolean) {
+        this._blockUnexpectedPlayerEvents = value;
     }
 
     /**

@@ -39,4 +39,16 @@ export class LiveEventSource<TEvent> {
     public async sendEvent(evt: TEvent): Promise<ILiveEvent<TEvent>> {
         return await this._scope.sendEvent<TEvent>(this._eventName, evt);
     }
+
+    /**
+     * Same as `SendEvent` but only sent locally. Useful for events that do not need to be sent as a signal.
+     * @param evt Optional. Partial event object. The `ILiveEvent.name`,
+     * `ILiveEvent.timestamp`, and `ILiveEvent.clientId`
+     * fields will be automatically populated.
+     * @returns The full event, including `ILiveEvent.name`,
+     * `ILiveEvent.timestamp`, and `ILiveEvent.clientId` fields if known.
+     */
+    public async sendLocalEvent(evt: TEvent): Promise<ILiveEvent<TEvent>> {
+        return await this._scope.sendLocalEvent<TEvent>(this._eventName, evt);
+    }
 }

@@ -211,7 +211,6 @@ describeNoCompat(
             );
             let positionUpdateCount = 0;
             new LiveEventTarget(scope2, "positionUpdate", (event, local) => {
-                // assert(!local, JSON.stringify(event));
                 positionUpdateCount += 1;
             });
 
@@ -225,6 +224,64 @@ describeNoCompat(
             assert(
                 positionUpdateCount == 1,
                 `positionUpdate event not sent, ${positionUpdateCount}`
+            );
+            dispose();
+        });
+
+        it("should send 'positionUpdate' event if object has canSendPositionUpdates set to false, but is suspended", async () => {
+            const { object1, object2, dispose, setObjectRoles } =
+                await getObjects(getTestObjectProvider);
+
+            const positionState: (position: number) => IMediaPlayerState = (
+                position: number
+            ) => ({
+                metadata: null,
+                playbackState: "paused",
+                positionState: {
+                    position: position,
+                },
+                trackData: null,
+            });
+
+            setObjectRoles(await object1.clientId(), [
+                UserMeetingRole.organizer,
+            ]);
+            setObjectRoles(await object2.clientId(), [
+                UserMeetingRole.attendee,
+            ]);
+
+            await object1.initialize([
+                UserMeetingRole.presenter,
+                UserMeetingRole.organizer,
+            ]);
+
+            object2.coordinator.canSendPositionUpdates = false;
+            await object2.initialize([
+                UserMeetingRole.presenter,
+                UserMeetingRole.organizer,
+            ]);
+            // wait for next event loop
+            await waitForDelay(1);
+            const suspension = object2.coordinator.beginSuspension();
+
+            object2.coordinator.sendPositionUpdate(positionState(200));
+            await waitForDelay(1);
+
+            assert(
+                // casting as any to access private properties
+                (object2.coordinator as any)._groupState?.playbackPosition
+                    .localPosition.position === 200
+            );
+
+            await object1.coordinator.seekTo(30);
+            object1.coordinator.sendPositionUpdate(positionState(30));
+
+            suspension.end();
+            await waitForDelay(1);
+            assert(
+                // casting as any to access private properties
+                (object2.coordinator as any)._groupState?.playbackPosition
+                    .targetPosition === 30
             );
             dispose();
         });

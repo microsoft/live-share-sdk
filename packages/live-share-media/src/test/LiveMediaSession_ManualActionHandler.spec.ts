@@ -262,6 +262,10 @@ describeNoCompat(
             ]);
             // wait for next event loop
             await waitForDelay(1);
+
+            await object1.coordinator.seekTo(30);
+            object1.coordinator.sendPositionUpdate(positionState(30));
+
             const suspension = object2.coordinator.beginSuspension();
 
             object2.coordinator.sendPositionUpdate(positionState(200));
@@ -272,9 +276,6 @@ describeNoCompat(
                 (object2.coordinator as any)._groupState?.playbackPosition
                     .localPosition.position === 200
             );
-
-            await object1.coordinator.seekTo(30);
-            object1.coordinator.sendPositionUpdate(positionState(30));
 
             suspension.end();
             await waitForDelay(1);

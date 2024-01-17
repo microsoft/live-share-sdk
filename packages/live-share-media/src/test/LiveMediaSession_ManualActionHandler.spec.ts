@@ -266,7 +266,7 @@ describeNoCompat(
             await object1.coordinator.seekTo(30);
             object1.coordinator.sendPositionUpdate(positionState(30));
 
-            const suspension = object2.coordinator.beginSuspension();
+            object2.coordinator.beginSuspension();
 
             object2.coordinator.sendPositionUpdate(positionState(200));
             await waitForDelay(1);
@@ -274,10 +274,10 @@ describeNoCompat(
             assert(
                 // casting as any to access private properties
                 (object2.coordinator as any)._groupState?.playbackPosition
-                    .localPosition.position === 200
+                    .localPosition.position === 200,
+                "local position update event was not sent"
             );
 
-            suspension.end();
             await waitForDelay(1);
             assert(
                 // casting as any to access private properties

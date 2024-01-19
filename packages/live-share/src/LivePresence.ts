@@ -199,13 +199,15 @@ export class LivePresence<
         // We do before sending initial update, since that requires this to happen first.
         this.initializeState = LiveDataObjectInitializeState.succeeded;
 
-        // Broadcast initial presence, or silently fail trying.
-        // Throttled so that a developer can have multiple presence instances in their app in a performant manner.
-        await this.updateInternal(
-            this._currentPresence!.data.data,
-            this._currentPresence!.data.state,
-            true
-        ).catch(() => {});
+        if (this.liveRuntime.canSendBackgroundUpdates) {
+            // Broadcast initial presence, or silently fail trying.
+            // Throttled so that a developer can have multiple presence instances in their app in a performant manner.
+            await this.updateInternal(
+                this._currentPresence!.data.data,
+                this._currentPresence!.data.state,
+                true
+            ).catch(() => {});
+        }
     }
 
     /**

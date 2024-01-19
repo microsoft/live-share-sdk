@@ -48,11 +48,6 @@ export interface CoordinationWaitPoint {
 }
 
 /**
- * The state of the `LiveMediaSessionCoordinator`.
- */
-export type MediaSessionCoordinatorState = "closed" | "waiting" | "joined";
-
-/**
  * Event types of `LiveMediaSessionCoordinator`.
  */
 export enum MediaSessionCoordinatorEvents {

@@ -34,6 +34,7 @@ class TestLivePresence<
 async function getObjects(
     getTestObjectProvider,
     updateInterval: number = 10000,
+    object2canSendBackgroundUpdates = true,
     customHost?: ILiveShareHost
 ) {
     // Temporarily change update interval
@@ -43,6 +44,7 @@ async function getObjects(
         liveRuntime1.setHost(customHost);
         liveRuntime2.setHost(customHost);
     }
+    liveRuntime2.canSendBackgroundUpdates = object2canSendBackgroundUpdates;
 
     let ObjectProxy1: any = getLiveDataObjectClass<
         TestLivePresence<{ foo: string }>
@@ -204,6 +206,40 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
+
+        disposeAll();
+    });
+
+    it("Should start in alternate state", async () => {
+        const { object1, object2, disposeAll } = await getObjects(
+            getTestObjectProvider,
+            10000,
+            false
+        );
+        const object1done = new Deferred();
+        await object1.initialize(undefined);
+
+        let object2PresenceChangeCallbackCount = 0;
+        const object2done = new Deferred();
+        object2.on("presenceChanged", (user, local) => {
+            object2PresenceChangeCallbackCount += 1;
+            if (local) {
+                object2done.reject();
+            } else {
+                object1done.resolve();
+            }
+        });
+        await object2.initialize(undefined);
+
+        // Wait for events to trigger
+        await Promise.all([
+            object1done.promise,
+            Promise.race([waitForDelay(10), object2done.promise]), // object 2 should not resolve
+        ]);
+        assert(
+            object2PresenceChangeCallbackCount == 1,
+            `expected one event from object1, ${object2PresenceChangeCallbackCount}`
+        );
 
         disposeAll();
     });
@@ -606,6 +642,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider,
             10000,
+            true,
             mockHost
         );
 
@@ -695,6 +732,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider,
             10000,
+            true,
             mockHost
         );
 
@@ -811,7 +849,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         // set same user test host
         const mockHost = new SameUserLiveShareTestHost();
         const { object1, object2, disposeAll, disposeObject1, disposeObject2 } =
-            await getObjects(getTestObjectProvider, 10000, mockHost);
+            await getObjects(getTestObjectProvider, 10000, true, mockHost);
 
         assert(!object1.isInitialized, `presence already initialized`);
         const init1 = object1.initialize();

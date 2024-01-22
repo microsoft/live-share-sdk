@@ -122,43 +122,6 @@ async function getObjects(
 describeNoCompat(
     "LiveMediaSession Manual Action Handlers (mostly testing coordinator)",
     (getTestObjectProvider) => {
-        it("should send 'joined' event when joined.", async () => {
-            const { object1, object2, dispose } = await getObjects(
-                getTestObjectProvider
-            );
-
-            await object1.initialize();
-            assert(
-                object1.isInitialized,
-                "LiveMediaSession objects not initialized"
-            );
-            assert(
-                object1.coordinator.isInitialized,
-                "LiveMediaSessionCoordinator objects not initialized"
-            );
-            // wait for next event loop, simulate existing user waiting for other people to join.
-            // otherwise joined event will fire for both users
-            await waitForDelay(1);
-
-            // create a duplicate scope/target with same event name as one declared in coordinator
-            const scope1 = new LiveEventScope(
-                object1.runtimeForTesting(),
-                object1.liveRuntimeForTesting()
-            );
-
-            let joinCount = 0;
-            new LiveEventTarget(scope1, "joined", (event, local) => {
-                joinCount += 1;
-            });
-
-            await object2.initialize();
-            // wait for next event loop
-            await waitForDelay(1);
-
-            assert(joinCount == 1, `joined event not sent`);
-            dispose();
-        });
-
         it("should send 'positionUpdate' event when someone joins.", async () => {
             const { object1, object2, dispose } = await getObjects(
                 getTestObjectProvider

@@ -205,6 +205,7 @@ export class LiveMediaSession extends LiveDataObject {
 
         // Create coordinator and listen for triggered actions
         this._coordinator = new LiveMediaSessionCoordinator(
+            this.id,
             this.runtime,
             this.liveRuntime,
             () => this.getCurrentPlayerState()

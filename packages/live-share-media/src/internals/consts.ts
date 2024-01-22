@@ -62,6 +62,7 @@ export const TelemetryEvents = {
         EndSuspensionAndWait: transmit(
             "SessionCoordinator:EndSuspensionAndWait"
         ),
+        RemoteConnectReceived: "SessionCoordinator:RemoteConnectReceived",
         RemoteSetTrackReceived: transmit(
             "SessionCoordinator:RemoteSetTrackReceived"
         ),

@@ -677,6 +677,17 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         sender: string,
         local: boolean
     ): Promise<boolean> {
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.SessionCoordinator.RemoteConnectReceived,
+            null,
+            {
+                correlationId: LiveTelemetryLogger.formatCorrelationId(
+                    evt.clientId,
+                    evt.timestamp
+                ),
+            }
+        );
+
         // Immediately send a position update
         try {
             const state = this._getPlayerState();

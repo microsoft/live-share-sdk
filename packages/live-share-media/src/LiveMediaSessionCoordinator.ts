@@ -556,6 +556,16 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                     err
                 );
             });
+        } else if (this.isSuspended) {
+            // send a local only position update event that was not sent as a signal, and use to handle local
+            // position update for clients that have canSendPositionUpdates==false, but are suspending
+            const evt = this._groupState!.createPositionUpdateEvent(state);
+            this._positionUpdateEvent?.sendLocalEvent(evt).catch((err) => {
+                this._logger.sendErrorEvent(
+                    TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
+                    err
+                );
+            });
         } else {
             // make sure position is synced to position of clients who can send position updates
             this._groupState!.syncLocalMediaSession();

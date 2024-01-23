@@ -93,31 +93,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             const clientId = message.clientId;
             message.content.clientId = clientId;
 
-            // Only call listeners when the runtime is connected and if the signal has an
-            // identifiable sender clientId.  The listener is responsible for deciding how
-            // it wants to handle local/remote signals
-            this._liveRuntime
-                .verifyRolesAllowed(clientId, this._allowedRoles)
-                .then((value) => {
-                    if (value) {
-                        this.emitter.emit(message.type, message.content, local);
-                    } else if (this.throwForEvents.includes(message.type)) {
-                        this._runtime.logger.sendErrorEvent(
-                            { eventName: "LiveEvent:invalidRole" },
-                            new Error(
-                                `The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(
-                                    this._allowedRoles
-                                )}.`
-                            )
-                        );
-                    }
-                })
-                .catch((err) => {
-                    this._runtime.logger.sendErrorEvent(
-                        { eventName: "LiveEvent:invalidRole" },
-                        err
-                    );
-                });
+            this.emitToListeners(clientId, message.content, local);
         });
     }
 
@@ -186,6 +162,36 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
         eventName: string,
         evt: TEvent
     ): Promise<ILiveEvent<TEvent>> {
+        const event = await this.createEvent(eventName, evt);
+        // Send event
+        this._runtime.submitSignal(eventName, event);
+        return event;
+    }
+
+    /**
+     * Sends a local only event to local event scope instance for the Fluid object.
+     * @template TEvent Type of event to send.
+     * @param eventName Name of the event to send.
+     * @param evt Optional. Partial event object to send. The `ILiveEvent.name`,
+     * `ILiveEvent.timestamp`, and `ILiveEvent.clientId`
+     * fields will be automatically populated prior to sending.
+     * @returns The full event, including `ILiveEvent.name`,
+     * `ILiveEvent.timestamp`, and `ILiveEvent.clientId` fields if known.
+     */
+    public async sendLocalEvent<TEvent>(
+        eventName: string,
+        evt: TEvent
+    ): Promise<ILiveEvent<TEvent>> {
+        const event = await this.createEvent(eventName, evt);
+        // Send event to local client only, without using signals
+        this.emitToListeners(event.clientId, event, true);
+        return event;
+    }
+
+    private async createEvent<TEvent>(
+        eventName: string,
+        evt: TEvent
+    ): Promise<ILiveEvent<TEvent>> {
         const clientId = await this.waitUntilConnected();
         const isAllowed = await this._liveRuntime.verifyRolesAllowed(
             clientId,
@@ -206,13 +212,42 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             data: evt,
         };
 
-        // Send event
-        this._runtime.submitSignal(eventName, clone);
-
         return clone;
     }
 
     private waitUntilConnected(): Promise<string> {
         return waitUntilConnected(this._runtime);
+    }
+
+    private emitToListeners(
+        clientId: string,
+        event: ILiveEvent,
+        local: boolean
+    ) {
+        // Only call listeners when the runtime is connected and if the signal has an
+        // identifiable sender clientId.  The listener is responsible for deciding how
+        // it wants to handle local/remote signals
+        this._liveRuntime
+            .verifyRolesAllowed(clientId, this._allowedRoles)
+            .then((value) => {
+                if (value) {
+                    this.emitter.emit(event.name, event, local);
+                } else if (this.throwForEvents.includes(event.name)) {
+                    this._runtime.logger.sendErrorEvent(
+                        { eventName: "LiveEvent:invalidRole" },
+                        new Error(
+                            `The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(
+                                this._allowedRoles
+                            )}.`
+                        )
+                    );
+                }
+            })
+            .catch((err) => {
+                this._runtime.logger.sendErrorEvent(
+                    { eventName: "LiveEvent:invalidRole" },
+                    err
+                );
+            });
     }
 }

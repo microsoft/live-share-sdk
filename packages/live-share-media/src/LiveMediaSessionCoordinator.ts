@@ -535,13 +535,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             // start needs to happen after setting initializedState to "succeeded"
             await this._synchronizer?.start(
                 undefined,
-                async (evt, sender, local) => {
-                    return await this.onReceivedConnectEvent(
-                        evt,
-                        sender,
-                        local
-                    );
-                },
+                async (evt, sender, local) => false,
                 async (connecting) => true
             );
         } catch (error: unknown) {
@@ -657,6 +651,11 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             this._runtime,
             this._liveRuntime
         );
+
+        // todo: move this into constructor?
+        this._synchronizer.onJoinedListener = (clientId: string) => {
+            this.onReceivedConnectEvent(clientId);
+        };
     }
 
     private getPlayerPosition(): number {
@@ -672,21 +671,18 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         }
     }
 
-    private async onReceivedConnectEvent(
-        evt: ILiveEvent<undefined>,
-        sender: string,
-        local: boolean
-    ): Promise<boolean> {
-        this._logger.sendTelemetryEvent(
-            TelemetryEvents.SessionCoordinator.RemoteConnectReceived,
-            null,
-            {
-                correlationId: LiveTelemetryLogger.formatCorrelationId(
-                    evt.clientId,
-                    evt.timestamp
-                ),
-            }
-        );
+    // private onReceivedConnectEvent(evt: ILiveEvent<undefined>) {
+    private onReceivedConnectEvent(clientId: string) {
+        // this._logger.sendTelemetryEvent(
+        //     TelemetryEvents.SessionCoordinator.RemoteConnectReceived,
+        //     null,
+        //     {
+        //         correlationId: LiveTelemetryLogger.formatCorrelationId(
+        //             evt.clientId,
+        //             evt.timestamp
+        //         ),
+        //     }
+        // );
 
         // Immediately send a position update
         try {
@@ -701,6 +697,5 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                 throw err;
             }
         }
-        return false;
     }
 }

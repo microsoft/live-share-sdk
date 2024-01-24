@@ -81,6 +81,7 @@ export class LiveObjectSynchronizer<TState> {
         initialState: TState,
         updateState: UpdateSynchronizationState<TState>,
         getLocalUserCanSend: GetLocalUserCanSend,
+        // onJoined: (clientId: string) => void,
         shouldUpdateTimestampPeriodically = false
     ): Promise<void> {
         return this.liveRuntime.objectManager.registerObject<TState>(
@@ -166,6 +167,22 @@ export class LiveObjectSynchronizer<TState> {
         return this.liveRuntime.objectManager.sendThrottledEventForObject(
             this.id,
             data
+        );
+    }
+
+    // TODO: make this pretty, move into constructor, maybe add optional object for config on start?
+    private _joinedListener: (clientId: string) => void = () => {};
+    public set onJoinedListener(callback: (clientId: string) => void) {
+        this.liveRuntime.objectManager.off("joined", this._joinedListener);
+        this._joinedListener = callback;
+
+        this.liveRuntime.objectManager.on(
+            "joined",
+            ({ objectId, clientId }) => {
+                if (objectId === this.id) {
+                    this._joinedListener(clientId);
+                }
+            }
         );
     }
 }

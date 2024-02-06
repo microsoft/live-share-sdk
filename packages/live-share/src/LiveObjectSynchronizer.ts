@@ -55,6 +55,8 @@ import {
  */
 export class LiveObjectSynchronizer<TState> {
     private _isDisposed = false;
+    private _joinedListener: (clientId: string, timestamp: number) => void =
+        () => {};
 
     /**
      * Creates a new `LiveObjectSynchronizer` instance.
@@ -171,17 +173,17 @@ export class LiveObjectSynchronizer<TState> {
         );
     }
 
-    // TODO: make this pretty, move into constructor, maybe add optional object for config on start?
-    private _joinedListener: (clientId: string) => void = () => {};
-    public set onJoinedListener(callback: (clientId: string) => void) {
+    public set onJoinedListener(
+        callback: (clientId: string, timestamp: number) => void
+    ) {
         this.liveRuntime.objectManager.off("joined", this._joinedListener);
         this._joinedListener = callback;
 
         this.liveRuntime.objectManager.on(
             "joined",
-            ({ objectId, clientId }) => {
+            ({ objectId, clientId, timestamp }) => {
                 if (objectId === this.id) {
-                    this._joinedListener(clientId);
+                    this._joinedListener(clientId, timestamp);
                 }
             }
         );

@@ -654,9 +654,35 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             this._liveRuntime
         );
 
-        // todo: move this into constructor?
-        this._synchronizer.onJoinedListener = (clientId: string) => {
-            this.onReceivedConnectEvent(clientId);
+        this._synchronizer.onJoinedListener = (
+            clientId: string,
+            timestamp: number
+        ) => {
+            this._logger.sendTelemetryEvent(
+                TelemetryEvents.SessionCoordinator.RemoteConnectReceived,
+                null,
+                {
+                    correlationId: LiveTelemetryLogger.formatCorrelationId(
+                        clientId,
+                        timestamp
+                    ),
+                }
+            );
+            // Immediately send a position update
+            try {
+                const state = this._getPlayerState();
+                this.sendPositionUpdate(state);
+            } catch (err: any) {
+                // if player is not setup yet, local client might have also just joined and can't send its position.
+                const playerNotSetup =
+                    isErrorLike(err) &&
+                    err.message.includes(
+                        "LiveMediaSession:getCurrentPlayerState"
+                    );
+                if (!playerNotSetup) {
+                    throw err;
+                }
+            }
         };
     }
 
@@ -670,34 +696,6 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                 return positionState && positionState.position != undefined
                     ? positionState.position
                     : 0.0;
-        }
-    }
-
-    // private onReceivedConnectEvent(evt: ILiveEvent<undefined>) {
-    private onReceivedConnectEvent(clientId: string) {
-        // this._logger.sendTelemetryEvent(
-        //     TelemetryEvents.SessionCoordinator.RemoteConnectReceived,
-        //     null,
-        //     {
-        //         correlationId: LiveTelemetryLogger.formatCorrelationId(
-        //             evt.clientId,
-        //             evt.timestamp
-        //         ),
-        //     }
-        // );
-
-        // Immediately send a position update
-        try {
-            const state = this._getPlayerState();
-            this.sendPositionUpdate(state);
-        } catch (err: any) {
-            // if player is not setup yet, local client might have also just joined and can't send its position.
-            const playerNotSetup =
-                isErrorLike(err) &&
-                err.message.includes("LiveMediaSession:getCurrentPlayerState");
-            if (!playerNotSetup) {
-                throw err;
-            }
         }
     }
 }

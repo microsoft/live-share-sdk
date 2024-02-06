@@ -321,7 +321,11 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             clientMap.set(event.clientId, event);
             this.objectStoreMap.set(objectId, clientMap);
             // todo: some event name that fits the case of dds being ready to listen
-            this.emit("joined", { objectId, clientId: event.clientId });
+            this.emit("joined", {
+                objectId,
+                clientId: event.clientId,
+                timestamp: event.timestamp,
+            });
         }
         return true;
     }

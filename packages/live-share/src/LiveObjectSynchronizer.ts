@@ -55,6 +55,8 @@ import {
  */
 export class LiveObjectSynchronizer<TState> {
     private _isDisposed = false;
+    private _joinedListener: (clientId: string, timestamp: number) => void =
+        () => {};
 
     /**
      * Creates a new `LiveObjectSynchronizer` instance.
@@ -75,13 +77,15 @@ export class LiveObjectSynchronizer<TState> {
      * @param initialState The initial state for the local user. Does not impact remote state that has been set since connecting to the session.
      * @param updateState A function called to process a state update received from a remote instance. This will be called anytime a "connect" or "update" message is received.
      * @param getLocalUserCanSend A async function called to determine whether the local user can send a connect/update message. Return true if the user can send the update.
-     * @param shouldUpdateTimestampPeriodically flag for updating the timestamp whenever sending out a periodic update
+     * @param shouldUpdateTimestampPeriodically flag for updating the timestamp whenever sending out a periodic update.
+     * @param enableBackgroundUpdates flag for enabling/disabling background updates. True by default.
      */
     public start(
         initialState: TState,
         updateState: UpdateSynchronizationState<TState>,
         getLocalUserCanSend: GetLocalUserCanSend,
-        shouldUpdateTimestampPeriodically = false
+        shouldUpdateTimestampPeriodically = false,
+        enableBackgroundUpdates = true
     ): Promise<void> {
         return this.liveRuntime.objectManager.registerObject<TState>(
             this.id,
@@ -91,7 +95,8 @@ export class LiveObjectSynchronizer<TState> {
                 updateState,
                 getLocalUserCanSend,
                 shouldUpdateTimestampPeriodically,
-            }
+            },
+            enableBackgroundUpdates
         );
     }
 
@@ -166,6 +171,26 @@ export class LiveObjectSynchronizer<TState> {
         return this.liveRuntime.objectManager.sendThrottledEventForObject(
             this.id,
             data
+        );
+    }
+
+    /**
+     * Set a callback for when a new client joins the session.
+     * @param callback called when a new client joins with the clientId, and timestamp.
+     */
+    public set onJoinedListener(
+        callback: (clientId: string, timestamp: number) => void
+    ) {
+        this.liveRuntime.objectManager.off("joined", this._joinedListener);
+        this._joinedListener = callback;
+
+        this.liveRuntime.objectManager.on(
+            "joined",
+            ({ objectId, clientId, timestamp }) => {
+                if (objectId === this.id) {
+                    this._joinedListener(clientId, timestamp);
+                }
+            }
         );
     }
 }

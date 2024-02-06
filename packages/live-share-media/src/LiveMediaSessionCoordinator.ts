@@ -14,6 +14,8 @@ import {
     LiveDataObjectInitializeState,
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
+    LiveObjectSynchronizer,
+    ILiveEvent,
 } from "@microsoft/live-share";
 import {
     CoordinationWaitPoint,
@@ -70,6 +72,7 @@ export interface IMediaPlayerState {
  * in sync with the group.
  */
 export class LiveMediaSessionCoordinator extends EventEmitter {
+    private readonly _id: string;
     private readonly _runtime: IRuntimeSignaler;
     private readonly _liveRuntime: LiveShareRuntime;
     private readonly _logger: LiveTelemetryLogger;
@@ -87,7 +90,10 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     private _setTrackEvent?: LiveEventTarget<ISetTrackEvent>;
     private _setTrackDataEvent?: LiveEventTarget<ISetTrackDataEvent>;
     private _positionUpdateEvent?: LiveEventTarget<IPositionUpdateEvent>;
-    private _joinedEvent?: LiveEventTarget<undefined>;
+
+    // Synchronizer does not play a significant role in LiveMediaSession beyond being able to
+    // use "connect" events to replace old "joined" events when sending position data to new clients.
+    private _synchronizer?: LiveObjectSynchronizer<undefined>;
 
     // Distributed state
     private _groupState?: GroupCoordinatorState;
@@ -97,11 +103,13 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * Applications shouldn't directly create new coordinator instances.
      */
     constructor(
+        id: string,
         runtime: IRuntimeSignaler,
         liveRuntime: LiveShareRuntime,
         getPlayerState: () => IMediaPlayerState
     ) {
         super();
+        this._id = id;
         this._runtime = runtime;
         this._liveRuntime = liveRuntime;
         this._logger = new LiveTelemetryLogger(runtime, liveRuntime);
@@ -522,6 +530,24 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             throw error;
         }
         this.initializeState = LiveDataObjectInitializeState.succeeded;
+
+        try {
+            // start needs to happen after setting initializedState to "succeeded"
+            await this._synchronizer?.start(
+                undefined,
+                async (evt, sender, local) => false,
+                async (connecting) => true,
+                false,
+                false
+            );
+        } catch (error: unknown) {
+            // not a fatal error for LiveMediaSession, only used for "connect" event to send new clients position updates.
+            this._logger.sendErrorEvent(
+                TelemetryEvents.SessionCoordinator
+                    .LiveObjectSynchronizerStartError,
+                error
+            );
+        }
     }
 
     /**
@@ -632,45 +658,42 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                 this._groupState!.handlePositionUpdate(event, local)
         );
 
-        // Listen for joined event
-        this._joinedEvent = new LiveEventTarget(
-            unrestrictedScope,
-            "joined",
-            (evt, local) => {
-                // Immediately send a position update
-                this._logger.sendTelemetryEvent(
-                    TelemetryEvents.SessionCoordinator.RemoteJoinReceived,
-                    null,
-                    {
-                        correlationId: LiveTelemetryLogger.formatCorrelationId(
-                            evt.clientId,
-                            evt.timestamp
-                        ),
-                    }
-                );
-                try {
-                    const state = this._getPlayerState();
-                    this.sendPositionUpdate(state);
-                } catch (err: any) {
-                    // if player is not setup yet, local client might have also just joined and can't send its position.
-                    const playerNotSetup =
-                        isErrorLike(err) &&
-                        err.message.includes(
-                            "LiveMediaSession:getCurrentPlayerState"
-                        );
-                    if (!playerNotSetup) {
-                        throw err;
-                    }
+        this._synchronizer = new LiveObjectSynchronizer<undefined>(
+            this._id,
+            this._runtime,
+            this._liveRuntime
+        );
+
+        this._synchronizer.onJoinedListener = (
+            clientId: string,
+            timestamp: number
+        ) => {
+            this._logger.sendTelemetryEvent(
+                TelemetryEvents.SessionCoordinator.RemoteConnectReceived,
+                null,
+                {
+                    correlationId: LiveTelemetryLogger.formatCorrelationId(
+                        clientId,
+                        timestamp
+                    ),
+                }
+            );
+            // Immediately send a position update
+            try {
+                const state = this._getPlayerState();
+                this.sendPositionUpdate(state);
+            } catch (err: any) {
+                // if player is not setup yet, local client might have also just joined and can't send its position.
+                const playerNotSetup =
+                    isErrorLike(err) &&
+                    err.message.includes(
+                        "LiveMediaSession:getCurrentPlayerState"
+                    );
+                if (!playerNotSetup) {
+                    throw err;
                 }
             }
-        );
-        // Send initial joined event
-        this._joinedEvent?.sendEvent(undefined).catch((err) => {
-            this._logger.sendErrorEvent(
-                TelemetryEvents.SessionCoordinator.SendJoinedEventError,
-                err
-            );
-        });
+        };
     }
 
     private getPlayerPosition(): number {

@@ -83,7 +83,8 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         id: string,
         runtime: IRuntimeSignaler,
         initialState: TState,
-        handlers: GetAndUpdateStateHandlers<TState>
+        handlers: GetAndUpdateStateHandlers<TState>,
+        enableBackgroundUpdates: boolean
     ): Promise<void> {
         // Get/create containers synchronizer
         if (!this._synchronizer) {
@@ -96,7 +97,11 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         }
 
         // Register object
-        this._synchronizer.registerObject(id, handlers);
+        this._synchronizer.registerObject(
+            id,
+            handlers,
+            enableBackgroundUpdates
+        );
 
         const initialEvent: ILiveEvent<TState> = {
             clientId: await waitUntilConnected(runtime),
@@ -306,10 +311,21 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
                 if (!LiveEvent.isNewer(existingEvent, event)) return false;
             }
             clientMap.set(event.clientId, event);
+            if (!existingEvent) {
+                // first event from client for objectId, can now consider them joined on that object
+                // todo: some event name that fits the case of dds being ready to listen
+                this.emit("joined", { objectId, clientId: event.clientId });
+            }
         } else {
             clientMap = new Map();
             clientMap.set(event.clientId, event);
             this.objectStoreMap.set(objectId, clientMap);
+            // todo: some event name that fits the case of dds being ready to listen
+            this.emit("joined", {
+                objectId,
+                clientId: event.clientId,
+                timestamp: event.timestamp,
+            });
         }
         return true;
     }

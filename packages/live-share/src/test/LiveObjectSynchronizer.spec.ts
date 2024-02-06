@@ -6,7 +6,7 @@
 import { strict as assert } from "assert";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
-import { Deferred } from "../internals";
+import { Deferred, waitForDelay } from "../internals";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
 interface ITestState {
@@ -170,15 +170,20 @@ describe("LiveObjectSynchronizer", () => {
                     assert(sender, `local: sender  ID not received`);
                     // The event is only emitted when the timestamp of a value has changed
                     changesEmitted++;
-                    assert(changesEmitted < 2, "received is >= 2");
+                    assert(changesEmitted < 6, "received is >= 6");
                 } catch (err) {
                     done.reject(err);
                 }
                 return Promise.resolve(true);
             },
-            () => {
+            (connecting) => {
+                if (connecting) {
+                    // counting updates not connects
+                    return Promise.resolve(true);
+                }
                 sent++;
-                if (sent == 2) {
+                if (sent == 6) {
+                    // 6 background updates
                     done.resolve();
                 }
                 // If this is called, it will send out an update
@@ -201,6 +206,68 @@ describe("LiveObjectSynchronizer", () => {
         );
 
         await done.promise;
+        localObject.dispose();
+        remoteObject.dispose();
+        localLiveRuntime.stop();
+        remoteLiveRuntime.stop();
+    });
+
+    it("Should not send periodic updates if dds specific enableBackgroundUpdates is false", async () => {
+        const localLiveRuntime = new MockLiveShareRuntime(true, 20);
+        const remoteLiveRuntime = new MockLiveShareRuntime(true, 20);
+        localLiveRuntime.connectToOtherRuntime(remoteLiveRuntime);
+        await localLiveRuntime.start();
+        await remoteLiveRuntime.start();
+
+        let sent = 0;
+        const done = new Deferred();
+        const localRuntime = new MockRuntimeSignaler();
+        const localObject = new LiveObjectSynchronizer<ITestState>(
+            "test",
+            localRuntime,
+            localLiveRuntime
+        );
+        await localObject.start(
+            { client: "local" },
+            (state, sender) => {
+                done.reject();
+                return Promise.resolve(true);
+            },
+            (connecting) => {
+                if (connecting) {
+                    // counting updates not connects
+                    return Promise.resolve(true);
+                }
+                sent++;
+                if (sent == 6) {
+                    // should never resolve, see race with timeout at end
+                    done.resolve();
+                }
+                // If this is called, it will send out an update
+                return Promise.resolve(true);
+            },
+            false,
+            false
+        );
+
+        const remoteRuntime = new MockRuntimeSignaler();
+        const remoteObject = new LiveObjectSynchronizer<ITestState>(
+            "test",
+            remoteRuntime,
+            remoteLiveRuntime
+        );
+        await remoteObject.start(
+            { client: "remote" },
+            (state, sender) => {
+                return Promise.resolve(true);
+            },
+            () => Promise.resolve(true),
+            false,
+            false
+        );
+
+        await Promise.race([done.promise, waitForDelay(300)]);
+        assert(sent == 0, `sent ${sent} updates when no updates was expected`);
         localObject.dispose();
         remoteObject.dispose();
         localLiveRuntime.stop();

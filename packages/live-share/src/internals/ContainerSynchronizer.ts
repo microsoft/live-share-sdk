@@ -21,7 +21,6 @@ export class ContainerSynchronizer {
     private _throttledEventsQueue: ThrottledEventQueue =
         new ThrottledEventQueue(this);
     private _connectedKeys: string[] = [];
-    private _refCount = 0;
     private _hTimer: NodeJS.Timeout | undefined;
     private _connectSentForClientId?: string;
     private _onBoundConnectedListener?: (clientId: string) => Promise<void>;
@@ -31,6 +30,7 @@ export class ContainerSynchronizer {
         local: boolean
     ) => Promise<void>;
     private _onSendUpdatesIntervalCallback?: () => Promise<void>;
+    private _ddsBackgroundUpdateEnabled: Set<string> = new Set<string>();
 
     constructor(
         private readonly _runtime: IRuntimeSignaler,
@@ -43,7 +43,8 @@ export class ContainerSynchronizer {
 
     public registerObject(
         id: string,
-        handlers: GetAndUpdateStateHandlers<any>
+        handlers: GetAndUpdateStateHandlers<any>,
+        enableBackgroundUpdates: boolean
     ): void {
         if (this._objects.has(id)) {
             throw new Error(
@@ -72,8 +73,11 @@ export class ContainerSynchronizer {
         });
 
         // Start update timer on first ref
-        if (this._refCount++ == 0) {
-            this.startBackgroundObjectUpdates();
+        if (enableBackgroundUpdates) {
+            this._ddsBackgroundUpdateEnabled.add(id);
+            if (this._ddsBackgroundUpdateEnabled.size == 1) {
+                this.startBackgroundObjectUpdates();
+            }
         }
     }
 
@@ -82,16 +86,22 @@ export class ContainerSynchronizer {
             // Remove object ref
             this._objects.delete(id);
 
-            // Stop update timer on last de-ref
-            if (--this._refCount == 0) {
-                this.stopBackgroundObjectUpdates();
-                return true;
-            }
-
             // Remove id from key lists
             this._connectedKeys = this._connectedKeys.filter(
                 (key) => key != id
             );
+
+            const ddsBackgroundUpdateEnabled =
+                this._ddsBackgroundUpdateEnabled.has(id);
+
+            // Stop update timer on last de-ref
+            if (ddsBackgroundUpdateEnabled) {
+                this._ddsBackgroundUpdateEnabled.delete(id);
+                if (this._ddsBackgroundUpdateEnabled.size == 0) {
+                    this.stopBackgroundObjectUpdates();
+                    return true;
+                }
+            }
         }
 
         return false;
@@ -105,7 +115,9 @@ export class ContainerSynchronizer {
     public async onSendBackgroundUpdates(): Promise<void> {
         if (!this._liveRuntime.canSendBackgroundUpdates) return;
         await this.sendGroupEvent(
-            this._connectedKeys,
+            this._connectedKeys.filter((key) =>
+                this._ddsBackgroundUpdateEnabled.has(key)
+            ),
             ObjectSynchronizerEvents.update
         ).catch((err) => console.error(err));
     }

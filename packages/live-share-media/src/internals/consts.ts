@@ -62,7 +62,7 @@ export const TelemetryEvents = {
         EndSuspensionAndWait: transmit(
             "SessionCoordinator:EndSuspensionAndWait"
         ),
-        RemoteJoinReceived: "SessionCoordinator:RemoteJoinReceived",
+        RemoteConnectReceived: "SessionCoordinator:RemoteConnectReceived",
         RemoteSetTrackReceived: transmit(
             "SessionCoordinator:RemoteSetTrackReceived"
         ),
@@ -75,7 +75,8 @@ export const TelemetryEvents = {
             "SessionCoordinator:RemoteSeekToReceived"
         ),
         PositionUpdateEventError: "SessionCoordinator:PositionUpdateEventError",
-        SendJoinedEventError: "SessionCoordinator:SendJoinedEventError",
+        LiveObjectSynchronizerStartError:
+            "SessionCoordinator:LiveObjectSynchronizerStartError",
     },
     GroupCoordinator: {
         TrackChanged: "GroupCoordinator:TrackChanged",

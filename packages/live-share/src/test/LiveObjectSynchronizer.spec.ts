@@ -183,6 +183,7 @@ describe("LiveObjectSynchronizer", () => {
                 }
                 sent++;
                 if (sent == 6) {
+                    // 6 background updates
                     done.resolve();
                 }
                 // If this is called, it will send out an update

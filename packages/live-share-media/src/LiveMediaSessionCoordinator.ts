@@ -536,7 +536,9 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             await this._synchronizer?.start(
                 undefined,
                 async (evt, sender, local) => false,
-                async (connecting) => true
+                async (connecting) => true,
+                false,
+                false
             );
         } catch (error: unknown) {
             // not a fatal error for LiveMediaSession, only used for "connect" event to send new clients position updates.

@@ -83,7 +83,8 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         id: string,
         runtime: IRuntimeSignaler,
         initialState: TState,
-        handlers: GetAndUpdateStateHandlers<TState>
+        handlers: GetAndUpdateStateHandlers<TState>,
+        enableBackgroundUpdates: boolean
     ): Promise<void> {
         // Get/create containers synchronizer
         if (!this._synchronizer) {
@@ -96,7 +97,11 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         }
 
         // Register object
-        this._synchronizer.registerObject(id, handlers);
+        this._synchronizer.registerObject(
+            id,
+            handlers,
+            enableBackgroundUpdates
+        );
 
         const initialEvent: ILiveEvent<TState> = {
             clientId: await waitUntilConnected(runtime),

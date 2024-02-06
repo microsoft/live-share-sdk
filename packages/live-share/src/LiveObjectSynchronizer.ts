@@ -81,8 +81,8 @@ export class LiveObjectSynchronizer<TState> {
         initialState: TState,
         updateState: UpdateSynchronizationState<TState>,
         getLocalUserCanSend: GetLocalUserCanSend,
-        // onJoined: (clientId: string) => void,
-        shouldUpdateTimestampPeriodically = false
+        shouldUpdateTimestampPeriodically = false, // TODO: options object with named params for live share v2?
+        enableBackgroundUpdates = true
     ): Promise<void> {
         return this.liveRuntime.objectManager.registerObject<TState>(
             this.id,
@@ -92,7 +92,8 @@ export class LiveObjectSynchronizer<TState> {
                 updateState,
                 getLocalUserCanSend,
                 shouldUpdateTimestampPeriodically,
-            }
+            },
+            enableBackgroundUpdates
         );
     }
 

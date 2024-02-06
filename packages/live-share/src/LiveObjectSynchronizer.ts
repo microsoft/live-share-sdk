@@ -84,7 +84,7 @@ export class LiveObjectSynchronizer<TState> {
         initialState: TState,
         updateState: UpdateSynchronizationState<TState>,
         getLocalUserCanSend: GetLocalUserCanSend,
-        shouldUpdateTimestampPeriodically = false, // TODO: options object with named params for live share v2?
+        shouldUpdateTimestampPeriodically = false,
         enableBackgroundUpdates = true
     ): Promise<void> {
         return this.liveRuntime.objectManager.registerObject<TState>(

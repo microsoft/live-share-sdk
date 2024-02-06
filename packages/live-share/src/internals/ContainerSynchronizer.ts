@@ -115,7 +115,9 @@ export class ContainerSynchronizer {
     public async onSendBackgroundUpdates(): Promise<void> {
         if (!this._liveRuntime.canSendBackgroundUpdates) return;
         await this.sendGroupEvent(
-            this._connectedKeys,
+            this._connectedKeys.filter((key) =>
+                this._ddsBackgroundUpdateEnabled.has(key)
+            ),
             ObjectSynchronizerEvents.update
         ).catch((err) => console.error(err));
     }

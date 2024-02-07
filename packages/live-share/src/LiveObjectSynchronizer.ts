@@ -107,6 +107,7 @@ export class LiveObjectSynchronizer<TState> {
         if (!this._isDisposed) {
             this._isDisposed = true;
             this.liveRuntime.objectManager.unregisterObject(this.id);
+            this.liveRuntime.objectManager.off("joined", this._joinedListener);
         }
     }
 

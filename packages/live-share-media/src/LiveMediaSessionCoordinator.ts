@@ -624,6 +624,11 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             this.emit(evt.name, evt)
         );
 
+        this._groupState.on(
+            GroupCoordinatorStateEvents.triggeractionignored,
+            (evt) => this.emit(evt.name, evt)
+        );
+
         // Listen for track changes
         this._setTrackEvent = new LiveEventTarget<ISetTrackEvent>(
             scope,

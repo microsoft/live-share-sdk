@@ -20,7 +20,7 @@ import {
 import { VolumeManager } from "./VolumeManager";
 import { LiveMediaSession } from "./LiveMediaSession";
 import { IMediaPlayer } from "./IMediaPlayer";
-import { TelemetryEvents } from "./internals";
+import { ITriggerActionEvent, TelemetryEvents } from "./internals";
 import { waitUntilConnected } from "@microsoft/live-share/bin/internals";
 
 /**
@@ -242,7 +242,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                 case "blocked":
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.MediaPlayerSynchronizer
-                            .PlaybackRateChangeBlocked
+                            .PlayerBlockedOperation
                     );
                     break;
             }
@@ -252,6 +252,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this._mediaSession.coordinator.on(
             MediaSessionCoordinatorEvents.coordinatorstatechange,
             (evt) => this.emit(evt.type, evt)
+        );
+
+        this._mediaSession.coordinator.on(
+            MediaSessionCoordinatorEvents.triggeractionignored,
+            (evt: ITriggerActionEvent) => {
+                this.dispatchGroupAction(evt.details, undefined);
+            }
         );
 
         // Register media session actions
@@ -687,7 +694,6 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         });
     }
 
-    // TODO: what is delay useful for? we do not use, delete?
     private dispatchGroupAction(
         details: ExtendedMediaSessionActionDetails,
         error: Error | undefined

@@ -313,21 +313,23 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             clientMap.set(event.clientId, event);
             if (!existingEvent) {
                 // first event from client for objectId, can now consider them joined on that object
-                // todo: some event name that fits the case of dds being ready to listen
-                this.emit("joined", { objectId, clientId: event.clientId });
+                this.emitJoined(objectId, event);
             }
         } else {
             clientMap = new Map();
             clientMap.set(event.clientId, event);
             this.objectStoreMap.set(objectId, clientMap);
-            // todo: some event name that fits the case of dds being ready to listen
-            this.emit("joined", {
-                objectId,
-                clientId: event.clientId,
-                timestamp: event.timestamp,
-            });
+            this.emitJoined(objectId, event);
         }
         return true;
+    }
+
+    private emitJoined(objectId: string, event: ILiveEvent<any>) {
+        this.emit("joined", {
+            objectId,
+            clientId: event.clientId,
+            timestamp: event.timestamp,
+        });
     }
 
     private startReceivingSignalUpdates() {

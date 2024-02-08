@@ -25,7 +25,9 @@ import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveSha
 import { isErrorLike } from "@microsoft/live-share/bin/internals";
 import {
     ExtendedMediaMetadata,
+    ExtendedMediaSessionAction,
     ExtendedMediaSessionActionDetails,
+    ExtendedMediaSessionActionIgnore,
     ExtendedMediaSessionActionSource,
 } from "../MediaSessionExtensions";
 import {
@@ -404,6 +406,13 @@ describeNoCompat(
             await object1.initialize([UserMeetingRole.organizer]);
             await object2.initialize([UserMeetingRole.organizer]);
             const object1ExpectedEventOrder: IExpectedEvent[] = [
+                {
+                    action: "play",
+                    clientId: await object2.clientId(),
+                    local: false,
+                    source: "user",
+                    ignoreReason: "localusersuspended", // emitted by group action, but ignored with reason "localusersuspended".
+                },
                 {
                     action: "seekto",
                     clientId: await object1.clientId(),
@@ -880,11 +889,12 @@ async function assertActionOccurred(
     });
 }
 
-interface IExpectedEvent {
-    action: string;
+interface IExpectedEvent extends ExtendedMediaSessionActionDetails {
+    action: ExtendedMediaSessionAction;
     clientId: string;
     local: boolean;
     source: ExtendedMediaSessionActionSource;
+    ignoreReason?: ExtendedMediaSessionActionIgnore | null;
 }
 
 async function assertExpectedEvents(

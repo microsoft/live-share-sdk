@@ -87,6 +87,7 @@ export interface ITriggerActionEvent extends IEvent {
 export enum GroupCoordinatorStateEvents {
     newwaitpoint = "newwaitpoint",
     triggeraction = "triggeraction",
+    triggeractionignored = "triggeractionignored",
 }
 
 /**
@@ -167,19 +168,19 @@ export class GroupCoordinatorState extends EventEmitter {
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.GroupCoordinator.TrackDataChanged
                     );
-                    const clientId = await waitUntilConnected(this._runtime);
-                    this.emitTriggerAction({
-                        action: "datachange",
-                        source: evt.source,
-                        data: evt.data,
-                        clientId: evt.clientId,
-                        local: evt.clientId === clientId,
-                    });
                 } else {
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.GroupCoordinator.TrackDataChangeDelayed
                     );
                 }
+                const clientId = await waitUntilConnected(this._runtime);
+                this.emitTriggerActionOrIgnored({
+                    action: "datachange",
+                    source: evt.source,
+                    data: evt.data,
+                    clientId: evt.clientId,
+                    local: evt.clientId === clientId,
+                });
             }
         );
 
@@ -196,43 +197,6 @@ export class GroupCoordinatorState extends EventEmitter {
                             seekTime: evt.seekTime,
                         }
                     );
-
-                    const localClientId = await waitUntilConnected(
-                        this._runtime
-                    );
-                    const local = evt.clientId === localClientId;
-                    // Trigger action
-                    switch (evt.action) {
-                        case "play":
-                            this.emitTriggerAction({
-                                action: "play",
-                                source: evt.source,
-                                clientId: evt.clientId,
-                                local,
-                                seekTime: evt.seekTime,
-                            });
-                            break;
-
-                        case "pause":
-                            this.emitTriggerAction({
-                                action: "pause",
-                                source: evt.source,
-                                clientId: evt.clientId,
-                                local,
-                                seekTime: evt.seekTime,
-                            });
-                            break;
-
-                        case "seekto":
-                            this.emitTriggerAction({
-                                action: "seekto",
-                                source: evt.source,
-                                clientId: evt.clientId,
-                                local,
-                                seekTime: evt.seekTime,
-                            });
-                            break;
-                    }
                 } else {
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.GroupCoordinator
@@ -243,6 +207,41 @@ export class GroupCoordinatorState extends EventEmitter {
                             seekTime: evt.seekTime,
                         }
                     );
+                }
+
+                const localClientId = await waitUntilConnected(this._runtime);
+                const local = evt.clientId === localClientId;
+                // Trigger action
+                switch (evt.action) {
+                    case "play":
+                        this.emitTriggerActionOrIgnored({
+                            action: "play",
+                            source: evt.source,
+                            clientId: evt.clientId,
+                            local,
+                            seekTime: evt.seekTime,
+                        });
+                        break;
+
+                    case "pause":
+                        this.emitTriggerActionOrIgnored({
+                            action: "pause",
+                            source: evt.source,
+                            clientId: evt.clientId,
+                            local,
+                            seekTime: evt.seekTime,
+                        });
+                        break;
+
+                    case "seekto":
+                        this.emitTriggerActionOrIgnored({
+                            action: "seekto",
+                            source: evt.source,
+                            clientId: evt.clientId,
+                            local,
+                            seekTime: evt.seekTime,
+                        });
+                        break;
                 }
             }
         );
@@ -589,7 +588,7 @@ export class GroupCoordinatorState extends EventEmitter {
                             target: target,
                         }
                     );
-                    await this.emitTriggerAction({
+                    this.emitTriggerAction({
                         action: "catchup",
                         source: "system",
                         clientId: await waitUntilConnected(this._runtime),
@@ -613,7 +612,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         localClientId === this.transportState.current.clientId;
                     switch (this.transportState.playbackState) {
                         case "playing":
-                            await this.emitTriggerAction({
+                            this.emitTriggerAction({
                                 action: "play",
                                 source: "system",
                                 clientId: this.transportState.current.clientId,
@@ -621,7 +620,7 @@ export class GroupCoordinatorState extends EventEmitter {
                             });
                             break;
                         case "paused":
-                            await this.emitTriggerAction({
+                            this.emitTriggerAction({
                                 action: "pause",
                                 source: "system",
                                 clientId: this.transportState.current.clientId,
@@ -642,7 +641,7 @@ export class GroupCoordinatorState extends EventEmitter {
                     const local =
                         localClientId ===
                         this.playbackTrackData.current.clientId;
-                    await this.emitTriggerAction({
+                    this.emitTriggerAction({
                         action: "datachange",
                         source: "system",
                         clientId: this.playbackTrackData.current.clientId,
@@ -673,6 +672,16 @@ export class GroupCoordinatorState extends EventEmitter {
         });
     }
 
+    private emitTriggerActionOrIgnored(
+        details: ExtendedMediaSessionActionDetails
+    ): void {
+        if (this.isSuspended || this.isWaiting) {
+            return this.emitTriggerActionIgnored(details);
+        } else {
+            return this.emitTriggerAction(details);
+        }
+    }
+
     private emitTriggerAction(
         details: ExtendedMediaSessionActionDetails
     ): void {
@@ -681,5 +690,16 @@ export class GroupCoordinatorState extends EventEmitter {
             details: details,
         };
         this.emit(GroupCoordinatorStateEvents.triggeraction, evt);
+    }
+
+    private emitTriggerActionIgnored(
+        details: ExtendedMediaSessionActionDetails
+    ): void {
+        details.ignoreReason = "localusersuspended";
+        const evt: ITriggerActionEvent = {
+            name: GroupCoordinatorStateEvents.triggeractionignored,
+            details: details,
+        };
+        this.emit(GroupCoordinatorStateEvents.triggeractionignored, evt);
     }
 }

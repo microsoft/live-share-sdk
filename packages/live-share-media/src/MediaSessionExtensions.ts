@@ -59,6 +59,10 @@ export enum MediaSessionCoordinatorEvents {
      * Event emitted when an action was triggered.
      */
     triggeraction = "triggeraction",
+    /**
+     * Event emitted when an action would have been triggered, but a suspension is active for the local client.
+     */
+    triggeractionignored = "triggeractionignored",
 }
 
 /**
@@ -117,6 +121,15 @@ export interface ExtendedMediaMetadata extends MediaMetadata {
 }
 
 /**
+ * The reasons why an action is ignored.
+ *
+ * @remarks
+ * Is `localusersuspended` when the action updated the group state, but ignored locally due to the local client being suspended.
+
+ */
+export type ExtendedMediaSessionActionIgnore = "localusersuspended";
+
+/**
  * Details for emitted actions from `LiveMediaSession`.
  *
  * @remarks
@@ -169,9 +182,9 @@ export interface ExtendedMediaSessionActionDetails {
      */
     data?: object | null;
     /**
-     * Action type that was blocked.
+     * Reason an action is ignored by the local client, undefined if not ignored.
      */
-    blocked?: ExtendedMediaSessionAction | null;
+    ignoreReason?: ExtendedMediaSessionActionIgnore | null;
 }
 
 /**

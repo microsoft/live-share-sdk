@@ -115,6 +115,7 @@ export class LivePresenceUser<TData = object> {
 
     /**
      * Returns the user's connections.
+     * See {@link LivePresenceConnection}
      */
     public getConnections(
         filter?: PresenceState
@@ -129,6 +130,11 @@ export class LivePresenceUser<TData = object> {
         return list;
     }
 
+    /**
+     * Returns the user's connection associated with clientId.
+     * See {@link LivePresenceConnection}
+     * @param clientId The ID of the client to lookup.
+     */
     public getConnection(
         clientId: string
     ): LivePresenceConnection<TData> | undefined {

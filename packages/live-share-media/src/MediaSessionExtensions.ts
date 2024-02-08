@@ -182,12 +182,6 @@ export interface ExtendedMediaSessionActionDetails {
      */
     data?: object | null;
     /**
-     * Action type that was blocked.
-     * TODO: does this make sense to have? blocked is never used anywhere, and in my use case would always be equal to action property
-     */
-    // blocked?: ExtendedMediaSessionAction | null;
-
-    /**
      * Reason for Action type being blocked.
      */
     ignored?: ExtendedMediaSessionActionIgnore | null;

@@ -182,7 +182,7 @@ export interface ExtendedMediaSessionActionDetails {
      */
     data?: object | null;
     /**
-     * Reason for Action type being blocked.
+     * Reason an action is ignored by the local client, undefined if not ignored.
      */
     ignored?: ExtendedMediaSessionActionIgnore | null;
 }

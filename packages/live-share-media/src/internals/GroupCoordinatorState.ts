@@ -695,7 +695,7 @@ export class GroupCoordinatorState extends EventEmitter {
     private emitTriggerActionIgnored(
         details: ExtendedMediaSessionActionDetails
     ): void {
-        details.ignored = "localusersuspended";
+        details.ignoreReason = "localusersuspended";
         const evt: ITriggerActionEvent = {
             name: GroupCoordinatorStateEvents.triggeractionignored,
             details: details,

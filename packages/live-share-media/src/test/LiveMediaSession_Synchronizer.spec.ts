@@ -411,7 +411,7 @@ describeNoCompat(
                     clientId: await object2.clientId(),
                     local: false,
                     source: "user",
-                    ignored: "localusersuspended", // emitted by group action, but ignored with reason "localusersuspended".
+                    ignoreReason: "localusersuspended", // emitted by group action, but ignored with reason "localusersuspended".
                 },
                 {
                     action: "seekto",
@@ -894,7 +894,7 @@ interface IExpectedEvent extends ExtendedMediaSessionActionDetails {
     clientId: string;
     local: boolean;
     source: ExtendedMediaSessionActionSource;
-    ignored?: ExtendedMediaSessionActionIgnore | null;
+    ignoreReason?: ExtendedMediaSessionActionIgnore | null;
 }
 
 async function assertExpectedEvents(

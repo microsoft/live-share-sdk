@@ -184,7 +184,7 @@ export interface ExtendedMediaSessionActionDetails {
     /**
      * Reason an action is ignored by the local client, undefined if not ignored.
      */
-    ignored?: ExtendedMediaSessionActionIgnore | null;
+    ignoreReason?: ExtendedMediaSessionActionIgnore | null;
 }
 
 /**

@@ -112,7 +112,7 @@ export class LivePresence<
     }
 
     /**
-     * Local LivePresenceUser.
+     * Local {@link LivePresenceUser}.
      * Can be undefined before LivePresence is initialized.
      */
     public get localUser(): LivePresenceUser<TData> | undefined {
@@ -222,6 +222,7 @@ export class LivePresence<
 
     /**
      * Returns a snapshot of the current list of presence objects being tracked.
+     * See {@link LivePresenceUser}
      * @param filter Optional. Presence state to filter enumeration to.
      * @returns Array of presence objects.
      */
@@ -250,6 +251,7 @@ export class LivePresence<
 
     /**
      * Returns the current presence info for a specific client ID.
+     * See {@link LivePresenceUser}
      * @param clientId The ID of the client to retrieve.
      * @returns The current presence information for the client if they've connected to the space.
      */
@@ -261,6 +263,7 @@ export class LivePresence<
 
     /**
      * Returns the current presence info for a specific user.
+     * See {@link LivePresenceUser}
      * @param userId The ID of the user to retrieve.
      * @returns The current presence information for the user if they've connected to the space.
      */

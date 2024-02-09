@@ -74,6 +74,9 @@ export const TelemetryEvents = {
         RemoteSeekToReceived: transmit(
             "SessionCoordinator:RemoteSeekToReceived"
         ),
+        RemoteRateChangeReceived: transmit(
+            "SessionCoordinator:RemoteRateChangeReceived"
+        ),
         PositionUpdateEventError: "SessionCoordinator:PositionUpdateEventError",
         LiveObjectSynchronizerStartError:
             "SessionCoordinator:LiveObjectSynchronizerStartError",

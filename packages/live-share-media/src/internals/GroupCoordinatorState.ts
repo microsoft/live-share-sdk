@@ -464,6 +464,16 @@ export class GroupCoordinatorState extends EventEmitter {
                             }
                         );
                         break;
+                    case "rateChange":
+                        this._logger.sendTelemetryEvent(
+                            TelemetryEvents.SessionCoordinator
+                                .RemoteRateChangeReceived,
+                            null,
+                            {
+                                correlationId: correlationId,
+                            }
+                        );
+                        break;
                 }
             }
         }

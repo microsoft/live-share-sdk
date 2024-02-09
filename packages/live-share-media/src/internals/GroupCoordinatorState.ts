@@ -594,7 +594,6 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
-    // TODO: sync playback speed?
     public async syncLocalMediaSession(): Promise<void> {
         // Skip further syncs if we're waiting or in a "soft suspension".
         const softSuspensionDelta =
@@ -714,6 +713,26 @@ export class GroupCoordinatorState extends EventEmitter {
                         clientId: this.playbackTrackData.current.clientId,
                         local,
                         data: this.playbackTrackData.data,
+                    });
+                }
+
+                // Sync playback rate
+                if (
+                    this.playbackRate.playbackRate !=
+                    positionState?.playbackRate
+                ) {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.PlaybackRateOutOfSync
+                    );
+                    const local =
+                        localClientId ===
+                        this.playbackTrackData.current.clientId;
+                    this.emitTriggerAction({
+                        action: "ratechange",
+                        source: "system",
+                        clientId: this.playbackTrackData.current.clientId,
+                        local,
+                        playbackRate: this.playbackRate.playbackRate,
                     });
                 }
             }

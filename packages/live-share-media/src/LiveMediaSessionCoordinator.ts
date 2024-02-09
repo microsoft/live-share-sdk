@@ -694,7 +694,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         );
         this._rateChangeEvent = new LiveEventTarget(
             scope,
-            "playbackRateChange",
+            "rateChange",
             (event: ILiveEvent<ITransportCommandEvent>, local) => {
                 if (
                     this._groupState?.transportState?.playbackRate !==

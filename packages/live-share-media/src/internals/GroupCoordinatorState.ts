@@ -545,6 +545,7 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
+    // TODO: sync playback speed?
     public async syncLocalMediaSession(): Promise<void> {
         // Skip further syncs if we're waiting or in a "soft suspension".
         const softSuspensionDelta =

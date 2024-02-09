@@ -16,6 +16,7 @@ export const TelemetryEvents = {
         PlayAction: "MediaPlayerSynchronizer:PlayAction",
         PauseAction: "MediaPlayerSynchronizer:PauseAction",
         SeekToAction: "MediaPlayerSynchronizer:SeekToAction",
+        RateChangeAction: "MediaPlayerSynchronizer:RateChangeAction",
         CatchupAction: "MediaPlayerSynchronizer:CatchupAction",
         SetTrackAction: "MediaPlayerSynchronizer:SetTrackAction",
         DataChangeAction: "MediaPlayerSynchronizer:DataChangeAction",
@@ -24,8 +25,6 @@ export const TelemetryEvents = {
         ),
         UserTappedVideoToPlayError:
             "MediaPlayerSynchronizer:UserTappedVideoToPlayError",
-        PlaybackRateChangeBlocked:
-            "MediaPlayerSynchronizer:PlaybackRateChangeBlocked",
         PlayerBlockedOperation: transmit(
             "MediaPlayerSynchronizer:PlayerBlockedOperation"
         ),
@@ -43,6 +42,7 @@ export const TelemetryEvents = {
         PlayAction: transmit("MediaSession:PlayAction"),
         PauseAction: transmit("MediaSession:PauseAction"),
         SeekToAction: transmit("MediaSession:SeekToAction"),
+        RateChangeAction: transmit("MediaSession:RateChangeAction"),
         CatchUpAction: transmit("MediaSession:CatchUpAction"),
         SetTrackAction: transmit("MediaSession:SetTrackAction"),
         DataChangeAction: "MediaSession:DataChangeAction",

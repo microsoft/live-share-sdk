@@ -144,7 +144,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                 playbackState: playbackState,
                 positionState: {
                     position: this._player.currentTime,
-                    playbackRate: this._player.playbackRate,
+                    playbackRate: this._player.playbackRate ?? 1,
                     duration: this._player.duration,
                 },
                 trackData: this._trackData,

@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveEvent, LiveShareRuntime } from "@microsoft/live-share";
+import { LiveShareRuntime } from "@microsoft/live-share";
 import EventEmitter from "events";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
@@ -15,6 +15,7 @@ import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
 } from "./GroupPlaybackTrack";
+import { IGroupStateEvent } from "./interfaces";
 import { GroupPlaybackRate } from "./GroupPlaybackRate";
 
 /**
@@ -37,7 +38,7 @@ export enum GroupTransportStateEvents {
 /**
  * @hidden
  */
-export interface ITransportStateChangeEvent extends ILiveEvent {
+export interface ITransportStateChangeEvent extends IGroupStateEvent {
     action: ExtendedMediaSessionAction;
     seekTime?: number;
 }
@@ -141,34 +142,36 @@ export class GroupTransportState extends EventEmitter {
             originalState.playbackState == state.playbackState &&
             playerState != "ended"
         ) {
-            this.emit(GroupTransportStateEvents.transportStateChange, {
-                type: GroupTransportStateEvents.transportStateChange,
+            const event: ITransportStateChangeEvent = {
+                name: GroupTransportStateEvents.transportStateChange,
                 action: "seekto",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
                 source,
-            });
+            };
+            this.emit(GroupTransportStateEvents.transportStateChange, event);
         } else if (state.playbackState == "playing") {
             const now = this._liveRuntime.getTimestamp();
             const projectedPosition =
                 state.startPosition +
-                ((now - state.timestamp) / 1000) *
-                    this._playbackRate.playbackRate;
-            this.emit(GroupTransportStateEvents.transportStateChange, {
-                type: GroupTransportStateEvents.transportStateChange,
+                ((now - state.timestamp) / 1000) * this._playbackRate.rate;
+            const event: ITransportStateChangeEvent = {
+                name: GroupTransportStateEvents.transportStateChange,
                 action: "play",
                 clientId: state.clientId,
                 seekTime: projectedPosition,
                 source,
-            });
+            };
+            this.emit(GroupTransportStateEvents.transportStateChange, event);
         } else {
-            this.emit(GroupTransportStateEvents.transportStateChange, {
-                type: GroupTransportStateEvents.transportStateChange,
+            const event: ITransportStateChangeEvent = {
+                name: GroupTransportStateEvents.transportStateChange,
                 action: "pause",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
                 source,
-            });
+            };
+            this.emit(GroupTransportStateEvents.transportStateChange, event);
         }
 
         return true;

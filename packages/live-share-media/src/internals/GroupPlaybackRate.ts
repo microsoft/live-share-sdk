@@ -3,9 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveEvent } from "@microsoft/live-share";
 import EventEmitter from "events";
 import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions";
+import { IGroupStateEvent } from "./interfaces";
 
 /**
  * @hidden
@@ -26,7 +26,7 @@ export enum PlaybackRateEvents {
 /**
  * @hidden
  */
-export interface IPlaybackRateChangeEvent extends ILiveEvent {
+export interface IPlaybackRateChangeEvent extends IGroupStateEvent {
     playbackRate: number;
 }
 
@@ -56,43 +56,45 @@ export class GroupPlaybackRate extends EventEmitter {
         return this._current;
     }
 
-    public get playbackRate(): number {
+    public get rate(): number {
         return this.current.playbackRate;
     }
 
     public updatePlaybackRate(
-        event: IPlaybackRate,
+        newRate: IPlaybackRate,
         source: ExtendedMediaSessionActionSource
     ): boolean {
         // Ignore state changes that are older
         const current = this.current;
-        if (event.timestamp < current.timestamp) {
+        if (newRate.timestamp < current.timestamp) {
             return false;
         }
 
         // Ignore state changes that have the same timestamp and the clientId sorts higher.
         if (
-            event.timestamp == current.timestamp &&
-            event.clientId.localeCompare(current.clientId) > 0
+            newRate.timestamp == current.timestamp &&
+            newRate.clientId.localeCompare(current.clientId) > 0
         ) {
             return false;
         }
 
         // Ignore state changes for same data object
-        if (current.playbackRate == event.playbackRate) {
+        if (current.playbackRate == newRate.playbackRate) {
             return false;
         }
 
         // Update current data
-        this._current = event;
+        this._current = newRate;
+
+        const event: IPlaybackRateChangeEvent = {
+            name: PlaybackRateEvents.rateChange,
+            clientId: newRate.clientId,
+            playbackRate: newRate.playbackRate,
+            source,
+        };
 
         // Notify listeners
-        this.emit(PlaybackRateEvents.rateChange, {
-            type: PlaybackRateEvents.rateChange,
-            clientId: event.clientId,
-            playbackRate: event.playbackRate,
-            source,
-        });
+        this.emit(PlaybackRateEvents.rateChange, event);
 
         return true;
     }

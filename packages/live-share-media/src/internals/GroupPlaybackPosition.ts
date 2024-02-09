@@ -140,7 +140,7 @@ export class GroupPlaybackPosition {
             const projected =
                 this._transportState.startPosition +
                 ((now - this._transportState.timestamp) / 1000) *
-                    this._playbackRate.playbackRate;
+                    this._playbackRate.rate;
             return this.limitProjectedPosition(projected);
         } else {
             return this._transportState.startPosition;
@@ -182,7 +182,7 @@ export class GroupPlaybackPosition {
                     position.playbackState == "playing" && shouldProject
                         ? position.position +
                           ((now - position.timestamp) / 1000) *
-                              this._playbackRate.playbackRate
+                              this._playbackRate.rate
                         : position.position;
                 callbackFn(position, this.limitProjectedPosition(projected));
             }

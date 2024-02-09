@@ -23,8 +23,13 @@ import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
     IPlaybackTrack,
+    IPlaybackTrackChangeEvent,
 } from "./GroupPlaybackTrack";
-import { GroupTransportState, ITransportState } from "./GroupTransportState";
+import {
+    GroupTransportState,
+    ITransportState,
+    ITransportStateChangeEvent,
+} from "./GroupTransportState";
 import {
     GroupPlaybackPosition,
     ICurrentPlaybackPosition,
@@ -35,12 +40,14 @@ import {
     GroupPlaybackTrackData,
     PlaybackTrackDataEvents,
     IPlaybackTrackData,
+    IPlaybackTrackDataChangeEvent,
 } from "./GroupPlaybackTrackData";
 import { TelemetryEvents } from "./consts";
 import { waitUntilConnected } from "@microsoft/live-share/bin/internals";
 import {
     GroupPlaybackRate,
     IPlaybackRate,
+    IPlaybackRateChangeEvent,
     PlaybackRateEvents,
 } from "./GroupPlaybackRate";
 
@@ -164,23 +171,26 @@ export class GroupCoordinatorState extends EventEmitter {
         this._getMediaPlayerState = getMediaPlayerState;
 
         // Listen track related events
-        this._playbackTrack.on(GroupPlaybackTrackEvents.trackChange, (evt) => {
-            if (!this.isSuspended) {
-                this._logger.sendTelemetryEvent(
-                    TelemetryEvents.GroupCoordinator.TrackChanged
-                );
-                this.emitSetTrack(evt.clientId, evt.metadata!, evt.source);
-            } else {
-                this._logger.sendTelemetryEvent(
-                    TelemetryEvents.GroupCoordinator.TrackChangeDelayed
-                );
+        this._playbackTrack.on(
+            GroupPlaybackTrackEvents.trackChange,
+            (evt: IPlaybackTrackChangeEvent) => {
+                if (!this.isSuspended) {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.TrackChanged
+                    );
+                    this.emitSetTrack(evt.clientId, evt.metadata!, evt.source);
+                } else {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.TrackChangeDelayed
+                    );
+                }
             }
-        });
+        );
 
         // Listen for track data changes
         this._playbackTrackData.on(
             PlaybackTrackDataEvents.dataChange,
-            async (evt) => {
+            async (evt: IPlaybackTrackDataChangeEvent) => {
                 if (!this.isSuspended && !this.isWaiting) {
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.GroupCoordinator.TrackDataChanged
@@ -201,32 +211,36 @@ export class GroupCoordinatorState extends EventEmitter {
             }
         );
 
-        this._playbackRate.on(PlaybackRateEvents.rateChange, async (evt) => {
-            if (!this.isSuspended && !this.isWaiting) {
-                this._logger.sendTelemetryEvent(
-                    TelemetryEvents.GroupCoordinator.PlaybackRateChanged
-                );
-            } else {
-                this._logger.sendTelemetryEvent(
-                    TelemetryEvents.GroupCoordinator.PlaybackRateChangedDelayed
-                );
-            }
+        this._playbackRate.on(
+            PlaybackRateEvents.rateChange,
+            async (evt: IPlaybackRateChangeEvent) => {
+                if (!this.isSuspended && !this.isWaiting) {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator.PlaybackRateChanged
+                    );
+                } else {
+                    this._logger.sendTelemetryEvent(
+                        TelemetryEvents.GroupCoordinator
+                            .PlaybackRateChangedDelayed
+                    );
+                }
 
-            const localClientId = await waitUntilConnected(this._runtime);
-            const local = evt.clientId === localClientId;
-            this.emitTriggerActionOrIgnored({
-                action: "ratechange",
-                source: evt.source,
-                clientId: evt.clientId,
-                local,
-                playbackRate: evt.playbackRate,
-            });
-        });
+                const localClientId = await waitUntilConnected(this._runtime);
+                const local = evt.clientId === localClientId;
+                this.emitTriggerActionOrIgnored({
+                    action: "ratechange",
+                    source: evt.source,
+                    clientId: evt.clientId,
+                    local,
+                    playbackRate: evt.playbackRate,
+                });
+            }
+        );
 
         // Listen to transport related events
         this._transportState.on(
             GroupTransportStateEvents.transportStateChange,
-            async (evt) => {
+            async (evt: ITransportStateChangeEvent) => {
                 const tag =
                     this.isSuspended || this.isWaiting
                         ? TelemetryEvents.GroupCoordinator
@@ -643,7 +657,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         Math.max(
                             this._maxPlaybackDrift.seconds,
                             this._maxPlaybackDrift.seconds *
-                                this._playbackRate.playbackRate
+                                this._playbackRate.rate
                         )
                 ) {
                     this._logger.sendTelemetryEvent(
@@ -717,10 +731,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 }
 
                 // Sync playback rate
-                if (
-                    this.playbackRate.playbackRate !=
-                    positionState?.playbackRate
-                ) {
+                if (this.playbackRate.rate != positionState?.playbackRate) {
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.GroupCoordinator.PlaybackRateOutOfSync
                     );
@@ -732,7 +743,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         source: "system",
                         clientId: this.playbackTrackData.current.clientId,
                         local,
-                        playbackRate: this.playbackRate.playbackRate,
+                        playbackRate: this.playbackRate.rate,
                     });
                 }
             }

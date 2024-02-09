@@ -62,7 +62,7 @@ describe("GroupPlaybackTrack", () => {
         await done.promise;
     });
 
-    it("should switch tracks", async () => {
+    it("should switch tracks", () => {
         let cnt = 0;
         let metadata: ExtendedMediaMetadata | null = null;
         const playbackTrack = new GroupPlaybackTrack(() => {
@@ -103,7 +103,7 @@ describe("GroupPlaybackTrack", () => {
         assert(metadata!.trackIdentifier == "track2", `wrong track set`);
     });
 
-    it("should ignore track changes with older timestamps", async () => {
+    it("should ignore track changes with older timestamps", () => {
         let cnt = 0;
         let metadata: ExtendedMediaMetadata | null = null;
         const playbackTrack = new GroupPlaybackTrack(() => {
@@ -143,7 +143,7 @@ describe("GroupPlaybackTrack", () => {
         assert(cnt == 1, `called trackChange event ${cnt} times`);
     });
 
-    it("should insert waitpoint if no existing waitpoints", async () => {
+    it("should insert waitpoint if no existing waitpoints", () => {
         const playbackTrack = new GroupPlaybackTrack(() => {
             return {
                 metadata: null,
@@ -156,7 +156,7 @@ describe("GroupPlaybackTrack", () => {
         assert(playbackTrack.findNextWaitPoint(undefined)?.position === 10);
     });
 
-    it("should insert waitpoints in correct order", async () => {
+    it("should insert waitpoints in correct order", () => {
         const playbackTrack = new GroupPlaybackTrack(() => {
             return {
                 metadata: null,
@@ -179,8 +179,7 @@ describe("GroupPlaybackTrack", () => {
         assert(playbackTrack.findNextWaitPoint(undefined)?.position === 10);
     });
 
-    it("updateTrack should return false for events that are the same time, but clientId is higher sort", async () => {
-        const done = new Deferred();
+    it("updateTrack should return false for events that are the same time, but clientId is higher sort", () => {
         const playbackTrack = new GroupPlaybackTrack(() => {
             return {
                 metadata: { trackIdentifier: "src" } as ExtendedMediaMetadata,

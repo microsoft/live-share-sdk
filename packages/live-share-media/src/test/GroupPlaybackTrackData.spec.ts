@@ -7,7 +7,6 @@ import "mocha";
 import { strict as assert } from "assert";
 import { GroupPlaybackTrack } from "../internals/GroupPlaybackTrack";
 import { ExtendedMediaMetadata } from "../MediaSessionExtensions";
-import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { GroupPlaybackTrackData } from "../internals";
 
 describe("GroupPlaybackTrackData", () => {
@@ -20,8 +19,7 @@ describe("GroupPlaybackTrackData", () => {
         title: "Test Track 2",
     } as ExtendedMediaMetadata;
 
-    it("updateData should return false for older events", async () => {
-        const done = new Deferred();
+    it("updateData should return false for older events", () => {
         const playbackTrack = new GroupPlaybackTrack(() => {
             return {
                 metadata: { trackIdentifier: "src" } as ExtendedMediaMetadata,
@@ -54,8 +52,7 @@ describe("GroupPlaybackTrackData", () => {
         );
     });
 
-    it("updateData should return false for events that are the same time, but clientId is higher sort", async () => {
-        const done = new Deferred();
+    it("updateData should return false for events that are the same time, but clientId is higher sort", () => {
         const playbackTrack = new GroupPlaybackTrack(() => {
             return {
                 metadata: { trackIdentifier: "src" } as ExtendedMediaMetadata,

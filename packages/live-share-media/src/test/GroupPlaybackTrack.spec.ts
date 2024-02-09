@@ -49,12 +49,15 @@ describe("GroupPlaybackTrack", () => {
             }
         );
 
-        await playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [],
-            timestamp: 1,
-            clientId: "a",
-        });
+        playbackTrack.updateTrack(
+            {
+                metadata: track1,
+                waitPoints: [],
+                timestamp: 1,
+                clientId: "a",
+            },
+            "user"
+        );
 
         await done.promise;
     });
@@ -78,18 +81,24 @@ describe("GroupPlaybackTrack", () => {
             }
         );
 
-        await playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [],
-            timestamp: 1,
-            clientId: "a",
-        });
-        await playbackTrack.updateTrack({
-            metadata: track2,
-            waitPoints: [],
-            timestamp: 2,
-            clientId: "b",
-        });
+        playbackTrack.updateTrack(
+            {
+                metadata: track1,
+                waitPoints: [],
+                timestamp: 1,
+                clientId: "a",
+            },
+            "user"
+        );
+        playbackTrack.updateTrack(
+            {
+                metadata: track2,
+                waitPoints: [],
+                timestamp: 2,
+                clientId: "b",
+            },
+            "user"
+        );
         assert(cnt == 2, `called trackChange event ${cnt} times`);
         assert(metadata!.trackIdentifier == "track2", `wrong track set`);
     });
@@ -113,18 +122,24 @@ describe("GroupPlaybackTrack", () => {
             }
         );
 
-        await playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [],
-            timestamp: 3,
-            clientId: "a",
-        });
-        await playbackTrack.updateTrack({
-            metadata: track2,
-            waitPoints: [],
-            timestamp: 2,
-            clientId: "b",
-        });
+        playbackTrack.updateTrack(
+            {
+                metadata: track1,
+                waitPoints: [],
+                timestamp: 3,
+                clientId: "a",
+            },
+            "user"
+        );
+        playbackTrack.updateTrack(
+            {
+                metadata: track2,
+                waitPoints: [],
+                timestamp: 2,
+                clientId: "b",
+            },
+            "user"
+        );
         assert(cnt == 1, `called trackChange event ${cnt} times`);
     });
 
@@ -151,12 +166,15 @@ describe("GroupPlaybackTrack", () => {
             };
         });
 
-        await playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [{ position: 30 }],
-            timestamp: 1,
-            clientId: "a",
-        });
+        playbackTrack.updateTrack(
+            {
+                metadata: track1,
+                waitPoints: [{ position: 30 }],
+                timestamp: 1,
+                clientId: "a",
+            },
+            "user"
+        );
         playbackTrack.addWaitPoint({ position: 10 });
         assert(playbackTrack.findNextWaitPoint(undefined)?.position === 10);
     });
@@ -172,20 +190,26 @@ describe("GroupPlaybackTrack", () => {
             };
         });
 
-        playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [],
-            timestamp: 3,
-            clientId: "a",
-        });
-
-        assert(
-            !playbackTrack.updateTrack({
+        playbackTrack.updateTrack(
+            {
                 metadata: track1,
                 waitPoints: [],
                 timestamp: 3,
-                clientId: "b",
-            })
+                clientId: "a",
+            },
+            "user"
+        );
+
+        assert(
+            !playbackTrack.updateTrack(
+                {
+                    metadata: track1,
+                    waitPoints: [],
+                    timestamp: 3,
+                    clientId: "b",
+                },
+                "user"
+            )
         );
     });
 });

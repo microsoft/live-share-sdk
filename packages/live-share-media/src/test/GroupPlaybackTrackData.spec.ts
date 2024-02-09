@@ -33,18 +33,24 @@ describe("GroupPlaybackTrackData", () => {
 
         const trackData = new GroupPlaybackTrackData(playbackTrack);
 
-        trackData.updateData({
-            data: { blah: "wow" },
-            timestamp: 2,
-            clientId: "",
-        });
+        trackData.updateData(
+            {
+                data: { blah: "wow" },
+                timestamp: 2,
+                clientId: "",
+            },
+            "user"
+        );
 
         assert(
-            !trackData.updateData({
-                data: { blah: "sup" },
-                timestamp: 1,
-                clientId: "",
-            })
+            !trackData.updateData(
+                {
+                    data: { blah: "sup" },
+                    timestamp: 1,
+                    clientId: "",
+                },
+                "user"
+            )
         );
     });
 
@@ -61,18 +67,24 @@ describe("GroupPlaybackTrackData", () => {
 
         const trackData = new GroupPlaybackTrackData(playbackTrack);
 
-        trackData.updateData({
-            data: { blah: "wow" },
-            timestamp: 2,
-            clientId: "a",
-        });
+        trackData.updateData(
+            {
+                data: { blah: "wow" },
+                timestamp: 2,
+                clientId: "a",
+            },
+            "user"
+        );
 
         assert(
-            !trackData.updateData({
-                data: { blah: "sup" },
-                timestamp: 2,
-                clientId: "b",
-            })
+            !trackData.updateData(
+                {
+                    data: { blah: "sup" },
+                    timestamp: 2,
+                    clientId: "b",
+                },
+                "user"
+            )
         );
     });
 });

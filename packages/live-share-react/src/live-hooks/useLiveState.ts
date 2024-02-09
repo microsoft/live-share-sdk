@@ -97,9 +97,7 @@ export function useLiveState<TState = any>(
         ) {
             liveState.initialize(initialState, allowedRoles);
         }
-        if (JSON.stringify(liveState.state) !== JSON.stringify(initialState)) {
-            onStateChanged(liveState.state);
-        }
+        onStateChanged(liveState.state);
 
         return () => {
             liveState?.off("stateChanged", onStateChanged);

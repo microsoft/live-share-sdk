@@ -87,6 +87,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     private _playEvent?: LiveEventTarget<ITransportCommandEvent>;
     private _pauseEvent?: LiveEventTarget<ITransportCommandEvent>;
     private _seekToEvent?: LiveEventTarget<ITransportCommandEvent>;
+    private _rateChangeEvent?: LiveEventTarget<ITransportCommandEvent>;
     private _setTrackEvent?: LiveEventTarget<ISetTrackEvent>;
     private _setTrackDataEvent?: LiveEventTarget<ISetTrackDataEvent>;
     private _positionUpdateEvent?: LiveEventTarget<IPositionUpdateEvent>;
@@ -257,6 +258,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         await this._playEvent!.sendEvent({
             track: this._groupState.playbackTrack.current,
             position: position,
+            playbackRate: this._groupState.transportState.playbackRate,
         });
     }
 
@@ -299,6 +301,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         await this._pauseEvent!.sendEvent({
             track: this._groupState.playbackTrack.current,
             position: position,
+            playbackRate: this._groupState.transportState.playbackRate,
         });
     }
 
@@ -339,11 +342,46 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             await this._seekToEvent!.sendEvent({
                 track: this._groupState.playbackTrack.current,
                 position: time,
+                playbackRate: this._groupState.transportState.playbackRate,
             });
         } catch (err) {
             await this._groupState!.syncLocalMediaSession();
             throw err;
         }
+    }
+
+    public async setPlaybackRate(playbackRate: number): Promise<void> {
+        LiveDataObjectNotInitializedError.assert(
+            "LiveMediaSessionCoordinator:setPlaybackRate",
+            "setPlaybackRate",
+            this.initializeState
+        );
+        TrackMetadataNotSetError.assert(
+            !!this._groupState?.playbackTrack.current.metadata,
+            "LiveMediaSessionCoordinator:setPlaybackRate",
+            "setPlaybackRate"
+        );
+        // ActionBlockedError.assert(
+        //     this.canPlayPause,
+        //     "LiveMediaSessionCoordinator:play",
+        //     "play",
+        //     "canPlayPause"
+        // );
+
+        // Get projected position
+        const position = this.getPlayerPosition();
+
+        // Send transport command
+        // this._logger.sendTelemetryEvent(
+        //     TelemetryEvents.SessionCoordinator.PlayCalled,
+        //     null,
+        //     { position: position }
+        // );
+        await this._rateChangeEvent!.sendEvent({
+            track: this._groupState.playbackTrack.current,
+            position: position,
+            playbackRate,
+        });
     }
 
     /**
@@ -653,6 +691,18 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             "seekTo",
             (event, local) =>
                 this._groupState!.handleTransportCommand(event, local)
+        );
+        this._rateChangeEvent = new LiveEventTarget(
+            scope,
+            "playbackRateChange",
+            (event: ILiveEvent<ITransportCommandEvent>, local) => {
+                if (
+                    this._groupState?.transportState?.playbackRate !==
+                    event.data.playbackRate
+                ) {
+                    this._groupState!.handleTransportCommand(event, local);
+                }
+            }
         );
 
         // Listen for position updates

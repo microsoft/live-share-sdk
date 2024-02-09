@@ -135,7 +135,8 @@ export class GroupPlaybackPosition {
             const now = this._liveRuntime.getTimestamp();
             const projected =
                 this._transportState.startPosition +
-                (now - this._transportState.timestamp) / 1000;
+                ((now - this._transportState.timestamp) / 1000) *
+                    this._transportState.playbackRate;
             return this.limitProjectedPosition(projected);
         } else {
             return this._transportState.startPosition;
@@ -175,7 +176,9 @@ export class GroupPlaybackPosition {
                 // - This computation does not take into account future wait points.
                 const projected =
                     position.playbackState == "playing" && shouldProject
-                        ? position.position + (now - position.timestamp) / 1000
+                        ? position.position +
+                          ((now - position.timestamp) / 1000) *
+                              this._transportState.playbackRate
                         : position.position;
                 callbackFn(position, this.limitProjectedPosition(projected));
             }

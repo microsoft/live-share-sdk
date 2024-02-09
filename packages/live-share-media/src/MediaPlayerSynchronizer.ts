@@ -64,6 +64,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         "pause",
         "seekto",
         "settrack",
+        "ratechange",
         "datachange",
         "catchup",
         "wait",
@@ -227,17 +228,19 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     }
                     break;
                 case "ratechange":
+                    console.log("ratechange", evt);
                     // Block rate changes unless suspended.
-                    if (
-                        this._player.playbackRate != 1.0 &&
-                        !this._mediaSession.coordinator.isSuspended
-                    ) {
-                        this._logger.sendTelemetryEvent(
-                            TelemetryEvents.MediaPlayerSynchronizer
-                                .PlaybackRateChangeBlocked
-                        );
-                        this._player.playbackRate = 1.0;
-                    }
+                    // if (
+                    //     this._player.playbackRate != 1.0 &&
+                    //     !this._mediaSession.coordinator.isSuspended
+                    // ) {
+                    //     this._logger.sendTelemetryEvent(
+                    //         TelemetryEvents.MediaPlayerSynchronizer
+                    //             .PlaybackRateChangeBlocked
+                    //     );
+                    //     this._player.playbackRate = 1.0;
+                    // }
+                    // this._player.playbackRate = 4.0;
                     break;
                 case "blocked":
                     this._logger.sendTelemetryEvent(
@@ -350,6 +353,12 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                                     TelemetryEvents.MediaPlayerSynchronizer
                                         .DataChangeAction
                                 );
+                                break;
+                            case "ratechange":
+                                if (details.playbackRate) {
+                                    this._player.playbackRate =
+                                        details.playbackRate;
+                                }
                                 break;
                             case "catchup":
                                 if (typeof details.seekTime == "number") {
@@ -639,6 +648,18 @@ export class MediaPlayerSynchronizer extends EventEmitter {
             clientId: await waitUntilConnected(this._runtime),
             seekTime: time,
             local: true,
+        });
+    }
+
+    public async setPlaybackRate(playbackRate: number): Promise<void> {
+        await this._mediaSession.coordinator.setPlaybackRate(playbackRate);
+
+        this.dispatchUserAction({
+            action: "ratechange",
+            source: "user",
+            clientId: await waitUntilConnected(this._runtime),
+            local: true,
+            playbackRate,
         });
     }
 

@@ -57,6 +57,7 @@ export interface IPositionUpdateEvent {
 export interface ITransportCommandEvent {
     track: IPlaybackTrack;
     position: number;
+    playbackRate: number;
 }
 
 /**
@@ -242,6 +243,17 @@ export class GroupCoordinatorState extends EventEmitter {
                             seekTime: evt.seekTime,
                         });
                         break;
+
+                    case "ratechange":
+                        this.emitTriggerActionOrIgnored({
+                            action: "ratechange",
+                            source: evt.source,
+                            clientId: evt.clientId,
+                            local,
+                            seekTime: evt.seekTime,
+                            playbackRate: evt.playbackRate,
+                        });
+                        break;
                 }
             }
         );
@@ -412,6 +424,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 startPosition: event.data.position,
                 timestamp: event.timestamp,
                 clientId: event.clientId || "",
+                playbackRate: event.data.playbackRate,
             };
             const updated = this.transportState.updateState(newState, "user");
 
@@ -578,7 +591,11 @@ export class GroupCoordinatorState extends EventEmitter {
                 if (
                     target >= 0.0 &&
                     Math.abs(target - position) >=
-                        this._maxPlaybackDrift.seconds
+                        Math.max(
+                            this._maxPlaybackDrift.seconds,
+                            this._maxPlaybackDrift.seconds *
+                                this._transportState.playbackRate
+                        )
                 ) {
                     this._logger.sendTelemetryEvent(
                         TelemetryEvents.GroupCoordinator.PositionOutOfSync,

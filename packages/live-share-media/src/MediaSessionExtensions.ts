@@ -75,6 +75,7 @@ export enum MediaSessionCoordinatorEvents {
 export type ExtendedMediaSessionAction =
     | MediaSessionAction
     | "settrack"
+    | "ratechange"
     | "wait"
     | "catchup"
     | "datachange"
@@ -185,6 +186,8 @@ export interface ExtendedMediaSessionActionDetails {
      * Reason an action is ignored by the local client, undefined if not ignored.
      */
     ignoreReason?: ExtendedMediaSessionActionIgnore | null;
+
+    playbackRate?: number | null;
 }
 
 /**

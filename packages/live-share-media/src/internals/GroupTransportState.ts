@@ -24,6 +24,7 @@ export interface ITransportState {
     startPosition: number;
     timestamp: number;
     clientId: string;
+    playbackRate: number;
 }
 
 /**
@@ -64,6 +65,7 @@ export class GroupTransportState extends EventEmitter {
             startPosition: 0.0,
             timestamp: 0,
             clientId: "",
+            playbackRate: 1.0,
         };
 
         // Listen for track changes
@@ -74,6 +76,7 @@ export class GroupTransportState extends EventEmitter {
                 startPosition: 0.0,
                 timestamp: this._track.current.timestamp,
                 clientId: this._track.current.clientId,
+                playbackRate: 1.0,
             };
         });
     }
@@ -84,6 +87,10 @@ export class GroupTransportState extends EventEmitter {
 
     public get playbackState(): ExtendedMediaSessionPlaybackState {
         return this.current.playbackState;
+    }
+
+    public get playbackRate(): number {
+        return this.current.playbackRate;
     }
 
     public get startPosition(): number {
@@ -133,7 +140,16 @@ export class GroupTransportState extends EventEmitter {
 
         // Trigger transport change
         const playerState = this._getMediaPlayerState().playbackState;
-        if (
+        if (originalState.playbackRate != state.playbackRate) {
+            this.emit(GroupTransportStateEvents.transportStateChange, {
+                type: GroupTransportStateEvents.transportStateChange,
+                action: "ratechange",
+                clientId: state.clientId,
+                seekTime: state.startPosition,
+                playbackRate: state.playbackRate,
+                source,
+            });
+        } else if (
             originalState.playbackState == state.playbackState &&
             playerState != "ended"
         ) {
@@ -142,17 +158,20 @@ export class GroupTransportState extends EventEmitter {
                 action: "seekto",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
+                playbackRate: state.playbackRate,
                 source,
             });
         } else if (state.playbackState == "playing") {
             const now = this._liveRuntime.getTimestamp();
             const projectedPosition =
-                state.startPosition + (now - state.timestamp) / 1000;
+                state.startPosition +
+                ((now - state.timestamp) / 1000) * state.playbackRate;
             this.emit(GroupTransportStateEvents.transportStateChange, {
                 type: GroupTransportStateEvents.transportStateChange,
                 action: "play",
                 clientId: state.clientId,
                 seekTime: projectedPosition,
+                playbackRate: state.playbackRate,
                 source,
             });
         } else {
@@ -161,6 +180,7 @@ export class GroupTransportState extends EventEmitter {
                 action: "pause",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
+                playbackRate: state.playbackRate,
                 source,
             });
         }

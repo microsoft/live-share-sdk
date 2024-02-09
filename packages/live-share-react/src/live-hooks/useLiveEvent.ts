@@ -117,6 +117,12 @@ export function useLiveEvent<TEvent = any>(
             allEventsRef.current = [...allEventsRef.current, received];
             setLatestReceived(received);
         };
+        // Reset the events list if it allEventRef.current is non-empty.
+        // This happens when the `id` a developer provides changes on the fly.
+        if (allEventsRef.current.length > 0) {
+            allEventsRef.current = [];
+            setLatestReceived(undefined);
+        }
         liveEvent.on(LiveEventEvents.received, onEventReceived);
         if (
             liveEvent.initializeState === LiveDataObjectInitializeState.needed

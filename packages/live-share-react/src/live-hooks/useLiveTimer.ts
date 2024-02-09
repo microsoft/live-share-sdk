@@ -141,6 +141,10 @@ export function useLiveTimer(
      */
     React.useEffect(() => {
         if (liveTimer === undefined) return;
+        // Reset default values, which is needed for when the `id` changes and a new DDS is loaded.
+        // React does not re-render if the values are already set to defaults (e.g., initial DDS).
+        setTimerConfig(undefined);
+        setMilliRemaining(undefined);
         // Register event listeners
         const onTimerConfigChange = (config: ITimerConfig) => {
             setTimerConfig(config);

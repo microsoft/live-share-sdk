@@ -15,6 +15,7 @@ import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
 } from "./GroupPlaybackTrack";
+import { GroupPlaybackRate } from "./GroupPlaybackRate";
 
 /**
  * @hidden
@@ -24,7 +25,6 @@ export interface ITransportState {
     startPosition: number;
     timestamp: number;
     clientId: string;
-    playbackRate: number;
 }
 
 /**
@@ -48,11 +48,13 @@ export interface ITransportStateChangeEvent extends ILiveEvent {
 export class GroupTransportState extends EventEmitter {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _track: GroupPlaybackTrack;
+    private _playbackRate: GroupPlaybackRate;
     private readonly _liveRuntime: LiveShareRuntime;
     private _current: ITransportState;
 
     constructor(
         track: GroupPlaybackTrack,
+        playbackRate: GroupPlaybackRate,
         getMediaPlayerState: () => IMediaPlayerState,
         liveRuntime: LiveShareRuntime
     ) {
@@ -60,12 +62,12 @@ export class GroupTransportState extends EventEmitter {
         this._liveRuntime = liveRuntime;
         this._getMediaPlayerState = getMediaPlayerState;
         this._track = track;
+        this._playbackRate = playbackRate;
         this._current = {
             playbackState: "none",
             startPosition: 0.0,
             timestamp: 0,
             clientId: "",
-            playbackRate: 1.0,
         };
 
         // Listen for track changes
@@ -76,7 +78,6 @@ export class GroupTransportState extends EventEmitter {
                 startPosition: 0.0,
                 timestamp: this._track.current.timestamp,
                 clientId: this._track.current.clientId,
-                playbackRate: 1.0,
             };
         });
     }
@@ -87,10 +88,6 @@ export class GroupTransportState extends EventEmitter {
 
     public get playbackState(): ExtendedMediaSessionPlaybackState {
         return this.current.playbackState;
-    }
-
-    public get playbackRate(): number {
-        return this.current.playbackRate;
     }
 
     public get startPosition(): number {
@@ -140,16 +137,7 @@ export class GroupTransportState extends EventEmitter {
 
         // Trigger transport change
         const playerState = this._getMediaPlayerState().playbackState;
-        if (originalState.playbackRate != state.playbackRate) {
-            this.emit(GroupTransportStateEvents.transportStateChange, {
-                type: GroupTransportStateEvents.transportStateChange,
-                action: "ratechange",
-                clientId: state.clientId,
-                seekTime: state.startPosition,
-                playbackRate: state.playbackRate,
-                source,
-            });
-        } else if (
+        if (
             originalState.playbackState == state.playbackState &&
             playerState != "ended"
         ) {
@@ -158,20 +146,19 @@ export class GroupTransportState extends EventEmitter {
                 action: "seekto",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
-                playbackRate: state.playbackRate,
                 source,
             });
         } else if (state.playbackState == "playing") {
             const now = this._liveRuntime.getTimestamp();
             const projectedPosition =
                 state.startPosition +
-                ((now - state.timestamp) / 1000) * state.playbackRate;
+                ((now - state.timestamp) / 1000) *
+                    this._playbackRate.playbackRate;
             this.emit(GroupTransportStateEvents.transportStateChange, {
                 type: GroupTransportStateEvents.transportStateChange,
                 action: "play",
                 clientId: state.clientId,
                 seekTime: projectedPosition,
-                playbackRate: state.playbackRate,
                 source,
             });
         } else {
@@ -180,7 +167,6 @@ export class GroupTransportState extends EventEmitter {
                 action: "pause",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
-                playbackRate: state.playbackRate,
                 source,
             });
         }

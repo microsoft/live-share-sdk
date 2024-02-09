@@ -38,6 +38,11 @@ import {
 } from "./GroupPlaybackTrackData";
 import { TelemetryEvents } from "./consts";
 import { waitUntilConnected } from "@microsoft/live-share/bin/internals";
+import {
+    GroupPlaybackRate,
+    IPlaybackRate,
+    PlaybackRateEvents,
+} from "./GroupPlaybackRate";
 
 /**
  * @hidden
@@ -46,6 +51,7 @@ export interface IPositionUpdateEvent {
     track: IPlaybackTrack;
     trackData: IPlaybackTrackData;
     transport: ITransportState;
+    playbackRate: IPlaybackRate;
     playbackState: ExtendedMediaSessionPlaybackState;
     position: number;
     waitPoint?: CoordinationWaitPoint;
@@ -57,6 +63,12 @@ export interface IPositionUpdateEvent {
 export interface ITransportCommandEvent {
     track: IPlaybackTrack;
     position: number;
+}
+
+/**
+ * @hidden
+ */
+export interface IRateChangeCommandEvent {
     playbackRate: number;
 }
 
@@ -106,6 +118,7 @@ export class GroupCoordinatorState extends EventEmitter {
     private _playbackTrackData: GroupPlaybackTrackData;
     private _transportState: GroupTransportState;
     private _playbackPosition: GroupPlaybackPosition;
+    private _playbackRate: GroupPlaybackRate;
 
     // Suspension tracking
     private _suspensionCnt: number = 0;
@@ -134,13 +147,16 @@ export class GroupCoordinatorState extends EventEmitter {
         this._playbackTrackData = new GroupPlaybackTrackData(
             this._playbackTrack
         );
+        this._playbackRate = new GroupPlaybackRate();
         this._transportState = new GroupTransportState(
             this._playbackTrack,
+            this._playbackRate,
             getMediaPlayerState,
             this._liveRuntime
         );
         this._playbackPosition = new GroupPlaybackPosition(
             this._transportState,
+            this._playbackRate,
             this._runtime,
             this._liveRuntime,
             positionUpdateInterval
@@ -185,30 +201,43 @@ export class GroupCoordinatorState extends EventEmitter {
             }
         );
 
+        this._playbackRate.on(PlaybackRateEvents.rateChange, async (evt) => {
+            if (!this.isSuspended && !this.isWaiting) {
+                this._logger.sendTelemetryEvent(
+                    TelemetryEvents.GroupCoordinator.PlaybackRateChanged
+                );
+            } else {
+                this._logger.sendTelemetryEvent(
+                    TelemetryEvents.GroupCoordinator.PlaybackRateChangedDelayed
+                );
+            }
+
+            const localClientId = await waitUntilConnected(this._runtime);
+            const local = evt.clientId === localClientId;
+            this.emitTriggerActionOrIgnored({
+                action: "ratechange",
+                source: evt.source,
+                clientId: evt.clientId,
+                local,
+                playbackRate: evt.playbackRate,
+            });
+        });
+
         // Listen to transport related events
         this._transportState.on(
             GroupTransportStateEvents.transportStateChange,
             async (evt) => {
-                if (!this.isSuspended && !this.isWaiting) {
-                    this._logger.sendTelemetryEvent(
-                        TelemetryEvents.GroupCoordinator.TransportStateChanged,
-                        null,
-                        {
-                            action: evt.action,
-                            seekTime: evt.seekTime,
-                        }
-                    );
-                } else {
-                    this._logger.sendTelemetryEvent(
-                        TelemetryEvents.GroupCoordinator
-                            .TransportStateChangeDelayed,
-                        null,
-                        {
-                            action: evt.action,
-                            seekTime: evt.seekTime,
-                        }
-                    );
-                }
+                const tag =
+                    this.isSuspended || this.isWaiting
+                        ? TelemetryEvents.GroupCoordinator
+                              .TransportStateChangeDelayed
+                        : TelemetryEvents.GroupCoordinator
+                              .TransportStateChanged;
+
+                this._logger.sendTelemetryEvent(tag, null, {
+                    action: evt.action,
+                    seekTime: evt.seekTime,
+                });
 
                 const localClientId = await waitUntilConnected(this._runtime);
                 const local = evt.clientId === localClientId;
@@ -243,17 +272,6 @@ export class GroupCoordinatorState extends EventEmitter {
                             seekTime: evt.seekTime,
                         });
                         break;
-
-                    case "ratechange":
-                        this.emitTriggerActionOrIgnored({
-                            action: "ratechange",
-                            source: evt.source,
-                            clientId: evt.clientId,
-                            local,
-                            seekTime: evt.seekTime,
-                            playbackRate: evt.playbackRate,
-                        });
-                        break;
                 }
             }
         );
@@ -273,6 +291,10 @@ export class GroupCoordinatorState extends EventEmitter {
 
     public get playbackPosition(): GroupPlaybackPosition {
         return this._playbackPosition;
+    }
+
+    public get playbackRate(): GroupPlaybackRate {
+        return this._playbackRate;
     }
 
     public get waitingAt(): CoordinationWaitPoint | undefined {
@@ -323,6 +345,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 track: this.playbackTrack.current,
                 trackData: this.playbackTrackData.current,
                 transport: this.transportState.current,
+                playbackRate: this.playbackRate.current,
                 playbackState: "suspended",
                 position: positionState?.position || 0.0,
                 waitPoint: this._waitPoint,
@@ -333,6 +356,7 @@ export class GroupCoordinatorState extends EventEmitter {
                 track: this.playbackTrack.current,
                 trackData: this.playbackTrackData.current,
                 transport: this.transportState.current,
+                playbackRate: this.playbackRate.current,
                 playbackState: this._waitPoint ? "waiting" : playbackState,
                 position: positionState?.position || 0.0,
                 waitPoint: this._waitPoint,
@@ -399,6 +423,32 @@ export class GroupCoordinatorState extends EventEmitter {
         }
     }
 
+    public handleRateChangeCommand(
+        event: ILiveEvent<IRateChangeCommandEvent>,
+        local: boolean
+    ): void {
+        const newState: IPlaybackRate = {
+            playbackRate: event.data.playbackRate,
+            clientId: event.clientId,
+            timestamp: event.timestamp,
+        };
+        const updated = this.playbackRate.updatePlaybackRate(newState, "user");
+
+        if (updated) {
+            const correlationId = LiveTelemetryLogger.formatCorrelationId(
+                event.clientId,
+                event.timestamp
+            );
+            this._logger.sendTelemetryEvent(
+                TelemetryEvents.SessionCoordinator.RemoteRateChangeReceived,
+                null,
+                {
+                    correlationId: correlationId,
+                }
+            );
+        }
+    }
+
     public handleTransportCommand(
         event: ILiveEvent<ITransportCommandEvent>,
         local: boolean
@@ -424,7 +474,6 @@ export class GroupCoordinatorState extends EventEmitter {
                 startPosition: event.data.position,
                 timestamp: event.timestamp,
                 clientId: event.clientId || "",
-                playbackRate: event.data.playbackRate,
             };
             const updated = this.transportState.updateState(newState, "user");
 
@@ -458,16 +507,6 @@ export class GroupCoordinatorState extends EventEmitter {
                         this._logger.sendTelemetryEvent(
                             TelemetryEvents.SessionCoordinator
                                 .RemoteSeekToReceived,
-                            null,
-                            {
-                                correlationId: correlationId,
-                            }
-                        );
-                        break;
-                    case "rateChange":
-                        this._logger.sendTelemetryEvent(
-                            TelemetryEvents.SessionCoordinator
-                                .RemoteRateChangeReceived,
                             null,
                             {
                                 correlationId: correlationId,
@@ -605,7 +644,7 @@ export class GroupCoordinatorState extends EventEmitter {
                         Math.max(
                             this._maxPlaybackDrift.seconds,
                             this._maxPlaybackDrift.seconds *
-                                this._transportState.playbackRate
+                                this._playbackRate.playbackRate
                         )
                 ) {
                     this._logger.sendTelemetryEvent(

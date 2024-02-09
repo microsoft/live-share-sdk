@@ -89,6 +89,8 @@ export const TelemetryEvents = {
         TransportStateChanged: "GroupCoordinator:TransportStateChanged",
         TransportStateChangeDelayed:
             "GroupCoordinator:TransportStateChangeDelayed",
+        PlaybackRateChanged: "GroupCoordinator:PlaybackRateChanged",
+        PlaybackRateChangedDelayed: "GroupCoordinator:PlaybackRateChanged",
         BeginSoftSuspension: "GroupCoordinator:BeginSoftSuspension",
         CheckingForSyncIssues: "GroupCoordinator:CheckingForSyncIssues",
         TrackOutOfSync: transmit("GroupCoordinator:TrackOutOfSync"),

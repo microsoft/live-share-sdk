@@ -33,6 +33,7 @@ import {
     ISetTrackDataEvent,
     TrackMetadataNotSetError,
     ActionBlockedError,
+    IRateChangeCommandEvent,
 } from "./internals";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
 import EventEmitter from "events";
@@ -87,7 +88,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     private _playEvent?: LiveEventTarget<ITransportCommandEvent>;
     private _pauseEvent?: LiveEventTarget<ITransportCommandEvent>;
     private _seekToEvent?: LiveEventTarget<ITransportCommandEvent>;
-    private _rateChangeEvent?: LiveEventTarget<ITransportCommandEvent>;
+    private _rateChangeEvent?: LiveEventTarget<IRateChangeCommandEvent>;
     private _setTrackEvent?: LiveEventTarget<ISetTrackEvent>;
     private _setTrackDataEvent?: LiveEventTarget<ISetTrackDataEvent>;
     private _positionUpdateEvent?: LiveEventTarget<IPositionUpdateEvent>;
@@ -258,7 +259,6 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         await this._playEvent!.sendEvent({
             track: this._groupState.playbackTrack.current,
             position: position,
-            playbackRate: this._groupState.transportState.playbackRate,
         });
     }
 
@@ -301,7 +301,6 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         await this._pauseEvent!.sendEvent({
             track: this._groupState.playbackTrack.current,
             position: position,
-            playbackRate: this._groupState.transportState.playbackRate,
         });
     }
 
@@ -342,7 +341,6 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             await this._seekToEvent!.sendEvent({
                 track: this._groupState.playbackTrack.current,
                 position: time,
-                playbackRate: this._groupState.transportState.playbackRate,
             });
         } catch (err) {
             await this._groupState!.syncLocalMediaSession();
@@ -377,11 +375,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         //     null,
         //     { position: position }
         // );
-        await this._rateChangeEvent!.sendEvent({
-            track: this._groupState.playbackTrack.current,
-            position: position,
-            playbackRate,
-        });
+        await this._rateChangeEvent!.sendEvent({ playbackRate });
     }
 
     /**
@@ -695,13 +689,8 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         this._rateChangeEvent = new LiveEventTarget(
             scope,
             "rateChange",
-            (event: ILiveEvent<ITransportCommandEvent>, local) => {
-                if (
-                    this._groupState?.transportState?.playbackRate !==
-                    event.data.playbackRate
-                ) {
-                    this._groupState!.handleTransportCommand(event, local);
-                }
+            (event: ILiveEvent<IRateChangeCommandEvent>, local) => {
+                this._groupState!.handleRateChangeCommand(event, local);
             }
         );
 

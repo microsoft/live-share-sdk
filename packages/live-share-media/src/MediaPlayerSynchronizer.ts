@@ -663,8 +663,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
             null,
             { playbackRate }
         );
-        // TODO: validate that player can change playback rate first.
-        // TODO: or leave it up to the developer by adding a flag if rate change is enabled.
+
         await this._mediaSession.coordinator.setPlaybackRate(playbackRate);
 
         this.dispatchUserAction({

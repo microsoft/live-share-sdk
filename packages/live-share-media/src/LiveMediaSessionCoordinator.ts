@@ -173,6 +173,20 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     public canSetTrackData: boolean = true;
 
     /**
+     * Controls whether or not the local client is allowed to change the playback rate.
+     *
+     * @remarks
+     * This flag largely meant to influence decisions made by the coordinator and can be used by
+     * the UI to determine what controls should be shown to the user. It does not provide any
+     * security in itself.
+     *
+     * If your app is running in a semi-trusted environment where only some clients are allowed
+     * to change the tracks data object, you should use "role based verification" to enforce those
+     * policies.
+     */
+    public canSetPlaybackRate: boolean = true;
+
+    /**
      * Controls whether or not the local client is allowed to send position updates to the group.
      *
      * @remarks
@@ -354,27 +368,24 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             "setPlaybackRate",
             this.initializeState
         );
-        TrackMetadataNotSetError.assert(
-            !!this._groupState?.playbackTrack.current.metadata,
+        // TODO: should playback rate be set back to 1 after a track change?
+        // TrackMetadataNotSetError.assert(
+        //     !!this._groupState?.playbackTrack.current.metadata,
+        //     "LiveMediaSessionCoordinator:setPlaybackRate",
+        //     "setPlaybackRate"
+        // );
+        ActionBlockedError.assert(
+            this.canSetPlaybackRate,
             "LiveMediaSessionCoordinator:setPlaybackRate",
-            "setPlaybackRate"
+            "setPlaybackRate",
+            "canSetPlaybackRate"
         );
-        // ActionBlockedError.assert(
-        //     this.canPlayPause,
-        //     "LiveMediaSessionCoordinator:play",
-        //     "play",
-        //     "canPlayPause"
-        // );
 
-        // Get projected position
-        const position = this.getPlayerPosition();
-
-        // Send transport command
-        // this._logger.sendTelemetryEvent(
-        //     TelemetryEvents.SessionCoordinator.PlayCalled,
-        //     null,
-        //     { position: position }
-        // );
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.SessionCoordinator.SetPlaybackRateCalled,
+            null,
+            { playbackRate }
+        );
         await this._rateChangeEvent!.sendEvent({ playbackRate });
     }
 

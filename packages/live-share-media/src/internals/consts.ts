@@ -52,6 +52,9 @@ export const TelemetryEvents = {
         PlayCalled: transmit("SessionCoordinator:PlayCalled"),
         PauseCalled: transmit("SessionCoordinator:PauseCalled"),
         SeekToCalled: transmit("SessionCoordinator:SeekToCalled"),
+        SetPlaybackRateCalled: transmit(
+            "SessionCoordinator:SetPlaybackRateCalled"
+        ),
         SetTrackCalled: transmit("SessionCoordinator:SetTrackCalled"),
         SetTrackDataCalled: "SessionCoordinator:SetTrackDataCalled",
         BeginSuspension: "SessionCoordinator:BeginSuspension",

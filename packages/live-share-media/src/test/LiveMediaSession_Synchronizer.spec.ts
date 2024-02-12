@@ -300,6 +300,54 @@ describeNoCompat(
             dispose();
         });
 
+        it("should change playback rate", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            const testMediaPlayer1 = new TestMediaPlayer();
+            const testMediaPlayer2 = new TestMediaPlayer();
+            await object1.initialize();
+            await object2.initialize();
+            const expectedEventOrder: IExpectedEvent[] = [
+                {
+                    action: "play",
+                    clientId: await object1.clientId(),
+                    local: false,
+                    source: "user",
+                },
+                {
+                    action: "ratechange",
+                    clientId: await object2.clientId(),
+                    local: true,
+                    source: "user",
+                },
+            ];
+            const sync1 = object1.synchronize(testMediaPlayer1);
+            const sync2 = object2.synchronize(testMediaPlayer2);
+            const eventAssertPromise = assertExpectedEvents(
+                sync2,
+                expectedEventOrder
+            );
+
+            await sync1.play();
+            await assertActionOccurred(
+                [testMediaPlayer1, testMediaPlayer2],
+                "play"
+            );
+
+            await sync2.setPlaybackRate(2);
+            await assertActionOccurred(
+                [testMediaPlayer1, testMediaPlayer2],
+                "ratechange"
+            );
+
+            await waitForDelay(100);
+
+            assert(isSynced(testMediaPlayer1, testMediaPlayer2, 0.2));
+            await eventAssertPromise;
+            dispose();
+        });
+
         it("should only let organizer play, pause, seek", async () => {
             const { object1, object2, dispose, setObjectRoles } =
                 await getObjects(getTestObjectProvider);

@@ -38,18 +38,7 @@ export class GroupPlaybackRate extends EventEmitter {
 
     constructor() {
         super();
-
         this._current = { playbackRate: 1.0, timestamp: 0, clientId: "" };
-
-        // TODO: Listen for track changes, reset to 1.0?
-        // this._track.on(GroupPlaybackTrackEvents.trackChange, () => {
-        //     // Track changed so reset state to empty object
-        //     this._current = {
-        //         data: null,
-        //         timestamp: this._track.current.timestamp,
-        //         clientId: this._track.current.clientId,
-        //     };
-        // });
     }
 
     public get current(): Readonly<IPlaybackRate> {

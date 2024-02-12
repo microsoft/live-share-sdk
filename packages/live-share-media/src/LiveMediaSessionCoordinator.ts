@@ -368,12 +368,6 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             "setPlaybackRate",
             this.initializeState
         );
-        // TODO: should playback rate be set back to 1 after a track change?
-        // TrackMetadataNotSetError.assert(
-        //     !!this._groupState?.playbackTrack.current.metadata,
-        //     "LiveMediaSessionCoordinator:setPlaybackRate",
-        //     "setPlaybackRate"
-        // );
         ActionBlockedError.assert(
             this.canSetPlaybackRate,
             "LiveMediaSessionCoordinator:setPlaybackRate",

@@ -35,6 +35,7 @@ export const TelemetryEvents = {
         PlayCalled: "MediaPlayerSynchronizer:PlayCalled",
         PauseCalled: "MediaPlayerSynchronizer:PauseCalled",
         SeekToCalled: "MediaPlayerSynchronizer:SeekToCalled",
+        RateChangeCalled: "MediaSession:RateChangeCalled",
         SetTrackCalled: "MediaPlayerSynchronizer:SetTrackCalled",
         SetTrackDataCalled: "MediaPlayerSynchronizer:SetTrackDataCalled",
     },

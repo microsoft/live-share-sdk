@@ -660,7 +660,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
 
     public async setPlaybackRate(playbackRate: number): Promise<void> {
         this._logger.sendTelemetryEvent(
-            TelemetryEvents.MediaPlayerSynchronizer.RateChangeAction,
+            TelemetryEvents.MediaPlayerSynchronizer.RateChangeCalled,
             null,
             { playbackRate }
         );

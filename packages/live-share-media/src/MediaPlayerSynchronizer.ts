@@ -423,10 +423,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      *
      * @remarks
      * Toggling this value to true results in `mediaSession.coordinator.canPlayPause`,
-     * `mediaSession.coordinator.canSeek`, `mediaSession.coordinator.canSetTrack`, and
-     * `mediaSession.coordinator.canSetTrackData` all being set to false.  For more fine
-     * grained control over the local clients policies, call the `mediaSession.coordinator`
-     * directly.
+     * `mediaSession.coordinator.canSeek`, `mediaSession.coordinator.canSetTrack`,
+     * `mediaSession.coordinator.canSetTrackData`, and `mediaSession.coordinator.canSetPlaybackRate`
+     *  all being set to false.  For more fine grained control over the local clients policies,
+     *  call the `mediaSession.coordinator` directly.
      */
     public get viewOnly(): boolean {
         return this._viewOnly;
@@ -438,6 +438,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.mediaSession.coordinator.canSeek = !value;
         this.mediaSession.coordinator.canSetTrack = !value;
         this.mediaSession.coordinator.canSetTrackData = !value;
+        this.mediaSession.coordinator.canSetPlaybackRate = !value;
     }
 
     /**

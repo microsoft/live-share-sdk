@@ -204,6 +204,7 @@ export class LivePresence<
         await this.updateInternal(
             this._currentPresence!.data.data,
             this._currentPresence!.data.state,
+            true,
             true
         ).catch(() => {});
     }
@@ -275,7 +276,8 @@ export class LivePresence<
     private async updateInternal(
         data?: TData,
         state?: PresenceState,
-        throttle: boolean = false
+        throttle: boolean = false,
+        background: boolean = false
     ): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
             "LivePresence:updateInternal",
@@ -299,7 +301,7 @@ export class LivePresence<
             data: cloneValue(data) ?? this._currentPresence.data.data,
         };
 
-        if (this.liveRuntime.canSendBackgroundUpdates) {
+        if (!background || this.liveRuntime.canSendBackgroundUpdates) {
             const evt = throttle
                 ? await this._synchronizer!.sendThrottledEvent(evtToSend)
                 : await this._synchronizer!.sendEvent(evtToSend);

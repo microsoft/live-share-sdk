@@ -210,35 +210,98 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         disposeAll();
     });
 
-    it("Should start in alternate state", async () => {
+    it("test canSendBackgroundUpdates only sends when true", async () => {
+        const canSendBackgroundUpdatesObject2 = false;
         const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider,
             10000,
-            false
+            canSendBackgroundUpdatesObject2
         );
-        const object1done = new Deferred();
+        const object2done = new Deferred();
+
         await object1.initialize(undefined);
 
-        let object2PresenceChangeCallbackCount = 0;
-        const object2done = new Deferred();
+        let object2PresenceChangeCount: number = 0;
+        let object2PresenceChangeOnlineCount: number = 0;
+        let object2PresenceChangeOfflineCount: number = 0;
         object2.on("presenceChanged", (user, local) => {
-            object2PresenceChangeCallbackCount += 1;
             if (local) {
-                object2done.reject();
-            } else {
-                object1done.resolve();
+                object2PresenceChangeCount += 1;
+                if (user.state === "online") {
+                    object2PresenceChangeOnlineCount += 1;
+                } else {
+                    object2PresenceChangeOfflineCount += 1;
+                }
+                object2done.resolve();
+            }
+        });
+        object1.on("presenceChanged", (user, local) => {
+            if (!local) {
+                object2PresenceChangeCount += 1;
+                if (user.state === "online") {
+                    object2PresenceChangeOnlineCount += 1;
+                } else {
+                    object2PresenceChangeOfflineCount += 1;
+                }
             }
         });
         await object2.initialize(undefined);
 
+        // as any to access private updateInternal, set background to true
+        // should not cause an event to be sent
+        const backgroundUpdate1 = true;
+        (object2 as any).updateInternal(
+            "hello",
+            object2.localUser?.state,
+            false,
+            backgroundUpdate1
+        );
+
+        await waitForDelay(1);
         // Wait for events to trigger
-        await Promise.all([
-            object1done.promise,
-            Promise.race([waitForDelay(10), object2done.promise]), // object 2 should not resolve
-        ]);
+        await object2done.promise;
         assert(
-            object2PresenceChangeCallbackCount == 1,
-            `expected one event from object1, ${object2PresenceChangeCallbackCount}`
+            object2PresenceChangeCount == 2,
+            `expected three events from object2, ${object2PresenceChangeCount}`
+        );
+        assert(
+            object2PresenceChangeOnlineCount == 2,
+            `expected two events from object2 that was online, ${object2PresenceChangeOnlineCount}`
+        );
+        assert(
+            object2PresenceChangeOfflineCount == 0,
+            `expected zero events from object2 that was offline, ${object2PresenceChangeOfflineCount}`
+        );
+        assert(
+            object1.localUser !== undefined,
+            "local user should not be undefined"
+        );
+        assert(
+            object2.localUser !== undefined,
+            "local user should not be undefined"
+        );
+
+        // should update as not a background update
+        const backgroundUpdateFalse = false;
+        (object2 as any).updateInternal(
+            "hello",
+            "offline",
+            false,
+            backgroundUpdateFalse
+        );
+        await waitForDelay(1);
+
+        assert(
+            object2PresenceChangeCount == 4,
+            `expected 4 events from object2, ${object2PresenceChangeCount}`
+        );
+        assert(
+            object2PresenceChangeOnlineCount == 2,
+            `expected two events from object2 that was online, ${object2PresenceChangeOnlineCount}`
+        );
+        assert(
+            object2PresenceChangeOfflineCount == 2,
+            `expected two events from object2 that was offline, ${object2PresenceChangeOfflineCount}`
         );
 
         disposeAll();

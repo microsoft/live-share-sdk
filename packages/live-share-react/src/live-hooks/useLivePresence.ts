@@ -124,9 +124,8 @@ export function useLivePresence<TData extends object = object>(
                 initialPresenceState,
                 allowedRoles
             );
-        } else {
-            onPresenceChanged();
         }
+        onPresenceChanged();
 
         return () => {
             livePresence?.off("presenceChanged", onPresenceChanged);

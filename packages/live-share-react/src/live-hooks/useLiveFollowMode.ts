@@ -284,10 +284,9 @@ export function useLiveFollowMode<TData = any>(
                     : initialData,
                 allowedRoles
             );
-        } else {
-            onPresenceChanged();
-            onStateChanged();
         }
+        onPresenceChanged();
+        onStateChanged();
 
         return () => {
             liveFollowMode?.off("presenceChanged", onPresenceChanged);

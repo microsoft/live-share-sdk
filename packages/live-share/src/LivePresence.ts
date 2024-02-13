@@ -199,15 +199,14 @@ export class LivePresence<
         // We do before sending initial update, since that requires this to happen first.
         this.initializeState = LiveDataObjectInitializeState.succeeded;
 
-        if (this.liveRuntime.canSendBackgroundUpdates) {
-            // Broadcast initial presence, or silently fail trying.
-            // Throttled so that a developer can have multiple presence instances in their app in a performant manner.
-            await this.updateInternal(
-                this._currentPresence!.data.data,
-                this._currentPresence!.data.state,
-                true
-            ).catch(() => {});
-        }
+        // Broadcast initial presence, or silently fail trying.
+        // Throttled so that a developer can have multiple presence instances in their app in a performant manner.
+        await this.updateInternal(
+            this._currentPresence!.data.data,
+            this._currentPresence!.data.state,
+            true,
+            true
+        ).catch(() => {});
     }
 
     /**
@@ -277,7 +276,8 @@ export class LivePresence<
     private async updateInternal(
         data?: TData,
         state?: PresenceState,
-        throttle: boolean = false
+        throttle: boolean = false,
+        background: boolean = false
     ): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
             "LivePresence:updateInternal",
@@ -300,10 +300,29 @@ export class LivePresence<
             state: state ?? this._currentPresence.data.state,
             data: cloneValue(data) ?? this._currentPresence.data.data,
         };
-        const evt = throttle
-            ? await this._synchronizer!.sendThrottledEvent(evtToSend)
-            : await this._synchronizer!.sendEvent(evtToSend);
-        await this.updateMembersList(evt, true);
+
+        if (!background || this.liveRuntime.canSendBackgroundUpdates) {
+            const evt = throttle
+                ? await this._synchronizer!.sendThrottledEvent(evtToSend)
+                : await this._synchronizer!.sendEvent(evtToSend);
+
+            await this.updateMembersList(evt, true);
+        } else {
+            /*
+             * If canSendBackgroundUpdates is false,
+             * local user should be able to keep track of local user state.
+             *
+             * Create an event that is not sent to other clients, but allows
+             * local user state to be created.
+             */
+            const localOnlyEvent = {
+                data: evtToSend,
+                name: "",
+                clientId: await this.waitUntilConnected(),
+                timestamp: 1,
+            };
+            await this.updateMembersList(localOnlyEvent, true);
+        }
     }
 
     /**

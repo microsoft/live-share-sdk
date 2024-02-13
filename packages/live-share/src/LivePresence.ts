@@ -315,13 +315,13 @@ export class LivePresence<
              * Create an event that is not sent to other clients, but allows
              * local user state to be created.
              */
-            const fakeEvent = {
+            const localOnlyEvent = {
                 data: evtToSend,
                 name: "",
                 clientId: await this.waitUntilConnected(),
                 timestamp: 1,
             };
-            await this.updateMembersList(fakeEvent, true);
+            await this.updateMembersList(localOnlyEvent, true);
         }
     }
 

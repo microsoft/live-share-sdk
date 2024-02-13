@@ -33,6 +33,7 @@ import {
     ISetTrackDataEvent,
     TrackMetadataNotSetError,
     ActionBlockedError,
+    IRateChangeCommandEvent,
 } from "./internals";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
 import EventEmitter from "events";
@@ -87,6 +88,7 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     private _playEvent?: LiveEventTarget<ITransportCommandEvent>;
     private _pauseEvent?: LiveEventTarget<ITransportCommandEvent>;
     private _seekToEvent?: LiveEventTarget<ITransportCommandEvent>;
+    private _rateChangeEvent?: LiveEventTarget<IRateChangeCommandEvent>;
     private _setTrackEvent?: LiveEventTarget<ISetTrackEvent>;
     private _setTrackDataEvent?: LiveEventTarget<ISetTrackDataEvent>;
     private _positionUpdateEvent?: LiveEventTarget<IPositionUpdateEvent>;
@@ -169,6 +171,20 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * policies.
      */
     public canSetTrackData: boolean = true;
+
+    /**
+     * Controls whether or not the local client is allowed to change the playback rate.
+     *
+     * @remarks
+     * This flag largely meant to influence decisions made by the coordinator and can be used by
+     * the UI to determine what controls should be shown to the user. It does not provide any
+     * security in itself.
+     *
+     * If your app is running in a semi-trusted environment where only some clients are allowed
+     * to change the tracks data object, you should use "role based verification" to enforce those
+     * policies.
+     */
+    public canSetPlaybackRate: boolean = true;
 
     /**
      * Controls whether or not the local client is allowed to send position updates to the group.
@@ -344,6 +360,27 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             await this._groupState!.syncLocalMediaSession();
             throw err;
         }
+    }
+
+    public async setPlaybackRate(playbackRate: number): Promise<void> {
+        LiveDataObjectNotInitializedError.assert(
+            "LiveMediaSessionCoordinator:setPlaybackRate",
+            "setPlaybackRate",
+            this.initializeState
+        );
+        ActionBlockedError.assert(
+            this.canSetPlaybackRate,
+            "LiveMediaSessionCoordinator:setPlaybackRate",
+            "setPlaybackRate",
+            "canSetPlaybackRate"
+        );
+
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.SessionCoordinator.SetPlaybackRateCalled,
+            null,
+            { playbackRate }
+        );
+        await this._rateChangeEvent!.sendEvent({ playbackRate });
     }
 
     /**
@@ -653,6 +690,13 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             "seekTo",
             (event, local) =>
                 this._groupState!.handleTransportCommand(event, local)
+        );
+        this._rateChangeEvent = new LiveEventTarget(
+            scope,
+            "rateChange",
+            (event: ILiveEvent<IRateChangeCommandEvent>, local) => {
+                this._groupState!.handleRateChangeCommand(event, local);
+            }
         );
 
         // Listen for position updates

@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveEvent, LiveShareRuntime } from "@microsoft/live-share";
+import { LiveShareRuntime } from "@microsoft/live-share";
 import EventEmitter from "events";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
@@ -15,6 +15,8 @@ import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
 } from "./GroupPlaybackTrack";
+import { IGroupStateEvent } from "./interfaces";
+import { GroupPlaybackRate } from "./GroupPlaybackRate";
 
 /**
  * @hidden
@@ -36,7 +38,7 @@ export enum GroupTransportStateEvents {
 /**
  * @hidden
  */
-export interface ITransportStateChangeEvent extends ILiveEvent {
+export interface ITransportStateChangeEvent extends IGroupStateEvent {
     action: ExtendedMediaSessionAction;
     seekTime?: number;
 }
@@ -47,11 +49,13 @@ export interface ITransportStateChangeEvent extends ILiveEvent {
 export class GroupTransportState extends EventEmitter {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _track: GroupPlaybackTrack;
+    private _playbackRate: GroupPlaybackRate;
     private readonly _liveRuntime: LiveShareRuntime;
     private _current: ITransportState;
 
     constructor(
         track: GroupPlaybackTrack,
+        playbackRate: GroupPlaybackRate,
         getMediaPlayerState: () => IMediaPlayerState,
         liveRuntime: LiveShareRuntime
     ) {
@@ -59,6 +63,7 @@ export class GroupTransportState extends EventEmitter {
         this._liveRuntime = liveRuntime;
         this._getMediaPlayerState = getMediaPlayerState;
         this._track = track;
+        this._playbackRate = playbackRate;
         this._current = {
             playbackState: "none",
             startPosition: 0.0,
@@ -137,32 +142,36 @@ export class GroupTransportState extends EventEmitter {
             originalState.playbackState == state.playbackState &&
             playerState != "ended"
         ) {
-            this.emit(GroupTransportStateEvents.transportStateChange, {
-                type: GroupTransportStateEvents.transportStateChange,
+            const event: ITransportStateChangeEvent = {
+                name: GroupTransportStateEvents.transportStateChange,
                 action: "seekto",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
                 source,
-            });
+            };
+            this.emit(GroupTransportStateEvents.transportStateChange, event);
         } else if (state.playbackState == "playing") {
             const now = this._liveRuntime.getTimestamp();
             const projectedPosition =
-                state.startPosition + (now - state.timestamp) / 1000;
-            this.emit(GroupTransportStateEvents.transportStateChange, {
-                type: GroupTransportStateEvents.transportStateChange,
+                state.startPosition +
+                ((now - state.timestamp) / 1000) * this._playbackRate.rate;
+            const event: ITransportStateChangeEvent = {
+                name: GroupTransportStateEvents.transportStateChange,
                 action: "play",
                 clientId: state.clientId,
                 seekTime: projectedPosition,
                 source,
-            });
+            };
+            this.emit(GroupTransportStateEvents.transportStateChange, event);
         } else {
-            this.emit(GroupTransportStateEvents.transportStateChange, {
-                type: GroupTransportStateEvents.transportStateChange,
+            const event: ITransportStateChangeEvent = {
+                name: GroupTransportStateEvents.transportStateChange,
                 action: "pause",
                 clientId: state.clientId,
                 seekTime: state.startPosition,
                 source,
-            });
+            };
+            this.emit(GroupTransportStateEvents.transportStateChange, event);
         }
 
         return true;

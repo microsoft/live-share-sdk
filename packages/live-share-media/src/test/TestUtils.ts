@@ -16,12 +16,12 @@ export class TestMediaPlayer implements IMediaPlayer {
     private done = new Deferred<string>();
     private playStartTime = 0;
     private _currentTime: number = 0;
+    private _playbackRate: number = 1;
 
     duration: number;
     ended: boolean;
     muted: boolean;
     paused: boolean = true;
-    playbackRate: number;
     src: string = "test";
     currentSrc: string;
     volume: number;
@@ -29,7 +29,9 @@ export class TestMediaPlayer implements IMediaPlayer {
     constructor(public onCurrentTimeSet?: (number) => void) {
         setInterval(() => {
             if (!this.paused && this.playStartTime != 0) {
-                this._currentTime = Date.now() / 1000 - this.playStartTime;
+                this._currentTime =
+                    (Date.now() / 1000 - this.playStartTime) *
+                    this.playbackRate;
             }
         });
     }
@@ -48,6 +50,15 @@ export class TestMediaPlayer implements IMediaPlayer {
         return this._currentTime;
     }
 
+    public set playbackRate(value: number) {
+        this._playbackRate = value;
+        this.done.resolve("ratechange");
+    }
+
+    public get playbackRate(): number {
+        return this._playbackRate;
+    }
+
     load(): void {
         this._currentTime = 0;
         this.paused = true;
@@ -55,7 +66,8 @@ export class TestMediaPlayer implements IMediaPlayer {
     }
     pause(): void {
         this.paused = true;
-        this._currentTime = Date.now() / 1000 - this.playStartTime;
+        this._currentTime =
+            (Date.now() / 1000 - this.playStartTime) * this.playbackRate;
         this.playStartTime = 0;
         this.done.resolve("pause");
     }

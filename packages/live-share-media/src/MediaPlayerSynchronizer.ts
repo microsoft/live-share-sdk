@@ -64,6 +64,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         "pause",
         "seekto",
         "settrack",
+        "ratechange",
         "datachange",
         "catchup",
         "wait",
@@ -89,6 +90,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
     private _viewOnly = false;
     private _blockUnexpectedPlayerEvents = true;
     private _expectedPlaybackState: ExtendedMediaSessionPlaybackState = "none";
+    private _expectedPlaybackRate: number = 1.0;
     private _metadata: ExtendedMediaMetadata | null = null;
     private _trackData: object | null = null;
 
@@ -142,7 +144,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                 playbackState: playbackState,
                 positionState: {
                     position: this._player.currentTime,
-                    playbackRate: this._player.playbackRate,
+                    playbackRate: this._player.playbackRate ?? 1,
                     duration: this._player.duration,
                 },
                 trackData: this._trackData,
@@ -227,16 +229,13 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                     }
                     break;
                 case "ratechange":
-                    // Block rate changes unless suspended.
                     if (
-                        this._player.playbackRate != 1.0 &&
+                        this._blockUnexpectedPlayerEvents &&
+                        this._expectedPlaybackRate !==
+                            this._player.playbackRate &&
                         !this._mediaSession.coordinator.isSuspended
                     ) {
-                        this._logger.sendTelemetryEvent(
-                            TelemetryEvents.MediaPlayerSynchronizer
-                                .PlaybackRateChangeBlocked
-                        );
-                        this._player.playbackRate = 1.0;
+                        this._player.playbackRate = this._expectedPlaybackRate;
                     }
                     break;
                 case "blocked":
@@ -351,6 +350,22 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                                         .DataChangeAction
                                 );
                                 break;
+                            case "ratechange":
+                                if (!details.playbackRate) {
+                                    break;
+                                }
+
+                                this._logger.sendTelemetryEvent(
+                                    TelemetryEvents.MediaPlayerSynchronizer
+                                        .RateChangeAction,
+                                    null,
+                                    { playbackRate: details.playbackRate }
+                                );
+                                this._expectedPlaybackRate =
+                                    details.playbackRate;
+                                this._player.playbackRate =
+                                    details.playbackRate;
+                                break;
                             case "catchup":
                                 if (typeof details.seekTime == "number") {
                                     this._logger.sendTelemetryEvent(
@@ -408,10 +423,10 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      *
      * @remarks
      * Toggling this value to true results in `mediaSession.coordinator.canPlayPause`,
-     * `mediaSession.coordinator.canSeek`, `mediaSession.coordinator.canSetTrack`, and
-     * `mediaSession.coordinator.canSetTrackData` all being set to false.  For more fine
-     * grained control over the local clients policies, call the `mediaSession.coordinator`
-     * directly.
+     * `mediaSession.coordinator.canSeek`, `mediaSession.coordinator.canSetTrack`,
+     * `mediaSession.coordinator.canSetTrackData`, and `mediaSession.coordinator.canSetPlaybackRate`
+     *  all being set to false.  For more fine grained control over the local clients policies,
+     *  call the `mediaSession.coordinator` directly.
      */
     public get viewOnly(): boolean {
         return this._viewOnly;
@@ -423,6 +438,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
         this.mediaSession.coordinator.canSeek = !value;
         this.mediaSession.coordinator.canSetTrack = !value;
         this.mediaSession.coordinator.canSetTrackData = !value;
+        this.mediaSession.coordinator.canSetPlaybackRate = !value;
     }
 
     /**
@@ -639,6 +655,24 @@ export class MediaPlayerSynchronizer extends EventEmitter {
             clientId: await waitUntilConnected(this._runtime),
             seekTime: time,
             local: true,
+        });
+    }
+
+    public async setPlaybackRate(playbackRate: number): Promise<void> {
+        this._logger.sendTelemetryEvent(
+            TelemetryEvents.MediaPlayerSynchronizer.RateChangeCalled,
+            null,
+            { playbackRate }
+        );
+
+        await this._mediaSession.coordinator.setPlaybackRate(playbackRate);
+
+        this.dispatchUserAction({
+            action: "ratechange",
+            source: "user",
+            clientId: await waitUntilConnected(this._runtime),
+            local: true,
+            playbackRate,
         });
     }
 

@@ -3,13 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveEvent } from "@microsoft/live-share";
 import EventEmitter from "events";
 import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
 } from "./GroupPlaybackTrack";
 import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions";
+import { IGroupStateEvent } from "./interfaces";
 
 /**
  * @hidden
@@ -30,7 +30,7 @@ export enum PlaybackTrackDataEvents {
 /**
  * @hidden
  */
-export interface IPlaybackTrackDataChangeEvent extends ILiveEvent {
+export interface IPlaybackTrackDataChangeEvent extends IGroupStateEvent {
     data: object | null;
 }
 
@@ -66,38 +66,39 @@ export class GroupPlaybackTrackData extends EventEmitter {
     }
 
     public updateData(
-        event: IPlaybackTrackData,
+        trackData: IPlaybackTrackData,
         source: ExtendedMediaSessionActionSource
     ): boolean {
         // Ignore state changes that are older
         const current = this.current;
-        if (event.timestamp < current.timestamp) {
+        if (trackData.timestamp < current.timestamp) {
             return false;
         }
 
         // Ignore state changes that have the same timestamp and the clientId sorts higher.
         if (
-            event.timestamp == current.timestamp &&
-            event.clientId.localeCompare(current.clientId) > 0
+            trackData.timestamp == current.timestamp &&
+            trackData.clientId.localeCompare(current.clientId) > 0
         ) {
             return false;
         }
 
         // Ignore state changes for same data object
-        if (JSON.stringify(current.data) == JSON.stringify(event.data)) {
+        if (JSON.stringify(current.data) == JSON.stringify(trackData.data)) {
             return false;
         }
 
         // Update current data
-        this._current = event;
+        this._current = trackData;
 
         // Notify listeners
-        this.emit(PlaybackTrackDataEvents.dataChange, {
-            type: PlaybackTrackDataEvents.dataChange,
-            clientId: event.clientId,
-            data: event.data,
+        const event: IPlaybackTrackDataChangeEvent = {
+            name: PlaybackTrackDataEvents.dataChange,
+            clientId: trackData.clientId,
+            data: trackData.data,
             source,
-        });
+        };
+        this.emit(PlaybackTrackDataEvents.dataChange, event);
 
         return true;
     }

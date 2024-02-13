@@ -12,6 +12,7 @@ import {
 } from "../MediaSessionExtensions";
 import {
     GroupPlaybackPosition,
+    GroupPlaybackRate,
     GroupPlaybackTrack,
     GroupTransportState,
     ICurrentPlaybackPosition,
@@ -116,13 +117,16 @@ async function getPlayBackPosition(
         };
     };
     const playbackTrack = new GroupPlaybackTrack(getMediaPlayerState);
+    const plybackRate = new GroupPlaybackRate();
     const transportState = new GroupTransportState(
         playbackTrack,
+        plybackRate,
         getMediaPlayerState,
         liveRuntime
     );
     const playbackPosition = new GroupPlaybackPosition(
         transportState,
+        plybackRate,
         runtime1,
         liveRuntime,
         updateInterval
@@ -408,11 +412,12 @@ describe("GroupPlaybackPosition", () => {
                 `wrong starting position of ${playbackPosition.maxPosition}`
             );
 
-            await transportState.updateState(
+            transportState.updateState(
                 subtractSeconds(
                     2.0,
                     createTransportUpdate(runtime1, liveRuntime, "playing", 0.0)
-                )
+                ),
+                "user"
             );
 
             assert(
@@ -442,7 +447,8 @@ describe("GroupPlaybackPosition", () => {
                 subtractSeconds(
                     2.0,
                     createTransportUpdate(runtime1, liveRuntime, "playing", 0.0)
-                )
+                ),
+                "user"
             );
             await playbackPosition.UpdatePlaybackPosition(
                 createPositionUpdate(runtime1, liveRuntime, "playing", 0.0)
@@ -478,7 +484,8 @@ describe("GroupPlaybackPosition", () => {
                 subtractSeconds(
                     2.0,
                     createTransportUpdate(runtime1, liveRuntime, "playing", 0.0)
-                )
+                ),
+                "user"
             );
             await playbackPosition.UpdatePlaybackPosition(
                 createPositionUpdate(
@@ -530,7 +537,8 @@ describe("GroupPlaybackPosition", () => {
                 subtractSeconds(
                     2.0,
                     createTransportUpdate(runtime1, liveRuntime, "playing", 0.0)
-                )
+                ),
+                "user"
             );
             await playbackPosition.UpdatePlaybackPosition(
                 createPositionUpdate(runtime1, liveRuntime, "suspended", 2.0, {
@@ -572,7 +580,8 @@ describe("GroupPlaybackPosition", () => {
                 subtractSeconds(
                     2.0,
                     createTransportUpdate(runtime1, liveRuntime, "playing", 0.0)
-                )
+                ),
+                "user"
             );
             await playbackPosition.UpdatePlaybackPosition(
                 createPositionUpdate(runtime1, liveRuntime, "waiting", 2.0, {
@@ -607,7 +616,8 @@ describe("GroupPlaybackPosition", () => {
                 subtractSeconds(
                     2.0,
                     createTransportUpdate(runtime1, liveRuntime, "playing", 0.0)
-                )
+                ),
+                "user"
             );
             await playbackPosition.UpdatePlaybackPosition(
                 createPositionUpdate(runtime1, liveRuntime, "waiting", 2.0, {

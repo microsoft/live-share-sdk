@@ -14,6 +14,7 @@ import {
     CoordinationWaitPoint,
     ExtendedMediaSessionPlaybackState,
 } from "../MediaSessionExtensions";
+import { GroupPlaybackRate } from "./GroupPlaybackRate";
 
 /**
  * Per client position
@@ -33,6 +34,7 @@ export interface ICurrentPlaybackPosition {
  */
 export class GroupPlaybackPosition {
     private _transportState: GroupTransportState;
+    private _playbackRate: GroupPlaybackRate;
     private _runtime: IRuntimeSignaler;
     private _liveRuntime: LiveShareRuntime;
     private _updateInterval: TimeInterval;
@@ -40,11 +42,13 @@ export class GroupPlaybackPosition {
 
     constructor(
         transportState: GroupTransportState,
+        playbackRate: GroupPlaybackRate,
         runtime: IRuntimeSignaler,
         liveRuntime: LiveShareRuntime,
         updateInterval: TimeInterval
     ) {
         this._transportState = transportState;
+        this._playbackRate = playbackRate;
         this._runtime = runtime;
         this._liveRuntime = liveRuntime;
         this._updateInterval = updateInterval;
@@ -135,7 +139,8 @@ export class GroupPlaybackPosition {
             const now = this._liveRuntime.getTimestamp();
             const projected =
                 this._transportState.startPosition +
-                (now - this._transportState.timestamp) / 1000;
+                ((now - this._transportState.timestamp) / 1000) *
+                    this._playbackRate.rate;
             return this.limitProjectedPosition(projected);
         } else {
             return this._transportState.startPosition;
@@ -175,7 +180,9 @@ export class GroupPlaybackPosition {
                 // - This computation does not take into account future wait points.
                 const projected =
                     position.playbackState == "playing" && shouldProject
-                        ? position.position + (now - position.timestamp) / 1000
+                        ? position.position +
+                          ((now - position.timestamp) / 1000) *
+                              this._playbackRate.rate
                         : position.position;
                 callbackFn(position, this.limitProjectedPosition(projected));
             }

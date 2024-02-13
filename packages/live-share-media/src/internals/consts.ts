@@ -16,6 +16,7 @@ export const TelemetryEvents = {
         PlayAction: "MediaPlayerSynchronizer:PlayAction",
         PauseAction: "MediaPlayerSynchronizer:PauseAction",
         SeekToAction: "MediaPlayerSynchronizer:SeekToAction",
+        RateChangeAction: "MediaPlayerSynchronizer:RateChangeAction",
         CatchupAction: "MediaPlayerSynchronizer:CatchupAction",
         SetTrackAction: "MediaPlayerSynchronizer:SetTrackAction",
         DataChangeAction: "MediaPlayerSynchronizer:DataChangeAction",
@@ -24,8 +25,6 @@ export const TelemetryEvents = {
         ),
         UserTappedVideoToPlayError:
             "MediaPlayerSynchronizer:UserTappedVideoToPlayError",
-        PlaybackRateChangeBlocked:
-            "MediaPlayerSynchronizer:PlaybackRateChangeBlocked",
         PlayerBlockedOperation: transmit(
             "MediaPlayerSynchronizer:PlayerBlockedOperation"
         ),
@@ -36,6 +35,7 @@ export const TelemetryEvents = {
         PlayCalled: "MediaPlayerSynchronizer:PlayCalled",
         PauseCalled: "MediaPlayerSynchronizer:PauseCalled",
         SeekToCalled: "MediaPlayerSynchronizer:SeekToCalled",
+        RateChangeCalled: "MediaSession:RateChangeCalled",
         SetTrackCalled: "MediaPlayerSynchronizer:SetTrackCalled",
         SetTrackDataCalled: "MediaPlayerSynchronizer:SetTrackDataCalled",
     },
@@ -43,6 +43,7 @@ export const TelemetryEvents = {
         PlayAction: transmit("MediaSession:PlayAction"),
         PauseAction: transmit("MediaSession:PauseAction"),
         SeekToAction: transmit("MediaSession:SeekToAction"),
+        RateChangeAction: transmit("MediaSession:RateChangeAction"),
         CatchUpAction: transmit("MediaSession:CatchUpAction"),
         SetTrackAction: transmit("MediaSession:SetTrackAction"),
         DataChangeAction: "MediaSession:DataChangeAction",
@@ -52,6 +53,9 @@ export const TelemetryEvents = {
         PlayCalled: transmit("SessionCoordinator:PlayCalled"),
         PauseCalled: transmit("SessionCoordinator:PauseCalled"),
         SeekToCalled: transmit("SessionCoordinator:SeekToCalled"),
+        SetPlaybackRateCalled: transmit(
+            "SessionCoordinator:SetPlaybackRateCalled"
+        ),
         SetTrackCalled: transmit("SessionCoordinator:SetTrackCalled"),
         SetTrackDataCalled: "SessionCoordinator:SetTrackDataCalled",
         BeginSuspension: "SessionCoordinator:BeginSuspension",
@@ -74,6 +78,9 @@ export const TelemetryEvents = {
         RemoteSeekToReceived: transmit(
             "SessionCoordinator:RemoteSeekToReceived"
         ),
+        RemoteRateChangeReceived: transmit(
+            "SessionCoordinator:RemoteRateChangeReceived"
+        ),
         PositionUpdateEventError: "SessionCoordinator:PositionUpdateEventError",
         LiveObjectSynchronizerStartError:
             "SessionCoordinator:LiveObjectSynchronizerStartError",
@@ -86,12 +93,17 @@ export const TelemetryEvents = {
         TransportStateChanged: "GroupCoordinator:TransportStateChanged",
         TransportStateChangeDelayed:
             "GroupCoordinator:TransportStateChangeDelayed",
+        PlaybackRateChanged: "GroupCoordinator:PlaybackRateChanged",
+        PlaybackRateChangedDelayed: "GroupCoordinator:PlaybackRateChanged",
         BeginSoftSuspension: "GroupCoordinator:BeginSoftSuspension",
         CheckingForSyncIssues: "GroupCoordinator:CheckingForSyncIssues",
         TrackOutOfSync: transmit("GroupCoordinator:TrackOutOfSync"),
         TrackDataOutOfSync: transmit("GroupCoordinator:TrackDataOutOfSync"),
         TransportOutOfSync: transmit("GroupCoordinator:TransportOutOfSync"),
         PositionOutOfSync: transmit("GroupCoordinator:PositionOutOfSync"),
+        PlaybackRateOutOfSync: transmit(
+            "GroupCoordinator:PlaybackRateOutOfSync"
+        ),
     },
 };
 

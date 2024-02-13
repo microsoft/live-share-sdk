@@ -236,6 +236,18 @@ export class LiveMediaSession extends LiveDataObject {
                             }
                         );
                         break;
+                    case "ratechange":
+                        if (!details.playbackRate) {
+                            break;
+                        }
+                        this.logger.sendTelemetryEvent(
+                            TelemetryEvents.MediaSession.RateChangeAction,
+                            null,
+                            {
+                                playbackRate: details.playbackRate,
+                            }
+                        );
+                        break;
                     case "seekto":
                         this.logger.sendTelemetryEvent(
                             TelemetryEvents.MediaSession.SeekToAction,

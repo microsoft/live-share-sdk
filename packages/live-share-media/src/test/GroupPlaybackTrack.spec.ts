@@ -49,17 +49,20 @@ describe("GroupPlaybackTrack", () => {
             }
         );
 
-        await playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [],
-            timestamp: 1,
-            clientId: "a",
-        });
+        playbackTrack.updateTrack(
+            {
+                metadata: track1,
+                waitPoints: [],
+                timestamp: 1,
+                clientId: "a",
+            },
+            "user"
+        );
 
         await done.promise;
     });
 
-    it("should switch tracks", async () => {
+    it("should switch tracks", () => {
         let cnt = 0;
         let metadata: ExtendedMediaMetadata | null = null;
         const playbackTrack = new GroupPlaybackTrack(() => {
@@ -78,23 +81,29 @@ describe("GroupPlaybackTrack", () => {
             }
         );
 
-        await playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [],
-            timestamp: 1,
-            clientId: "a",
-        });
-        await playbackTrack.updateTrack({
-            metadata: track2,
-            waitPoints: [],
-            timestamp: 2,
-            clientId: "b",
-        });
+        playbackTrack.updateTrack(
+            {
+                metadata: track1,
+                waitPoints: [],
+                timestamp: 1,
+                clientId: "a",
+            },
+            "user"
+        );
+        playbackTrack.updateTrack(
+            {
+                metadata: track2,
+                waitPoints: [],
+                timestamp: 2,
+                clientId: "b",
+            },
+            "user"
+        );
         assert(cnt == 2, `called trackChange event ${cnt} times`);
         assert(metadata!.trackIdentifier == "track2", `wrong track set`);
     });
 
-    it("should ignore track changes with older timestamps", async () => {
+    it("should ignore track changes with older timestamps", () => {
         let cnt = 0;
         let metadata: ExtendedMediaMetadata | null = null;
         const playbackTrack = new GroupPlaybackTrack(() => {
@@ -113,22 +122,28 @@ describe("GroupPlaybackTrack", () => {
             }
         );
 
-        await playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [],
-            timestamp: 3,
-            clientId: "a",
-        });
-        await playbackTrack.updateTrack({
-            metadata: track2,
-            waitPoints: [],
-            timestamp: 2,
-            clientId: "b",
-        });
+        playbackTrack.updateTrack(
+            {
+                metadata: track1,
+                waitPoints: [],
+                timestamp: 3,
+                clientId: "a",
+            },
+            "user"
+        );
+        playbackTrack.updateTrack(
+            {
+                metadata: track2,
+                waitPoints: [],
+                timestamp: 2,
+                clientId: "b",
+            },
+            "user"
+        );
         assert(cnt == 1, `called trackChange event ${cnt} times`);
     });
 
-    it("should insert waitpoint if no existing waitpoints", async () => {
+    it("should insert waitpoint if no existing waitpoints", () => {
         const playbackTrack = new GroupPlaybackTrack(() => {
             return {
                 metadata: null,
@@ -141,7 +156,7 @@ describe("GroupPlaybackTrack", () => {
         assert(playbackTrack.findNextWaitPoint(undefined)?.position === 10);
     });
 
-    it("should insert waitpoints in correct order", async () => {
+    it("should insert waitpoints in correct order", () => {
         const playbackTrack = new GroupPlaybackTrack(() => {
             return {
                 metadata: null,
@@ -151,18 +166,20 @@ describe("GroupPlaybackTrack", () => {
             };
         });
 
-        await playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [{ position: 30 }],
-            timestamp: 1,
-            clientId: "a",
-        });
+        playbackTrack.updateTrack(
+            {
+                metadata: track1,
+                waitPoints: [{ position: 30 }],
+                timestamp: 1,
+                clientId: "a",
+            },
+            "user"
+        );
         playbackTrack.addWaitPoint({ position: 10 });
         assert(playbackTrack.findNextWaitPoint(undefined)?.position === 10);
     });
 
-    it("updateTrack should return false for events that are the same time, but clientId is higher sort", async () => {
-        const done = new Deferred();
+    it("updateTrack should return false for events that are the same time, but clientId is higher sort", () => {
         const playbackTrack = new GroupPlaybackTrack(() => {
             return {
                 metadata: { trackIdentifier: "src" } as ExtendedMediaMetadata,
@@ -172,20 +189,26 @@ describe("GroupPlaybackTrack", () => {
             };
         });
 
-        playbackTrack.updateTrack({
-            metadata: track1,
-            waitPoints: [],
-            timestamp: 3,
-            clientId: "a",
-        });
-
-        assert(
-            !playbackTrack.updateTrack({
+        playbackTrack.updateTrack(
+            {
                 metadata: track1,
                 waitPoints: [],
                 timestamp: 3,
-                clientId: "b",
-            })
+                clientId: "a",
+            },
+            "user"
+        );
+
+        assert(
+            !playbackTrack.updateTrack(
+                {
+                    metadata: track1,
+                    waitPoints: [],
+                    timestamp: 3,
+                    clientId: "b",
+                },
+                "user"
+            )
         );
     });
 });

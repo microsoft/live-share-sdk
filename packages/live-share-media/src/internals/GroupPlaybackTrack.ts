@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveEvent } from "@microsoft/live-share";
 import EventEmitter from "events";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
@@ -11,6 +10,7 @@ import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionSource,
 } from "../MediaSessionExtensions";
+import { IGroupStateEvent } from "./interfaces";
 
 /**
  * @hidden
@@ -32,7 +32,7 @@ export enum GroupPlaybackTrackEvents {
 /**
  * @hidden
  */
-export interface IPlaybackTrackChangeEvent extends ILiveEvent {
+export interface IPlaybackTrackChangeEvent extends IGroupStateEvent {
     metadata: ExtendedMediaMetadata | null;
 }
 
@@ -149,12 +149,13 @@ export class GroupPlaybackTrack extends EventEmitter {
         this._current = track;
 
         // Notify listeners
-        this.emit(GroupPlaybackTrackEvents.trackChange, {
+        const event: IPlaybackTrackChangeEvent = {
             name: GroupPlaybackTrackEvents.trackChange,
             clientId: track.clientId,
             metadata: track.metadata,
             source,
-        });
+        };
+        this.emit(GroupPlaybackTrackEvents.trackChange, event);
 
         return true;
     }

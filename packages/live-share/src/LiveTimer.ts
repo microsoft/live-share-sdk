@@ -215,12 +215,12 @@ export class LiveTimer extends LiveDataObject<{
     /**
      * Disposes of the object when its container is disposed of.
      */
-    public dispose(): void {
-        super.dispose();
-        if (this._synchronizer) {
-            this._synchronizer.dispose();
-        }
-    }
+    // public dispose(): void {
+    //     super.dispose();
+    //     if (this._synchronizer) {
+    //         this._synchronizer.dispose();
+    //     }
+    // }
 
     /**
      * Starts the timer with a specified duration.

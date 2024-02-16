@@ -212,12 +212,12 @@ export class LivePresence<
     /**
      * Disposes of the object when its container is disposed of.
      */
-    public dispose(): void {
-        super.dispose();
-        if (this._synchronizer) {
-            this._synchronizer.dispose();
-        }
-    }
+    // public dispose(): void {
+    //     super.dispose();
+    //     if (this._synchronizer) {
+    //         this._synchronizer.dispose();
+    //     }
+    // }
 
     /**
      * Returns a snapshot of the current list of presence objects being tracked.

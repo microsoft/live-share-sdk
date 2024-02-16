@@ -4,7 +4,7 @@ import {
     IDataObjectProps,
 } from "@fluidframework/aqueduct";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { assert } from "@fluidframework/common-utils";
+import { assert } from "@fluidframework/core-utils";
 import {
     IClientInfo,
     LiveDataObjectInitializeState,

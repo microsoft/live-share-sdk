@@ -3,12 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    LoadableObjectClass,
-    SharedMap,
-    SharedString,
-    SharedDirectory,
-} from "fluid-framework";
+import { LoadableObjectClass, SharedMap } from "fluid-framework";
+
+import { SharedDirectory } from "@fluidframework/map";
+import { SharedString } from "@fluidframework/sequence";
 
 /**
  * Key for window global reference to loadable objects.

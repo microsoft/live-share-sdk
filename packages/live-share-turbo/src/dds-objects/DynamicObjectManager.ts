@@ -10,7 +10,7 @@ import {
     FluidObject,
     IFluidLoadable,
 } from "@fluidframework/core-interfaces";
-import { assert } from "@fluidframework/common-utils";
+import { assert } from "@fluidframework/core-utils";
 import { ConsensusRegisterCollection } from "@fluidframework/register-collection";
 import { DynamicObjectRegistry, LiveDataObject } from "@microsoft/live-share";
 

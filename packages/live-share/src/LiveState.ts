@@ -4,7 +4,7 @@
  */
 
 import { DataObjectFactory } from "@fluidframework/aqueduct";
-import { assert } from "@fluidframework/common-utils";
+import { assert } from "@fluidframework/core-utils";
 import { IEvent } from "@fluidframework/common-definitions";
 import {
     ILiveEvent,
@@ -175,12 +175,12 @@ export class LiveState<TState = any> extends LiveDataObject<{
     /**
      * Disposes of the object when its container is disposed of.
      */
-    public dispose(): void {
-        super.dispose();
-        if (this._synchronizer) {
-            this._synchronizer.dispose();
-        }
-    }
+    // public dispose(): void {
+    //     super.dispose();
+    //     if (this._synchronizer) {
+    //         this._synchronizer.dispose();
+    //     }
+    // }
 
     /**
      * Set a new state value

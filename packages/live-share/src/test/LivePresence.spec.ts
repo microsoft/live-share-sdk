@@ -6,7 +6,8 @@
 import { strict as assert } from "assert";
 import { requestFluidObject } from "@fluidframework/runtime-utils";
 import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import { describeCompat } from "@fluid-internal/test-version-utils";
+// import { describeCompat } from "@fluidframework/test-version-utils";
 import { LivePresence } from "../LivePresence";
 import { PresenceState } from "../LivePresenceUser";
 import { waitForDelay } from "../internals";

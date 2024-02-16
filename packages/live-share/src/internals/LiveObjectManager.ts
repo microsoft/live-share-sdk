@@ -4,7 +4,7 @@
  */
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
-import { TypedEventEmitter } from "@fluidframework/common-utils";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IRuntimeSignaler } from "../LiveEventScope";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";

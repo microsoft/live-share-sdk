@@ -14,6 +14,7 @@ import {
 } from "@microsoft/live-share";
 import { FluidContext, useFluidObjectsContext } from "./AzureProvider";
 import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
+import { isITeamsJsSdkError } from "../internal";
 
 /**
  * React Context provider values for `<LiveShareProvider>`.
@@ -158,6 +159,17 @@ export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
             console.error(error);
             if (error instanceof Error) {
                 setJoinError(error);
+            } else if (isITeamsJsSdkError(error)) {
+                setJoinError(
+                    new Error(
+                        `[${error.errorCode}] ${
+                            error.message ??
+                            "An unknown error occurred while joining container."
+                        }`
+                    )
+                );
+            } else if (typeof error == "string") {
+                setJoinError(new Error(error));
             } else {
                 setJoinError(
                     new Error(

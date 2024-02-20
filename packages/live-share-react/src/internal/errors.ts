@@ -52,6 +52,22 @@ export class ActionLiveDataObjectInitializedError extends UseLiveDataObjectActio
 /**
  * @hidden
  */
+export interface ITeamsJsSdkError {
+    /**
+     * error code
+     */
+    errorCode: number;
+    /**
+     * Optional description for the error. This may contain useful information for web-app developers.
+     * This string will not be localized and is not for end-user consumption.
+     * App should not depend on the string content. The exact value may change. This is only for debugging purposes.
+     */
+    message?: string;
+}
+
+/**
+ * @hidden
+ */
 function toFirstLetterUppercase(word: string) {
     return word[0].toUpperCase() + word.substring(1);
 }

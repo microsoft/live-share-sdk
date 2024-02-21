@@ -133,11 +133,23 @@ export class GroupTransportState extends EventEmitter {
             return false;
         }
 
+        // Trigger transport change
+        const playerState = this._getMediaPlayerState().playbackState;
+        console.log(
+            "changed\n",
+            "state:",
+            state,
+            "\nsource:",
+            source,
+            "\ncurrent:",
+            this.current,
+            "\nplayerState:",
+            playerState
+        );
+
         // Update playback state
         this._current = state;
 
-        // Trigger transport change
-        const playerState = this._getMediaPlayerState().playbackState;
         if (
             originalState.playbackState == state.playbackState &&
             playerState != "ended"
@@ -149,6 +161,7 @@ export class GroupTransportState extends EventEmitter {
                 seekTime: state.startPosition,
                 source,
             };
+            console.log("  1");
             this.emit(GroupTransportStateEvents.transportStateChange, event);
         } else if (state.playbackState == "playing") {
             const now = this._liveRuntime.getTimestamp();
@@ -162,6 +175,7 @@ export class GroupTransportState extends EventEmitter {
                 seekTime: projectedPosition,
                 source,
             };
+            console.log("  2");
             this.emit(GroupTransportStateEvents.transportStateChange, event);
         } else {
             const event: ITransportStateChangeEvent = {
@@ -171,6 +185,7 @@ export class GroupTransportState extends EventEmitter {
                 seekTime: state.startPosition,
                 source,
             };
+            console.log("  3");
             this.emit(GroupTransportStateEvents.transportStateChange, event);
         }
 

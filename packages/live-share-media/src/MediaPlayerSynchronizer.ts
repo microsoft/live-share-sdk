@@ -182,6 +182,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                             this._mediaSession.coordinator.canPlayPause &&
                             this._player.currentTime < 1.0
                         ) {
+                            console.log("playing bc tap");
                             this._logger.sendTelemetryEvent(
                                 TelemetryEvents.MediaPlayerSynchronizer
                                     .UserTappedVideoToPlay
@@ -202,6 +203,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                         this._expectedPlaybackState === "paused" &&
                         !this._mediaSession.coordinator.isSuspended
                     ) {
+                        console.log("blocking play to pause ex");
                         this._player.pause();
                     }
 
@@ -212,6 +214,7 @@ export class MediaPlayerSynchronizer extends EventEmitter {
                         this._expectedPlaybackState === "none" &&
                         !this._mediaSession.coordinator.isSuspended
                     ) {
+                        console.log("blocking play to none ex");
                         this._player.pause();
                     }
                     break;
@@ -495,26 +498,21 @@ export class MediaPlayerSynchronizer extends EventEmitter {
      * Ends synchronization of the current media player.
      */
     public end(): void {
-        if (this._onEnd) {
-            try {
-                // Clear media session actions
-                for (const action of MediaPlayerSynchronizer.SESSION_ACTIONS) {
-                    this._mediaSession.setActionHandler(action, null);
-                }
-
-                // Subscribe to player events
-                for (const event of MediaPlayerSynchronizer.PLAYER_EVENTS) {
-                    this._player.removeEventListener(
-                        event,
-                        this._onPlayerEvent
-                    );
-                }
-
-                // Notify parent
-                this._onEnd();
-            } finally {
-                this._onEnd = undefined;
+        try {
+            // Clear media session actions
+            for (const action of MediaPlayerSynchronizer.SESSION_ACTIONS) {
+                this._mediaSession.setActionHandler(action, null);
             }
+
+            // Subscribe to player events
+            for (const event of MediaPlayerSynchronizer.PLAYER_EVENTS) {
+                this._player.removeEventListener(event, this._onPlayerEvent);
+            }
+
+            // Notify parent
+            this._onEnd?.();
+        } finally {
+            this._onEnd = undefined;
         }
     }
 

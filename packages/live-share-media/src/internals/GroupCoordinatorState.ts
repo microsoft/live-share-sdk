@@ -610,15 +610,27 @@ export class GroupCoordinatorState extends EventEmitter {
 
     public async syncLocalMediaSession(): Promise<void> {
         // Skip further syncs if we're waiting or in a "soft suspension".
+        let { metadata, trackData, positionState, playbackState } =
+            this._getMediaPlayerState();
         const softSuspensionDelta =
             this._liveRuntime.getTimestamp() - this._lastStateChangeTime;
         if (!this.isWaiting && softSuspensionDelta >= 1000) {
-            let { metadata, trackData, positionState, playbackState } =
-                this._getMediaPlayerState();
+            console.log(
+                "--GroupCoordinatorState:",
+                "\npositionState:",
+                positionState,
+                "\nmetadata:",
+                metadata,
+                "\nplaybackState:",
+                playbackState,
+                "\ncurrent transport state:",
+                this._transportState.current,
+                "\n_playbackPosition.trackEnded:",
+                this._playbackPosition.trackEnded
+            );
             this._logger.sendTelemetryEvent(
                 TelemetryEvents.GroupCoordinator.CheckingForSyncIssues
             );
-
             // Check for track change
             if (!this.playbackTrack.compare(metadata)) {
                 this._logger.sendTelemetryEvent(
@@ -631,7 +643,6 @@ export class GroupCoordinatorState extends EventEmitter {
                 );
                 return;
             }
-
             // Once local playback has ended there's no need to further sync the client. In fact
             // doing so could cause the player to loop.
             // - The playbackPosition.trackEnded check is to catch late joiners and prevents syncing if everyone
@@ -639,15 +650,14 @@ export class GroupCoordinatorState extends EventEmitter {
             // - Should another user seek or press play after the video has ended that will cause
             //   a transport action to trigger which will take the player out of the ended state.
             if (
-                playbackState != "ended" &&
-                !this._playbackPosition.trackEnded
+                playbackState != "ended"
+                // && !this._playbackPosition.trackEnded
             ) {
                 // Ensure we have a position
                 let position = positionState?.position;
                 if (position == undefined) {
                     position = 0.0;
                 }
-
                 // Check for catchup
                 // - Target can return -1 in cases where there is no position tracking data
                 const target = this.playbackPosition.targetPosition;
@@ -676,77 +686,74 @@ export class GroupCoordinatorState extends EventEmitter {
                         seekTime: target,
                     });
                 }
-
-                const localClientId = await waitUntilConnected(this._runtime);
-                // Sync transport state
-                if (this.transportState.playbackState != playbackState) {
-                    this._logger.sendTelemetryEvent(
-                        TelemetryEvents.GroupCoordinator.TransportOutOfSync,
-                        null,
-                        {
-                            current: playbackState,
-                            target: this.transportState.playbackState,
-                        }
-                    );
-                    const local =
-                        localClientId === this.transportState.current.clientId;
-                    switch (this.transportState.playbackState) {
-                        case "playing":
-                            this.emitTriggerAction({
-                                action: "play",
-                                source: "system",
-                                clientId: this.transportState.current.clientId,
-                                local,
-                            });
-                            break;
-                        case "paused":
-                            this.emitTriggerAction({
-                                action: "pause",
-                                source: "system",
-                                clientId: this.transportState.current.clientId,
-                                local,
-                            });
-                            break;
+            }
+        }
+        const localClientId = await waitUntilConnected(this._runtime);
+        if (playbackState != "ended") {
+            // Sync transport state
+            if (this.transportState.playbackState != playbackState) {
+                this._logger.sendTelemetryEvent(
+                    TelemetryEvents.GroupCoordinator.TransportOutOfSync,
+                    null,
+                    {
+                        current: playbackState,
+                        target: this.transportState.playbackState,
                     }
-                }
-
-                // Sync track data
-                if (
-                    JSON.stringify(this.playbackTrackData.data) !=
-                    JSON.stringify(trackData)
-                ) {
-                    this._logger.sendTelemetryEvent(
-                        TelemetryEvents.GroupCoordinator.TrackDataOutOfSync
-                    );
-                    const local =
-                        localClientId ===
-                        this.playbackTrackData.current.clientId;
-                    this.emitTriggerAction({
-                        action: "datachange",
-                        source: "system",
-                        clientId: this.playbackTrackData.current.clientId,
-                        local,
-                        data: this.playbackTrackData.data,
-                    });
-                }
-
-                // Sync playback rate
-                if (this.playbackRate.rate != positionState?.playbackRate) {
-                    this._logger.sendTelemetryEvent(
-                        TelemetryEvents.GroupCoordinator.PlaybackRateOutOfSync
-                    );
-                    const local =
-                        localClientId ===
-                        this.playbackTrackData.current.clientId;
-                    this.emitTriggerAction({
-                        action: "ratechange",
-                        source: "system",
-                        clientId: this.playbackTrackData.current.clientId,
-                        local,
-                        playbackRate: this.playbackRate.rate,
-                    });
+                );
+                const local =
+                    localClientId === this.transportState.current.clientId;
+                switch (this.transportState.playbackState) {
+                    case "playing":
+                        this.emitTriggerAction({
+                            action: "play",
+                            source: "system",
+                            clientId: this.transportState.current.clientId,
+                            local,
+                        });
+                        break;
+                    case "paused":
+                        this.emitTriggerAction({
+                            action: "pause",
+                            source: "system",
+                            clientId: this.transportState.current.clientId,
+                            local,
+                        });
+                        break;
                 }
             }
+        }
+        // Sync track data
+        if (
+            JSON.stringify(this.playbackTrackData.data) !=
+            JSON.stringify(trackData)
+        ) {
+            this._logger.sendTelemetryEvent(
+                TelemetryEvents.GroupCoordinator.TrackDataOutOfSync
+            );
+            const local =
+                localClientId === this.playbackTrackData.current.clientId;
+            this.emitTriggerAction({
+                action: "datachange",
+                source: "system",
+                clientId: this.playbackTrackData.current.clientId,
+                local,
+                data: this.playbackTrackData.data,
+            });
+        }
+        // Sync playback rate
+        if (this.playbackRate.rate != positionState?.playbackRate) {
+            this._logger.sendTelemetryEvent(
+                TelemetryEvents.GroupCoordinator.PlaybackRateOutOfSync
+            );
+            const local =
+                localClientId === this.playbackTrackData.current.clientId;
+            this.emitTriggerAction({
+                action: "ratechange",
+                source: "system",
+                clientId: this.playbackTrackData.current.clientId,
+                local,
+                playbackRate: this.playbackRate.rate,
+            });
         }
     }
 

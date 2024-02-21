@@ -58,6 +58,7 @@ export class GroupPlaybackTrack extends EventEmitter {
         // Populate with sessions current metadata if null
         if (!this._current.metadata) {
             this._current.metadata = this._getMediaPlayerState().metadata;
+            console.log(this._current);
         }
 
         return this._current;

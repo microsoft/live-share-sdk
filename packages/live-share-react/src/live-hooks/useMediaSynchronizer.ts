@@ -220,6 +220,10 @@ export function useMediaSynchronizer(
             synchronizer.mediaSession.coordinator.canSendPositionUpdates =
                 canSendPositionUpdates;
         }
+        console.log(
+            "mounting useMediaSynchronizer",
+            mediaSession.initializeState
+        );
 
         if (
             mediaSession.initializeState ===
@@ -231,13 +235,17 @@ export function useMediaSynchronizer(
             mediaSession.onLocalUserAllowed(async () => {
                 if (!mounted) return;
                 try {
-                    if (isExtendedMediaMetadata(initialTrack)) {
-                        await synchronizer.setTrack(initialTrack);
-                    } else if (typeof initialTrack === "string") {
-                        await synchronizer.setTrack({
-                            trackIdentifier: initialTrack,
-                        } as ExtendedMediaMetadata);
-                    }
+                    synchronizer.mediaSession.coordinator.sendPositionUpdate(
+                        synchronizer.mediaSession.getCurrentPlayerState()
+                    );
+                    // await synchronizer.pause();
+                    // if (isExtendedMediaMetadata(initialTrack)) {
+                    //     await synchronizer.setTrack(initialTrack);
+                    // } else if (typeof initialTrack === "string") {
+                    //     await synchronizer.setTrack({
+                    //         trackIdentifier: initialTrack,
+                    //     } as ExtendedMediaMetadata);
+                    // }
                 } catch (err) {
                     console.error(err);
                 }
@@ -250,7 +258,7 @@ export function useMediaSynchronizer(
             synchronizer.removeAllListeners();
             mediaSession.removeAllListeners();
             synchronizer?.end();
-            mediaSession?.dispose();
+            mediaSession?.end();
         };
     }, [mediaSession, mediaPlayerElement]);
 

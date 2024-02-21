@@ -200,6 +200,35 @@ export class LiveMediaSession extends LiveDataObject {
         });
     }
 
+    /**
+     * Callback to get the state of the media player.
+     *
+     * @remarks
+     * Must have called `setRequestPlayerStateHandler` before calling this API.
+     * This is done automatically if you use `MediaPlayerSynchronizer`.
+     *
+     * @returns media player state
+     */
+    public getCurrentPlayerState(): IMediaPlayerState {
+        if (!this._requestPlayerStateHandler) {
+            throw new Error(
+                "LiveMediaSession:getCurrentPlayerState - no `requestPlayerStateHandler` callback configured.\nTo fix this error, ensure `setRequestPlayerStateHandler()` has been set with a delegate to retrieve your player's state, or use the `synchronize()` function to create a new `MediaPlayerSynchronizer` instance tied to your `IMediaPlayer` instance."
+            );
+        }
+
+        return this._requestPlayerStateHandler();
+    }
+
+    /**
+     * Stop synchronizing media events and checking for updates
+     */
+    public end() {
+        this.removeAllListeners();
+        if (!this._updateTimer) return;
+        clearInterval(this._updateTimer);
+        this._updateTimer = undefined;
+    }
+
     protected async hasInitialized(): Promise<void> {
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
@@ -318,16 +347,6 @@ export class LiveMediaSession extends LiveDataObject {
                 });
             }
         }
-    }
-
-    private getCurrentPlayerState(): IMediaPlayerState {
-        if (!this._requestPlayerStateHandler) {
-            throw new Error(
-                "LiveMediaSession:getCurrentPlayerState - no `requestPlayerStateHandler` callback configured.\nTo fix this error, ensure `setRequestPlayerStateHandler()` has been set with a delegate to retrieve your player's state, or use the `synchronize()` function to create a new `MediaPlayerSynchronizer` instance tied to your `IMediaPlayer` instance."
-            );
-        }
-
-        return this._requestPlayerStateHandler();
     }
 
     private dispatchAction(

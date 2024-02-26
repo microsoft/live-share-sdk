@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-media",
-    "version": "2.0.0-internal.1",
+    "version": "2.0.0-internal.2",
     "description": "Live Share classes that synchronize media playback across clients.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -15,7 +15,7 @@
         "test:race": "node ./../live-share/test-for-race-conditions.js"
     },
     "devDependencies": {
-        "@microsoft/live-share": "2.0.0-internal.1",
+        "@microsoft/live-share": "2.0.0-internal.2",
         "@fluidframework/test-runtime-utils": "^2.0.0-rc.1",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
@@ -27,7 +27,7 @@
         "typescript": "^5.0.4"
     },
     "peerDependencies": {
-        "@microsoft/live-share": "2.0.0-internal.1",
+        "@microsoft/live-share": "2.0.0-internal.2",
         "fluid-framework": "^2.0.0-rc || ^2.0.0-internal"
     },
     "repository": {

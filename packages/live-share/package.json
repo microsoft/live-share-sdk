@@ -33,7 +33,7 @@
         "typescript": "^5.0.4"
     },
     "peerDependencies": {
-        "fluid-framework": "^2.0.0-rc.1"
+        "fluid-framework": "^2.0.0-rc || ^2.0.0-internal"
     },
     "repository": {
         "directory": "packages/live-share",

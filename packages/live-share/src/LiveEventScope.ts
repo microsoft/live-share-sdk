@@ -10,7 +10,7 @@ import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { waitUntilConnected } from "./internals";
+import { isILiveEvent, waitUntilConnected } from "./internals";
 
 /**
  * Live event callback.
@@ -90,11 +90,11 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             // spoofed.
             const clientId = message.clientId;
 
-            // TODO: validate type is correct, casting from unknown
-            const content = message.content as ILiveEvent<any>;
-            content.clientId = clientId;
-
-            this.emitToListeners(clientId, content, local);
+            if (isILiveEvent(message.content)) {
+                const content = message.content;
+                content.clientId = clientId;
+                this.emitToListeners(clientId, content, local);
+            }
         });
     }
 

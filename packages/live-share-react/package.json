@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/live-share-react",
-  "version": "2.0.0-beta.1-preview.0",
+  "version": "2.0.0-internal.1-preview.0",
   "description": "Build collaborative React apps using Microsoft's Fluid & Live Share frameworks with ease.",
   "author": "Microsoft",
   "license": "SEE LICENSE IN LICENSE",
@@ -12,15 +12,15 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@microsoft/live-share-turbo": "2.0.0-beta.1-preview.0",
+    "@microsoft/live-share-turbo": "2.0.0-internal.1-preview.0",
     "url": "^0.11.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.21.8",
-    "@microsoft/live-share": "2.0.0-beta.1",
-    "@microsoft/live-share-canvas": "2.0.0-beta.1",
-    "@microsoft/live-share-media": "2.0.0-beta.1",
+    "@microsoft/live-share": "2.0.0-internal.1",
+    "@microsoft/live-share-canvas": "2.0.0-internal.1",
+    "@microsoft/live-share-media": "2.0.0-internal.1",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/uuid": "^9.0.1",
@@ -29,9 +29,9 @@
     "typescript": "^5.0.4"
   },
   "peerDependencies": {
-    "@microsoft/live-share": "2.0.0-beta.1",
-    "@microsoft/live-share-canvas": "2.0.0-beta.1",
-    "@microsoft/live-share-media": "2.0.0-beta.1",
+    "@microsoft/live-share": "2.0.0-internal.1",
+    "@microsoft/live-share-canvas": "2.0.0-internal.1",
+    "@microsoft/live-share-media": "2.0.0-internal.1",
     "fluid-framework": "^2.0.0-rc || ^2.0.0-internal",
     "react": "^16.8.0 || ^17 || ^18",
     "react-dom": "^16.8.0 || ^17 || ^18"

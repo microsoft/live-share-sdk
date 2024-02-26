@@ -3,7 +3,7 @@ import { LiveState } from "./LiveState";
 import { ILivePresenceEvents, LivePresence } from "./LivePresence";
 import { DataObjectFactory } from "@fluidframework/aqueduct";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
-import { assert } from "@fluidframework/common-utils";
+import { assert } from "@fluidframework/core-utils";
 import { LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LivePresenceUser, PresenceState } from "./LivePresenceUser";
@@ -674,11 +674,11 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
     /**
      * Disposes of the object when its container is disposed of.
      */
-    public dispose(): void {
-        super.dispose();
-        this.presence.dispose();
-        this.presentingUserIdState.dispose();
-    }
+    // public dispose(): void {
+    //     super.dispose();
+    //     this.presence.dispose();
+    //     this.presentingUserIdState.dispose();
+    // }
 
     /**
      * initializingFirstTime is run only once by the first client to create the DataObject. Here we use it to

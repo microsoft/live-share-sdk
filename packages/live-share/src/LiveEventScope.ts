@@ -4,15 +4,13 @@
  */
 
 import EventEmitter from "events";
-import {
-    IErrorEvent,
-    ITelemetryLogger,
-} from "@fluidframework/common-definitions";
-import { TypedEventEmitter } from "@fluidframework/common-utils";
+import { IErrorEvent } from "@fluidframework/core-interfaces";
+import { ITelemetryLoggerExt } from "@fluidframework/telemetry-utils";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { waitUntilConnected } from "./internals";
+import { isILiveEvent, waitUntilConnected } from "./internals";
 
 /**
  * Live event callback.
@@ -32,7 +30,7 @@ export type LiveEventListener<TEvent> = (
 export interface IRuntimeSignaler {
     readonly clientId: string | undefined;
     readonly connected: boolean;
-    readonly logger: ITelemetryLogger;
+    readonly logger: ITelemetryLoggerExt;
     on(event: "connected", listener: (clientId: string) => void): this;
     off(event: "connected", listener: (clientId: string) => void): this;
     on(
@@ -91,9 +89,12 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
             // We'll overwrite the contents clientId with the messages clientId which can't be
             // spoofed.
             const clientId = message.clientId;
-            message.content.clientId = clientId;
 
-            this.emitToListeners(clientId, message.content, local);
+            if (isILiveEvent(message.content)) {
+                const content = message.content;
+                content.clientId = clientId;
+                this.emitToListeners(clientId, content, local);
+            }
         });
     }
 

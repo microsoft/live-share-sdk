@@ -721,7 +721,7 @@ export class LiveCanvas extends LiveDataObject {
 
                     try {
                         if (!local) {
-                            if (op.contents.type === "clear") {
+                            if (isClearEvent(op.contents)) {
                                 inkingManager.clear();
                             }
                         }
@@ -1016,6 +1016,14 @@ class LivePointerInputProvider extends InputProvider {
     get pointerLeave(): IMulticastEvent<IPointerEvent> {
         return this.delegate.pointerLeave;
     }
+}
+
+function isClearEvent(value: any): boolean {
+    return (
+        typeof value === "object" &&
+        typeof value.type === "string" &&
+        value.type === ClearEvent
+    );
 }
 
 /**

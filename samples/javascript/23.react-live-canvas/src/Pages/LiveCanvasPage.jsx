@@ -1,6 +1,5 @@
 import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import { LiveCanvas, InkingTool } from "@microsoft/live-share-canvas";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useLiveCanvas } from "../utils/useLiveCanvas";
 

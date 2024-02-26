@@ -24,6 +24,7 @@
         "web-vitals": "^3.1.1"
     },
     "devDependencies": {
+        "@fluidframework/test-runtime-utils": "^2.0.0-rc.1",
         "@typescript-eslint/eslint-plugin": "^5.59.2",
         "@typescript-eslint/parser": "^5.59.7",
         "@vitejs/plugin-react": "^3.0.1",

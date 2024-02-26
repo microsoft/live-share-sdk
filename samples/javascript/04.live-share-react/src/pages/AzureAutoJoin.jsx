@@ -1,4 +1,4 @@
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { InsecureTokenProvider } from "@fluidframework/test-runtime-utils";
 import { AzureProvider } from "@microsoft/live-share-react";
 import { SharedMap } from "fluid-framework";
 import {

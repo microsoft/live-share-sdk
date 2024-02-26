@@ -4,7 +4,6 @@
  */
 
 import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
 import { SharedMap } from "fluid-framework";

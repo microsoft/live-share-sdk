@@ -1,4 +1,4 @@
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
+import { InsecureTokenProvider } from "@fluidframework/test-runtime-utils";
 import { AzureProvider } from "@microsoft/live-share-react";
 import { SharedMap } from "fluid-framework";
 import {
@@ -14,6 +14,7 @@ const azureClientOptions: AzureClientProps = {
         type: "local",
         tokenProvider: new InsecureTokenProvider("", {
             id: "123",
+            name: "123",
         }),
         endpoint: "http://localhost:7070",
     },

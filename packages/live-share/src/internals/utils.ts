@@ -139,14 +139,14 @@ export function timeoutRequest<TResult>(
 }
 
 /**
- * Dynamically import InsecureTokenProvider class, in case developer does not yet have "@fluidframework/test-client-utils",
+ * Dynamically import InsecureTokenProvider class, in case developer does not yet have "@fluidframework/test-runtime-utils",
  * since don't want to require that they include it in package.json.
  * @hidden
  */
 export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
     try {
         const { InsecureTokenProvider } =
-            await require("@fluidframework/test-client-utils");
+            await require("@fluidframework/test-runtime-utils");
         const userIdParam = new URL(window.location.href)?.searchParams?.get(
             "userId"
         );
@@ -157,7 +157,7 @@ export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
         return tokenProvider as ITokenProvider;
     } catch {
         throw new Error(
-            "@microsoft/live-share: when using 'local' connection type, you must have @fluidframework/test-client-utils installed"
+            "@microsoft/live-share: when using 'local' connection type, you must have @fluidframework/test-runtime-utils installed"
         );
     }
 }

@@ -3,17 +3,12 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    ILiveShareClientOptions,
-    LiveShareClient,
-    TestLiveShareHost,
-} from "@microsoft/live-share";
+import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import {
     InkingManager,
     InputFilter,
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 
 const containerSchema = {

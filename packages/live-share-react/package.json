@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/live-share-react",
-  "version": "2.0.0-internal.1-preview.0",
+  "version": "2.0.0-internal.1",
   "description": "Build collaborative React apps using Microsoft's Fluid & Live Share frameworks with ease.",
   "author": "Microsoft",
   "license": "SEE LICENSE IN LICENSE",
@@ -12,7 +12,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@microsoft/live-share-turbo": "2.0.0-internal.1-preview.0",
+    "@microsoft/live-share-turbo": "2.0.0-internal.1",
     "url": "^0.11.0",
     "uuid": "^9.0.0"
   },

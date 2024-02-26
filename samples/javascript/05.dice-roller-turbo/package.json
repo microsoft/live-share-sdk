@@ -18,7 +18,7 @@
     },
     "dependencies": {
         "@microsoft/live-share": "2.0.0-internal.1",
-        "@microsoft/live-share-turbo": "2.0.0-internal.1-preview.0",
+        "@microsoft/live-share-turbo": "2.0.0-internal.1",
         "@microsoft/teams-js": "^2.16.0",
         "fluid-framework": "^2.0.0-rc.1"
     },

@@ -6,9 +6,11 @@
 import { TestLiveMediaSession, TestMediaTimeStampProvider } from "./TestUtils";
 import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { strict as assert } from "assert";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
-import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import {
+    ITestObjectProvider,
+    fluidEntryPoint,
+    getContainerEntryPointBackCompat,
+} from "@fluidframework/test-utils";
 import {
     ITimestampProvider,
     LiveEventScope,
@@ -25,6 +27,7 @@ import {
     ExtendedMediaSessionActionDetails,
 } from "../MediaSessionExtensions";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import { describeCompat } from "@live-share-private/test-utils";
 
 async function getObjects(
     getTestObjectProvider,
@@ -59,17 +62,18 @@ async function getObjects(
 
     let provider: ITestObjectProvider = getTestObjectProvider();
 
-    let container1 = await provider.createContainer(ObjectProxy1.factory);
-    let object1 = await requestFluidObject<TestLiveMediaSession>(
-        container1,
-        "default"
+    let container1 = await provider.createContainer(
+        ObjectProxy1.factory as fluidEntryPoint
+    );
+    let object1 = await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+        container1
     );
     object1.coordinator.positionUpdateInterval = 0.02;
-
-    let container2 = await provider.loadContainer(ObjectProxy2.factory);
-    let object2 = await requestFluidObject<TestLiveMediaSession>(
-        container2,
-        "default"
+    let container2 = await provider.loadContainer(
+        ObjectProxy2.factory as fluidEntryPoint
+    );
+    let object2 = await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+        container2
     );
     object2.coordinator.positionUpdateInterval = 0.02;
 
@@ -104,8 +108,8 @@ async function getObjects(
         (host as TestLiveShareHost).addClient(clientId, roles);
     };
     const dispose = () => {
-        object1.dispose();
-        object2.dispose();
+        // object1.dispose();
+        // object2.dispose();
         container1.disconnect?.();
         container2.disconnect?.();
         liveRuntime1.stop();
@@ -119,7 +123,7 @@ async function getObjects(
     };
 }
 
-describeNoCompat(
+describeCompat(
     "LiveMediaSession Manual Action Handlers (mostly testing coordinator)",
     (getTestObjectProvider) => {
         it("should send 'positionUpdate' event when someone joins.", async () => {

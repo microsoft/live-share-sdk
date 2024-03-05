@@ -26,7 +26,7 @@ function createCompatSuite(
     ) => void
 ): (this: Mocha.Suite) => void {
     return function (this: Mocha.Suite) {
-        describe("testing todo describe name",  () => {
+        describe(`Fluid Test: ${this.title}`,  () => {
             let provider: ITestObjectProvider;
             let resetAfterEach: boolean;
             const apis: CompatApis = getVersionedApis();

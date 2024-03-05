@@ -297,6 +297,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
         await waitForDelay(1);
 
         assert(
+            // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
             object2PresenceChangeCount == 4,
             `expected 4 events from object2, ${object2PresenceChangeCount}`
         );
@@ -305,6 +306,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             `expected two events from object2 that was online, ${object2PresenceChangeOnlineCount}`
         );
         assert(
+            // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
             object2PresenceChangeOfflineCount == 2,
             `expected two events from object2 that was offline, ${object2PresenceChangeOfflineCount}`
         );

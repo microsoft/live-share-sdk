@@ -5,14 +5,10 @@
 
 import { strict as assert } from "assert";
 import {
-    DataObjectFactoryType,
-    ITestContainerConfig,
-    ITestFluidObject,
     ITestObjectProvider,
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils";
-// import { describeCompat } from "@fluid-private/test-version-utils";
 import { LiveEvent } from "../LiveEvent";
 import { Deferred } from "../internals";
 import { MockTimestampProvider } from "./MockTimestampProvider";

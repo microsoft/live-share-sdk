@@ -4,9 +4,11 @@
  */
 
 import { strict as assert } from "assert";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
-import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import {
+    ITestObjectProvider,
+    fluidEntryPoint,
+    getContainerEntryPointBackCompat,
+} from "@fluidframework/test-utils";
 import { LivePresence } from "../LivePresence";
 import { PresenceState } from "../LivePresenceUser";
 import { waitForDelay } from "../internals";
@@ -22,6 +24,7 @@ import {
 import { TestLiveShareHost } from "../TestLiveShareHost";
 import { getLiveDataObjectClass } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
+import { describeCompat } from "@live-share-private/test-utils";
 
 class TestLivePresence<
     TData extends object = object
@@ -58,17 +61,19 @@ async function getObjects(
 
     let provider: ITestObjectProvider = getTestObjectProvider();
 
-    let container1 = await provider.createContainer(ObjectProxy1.factory);
-    let object1 = await requestFluidObject<TestLivePresence<{ foo: string }>>(
-        container1,
-        "default"
+    let container1 = await provider.createContainer(
+        ObjectProxy1.factory as fluidEntryPoint
     );
+    let object1 = await getContainerEntryPointBackCompat<
+        TestLivePresence<{ foo: string }>
+    >(container1);
 
-    let container2 = await provider.loadContainer(ObjectProxy2.factory);
-    let object2 = await requestFluidObject<TestLivePresence<{ foo: string }>>(
-        container2,
-        "default"
+    let container2 = await provider.loadContainer(
+        ObjectProxy2.factory as fluidEntryPoint
     );
+    let object2 = await getContainerEntryPointBackCompat<
+        TestLivePresence<{ foo: string }>
+    >(container2);
     // need to be connected to send signals
     if (!container1.connect) {
         await new Promise((resolve) => container1.once("connected", resolve));
@@ -78,20 +83,20 @@ async function getObjects(
     }
 
     const disposeAll = () => {
-        object1.dispose();
-        object2.dispose();
+        // object1.dispose();
+        // object2.dispose();
         container1.disconnect?.();
         container2.disconnect?.();
         liveRuntime1.stop();
         liveRuntime2.stop();
     };
     const disposeObject1 = () => {
-        object1.dispose();
+        // object1.dispose();
         container1.disconnect?.();
         liveRuntime1.stop();
     };
     const disposeObject2 = () => {
-        object2.dispose();
+        // object2.dispose();
         container2.disconnect?.();
         liveRuntime2.stop();
     };
@@ -104,7 +109,7 @@ async function getObjects(
     };
 }
 
-describeNoCompat("LivePresence", (getTestObjectProvider) => {
+describeCompat("LivePresence", (getTestObjectProvider) => {
     it("Should exchange initial presence information", async () => {
         const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider

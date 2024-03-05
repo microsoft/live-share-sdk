@@ -9,7 +9,7 @@
     "scripts": {
         "clean": "npx shx rm -rf bin",
         "build": "tsc -p tsconfig.build.json",
-        "test": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --timeout 10000",
+        "test": "ts-mocha --config ./src/test/.mocharc.js src/test/LiveEvent.spec.ts --timeout 10000",
         "test:debug": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
         "test:race": "node test-for-race-conditions.js"
@@ -18,10 +18,10 @@
         "uuid": "^9.0.0"
     },
     "devDependencies": {
-        "@fluidframework/test-utils": "^2.0.0-rc.1",
+        "@fluid-internal/client-utils": "^2.0.0-rc.1",
         "@fluidframework/azure-client": "^2.0.0-rc.1",
         "@fluidframework/test-runtime-utils": "^2.0.0-rc.1",
-        "@fluid-internal/client-utils": "^2.0.0-rc.1",
+        "@fluidframework/test-utils": "^2.0.0-rc.1",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",

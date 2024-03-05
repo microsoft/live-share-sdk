@@ -1,0 +1,89 @@
+{
+	"name": "@fluid-private/test-drivers",
+	"version": "2.0.0-rc.2.0.0",
+	"description": "A driver abstraction and implementations for testing against server",
+	"homepage": "https://fluidframework.com",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/microsoft/FluidFramework.git",
+		"directory": "packages/test/test-drivers"
+	},
+	"license": "MIT",
+	"author": "Microsoft and contributors",
+	"sideEffects": false,
+	"main": "./bin/index.js",
+    "types": "./bin/index.d.ts",
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"eslint": "eslint --format stylish src",
+		"eslint:fix": "eslint --format stylish src --fix --fix-type problem,suggestion,layout",
+		"format": "npm run prettier:fix",
+		"lint": "npm run prettier && npm run check:release-tags && npm run eslint",
+		"lint:fix": "npm run prettier:fix && npm run eslint:fix",
+		"prettier": "prettier --check . --cache --ignore-path ../../../.prettierignore",
+		"prettier:fix": "prettier --write . --cache --ignore-path ../../../.prettierignore",
+		"tsc": "tsc"
+	},
+	"c8": {
+		"all": true,
+		"cache-dir": "nyc/.cache",
+		"exclude": [
+			"src/test/**/*.*ts",
+			"dist/test/**/*.*js"
+		],
+		"exclude-after-remap": false,
+		"include": [
+			"src/**/*.*ts",
+			"dist/**/*.*js"
+		],
+		"report-dir": "nyc/report",
+		"reporter": [
+			"cobertura",
+			"html",
+			"text"
+		],
+		"temp-directory": "nyc/.nyc_output"
+	},
+	"dependencies": {
+		"@fluidframework/core-interfaces": "^2.0.0-rc.1",
+		"@fluidframework/core-utils": "^2.0.0-rc.1",
+		"@fluidframework/driver-definitions": "^2.0.0-rc.1",
+		"@fluidframework/driver-utils": "^2.0.0-rc.1",
+		"@fluidframework/local-driver": "^2.0.0-rc.1",
+		"@fluidframework/odsp-doclib-utils": "^2.0.0-rc.1",
+		"@fluidframework/odsp-driver": "^2.0.0-rc.1",
+		"@fluidframework/odsp-driver-definitions": "^2.0.0-rc.1",
+		"@fluidframework/odsp-urlresolver": "^2.0.0-rc.1",
+		"@fluidframework/protocol-definitions": "^3.2.0-237840",
+		"@fluidframework/routerlicious-driver": "^2.0.0-rc.1",
+		"@fluidframework/server-local-server": "^3.1.0-237980",
+		"@fluidframework/test-driver-definitions": "^2.0.0-rc.1",
+		"@fluidframework/test-runtime-utils": "^2.0.0-rc.1",
+		"@fluidframework/tinylicious-driver": "^2.0.0-rc.1",
+		"@fluidframework/tool-utils": "^2.0.0-rc.1",
+		"agentkeepalive": "^4.5.0",
+		"axios": "^1.6.2",
+		"semver": "^7.5.3",
+		"uuid": "^9.0.0"
+	},
+	"devDependencies": {
+		"@arethetypeswrong/cli": "^0.13.3",
+		"@fluid-tools/build-cli": "^0.34.0",
+		"@fluidframework/build-common": "^2.0.3",
+		"@fluidframework/build-tools": "^0.34.0",
+		"@fluidframework/eslint-config-fluid": "^3.5.0",
+		"@microsoft/api-extractor": "^7.39.1",
+		"@types/node": "^18.19.0",
+		"@types/uuid": "^9.0.2",
+		"c8": "^8.0.1",
+		"copyfiles": "^2.4.1",
+		"eslint": "~8.50.0",
+		"prettier": "~3.0.3",
+		"rimraf": "^4.4.0",
+		"typescript": "~5.1.6"
+	},
+	"typeValidation": {
+		"disabled": true,
+		"broken": {}
+	}
+}

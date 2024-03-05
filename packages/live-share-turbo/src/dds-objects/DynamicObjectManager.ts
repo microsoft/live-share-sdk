@@ -21,7 +21,7 @@ DynamicObjectRegistry.registerObjectClass(
 );
 
 type DynamicObjectsCollection = ConsensusRegisterCollection<IFluidHandle<any>>;
-const dynamicObjectsCollectionKey = "<<consensusRegisterCollectionKey>>";
+const dynamicObjectsCollectionKey = "liveShareConsensusRegisterCollectionKey";
 
 /**
  * Fluid DataObject used in `FluidTurboClient` for the purposes of dynamically loading DDSes.

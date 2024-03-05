@@ -4,9 +4,9 @@
  */
 
 import {
-	LocalDocumentServiceFactory,
-	LocalResolver,
-	createLocalResolverCreateNewRequest,
+    LocalDocumentServiceFactory,
+    LocalResolver,
+    createLocalResolverCreateNewRequest,
 } from "@fluidframework/local-driver";
 import { LocalDeltaConnectionServer } from "@fluidframework/server-local-server";
 
@@ -14,10 +14,10 @@ import { LocalDeltaConnectionServer } from "@fluidframework/server-local-server"
  * @internal
  */
 export const LocalDriverApi = {
-	LocalDocumentServiceFactory,
-	LocalDeltaConnectionServer,
-	LocalResolver,
-	createLocalResolverCreateNewRequest,
+    LocalDocumentServiceFactory,
+    LocalDeltaConnectionServer,
+    LocalResolver,
+    createLocalResolverCreateNewRequest,
 };
 
 /**

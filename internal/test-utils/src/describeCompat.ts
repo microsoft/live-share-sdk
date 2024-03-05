@@ -26,16 +26,15 @@ function createCompatSuite(
     ) => void
 ): (this: Mocha.Suite) => void {
     return function (this: Mocha.Suite) {
-        describe(`Fluid Test: ${this.title}`,  () => {
+        describe(`Fluid Test: ${this.title}`, () => {
             let provider: ITestObjectProvider;
             let resetAfterEach: boolean;
             const apis: CompatApis = getVersionedApis();
 
             before(async function () {
                 try {
-                    provider = await getVersionedTestObjectProviderFromApis(
-                        apis
-                    );
+                    provider =
+                        await getVersionedTestObjectProviderFromApis(apis);
                 } catch (error) {
                     const logger = createChildLogger({
                         logger: getTestLogger?.(),

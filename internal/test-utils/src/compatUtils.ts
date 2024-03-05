@@ -3,9 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import {
-    IFluidLoadable,
-} from "@fluidframework/core-interfaces";
+import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import {
     IFluidDataStoreContext,
     IFluidDataStoreFactory,
@@ -113,7 +111,7 @@ export const getDataStoreFactory =
  * @internal
  */
 export async function getVersionedTestObjectProviderFromApis(
-    apis: Omit<CompatApis, "dds">,
+    apis: Omit<CompatApis, "dds">
 ) {
     const driver = new LocalServerTestDriver(LocalDriverApi);
 

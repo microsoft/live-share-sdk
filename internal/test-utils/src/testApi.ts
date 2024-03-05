@@ -34,7 +34,6 @@ import {
     DataObjectFactory,
 } from "@fluidframework/aqueduct";
 import * as sequenceDeprecated from "@fluid-experimental/sequence-deprecated";
-import { SparseMatrix } from "@fluid-experimental/sequence-deprecated";
 
 // #region Current versions of the APIs.
 
@@ -72,7 +71,6 @@ export const DataRuntimeApi = {
         ConsensusQueue,
         ConsensusRegisterCollection,
         SharedString,
-        SparseMatrix,
     },
     /**
      * Contains all APIs from imported DDS packages.

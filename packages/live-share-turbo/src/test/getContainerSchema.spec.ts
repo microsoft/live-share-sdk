@@ -5,12 +5,9 @@
 
 import { LiveEvent, TestLiveShareHost } from "@microsoft/live-share";
 import { strict as assert } from "assert";
-import {
-    LoadableObjectClassRecord,
-    SharedMap,
-    SharedString,
-} from "fluid-framework";
+import { LoadableObjectClassRecord, SharedMap } from "fluid-framework";
 import { LiveShareTurboClient } from "../LiveShareTurboClient";
+import { SharedString } from "@fluidframework/sequence";
 
 class TestLiveShareTurboClient extends LiveShareTurboClient {
     // exposes protected method as public

@@ -14,9 +14,21 @@ import {
     AzureLocalConnectionConfig,
 } from "@fluidframework/azure-client";
 import { AzureTurboClient } from "../AzureTurboClient";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
-import { generateUser } from "@fluidframework/server-services-client";
+import {
+    IInsecureUser,
+    InsecureTokenProvider,
+} from "@fluidframework/test-runtime-utils";
 import { LiveEvent } from "@microsoft/live-share";
+import { v4 as uuid } from "uuid";
+
+function generateUser(): IInsecureUser {
+    const randomUser = {
+        id: uuid(),
+        name: uuid(),
+    };
+
+    return randomUser;
+}
 
 describe("AzureTurboClient", () => {
     (window.performance as any).mark = () => {

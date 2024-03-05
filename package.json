@@ -9,7 +9,7 @@
         "packages/live-share-media",
         "packages/live-share-turbo",
         "packages/live-share-react",
-        "internal/test-drivers",
+        "internal/test-utils",
         "samples/javascript/*",
         "samples/typescript/*"
     ],

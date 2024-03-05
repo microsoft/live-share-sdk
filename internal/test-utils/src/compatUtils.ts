@@ -4,18 +4,9 @@
  */
 
 import {
-    DriverApi,
-    FluidTestDriverConfig,
-    createFluidTestDriver,
-} from "@fluid-private/test-drivers";
-import {
-    FluidObject,
-    IFluidHandleContext,
     IFluidLoadable,
-    IRequest,
 } from "@fluidframework/core-interfaces";
 import {
-    IContainerRuntimeBase,
     IFluidDataStoreContext,
     IFluidDataStoreFactory,
 } from "@fluidframework/runtime-definitions";
@@ -24,30 +15,18 @@ import {
     IChannelFactory,
 } from "@fluidframework/datastore-definitions";
 import { ISharedDirectory } from "@fluidframework/map";
-import { assert, unreachableCase } from "@fluidframework/core-utils";
+import { unreachableCase } from "@fluidframework/core-utils";
 import {
     ITestContainerConfig,
     DataObjectFactoryType,
     ChannelFactoryRegistry,
     createTestContainerRuntimeFactory,
     TestObjectProvider,
-    TestObjectProviderWithVersionedLoad,
 } from "@fluidframework/test-utils";
-import { TestDriverTypes } from "@fluidframework/test-driver-definitions";
 import { mixinAttributor } from "@fluid-experimental/attributor";
 import { ContainerRuntimeApi, DataRuntimeApi, LoaderApi } from "./testApi";
-// import {
-//     getLoaderApi,
-//     getContainerRuntimeApi,
-//     getDataRuntimeApi,
-//     getDriverApi,
-//     CompatApis,
-// } from "./testApi";
-// import {
-//     ContainerRuntimeApi,
-//     DataRuntimeApi,
-//     LoaderApi,
-// } from "@fluid-private/test-version-utils";
+import { LocalServerTestDriver } from "./localServerTestDriver";
+import { LocalDriverApi } from "./localDriverApi";
 
 /**
  * @internal
@@ -135,16 +114,8 @@ export const getDataStoreFactory =
  */
 export async function getVersionedTestObjectProviderFromApis(
     apis: Omit<CompatApis, "dds">,
-    driverConfig?: {
-        type?: TestDriverTypes;
-        config?: FluidTestDriverConfig;
-    }
 ) {
-    const driver = await createFluidTestDriver(
-        driverConfig?.type ?? "local",
-        driverConfig?.config,
-        apis.driver
-    );
+    const driver = new LocalServerTestDriver(LocalDriverApi);
 
     const getDataStoreFactoryFn = createGetDataStoreFactoryFunction(
         apis.dataRuntime
@@ -170,35 +141,10 @@ export async function getVersionedTestObjectProviderFromApis(
     );
 }
 
-/**
- * @internal
- */
-export async function getVersionedTestObjectProvider(
-    baseVersion: string,
-    loaderVersion?: number | string,
-    driverConfig?: {
-        type?: TestDriverTypes;
-        config?: FluidTestDriverConfig;
-        version?: number | string;
-    },
-    runtimeVersion?: number | string,
-    dataRuntimeVersion?: number | string
-): Promise<TestObjectProvider> {
-    return getVersionedTestObjectProviderFromApis(
-        {
-            loader: LoaderApi,
-            containerRuntime: ContainerRuntimeApi,
-            dataRuntime: DataRuntimeApi,
-            driver: DriverApi,
-        },
-        driverConfig
-    );
-}
-
 export interface CompatApis {
     containerRuntime: typeof ContainerRuntimeApi;
     dataRuntime: typeof DataRuntimeApi;
     dds: (typeof DataRuntimeApi)["dds"];
-    driver: typeof DriverApi;
+    driver: typeof LocalDriverApi;
     loader: typeof LoaderApi;
 }

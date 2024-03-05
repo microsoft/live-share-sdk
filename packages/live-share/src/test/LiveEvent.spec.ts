@@ -23,36 +23,9 @@ import { TestLiveShareHost } from "../TestLiveShareHost";
 import { getLiveDataObjectClass } from "../schema-injection-utils";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import { DataObjectClass } from "fluid-framework";
-import { describeCompat } from "./describeCompat";
+import { describeCompat } from "@live-share-private/test-utils";
 
 describeCompat("LiveEvent", (getTestObjectProvider) => {
-    // class LiveEvent extends apis.dataRuntime.DataObject {
-    //     public get _root() {
-    //         return this.root;
-    //     }
-    // }
-
-    // const { SharedMap, ConsensusQueue } = apis.dds;
-    // const { acquireAndComplete, ConsensusResult, waitAcquireAndComplete } =
-    //     apis.dataRuntime.packages.orderedCollection;
-
-    // const registry: ChannelFactoryRegistry = [
-    //     [
-    //         "liveEventId",
-    //         () => {
-    //             return LiveEvent.factory
-    //         },
-    //     ],
-    // [mapId, SharedMap.getFactory()],
-    // [undefined, ConsensusQueue.getFactory()],
-    // ];
-    const testContainerConfig: ITestContainerConfig = {
-        fluidDataObjectType: DataObjectFactoryType.Test,
-    };
-
-    let dataStore1: ITestFluidObject;
-    let dataStore2: ITestFluidObject;
-
     let provider: ITestObjectProvider;
     let object1: LiveEvent;
     let object2: LiveEvent;
@@ -79,25 +52,6 @@ describeCompat("LiveEvent", (getTestObjectProvider) => {
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
-
-        // const container1 = await provider.makeTestContainer(
-        //     testContainerConfig
-        // );
-        // dataStore1 = await getContainerEntryPointBackCompat<ITestFluidObject>(
-        //     container1
-        // );
-        // const blah = await getContainerEntryPointBackCompat<
-        //     typeof LiveEventProxy1
-        // >(container1);
-
-        // dataStore1.root;
-
-        // await dataStore1.getSharedObject<SharedMap>(mapId);
-        // const sup = {
-        //     IFluidDataStoreFactory: LiveEventProxy1.factory,
-        //     type: "LiveEventProxy1.factory",
-        // };
-        // const blahs: IFluidDataStoreFactory = LiveEventProxy1.factory;
 
         const container1 = await provider.createContainer(
             LiveEventProxy1.factory as fluidEntryPoint

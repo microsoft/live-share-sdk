@@ -3,9 +3,6 @@
  * Licensed under the MIT License.
  */
 
-// Driver API
-import { DriverApi } from "@fluid-private/test-drivers";
-
 // Loader API
 import { Loader } from "@fluidframework/container-loader";
 

@@ -19,7 +19,7 @@ export class LocalServerTestDriver implements ITestDriver {
 	public readonly endpointName = "local";
 	public readonly type = "local";
 	public get version() {
-		return this.api.version;
+		return "";
 	}
 	public get server(): ILocalDeltaConnectionServer {
 		return this._server;

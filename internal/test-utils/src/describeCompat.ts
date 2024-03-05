@@ -8,30 +8,12 @@ import {
     getUnexpectedLogErrorException,
     ITestObjectProvider,
 } from "@fluidframework/test-utils";
-import { assert } from "@fluidframework/core-utils";
-// import { CompatKind, driver, r11sEndpointName } from "./compatOptions";
-// import {
-//     CompatConfig,
-//     configList,
-//     isCompatVersionBelowMinVersion,
-//     mochaGlobalSetup,
-// } from "./compatConfig";
 import {
     CompatApis,
     getVersionedTestObjectProviderFromApis,
 } from "./compatUtils";
-// import { testBaseVersion } from "./baseVersion";
-// import {
-//     ContainerRuntimeApi,
-//     DataRuntimeApi,
-//     LoaderApi,
-// } from "@fluid-private/test-version-utils";
-import { DriverApi } from "@fluid-private/test-drivers";
 import { ContainerRuntimeApi, DataRuntimeApi, LoaderApi } from "./testApi";
-// import { pkgVersion } from "./packageVersion";
-
-// See doc comment on mochaGlobalSetup.
-// await mochaGlobalSetup();
+import { LocalDriverApi } from "./localDriverApi";
 
 /*
  * Mocha Utils for test to generate the compat variants.
@@ -44,7 +26,7 @@ function createCompatSuite(
     ) => void
 ): (this: Mocha.Suite) => void {
     return function (this: Mocha.Suite) {
-        describe("testing todo describe name", function () {
+        describe("testing todo describe name",  () => {
             let provider: ITestObjectProvider;
             let resetAfterEach: boolean;
             const apis: CompatApis = getVersionedApis();
@@ -52,14 +34,7 @@ function createCompatSuite(
             before(async function () {
                 try {
                     provider = await getVersionedTestObjectProviderFromApis(
-                        apis,
-                        {
-                            type: "local",
-                            config: {
-                                r11s: { r11sEndpointName: "r11s" },
-                                // odsp: { tenantIndex },
-                            },
-                        }
+                        apis
                     );
                 } catch (error) {
                     const logger = createChildLogger({
@@ -91,7 +66,7 @@ function createCompatSuite(
                 return provider;
             }, apis);
 
-            afterEach(function (done: Mocha.Done) {
+            afterEach(function (this: Mocha.Context, done: Mocha.Done) {
                 const logErrors = getUnexpectedLogErrorException(
                     provider.logger
                 );
@@ -119,7 +94,7 @@ function getVersionedApis(): CompatApis {
         containerRuntime: ContainerRuntimeApi,
         dataRuntime: DataRuntimeApi,
         dds: DataRuntimeApi.dds,
-        driver: DriverApi,
+        driver: LocalDriverApi,
         loader: LoaderApi,
     };
 }

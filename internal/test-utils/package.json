@@ -1,12 +1,11 @@
 {
-	"name": "@fluid-private/test-drivers",
-	"version": "2.0.0-rc.2.0.0",
-	"description": "A driver abstraction and implementations for testing against server",
-	"homepage": "https://fluidframework.com",
+	"name": "@live-share-private/test-utils",
+	"version": "2.0.0-internal.1",
+	"description": "testing utils for live share",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/microsoft/FluidFramework.git",
-		"directory": "packages/test/test-drivers"
+		"url": "https://github.com/microsoft/live-share-sdk",
+		"directory": "internal/test-utils"
 	},
 	"license": "MIT",
 	"author": "Microsoft and contributors",
@@ -24,36 +23,21 @@
 		"prettier:fix": "prettier --write . --cache --ignore-path ../../../.prettierignore",
 		"tsc": "tsc"
 	},
-	"c8": {
-		"all": true,
-		"cache-dir": "nyc/.cache",
-		"exclude": [
-			"src/test/**/*.*ts",
-			"dist/test/**/*.*js"
-		],
-		"exclude-after-remap": false,
-		"include": [
-			"src/**/*.*ts",
-			"dist/**/*.*js"
-		],
-		"report-dir": "nyc/report",
-		"reporter": [
-			"cobertura",
-			"html",
-			"text"
-		],
-		"temp-directory": "nyc/.nyc_output"
-	},
 	"dependencies": {
+		"@fluidframework/agent-scheduler": "^2.0.0-rc.1",
+		"@fluidframework/cell": "^2.0.0-rc.1",
 		"@fluidframework/core-interfaces": "^2.0.0-rc.1",
 		"@fluidframework/core-utils": "^2.0.0-rc.1",
+		"@fluidframework/counter": "^2.0.0-rc.1",
 		"@fluidframework/driver-definitions": "^2.0.0-rc.1",
 		"@fluidframework/driver-utils": "^2.0.0-rc.1",
 		"@fluidframework/local-driver": "^2.0.0-rc.1",
+		"@fluidframework/matrix": "^2.0.0-rc.1",
 		"@fluidframework/odsp-doclib-utils": "^2.0.0-rc.1",
 		"@fluidframework/odsp-driver": "^2.0.0-rc.1",
 		"@fluidframework/odsp-driver-definitions": "^2.0.0-rc.1",
 		"@fluidframework/odsp-urlresolver": "^2.0.0-rc.1",
+		"@fluidframework/ordered-collection": "^2.0.0-rc.1",
 		"@fluidframework/protocol-definitions": "^3.2.0-237840",
 		"@fluidframework/routerlicious-driver": "^2.0.0-rc.1",
 		"@fluidframework/server-local-server": "^3.1.0-237980",
@@ -61,6 +45,9 @@
 		"@fluidframework/test-runtime-utils": "^2.0.0-rc.1",
 		"@fluidframework/tinylicious-driver": "^2.0.0-rc.1",
 		"@fluidframework/tool-utils": "^2.0.0-rc.1",
+		"@fluid-experimental/attributor": "^2.0.0-rc.1",
+		"@fluid-experimental/sequence-deprecated": "^2.0.0-rc.1",
+		"@live-share-private/test-drivers": "^2.0.0-internal.1",
 		"agentkeepalive": "^4.5.0",
 		"axios": "^1.6.2",
 		"semver": "^7.5.3",
@@ -78,6 +65,8 @@
 		"c8": "^8.0.1",
 		"copyfiles": "^2.4.1",
 		"eslint": "~8.50.0",
+		"mocha-json-output-reporter": "^2.0.1",
+		"mocha-multi-reporters": "^1.5.1",
 		"prettier": "~3.0.3",
 		"rimraf": "^4.4.0",
 		"typescript": "~5.1.6"

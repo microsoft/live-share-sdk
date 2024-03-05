@@ -14,8 +14,8 @@
         "samples/typescript/*"
     ],
     "scripts": {
-        "build": "node workspace-cmd-util.js build packages samples/javascript samples/typescript",
-        "build:packages": "node workspace-cmd-util.js build packages",
+        "build": "node workspace-cmd-util.js build internal packages samples/javascript samples/typescript",
+        "build:packages": "node workspace-cmd-util.js build internal packages",
         "build:samples": "node workspace-cmd-util.js build samples/javascript samples/typescript",
         "build:docs": "typedoc packages/live-share packages/live-share-media packages/live-share-turbo packages/live-share-canvas",
         "test:packages": "node workspace-cmd-util.js test packages",

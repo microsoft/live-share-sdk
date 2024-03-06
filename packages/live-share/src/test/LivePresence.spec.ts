@@ -4,9 +4,11 @@
  */
 
 import { strict as assert } from "assert";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
-import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import {
+    ITestObjectProvider,
+    fluidEntryPoint,
+    getContainerEntryPointBackCompat,
+} from "@fluidframework/test-utils";
 import { LivePresence } from "../LivePresence";
 import { PresenceState } from "../LivePresenceUser";
 import { waitForDelay } from "../internals";
@@ -22,6 +24,7 @@ import {
 import { TestLiveShareHost } from "../TestLiveShareHost";
 import { getLiveDataObjectClass } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
+import { describeCompat } from "@live-share-private/test-utils";
 
 class TestLivePresence<
     TData extends object = object
@@ -58,17 +61,19 @@ async function getObjects(
 
     let provider: ITestObjectProvider = getTestObjectProvider();
 
-    let container1 = await provider.createContainer(ObjectProxy1.factory);
-    let object1 = await requestFluidObject<TestLivePresence<{ foo: string }>>(
-        container1,
-        "default"
+    let container1 = await provider.createContainer(
+        ObjectProxy1.factory as fluidEntryPoint
     );
+    let object1 = await getContainerEntryPointBackCompat<
+        TestLivePresence<{ foo: string }>
+    >(container1);
 
-    let container2 = await provider.loadContainer(ObjectProxy2.factory);
-    let object2 = await requestFluidObject<TestLivePresence<{ foo: string }>>(
-        container2,
-        "default"
+    let container2 = await provider.loadContainer(
+        ObjectProxy2.factory as fluidEntryPoint
     );
+    let object2 = await getContainerEntryPointBackCompat<
+        TestLivePresence<{ foo: string }>
+    >(container2);
     // need to be connected to send signals
     if (!container1.connect) {
         await new Promise((resolve) => container1.once("connected", resolve));
@@ -104,7 +109,7 @@ async function getObjects(
     };
 }
 
-describeNoCompat("LivePresence", (getTestObjectProvider) => {
+describeCompat("LivePresence", (getTestObjectProvider) => {
     it("Should exchange initial presence information", async () => {
         const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
@@ -292,6 +297,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
         await waitForDelay(1);
 
         assert(
+            // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
             object2PresenceChangeCount == 4,
             `expected 4 events from object2, ${object2PresenceChangeCount}`
         );
@@ -300,6 +306,7 @@ describeNoCompat("LivePresence", (getTestObjectProvider) => {
             `expected two events from object2 that was online, ${object2PresenceChangeOnlineCount}`
         );
         assert(
+            // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
             object2PresenceChangeOfflineCount == 2,
             `expected two events from object2 that was offline, ${object2PresenceChangeOfflineCount}`
         );

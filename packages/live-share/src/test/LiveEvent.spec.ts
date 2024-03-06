@@ -4,9 +4,11 @@
  */
 
 import { strict as assert } from "assert";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
-import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import {
+    ITestObjectProvider,
+    fluidEntryPoint,
+    getContainerEntryPointBackCompat,
+} from "@fluidframework/test-utils";
 import { LiveEvent } from "../LiveEvent";
 import { Deferred } from "../internals";
 import { MockTimestampProvider } from "./MockTimestampProvider";
@@ -17,8 +19,9 @@ import { TestLiveShareHost } from "../TestLiveShareHost";
 import { getLiveDataObjectClass } from "../schema-injection-utils";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import { DataObjectClass } from "fluid-framework";
+import { describeCompat } from "@live-share-private/test-utils";
 
-describeNoCompat("LiveEvent", (getTestObjectProvider) => {
+describeCompat("LiveEvent", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
     let object1: LiveEvent;
     let object2: LiveEvent;
@@ -45,15 +48,16 @@ describeNoCompat("LiveEvent", (getTestObjectProvider) => {
 
     beforeEach(async () => {
         provider = getTestObjectProvider();
+
         const container1 = await provider.createContainer(
-            LiveEventProxy1.factory
+            LiveEventProxy1.factory as fluidEntryPoint
         );
-        object1 = await requestFluidObject<LiveEvent>(container1, "default");
+        object1 = await getContainerEntryPointBackCompat<LiveEvent>(container1);
 
         const container2 = await provider.loadContainer(
-            LiveEventProxy2.factory
+            LiveEventProxy2.factory as fluidEntryPoint
         );
-        object2 = await requestFluidObject<LiveEvent>(container2, "default");
+        object2 = await getContainerEntryPointBackCompat<LiveEvent>(container2);
 
         // need to be connected to send signals
         if (!container1.connect) {

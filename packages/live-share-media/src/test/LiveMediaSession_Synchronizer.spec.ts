@@ -10,9 +10,11 @@ import {
 } from "./TestUtils";
 import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { strict as assert } from "assert";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
-import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import {
+    ITestObjectProvider,
+    fluidEntryPoint,
+    getContainerEntryPointBackCompat,
+} from "@fluidframework/test-utils";
 import {
     ITimestampProvider,
     LocalTimestampProvider,
@@ -35,6 +37,7 @@ import {
     MediaPlayerSynchronizer,
     MediaPlayerSynchronizerEvents,
 } from "../MediaPlayerSynchronizer";
+import { describeCompat } from "@live-share-private/test-utils";
 
 async function getObjects(
     getTestObjectProvider,
@@ -69,17 +72,18 @@ async function getObjects(
 
     let provider: ITestObjectProvider = getTestObjectProvider();
 
-    let container1 = await provider.createContainer(ObjectProxy1.factory);
-    let object1 = await requestFluidObject<TestLiveMediaSession>(
-        container1,
-        "default"
+    let container1 = await provider.createContainer(
+        ObjectProxy1.factory as fluidEntryPoint
+    );
+    let object1 = await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+        container1
     );
     object1.coordinator.positionUpdateInterval = 0.02;
-
-    let container2 = await provider.loadContainer(ObjectProxy2.factory);
-    let object2 = await requestFluidObject<TestLiveMediaSession>(
-        container2,
-        "default"
+    let container2 = await provider.loadContainer(
+        ObjectProxy2.factory as fluidEntryPoint
+    );
+    let object2 = await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+        container2
     );
     object2.coordinator.positionUpdateInterval = 0.02;
     // need to be connected to send signals
@@ -111,7 +115,7 @@ async function getObjects(
     };
 }
 
-describeNoCompat(
+describeCompat(
     "LiveMediaSession Using MediaPlayerSynchronizer",
     (getTestObjectProvider) => {
         it("should play and pause on both", async () => {

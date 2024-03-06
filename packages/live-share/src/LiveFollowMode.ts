@@ -674,11 +674,11 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
     /**
      * Disposes of the object when its container is disposed of.
      */
-    // public dispose(): void {
-    //     super.dispose();
-    //     this.presence.dispose();
-    //     this.presentingUserIdState.dispose();
-    // }
+    public dispose(): void {
+        super.dispose();
+        this.presence.dispose();
+        this.presentingUserIdState.dispose();
+    }
 
     /**
      * initializingFirstTime is run only once by the first client to create the DataObject. Here we use it to

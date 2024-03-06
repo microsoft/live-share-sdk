@@ -4,9 +4,11 @@
  */
 
 import { strict as assert } from "assert";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
-import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import {
+    ITestObjectProvider,
+    fluidEntryPoint,
+    getContainerEntryPointBackCompat,
+} from "@fluidframework/test-utils";
 import {
     FollowModeType,
     IFollowModePresenceUserData,
@@ -17,6 +19,7 @@ import { Deferred, waitForDelay } from "../internals";
 import { getLiveDataObjectClass } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 import { LivePresenceUser } from "../LivePresenceUser";
+import { describeCompat } from "@live-share-private/test-utils";
 
 interface TestFollowData {
     page: string;
@@ -39,17 +42,20 @@ async function getObjects(getTestObjectProvider) {
 
     let provider: ITestObjectProvider = getTestObjectProvider();
 
-    let container1 = await provider.createContainer(ObjectProxy1.factory);
-    let object1 = await requestFluidObject<LiveFollowMode<TestFollowData>>(
-        container1,
-        "default"
+    let container1 = await provider.createContainer(
+        ObjectProxy1.factory as fluidEntryPoint
+    );
+    let object1 = await getContainerEntryPointBackCompat<LiveFollowMode>(
+        container1
     );
 
-    let container2 = await provider.loadContainer(ObjectProxy2.factory);
-    let object2 = await requestFluidObject<LiveFollowMode<TestFollowData>>(
-        container2,
-        "default"
+    let container2 = await provider.loadContainer(
+        ObjectProxy2.factory as fluidEntryPoint
     );
+    let object2 = await getContainerEntryPointBackCompat<LiveFollowMode>(
+        container2
+    );
+
     // need to be connected to send signals
     if (!container1.connect) {
         await new Promise((resolve) => container1.once("connected", resolve));
@@ -76,7 +82,7 @@ const mockDefaultValue: TestFollowData = {
     page: "foo",
 };
 
-describeNoCompat("LiveFollowMode", (getTestObjectProvider) => {
+describeCompat("LiveFollowMode", (getTestObjectProvider) => {
     it("Should initialize with correct defaults", async () => {
         const { object1, object2, dispose } = await getObjects(
             getTestObjectProvider

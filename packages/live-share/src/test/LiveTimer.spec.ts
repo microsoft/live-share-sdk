@@ -4,13 +4,16 @@
  */
 
 import { strict as assert } from "assert";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
-import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import {
+    ITestObjectProvider,
+    fluidEntryPoint,
+    getContainerEntryPointBackCompat,
+} from "@fluidframework/test-utils";
 import { LiveTimer } from "../LiveTimer";
 import { Deferred, waitForDelay } from "../internals";
 import { getLiveDataObjectClass } from "../schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
+import { describeCompat } from "@live-share-private/test-utils";
 
 async function getObjects(
     getTestObjectProvider,
@@ -34,11 +37,15 @@ async function getObjects(
 
     let provider: ITestObjectProvider = getTestObjectProvider();
 
-    let container1 = await provider.createContainer(ObjectProxy1.factory);
-    let object1 = await requestFluidObject<LiveTimer>(container1, "default");
+    let container1 = await provider.createContainer(
+        ObjectProxy1.factory as fluidEntryPoint
+    );
+    let object1 = await getContainerEntryPointBackCompat<LiveTimer>(container1);
 
-    let container2 = await provider.loadContainer(ObjectProxy2.factory);
-    let object2 = await requestFluidObject<LiveTimer>(container2, "default");
+    let container2 = await provider.loadContainer(
+        ObjectProxy2.factory as fluidEntryPoint
+    );
+    let object2 = await getContainerEntryPointBackCompat<LiveTimer>(container2);
     // need to be connected to send signals
     if (!container1.connect) {
         await new Promise((resolve) => container1.once("connected", resolve));
@@ -62,7 +69,7 @@ async function getObjects(
 }
 const milliTolerance = 31;
 
-describeNoCompat("LiveTimer", (getTestObjectProvider) => {
+describeCompat("LiveTimer", (getTestObjectProvider) => {
     it("Should raise local and remote start events", async () => {
         const { object1, object2, dispose } = await getObjects(
             getTestObjectProvider

@@ -9,12 +9,13 @@
         "packages/live-share-media",
         "packages/live-share-turbo",
         "packages/live-share-react",
+        "internal/test-utils",
         "samples/javascript/*",
         "samples/typescript/*"
     ],
     "scripts": {
-        "build": "node workspace-cmd-util.js build packages samples/javascript samples/typescript",
-        "build:packages": "node workspace-cmd-util.js build packages",
+        "build": "node workspace-cmd-util.js build internal packages samples/javascript samples/typescript",
+        "build:packages": "node workspace-cmd-util.js build internal packages",
         "build:samples": "node workspace-cmd-util.js build samples/javascript samples/typescript",
         "build:docs": "typedoc packages/live-share packages/live-share-media packages/live-share-turbo packages/live-share-canvas",
         "test:packages": "node workspace-cmd-util.js test packages",
@@ -31,7 +32,6 @@
         "eslint-plugin-react": "^7.32.2",
         "eslint-plugin-react-hooks": "^4.6.0",
         "prettier": "^2.8.8",
-        "sxh": "^1.0.0",
         "typedoc": "^0.24.6",
         "typescript": "^5.0.4"
     }

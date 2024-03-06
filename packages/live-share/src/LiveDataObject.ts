@@ -76,7 +76,15 @@ export abstract class LiveDataObject<
 
     public constructor(props: IDataObjectProps<I>) {
         super(props);
+        this.runtime.once("dispose", () => {
+            this.dispose();
+        });
     }
+
+    /**
+     * Disposes of the object when its container is disposed of.
+     */
+    public dispose(): void {}
 
     /**
      * Get the client info for a given clientId

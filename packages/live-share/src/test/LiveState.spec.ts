@@ -60,8 +60,8 @@ async function getObjects(getTestObjectProvider) {
         await new Promise((resolve) => container2.once("connected", resolve));
     }
     const dispose = () => {
-        // object1.dispose();
-        // object2.dispose();
+        object1.dispose();
+        object2.dispose();
         container1.disconnect?.();
         container2.disconnect?.();
         liveRuntime1.stop();

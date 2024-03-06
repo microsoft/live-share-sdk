@@ -100,8 +100,8 @@ async function getObjects(
         (host as TestLiveShareHost).addClient(clientId, roles);
     };
     const dispose = () => {
-        // object1.dispose();
-        // object2.dispose();
+        object1.dispose();
+        object2.dispose();
         container1.disconnect?.();
         container2.disconnect?.();
         liveRuntime1.stop();

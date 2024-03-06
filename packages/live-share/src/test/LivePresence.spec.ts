@@ -83,20 +83,20 @@ async function getObjects(
     }
 
     const disposeAll = () => {
-        // object1.dispose();
-        // object2.dispose();
+        object1.dispose();
+        object2.dispose();
         container1.disconnect?.();
         container2.disconnect?.();
         liveRuntime1.stop();
         liveRuntime2.stop();
     };
     const disposeObject1 = () => {
-        // object1.dispose();
+        object1.dispose();
         container1.disconnect?.();
         liveRuntime1.stop();
     };
     const disposeObject2 = () => {
-        // object2.dispose();
+        object2.dispose();
         container2.disconnect?.();
         liveRuntime2.stop();
     };

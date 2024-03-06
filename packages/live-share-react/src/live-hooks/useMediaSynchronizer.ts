@@ -250,7 +250,7 @@ export function useMediaSynchronizer(
             synchronizer.removeAllListeners();
             mediaSession.removeAllListeners();
             synchronizer?.end();
-            // mediaSession?.dispose();
+            mediaSession?.dispose();
         };
     }, [mediaSession, mediaPlayerElement]);
 

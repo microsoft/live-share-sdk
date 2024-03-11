@@ -1,0 +1,16 @@
+.cursor-span {
+    --cursor-color: red;
+    position: relative;
+    width: 0;
+}
+
+
+.cursor-span::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0; /* Adjust this value as needed to center the cursor */
+    width: 1px;
+    height: 1rem; /* Adjust to match the line height of your text */
+    background-color: var(--cursor-color, blue);
+}

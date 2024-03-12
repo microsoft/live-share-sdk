@@ -293,15 +293,21 @@ const CollaborativeTextAreaInner: React.ForwardRefExoticComponent<ICollaborative
             }, [sharedStringHelper, updateSelection]);
 
             useEffect(() => {
-                if (!textareaRef.current) {
-                    return;
-                }
-                const textareaElement = textareaRef.current;
-                textareaElement.style.height = "auto";
-                textareaElement.style.height =
-                    textareaElement.scrollHeight + "px";
+                const resizeTextArea = () => {
+                    const textareaElement = textareaRef.current;
+                    if (!textareaElement) return;
+                    textareaElement.style.height = "auto";
+                    textareaElement.style.height =
+                        textareaElement.scrollHeight + "px";
+                };
+                resizeTextArea();
                 // when the text changes the selection may change as well, so we call updateSelection as a safeguard
                 updateSelection();
+
+                window.addEventListener("resize", resizeTextArea);
+                return () => {
+                    window.removeEventListener("resize", resizeTextArea);
+                };
             }, [text, updateSelection]);
 
             return (

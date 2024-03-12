@@ -43,25 +43,26 @@ export const Cursor: FC<{
     const avatarNamedColor = getAvatarColor(displayName);
     const avatarColorBackground =
         getAvatarBackgroundColorStyle(avatarNamedColor);
+    /**
+     * TODO: this method has an edge case where cursors near the start of a line after a line break
+     * may cause the letters "cut off" by the cursor to appear on the previous line. This text is transparent,
+     * so it will cause the cursor to appear in the incorrect position in this case.
+     *
+     * A more accurate and sophisticated approach would be to calculate the absolute position of the text virtually
+     * and render based on that, without creating transparent text that isn't doing anything. This would have accessibility
+     * benefits as well, since it wouldn't need to be hidden from the screen reader.
+     *
+     * For now, this edge case is deemed acceptable for this example, but in production we recommend a more robust solution
+     * that meets your projects requirements.
+     */
     return (
         <div
             key={user.userId}
-            style={{
-                pointerEvents: "none",
-                color: "transparent",
-                height: "100%",
-                position: "absolute",
-                bottom: 0,
-                top: 0,
-                right: 0,
-                left: 0,
-                whiteSpace: "pre-wrap",
-            }}
             aria-hidden
             role="presentation"
-            className={textareaRef.current.className}
+            className={`${textareaRef.current.className} cursor-container`}
         >
-            <span>{beforeSelectionText}</span>
+            {beforeSelectionText}
             <mark
                 style={{
                     color: "transparent",
@@ -87,7 +88,7 @@ export const Cursor: FC<{
                         }}
                     />
                 </div>
-                <div
+                <span
                     className="cursor-avatar-dot"
                     style={{
                         // @ts-ignore

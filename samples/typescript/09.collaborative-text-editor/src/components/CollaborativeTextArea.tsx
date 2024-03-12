@@ -10,14 +10,10 @@ import {
 } from "../utils/SharedStringHelper";
 import { useDynamicDDS, useLivePresence } from "@microsoft/live-share-react";
 import { SharedString } from "@fluidframework/sequence";
-import { Avatar, Textarea, tokens } from "@fluentui/react-components";
+import { Textarea } from "@fluentui/react-components";
 import { IUserData, PRESENCE_KEY } from "./LiveAvatars";
 import { LivePresenceUser } from "@microsoft/live-share";
 import "./CollaborativeTextArea-styles.css";
-import {
-    getAvatarBackgroundColorStyle,
-    getAvatarColor,
-} from "../utils/avatar-color";
 import { Cursor } from "./Cursor";
 
 interface ICollaborativeTextAreaProps {

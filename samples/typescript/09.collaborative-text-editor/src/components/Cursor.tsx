@@ -55,13 +55,13 @@ export const Cursor: FC<{
                 top: 0,
                 right: 0,
                 left: 0,
-                whiteSpace: "pre",
+                whiteSpace: "pre-wrap",
             }}
             aria-hidden
             role="presentation"
             className={textareaRef.current.className}
         >
-            {beforeSelectionText}
+            <span>{beforeSelectionText}</span>
             <mark
                 style={{
                     color: "transparent",

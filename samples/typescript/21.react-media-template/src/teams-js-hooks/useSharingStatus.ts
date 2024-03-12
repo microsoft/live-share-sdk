@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 
 export const useSharingStatus = (context?: microsoftTeams.app.Context) => {
     const [sharingActive, setSharingActive] = useState(false);
-    const intervalIdRef = useRef<NodeJS.Timer>();
+    const intervalIdRef = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
         if (!intervalIdRef.current) {

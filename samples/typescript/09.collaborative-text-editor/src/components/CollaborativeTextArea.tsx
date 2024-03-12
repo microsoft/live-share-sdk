@@ -10,11 +10,15 @@ import {
 } from "../utils/SharedStringHelper";
 import { useDynamicDDS, useLivePresence } from "@microsoft/live-share-react";
 import { SharedString } from "@fluidframework/sequence";
-import { Textarea } from "@fluentui/react-components";
+import { Avatar, Textarea, tokens } from "@fluentui/react-components";
 import { IUserData, PRESENCE_KEY } from "./LiveAvatars";
 import { LivePresenceUser } from "@microsoft/live-share";
 import "./CollaborativeTextArea-styles.css";
-import { getAvatarBackgroundColorStyle } from "../utils/avatar-color";
+import {
+    getAvatarBackgroundColorStyle,
+    getAvatarColor,
+} from "../utils/avatar-color";
+import { Cursor } from "./Cursor";
 
 interface ICollaborativeTextAreaProps {
     //
@@ -79,62 +83,12 @@ const CursorSelections: React.FC<CursorSelectionsProps> = ({
     return (
         <>
             {otherUsers.map((user) => {
-                const selection = user.data?.selection;
-                if (!selection) return null;
-                if (!textareaRef.current) return null;
-                const textValue = textareaRef.current.value;
-                const beforeSelectionText = textValue.substring(
-                    0,
-                    selection.start
-                );
-                const selectionText = textValue.substring(
-                    selection.start,
-                    selection.end
-                );
-                const afterSelectionText = textValue.substring(
-                    selection.end,
-                    textValue.length
-                );
-                const avatarColor = getAvatarBackgroundColorStyle(
-                    user.displayName ?? "User"
-                );
                 return (
-                    <div
-                        key={user.userId}
-                        style={{
-                            pointerEvents: "none",
-                            color: "transparent",
-                            height: "100%",
-                            position: "absolute",
-                            bottom: 0,
-                            top: 0,
-                            right: 0,
-                            left: 0,
-                            whiteSpace: "pre",
-                        }}
-                        aria-hidden
-                        role="presentation"
-                        className={textareaRef.current.className}
-                    >
-                        {beforeSelectionText}
-                        <mark
-                            style={{
-                                color: "transparent",
-                                opacity: 0.4,
-                                backgroundColor: avatarColor,
-                            }}
-                        >
-                            {selectionText}
-                        </mark>
-                        <span
-                            className="cursor-span"
-                            style={{
-                                // @ts-ignore
-                                "--cursor-color": avatarColor,
-                            }}
-                        />
-                        {afterSelectionText}
-                    </div>
+                    <Cursor
+                        key={`${user.userId}-cursor`}
+                        user={user}
+                        textareaRef={textareaRef}
+                    />
                 );
             })}
         </>
@@ -380,6 +334,7 @@ const CollaborativeTextAreaInner: React.ForwardRefExoticComponent<ICollaborative
                     // https://medium.com/capital-one-tech/how-to-work-with-forms-inputs-and-events-in-react-c337171b923b
                     onChange={handleChange}
                     value={text}
+                    size="large"
                 />
             );
         }

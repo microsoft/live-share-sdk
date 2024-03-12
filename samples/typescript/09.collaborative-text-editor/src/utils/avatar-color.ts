@@ -48,8 +48,9 @@ export const getAvatarColor = (str: string): AvatarNamedColor => {
     return avatarColors[getHashCode(str) % avatarColors.length];
 };
 
-export const getAvatarBackgroundColorStyle = (str: string): string => {
-    const color = getAvatarColor(str);
+export const getAvatarBackgroundColorStyle = (
+    color: AvatarNamedColor
+): string => {
     switch (color) {
         case "dark-red":
             return tokens.colorPaletteDarkRedBackground2;

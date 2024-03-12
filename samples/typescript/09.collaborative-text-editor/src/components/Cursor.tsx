@@ -12,6 +12,7 @@ export const Cursor: FC<{
     textareaRef: RefObject<HTMLTextAreaElement>;
 }> = ({ user, textareaRef }) => {
     const [showAvatar, setShowAvatar] = useState(true);
+    const [hover, setHover] = useState(false);
     const selection = user.data?.selection;
 
     useEffect(() => {
@@ -79,6 +80,12 @@ export const Cursor: FC<{
                         // @ts-ignore
                         "--cursor-height": tokens.lineHeightBase400,
                     }}
+                    onMouseEnter={() => {
+                        setHover(true);
+                    }}
+                    onMouseLeave={() => {
+                        setHover(false);
+                    }}
                 >
                     <div
                         className="cursor-inner"
@@ -87,27 +94,38 @@ export const Cursor: FC<{
                             "--cursor-color": avatarColorBackground,
                         }}
                     />
+                    <div
+                        className="cursor-avatar-dot"
+                        style={{
+                            // @ts-ignore
+                            "--cursor-color": avatarColorBackground,
+                        }}
+                    />
+                    <div
+                        className={
+                            showAvatar
+                                ? "cursor-avatar"
+                                : "cursor-avatar hidden"
+                        }
+                    >
+                        <Avatar
+                            name={displayName}
+                            color={avatarNamedColor}
+                            size={16}
+                            style={{
+                                verticalAlign: "top",
+                            }}
+                        />
+                    </div>
                 </div>
-                <span
-                    className="cursor-avatar-dot"
+                <div
+                    className={hover ? "cursor-hover" : "cursor-hover hidden"}
                     style={{
                         // @ts-ignore
                         "--cursor-color": avatarColorBackground,
                     }}
-                />
-                <div
-                    className={
-                        showAvatar ? "cursor-avatar" : "cursor-avatar hidden"
-                    }
                 >
-                    <Avatar
-                        name={displayName}
-                        color={avatarNamedColor}
-                        size={16}
-                        style={{
-                            verticalAlign: "top",
-                        }}
-                    />
+                    {user.displayName}
                 </div>
             </span>
             {afterSelectionText}

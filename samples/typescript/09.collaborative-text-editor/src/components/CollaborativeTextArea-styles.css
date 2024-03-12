@@ -26,6 +26,7 @@
     padding-bottom: 2px;
     height: var(--cursor-height);
     box-sizing: border-box;
+    pointer-events: all;
 }
 .cursor-inner {
     --cursor-color: red;
@@ -51,7 +52,7 @@
 
 .cursor-avatar {
     position: absolute;
-    top: -2;
+    top: -3px;
     left: 0; /* Adjust this value as needed to center the cursor */
     bottom: 0;
     vertical-align: top;
@@ -59,6 +60,28 @@
     opacity: 1;
 }
 .cursor-avatar.hidden {
+    transition: opacity 0.25s ease-out;
+    opacity: 0;
+    width: 0px;
+}
+
+.cursor-hover {
+    --cursor-color: red;
+    position: absolute;
+    top: -4px;
+    left: 0; /* Adjust this value as needed to center the cursor */
+    vertical-align: top;
+    transition: opacity 0.25s ease-in;
+    opacity: 1;
+    border-radius: 8px;
+    background-color: var(--cursor-color, blue);
+    color: white;
+    font-size: 0.75rem;
+    line-height: 0.8rem;
+    padding: 3px 6px;
+    pointer-events: none;
+}
+.cursor-hover.hidden {
     transition: opacity 0.25s ease-out;
     opacity: 0;
 }

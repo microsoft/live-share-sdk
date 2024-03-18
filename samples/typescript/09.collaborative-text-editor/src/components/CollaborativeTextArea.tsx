@@ -13,7 +13,6 @@ import { SharedString } from "@fluidframework/sequence";
 import { Textarea } from "@fluentui/react-components";
 import { IUserData, PRESENCE_KEY } from "./LiveAvatars";
 import { LivePresenceUser } from "@microsoft/live-share";
-import "./CollaborativeTextArea-styles.css";
 import { Cursor } from "./Cursor";
 
 interface ICollaborativeTextAreaProps {

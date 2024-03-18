@@ -5,7 +5,16 @@ import {
     getAvatarBackgroundColorStyle,
     getAvatarColor,
 } from "../utils/avatar-color";
-import { Avatar, tokens } from "@fluentui/react-components";
+import { Avatar, mergeClasses, tokens } from "@fluentui/react-components";
+import {
+    getCursorAvatarDotStyles,
+    getCursorAvatarStyles,
+    getCursorContainerStyles,
+    getCursorHoverStyles,
+    getCursorInnerStyles,
+    getCursorSpanStyles,
+    getCursorStyles,
+} from "./CollaborativeTextArea-styles";
 
 export const Cursor: FC<{
     user: LivePresenceUser<IUserData>;
@@ -31,6 +40,27 @@ export const Cursor: FC<{
             clearTimeout(timer);
         };
     }, [selection?.start, selection?.end]);
+    const { root: cursorContainerRoot } = getCursorContainerStyles();
+    const { root: cursorSpanRoot } = getCursorSpanStyles();
+    const { root: cursorRoot } = getCursorStyles();
+    const { root: cursorInnerRoot } = getCursorInnerStyles();
+    const { root: cursorAvatarDotRoot } = getCursorAvatarDotStyles();
+    const { root: cursorAvatarRoot, hidden: cursorAvatarHidden } =
+        getCursorAvatarStyles();
+    const { root: cursorHoverRoot, hidden: cursorHoverHidden } =
+        getCursorHoverStyles();
+
+    const cursorAvatarVisibleClass = mergeClasses(cursorAvatarRoot);
+    const cursorAvatarHiddenClass = mergeClasses(
+        cursorAvatarRoot,
+        cursorAvatarHidden
+    );
+
+    const cursorHoverVisibleClass = mergeClasses(cursorHoverRoot);
+    const cursorHoverHiddenClass = mergeClasses(
+        cursorHoverRoot,
+        cursorHoverHidden
+    );
     if (!selection) return null;
     if (!textareaRef.current) return null;
     const textValue = textareaRef.current.value;
@@ -44,6 +74,7 @@ export const Cursor: FC<{
     const avatarNamedColor = getAvatarColor(displayName);
     const avatarColorBackground =
         getAvatarBackgroundColorStyle(avatarNamedColor);
+
     /**
      * TODO: this method has an edge case where cursors near the start of a line after a line break
      * may cause the letters "cut off" by the cursor to appear on the previous line. This text is transparent,
@@ -61,7 +92,10 @@ export const Cursor: FC<{
             key={user.userId}
             aria-hidden
             role="presentation"
-            className={`${textareaRef.current.className} cursor-container`}
+            className={mergeClasses(
+                textareaRef.current.className,
+                cursorContainerRoot
+            )}
         >
             {beforeSelectionText}
             <mark
@@ -73,12 +107,11 @@ export const Cursor: FC<{
             >
                 {selectionText}
             </mark>
-            <span className="cursor-span">
+            <span className={cursorSpanRoot}>
                 <div
-                    className="cursor"
+                    className={cursorRoot}
                     style={{
-                        // @ts-ignore
-                        "--cursor-height": tokens.lineHeightBase400,
+                        height: tokens.lineHeightBase400,
                     }}
                     onMouseEnter={() => {
                         setHover(true);
@@ -88,24 +121,22 @@ export const Cursor: FC<{
                     }}
                 >
                     <div
-                        className="cursor-inner"
+                        className={cursorInnerRoot}
                         style={{
-                            // @ts-ignore
-                            "--cursor-color": avatarColorBackground,
+                            backgroundColor: avatarColorBackground,
                         }}
                     />
                     <div
-                        className="cursor-avatar-dot"
+                        className={cursorAvatarDotRoot}
                         style={{
-                            // @ts-ignore
-                            "--cursor-color": avatarColorBackground,
+                            backgroundColor: avatarColorBackground,
                         }}
                     />
                     <div
                         className={
                             showAvatar
-                                ? "cursor-avatar"
-                                : "cursor-avatar hidden"
+                                ? cursorAvatarVisibleClass
+                                : cursorAvatarHiddenClass
                         }
                     >
                         <Avatar
@@ -119,10 +150,11 @@ export const Cursor: FC<{
                     </div>
                 </div>
                 <div
-                    className={hover ? "cursor-hover" : "cursor-hover hidden"}
+                    className={
+                        hover ? cursorHoverVisibleClass : cursorHoverHiddenClass
+                    }
                     style={{
-                        // @ts-ignore
-                        "--cursor-color": avatarColorBackground,
+                        backgroundColor: avatarColorBackground,
                     }}
                 >
                     {user.displayName}

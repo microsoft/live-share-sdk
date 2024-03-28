@@ -11,7 +11,6 @@ import {
     LiveShareRuntime,
     IEvent,
 } from "@microsoft/live-share";
-import EventEmitter from "events";
 import {
     ExtendedMediaMetadata,
     CoordinationWaitPoint,
@@ -50,6 +49,9 @@ import {
     IPlaybackRateChangeEvent,
     PlaybackRateEvents,
 } from "./GroupPlaybackRate";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
+import { IEvent as FluidIEvent } from "@fluidframework/common-definitions";
+import { IGenericTypedEvents } from "./interfaces";
 
 /**
  * @hidden
@@ -113,7 +115,7 @@ export enum GroupCoordinatorStateEvents {
 /**
  * @hidden
  */
-export class GroupCoordinatorState extends EventEmitter {
+export class GroupCoordinatorState extends TypedEventEmitter<IGenericTypedEvents> {
     private readonly _runtime: IRuntimeSignaler;
     private readonly _liveRuntime: LiveShareRuntime;
     private readonly _logger: LiveTelemetryLogger;

@@ -36,8 +36,9 @@ import {
     IRateChangeCommandEvent,
 } from "./internals";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
-import EventEmitter from "events";
 import { isErrorLike } from "@microsoft/live-share/bin/internals";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
+import { IEvent } from "@fluidframework/common-definitions";
 
 /**
  * Most recent state of the media session.
@@ -68,11 +69,24 @@ export interface IMediaPlayerState {
 }
 
 /**
+ * @hidden
+ */
+export interface ILiveMediaSessionCoordinatorEvents extends IEvent {
+    /**
+     * Event listener for events emitted
+     * @param event update
+     * @param listener listener function
+     * @param listener.event the event instance
+     */
+    (event: string, listener: (event: any) => void): void;
+}
+
+/**
  * The `LiveMediaSessionCoordinator` tracks the playback & position state of all other
  * clients being synchronized with. It is responsible for keeping the local media player
  * in sync with the group.
  */
-export class LiveMediaSessionCoordinator extends EventEmitter {
+export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSessionCoordinatorEvents> {
     private readonly _id: string;
     private readonly _runtime: IRuntimeSignaler;
     private readonly _liveRuntime: LiveShareRuntime;

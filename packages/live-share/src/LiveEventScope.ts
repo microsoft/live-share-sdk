@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import EventEmitter from "events";
 import { IErrorEvent } from "@fluidframework/core-interfaces";
 import { ITelemetryLoggerExt } from "@fluidframework/telemetry-utils";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
@@ -11,6 +10,7 @@ import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { isILiveEvent, waitUntilConnected } from "./internals";
+import { IEvent } from "@fluidframework/common-definitions";
 
 /**
  * Live event callback.
@@ -41,6 +41,27 @@ export interface IRuntimeSignaler {
 }
 
 /**
+ * @hidden
+ */
+interface ILiveEventInternalEmitterEvents extends IEvent {
+    /**
+     * Event listener for error events
+     * @param event update
+     * @param listener listener function
+     * @param listener.error the error instance
+     */
+    (event: "error", listener: (error: any) => void): void;
+    /**
+     * Event listener for events emitted through `LiveEventScope`
+     * @param event update
+     * @param listener listener function
+     * @param listener.event the event instance
+     * @param listener.local whether the event was initiated from the local client
+     */
+    (event: string, listener: (event: any, local: boolean) => void): void;
+}
+
+/**
  * Object responsible for sending and receiving live share events.
  *
  * @remarks
@@ -55,7 +76,8 @@ export interface IRuntimeSignaler {
  * events.
  */
 export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
-    private readonly emitter = new EventEmitter();
+    private readonly emitter =
+        new TypedEventEmitter<ILiveEventInternalEmitterEvents>();
     private readonly _runtime: IRuntimeSignaler;
     private _allowedRoles: UserMeetingRole[];
 

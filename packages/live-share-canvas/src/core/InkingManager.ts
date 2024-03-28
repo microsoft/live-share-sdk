@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { EventEmitter } from "events";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import {
     CanvasReferencePoint,
     InkingCanvas,
@@ -51,6 +51,7 @@ import {
     computeQuadPath,
     renderQuadPathToSVG,
 } from "./internals";
+import { IEvent } from "@fluidframework/common-definitions";
 
 /**
  * Defines available inking tools.
@@ -413,9 +414,64 @@ class WetLineStroke extends WetStroke {
 }
 
 /**
+ * Events emitted by the `InkingManager` class.
+ */
+export interface IInkingManagerEvents extends IEvent {
+    /**
+     * Event listener for when the user's pointer is moved over the canvas element
+     * @param event update
+     * @param listener listener function
+     * @param listener.event the `IPointerMovedEventArgs` event
+     */
+    (
+        event: "PointerMoved",
+        listener: (event: IPointerMovedEventArgs) => void
+    ): void;
+    /**
+     * Event listener for when strokes are added to the canvas element
+     * @param event update
+     * @param listener listener function
+     * @param listener.strokes list of strokes that were added
+     */
+    (event: "StrokesAdded", listener: (strokes: IStroke[]) => void): void;
+    /**
+     * Event listener for when strokes are removed from the canvas element
+     * @param event update
+     * @param listener listener function
+     * @param listener.strokeIds list of stroke ids that were removed
+     */
+    (event: "StrokesRemoved", listener: (strokeIds: string[]) => void): void;
+    /**
+     * Event listener for when all strokes are cleared from the canvas element.
+     * @see InkingManager.clear
+     * @param event update
+     * @param listener listener function
+     */
+    (event: "Clear", listener: () => void): void;
+    /**
+     * Event listener for when a stroke begins.
+     * @param event update
+     * @param listener listener function
+     * @param listener.event event object with information about the stroke that begun
+     */
+    (
+        event: "BeginStroke",
+        listener: (event: IBeginStrokeEventArgs) => void
+    ): void;
+    /**
+     * Event listener for when points are added to a stroke.
+     * Also called when the stroke ends.
+     * @param event update
+     * @param listener listener function
+     * @param listener.event event object with information about the added points
+     */
+    (event: "AddPoints", listener: (event: IAddPointsEventArgs) => void): void;
+}
+
+/**
  * Handles user interaction with a canvas, and manages the rendering of wet and dry strokes.
  */
-export class InkingManager extends EventEmitter {
+export class InkingManager extends TypedEventEmitter<IInkingManagerEvents> {
     /**
      * Configures the amount of time to wait before sending a pointer moved event. This delay
      * allows for the elimination of fast, consecutive pointer move events, and only send the

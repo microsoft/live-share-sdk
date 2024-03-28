@@ -4,7 +4,7 @@
  */
 
 import { LiveShareRuntime } from "@microsoft/live-share";
-import EventEmitter from "events";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {
     ExtendedMediaSessionPlaybackState,
@@ -15,7 +15,7 @@ import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
 } from "./GroupPlaybackTrack";
-import { IGroupStateEvent } from "./interfaces";
+import { IGenericTypedEvents, IGroupStateEvent } from "./interfaces";
 import { GroupPlaybackRate } from "./GroupPlaybackRate";
 
 /**
@@ -46,7 +46,7 @@ export interface ITransportStateChangeEvent extends IGroupStateEvent {
 /**
  * @hidden
  */
-export class GroupTransportState extends EventEmitter {
+export class GroupTransportState extends TypedEventEmitter<IGenericTypedEvents> {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _track: GroupPlaybackTrack;
     private _playbackRate: GroupPlaybackRate;

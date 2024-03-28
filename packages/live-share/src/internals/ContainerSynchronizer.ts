@@ -21,7 +21,7 @@ export class ContainerSynchronizer {
     private _throttledEventsQueue: ThrottledEventQueue =
         new ThrottledEventQueue(this);
     private _connectedKeys: string[] = [];
-    private _hTimer: NodeJS.Timeout | undefined;
+    private _hTimer?: any;
     private _connectSentForClientId?: string;
     private _onBoundConnectedListener?: (clientId: string) => Promise<void>;
     private _onReceiveObjectUpdateListener?: (

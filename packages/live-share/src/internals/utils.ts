@@ -118,7 +118,7 @@ export function timeoutRequest<TResult>(
     lateFinish?: () => void
 ): Promise<TResult> {
     return new Promise<TResult>(async (resolve, reject) => {
-        let hTimer: NodeJS.Timeout | null = setTimeout(() => {
+        let hTimer: any = setTimeout(() => {
             reject(new TimeoutError());
             hTimer = null;
         }, timeout);

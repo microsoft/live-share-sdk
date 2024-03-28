@@ -17,7 +17,7 @@ export class ThrottledEventQueue {
     private _events: StateSyncEventContent = {};
     private _throttleIntervalMilli: number;
     private _deferred: Deferred<ILiveEvent<StateSyncEventContent>> | undefined;
-    private _hTimer: NodeJS.Timeout | undefined;
+    private _hTimer?: any;
     /**
      * @hidden
      * Queue for grouping multiple signal events together.

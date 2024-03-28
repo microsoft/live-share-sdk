@@ -7,7 +7,7 @@ export function debounce<R = void>(
     fn: (...args: any[]) => R,
     ms: number
 ): [(...args: any[]) => Promise<R>, () => void] {
-    let timer: NodeJS.Timeout;
+    let timer: any;
 
     const debouncedFunc = (...args: any[]): Promise<R> =>
         new Promise((resolve) => {

@@ -6,6 +6,9 @@
 import { ITokenProvider } from "@fluidframework/azure-client";
 import { v4 as uuid } from "uuid";
 import { IRuntimeSignaler } from "../LiveEventScope";
+import { isExtendedLogger } from "./type-guards";
+import { ITelemetryErrorEventExt } from "@fluidframework/telemetry-utils";
+import { LogLevel } from "@fluidframework/core-interfaces";
 
 /**
  * @hidden
@@ -180,4 +183,42 @@ export function waitUntilConnected(runtime: IRuntimeSignaler): Promise<string> {
             runtime.on("connected", onConnected);
         }
     });
+}
+
+/**
+ * @hidden
+ */
+function parseErrorMessage(error?: any): string {
+    if (!error) {
+        return `${error}`;
+    }
+    if (typeof error === "string") {
+        return error;
+    }
+    if (typeof error.message === "string") {
+        return error.message;
+    }
+    return `${JSON.stringify(error)}`;
+}
+
+/**
+ * @hidden
+ */
+export function safeFluidTelemetryLogError(
+    runtime: IRuntimeSignaler,
+    event: ITelemetryErrorEventExt,
+    error?: unknown
+) {
+    if (isExtendedLogger(runtime.logger)) {
+        runtime.logger.sendErrorEvent(event, error);
+        return;
+    }
+    runtime.logger.send(
+        {
+            ...event,
+            category: "error",
+            error: parseErrorMessage(error),
+        },
+        LogLevel.error
+    );
 }

@@ -20,10 +20,10 @@
     "dependencies": {
         "@microsoft/live-share": "2.0.0-internal.4",
         "@microsoft/teams-js": "^2.16.0",
-        "fluid-framework": "^2.0.0-rc.1"
+        "fluid-framework": "^2.0.0-rc.2.0.0"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": "^2.0.0-rc.1",
+        "@fluidframework/test-runtime-utils": "^2.0.0-rc.2.0.0",
         "@typescript-eslint/eslint-plugin": "^5.59.2",
         "@typescript-eslint/parser": "^5.59.7",
         "buffer": "^6.0.3",

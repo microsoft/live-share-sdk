@@ -9,16 +9,18 @@ const fs = require("fs");
 ensurePackagesBuilt();
 /**
  * if packages are not built or if they are old builds then:
- * 
+ *
  * 1. run npm install from "packages/live-share-react".
  *    live-share-react uses all other live-share packages as dependencies, hence will install all packages needed to build live-share packages.
  * 2. run npm run build:packages from root
  */
 async function ensurePackagesBuilt() {
     const rootFolderPath = await getRootFolder();
-    const currentGitHash = await getGitHash()
+    const currentGitHash = await getGitHash();
 
-    const packagesNotBuilt = !fs.existsSync(`${rootFolderPath}/node_modules/@microsoft/live-share-react/bin`);
+    const packagesNotBuilt = !fs.existsSync(
+        `${rootFolderPath}/node_modules/@microsoft/live-share-react/bin`
+    );
     const isOldBuild = currentGitHash !== getBuildData()?.lastGitHashBuilt;
     if (packagesNotBuilt || isOldBuild) {
         await npmInstallFromLiveShareReact();
@@ -26,10 +28,14 @@ async function ensurePackagesBuilt() {
     }
 
     async function getGitHash() {
-        const currentGitHash = childProcess.spawn("git", ["rev-parse", "HEAD"], {
-            shell: true,
-            cwd: process.cwd(),
-        });
+        const currentGitHash = childProcess.spawn(
+            "git",
+            ["rev-parse", "HEAD"],
+            {
+                shell: true,
+                cwd: process.cwd(),
+            }
+        );
         return new Promise((resolve, reject) => {
             currentGitHash.stdout.on("data", (data) => {
                 const hash = data.toString().slice(0, -1);
@@ -40,15 +46,19 @@ async function ensurePackagesBuilt() {
                     reject(code);
                 }
             });
-        })
+        });
     }
 
     async function getRootFolder() {
-        const rootDir = childProcess.spawn("git", ["rev-parse", " --show-toplevel"], {
-            shell: true,
-            cwd: process.cwd(),
-        });
-        
+        const rootDir = childProcess.spawn(
+            "git",
+            ["rev-parse", " --show-toplevel"],
+            {
+                shell: true,
+                cwd: process.cwd(),
+            }
+        );
+
         return new Promise((resolve, reject) => {
             rootDir.stdout.on("data", (data) => {
                 const path = data.toString().slice(0, -1);
@@ -59,7 +69,7 @@ async function ensurePackagesBuilt() {
                     reject(code);
                 }
             });
-        })
+        });
     }
 
     // live-share-react uses all other live-share packages as dependencies
@@ -70,7 +80,7 @@ async function ensurePackagesBuilt() {
                 cwd: `${rootFolderPath}/packages/live-share-react`,
                 stdio: "inherit",
             });
-        
+
             installProcess.on("close", (code) => {
                 if (code == 0) {
                     resolve();
@@ -78,16 +88,20 @@ async function ensurePackagesBuilt() {
                     reject(code);
                 }
             });
-        })
+        });
     }
 
     function build() {
-        const buildProcess = childProcess.spawn("npm", ["run", "build:packages"], {
-            shell: true,
-            cwd: rootFolderPath,
-            stdio: "inherit",
-        });
-        
+        const buildProcess = childProcess.spawn(
+            "npm",
+            ["run", "build:packages"],
+            {
+                shell: true,
+                cwd: rootFolderPath,
+                stdio: "inherit",
+            }
+        );
+
         buildProcess.on("close", (code) => {
             if (code === 0) {
                 fs.writeFileSync(

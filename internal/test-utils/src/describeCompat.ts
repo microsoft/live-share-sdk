@@ -33,8 +33,9 @@ function createCompatSuite(
 
             before(async function () {
                 try {
-                    provider =
-                        await getVersionedTestObjectProviderFromApis(apis);
+                    provider = await getVersionedTestObjectProviderFromApis(
+                        apis
+                    );
                 } catch (error) {
                     const logger = createChildLogger({
                         logger: getTestLogger?.(),

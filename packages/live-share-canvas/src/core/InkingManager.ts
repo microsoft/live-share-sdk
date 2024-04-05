@@ -217,11 +217,11 @@ class ChangeLog {
     }
 
     public getRemovedStrokes(): string[] {
-        return [...this._removedStrokes];
+        return Array.from(this._removedStrokes);
     }
 
     public getAddedStrokes(): IStroke[] {
-        return [...this._addedStrokes.values()];
+        return Array.from(this._addedStrokes.values());
     }
 
     get hasChanges(): boolean {
@@ -586,7 +586,7 @@ export class InkingManager extends TypedEventEmitter<IInkingManagerEvents> {
         this._dryCanvas.offset = this._offset;
         this._dryCanvas.scale = this._scale;
 
-        const sortedStrokes = [...this._strokes.values()].sort(
+        const sortedStrokes = Array.from(this._strokes.values()).sort(
             (stroke1: IStroke, stroke2: IStroke) => {
                 return stroke1.timeStamp - stroke2.timeStamp;
             }
@@ -617,8 +617,8 @@ export class InkingManager extends TypedEventEmitter<IInkingManagerEvents> {
         }
 
         if (this._changeLog.hasChanges) {
-            this.notifyStrokesRemoved(...this._changeLog.getRemovedStrokes());
-            this.notifyStrokesAdded(...this._changeLog.getAddedStrokes());
+            this.notifyStrokesRemoved(this._changeLog.getRemovedStrokes());
+            this.notifyStrokesAdded(this._changeLog.getAddedStrokes());
 
             this._changeLog.clear();
         }
@@ -969,13 +969,13 @@ export class InkingManager extends TypedEventEmitter<IInkingManagerEvents> {
         this.emit(PointerMovedEvent, eventArgs);
     }
 
-    private notifyStrokesAdded(...strokes: IStroke[]) {
+    private notifyStrokesAdded(strokes: IStroke[]) {
         if (strokes.length > 0) {
             this.emit(StrokesAddedEvent, strokes);
         }
     }
 
-    private notifyStrokesRemoved(...strokeIds: string[]) {
+    private notifyStrokesRemoved(strokeIds: string[]) {
         if (strokeIds.length > 0) {
             this.emit(StrokesRemovedEvent, strokeIds);
         }

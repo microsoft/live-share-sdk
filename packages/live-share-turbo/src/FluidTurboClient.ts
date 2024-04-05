@@ -98,7 +98,11 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
         if (initialDDS !== undefined) {
             return initialDDS;
         }
-        const uniqueKey = `<${objectClass.name}>:${objectKey}`;
+        // TODO: investigate fixes
+        // Fluid v2.0.0 removed "name" from their interfaces...
+        // This likely causes problems for non Live Share DDSs (which have static name fields)
+        const className = (objectClass as any).name ?? "unknown";
+        const uniqueKey = `<${className}>:${objectKey}`;
         const response = await this.dynamicObjects.getDDS<T>(
             uniqueKey,
             objectClass,

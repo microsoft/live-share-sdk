@@ -1022,7 +1022,8 @@ function isClearEvent(value: any): boolean {
     return (
         typeof value === "object" &&
         typeof value.type === "string" &&
-        value.type === ClearEvent
+        // Fluid v2 emits "clear" instead of "Clear" on SharedMap.clear(), so we equalize it
+        value.type.toLowerCase() === ClearEvent.toLowerCase()
     );
 }
 

@@ -3,13 +3,19 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IErrorEvent } from "@fluidframework/core-interfaces";
-import { ITelemetryLoggerExt } from "@fluidframework/telemetry-utils";
+import {
+    IErrorEvent,
+    ITelemetryBaseLogger,
+} from "@fluidframework/core-interfaces";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { isILiveEvent, waitUntilConnected } from "./internals";
+import {
+    isILiveEvent,
+    safeFluidTelemetryLogError,
+    waitUntilConnected,
+} from "./internals";
 import { IEvent } from "@fluidframework/common-definitions";
 
 /**
@@ -30,7 +36,7 @@ export type LiveEventListener<TEvent> = (
 export interface IRuntimeSignaler {
     readonly clientId: string | undefined;
     readonly connected: boolean;
-    readonly logger: ITelemetryLoggerExt;
+    readonly logger: ITelemetryBaseLogger;
     on(event: "connected", listener: (clientId: string) => void): this;
     off(event: "connected", listener: (clientId: string) => void): this;
     on(
@@ -256,7 +262,13 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
                 if (value) {
                     this.emitter.emit(event.name, event, local);
                 } else if (this.throwForEvents.includes(event.name)) {
-                    this._runtime.logger.sendErrorEvent(
+                    const error = new Error(
+                        `The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(
+                            this._allowedRoles
+                        )}.`
+                    );
+                    safeFluidTelemetryLogError(
+                        this._runtime,
                         { eventName: "LiveEvent:invalidRole" },
                         new Error(
                             `The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(
@@ -267,7 +279,8 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
                 }
             })
             .catch((err) => {
-                this._runtime.logger.sendErrorEvent(
+                safeFluidTelemetryLogError(
+                    this._runtime,
                     { eventName: "LiveEvent:invalidRole" },
                     err
                 );

@@ -4,19 +4,22 @@
  */
 
 import {
-    ITelemetryErrorEvent,
-    ITelemetryGenericEvent,
-    ITelemetryPerformanceEvent,
-    ITelemetryProperties,
-} from "@fluidframework/common-definitions";
+    ITelemetryBaseProperties,
+    LogLevel,
+} from "@fluidframework/core-interfaces";
+import {
+    ITelemetryPerformanceEventExt,
+    ITelemetryErrorEventExt,
+    ITelemetryGenericEventExt,
+} from "@fluidframework/telemetry-utils";
 import { IRuntimeSignaler } from "./LiveEventScope";
-import { LiveShareClient } from "./LiveShareClient";
 import { LiveShareRuntime } from "./LiveShareRuntime";
+import { isExtendedLogger, safeFluidTelemetryLogError } from "./internals";
 
 /**
  * Properties included on all events sent by `LiveTelemetryLogger`.
  */
-export interface ILiveTelemetryProperties extends ITelemetryProperties {
+export interface ILiveTelemetryProperties extends ITelemetryBaseProperties {
     /**
      * Optional. ID of the client if it's been assigned by the runtime.
      */
@@ -70,11 +73,22 @@ export class LiveTelemetryLogger {
         additionalProperties?: Partial<ILiveTelemetryProperties>
     ): void {
         if (this._runtime.logger) {
-            const evt: ITelemetryGenericEvent = this.createTelemetryEvent(
+            const evt: ITelemetryGenericEventExt = this.createTelemetryEvent(
                 eventName,
                 additionalProperties
             );
-            this._runtime.logger.sendTelemetryEvent(evt, error);
+            // Newer versions of Fluid seem to use ITelemetryBaseEvent instead of ITelemetryGenericEventExt
+            if (isExtendedLogger(this._runtime.logger)) {
+                this._runtime.logger.sendTelemetryEvent(evt, error);
+                return;
+            }
+            this._runtime.logger.send(
+                {
+                    ...evt,
+                    category: evt.category ?? "default",
+                },
+                LogLevel.default
+            );
         }
     }
 
@@ -90,11 +104,12 @@ export class LiveTelemetryLogger {
         additionalProperties?: Partial<ILiveTelemetryProperties>
     ): void {
         if (this._runtime.logger) {
-            const evt: ITelemetryErrorEvent = this.createTelemetryEvent(
+            const evt: ITelemetryErrorEventExt = this.createTelemetryEvent(
                 eventName,
                 additionalProperties
             );
-            this._runtime.logger.sendErrorEvent(evt, error);
+            // Newer versions of Fluid seem to use ITelemetryBaseEvent instead of ITelemetryGenericEventExt
+            safeFluidTelemetryLogError(this._runtime, evt, error);
         }
     }
 
@@ -112,11 +127,23 @@ export class LiveTelemetryLogger {
         additionalProperties?: Partial<ILiveTelemetryProperties>
     ): void {
         if (this._runtime.logger) {
-            const evt: ITelemetryPerformanceEvent = {
+            const evt: ITelemetryPerformanceEventExt = {
                 duration: duration,
                 ...this.createTelemetryEvent(eventName, additionalProperties),
             };
-            this._runtime.logger.sendPerformanceEvent(evt, error);
+            // Newer versions of Fluid seem to use ITelemetryBaseEvent instead of ITelemetryGenericEventExt
+            if (isExtendedLogger(this._runtime.logger)) {
+                this._runtime.logger.sendPerformanceEvent(evt, error);
+                return;
+            }
+            this._runtime.logger.send(
+                {
+                    ...evt,
+                    category: evt.category ?? "performance",
+                    error: error.verbose,
+                },
+                LogLevel.error
+            );
         }
     }
 

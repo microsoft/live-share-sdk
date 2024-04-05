@@ -18,7 +18,7 @@
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
-        "fluid-framework": "^2.0.0-rc.1",
+        "fluid-framework": "^2.0.0-rc.2.0.0",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
         "ts-mocha": "^10.0.0",

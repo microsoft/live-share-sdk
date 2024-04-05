@@ -1,5 +1,6 @@
 import { TimestampProvider } from "../TimestampProvider";
 import { IClientInfo, ILiveEvent, UserMeetingRole } from "../interfaces";
+import { ITelemetryLoggerExt } from "@fluidframework/telemetry-utils";
 
 interface IMobileWorkaroundRolesResponse {
     userRoles: UserMeetingRole[];
@@ -58,4 +59,16 @@ export function isILiveEvent(value: any): value is ILiveEvent {
  */
 export function isTimestampProvider(value: any): value is TimestampProvider {
     return typeof value?.start === "function";
+}
+
+/**
+ * @hidden
+ */
+export function isExtendedLogger(value: any): value is ITelemetryLoggerExt {
+    return (
+        value &&
+        typeof value.sendTelemetryEvent === "function" &&
+        typeof value.sendErrorEvent === "function" &&
+        typeof value.sendPerformanceEvent === "function"
+    );
 }

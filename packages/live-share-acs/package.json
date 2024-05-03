@@ -1,0 +1,40 @@
+{
+    "name": "@microsoft/live-share-acs",
+    "version": "1.4.0-preview.0",
+    "description": "Live Share integration package for Azure Communication Services.",
+    "author": "Microsoft",
+    "license": "SEE LICENSE IN LICENSE",
+    "main": "./bin/index.js",
+    "types": "./bin/index.d.ts",
+    "scripts": {
+        "clean": "npx shx rm -rf bin",
+        "build": "tsc -p tsconfig.build.json",
+        "test": "ts-mocha src/**/*.spec.ts --timeout 10000",
+        "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
+        "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
+    },
+    "devDependencies": {
+        "@microsoft/live-share": "1.4.0",
+        "@azure/communication-calling": "^1.14.0",
+        "@types/assert": "^1.5.6",
+        "@types/mocha": "^10.0.1",
+        "@types/node": "^18.11.18",
+        "mocha": "^10.2.0",
+        "nyc": "^15.1.0",
+        "ts-mocha": "^10.0.0",
+        "typescript": "^4.6.4"
+    },
+    "peerDependencies": {
+        "@microsoft/live-share": "1.4.0",
+        "@azure/communication-calling": "^1.14.0"
+    },
+    "repository": {
+        "directory": "packages/live-share-acs",
+        "type": "git",
+        "url": "https://github.com/microsoft/live-share-sdk"
+    },
+    "homepage": "https://aka.ms/teamsliveshare",
+    "bugs": {
+        "url": "https://github.com/microsoft/live-share-sdk/issues"
+    }
+}

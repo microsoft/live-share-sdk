@@ -5,6 +5,7 @@
     "main": "index.js",
     "workspaces": [
         "packages/live-share",
+        "packages/live-share-acs",
         "packages/live-share-canvas",
         "packages/live-share-media",
         "packages/live-share-turbo",

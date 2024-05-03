@@ -247,10 +247,15 @@ export class ACSTeamsLiveShareHost implements ILiveShareHost {
      * Returns the global timestamp for the current session.
      */
     public async getNtpTime(): Promise<INtpTimeInfo> {
+        const token = await this.options.acsTokenProvider();
         const response = await fetch(
             `${LiveShareBaseUrl}/${LiveShareRoutePrefix}/${GetNtpTimeRoute}`,
             {
                 method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `SkypeToken ${token}`,
+                },
             }
         );
         const data: unknown = await response.json();

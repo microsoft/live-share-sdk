@@ -196,7 +196,10 @@ async function joinFromACS(): Promise<void> {
         displayName: userDisplayName,
     });
     // Get the meeting join URL
-    const meetingJoinUrl = "<MEETING JOIN URL>";
+    // NOTE: if the meeting join URL is shortened (e.g., https://teams.microsoft.com/meet/{id}?p={password}), then
+    // you must manually construct the long meeting url. This is a recent change for anonymous user calendar invites.
+    // See the "Long Meeting Join URL update" section of this README for more info.
+    const longMeetingJoinUrl = "<LONG MEETING JOIN URL>";
     // Join the Teams meeting
     const teamsCall = callAgent.join({meetingLink: meetingJoinUrl}, {});
     // Create the ACSTeamsLiveShareHost
@@ -204,7 +207,7 @@ async function joinFromACS(): Promise<void> {
         userId: userACSId,
         displayName: userDisplayName,
         call: teamsCall,
-        teamsMeetingJoinUrl: meetingJoinUrl,
+        teamsMeetingJoinUrl: longMeetingJoinUrl,
         acsTokenProvider: () => {
             // In production, you likely want to refresh the token.
             // Refer to the Azure Communication Services documentation for examples of this.
@@ -226,6 +229,27 @@ if (IN_TEAMS) {
 } else {
     joinFromACS();
 }
+```
+
+#### Long Meeting Join URL update
+
+In 2024, Microsoft Teams changed the meeting join URL format for calendar invites. The APIs this feature depends on relies on having a long meeting join URL; for now, short URLs will not work.
+
+Here is an example of a short join URL: `https://teams.microsoft.com/meet/${meetingId}?p=${joinPasscode}`.
+Here is an example of a long join URL: `https://teams.microsoft.com/l/meetup-join/${threadId}/0?context=${encodedJSONContext}`
+
+If you only have access to the short URL for whatever reason, you must manually construct a join URL, like this:
+
+```TypeScript
+const threadId = 'TEAMS_THREAD_ID'; // e.g., `19:meeting_{SOME_ID}@thread.v2`, may need to get from Graph
+const tenantId = 'MEETING_ORGANIZER_TENANT_ID';  // e.g., tenant AAD identifier parsed from AAD token of meeting organizer
+const organizerId = ''; // e.g., user's AAD identifier parsed from AAD token of meeting organizer
+const context = {
+  Tid: tenantId,
+  Oid: organizerId,
+};
+const encodedContext = encodeURIComponent(JSON.parse(context));
+const longJoinUrl = `https://teams.microsoft.com/l/meetup-join/${threadId}/0?context=${encodedContext}`;
 ```
 
 ### Why use Live Share with Azure Communication Services?

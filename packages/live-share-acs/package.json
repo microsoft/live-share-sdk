@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-acs",
-    "version": "1.4.0-preview.1",
+    "version": "1.4.0-preview.3",
     "description": "Live Share integration package for Azure Communication Services.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",

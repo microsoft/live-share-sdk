@@ -68,6 +68,15 @@ export function isINtpTimeInfo(value: any): value is INtpTimeInfo {
 /**
  * @hidden
  */
+export function isUserMeetingRoleResponse(value: any): value is {
+    userRoles: UserMeetingRole[];
+} {
+    return value && isUserMeetingRoleList(value.userRoles);
+}
+
+/**
+ * @hidden
+ */
 export function isUserMeetingRoleList(value: any): value is UserMeetingRole[] {
     const meetingRoleValues = Object.values(UserMeetingRole);
     return (

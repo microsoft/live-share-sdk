@@ -24,8 +24,8 @@ import {
     isIFluidTokenResponse,
     isIFluidContainerInfo,
     isINtpTimeInfo,
-    isUserMeetingRoleList,
     isIGetClientInfoResponse,
+    isUserMeetingRoleResponse,
 } from "./internals";
 
 const LiveShareRoutePrefix = "/livesync/v1/acs";
@@ -291,12 +291,12 @@ export class ACSTeamsLiveShareHost implements ILiveShareHost {
             }
         );
         const data: unknown = await response.json();
-        if (!isUserMeetingRoleList(data)) {
+        if (!isUserMeetingRoleResponse(data)) {
             throw new Error(
                 "ACSTeamsLiveShareHost.registerClientId: invalid response from server"
             );
         }
-        return data;
+        return data.userRoles;
     }
 
     /**

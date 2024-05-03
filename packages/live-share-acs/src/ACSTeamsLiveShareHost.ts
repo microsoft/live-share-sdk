@@ -28,7 +28,7 @@ import {
     isUserMeetingRoleResponse,
 } from "./internals";
 
-const LiveShareRoutePrefix = "/livesync/v1/acs";
+const LiveShareRoutePrefix = "livesync/v1/acs";
 const LiveShareBaseUrl = "https://teams.microsoft.com/api/platform";
 const GetNtpTimeRoute = "getNTPTime";
 const GetFluidTenantInfoRoute = "fluid/tenantInfo/get";

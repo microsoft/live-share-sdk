@@ -16,13 +16,13 @@
         "postinstall":"node ../../../ensure-packages-built.js"
     },
     "dependencies": {
-        "@fluidframework/azure-client": "^2.0.0-rc.2.0.0",
+        "@fluidframework/azure-client": "^2.0.0-rc.4.0.1",
         "@microsoft/live-share": "2.0.0-internal.5",
         "@microsoft/live-share-canvas": "2.0.0-internal.5",
-        "fluid-framework": "^2.0.0-rc.2.0.0"
+        "fluid-framework": "^2.0.0-rc.4.0.1"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": "^2.0.0-rc.2.0.0",
+        "@fluidframework/test-runtime-utils": "^2.0.0-rc.4.0.1",
         "buffer": "^6.0.3",
         "concurrently": "^5.3.0",
         "start-server-and-test": "^2.0.0",

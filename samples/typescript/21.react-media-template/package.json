@@ -12,7 +12,7 @@
         "@microsoft/live-share-canvas": "2.0.0-internal.5",
         "@microsoft/live-share-media": "2.0.0-internal.5",
         "@microsoft/teams-js": "^2.16.0",
-        "fluid-framework": "^2.0.0-rc.2.0.0",
+        "fluid-framework": "^2.0.0-rc.4.0.1",
         "lodash": "^4.17.21",
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
@@ -24,7 +24,7 @@
         "web-vitals": "^3.1.1"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": "^2.0.0-rc.2.0.0",
+        "@fluidframework/test-runtime-utils": "^2.0.0-rc.4.0.1",
         "@types/lodash": "^4.14.191",
         "@types/react": "^18.0.0",
         "@types/react-dom": "^18.0.0",

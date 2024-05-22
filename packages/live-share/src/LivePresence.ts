@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
 import { IEvent } from "@fluidframework/common-definitions";
 import {
     LivePresenceUser,

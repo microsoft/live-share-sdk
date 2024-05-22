@@ -14,7 +14,7 @@ import { renderMeetingStage } from "./renderMeetingStage";
 import { renderMeetingSidePanel } from "./renderMeetingSidePanel";
 import { renderTabConfig } from "./renderTabConfig";
 import { renderError } from "./renderError";
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 
 const searchParams = new URL(window.location.href).searchParams;
 const IN_TEAMS = searchParams.get("inTeams") === "1";

@@ -3,11 +3,11 @@
  * Licensed under the MIT License.
  */
 
-import { createChildLogger } from "@fluidframework/telemetry-utils";
+import { createChildLogger } from "@fluidframework/telemetry-utils/internal";
 import {
     getUnexpectedLogErrorException,
     ITestObjectProvider,
-} from "@fluidframework/test-utils";
+} from "@fluidframework/test-utils/internal";
 import {
     CompatApis,
     getVersionedTestObjectProviderFromApis,
@@ -68,7 +68,7 @@ function createCompatSuite(
 
             afterEach(function (this: Mocha.Context, done: Mocha.Done) {
                 const logErrors = getUnexpectedLogErrorException(
-                    provider.logger
+                    provider.tracker
                 );
                 // if the test failed for another reason
                 // then we don't need to check errors

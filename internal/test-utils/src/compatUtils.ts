@@ -7,20 +7,20 @@ import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import {
     IFluidDataStoreContext,
     IFluidDataStoreFactory,
-} from "@fluidframework/runtime-definitions";
+} from "@fluidframework/runtime-definitions/internal";
 import {
     IFluidDataStoreRuntime,
     IChannelFactory,
 } from "@fluidframework/datastore-definitions";
-import { ISharedDirectory } from "@fluidframework/map";
-import { unreachableCase } from "@fluidframework/core-utils";
+import { ISharedDirectory } from "@fluidframework/map/internal";
+import { unreachableCase } from "@fluidframework/core-utils/internal";
 import {
     ITestContainerConfig,
     DataObjectFactoryType,
     ChannelFactoryRegistry,
     createTestContainerRuntimeFactory,
     TestObjectProvider,
-} from "@fluidframework/test-utils";
+} from "@fluidframework/test-utils/internal";
 import { mixinAttributor } from "@fluid-experimental/attributor";
 import { ContainerRuntimeApi, DataRuntimeApi, LoaderApi } from "./testApi";
 import { LocalServerTestDriver } from "./localServerTestDriver";

@@ -3,7 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ContainerSchema, SharedMap } from "fluid-framework";
+import { ContainerSchema } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { DynamicObjectManager } from "../dds-objects";
 
 /**

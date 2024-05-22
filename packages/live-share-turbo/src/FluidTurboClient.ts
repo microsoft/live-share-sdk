@@ -7,8 +7,8 @@ import {
     IFluidContainer,
     LoadableObjectClass,
     LoadableObjectClassRecord,
-    SharedMap,
 } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 import { IFluidTurboClient } from "./interfaces/IFluidTurboClient";

@@ -20,7 +20,8 @@ import {
     ExtendedMediaMetadata,
     MediaPlayerSynchronizer,
 } from "@microsoft/live-share-media";
-import { IFluidContainer, SharedMap } from "fluid-framework";
+import { IFluidContainer } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { IReceiveLiveEvent } from "../interfaces";
 import {
     OnPauseTimerAction,

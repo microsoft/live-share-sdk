@@ -1,9 +1,9 @@
 import { LiveDataObject } from "./LiveDataObject";
 import { LiveState } from "./LiveState";
 import { ILivePresenceEvents, LivePresence } from "./LivePresence";
-import { DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
-import { assert } from "@fluidframework/core-utils";
+import { assert } from "@fluidframework/core-utils/internal";
 import { LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LivePresenceUser, PresenceState } from "./LivePresenceUser";

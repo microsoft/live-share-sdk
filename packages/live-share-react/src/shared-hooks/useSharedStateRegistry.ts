@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IValueChanged, SharedMap } from "fluid-framework";
+import { IValueChanged, SharedMap } from "fluid-framework/legacy";
 import React from "react";
 import {
     DeleteSharedStateAction,

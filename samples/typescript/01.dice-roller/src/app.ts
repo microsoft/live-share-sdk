@@ -14,7 +14,7 @@ import { renderMeetingStage } from "./renderMeetingStage";
 import { renderMeetingSidePanel } from "./renderMeetingSidePanel";
 import { renderTabConfig } from "./renderTabConfig";
 import { renderError } from "./renderError";
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { AppTheme, IPresenceData } from "./types-interfaces";
 
 const searchParams = new URL(window.location.href).searchParams;

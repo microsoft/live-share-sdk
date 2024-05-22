@@ -1,9 +1,9 @@
-import { DataObjectTypes, IDataObjectProps } from "@fluidframework/aqueduct";
-import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import {
-    LoadableObjectCtor,
-    DataObjectClass,
-} from "@fluidframework/fluid-static";
+    DataObjectTypes,
+    IDataObjectProps,
+} from "@fluidframework/aqueduct/internal";
+import { IFluidLoadable } from "@fluidframework/core-interfaces";
+import { DataObjectClass } from "@fluidframework/fluid-static/internal";
 import { LiveDataObject } from "./LiveDataObject";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import {
@@ -12,6 +12,8 @@ import {
     LoadableObjectClassRecord,
 } from "fluid-framework";
 
+type LoadableObjectCtor<T> = new (...args: any[]) => T;
+
 /**
  * A LiveObjectClass is a class that has a factory that can create a DDS (SharedObject) and a
  * constructor that will return the type of the DataObject.
@@ -19,8 +21,7 @@ import {
  */
 type LiveObjectClass<T extends IFluidLoadable> = {
     TypeName: string;
-} & DataObjectClass<T> &
-    LoadableObjectCtor<T>;
+} & DataObjectClass<T>;
 
 /**
  * Inject Live Share dependencies into your Fluid container schema.

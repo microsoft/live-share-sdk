@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ITimestampProvider } from "@microsoft/live-share";
-// eslint-disable-next-line
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 
 /**
  * @param {boolean} localUserIsEligiblePresenter boolean that is true when local user is eligible presenter

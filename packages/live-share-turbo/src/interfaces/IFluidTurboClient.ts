@@ -3,7 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LoadableObjectClass, SharedMap } from "fluid-framework";
+import { LoadableObjectClass } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 
 export interface IFluidTurboClient {

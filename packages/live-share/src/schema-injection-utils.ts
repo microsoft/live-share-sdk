@@ -12,8 +12,6 @@ import {
     LoadableObjectClassRecord,
 } from "fluid-framework";
 
-type LoadableObjectCtor<T> = new (...args: any[]) => T;
-
 /**
  * A LiveObjectClass is a class that has a factory that can create a DDS (SharedObject) and a
  * constructor that will return the type of the DataObject.

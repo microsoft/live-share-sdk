@@ -50,7 +50,6 @@ import {
     PlaybackRateEvents,
 } from "./GroupPlaybackRate";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IEvent as FluidIEvent } from "@fluidframework/common-definitions";
 import { IGenericTypedEvents } from "./interfaces";
 
 /**

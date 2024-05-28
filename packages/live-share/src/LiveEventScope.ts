@@ -11,12 +11,9 @@ import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import {
-    isILiveEvent,
-    safeFluidTelemetryLogError,
-    waitUntilConnected,
-} from "./internals";
+import { isILiveEvent, waitUntilConnected } from "./internals";
 import { IEvent } from "@fluidframework/common-definitions";
+import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 
 /**
  * Live event callback.
@@ -86,6 +83,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
         new TypedEventEmitter<ILiveEventInternalEmitterEvents>();
     private readonly _runtime: IRuntimeSignaler;
     private _allowedRoles: UserMeetingRole[];
+    private _logger: LiveTelemetryLogger;
 
     /**
      * Only throw role validation failed errors for events that are associated with this scope.
@@ -107,6 +105,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
         super();
         this._runtime = runtime;
         this._allowedRoles = allowedRoles || [];
+        this._logger = new LiveTelemetryLogger(runtime, _liveRuntime);
         this.emitter.on("error", (error) => {
             this.emit("error", error);
         });
@@ -267,9 +266,8 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
                             this._allowedRoles
                         )}.`
                     );
-                    safeFluidTelemetryLogError(
-                        this._runtime,
-                        { eventName: "LiveEvent:invalidRole" },
+                    this._logger.sendErrorEvent(
+                        "LiveEvent:invalidRole",
                         new Error(
                             `The clientId of "${clientId}" doesn't have a role of ${JSON.stringify(
                                 this._allowedRoles
@@ -279,11 +277,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
                 }
             })
             .catch((err) => {
-                safeFluidTelemetryLogError(
-                    this._runtime,
-                    { eventName: "LiveEvent:invalidRole" },
-                    err
-                );
+                this._logger.sendErrorEvent("LiveEvent:invalidRole", err);
             });
     }
 }

@@ -6,7 +6,7 @@
 import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { useEffect, useRef, useState } from "react";
 import { LiveEvent, LivePresence } from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";

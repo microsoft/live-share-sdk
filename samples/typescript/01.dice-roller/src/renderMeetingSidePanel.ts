@@ -5,7 +5,8 @@
 
 import { meeting } from "@microsoft/teams-js";
 import { getRandomDiceValue, stylizeDiceElem } from "./utils";
-import { IFluidContainer, SharedMap } from "fluid-framework";
+import { IFluidContainer } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { AppTheme } from "./types-interfaces";
 
 export async function renderMeetingSidePanel(

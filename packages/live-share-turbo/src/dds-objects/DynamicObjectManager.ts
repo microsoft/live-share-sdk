@@ -3,15 +3,15 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObject, DataObjectFactory } from "@fluidframework/aqueduct";
+import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
 import { LoadableObjectClass, IFluidContainer } from "fluid-framework";
 import {
     IFluidHandle,
     FluidObject,
     IFluidLoadable,
 } from "@fluidframework/core-interfaces";
-import { assert } from "@fluidframework/core-utils";
-import { ConsensusRegisterCollection } from "@fluidframework/register-collection";
+import { assert } from "@fluidframework/core-utils/internal";
+import { ConsensusRegisterCollection } from "@fluidframework/register-collection/internal";
 import { DynamicObjectRegistry, LiveDataObject } from "@microsoft/live-share";
 
 // Register ConsensusRegisterCollection

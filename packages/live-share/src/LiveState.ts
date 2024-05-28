@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct";
-import { assert } from "@fluidframework/core-utils";
+import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
+import { assert } from "@fluidframework/core-utils/internal";
 import { IEvent } from "@fluidframework/common-definitions";
 import {
     ILiveEvent,

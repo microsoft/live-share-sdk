@@ -73,9 +73,9 @@ export class AzureLiveShareHost implements ILiveShareHost {
             );
         }
         return {
-            userId: audienceInfo.userId,
+            userId: audienceInfo.id,
             roles: this.getRolesForAudienceMember(audienceInfo),
-            displayName: audienceInfo.userName,
+            displayName: audienceInfo.name,
         };
     }
 

@@ -7,7 +7,7 @@ import React from "react";
 import { isEntries, isJSON, isMap } from "../utils";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types";
 import { useDynamicDDS } from "./useDynamicDDS";
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { useFluidObjectsContext } from "../providers";
 import {
     ActionContainerNotJoinedError,

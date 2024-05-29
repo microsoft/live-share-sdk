@@ -8,7 +8,7 @@ import {
     ITestObjectProvider,
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
-} from "@fluidframework/test-utils";
+} from "@fluidframework/test-utils/internal";
 import { LiveState } from "../LiveState";
 import { Deferred } from "../internals";
 import { getLiveDataObjectClass } from "../schema-injection-utils";

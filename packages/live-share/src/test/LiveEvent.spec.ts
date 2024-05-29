@@ -8,7 +8,7 @@ import {
     ITestObjectProvider,
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
-} from "@fluidframework/test-utils";
+} from "@fluidframework/test-utils/internal";
 import { LiveEvent } from "../LiveEvent";
 import { Deferred } from "../internals";
 import { MockTimestampProvider } from "./MockTimestampProvider";

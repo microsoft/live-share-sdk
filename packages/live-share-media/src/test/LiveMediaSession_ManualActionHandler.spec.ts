@@ -10,7 +10,7 @@ import {
     ITestObjectProvider,
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
-} from "@fluidframework/test-utils";
+} from "@fluidframework/test-utils/internal";
 import {
     ITimestampProvider,
     LiveEventScope,

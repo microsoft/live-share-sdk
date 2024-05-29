@@ -8,7 +8,7 @@ import {
     ITestObjectProvider,
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
-} from "@fluidframework/test-utils";
+} from "@fluidframework/test-utils/internal";
 import { LivePresence } from "../LivePresence";
 import { PresenceState } from "../LivePresenceUser";
 import { waitForDelay } from "../internals";

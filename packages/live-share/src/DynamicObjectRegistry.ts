@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LoadableObjectClass } from "fluid-framework";
+import { LoadableObjectClass, SharedTree } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
 import { SharedDirectory } from "@fluidframework/map/internal";
 import { SharedString } from "@fluidframework/sequence/internal";
@@ -80,4 +80,8 @@ DynamicObjectRegistry.registerObjectClass(
 DynamicObjectRegistry.registerObjectClass(
     SharedDirectory,
     SharedDirectory.getFactory().type
+);
+DynamicObjectRegistry.registerObjectClass(
+    SharedTree,
+    SharedTree.getFactory().type
 );

@@ -4,6 +4,7 @@
  */
 
 export * from "./DynamicObjectRegistry";
+export * from "./DynamicObjectManager";
 export * from "./HostTimestampProvider";
 export * from "./interfaces";
 export * from "./LiveEvent";

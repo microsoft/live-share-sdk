@@ -15,8 +15,6 @@ import {
 } from "./errors";
 
 /**
- * @beta
- *
  * Events supported by `LiveFollowMode` object.
  */
 export enum LiveFollowModeEvents {
@@ -31,8 +29,6 @@ export enum LiveFollowModeEvents {
 }
 
 /**
- * @beta
- *
  * Event typings for `LiveFollowMode` class.
  * @template TData Type of data object to share with clients.
  */
@@ -57,8 +53,6 @@ export interface ILiveFollowModeEvents<TData = any>
 }
 
 /**
- * @beta
- *
  * The follow mode type.
  *
  * @remarks
@@ -98,8 +92,6 @@ export enum FollowModeType {
 }
 
 /**
- * @beta
- *
  * Information about the state of the local user's follow mode.
  *
  * @remarks
@@ -146,8 +138,6 @@ export interface IFollowModeState<TData = any> {
 }
 
 /**
- * @beta
- *
  * The presence data for a user's personal follow mode state.
  */
 export interface IFollowModePresenceUserData<TData = any> {
@@ -165,19 +155,17 @@ export interface IFollowModePresenceUserData<TData = any> {
 }
 
 /**
- * @beta
- *
  * Convenience type for a LivePresenceUser in LiveFollowMode
  */
 export type FollowModePresenceUser<TData = any> = LivePresenceUser<
     IFollowModePresenceUserData<TData>
 >;
 
-const presentingUserIdLiveStateKey = "<<presentingUserIdLiveStateKey>>";
-const livePresenceKey = "<<livePresenceKey>>";
+const presentingUserIdLiveStateKey =
+    "@microsoft/live-share:LiveFollowMode:LiveState";
+const livePresenceKey = "@microsoft/live-share:LiveFollowMode:LivePresence";
 
 /**
- * @beta
  *
  * Live object that allows users to present and/or follow other users.
  * Provides a {@link state} value, which reflects the relevant value to reference (e.g., the presenting user's state value).

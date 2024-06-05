@@ -3,12 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    BASE_CONTAINER_SCHEMA,
-    LiveShareTokenProvider,
-    getInsecureTokenProvider,
-    waitForDelay,
-} from "./internals";
+import { getInsecureTokenProvider, waitForDelay } from "./internals/utils";
+import { LiveShareTokenProvider } from "./internals/LiveShareTokenProvider";
 import {
     AzureClient,
     AzureContainerServices,
@@ -24,15 +20,11 @@ import {
     IRoleVerifier,
     ILiveShareJoinResults,
 } from "./interfaces";
+import { BaseLiveShareClient } from "./BaseLiveShareClient";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveContainerSchema } from "./schema-injection-utils";
-import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
-import { LoadableObjectClass } from "fluid-framework";
-import { DynamicObjectManager } from "./DynamicObjectManager";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { SharedMap } from "fluid-framework/legacy";
 
 /**
  * @hidden
@@ -96,13 +88,12 @@ export interface ILiveShareClientOptions {
 /**
  * Client used to connect to fluid containers within a Microsoft Teams context.
  */
-export class LiveShareClient {
+export class LiveShareClient extends BaseLiveShareClient {
     private _host: ILiveShareHost = TestLiveShareHost.create(
         undefined,
         undefined
     );
     private readonly _options: ILiveShareClientOptions;
-    private readonly _runtime: LiveShareRuntime;
     private _results: ILiveShareJoinResults | undefined;
 
     /**
@@ -122,6 +113,7 @@ export class LiveShareClient {
                 `LiveShareClient: \`host.getFluidTenantInfo\` is of type \`${typeof host.getFluidTenantInfo}\` when it is expected to be a type of \`function\`. For more information, review the \`ILiveShareHost\` interface.`
             );
         }
+        super(new LiveShareRuntime(host, options, true));
         this._host = host;
         // Save options
         this._options = {
@@ -131,6 +123,13 @@ export class LiveShareClient {
                 : options?.timestampProvider,
         };
         this._runtime = new LiveShareRuntime(this._host, this._options, true);
+    }
+
+    /**
+     * @see BaseLiveShareClient.results
+     */
+    public get results(): ILiveShareJoinResults | undefined {
+        return this._results;
     }
 
     /**
@@ -265,64 +264,6 @@ export class LiveShareClient {
         }
     }
 
-    public get stateMap(): SharedMap | undefined {
-        if (this._results) {
-            return this._results.container.initialObjects
-                .TURBO_STATE_MAP as SharedMap;
-        }
-        return undefined;
-    }
-
-    /**
-     * Callback to load a Fluid DDS for a given key. If the object does not already exist, a new one will be created.
-     *
-     * @template T Type of Fluid object to load.
-     * @param objectKey unique key for the Fluid DDS you'd like to load
-     * @param objectClass Fluid LoadableObjectClass you'd like to load of type T
-     * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created.
-     * @returns DDS object corresponding to `objectKey`
-     */
-    public async getDDS<
-        T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
-    >(
-        objectKey: string,
-        objectClass: LoadableObjectClass<T>,
-        onDidFirstInitialize?: (dds: T) => void
-    ): Promise<T> {
-        // The uniqueKey key makes the developer provided uniqueKey never conflict across different DDS objects
-        if (!this._results) {
-            throw new Error(
-                "FluidTurboClient getDDS: cannot call until successful get/create/join FluidContainer"
-            );
-        }
-        if (!this.dynamicObjects) {
-            throw new Error(
-                "FluidTurboClient: getDDS must have valid dynamicObjects DynamicObjectManager"
-            );
-        }
-        await this.waitUntilConnected();
-        const initialDDS = this._results.container.initialObjects[objectKey] as
-            | T
-            | undefined;
-        if (initialDDS !== undefined) {
-            return initialDDS;
-        }
-        // TODO: investigate fixes
-        // Fluid v2.0.0 removed "name" from their interfaces...
-        // This likely causes problems for non Live Share DDSs (which have static name fields)
-        const className = (objectClass as any).name ?? "unknown";
-        const uniqueKey = `<${className}>:${objectKey}`;
-        const response = await this.dynamicObjects.getDDS<T>(
-            uniqueKey,
-            objectClass,
-            this._results.container
-        );
-        if (response.created) {
-            onDidFirstInitialize?.(response.dds);
-        }
-        return response.dds;
-    }
-
     private async getOrCreateContainer(
         client: AzureClient,
         fluidContainerSchema: ContainerSchema,
@@ -410,59 +351,6 @@ export class LiveShareClient {
         } else {
             return { container, services, created: true };
         }
-    }
-
-    private get dynamicObjects(): DynamicObjectManager | undefined {
-        if (this._results) {
-            return this._results.container.initialObjects
-                .TURBO_DYNAMIC_OBJECTS as DynamicObjectManager;
-        }
-        return undefined;
-    }
-
-    private _awaitConnectedPromise?: Promise<void>;
-    private async waitUntilConnected(): Promise<void> {
-        if (this._awaitConnectedPromise) {
-            return this._awaitConnectedPromise;
-        }
-        this._awaitConnectedPromise = new Promise((resolve, reject) => {
-            if (!this._results?.container) {
-                reject(
-                    new Error(
-                        "FluidTurboClient awaitConnected: cannot load DDS without a Fluid container"
-                    )
-                );
-                this._awaitConnectedPromise = undefined;
-            } else {
-                const onConnected = () => {
-                    this._results?.container.off("connected", onConnected);
-                    resolve();
-                };
-                // Wait until connected event to ensure we have the latest document
-                // and don't accidentally override a dds handle recently created
-                // by another client
-                if (this._results.container.connectionState === 2) {
-                    resolve();
-                } else {
-                    this._results.container.on("connected", onConnected);
-                }
-            }
-        });
-        return this._awaitConnectedPromise;
-    }
-
-    protected getContainerSchema(schema?: ContainerSchema) {
-        return {
-            initialObjects: {
-                ...BASE_CONTAINER_SCHEMA.initialObjects,
-                ...schema?.initialObjects,
-            },
-            // Get the static registry of LoadableObjectClass types.
-            dynamicObjectTypes: [
-                ...(schema?.dynamicObjectTypes ?? []),
-                ...DynamicObjectRegistry.dynamicLoadableObjects.values(),
-            ],
-        };
     }
 }
 

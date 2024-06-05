@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
+import { ContainerSchema, IFluidContainer } from "fluid-framework";
 import React from "react";
 import { useSharedStateRegistry } from "../shared-hooks";
 import {
@@ -11,9 +11,9 @@ import {
     ILiveShareHost,
     ILiveShareJoinResults,
     ITimestampProvider,
+    LiveShareClient,
 } from "@microsoft/live-share";
 import { FluidContext, useFluidObjectsContext } from "./AzureProvider";
-import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
 import { isITeamsJsSdkError } from "../internal";
 
 /**
@@ -52,7 +52,7 @@ export interface ILiveShareContext {
      * @returns Promise with `ILiveShareJoinResults`, which includes the Fluid container
      */
     join: (
-        initialObjects?: LoadableObjectClassRecord,
+        fluidContainerSchema?: ContainerSchema,
         onInitializeContainer?: (container: IFluidContainer) => void
     ) => Promise<ILiveShareJoinResults>;
 }
@@ -103,9 +103,9 @@ export interface ILiveShareProviderProps {
      */
     host: ILiveShareHost;
     /**
-     * The initial object schema to use when {@link joinOnLoad} is true.
+     * The schema to use when {@link joinOnLoad} is true.
      */
-    initialObjects?: LoadableObjectClassRecord;
+    fluidContainerSchema?: ContainerSchema;
     /**
      * Optional. Flag to determine whether to join Fluid container on load.
      */
@@ -118,7 +118,7 @@ export interface ILiveShareProviderProps {
 export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
     const startedRef = React.useRef(false);
     const clientRef = React.useRef(
-        new LiveShareTurboClient(props.host, props.clientOptions)
+        new LiveShareClient(props.host, props.clientOptions)
     );
     const [results, setResults] = React.useState<
         ILiveShareJoinResults | undefined
@@ -132,12 +132,12 @@ export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
      */
     const join = React.useCallback(
         async (
-            initialObjects?: LoadableObjectClassRecord,
+            fluidContainerSchema?: ContainerSchema,
             onInitializeContainer?: (container: IFluidContainer) => void
         ): Promise<ILiveShareJoinResults> => {
             startedRef.current = true;
-            const results = await clientRef.current.join(
-                initialObjects,
+            const results = await clientRef.current.joinContainer(
+                fluidContainerSchema,
                 onInitializeContainer
             );
             setResults(results);
@@ -155,7 +155,7 @@ export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
         // We are not doing this here for backwards compatibility. View the README for more information.
         if (results !== undefined || startedRef.current || !props.joinOnLoad)
             return;
-        join(props.initialObjects).catch((error) => {
+        join(props.fluidContainerSchema).catch((error) => {
             console.error(error);
             if (error instanceof Error) {
                 setJoinError(error);
@@ -178,7 +178,7 @@ export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
                 );
             }
         });
-    }, [results, props.joinOnLoad, props.initialObjects, join]);
+    }, [results, props.joinOnLoad, props.fluidContainerSchema, join]);
 
     return (
         <LiveShareContext.Provider

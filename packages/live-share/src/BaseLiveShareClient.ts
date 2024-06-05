@@ -4,17 +4,17 @@
  */
 
 import {
+    ContainerSchema,
     IFluidContainer,
     LoadableObjectClass,
-    LoadableObjectClassRecord,
 } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
-import { IFluidTurboClient } from "./interfaces/IFluidTurboClient";
-import { DynamicObjectManager } from "./dds-objects";
-import { DynamicObjectRegistry } from "@microsoft/live-share";
-import { BASE_CONTAINER_SCHEMA } from "./internals";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { BASE_CONTAINER_SCHEMA } from "./internals/schema";
+import { DynamicObjectManager } from "./DynamicObjectManager";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 
 /**
  * Base class for building Fluid Turbo clients.
@@ -22,8 +22,13 @@ import { BASE_CONTAINER_SCHEMA } from "./internals";
  * Unlike other Fluid clients, the turbo client wraps functionality regularly exposed through an `IFluidContainer`. This is due to the more opinionated
  * nature of this package than vanilla Fluid Framework, where developers do not define a full `ContainerSchema` themselves and objects are loaded dynamically.
  */
-export abstract class FluidTurboClient implements IFluidTurboClient {
+export abstract class BaseLiveShareClient {
     private _awaitConnectedPromise?: Promise<void>;
+    protected _runtime: LiveShareRuntime;
+
+    protected constructor(runtime: LiveShareRuntime) {
+        this._runtime = runtime;
+    }
 
     /**
      * Get the Fluid join container results
@@ -36,7 +41,7 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
         | undefined;
 
     /**
-     * @see IFluidTurboClient.stateMap
+     * Default SharedMap included in all clients for the purposes of tracking simple app state
      */
     public get stateMap(): SharedMap | undefined {
         if (this.results) {
@@ -58,9 +63,13 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
      * This setting will not prevent the local user from explicitly changing the state of objects using `LiveObjectSynchronizer`, such as `.set()` in `LiveState`.
      * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
      */
-    public abstract get canSendBackgroundUpdates(): boolean;
+    public get canSendBackgroundUpdates(): boolean {
+        return this._runtime.canSendBackgroundUpdates;
+    }
 
-    public abstract set canSendBackgroundUpdates(value: boolean);
+    public set canSendBackgroundUpdates(value: boolean) {
+        this._runtime.canSendBackgroundUpdates = value;
+    }
 
     private get dynamicObjects(): DynamicObjectManager | undefined {
         if (this.results) {
@@ -71,7 +80,13 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
     }
 
     /**
-     * @see IFluidTurboClient.getDDS
+     * Callback to load a Fluid DDS for a given key. If the object does not already exist, a new one will be created.
+     *
+     * @template T Type of Fluid object to load.
+     * @param objectKey unique key for the Fluid DDS you'd like to load
+     * @param objectClass Fluid LoadableObjectClass you'd like to load of type T
+     * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created.
+     * @returns DDS object corresponding to `objectKey`
      */
     public async getDDS<
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
@@ -115,25 +130,26 @@ export abstract class FluidTurboClient implements IFluidTurboClient {
     }
 
     /**
-     * Get the container schema to use within a `FluidTurboClient` container.
+     * Get the container schema to use within a `BaseLiveShareClient` container.
      *
      * @param initialObjects Optional. Initial objects to add to the schema
      * @returns a `ContainerSchema` record to use in a Fluid container
      */
-    protected getContainerSchema(initialObjects?: LoadableObjectClassRecord) {
+    protected getContainerSchema(schema?: ContainerSchema): ContainerSchema {
         return {
             initialObjects: {
                 ...BASE_CONTAINER_SCHEMA.initialObjects,
-                ...initialObjects,
+                ...schema?.initialObjects,
             },
             // Get the static registry of LoadableObjectClass types.
             dynamicObjectTypes: [
+                ...(schema?.dynamicObjectTypes ?? []),
                 ...DynamicObjectRegistry.dynamicLoadableObjects.values(),
             ],
         };
     }
 
-    private async waitUntilConnected(): Promise<void> {
+    protected async waitUntilConnected(): Promise<void> {
         if (this._awaitConnectedPromise) {
             return this._awaitConnectedPromise;
         }

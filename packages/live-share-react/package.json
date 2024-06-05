@@ -12,7 +12,6 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@microsoft/live-share-turbo": "2.0.0-internal.5",
     "url": "^0.11.0",
     "uuid": "^9.0.0"
   },

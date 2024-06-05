@@ -10,7 +10,8 @@ import {
     LiveDataObjectInitializeState,
     UserMeetingRole,
 } from "./interfaces";
-import { LiveShareReportIssueLink, waitUntilConnected } from "./internals";
+import { LiveShareReportIssueLink } from "./internals/consts";
+import { waitUntilConnected } from "./internals/utils";
 
 /**
  * Extends Fluid's DataObject class. Intended for use with Live Share custom DDS's that rely on a `ILiveShareHost`.

@@ -26,6 +26,8 @@ export * from "./TimestampProvider";
 export * from "./schema-injection-utils";
 export * from "./LiveDataObject";
 export * from "./LiveShareRuntime";
+export * from "./AzureLiveShareClient";
 export * from "./AzureLiveShareHost";
+export * from "./BaseLiveShareClient";
 export * from "./LiveObjectSynchronizer";
 export * from "./errors";

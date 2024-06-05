@@ -4,22 +4,20 @@
  */
 
 import { strict as assert } from "assert";
-import {
-    IFluidContainer,
-    LoadableObjectClassRecord,
-    SharedMap,
-} from "fluid-framework";
-import { LiveEvent, TestLiveShareHost } from "@microsoft/live-share";
-import { LiveShareTurboClient } from "../LiveShareTurboClient";
+import { ContainerSchema, IFluidContainer } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client";
+import { TestLiveShareHost } from "../TestLiveShareHost";
+import { LiveShareClient } from "../LiveShareClient";
+import { LiveEvent } from "../LiveEvent";
 
-describe("LiveShareTurboClient", () => {
-    (window.performance as any).mark = () => {
-        return {};
-    };
-    (window.performance as any).measure = () => {
-        return {};
-    };
+describe("LiveShareClient dynamic objects", () => {
+    // (window.performance as any).mark = () => {
+    //     return {};
+    // };
+    // (window.performance as any).measure = () => {
+    //     return {};
+    // };
 
     let containerId: string | undefined;
     const getContainerId = (): string | undefined => {
@@ -29,8 +27,8 @@ describe("LiveShareTurboClient", () => {
         containerId = newContainerId;
     };
     const host = TestLiveShareHost.create(getContainerId, setContainerId);
-    let client1: LiveShareTurboClient;
-    let client2: LiveShareTurboClient;
+    let client1: LiveShareClient;
+    let client2: LiveShareClient;
 
     const testMapKey = "TEST-MAP-KEY";
     const testLiveEventKey = "TEST-LIVE-EVENT-KEY";
@@ -46,25 +44,23 @@ describe("LiveShareTurboClient", () => {
     };
 
     beforeEach(async () => {
-        client1 = new LiveShareTurboClient(host);
-        client2 = new LiveShareTurboClient(host);
-        const initialObjects: LoadableObjectClassRecord = {
-            [testLiveEventKey]: LiveEvent,
+        client1 = new LiveShareClient(host);
+        client2 = new LiveShareClient(host);
+        const schema: ContainerSchema = {
+            initialObjects: {
+                [testLiveEventKey]: LiveEvent,
+            },
         };
         containerId = undefined;
-        results1 = await client1.join(initialObjects);
-        results2 = await client2.join(initialObjects);
+        results1 = await client1.joinContainer(schema);
+        results2 = await client2.joinContainer(schema);
     });
 
-    it("Containers should be configured correctly", async () => {
+    it("Containers should be configured correctly", () => {
         assert(
             [results1.created, results2.created].filter((created) => created)
                 .length === 1,
             "Incorrect number of containers created"
-        );
-        assert(
-            !!client1.results && !!client2.results,
-            "client.results results not defined"
         );
         assert(
             !!results1.container || !!results1.services,

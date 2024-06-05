@@ -6,61 +6,77 @@
 import { strict as assert } from "assert";
 import { ContainerSchema, IFluidContainer } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
-import { AzureContainerServices } from "@fluidframework/azure-client";
-import { TestLiveShareHost } from "../TestLiveShareHost";
-import { LiveShareClient } from "../LiveShareClient";
-import { LiveEvent } from "../LiveEvent";
 
-describe("LiveShareClient dynamic objects", () => {
-    (window.performance as any).mark = () => {
-        return {};
-    };
-    (window.performance as any).measure = () => {
-        return {};
+import {
+    AzureContainerServices,
+    AzureLocalConnectionConfig,
+} from "@fluidframework/azure-client";
+import { AzureLiveShareClient } from "../AzureLiveShareClient";
+import {
+    IInsecureUser,
+    InsecureTokenProvider,
+} from "@fluidframework/test-runtime-utils/internal";
+import { LiveEvent } from "@microsoft/live-share";
+import { v4 as uuid } from "uuid";
+
+function generateUser(): IInsecureUser {
+    const randomUser = {
+        id: uuid(),
+        name: uuid(),
     };
 
-    let containerId: string | undefined;
-    const getContainerId = (): string | undefined => {
-        return containerId;
+    return randomUser;
+}
+
+describe("AzureTurboClient", () => {
+    // (window.performance as any).mark = () => {
+    //     return {};
+    // };
+    // (window.performance as any).measure = () => {
+    //     return {};
+    // };
+
+    const connectionProps: AzureLocalConnectionConfig = {
+        tokenProvider: new InsecureTokenProvider("fooBar", generateUser()),
+        endpoint: "http://localhost:7070",
+        type: "local",
     };
-    const setContainerId = (newContainerId: string) => {
-        containerId = newContainerId;
-    };
-    const host = TestLiveShareHost.create(getContainerId, setContainerId);
-    let client1: LiveShareClient;
-    let client2: LiveShareClient;
+    let client1: AzureLiveShareClient;
+    let client2: AzureLiveShareClient;
 
     const testMapKey = "TEST-MAP-KEY";
     const testLiveEventKey = "TEST-LIVE-EVENT-KEY";
     let results1: {
         container: IFluidContainer;
         services: AzureContainerServices;
-        created: boolean;
     };
     let results2: {
         container: IFluidContainer;
         services: AzureContainerServices;
-        created: boolean;
     };
 
     beforeEach(async () => {
-        client1 = new LiveShareClient(host);
-        client2 = new LiveShareClient(host);
-        const schema: ContainerSchema = {
+        client1 = new AzureLiveShareClient({
+            connection: connectionProps,
+        });
+        client2 = new AzureLiveShareClient({
+            connection: connectionProps,
+        });
+        const initialObjects: ContainerSchema = {
             initialObjects: {
                 [testLiveEventKey]: LiveEvent,
             },
+            dynamicObjectTypes: [],
         };
-        containerId = undefined;
-        results1 = await client1.joinContainer(schema);
-        // results2 = await client2.join(schema);
+        results1 = await client1.createContainer(initialObjects);
+        const containerId = await results1.container.attach();
+        results2 = await client2.getContainer(containerId, initialObjects);
     });
 
-    it("Containers should be configured correctly", () => {
+    it("Containers should be configured correctly", async () => {
         assert(
-            [results1.created, results2.created].filter((created) => created)
-                .length === 1,
-            "Incorrect number of containers created"
+            !!client1.results && !!client2.results,
+            "client.results results not defined"
         );
         assert(
             !!results1.container || !!results1.services,

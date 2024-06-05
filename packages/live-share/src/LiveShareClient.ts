@@ -146,26 +146,6 @@ export class LiveShareClient extends BaseLiveShareClient {
     public maxContainerLookupTries = 3;
 
     /**
-     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
-     * Default value is `true`.
-     *
-     * @remarks
-     * This is useful for scenarios where there are a large number of participants in a session, since service performance degrades as more socket connections are opened.
-     * Intended for use when a small number of users are intended to be "in control", such as the `LiveFollowMode` class's `startPresenting()` feature.
-     * There should always be at least one user in the session that has `canSendBackgroundUpdates` set to true.
-     * Set to true when the user is eligible to send background updates (e.g., "in control"), or false when that user is not in control.
-     * This setting will not prevent the local user from explicitly changing the state of objects using `LiveObjectSynchronizer`, such as `.set()` in `LiveState`.
-     * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
-     */
-    public get canSendBackgroundUpdates(): boolean {
-        return this._runtime.canSendBackgroundUpdates;
-    }
-
-    public set canSendBackgroundUpdates(value: boolean) {
-        this._runtime.canSendBackgroundUpdates = value;
-    }
-
-    /**
      * Connects to the fluid container for the current teams context.
      *
      * @remarks

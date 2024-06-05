@@ -29,13 +29,6 @@ function generateUser(): IInsecureUser {
 }
 
 describe("AzureTurboClient", () => {
-    // (window.performance as any).mark = () => {
-    //     return {};
-    // };
-    // (window.performance as any).measure = () => {
-    //     return {};
-    // };
-
     const connectionProps: AzureLocalConnectionConfig = {
         tokenProvider: new InsecureTokenProvider("fooBar", generateUser()),
         endpoint: "http://localhost:7070",

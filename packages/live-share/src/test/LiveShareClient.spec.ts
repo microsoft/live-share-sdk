@@ -12,13 +12,6 @@ import { LiveShareClient } from "../LiveShareClient";
 import { LiveEvent } from "../LiveEvent";
 
 describe("LiveShareClient dynamic objects", () => {
-    // (window.performance as any).mark = () => {
-    //     return {};
-    // };
-    // (window.performance as any).measure = () => {
-    //     return {};
-    // };
-
     let containerId: string | undefined;
     const getContainerId = (): string | undefined => {
         return containerId;

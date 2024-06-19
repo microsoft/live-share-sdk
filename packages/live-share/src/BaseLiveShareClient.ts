@@ -15,6 +15,7 @@ import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import { BASE_CONTAINER_SCHEMA } from "./internals/schema";
 import { DynamicObjectManager } from "./DynamicObjectManager";
 import { LiveShareRuntime } from "./LiveShareRuntime";
+import { getContainerEntryPoint, getRootDirectory } from "./internals/smuggle";
 
 /**
  * Base class for building Fluid Turbo clients.
@@ -25,6 +26,8 @@ import { LiveShareRuntime } from "./LiveShareRuntime";
 export abstract class BaseLiveShareClient {
     private _awaitConnectedPromise?: Promise<void>;
     protected _runtime: LiveShareRuntime;
+    private _turboStateMap?: SharedMap;
+    private _turboDynamicObjects?: DynamicObjectManager;
 
     protected constructor(runtime: LiveShareRuntime) {
         this._runtime = runtime;
@@ -44,9 +47,8 @@ export abstract class BaseLiveShareClient {
      * Default SharedMap included in all clients for the purposes of tracking simple app state
      */
     public get stateMap(): SharedMap | undefined {
-        if (this.results) {
-            return this.results.container.initialObjects
-                .TURBO_STATE_MAP as SharedMap;
+        if (this._turboStateMap) {
+            return this._turboStateMap;
         }
         return undefined;
     }
@@ -71,10 +73,31 @@ export abstract class BaseLiveShareClient {
         this._runtime.canSendBackgroundUpdates = value;
     }
 
-    private get dynamicObjects(): DynamicObjectManager | undefined {
+    private async dynamicObjects(): Promise<DynamicObjectManager | undefined> {
+        if (this._turboDynamicObjects) {
+            return this._turboDynamicObjects;
+        }
         if (this.results) {
-            return this.results.container.initialObjects
-                .TURBO_DYNAMIC_OBJECTS as DynamicObjectManager;
+            const rootDataObject = getContainerEntryPoint(
+                this.results.container
+            );
+            const rootDirectory = getRootDirectory(rootDataObject);
+            const turboDir = rootDirectory.getSubDirectory("turbo-directory");
+            const turboDynamicObject = await turboDir
+                ?.get("TURBO_DYNAMIC_OBJECTS")
+                ?.get();
+            const turboMap = await turboDir?.get("TURBO_STATE_MAP")?.get();
+
+            this._turboDynamicObjects =
+                turboDynamicObject ??
+                (this.results.container.initialObjects
+                    .TURBO_DYNAMIC_OBJECTS as DynamicObjectManager);
+
+            this._turboStateMap =
+                turboMap ??
+                (this.results.container.initialObjects
+                    .TURBO_STATE_MAP as SharedMap);
+            return this._turboDynamicObjects;
         }
         return undefined;
     }
@@ -101,11 +124,7 @@ export abstract class BaseLiveShareClient {
                 "FluidTurboClient getDDS: cannot call until successful get/create/join FluidContainer"
             );
         }
-        if (!this.dynamicObjects) {
-            throw new Error(
-                "FluidTurboClient: getDDS must have valid dynamicObjects DynamicObjectManager"
-            );
-        }
+
         await this.waitUntilConnected();
         const initialDDS = this.results.container.initialObjects[objectKey] as
             | T
@@ -113,12 +132,20 @@ export abstract class BaseLiveShareClient {
         if (initialDDS !== undefined) {
             return initialDDS;
         }
+
+        const dynamicObjects = await this.dynamicObjects();
+        if (!dynamicObjects) {
+            throw new Error(
+                "FluidTurboClient: getDDS must have valid dynamicObjects DynamicObjectManager"
+            );
+        }
+
         // TODO: investigate fixes
         // Fluid v2.0.0 removed "name" from their interfaces...
         // This likely causes problems for non Live Share DDSs (which have static name fields)
         const className = (objectClass as any).name ?? "unknown";
         const uniqueKey = `<${className}>:${objectKey}`;
-        const response = await this.dynamicObjects.getDDS<T>(
+        const response = await dynamicObjects.getDDS<T>(
             uniqueKey,
             objectClass,
             this.results.container

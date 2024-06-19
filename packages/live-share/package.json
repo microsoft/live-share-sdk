@@ -20,7 +20,8 @@
         "test": "does additional local server setup that LiveShareClient.spec.ts and AzureLiveShareClient.spec.ts need, then runs all tests with test:run"
       },
     "dependencies": {
-        "uuid": "^9.0.0"
+        "uuid": "^9.0.0",
+        "@fluidframework/register-collection": "^2.0.0-rc || ^2.0.0-internal"
     },
     "devDependencies": {
         "@fluid-internal/client-utils": "^2.0.0-rc.4.0.2",

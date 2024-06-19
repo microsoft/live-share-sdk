@@ -25,6 +25,13 @@ import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveContainerSchema } from "./schema-injection-utils";
+import { SharedMap } from "fluid-framework/legacy";
+import {
+    getContainerEntryPoint,
+    getContainerRuntime,
+    getRootDirectory,
+} from "./internals/smuggle";
+import { DynamicObjectManager } from "./DynamicObjectManager";
 
 /**
  * @hidden
@@ -156,6 +163,7 @@ export class LiveShareClient extends BaseLiveShareClient {
      * @param onContainerFirstCreated Optional. Callback that's called when the container is first created.
      * @returns the results of join container.
      */
+    // TODO: join
     public async joinContainer(
         fluidContainerSchema?: ContainerSchema,
         onContainerFirstCreated?: (container: IFluidContainer) => void
@@ -166,6 +174,7 @@ export class LiveShareClient extends BaseLiveShareClient {
             const pStartRuntime = this._runtime.start();
 
             // Apply runtime to ContainerSchema
+            // TODO: two schemas, use live share one preferentially, otherwise use provided
             const schema = getLiveContainerSchema(
                 this.getContainerSchema(fluidContainerSchema),
                 this._runtime
@@ -305,6 +314,18 @@ export class LiveShareClient extends BaseLiveShareClient {
         const { container, services } = await client.createContainer(
             fluidContainerSchema
         );
+
+        const rootDataObject = getContainerEntryPoint(container);
+        const rootDirectory = getRootDirectory(rootDataObject);
+        const containerRuntime = getContainerRuntime(rootDataObject);
+
+        const turboDir = rootDirectory.createSubDirectory("turbo-directory");
+        const obj = await SharedMap.create(containerRuntime, undefined);
+        turboDir.set("TURBO_STATE_MAP", obj.handle);
+
+        const turboObjectManager = await container.create(DynamicObjectManager);
+        turboDir.set("TURBO_DYNAMIC_OBJECTS", turboObjectManager.handle);
+
         if (onInitializeContainer) {
             onInitializeContainer(container);
         }

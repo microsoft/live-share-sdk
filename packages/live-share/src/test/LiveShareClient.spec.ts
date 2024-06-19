@@ -10,6 +10,7 @@ import { AzureContainerServices } from "@fluidframework/azure-client";
 import { TestLiveShareHost } from "../TestLiveShareHost";
 import { LiveShareClient } from "../LiveShareClient";
 import { LiveEvent } from "../LiveEvent";
+import { LiveState } from "../LiveState";
 
 describe("LiveShareClient dynamic objects", () => {
     let containerId: string | undefined;
@@ -49,7 +50,7 @@ describe("LiveShareClient dynamic objects", () => {
         results2 = await client2.joinContainer(schema);
     });
 
-    it("Containers should be configured correctly", () => {
+    it("Containers should be configured correctly", async () => {
         assert(
             [results1.created, results2.created].filter((created) => created)
                 .length === 1,
@@ -59,6 +60,10 @@ describe("LiveShareClient dynamic objects", () => {
             !!results1.container || !!results1.services,
             "client1 results container or services are not defined"
         );
+
+        // state map not initialized until dynamic features are used.
+        await client1.getDDS<LiveState>("test", LiveState);
+        await client2.getDDS<LiveState>("test", LiveState);
         assert(
             !!client1.stateMap || !!client2.stateMap,
             "stateMap is not defined"

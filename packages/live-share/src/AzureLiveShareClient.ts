@@ -14,6 +14,13 @@ import { ILiveShareHost } from "./interfaces";
 import { AzureLiveShareHost } from "./AzureLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveContainerSchema } from "./schema-injection-utils";
+import {
+    getContainerEntryPoint,
+    getContainerRuntime,
+    getRootDirectory,
+} from "./internals/smuggle";
+import { SharedMap } from "fluid-framework/legacy";
+import { DynamicObjectManager } from "./DynamicObjectManager";
 
 /**
  * The `AzureLiveShareClient` implementation `BaseLiveShareClient`.
@@ -71,6 +78,20 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }
+
+        const rootDataObject = getContainerEntryPoint(this._results.container);
+        const rootDirectory = getRootDirectory(rootDataObject);
+        const containerRuntime = getContainerRuntime(rootDataObject);
+
+        const turboDir = rootDirectory.createSubDirectory("turbo-directory");
+        const obj = await SharedMap.create(containerRuntime, undefined);
+        turboDir.set("TURBO_STATE_MAP", obj.handle);
+
+        const turboObjectManager = await this._results.container.create(
+            DynamicObjectManager
+        );
+        turboDir.set("TURBO_DYNAMIC_OBJECTS", turboObjectManager.handle);
+
         await this._runtime.start();
         return this._results;
     }

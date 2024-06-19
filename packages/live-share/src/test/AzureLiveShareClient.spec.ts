@@ -16,7 +16,7 @@ import {
     IInsecureUser,
     InsecureTokenProvider,
 } from "@fluidframework/test-runtime-utils/internal";
-import { LiveEvent } from "@microsoft/live-share";
+import { LiveEvent, LiveState } from "@microsoft/live-share";
 import { v4 as uuid } from "uuid";
 
 function generateUser(): IInsecureUser {
@@ -55,15 +55,14 @@ describe("AzureTurboClient", () => {
         client2 = new AzureLiveShareClient({
             connection: connectionProps,
         });
-        const initialObjects: ContainerSchema = {
+        const schema: ContainerSchema = {
             initialObjects: {
                 [testLiveEventKey]: LiveEvent,
             },
-            dynamicObjectTypes: [],
         };
-        results1 = await client1.createContainer(initialObjects);
+        results1 = await client1.createContainer(schema);
         const containerId = await results1.container.attach();
-        results2 = await client2.getContainer(containerId, initialObjects);
+        results2 = await client2.getContainer(containerId, schema);
     });
 
     it("Containers should be configured correctly", async () => {
@@ -75,6 +74,10 @@ describe("AzureTurboClient", () => {
             !!results1.container || !!results1.services,
             "client1 results container or services are not defined"
         );
+
+        // state map not initialized until dynamic features are used.
+        await client1.getDDS<LiveState>("test", LiveState);
+        await client2.getDDS<LiveState>("test", LiveState);
         assert(
             !!client1.stateMap || !!client2.stateMap,
             "stateMap is not defined"

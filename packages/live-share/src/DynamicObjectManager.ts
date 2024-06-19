@@ -199,3 +199,11 @@ export class DynamicObjectManager extends LiveDataObject {
         return await this.loadDDSWithConsensus(key, localDDS);
     }
 }
+
+/**
+ * Register `DynamicObjectManager` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share`.
+ */
+DynamicObjectRegistry.registerObjectClass(
+    DynamicObjectManager,
+    DynamicObjectManager.TypeName
+);

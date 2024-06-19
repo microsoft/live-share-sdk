@@ -12,7 +12,6 @@ import { SharedMap } from "fluid-framework/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { BASE_CONTAINER_SCHEMA } from "./internals/schema";
 import { DynamicObjectManager } from "./DynamicObjectManager";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getContainerEntryPoint, getRootDirectory } from "./internals/smuggle";
@@ -74,32 +73,27 @@ export abstract class BaseLiveShareClient {
     }
 
     private async dynamicObjects(): Promise<DynamicObjectManager | undefined> {
-        if (this._turboDynamicObjects) {
-            return this._turboDynamicObjects;
+        if (!this._turboDynamicObjects) {
+            await this.loadFromTurboDirectory();
         }
-        if (this.results) {
-            const rootDataObject = getContainerEntryPoint(
-                this.results.container
-            );
-            const rootDirectory = getRootDirectory(rootDataObject);
-            const turboDir = rootDirectory.getSubDirectory("turbo-directory");
-            const turboDynamicObject = await turboDir
-                ?.get("TURBO_DYNAMIC_OBJECTS")
-                ?.get();
-            const turboMap = await turboDir?.get("TURBO_STATE_MAP")?.get();
+        return this._turboDynamicObjects;
+    }
 
-            this._turboDynamicObjects =
-                turboDynamicObject ??
-                (this.results.container.initialObjects
-                    .TURBO_DYNAMIC_OBJECTS as DynamicObjectManager);
-
-            this._turboStateMap =
-                turboMap ??
-                (this.results.container.initialObjects
-                    .TURBO_STATE_MAP as SharedMap);
-            return this._turboDynamicObjects;
+    private async loadFromTurboDirectory() {
+        if (!this.results) {
+            return;
         }
-        return undefined;
+
+        const rootDataObject = getContainerEntryPoint(this.results.container);
+        const rootDirectory = getRootDirectory(rootDataObject);
+        const turboDir = rootDirectory.getSubDirectory("turbo-directory");
+
+        if (turboDir) {
+            this._turboDynamicObjects = await turboDir
+                .get("TURBO_DYNAMIC_OBJECTS")
+                .get();
+            this._turboStateMap = await turboDir.get("TURBO_STATE_MAP").get();
+        }
     }
 
     /**
@@ -126,11 +120,17 @@ export abstract class BaseLiveShareClient {
         }
 
         await this.waitUntilConnected();
-        const initialDDS = this.results.container.initialObjects[objectKey] as
-            | T
-            | undefined;
-        if (initialDDS !== undefined) {
-            return initialDDS;
+        try {
+            const initialDDS = this.results.container.initialObjects[
+                objectKey
+            ] as T | undefined;
+            if (initialDDS !== undefined) {
+                return initialDDS;
+            }
+        } catch (e) {
+            console.trace(
+                "getDDS, No initial objects defined, which is an error in fluid that we don't care about, will use all dynamic"
+            );
         }
 
         const dynamicObjects = await this.dynamicObjects();
@@ -165,7 +165,6 @@ export abstract class BaseLiveShareClient {
     protected getContainerSchema(schema?: ContainerSchema): ContainerSchema {
         return {
             initialObjects: {
-                ...BASE_CONTAINER_SCHEMA.initialObjects,
                 ...schema?.initialObjects,
             },
             // Get the static registry of LoadableObjectClass types.

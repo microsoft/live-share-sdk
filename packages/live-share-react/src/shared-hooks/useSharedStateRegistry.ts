@@ -3,7 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IValueChanged, SharedMap } from "fluid-framework/legacy";
+import {
+    IFluidContainer,
+    IValueChanged,
+    SharedMap,
+} from "fluid-framework/legacy";
 import React from "react";
 import {
     DeleteSharedStateAction,
@@ -13,6 +17,10 @@ import {
     UnregisterSharedSetStateAction,
     UpdateSharedStateAction,
 } from "../types";
+import {
+    getContainerEntryPoint,
+    getRootDirectory,
+} from "@microsoft/live-share/src/internals/smuggle";
 
 /**
  * Response for the {@link useSharedStateRegistry} hook.
@@ -52,6 +60,8 @@ export const useSharedStateRegistry = (
         Map<string, Map<string, SetLocalStateAction>>
     >(new Map());
 
+    const stateMap = useStateMap(results?.container);
+
     /**
      * @see ISharedStateRegistryResponse.registerSharedSetStateAction
      */
@@ -76,14 +86,12 @@ export const useSharedStateRegistry = (
                 );
             }
             // Set initial values, if known
-            const stateMap = results?.container.initialObjects
-                .TURBO_STATE_MAP as SharedMap | undefined;
             const initialValue = stateMap?.get(uniqueKey);
             if (initialValue) {
                 setLocalStateAction(initialValue);
             }
         },
-        [results]
+        [stateMap]
     );
 
     /**
@@ -105,13 +113,10 @@ export const useSharedStateRegistry = (
      */
     const updateSharedState: UpdateSharedStateAction = React.useCallback(
         (uniqueKey: string, value: any) => {
-            if (!results) return;
-            const { container } = results;
-            const stateMap = container.initialObjects
-                .TURBO_STATE_MAP as SharedMap;
-            stateMap.set(uniqueKey, value);
+            if (!stateMap) return;
+            stateMap?.set(uniqueKey, value);
         },
-        [results]
+        [stateMap]
     );
 
     /**
@@ -119,25 +124,20 @@ export const useSharedStateRegistry = (
      */
     const deleteSharedState: DeleteSharedStateAction = React.useCallback(
         (uniqueKey: string) => {
-            if (!results) return;
-            const { container } = results;
+            if (!stateMap) return;
             let actionsMap =
                 registeredSharedSetStateActionMapRef.current.get(uniqueKey);
             actionsMap?.clear();
-            const stateMap = container.initialObjects
-                .TURBO_STATE_MAP as SharedMap;
             stateMap.delete(uniqueKey);
         },
-        [results]
+        [stateMap]
     );
 
     React.useEffect(() => {
-        if (!results) return;
-        const { container } = results;
-        const stateMap = container.initialObjects.TURBO_STATE_MAP as SharedMap;
+        if (!stateMap) return;
         const valueChangedListener = (changed: IValueChanged): void => {
             if (registeredSharedSetStateActionMapRef.current.has(changed.key)) {
-                const value = stateMap.get(changed.key);
+                const value = stateMap?.get(changed.key);
                 const actionMap =
                     registeredSharedSetStateActionMapRef.current.get(
                         changed.key
@@ -157,9 +157,9 @@ export const useSharedStateRegistry = (
             });
         });
         return () => {
-            stateMap.off("valueChanged", valueChangedListener);
+            stateMap?.off("valueChanged", valueChangedListener);
         };
-    }, [results]);
+    }, [stateMap]);
 
     return {
         registerSharedSetStateAction,
@@ -167,4 +167,24 @@ export const useSharedStateRegistry = (
         updateSharedState,
         deleteSharedState,
     };
+};
+
+const useStateMap = (container: IFluidContainer | undefined) => {
+    const [stateMap, setStateMap] = React.useState<SharedMap | undefined>();
+    React.useEffect(() => {
+        if (!container) {
+            return;
+        }
+        const rootDataObject = getContainerEntryPoint(container);
+        const rootDirectory = getRootDirectory(rootDataObject);
+        const turboDir = rootDirectory.getSubDirectory("turbo-directory");
+        turboDir
+            ?.get("TURBO_STATE_MAP")
+            .get()
+            .then((state: SharedMap) => {
+                setStateMap(state);
+            });
+    }, [container]);
+
+    return stateMap;
 };

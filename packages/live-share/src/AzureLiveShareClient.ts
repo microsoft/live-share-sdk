@@ -13,7 +13,7 @@ import { BaseLiveShareClient } from "./internals/BaseLiveShareClient";
 import { ILiveShareHost } from "./interfaces";
 import { AzureLiveShareHost } from "./AzureLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { getLiveContainerSchema } from "./schema-injection-utils";
+import { getLiveContainerSchema } from "./internals/schema-injection-utils";
 
 /**
  * The `AzureLiveShareClient` implementation `BaseLiveShareClient`.

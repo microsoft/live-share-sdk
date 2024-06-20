@@ -16,7 +16,7 @@ import { MockRoleVerifier } from "./MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { getLiveDataObjectClass } from "../schema-injection-utils";
+import { getLiveDataObjectClass } from "../internals/schema-injection-utils";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import { DataObjectClass } from "fluid-framework";
 import { describeCompat } from "@live-share-private/test-utils";

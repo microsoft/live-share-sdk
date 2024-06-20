@@ -22,7 +22,7 @@ import {
     UserMeetingRole,
 } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { getLiveDataObjectClass } from "../schema-injection-utils";
+import { getLiveDataObjectClass } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
 

@@ -4,9 +4,9 @@ import {
 } from "@fluidframework/aqueduct/internal";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { DataObjectClass } from "@fluidframework/fluid-static/internal";
-import { LiveDataObject } from "./LiveDataObject";
-import { LiveShareRuntime } from "./LiveShareRuntime";
-import { LoadableObjectCtor } from "./internals/fluid-duplicated";
+import { LiveDataObject } from "../LiveDataObject";
+import { LiveShareRuntime } from "../LiveShareRuntime";
+import { LoadableObjectCtor } from "./fluid-duplicated";
 import {
     ContainerSchema,
     LoadableObjectClass,

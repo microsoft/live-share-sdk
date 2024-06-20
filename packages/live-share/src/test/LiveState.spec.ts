@@ -11,7 +11,7 @@ import {
 } from "@fluidframework/test-utils/internal";
 import { LiveState } from "../LiveState";
 import { Deferred } from "../internals";
-import { getLiveDataObjectClass } from "../schema-injection-utils";
+import { getLiveDataObjectClass } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
 

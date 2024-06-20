@@ -24,7 +24,7 @@ import { BaseLiveShareClient } from "./internals/BaseLiveShareClient";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { getLiveContainerSchema } from "./schema-injection-utils";
+import { getLiveContainerSchema } from "./internals/schema-injection-utils";
 
 /**
  * @hidden

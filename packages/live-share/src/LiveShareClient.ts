@@ -20,7 +20,7 @@ import {
     IRoleVerifier,
     ILiveShareJoinResults,
 } from "./interfaces";
-import { BaseLiveShareClient } from "./BaseLiveShareClient";
+import { BaseLiveShareClient } from "./internals/BaseLiveShareClient";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";

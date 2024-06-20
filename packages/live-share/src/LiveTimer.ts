@@ -13,7 +13,7 @@ import {
 } from "./interfaces";
 import { IEvent } from "@fluidframework/common-definitions";
 import { LiveEvent } from "./LiveEvent";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
 import { LiveDataObject } from "./LiveDataObject";
 import {
     LiveDataObjectInitializeNotNeededError,

@@ -9,7 +9,7 @@ import {
     AzureClientProps,
     AzureContainerServices,
 } from "@fluidframework/azure-client";
-import { BaseLiveShareClient } from "./BaseLiveShareClient";
+import { BaseLiveShareClient } from "./internals/BaseLiveShareClient";
 import { ILiveShareHost } from "./interfaces";
 import { AzureLiveShareHost } from "./AzureLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";

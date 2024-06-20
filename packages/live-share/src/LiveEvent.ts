@@ -4,7 +4,7 @@
  */
 
 import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 import {
     UserMeetingRole,
     IClientTimestamp,
@@ -13,7 +13,7 @@ import {
 } from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
 import { LiveDataObject } from "./LiveDataObject";
 import { cloneValue } from "./internals";
 import {

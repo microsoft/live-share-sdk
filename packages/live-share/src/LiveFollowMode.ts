@@ -7,7 +7,7 @@ import { assert } from "@fluidframework/core-utils/internal";
 import { LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LivePresenceUser, PresenceState } from "./LivePresenceUser";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,

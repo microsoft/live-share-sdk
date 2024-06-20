@@ -13,18 +13,16 @@ import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import { DynamicObjectManager } from "./DynamicObjectManager";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LiveShareRuntime } from "../LiveShareRuntime";
 import {
     getRootDataObject,
     getContainerRuntime,
     getRootDirectory,
-} from "./smuggle";
-import {
     TurboDirectory,
     TurboDynamicObjects,
     TurboStateMap,
-    isErrorLike,
-} from "./internals";
+} from "./smuggle";
+import { isErrorLike } from "./type-guards";
 
 /**
  * Base class for building Fluid Turbo clients.

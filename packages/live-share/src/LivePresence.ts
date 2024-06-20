@@ -20,7 +20,7 @@ import {
     UnexpectedError,
 } from "./errors";
 import { TimeInterval } from "./TimeInterval";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
 import {
     IClientInfo,
     LiveDataObjectInitializeState,

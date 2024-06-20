@@ -65,17 +65,6 @@ export function getLiveContainerSchema(
 }
 
 /**
- * @deprecated
- * Use {@link getLiveContainerSchema} instead.
- */
-export function getLiveContainerSchemaProxy(
-    schema: ContainerSchema,
-    liveRuntime: LiveShareRuntime
-): ContainerSchema {
-    return getLiveContainerSchema(schema, liveRuntime);
-}
-
-/**
  * Inject Live Share dependencies to relevant `LiveDataObject` derived classes.
  * Regular `DataObject` classes are not injected.
  *

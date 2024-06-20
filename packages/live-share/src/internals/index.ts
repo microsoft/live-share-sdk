@@ -16,3 +16,5 @@ export * from "./internal-interfaces";
 export * from "./LiveObjectManager";
 export * from "./ContainerSynchronizer";
 export * from "./FormatFixHostDecorator";
+
+// TODO: delete internals/index.ts

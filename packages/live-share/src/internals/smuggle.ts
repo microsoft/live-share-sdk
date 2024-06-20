@@ -3,6 +3,24 @@ import { type ISharedDirectory } from "@fluidframework/map/internal";
 import { type IFluidDataStoreRuntime } from "@fluidframework/datastore-definitions";
 import { IFluidContainer } from "@fluidframework/fluid-static";
 
+/**
+ * @hidden
+ */
+export const TurboDirectory = "TURBO_DIRECTORY";
+
+/**
+ * @hidden
+ */
+export const TurboStateMap = "TURBO_STATE_MAP";
+
+/**
+ * @hidden
+ */
+export const TurboDynamicObjects = "TURBO_DYNAMIC_OBJECTS";
+
+/**
+ * @hidden
+ */
 export function getRootDataObject(container: IFluidContainer): DataObject {
     interface RootDataObjectSmuggler {
         rootDataObject: DataObject;
@@ -11,6 +29,9 @@ export function getRootDataObject(container: IFluidContainer): DataObject {
     return blah.rootDataObject;
 }
 
+/**
+ * @hidden
+ */
 export function getRootDirectory(rootDataObject: DataObject): ISharedDirectory {
     interface RootDataObjectDirectorymuggler {
         root: ISharedDirectory;
@@ -19,6 +40,9 @@ export function getRootDirectory(rootDataObject: DataObject): ISharedDirectory {
     return blah.root;
 }
 
+/**
+ * @hidden
+ */
 export function getContainerRuntime(
     rootDataObject: DataObject
 ): IFluidDataStoreRuntime {

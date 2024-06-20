@@ -23,6 +23,7 @@ import {
     TurboDirectory,
     TurboDynamicObjects,
     TurboStateMap,
+    isErrorLike,
 } from "./internals";
 
 /**
@@ -137,9 +138,16 @@ export abstract class BaseLiveShareClient {
                 return initialDDS;
             }
         } catch (e) {
-            console.trace(
-                "getDDS, No initial objects defined, which is an error in fluid that we don't care about, will use all dynamic"
-            );
+            if (
+                isErrorLike(e) &&
+                e.message == "Initial Objects were not correctly initialized"
+            ) {
+                console.trace(
+                    "getDDS, No initial objects defined, which is an error in fluid that we don't care about, will use all dynamic"
+                );
+            } else {
+                throw e;
+            }
         }
 
         const dynamicObjects = await this.dynamicObjects();

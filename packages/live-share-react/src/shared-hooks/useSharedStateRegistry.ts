@@ -18,9 +18,11 @@ import {
     UpdateSharedStateAction,
 } from "../types";
 import {
-    getContainerEntryPoint,
+    getRootDataObject,
     getRootDirectory,
-} from "@microsoft/live-share/src/internals/smuggle";
+    TurboDirectory,
+    TurboStateMap,
+} from "@microsoft/live-share";
 
 /**
  * Response for the {@link useSharedStateRegistry} hook.
@@ -175,11 +177,11 @@ const useStateMap = (container: IFluidContainer | undefined) => {
         if (!container) {
             return;
         }
-        const rootDataObject = getContainerEntryPoint(container);
+        const rootDataObject = getRootDataObject(container);
         const rootDirectory = getRootDirectory(rootDataObject);
-        const turboDir = rootDirectory.getSubDirectory("turbo-directory");
+        const turboDir = rootDirectory.getSubDirectory(TurboDirectory);
         turboDir
-            ?.get("TURBO_STATE_MAP")
+            ?.get(TurboStateMap)
             .get()
             .then((state: SharedMap) => {
                 setStateMap(state);

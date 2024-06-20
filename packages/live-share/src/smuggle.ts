@@ -3,7 +3,7 @@ import { type ISharedDirectory } from "@fluidframework/map/internal";
 import { type IFluidDataStoreRuntime } from "@fluidframework/datastore-definitions";
 import { IFluidContainer } from "@fluidframework/fluid-static";
 
-export function getContainerEntryPoint(container: IFluidContainer): DataObject {
+export function getRootDataObject(container: IFluidContainer): DataObject {
     interface RootDataObjectSmuggler {
         rootDataObject: DataObject;
     }

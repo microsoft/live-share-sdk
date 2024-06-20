@@ -25,13 +25,6 @@ import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveContainerSchema } from "./schema-injection-utils";
-import { SharedMap } from "fluid-framework/legacy";
-import {
-    getContainerEntryPoint,
-    getContainerRuntime,
-    getRootDirectory,
-} from "./internals/smuggle";
-import { DynamicObjectManager } from "./DynamicObjectManager";
 
 /**
  * @hidden
@@ -315,16 +308,7 @@ export class LiveShareClient extends BaseLiveShareClient {
             fluidContainerSchema
         );
 
-        const rootDataObject = getContainerEntryPoint(container);
-        const rootDirectory = getRootDirectory(rootDataObject);
-        const containerRuntime = getContainerRuntime(rootDataObject);
-
-        const turboDir = rootDirectory.createSubDirectory("turbo-directory");
-        const obj = await SharedMap.create(containerRuntime, undefined);
-        turboDir.set("TURBO_STATE_MAP", obj.handle);
-
-        const turboObjectManager = await container.create(DynamicObjectManager);
-        turboDir.set("TURBO_DYNAMIC_OBJECTS", turboObjectManager.handle);
+        await this.addTurboFolder(container);
 
         if (onInitializeContainer) {
             onInitializeContainer(container);

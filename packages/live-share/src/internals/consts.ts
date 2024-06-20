@@ -41,3 +41,18 @@ export const ObjectSynchronizerEvents = {
  * @hidden
  */
 export const LiveShareReportIssueLink = "https://aka.ms/teamsliveshare/issue";
+
+/**
+ * @hidden
+ */
+export const TurboDirectory = "TURBO_DIRECTORY";
+
+/**
+ * @hidden
+ */
+export const TurboStateMap = "TURBO_STATE_MAP";
+
+/**
+ * @hidden
+ */
+export const TurboDynamicObjects = "TURBO_DYNAMIC_OBJECTS";

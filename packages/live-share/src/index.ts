@@ -31,3 +31,9 @@ export * from "./AzureLiveShareHost";
 export * from "./BaseLiveShareClient";
 export * from "./LiveObjectSynchronizer";
 export * from "./errors";
+export * from "./smuggle";
+export {
+    TurboDirectory,
+    TurboDynamicObjects,
+    TurboStateMap,
+} from "./internals/consts";

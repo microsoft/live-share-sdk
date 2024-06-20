@@ -14,7 +14,16 @@ import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import { DynamicObjectManager } from "./DynamicObjectManager";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { getContainerEntryPoint, getRootDirectory } from "./internals/smuggle";
+import {
+    getRootDataObject,
+    getContainerRuntime,
+    getRootDirectory,
+} from "./smuggle";
+import {
+    TurboDirectory,
+    TurboDynamicObjects,
+    TurboStateMap,
+} from "./internals";
 
 /**
  * Base class for building Fluid Turbo clients.
@@ -84,15 +93,15 @@ export abstract class BaseLiveShareClient {
             return;
         }
 
-        const rootDataObject = getContainerEntryPoint(this.results.container);
+        const rootDataObject = getRootDataObject(this.results.container);
         const rootDirectory = getRootDirectory(rootDataObject);
-        const turboDir = rootDirectory.getSubDirectory("turbo-directory");
+        const turboDir = rootDirectory.getSubDirectory(TurboDirectory);
 
         if (turboDir) {
             this._turboDynamicObjects = await turboDir
-                .get("TURBO_DYNAMIC_OBJECTS")
+                .get(TurboDynamicObjects)
                 .get();
-            this._turboStateMap = await turboDir.get("TURBO_STATE_MAP").get();
+            this._turboStateMap = await turboDir.get(TurboStateMap).get();
         }
     }
 
@@ -203,5 +212,18 @@ export abstract class BaseLiveShareClient {
             }
         });
         return this._awaitConnectedPromise;
+    }
+
+    protected async addTurboFolder(container: IFluidContainer) {
+        const rootDataObject = getRootDataObject(container);
+        const rootDirectory = getRootDirectory(rootDataObject);
+        const containerRuntime = getContainerRuntime(rootDataObject);
+
+        const turboDir = rootDirectory.createSubDirectory(TurboDirectory);
+        const obj = await SharedMap.create(containerRuntime, undefined);
+        turboDir.set(TurboStateMap, obj.handle);
+
+        const turboObjectManager = await container.create(DynamicObjectManager);
+        turboDir.set(TurboDynamicObjects, turboObjectManager.handle);
     }
 }

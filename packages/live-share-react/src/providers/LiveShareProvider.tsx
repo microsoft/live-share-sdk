@@ -136,7 +136,7 @@ export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
             onInitializeContainer?: (container: IFluidContainer) => void
         ): Promise<ILiveShareJoinResults> => {
             startedRef.current = true;
-            const results = await clientRef.current.joinContainer(
+            const results = await clientRef.current.join(
                 fluidContainerSchema,
                 onInitializeContainer
             );

@@ -156,8 +156,7 @@ export class LiveShareClient extends BaseLiveShareClient {
      * @param onContainerFirstCreated Optional. Callback that's called when the container is first created.
      * @returns the results of join container.
      */
-    // TODO: join
-    public async joinContainer(
+    public async join(
         fluidContainerSchema?: ContainerSchema,
         onContainerFirstCreated?: (container: IFluidContainer) => void
     ): Promise<ILiveShareJoinResults> {
@@ -167,7 +166,6 @@ export class LiveShareClient extends BaseLiveShareClient {
             const pStartRuntime = this._runtime.start();
 
             // Apply runtime to ContainerSchema
-            // TODO: two schemas, use live share one preferentially, otherwise use provided
             const schema = getLiveContainerSchema(
                 this.getContainerSchema(fluidContainerSchema),
                 this._runtime

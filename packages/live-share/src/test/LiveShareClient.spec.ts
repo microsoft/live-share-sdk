@@ -46,8 +46,8 @@ describe("LiveShareClient dynamic objects", () => {
             },
         };
         containerId = undefined;
-        results1 = await client1.joinContainer(schema);
-        results2 = await client2.joinContainer(schema);
+        results1 = await client1.join(schema);
+        results2 = await client2.join(schema);
     });
 
     it("Containers should be configured correctly", async () => {

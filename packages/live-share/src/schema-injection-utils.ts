@@ -6,6 +6,7 @@ import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { DataObjectClass } from "@fluidframework/fluid-static/internal";
 import { LiveDataObject } from "./LiveDataObject";
 import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LoadableObjectCtor } from "./internals/fluid-duplicated";
 import {
     ContainerSchema,
     LoadableObjectClass,
@@ -19,7 +20,8 @@ import {
  */
 type LiveObjectClass<T extends IFluidLoadable> = {
     TypeName: string;
-} & DataObjectClass<T>;
+} & DataObjectClass<T> &
+    LoadableObjectCtor<T>;
 
 /**
  * Inject Live Share dependencies into your Fluid container schema.

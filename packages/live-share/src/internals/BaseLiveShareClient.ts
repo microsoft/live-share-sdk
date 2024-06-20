@@ -23,6 +23,7 @@ import {
     TurboStateMap,
 } from "./smuggle";
 import { isErrorLike } from "./type-guards";
+import { getFactoryName } from "./fluid-duplicated";
 
 /**
  * Base class for building Fluid Turbo clients.
@@ -155,10 +156,10 @@ export abstract class BaseLiveShareClient {
             );
         }
 
-        // TODO: investigate fixes
-        // Fluid v2.0.0 removed "name" from their interfaces...
-        // This likely causes problems for non Live Share DDSs (which have static name fields)
-        const className = (objectClass as any).name ?? "unknown";
+        const className =
+            (objectClass as any).name ??
+            getFactoryName(objectClass) ??
+            "unknown";
         const uniqueKey = `<${className}>:${objectKey}`;
         const response = await dynamicObjects.getDDS<T>(
             uniqueKey,

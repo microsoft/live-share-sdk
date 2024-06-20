@@ -137,14 +137,11 @@ export abstract class BaseLiveShareClient {
                 return initialDDS;
             }
         } catch (e) {
-            if (
+            const canIgnore =
                 isErrorLike(e) &&
-                e.message == "Initial Objects were not correctly initialized"
-            ) {
-                console.trace(
-                    "getDDS, No initial objects defined, which is an error in fluid that we don't care about, will use all dynamic"
-                );
-            } else {
+                e.message == "Initial Objects were not correctly initialized";
+
+            if (!canIgnore) {
                 throw e;
             }
         }

@@ -36,7 +36,7 @@ const MeetingStage: FC = () => {
         liveCanvas, // LiveEvent Fluid object
         container, // Fluid container
         error, // Join container error
-        timestampProvider, // LiveShareRuntime instance, used for getting reference server timestamp
+        timestampProvider, // ITimestampProvider instance, used for getting reference server timestamp
     } = liveShareHooks.useSharedObjects();
 
     // Notification hook

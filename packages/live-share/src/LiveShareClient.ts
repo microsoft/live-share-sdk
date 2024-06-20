@@ -146,6 +146,17 @@ export class LiveShareClient extends BaseLiveShareClient {
     public maxContainerLookupTries = 3;
 
     /**
+     * {@inheritDoc LiveShareClient.join}
+     * @deprecated Use {@link LiveShareClient.join} instead.
+     */
+    public async joinContainer(
+        fluidContainerSchema?: ContainerSchema,
+        onContainerFirstCreated?: (container: IFluidContainer) => void
+    ): Promise<ILiveShareJoinResults> {
+        return this.join(fluidContainerSchema, onContainerFirstCreated);
+    }
+
+    /**
      * Connects to the fluid container for the current teams context.
      *
      * @remarks

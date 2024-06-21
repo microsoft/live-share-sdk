@@ -9,7 +9,7 @@ import {
     LoadableObjectClass,
 } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
-import { AzureContainerServices } from "@fluidframework/azure-client";
+import { AzureContainerServices } from "@fluidframework/azure-client/internal";
 import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import { DynamicObjectManager } from "./DynamicObjectManager";
@@ -24,6 +24,7 @@ import {
 } from "./smuggle";
 import { isErrorLike } from "./type-guards";
 import { getFactoryName } from "./fluid-duplicated";
+import { ExpectedError } from "../errors";
 
 /**
  * Base class for building Fluid Turbo clients.
@@ -37,12 +38,18 @@ export abstract class BaseLiveShareClient {
     private _turboStateMap?: SharedMap;
     private _turboDynamicObjects?: DynamicObjectManager;
 
+    /**
+     * Constructor to create a new BaseLiveShareClient instance.
+     *
+     * @param runtime Live Share runtime instance
+     */
     protected constructor(runtime: LiveShareRuntime) {
         this._runtime = runtime;
     }
 
     /**
-     * Get the Fluid join container results
+     * Get the Fluid join container results.
+     * Includes Fluid container and Azure container services.
      */
     public abstract get results():
         | {
@@ -60,6 +67,11 @@ export abstract class BaseLiveShareClient {
         }
         return undefined;
     }
+
+    /**
+     * Join container functions to call. Used for generating helpful error messages when calling {@link getDDS}.
+     */
+    protected abstract getDDSErrorJoinFunctionText: string;
 
     /**
      * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
@@ -107,12 +119,16 @@ export abstract class BaseLiveShareClient {
 
     /**
      * Callback to load a Fluid DDS for a given key. If the object does not already exist, a new one will be created.
+     * If the key matches an object in the `initialObjects` from your `ContainerSchema`, the initial object will be returned.
      *
      * @template T Type of Fluid object to load.
      * @param objectKey unique key for the Fluid DDS you'd like to load
      * @param objectClass Fluid LoadableObjectClass you'd like to load of type T
      * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created.
      * @returns DDS object corresponding to `objectKey`
+     *
+     * @throws error if you have not already joined the Fluid container.
+     * @throws error if you are using a legacy container created prior to Live Share version 2.0.0 or greater.
      */
     public async getDDS<
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
@@ -121,12 +137,12 @@ export abstract class BaseLiveShareClient {
         objectClass: LoadableObjectClass<T>,
         onDidFirstInitialize?: (dds: T) => void
     ): Promise<T> {
-        // The uniqueKey key makes the developer provided uniqueKey never conflict across different DDS objects
-        if (!this.results) {
-            throw new Error(
-                "FluidTurboClient getDDS: cannot call until successful get/create/join FluidContainer"
-            );
-        }
+        ExpectedError.assert(
+            !!this.results,
+            "BaseLiveShareClient:getDDS",
+            "cannot call until successfully joined a FluidContainer",
+            `To fix this issue, call the ${this.getDDSErrorJoinFunctionText} function before using this API.`
+        );
 
         await this.waitUntilConnected();
         try {
@@ -147,12 +163,14 @@ export abstract class BaseLiveShareClient {
         }
 
         const dynamicObjects = await this.dynamicObjects();
-        if (!dynamicObjects) {
-            throw new Error(
-                "FluidTurboClient: getDDS must have valid dynamicObjects DynamicObjectManager"
-            );
-        }
+        ExpectedError.assert(
+            !!dynamicObjects,
+            "BaseLiveShareClient:getDDS",
+            "getDDS must have valid dynamicObjects DynamicObjectManager instance. This implies this container was created with a version of Live Share prior to 2.0.0 or greater.",
+            "To fix this error, please create a new Fluid container and try again."
+        );
 
+        // The uniqueKey key makes the developer provided uniqueKey never conflict across different DDS objects
         const className =
             (objectClass as any).name ??
             getFactoryName(objectClass) ??
@@ -188,6 +206,11 @@ export abstract class BaseLiveShareClient {
         };
     }
 
+    /**
+     * Utility function to wait until the Fluid container is connected.
+     *
+     * @returns promise that will resolve once the container connects.
+     */
     protected async waitUntilConnected(): Promise<void> {
         if (this._awaitConnectedPromise) {
             return this._awaitConnectedPromise;
@@ -218,6 +241,14 @@ export abstract class BaseLiveShareClient {
         return this._awaitConnectedPromise;
     }
 
+    /**
+     * @internal
+     * Adds additional objects needed by Live Share to the Fluid container's root data object.
+     * Intended for use only when extending `BaseLiveShareClient`.
+     * This should be called only when the container is first created.
+     *
+     * @param container Fluid container to add the objects to.
+     */
     protected async addTurboFolder(container: IFluidContainer) {
         const rootDataObject = getRootDataObject(container);
         const rootDirectory = getRootDirectory(rootDataObject);

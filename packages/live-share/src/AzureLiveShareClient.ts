@@ -4,20 +4,25 @@
  */
 
 import { ContainerSchema, IFluidContainer } from "fluid-framework";
-import {
-    AzureClient,
-    AzureClientProps,
-    AzureContainerServices,
-} from "@fluidframework/azure-client";
+import { AzureClient, AzureClientProps } from "@fluidframework/azure-client";
+import { AzureContainerServices } from "@fluidframework/azure-client/internal";
 import { BaseLiveShareClient } from "./internals/BaseLiveShareClient";
 import { ILiveShareHost } from "./interfaces";
 import { AzureLiveShareHost } from "./AzureLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils";
+import { LiveShareClient } from "./LiveShareClient";
+import { LiveDataObject } from "./LiveDataObject";
 
 /**
  * The `AzureLiveShareClient` implementation `BaseLiveShareClient`.
  * @see BaseLiveShareClient
+ *
+ * @remarks
+ * You may choose to use this instead of {@link LiveShareClient} if you are using a custom Azure Fluid Relay instance.
+ * {@link LiveShareClient} does support custom Azure Fluid Relay connections, but only allows joining a container via {@link LiveShareClient.join}.
+ * Use {@link AzureLiveShareClient.getContainer} and {@link AzureLiveShareClient.createContainer} for more fine-grained control of connecting to containers.
+ * This ensures you can still use {@link LiveDataObject} DDS's, and useful Live Share features like {@link BaseLiveShareClient.getDDS}.
  */
 export class AzureLiveShareClient extends BaseLiveShareClient {
     private _host: ILiveShareHost;
@@ -28,6 +33,12 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
               services: AzureContainerServices;
           }
         | undefined;
+
+    /**
+     * @hidden
+     */
+    protected getDDSErrorJoinFunctionText: string =
+        "getContainer or createContainer";
 
     /**
      * Creates a new client instance using configuration parameters.
@@ -44,9 +55,9 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
     }
 
     /**
-     * Get the Fluid join container results
+     * See {@link BaseLiveShareClient.results} for more information.
      */
-    public override get results():
+    public get results():
         | {
               container: IFluidContainer;
               services: AzureContainerServices;
@@ -57,6 +68,12 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
 
     /**
      * Creates a new detached container instance in the Azure Fluid Relay.
+     *
+     * @remarks
+     * Internally uses `AzureClient.createContainer`.
+     * See the docs for `AzureClient.createContainer` for more information.
+     * {@link https://fluidframework.com/docs/api/v2/azure-client/azureclient-class#createcontainer-method}
+     *
      * @param initialObjects Optional. Fluid ContainerSchema initialObjects.
      * @returns New detached container instance along with associated services.
      */
@@ -80,6 +97,12 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
 
     /**
      * Accesses the existing container given its unique ID in the Azure Fluid Relay.
+     *
+     * @remarks
+     * Internally uses `AzureClient.getContainer`.
+     * See the docs for `AzureClient.getContainer` for more information.
+     * {@link https://fluidframework.com/docs/api/v2/azure-client/azureclient-class#getcontainer-method}
+     *
      * @param id - Unique ID of the container in Azure Fluid Relay.
      * @param initialObjects Optional. Fluid ContainerSchema initialObjects.
      * @param host Optional. ILiveShareHost implementation to use when using Live Share DDS's.

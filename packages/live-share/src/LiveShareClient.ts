@@ -25,6 +25,7 @@ import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils";
+import { ExpectedError, UnexpectedError } from "./errors";
 
 /**
  * @hidden
@@ -97,22 +98,29 @@ export class LiveShareClient extends BaseLiveShareClient {
     private _results: ILiveShareJoinResults | undefined;
 
     /**
+     * @hidden
+     */
+    protected getDDSErrorJoinFunctionText: string = "join";
+
+    /**
      * Creates a new `LiveShareClient` instance.
      * @param host Host for the current Live Share session.
      * @param options Optional. Configuration options for the client.
      */
     constructor(host: ILiveShareHost, options?: ILiveShareClientOptions) {
         // Validate host passed in
-        if (!host) {
-            throw new Error(
-                `LiveShareClient: prop \`host\` is \`${host}\` when it is expected to be a non-optional value of type \`ILiveShareHost\`. Please ensure \`host\` is defined before initializing \`LiveShareClient\`.`
-            );
-        }
-        if (typeof host.getFluidTenantInfo != "function") {
-            throw new Error(
-                `LiveShareClient: \`host.getFluidTenantInfo\` is of type \`${typeof host.getFluidTenantInfo}\` when it is expected to be a type of \`function\`. For more information, review the \`ILiveShareHost\` interface.`
-            );
-        }
+        ExpectedError.assert(
+            !!host,
+            "LiveShareClient:constructor",
+            `prop \`host\` is \`${host}\` when it is expected to be a non-optional value of type \`ILiveShareHost\`.`,
+            "Please ensure `host` is defined before initializing `LiveShareClient`."
+        );
+        ExpectedError.assert(
+            typeof host.getFluidTenantInfo === "function",
+            "LiveShareClient:constructor",
+            `\`host.getFluidTenantInfo\` is of type \`${typeof host.getFluidTenantInfo}\` when it is expected to be a type of \`function\`.`,
+            "For more information, review the `ILiveShareHost` interface."
+        );
         super(new LiveShareRuntime(host, options, true));
         this._host = host;
         // Save options
@@ -126,7 +134,9 @@ export class LiveShareClient extends BaseLiveShareClient {
     }
 
     /**
-     * @see BaseLiveShareClient.results
+     * @remarks
+     * Includes additional information, such as whether the local user created the container.
+     * See {@link BaseLiveShareClient.results} for more information.
      */
     public get results(): ILiveShareJoinResults | undefined {
         return this._results;
@@ -146,7 +156,6 @@ export class LiveShareClient extends BaseLiveShareClient {
     public maxContainerLookupTries = 3;
 
     /**
-     * {@inheritDoc LiveShareClient.join}
      * @deprecated Use {@link LiveShareClient.join} instead.
      */
     public async joinContainer(
@@ -157,7 +166,7 @@ export class LiveShareClient extends BaseLiveShareClient {
     }
 
     /**
-     * Connects to the fluid container for the current teams context.
+     * Connects to the Fluid container for the relevant context (e.g., a Teams meeting).
      *
      * @remarks
      * The first client joining the container will create the container resulting in the
@@ -194,15 +203,14 @@ export class LiveShareClient extends BaseLiveShareClient {
                 let endpoint: string | undefined =
                     frsTenantInfo.serviceEndpoint;
                 if (!endpoint) {
-                    if (serviceEndpointMap.has(frsTenantInfo.serviceEndpoint)) {
-                        endpoint = serviceEndpointMap.get(
-                            frsTenantInfo.serviceEndpoint
-                        );
-                    } else {
-                        throw new Error(
-                            `LiveShareClient:joinContainer - unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
-                        );
-                    }
+                    UnexpectedError.assert(
+                        serviceEndpointMap.has(frsTenantInfo.serviceEndpoint),
+                        "LiveShareClient:joinContainer",
+                        `unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
+                    );
+                    endpoint = serviceEndpointMap.get(
+                        frsTenantInfo.serviceEndpoint
+                    );
                 }
 
                 // Is this a local config?

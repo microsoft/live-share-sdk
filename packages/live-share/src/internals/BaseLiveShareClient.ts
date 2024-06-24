@@ -154,13 +154,7 @@ export abstract class BaseLiveShareClient {
                 return initialDDS;
             }
         } catch (e) {
-            const canIgnore =
-                isErrorLike(e) &&
-                e.message == "Initial Objects were not correctly initialized";
-
-            if (!canIgnore) {
-                throw e;
-            }
+            // ignore "Initial Objects were not correctly initialized" error if none defined.
         }
 
         const dynamicObjects = await this.dynamicObjects();

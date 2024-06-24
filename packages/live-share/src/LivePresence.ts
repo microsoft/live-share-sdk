@@ -480,8 +480,8 @@ export type LivePresence<TData extends object = object> =
 
 // eslint-disable-next-line no-redeclare
 export const LivePresence = (() => {
-    const kind = createDataObjectKind(LivePresenceClass);
-    return kind as typeof kind & SharedObjectKind<LivePresenceClass>;
+    const kind = createDataObjectKind(LivePresenceClass<any>);
+    return kind as typeof kind & SharedObjectKind<LivePresenceClass<any>>;
 })();
 
 /**

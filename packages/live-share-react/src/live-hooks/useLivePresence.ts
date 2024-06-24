@@ -55,7 +55,7 @@ export function useLivePresence<TData extends object = object>(
      */
     const { dds: livePresence } = useDynamicDDS<LivePresence<TData>>(
         uniqueKey,
-        LivePresence<TData>
+        LivePresence
     );
 
     /**

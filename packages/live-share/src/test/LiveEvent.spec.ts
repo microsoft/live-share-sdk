@@ -31,20 +31,20 @@ describeCompat("LiveEvent", (getTestObjectProvider) => {
             timestampProvider: new LocalTimestampProvider(),
         }
     );
-    let LiveEventProxy1 = getLiveDataObjectClass<LiveEvent>(
+    let LiveEventProxy1: any = getLiveDataObjectClass<LiveEvent>(
         LiveEvent,
         liveRuntime1
-    ) as DataObjectClass<LiveEvent>;
+    );
     let liveRuntime2: LiveShareRuntime = new LiveShareRuntime(
         TestLiveShareHost.create(),
         {
             timestampProvider: new LocalTimestampProvider(),
         }
     );
-    let LiveEventProxy2 = getLiveDataObjectClass<LiveEvent>(
+    let LiveEventProxy2: any = getLiveDataObjectClass<LiveEvent>(
         LiveEvent,
         liveRuntime2
-    ) as DataObjectClass<LiveEvent>;
+    );
 
     beforeEach(async () => {
         provider = getTestObjectProvider();

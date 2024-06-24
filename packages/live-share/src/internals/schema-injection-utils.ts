@@ -57,11 +57,9 @@ export function getLiveContainerSchema(
     const newInitialObjects: LoadableObjectClassRecord =
         Object.fromEntries(initialObjectEntries);
 
-    const dynamicObjectsCast = schema.dynamicObjectTypes;
-
     return {
         initialObjects: newInitialObjects,
-        dynamicObjectTypes: dynamicObjectsCast?.map((ObjectClass) =>
+        dynamicObjectTypes: schema.dynamicObjectTypes?.map((ObjectClass) =>
             getLiveDataObjectClass(ObjectClass, liveRuntime, injectedClasses)
         ),
     };

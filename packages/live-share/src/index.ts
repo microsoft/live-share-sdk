@@ -28,7 +28,6 @@ export * from "./LiveEventTimer"; // TODO: Delete LiveEventTime.ts
 export * from "./internals/BaseLiveShareClient";
 export * from "./internals/DynamicObjectRegistry";
 export * from "./internals/DynamicObjectManager";
-export { LoadableObjectClass } from "./internals/fluid-duplicated";
 export * from "./internals/schema-injection-utils";
 export * from "./internals/smuggle";
 

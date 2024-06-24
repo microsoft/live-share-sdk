@@ -46,15 +46,7 @@ export function useSharedTree<TSchema extends ImplicitFieldSchema>(
         if (!sharedTree) return;
         // Create a `treeView` with the provided `treeViewConfiguration`
         const _treeView = sharedTree.viewWith(treeViewConfiguration);
-        if (_treeView.compatibility.canInitialize) {
-            // Also initialize here in addition to onFirstInitialize.
-            // This is because there is an edge case if someone disconnects before `onFirstInitialize` is called.
-            // This helps recover in that case.
-            // We still want to prioritize it in `onFirstInitialize` though.
-            // It helps improve the odds that the creator is the one to initialize the `SharedTree`.
-            _treeView.initialize(initialData);
-        }
-        setTreeView(sharedTree.viewWith(treeViewConfiguration));
+        setTreeView(_treeView);
     }, [sharedTree, treeViewConfiguration]);
 
     return {

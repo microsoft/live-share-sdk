@@ -180,11 +180,9 @@ export abstract class BaseLiveShareClient {
         const response = await dynamicObjects.getDDS<T>(
             uniqueKey,
             objectClass,
-            this.results.container
+            this.results.container,
+            onDidFirstInitialize
         );
-        if (response.created) {
-            onDidFirstInitialize?.(response.dds);
-        }
         return response.dds;
     }
 

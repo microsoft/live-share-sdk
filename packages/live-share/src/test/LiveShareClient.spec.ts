@@ -103,10 +103,10 @@ describe("LiveShareClient dynamic objects", () => {
             dds1 !== undefined && dds2 !== undefined,
             "test map(s) not defined"
         );
-        // Only one should be marked as created
+        // two should be marked as created, one gets discarded after consensus is reached
         assert(
             [object1Created, object2Created].filter((created) => created)
-                .length === 1,
+                .length === 2,
             "Incorrect number of objects created"
         );
     });

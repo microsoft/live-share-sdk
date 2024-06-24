@@ -7,7 +7,7 @@ import { type IFluidDataStoreRuntime } from "@fluidframework/datastore-definitio
 
 /**
  * TODO: include fluid package this came from
- * 
+ *
  * Utility for creating ISharedObjectKind instances.
  * @remarks
  * This takes in a class which implements IChannelFactory,
@@ -17,21 +17,22 @@ import { type IFluidDataStoreRuntime } from "@fluidframework/datastore-definitio
  * @internal
  */
 export function createSharedObjectKind<TSharedObject>(
-	factory: (new () => IChannelFactory<TSharedObject>) & { readonly Type: string },
+    factory: (new () => IChannelFactory<TSharedObject>) & {
+        readonly Type: string;
+    }
 ): ISharedObjectKind<TSharedObject> & SharedObjectKind<TSharedObject> {
-	const result: ISharedObjectKind<TSharedObject> = {
-		getFactory(): IChannelFactory<TSharedObject> {
-			return new factory();
-		},
+    const result: ISharedObjectKind<TSharedObject> = {
+        getFactory(): IChannelFactory<TSharedObject> {
+            return new factory();
+        },
 
-		create(runtime: IFluidDataStoreRuntime, id?: string): TSharedObject {
-			return runtime.createChannel(id, factory.Type) as TSharedObject;
-		},
-	};
+        create(runtime: IFluidDataStoreRuntime, id?: string): TSharedObject {
+            return runtime.createChannel(id, factory.Type) as TSharedObject;
+        },
+    };
 
-	return result as typeof result & SharedObjectKind<TSharedObject>;
+    return result as typeof result & SharedObjectKind<TSharedObject>;
 }
-
 
 /**
  * TODO: include fluid package this came from
@@ -48,25 +49,8 @@ export type LoadableObjectRecord = Record<string, IFluidLoadable>;
 export type LoadableObjectClassRecord = Record<string, SharedObjectKind>;
 
 /**
- * TODO: include fluid package this came from
- * A class object of `DataObject` or `SharedObject`.
- *
- * @typeParam T - The class of the `DataObject` or `SharedObject`.
- *
- * @privateRemarks
- * There are some edge cases in TypeScript where the order of the members in a union matter.
- * Once such edge case is when multiple members of a generic union partially match, and the type parameter is being inferred.
- * In this case, its better to have the desired match and/or the simpler type first.
- * In this case placing ISharedObjectKind fixed one usage and didn't break anything, and generally seems more likely to work than the reverse, so this is the order being used.
- * This is likely (a bug in TypeScript)[https://github.com/microsoft/TypeScript/issues/45809].
- */
-export type LoadableObjectClass<T extends IFluidLoadable = IFluidLoadable> =
-	| ISharedObjectKind<T>
-	| DataObjectClass<T>;
-
-/**
  * COPIED FROM @fluidframework/fluid-static
- * 
+ *
  * A class that has a factory that can create a `DataObject` and a
  * constructor that will return the type of the `DataObject`.
  *
@@ -76,9 +60,8 @@ export type LoadableObjectClass<T extends IFluidLoadable = IFluidLoadable> =
  * TODO: It appears the factory is what's used, so the constructor should be removed once factory provides strong typing.
  */
 export interface DataObjectClass<T extends IFluidLoadable> {
-	readonly factory: IFluidDataStoreFactory;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	new (...args: any[]): T;
+    readonly factory: IFluidDataStoreFactory;
+    new (...args: any[]): T;
 }
 
 /**

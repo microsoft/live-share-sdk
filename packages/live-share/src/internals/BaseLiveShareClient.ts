@@ -13,7 +13,7 @@ import { SharedMap } from "fluid-framework/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client/internal";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { DynamicObjectManager, DynamicObjectManagerClass } from "./DynamicObjectManager";
+import { DynamicObjectManager } from "./DynamicObjectManager";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import {
     getRootDataObject,
@@ -24,7 +24,7 @@ import {
     TurboStateMap,
 } from "./smuggle";
 import { isErrorLike } from "./type-guards";
-import { LoadableObjectClass, getFactoryName } from "./fluid-duplicated";
+import { getFactoryName } from "./fluid-duplicated";
 import { ExpectedError } from "../errors";
 
 /**
@@ -124,7 +124,7 @@ export abstract class BaseLiveShareClient {
      *
      * @template T Type of Fluid object to load.
      * @param objectKey unique key for the Fluid DDS you'd like to load
-     * @param objectClass Fluid LoadableObjectClass you'd like to load of type T
+     * @param objectClass Fluid SharedObjectKind you'd like to load of type T
      * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created.
      * @returns DDS object corresponding to `objectKey`
      *
@@ -135,7 +135,7 @@ export abstract class BaseLiveShareClient {
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
     >(
         objectKey: string,
-        objectClass: LoadableObjectClass<T>,
+        objectClass: SharedObjectKind<T>,
         onDidFirstInitialize?: (dds: T) => void
     ): Promise<T> {
         ExpectedError.assert(
@@ -199,7 +199,7 @@ export abstract class BaseLiveShareClient {
             initialObjects: {
                 ...schema?.initialObjects,
             },
-            // Get the static registry of LoadableObjectClass types.
+            // Get the static registry of SharedObjectKind types.
             dynamicObjectTypes: [
                 ...(schema?.dynamicObjectTypes ?? []),
                 ...DynamicObjectRegistry.dynamicLoadableObjects.values(),
@@ -259,7 +259,7 @@ export abstract class BaseLiveShareClient {
         const obj = await SharedMap.create(containerRuntime, undefined);
         turboDir.set(TurboStateMap, obj.handle);
 
-        const turboObjectManager = await container.create(DynamicObjectManager as unknown as SharedObjectKind<DynamicObjectManager>);
+        const turboObjectManager = await container.create(DynamicObjectManager);
         turboDir.set(TurboDynamicObjects, turboObjectManager.handle);
     }
 }

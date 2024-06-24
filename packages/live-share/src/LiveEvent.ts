@@ -3,7 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory, createDataObjectKind } from "@fluidframework/aqueduct/internal";
+import {
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
 import { IEvent } from "@fluidframework/core-interfaces";
 import {
     UserMeetingRole,
@@ -227,10 +230,10 @@ export type LiveEvent<TEvent = any> = LiveEventClass<TEvent>;
 // eslint-disable-next-line no-redeclare
 export const LiveEvent = (() => {
     const kind = createDataObjectKind(LiveEventClass);
-    return kind as typeof kind & SharedObjectKind<LiveEventClass>
+    return kind as typeof kind & SharedObjectKind<LiveEventClass>;
 })();
 
 /**
- * Register `LiveEvent` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveEvent` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
 DynamicObjectRegistry.registerObjectClass(LiveEvent, LiveEvent.TypeName);

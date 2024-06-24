@@ -7,7 +7,6 @@ import { ITree, SharedObjectKind, SharedTree } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
 import { SharedDirectory } from "@fluidframework/map/internal";
 import { SharedString } from "@fluidframework/sequence/internal";
-import { LoadableObjectClass } from "./fluid-duplicated";
 import type { ISharedObjectKind } from "@fluidframework/shared-object-base/internal";
 
 /**
@@ -25,25 +24,20 @@ const GLOBAL_WINDOW_KEY = "@microsoft/live-share:DYNAMIC-LOADABLE-OBJECTS";
  * aware of what every DDS is.
  */
 export class DynamicObjectRegistry {
-    private static _dynamicLoadableObjects: Map<
-        string,
-        LoadableObjectClass<any>
-    > = new Map<string, LoadableObjectClass<any>>();
+    private static _dynamicLoadableObjects: Map<string, SharedObjectKind<any>> =
+        new Map<string, SharedObjectKind<any>>();
     /**
      * Get all registered dynamic loadable objects
      */
     public static get dynamicLoadableObjects(): Map<
         string,
-        LoadableObjectClass<any>
+        SharedObjectKind<any>
     > {
         if (typeof window === "undefined") {
             return this._dynamicLoadableObjects;
         }
         return ((window as any)[GLOBAL_WINDOW_KEY] ||
-            this._dynamicLoadableObjects) as Map<
-            string,
-            LoadableObjectClass<any>
-        >;
+            this._dynamicLoadableObjects) as Map<string, SharedObjectKind<any>>;
     }
 
     /**
@@ -55,7 +49,7 @@ export class DynamicObjectRegistry {
      * @param loadableObjectClass the Fluid loadable object class to register
      */
     public static registerObjectClass(
-        loadableObjectClass: LoadableObjectClass<any>,
+        loadableObjectClass: SharedObjectKind<any>,
         typeName: string
     ) {
         const loadableObjects = this.dynamicLoadableObjects;
@@ -84,7 +78,7 @@ DynamicObjectRegistry.registerObjectClass(
     SharedDirectory.getFactory().type
 );
 DynamicObjectRegistry.registerObjectClass(
-    SharedTree as unknown as LoadableObjectClass<ITree>,
+    SharedTree,
     (
         SharedTree as unknown as ISharedObjectKind<ITree> &
             SharedObjectKind<ITree>

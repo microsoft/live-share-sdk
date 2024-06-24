@@ -1040,6 +1040,6 @@ export const LiveCanvas = (() => {
 })();
 
 /**
- * Register `LiveCanvas` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveCanvas` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
 DynamicObjectRegistry.registerObjectClass(LiveCanvas, LiveCanvas.TypeName);

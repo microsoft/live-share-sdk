@@ -7,16 +7,16 @@ import {
     DataObjectFactory,
     createDataObjectKind,
 } from "@fluidframework/aqueduct/internal";
-import { FluidObject, IFluidContainer, SharedObjectKind } from "fluid-framework";
 import {
-    IFluidHandle,
-    IFluidLoadable,
-} from "@fluidframework/core-interfaces";
+    FluidObject,
+    IFluidContainer,
+    SharedObjectKind,
+} from "fluid-framework";
+import { IFluidHandle, IFluidLoadable } from "@fluidframework/core-interfaces";
 import { assert } from "@fluidframework/core-utils/internal";
 import { ConsensusRegisterCollection } from "@fluidframework/register-collection/internal";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import { LiveDataObject } from "../LiveDataObject";
-import { LoadableObjectClass } from "./fluid-duplicated";
 
 // Register ConsensusRegisterCollection
 DynamicObjectRegistry.registerObjectClass(
@@ -105,7 +105,7 @@ export class DynamicObjectManagerClass extends LiveDataObject {
      *
      * @template T Type of Fluid object to load.
      * @param key unique key for the dynamic object
-     * @param loadableClass the Fluid LoadableObjectClass
+     * @param loadableClass the Fluid SharedObjectKind
      * @param container Fluid container to load the DDS into
      * @returns the DDS and whether or not it was created locally
      */
@@ -113,7 +113,7 @@ export class DynamicObjectManagerClass extends LiveDataObject {
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
     >(
         key: string,
-        loadableClass: LoadableObjectClass,
+        loadableClass: SharedObjectKind<T>,
         container: IFluidContainer
     ): Promise<{
         dds: T;
@@ -129,7 +129,7 @@ export class DynamicObjectManagerClass extends LiveDataObject {
         }
         // Create a new DDS to attempt to store it into consensusRegisterCollection. The localDDS may not be used if it has first been written by another client.
         // Fluid's garbage collector will clean up the DDS if it is not used.
-        const localDDS = await container.create(loadableClass as unknown as SharedObjectKind<T>);
+        const localDDS = await container.create(loadableClass);
         // Get the DDS with consensus
         return this.loadDDSWithConsensus<T>(key, localDDS);
     }
@@ -212,7 +212,7 @@ export const DynamicObjectManager = (() => {
 })();
 
 /**
- * Register `DynamicObjectManager` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share`.
+ * Register `DynamicObjectManager` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share`.
  */
 DynamicObjectRegistry.registerObjectClass(
     DynamicObjectManager,

@@ -1,9 +1,6 @@
 import { LiveDataObject } from "./LiveDataObject";
-import { LiveState, LiveStateClass } from "./LiveState";
-import {
-    ILivePresenceEvents,
-    LivePresence,
-} from "./LivePresence";
+import { LiveState } from "./LiveState";
+import { ILivePresenceEvents, LivePresence } from "./LivePresence";
 import {
     DataObjectFactory,
     createDataObjectKind,
@@ -748,7 +745,7 @@ export const LiveFollowMode = (() => {
 })();
 
 /**
- * Register `LiveFollowMode` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveFollowMode` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
 DynamicObjectRegistry.registerObjectClass(
     LiveFollowMode,

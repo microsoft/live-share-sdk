@@ -5,12 +5,8 @@
 
 import React from "react";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import {
-    ITimerConfig,
-    ILiveEvent,
-    PresenceState,
-    LoadableObjectClass,
-} from "@microsoft/live-share";
+import { ITimerConfig, ILiveEvent, PresenceState } from "@microsoft/live-share";
+import { SharedObjectKind } from "fluid-framework";
 
 // React actions
 
@@ -29,12 +25,12 @@ export type SetLocalStateAction = React.Dispatch<React.SetStateAction<any>>;
 
 /**
  * Callback for UnregisterDDSSetStateAction.
- * <T extends IFluidLoadable>(uniqueKey: string, componentId: string, objectClass: LoadableObjectClass<T>, setLocalStateAction: SetLocalStateAction, onDidFirstInitialize?: (dds: T) => void) => void
+ * <T extends IFluidLoadable>(uniqueKey: string, componentId: string, objectClass: SharedObjectKind<T>, setLocalStateAction: SetLocalStateAction, onDidFirstInitialize?: (dds: T) => void) => void
  */
 export type RegisterDDSSetStateAction = <T extends IFluidLoadable>(
     uniqueKey: string,
     componentId: string,
-    objectClass: LoadableObjectClass<T>,
+    objectClass: SharedObjectKind<T>,
     setLocalStateAction: SetLocalStateAction,
     onDidFirstInitialize?: (dds: T) => void
 ) => void;

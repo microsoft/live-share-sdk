@@ -16,10 +16,9 @@ import { MockRoleVerifier } from "./MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { getLiveDataObjectClass } from "../internals/schema-injection-utils";
+import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
-import { DataObjectClass } from "../internals/fluid-duplicated";
 
 describeCompat("LiveEvent", (getTestObjectProvider) => {
     let provider: ITestObjectProvider;
@@ -31,7 +30,7 @@ describeCompat("LiveEvent", (getTestObjectProvider) => {
             timestampProvider: new LocalTimestampProvider(),
         }
     );
-    let LiveEventProxy1: any = getLiveDataObjectClass<LiveEvent>(
+    let LiveEventProxy1: any = getLiveDataObjectKind<LiveEvent>(
         LiveEvent,
         liveRuntime1
     );
@@ -41,7 +40,7 @@ describeCompat("LiveEvent", (getTestObjectProvider) => {
             timestampProvider: new LocalTimestampProvider(),
         }
     );
-    let LiveEventProxy2: any = getLiveDataObjectClass<LiveEvent>(
+    let LiveEventProxy2: any = getLiveDataObjectKind<LiveEvent>(
         LiveEvent,
         liveRuntime2
     );

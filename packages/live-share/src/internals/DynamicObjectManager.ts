@@ -105,7 +105,7 @@ export class DynamicObjectManagerClass extends LiveDataObject {
      *
      * @template T Type of Fluid object to load.
      * @param key unique key for the dynamic object
-     * @param loadableClass the Fluid SharedObjectKind
+     * @param objectClass the Fluid SharedObjectKind
      * @param container Fluid container to load the DDS into
      * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created, regardless of whether it is confirmed via consensus or not.
      * @returns the DDS and whether or not it was created locally
@@ -114,7 +114,7 @@ export class DynamicObjectManagerClass extends LiveDataObject {
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
     >(
         key: string,
-        loadableClass: SharedObjectKind<T>,
+        objectClass: SharedObjectKind<T>,
         container: IFluidContainer,
         onDidFirstInitialize?: (dds: T) => void
     ): Promise<{
@@ -131,7 +131,7 @@ export class DynamicObjectManagerClass extends LiveDataObject {
         }
         // Create a new DDS to attempt to store it into consensusRegisterCollection. The localDDS may not be used if it has first been written by another client.
         // Fluid's garbage collector will clean up the DDS if it is not used.
-        const localDDS = await container.create(loadableClass);
+        const localDDS = await container.create(objectClass);
         onDidFirstInitialize?.(localDDS);
         // Get the DDS with consensus
         return this.loadDDSWithConsensus<T>(key, localDDS);

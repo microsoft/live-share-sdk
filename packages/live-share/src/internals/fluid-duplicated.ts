@@ -6,7 +6,7 @@ import type { ISharedObjectKind } from "@fluidframework/shared-object-base/inter
 import { type IFluidDataStoreRuntime } from "@fluidframework/datastore-definitions/internal";
 
 /**
- * TODO: include fluid package this came from
+ * COPIED FROM @fluidframework/shared-object-base
  *
  * Utility for creating ISharedObjectKind instances.
  * @remarks
@@ -35,7 +35,7 @@ export function createSharedObjectKind<TSharedObject>(
 }
 
 /**
- * TODO: include fluid package this came from
+ * COPIED FROM @fluidframework/fluid-static
  * A mapping of string identifiers to instantiated `DataObject`s or `SharedObject`s.
  * @internal
  */

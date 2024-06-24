@@ -9,7 +9,7 @@ import {
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils/internal";
-import { LivePresence } from "../LivePresence";
+import { LivePresence, LivePresenceClass } from "../LivePresence";
 import { PresenceState } from "../LivePresenceUser";
 import { waitForDelay } from "../internals";
 import { Deferred } from "../internals";
@@ -22,13 +22,13 @@ import {
     UserMeetingRole,
 } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { getLiveDataObjectClass } from "../internals/schema-injection-utils";
+import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
 
 class TestLivePresence<
     TData extends object = object
-> extends LivePresence<TData> {
+> extends LivePresenceClass<TData> {
     public async clientId(): Promise<string> {
         return await this.waitUntilConnected();
     }
@@ -49,10 +49,10 @@ async function getObjects(
     }
     liveRuntime2.canSendBackgroundUpdates = object2canSendBackgroundUpdates;
 
-    let ObjectProxy1: any = getLiveDataObjectClass<
+    let ObjectProxy1: any = getLiveDataObjectKind<
         TestLivePresence<{ foo: string }>
     >(TestLivePresence, liveRuntime1);
-    let ObjectProxy2: any = getLiveDataObjectClass<
+    let ObjectProxy2: any = getLiveDataObjectKind<
         TestLivePresence<{ foo: string }>
     >(TestLivePresence, liveRuntime2);
 

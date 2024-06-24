@@ -46,15 +46,15 @@ export class DynamicObjectRegistry {
      * @remarks
      * Duplicate classes will be ignored.
      *
-     * @param loadableObjectClass the Fluid loadable object class to register
+     * @param objectKind the Fluid loadable object class to register
      */
     public static registerObjectClass(
-        loadableObjectClass: SharedObjectKind<any>,
+        objectClass: SharedObjectKind<any>,
         typeName: string
     ) {
         const loadableObjects = this.dynamicLoadableObjects;
         if (loadableObjects.has(typeName)) return;
-        loadableObjects.set(typeName, loadableObjectClass);
+        loadableObjects.set(typeName, objectClass);
         if (typeof window !== "undefined") {
             (window as any)[GLOBAL_WINDOW_KEY] = loadableObjects;
         }

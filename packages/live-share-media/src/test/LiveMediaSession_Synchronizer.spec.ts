@@ -21,7 +21,7 @@ import {
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { TestLiveShareHost } from "@microsoft/live-share";
-import { getLiveDataObjectClass } from "@microsoft/live-share";
+import { getLiveDataObjectKind } from "@microsoft/live-share";
 import { waitForDelay } from "@microsoft/live-share/src/internals";
 import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveShareRuntime";
 import { isErrorLike } from "@microsoft/live-share/bin/internals";
@@ -58,11 +58,11 @@ async function getObjects(
         timestampProvider
     );
 
-    let ObjectProxy1: any = getLiveDataObjectClass<TestLiveMediaSession>(
+    let ObjectProxy1: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
         liveRuntime1
     );
-    let ObjectProxy2: any = getLiveDataObjectClass<TestLiveMediaSession>(
+    let ObjectProxy2: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
         liveRuntime2
     );

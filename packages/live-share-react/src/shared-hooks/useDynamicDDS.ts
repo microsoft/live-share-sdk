@@ -16,7 +16,7 @@ import { SharedObjectKind } from "fluid-framework";
  *
  * @template T Type of Fluid SharedObjectKind type to load. Must conform to IFluidLoadable interface.
  * @param uniqueKey uniqueKey value for the data object
- * @param loadableObjectClass Fluid SharedObjectKind<T> to create/load.
+ * @param objectKind Fluid SharedObjectKind<T> to create/load.
  * @param onFirstInitialize Optional. Callback function for when the DDS is first loaded
  * @returns the DDS object, which is of type T when loaded and undefined while loading
  */
@@ -24,7 +24,7 @@ export function useDynamicDDS<
     T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
 >(
     uniqueKey: string,
-    loadableObjectClass: SharedObjectKind<T>,
+    objectClass: SharedObjectKind<T>,
     onFirstInitialize?: (dds: T) => void
 ): {
     dds: T | undefined;
@@ -51,7 +51,7 @@ export function useDynamicDDS<
             try {
                 const dds = await clientRef.current.getDDS<T>(
                     uniqueKey,
-                    loadableObjectClass,
+                    objectClass,
                     onFirstInitialize
                 );
                 if (mounted) {

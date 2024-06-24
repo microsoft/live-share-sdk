@@ -1,7 +1,13 @@
 import { LiveDataObject } from "./LiveDataObject";
-import { LiveState } from "./LiveState";
-import { ILivePresenceEvents, LivePresence } from "./LivePresence";
-import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
+import { LiveState, LiveStateClass } from "./LiveState";
+import {
+    ILivePresenceEvents,
+    LivePresence,
+} from "./LivePresence";
+import {
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import { assert } from "@fluidframework/core-utils/internal";
 import { LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
@@ -13,6 +19,7 @@ import {
     LiveDataObjectNotInitializedError,
     UnexpectedError,
 } from "./errors";
+import { SharedObjectKind } from "fluid-framework";
 
 /**
  * Events supported by `LiveFollowMode` object.
@@ -172,7 +179,7 @@ const livePresenceKey = "@microsoft/live-share:LiveFollowMode:LivePresence";
  *
  * @template TData Type of data value to share with clients for each user (e.g., the user's camera position in a 3D scene).
  */
-export class LiveFollowMode<TData = any> extends LiveDataObject<{
+export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
     Events: ILiveFollowModeEvents<TData>;
 }> {
     private _logger?: LiveTelemetryLogger;
@@ -203,8 +210,8 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveFollowMode.TypeName,
-        LiveFollowMode,
+        LiveFollowModeClass.TypeName,
+        LiveFollowModeClass,
         [],
         {},
         new Map<string, Promise<any>>([
@@ -731,6 +738,14 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
         this.emit("stateChanged", newState, local, clientId);
     }
 }
+
+export type LiveFollowMode<TData = any> = LiveFollowModeClass<TData>;
+
+// eslint-disable-next-line no-redeclare
+export const LiveFollowMode = (() => {
+    const kind = createDataObjectKind(LiveFollowModeClass);
+    return kind as typeof kind & SharedObjectKind<LiveFollowModeClass>;
+})();
 
 /**
  * Register `LiveFollowMode` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.

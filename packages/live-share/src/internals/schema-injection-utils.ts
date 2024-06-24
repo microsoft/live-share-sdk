@@ -3,15 +3,15 @@ import {
     IDataObjectProps,
 } from "@fluidframework/aqueduct/internal";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { DataObjectClass } from "@fluidframework/fluid-static/internal";
 import { LiveDataObject } from "../LiveDataObject";
 import { LiveShareRuntime } from "../LiveShareRuntime";
-import { LoadableObjectCtor } from "./fluid-duplicated";
 import {
-    ContainerSchema,
+    LoadableObjectCtor,
     LoadableObjectClass,
     LoadableObjectClassRecord,
-} from "fluid-framework";
+    DataObjectClass,
+} from "./fluid-duplicated";
+import { ContainerSchema, SharedObjectKind } from "fluid-framework";
 
 /**
  * A LiveObjectClass is a class that has a factory that can create a DDS (SharedObject) and a
@@ -43,26 +43,25 @@ export function getLiveContainerSchema(
     // This map is used to de-duplicate proxies for each class.
     const injectedClasses = new Map<string, LoadableObjectClass<any>>();
 
-    const initialObjectEntries = Object.entries(schema.initialObjects).map(
-        ([key, ObjectClass]) => {
-            return [
-                key,
-                getLiveDataObjectClass(
-                    ObjectClass,
-                    liveRuntime,
-                    injectedClasses
-                ),
-            ];
-        }
-    );
+    const initialObjectEntries = Object.entries(
+        schema.initialObjects as unknown as LoadableObjectClass
+    ).map(([key, ObjectClass]) => {
+        return [
+            key,
+            getLiveDataObjectClass(ObjectClass, liveRuntime, injectedClasses),
+        ];
+    });
     const newInitialObjects: LoadableObjectClassRecord =
         Object.fromEntries(initialObjectEntries);
 
+    const dynamicObjectsCast =
+        schema.dynamicObjectTypes as unknown as LoadableObjectClass[];
+
     return {
         initialObjects: newInitialObjects,
-        dynamicObjectTypes: schema.dynamicObjectTypes?.map((ObjectClass) =>
+        dynamicObjectTypes: dynamicObjectsCast?.map((ObjectClass) =>
             getLiveDataObjectClass(ObjectClass, liveRuntime, injectedClasses)
-        ),
+        ) as unknown as SharedObjectKind[],
     };
 }
 

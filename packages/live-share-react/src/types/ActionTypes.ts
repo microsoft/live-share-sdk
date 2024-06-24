@@ -5,8 +5,12 @@
 
 import React from "react";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { LoadableObjectClass } from "fluid-framework";
-import { ITimerConfig, ILiveEvent, PresenceState } from "@microsoft/live-share";
+import {
+    ITimerConfig,
+    ILiveEvent,
+    PresenceState,
+    LoadableObjectClass,
+} from "@microsoft/live-share";
 
 // React actions
 

@@ -3,7 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
+import {
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
 import {
     IClientTimestamp,
@@ -11,7 +14,7 @@ import {
     LiveDataObjectInitializeState,
     UserMeetingRole,
 } from "./interfaces";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 import { LiveEvent } from "./LiveEvent";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
 import { LiveDataObject } from "./LiveDataObject";
@@ -20,6 +23,7 @@ import {
     LiveDataObjectNotInitializedError,
     UnexpectedError,
 } from "./errors";
+import { SharedObjectKind } from "fluid-framework";
 
 export interface ITimerConfigData {
     /**
@@ -100,7 +104,7 @@ export interface ILiveTimerEvents extends IEvent {
     (event: "onTick", listener: (milliRemaining: number) => void): any;
 }
 
-export class LiveTimer extends LiveDataObject<{
+export class LiveTimerClass extends LiveDataObject<{
     Events: ILiveTimerEvents;
 }> {
     private _currentConfig: ITimerConfigEvent = {
@@ -125,8 +129,8 @@ export class LiveTimer extends LiveDataObject<{
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveTimer.TypeName,
-        LiveTimer,
+        LiveTimerClass.TypeName,
+        LiveTimerClass,
         [],
         {}
     );
@@ -463,6 +467,14 @@ export class LiveTimer extends LiveDataObject<{
         return config.timestamp - config.data.position + config.data.duration;
     }
 }
+
+export type LiveTimer = LiveTimerClass;
+
+// eslint-disable-next-line no-redeclare
+export const LiveTimer = (() => {
+    const kind = createDataObjectKind(LiveTimerClass);
+    return kind as typeof kind & SharedObjectKind<LiveTimerClass>;
+})();
 
 /**
  * Register `LiveTimer` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.

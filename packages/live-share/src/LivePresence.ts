@@ -3,7 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
+import {
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
 import { IEvent } from "@fluidframework/common-definitions";
 import {
     LivePresenceUser,
@@ -27,6 +30,7 @@ import {
     UserMeetingRole,
 } from "./interfaces";
 import { LiveDataObject } from "./LiveDataObject";
+import { SharedObjectKind } from "fluid-framework";
 
 /**
  * Events supported by `LivePresence` object.
@@ -66,7 +70,7 @@ export interface ILivePresenceEvents<TData extends object = object>
  * Live fluid object that synchronizes presence information for the user with other clients.
  * @template TData Type of data object to share with clients.
  */
-export class LivePresence<
+export class LivePresenceClass<
     TData extends object = object
 > extends LiveDataObject<{
     Events: ILivePresenceEvents<TData>;
@@ -88,8 +92,8 @@ export class LivePresence<
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LivePresence.TypeName,
-        LivePresence,
+        LivePresenceClass.TypeName,
+        LivePresenceClass,
         [],
         {}
     );
@@ -470,6 +474,15 @@ export class LivePresence<
         return true;
     }
 }
+
+export type LivePresence<TData extends object = object> =
+    LivePresenceClass<TData>;
+
+// eslint-disable-next-line no-redeclare
+export const LivePresence = (() => {
+    const kind = createDataObjectKind(LivePresenceClass);
+    return kind as typeof kind & SharedObjectKind<LivePresenceClass>;
+})();
 
 /**
  * Register `LivePresence` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.

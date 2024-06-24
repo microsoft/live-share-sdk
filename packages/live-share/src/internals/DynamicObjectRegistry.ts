@@ -3,10 +3,12 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LoadableObjectClass, SharedTree } from "fluid-framework";
+import { ITree, SharedObjectKind, SharedTree } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
 import { SharedDirectory } from "@fluidframework/map/internal";
 import { SharedString } from "@fluidframework/sequence/internal";
+import { LoadableObjectClass } from "./fluid-duplicated";
+import type { ISharedObjectKind } from "@fluidframework/shared-object-base/internal";
 
 /**
  * Key for window global reference to loadable objects.
@@ -82,6 +84,9 @@ DynamicObjectRegistry.registerObjectClass(
     SharedDirectory.getFactory().type
 );
 DynamicObjectRegistry.registerObjectClass(
-    SharedTree,
-    SharedTree.getFactory().type
+    SharedTree as unknown as LoadableObjectClass<ITree>,
+    (
+        SharedTree as unknown as ISharedObjectKind<ITree> &
+            SharedObjectKind<ITree>
+    ).getFactory().type
 );

@@ -6,7 +6,7 @@
 import React from "react";
 import { FluidObject, IFluidLoadable } from "@fluidframework/core-interfaces";
 import { useFluidObjectsContext } from "../providers";
-import { LoadableObjectClass } from "fluid-framework";
+import { LoadableObjectClass } from "@microsoft/live-share";
 
 /**
  * Hook to gets or creates a DDS that corresponds to a given uniqueKey string.

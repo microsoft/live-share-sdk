@@ -84,7 +84,8 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
         services: AzureContainerServices;
     }> {
         const schema = this.getInjectedContainerSchema(fluidContainerSchema);
-        this._results = await this._client.createContainer(schema);
+        // TODO: use compat constant instead of "2" everywhere
+        this._results = await this._client.createContainer(schema, "2");
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }
@@ -116,7 +117,7 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
         services: AzureContainerServices;
     }> {
         const schema = this.getInjectedContainerSchema(fluidContainerSchema);
-        this._results = await this._client.getContainer(id, schema);
+        this._results = await this._client.getContainer(id, schema, "2");
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }

@@ -289,7 +289,8 @@ export class LiveShareClient extends BaseLiveShareClient {
                 created: false,
                 ...(await client.getContainer(
                     containerInfo.containerId,
-                    fluidContainerSchema
+                    fluidContainerSchema,
+                    "2" // TODO: use compat constant instead of "2" everywhere
                 )),
             };
         } else if (
@@ -322,7 +323,8 @@ export class LiveShareClient extends BaseLiveShareClient {
     }> {
         // Create and initialize container
         const { container, services } = await client.createContainer(
-            fluidContainerSchema
+            fluidContainerSchema,
+            "2"
         );
 
         await this.addTurboFolder(container);
@@ -347,7 +349,8 @@ export class LiveShareClient extends BaseLiveShareClient {
                 created: false,
                 ...(await client.getContainer(
                     containerInfo.containerId!,
-                    fluidContainerSchema
+                    fluidContainerSchema,
+                    "2"
                 )),
             };
         } else {

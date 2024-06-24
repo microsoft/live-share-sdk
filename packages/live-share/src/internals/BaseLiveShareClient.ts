@@ -5,14 +5,15 @@
 
 import {
     ContainerSchema,
+    FluidObject,
     IFluidContainer,
-    LoadableObjectClass,
+    SharedObjectKind,
 } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client/internal";
-import { IFluidLoadable, FluidObject } from "@fluidframework/core-interfaces";
+import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { DynamicObjectManager } from "./DynamicObjectManager";
+import { DynamicObjectManager, DynamicObjectManagerClass } from "./DynamicObjectManager";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 import {
     getRootDataObject,
@@ -23,7 +24,7 @@ import {
     TurboStateMap,
 } from "./smuggle";
 import { isErrorLike } from "./type-guards";
-import { getFactoryName } from "./fluid-duplicated";
+import { LoadableObjectClass, getFactoryName } from "./fluid-duplicated";
 import { ExpectedError } from "../errors";
 
 /**
@@ -202,7 +203,7 @@ export abstract class BaseLiveShareClient {
             dynamicObjectTypes: [
                 ...(schema?.dynamicObjectTypes ?? []),
                 ...DynamicObjectRegistry.dynamicLoadableObjects.values(),
-            ],
+            ] as unknown as SharedObjectKind[],
         };
     }
 
@@ -258,7 +259,7 @@ export abstract class BaseLiveShareClient {
         const obj = await SharedMap.create(containerRuntime, undefined);
         turboDir.set(TurboStateMap, obj.handle);
 
-        const turboObjectManager = await container.create(DynamicObjectManager);
+        const turboObjectManager = await container.create(DynamicObjectManager as unknown as SharedObjectKind<DynamicObjectManager>);
         turboDir.set(TurboDynamicObjects, turboObjectManager.handle);
     }
 }

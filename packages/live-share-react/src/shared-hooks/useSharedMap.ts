@@ -8,11 +8,6 @@ import { isEntries, isJSON, isMap } from "../utils";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types";
 import { useDynamicDDS } from "./useDynamicDDS";
 import { SharedMap } from "fluid-framework/legacy";
-import { useFluidObjectsContext } from "../providers";
-import {
-    ActionContainerNotJoinedError,
-    ActionLiveDataObjectUndefinedError,
-} from "../internal";
 
 /**
  * React hook for using a Fluid `SharedMap`.
@@ -28,19 +23,12 @@ import {
  * will be created, otherwise it will use the existing one.
  * @param initialData a JS Map, entries array, or JSON object to insert into the `SharedMap` when creating
  * the DDS for the first time.
- * @returns stateful `map` entries, `setEntry` callback, `deleteEntry` callback, and the Fluid `sharedMap`.
+ * @returns the Fluid `sharedMap`.
  */
 export function useSharedMap<TData = any>(
     uniqueKey: string,
     initialData?: SharedMapInitialData<TData>
-): IUseSharedMapResults<TData> {
-    /**
-     * Stateful readonly map (user facing) with most recent values from `SharedMap` and its setter method.
-     */
-    const [map, setMap] = React.useState<ReadonlyMap<string, TData>>(
-        getInitialData<TData>(initialData)
-    );
-
+): IUseSharedMapResults {
     const onFirstInitialize = React.useCallback(
         (newDDS: SharedMap): void => {
             /**
@@ -62,59 +50,20 @@ export function useSharedMap<TData = any>(
         onFirstInitialize
     );
 
-    const { container } = useFluidObjectsContext();
-
-    /**
-     * User facing: set a value to the Fluid `SharedMap`.
-     */
-    const setEntry = React.useCallback(
-        (key: string, value: TData) => {
-            if (!container) {
-                throw new ActionContainerNotJoinedError(
-                    "sharedMap",
-                    "setEntry"
-                );
-            }
-            if (sharedMap === undefined) {
-                throw new ActionLiveDataObjectUndefinedError(
-                    "sharedMap",
-                    "setEntry"
-                );
-            }
-            sharedMap.set(key, value);
-        },
-        [container, sharedMap]
-    );
-
-    /**
-     * User facing: delete a value from the Fluid `SharedMap`.
-     */
-    const deleteEntry = React.useCallback(
-        (key: string) => {
-            if (!container) {
-                throw new ActionContainerNotJoinedError(
-                    "sharedMap",
-                    "deleteEntry"
-                );
-            }
-            if (sharedMap === undefined) {
-                throw new ActionLiveDataObjectUndefinedError(
-                    "sharedMap",
-                    "deleteEntry"
-                );
-            }
-            sharedMap.delete(key);
-        },
-        [container, sharedMap]
-    );
+    const [sharedMapProxy, setSharedMapProxy] = React.useState<SharedMap>();
 
     // Setup change listeners, initial values, etc.
     React.useEffect(() => {
         if (!sharedMap) return;
+        setSharedMapProxy(sharedMap);
+
+        class SharedMapProxyHandler implements ProxyHandler<SharedMap> {}
 
         // Register valueChanged listener for `SharedMap`.
         const onValueChanged = () => {
-            setMap(new Map<string, TData>(sharedMap.entries()));
+            setSharedMapProxy(
+                new Proxy(sharedMap, new SharedMapProxyHandler())
+            );
         };
         sharedMap.on("valueChanged", onValueChanged);
         // Get initial values from `SharedMap`.
@@ -127,10 +76,7 @@ export function useSharedMap<TData = any>(
     }, [sharedMap]);
 
     return {
-        map,
-        setEntry,
-        deleteEntry,
-        sharedMap,
+        sharedMap: sharedMapProxy,
     };
 }
 

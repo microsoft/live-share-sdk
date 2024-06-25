@@ -10,7 +10,9 @@ import { IUseSharedTreeResults } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
 import React from "react";
 
-export function useSharedTree<TSchema extends ImplicitFieldSchema>(
+export function useSharedTree<
+    TSchema extends ImplicitFieldSchema = ImplicitFieldSchema
+>(
     uniqueKey: string,
     treeViewConfiguration: TreeViewConfiguration<TSchema>,
     initialData: InsertableTreeFieldFromImplicitField<TSchema>
@@ -18,15 +20,19 @@ export function useSharedTree<TSchema extends ImplicitFieldSchema>(
     const [treeView, setTreeView] = React.useState<TreeView<TSchema>>();
     const onFirstInitialize = React.useCallback(
         (newDDS: ITree): void => {
-            // Create a `treeView` with the provided `treeViewConfiguration`
-            const _treeView = newDDS.viewWith(treeViewConfiguration);
-            if (_treeView.compatibility.canInitialize) {
-                // Set initial data
-                _treeView.initialize(initialData);
+            try {
+                // Create a `treeView` with the provided `treeViewConfiguration`
+                const _treeView = newDDS.viewWith(treeViewConfiguration);
+                if (_treeView.compatibility.canInitialize) {
+                    // Set initial data
+                    _treeView.initialize(initialData);
+                }
+                // `onFirstInitialize` is only called for the user that created the tree, but we need this object for all clients.
+                // Dispose, since we will call `sharedTree.viewWith` in a `useEffect` down below and set it to state.
+                _treeView.dispose();
+            } catch (err) {
+                console.error(err);
             }
-            // `onFirstInitialize` is only called for the user that created the tree, but we need this object for all clients.
-            // Dispose, since we will call `sharedTree.viewWith` in a `useEffect` down below and set it to state.
-            _treeView.dispose();
         },
         [treeViewConfiguration, initialData]
     );

@@ -36,13 +36,7 @@ export function createSharedObjectKind<TSharedObject>(
 
 /**
  * COPIED FROM @fluidframework/fluid-static
- * A mapping of string identifiers to instantiated `DataObject`s or `SharedObject`s.
- * @internal
- */
-export type LoadableObjectRecord = Record<string, IFluidLoadable>;
-
-/**
- * TODO: include fluid package this came from
+ *
  * A mapping of string identifiers to classes that will later be used to instantiate a corresponding `DataObject`
  * or `SharedObject`.
  */

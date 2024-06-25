@@ -26,6 +26,7 @@ import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils";
 import { ExpectedError, UnexpectedError } from "./errors";
+import { FluidCompatibilityMode } from "./internals";
 
 /**
  * @hidden
@@ -290,7 +291,7 @@ export class LiveShareClient extends BaseLiveShareClient {
                 ...(await client.getContainer(
                     containerInfo.containerId,
                     fluidContainerSchema,
-                    "2" // TODO: use compat constant instead of "2" everywhere
+                    FluidCompatibilityMode
                 )),
             };
         } else if (
@@ -324,7 +325,7 @@ export class LiveShareClient extends BaseLiveShareClient {
         // Create and initialize container
         const { container, services } = await client.createContainer(
             fluidContainerSchema,
-            "2"
+            FluidCompatibilityMode
         );
 
         await this.addTurboFolder(container);
@@ -350,7 +351,7 @@ export class LiveShareClient extends BaseLiveShareClient {
                 ...(await client.getContainer(
                     containerInfo.containerId!,
                     fluidContainerSchema,
-                    "2"
+                    FluidCompatibilityMode
                 )),
             };
         } else {

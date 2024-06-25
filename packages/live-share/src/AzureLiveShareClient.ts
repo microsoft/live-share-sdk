@@ -13,6 +13,7 @@ import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils";
 import { LiveShareClient } from "./LiveShareClient";
 import { LiveDataObject } from "./LiveDataObject";
+import { FluidCompatibilityMode } from "./internals/consts";
 
 /**
  * The `AzureLiveShareClient` implementation `BaseLiveShareClient`.
@@ -84,8 +85,10 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
         services: AzureContainerServices;
     }> {
         const schema = this.getInjectedContainerSchema(fluidContainerSchema);
-        // TODO: use compat constant instead of "2" everywhere
-        this._results = await this._client.createContainer(schema, "2");
+        this._results = await this._client.createContainer(
+            schema,
+            FluidCompatibilityMode
+        );
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }
@@ -117,7 +120,11 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
         services: AzureContainerServices;
     }> {
         const schema = this.getInjectedContainerSchema(fluidContainerSchema);
-        this._results = await this._client.getContainer(id, schema, "2");
+        this._results = await this._client.getContainer(
+            id,
+            schema,
+            FluidCompatibilityMode
+        );
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }

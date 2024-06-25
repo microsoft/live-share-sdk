@@ -2,38 +2,6 @@ import { type IFluidDataStoreFactory } from "@fluidframework/runtime-definitions
 import { type IChannelFactory } from "@fluidframework/datastore-definitions/internal";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import type { SharedObjectKind } from "@fluidframework/shared-object-base";
-import type { ISharedObjectKind } from "@fluidframework/shared-object-base/internal";
-import { type IFluidDataStoreRuntime } from "@fluidframework/datastore-definitions/internal";
-
-/**
- * COPIED FROM @fluidframework/shared-object-base
- *
- * Utility for creating ISharedObjectKind instances.
- * @remarks
- * This takes in a class which implements IChannelFactory,
- * and uses it to return a a single value which is intended to be used as the APi entry point for the corresponding shared object type.
- * The returned value implements {@link ISharedObjectKind} for use in the encapsulated API, as well as the type erased {@link SharedObjectKind} used by the declarative API.
- * See {@link @fluidframework/fluid-static#ContainerSchema} for how this is used in the declarative API.
- * @internal
- */
-export function createSharedObjectKind<TSharedObject>(
-    factory: (new () => IChannelFactory<TSharedObject>) & {
-        readonly Type: string;
-    }
-): ISharedObjectKind<TSharedObject> & SharedObjectKind<TSharedObject> {
-    const result: ISharedObjectKind<TSharedObject> = {
-        getFactory(): IChannelFactory<TSharedObject> {
-            return new factory();
-        },
-
-        create(runtime: IFluidDataStoreRuntime, id?: string): TSharedObject {
-            return runtime.createChannel(id, factory.Type) as TSharedObject;
-        },
-    };
-
-    return result as typeof result & SharedObjectKind<TSharedObject>;
-}
-
 /**
  * COPIED FROM @fluidframework/fluid-static
  *

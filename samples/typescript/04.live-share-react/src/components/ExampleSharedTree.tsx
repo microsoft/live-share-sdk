@@ -1,7 +1,7 @@
-import { useSharedTree } from "@microsoft/live-share-react";
-import { Tree, TreeViewConfiguration } from "fluid-framework";
-import { FC, useEffect, useState } from "react";
-import { INote, Note, Notes } from "./ExampleSharedTree-schema";
+import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
+import { TreeViewConfiguration } from "fluid-framework";
+import { FC } from "react";
+import { Note, Notes } from "./ExampleSharedTree-schema";
 import { Button, Textarea } from "@fluentui/react-components";
 
 // Export the tree config appropriate for this schema.
@@ -14,22 +14,14 @@ export const appTreeConfiguration = new TreeViewConfiguration(
 const initialData = new Notes([]);
 
 export const ExampleSharedTree: FC = () => {
-    const { treeView } = useSharedTree<typeof Notes>(
+    const { treeView } = useSharedTree(
         "my-tree",
         appTreeConfiguration,
         initialData
     );
-    const [notes, setNotes] = useState<Note[]>([]);
+    const { node: notes } = useTreeNode(treeView?.root);
 
-    useEffect(() => {
-        if (!treeView) return;
-        const unsubscribe = Tree.on(treeView.root, "nodeChanged", () => {
-            setNotes([...treeView.root.values()]);
-        });
-        return unsubscribe;
-    }, [treeView]);
-
-    if (!treeView) {
+    if (!notes) {
         return <>Loading notes...</>;
     }
     return (
@@ -37,7 +29,7 @@ export const ExampleSharedTree: FC = () => {
             <div>
                 <Button
                     onClick={() => {
-                        treeView.root.addNode("Me");
+                        notes.addNode("Me");
                     }}
                 >
                     {"Add note"}
@@ -55,42 +47,16 @@ interface IExampleNoteStickyProps {
 }
 
 const ExampleNoteSticky: FC<IExampleNoteStickyProps> = ({ note }) => {
-    const [noteObj, setObj] = useState<INote>({
-        id: note.id,
-        text: note.text,
-        author: note.author,
-        /**
-         * Sequence of user ids to track which users have voted on this note.
-         */
-        votes: note.votes,
-        created: note.created,
-        lastChanged: note.lastChanged,
-    });
-    useEffect(() => {
-        const unsubscribe = Tree.on(note, "nodeChanged", () => {
-            setObj({
-                id: note.id,
-                text: note.text,
-                author: note.author,
-                /**
-                 * Sequence of user ids to track which users have voted on this note.
-                 */
-                votes: note.votes,
-                created: note.created,
-                lastChanged: note.lastChanged,
-            });
-        });
-        return unsubscribe;
-    }, [note]);
+    const { node: noteNode } = useTreeNode(note);
     return (
         <div>
             <Textarea
-                value={noteObj.text}
+                value={noteNode.text}
                 onChange={(ev, data) => {
                     note.text = data.value;
                 }}
             />
-            {noteObj.author}
+            {noteNode.author}
         </div>
     );
 };

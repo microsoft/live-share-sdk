@@ -9,26 +9,32 @@
     "scripts": {
         "clean": "npx shx rm -rf bin",
         "build": "tsc -p tsconfig.build.json",
-        "test": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --timeout 10000",
+        "test": "start-server-and-test test:client:start:server 7070 test:run",
+        "test:run": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --timeout 10000",
         "test:debug": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
-        "test:race": "node test-for-race-conditions.js"
+        "test:race": "node test-for-race-conditions.js",
+        "test:client:start:server": "npx tinylicious@latest > tinylicious.log 2>&1"
     },
+    "scriptsComments": {
+        "test": "does additional local server setup that LiveShareClient.spec.ts and AzureLiveShareClient.spec.ts need, then runs all tests with test:run"
+      },
     "dependencies": {
-        "uuid": "^9.0.0"
+        "uuid": "^9.0.0",
+        "@fluidframework/register-collection": "^2.0.0-rc || ^2.0.0-internal"
     },
     "devDependencies": {
-        "@fluid-internal/client-utils": "^2.0.0-rc.4.0.2",
-        "@fluidframework/azure-client": "^2.0.0-rc.4.0.2",
+        "@fluid-internal/client-utils": "^2.0.0-rc.5.0.1",
+        "@fluidframework/azure-client": "^2.0.0-rc.5.0.1",
         "@fluidframework/mocha-test-setup": "^2.0.0-rc.1.0.9",
-        "@fluidframework/test-runtime-utils": "^2.0.0-rc.4.0.2",
-        "@fluidframework/test-utils": "^2.0.0-rc.4.0.2",
+        "@fluidframework/test-runtime-utils": "^2.0.0-rc.5.0.1",
+        "@fluidframework/test-utils": "^2.0.0-rc.5.0.1",
         "@live-share-private/test-utils": "^2.0.0-internal.2",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
         "@types/uuid": "9.0.1",
-        "fluid-framework": "^2.0.0-rc.4.0.2",
+        "fluid-framework": "^2.0.0-rc.5.0.1",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
         "ts-mocha": "^10.0.0",

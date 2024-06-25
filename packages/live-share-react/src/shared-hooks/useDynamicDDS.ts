@@ -6,7 +6,7 @@
 import React from "react";
 import { FluidObject, IFluidLoadable } from "@fluidframework/core-interfaces";
 import { useFluidObjectsContext } from "../providers";
-import { LoadableObjectClass } from "fluid-framework";
+import { SharedObjectKind } from "fluid-framework";
 
 /**
  * Hook to gets or creates a DDS that corresponds to a given uniqueKey string.
@@ -14,9 +14,9 @@ import { LoadableObjectClass } from "fluid-framework";
  * @remarks
  * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
- * @template T Type of Fluid LoadableObjectClass type to load. Must conform to IFluidLoadable interface.
+ * @template T Type of Fluid SharedObjectKind type to load. Must conform to IFluidLoadable interface.
  * @param uniqueKey uniqueKey value for the data object
- * @param loadableObjectClass Fluid LoadableObjectClass<T> to create/load.
+ * @param objectKind Fluid SharedObjectKind<T> to create/load.
  * @param onFirstInitialize Optional. Callback function for when the DDS is first loaded
  * @returns the DDS object, which is of type T when loaded and undefined while loading
  */
@@ -24,7 +24,7 @@ export function useDynamicDDS<
     T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
 >(
     uniqueKey: string,
-    loadableObjectClass: LoadableObjectClass<T>,
+    objectClass: SharedObjectKind<T>,
     onFirstInitialize?: (dds: T) => void
 ): {
     dds: T | undefined;
@@ -51,7 +51,7 @@ export function useDynamicDDS<
             try {
                 const dds = await clientRef.current.getDDS<T>(
                     uniqueKey,
-                    loadableObjectClass,
+                    objectClass,
                     onFirstInitialize
                 );
                 if (mounted) {

@@ -16,9 +16,8 @@ import { MockRoleVerifier } from "./MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
-import { getLiveDataObjectClass } from "../schema-injection-utils";
+import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { LiveShareRuntime } from "../LiveShareRuntime";
-import { DataObjectClass } from "fluid-framework";
 import { describeCompat } from "@live-share-private/test-utils";
 
 describeCompat("LiveEvent", (getTestObjectProvider) => {
@@ -31,20 +30,20 @@ describeCompat("LiveEvent", (getTestObjectProvider) => {
             timestampProvider: new LocalTimestampProvider(),
         }
     );
-    let LiveEventProxy1 = getLiveDataObjectClass<LiveEvent>(
+    let LiveEventProxy1: any = getLiveDataObjectKind<LiveEvent>(
         LiveEvent,
         liveRuntime1
-    ) as DataObjectClass<LiveEvent>;
+    );
     let liveRuntime2: LiveShareRuntime = new LiveShareRuntime(
         TestLiveShareHost.create(),
         {
             timestampProvider: new LocalTimestampProvider(),
         }
     );
-    let LiveEventProxy2 = getLiveDataObjectClass<LiveEvent>(
+    let LiveEventProxy2: any = getLiveDataObjectKind<LiveEvent>(
         LiveEvent,
         liveRuntime2
-    ) as DataObjectClass<LiveEvent>;
+    );
 
     beforeEach(async () => {
         provider = getTestObjectProvider();

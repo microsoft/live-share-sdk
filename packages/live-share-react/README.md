@@ -477,7 +477,7 @@ export const ExampleTaskManager = () => {
 
 ### Custom Fluid object hooks
 
-If you want to dynamically load a custom Fluid object in your app, use the `useDynamicDDS` to create a custom hook. This is the same hook that Live Share React uses internally within our custom hooks, such as `useLiveEvent`. If you made a custom data object or are using one of Fluid's experimental data structures, you also must register your Fluid `LoadableObjectClass` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
+If you want to dynamically load a custom Fluid object in your app, use the `useDynamicDDS` to create a custom hook. This is the same hook that Live Share React uses internally within our custom hooks, such as `useLiveEvent`. If you made a custom data object or are using one of Fluid's experimental data structures, you also must register your Fluid `SharedObjectKind` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
 
 Implementations may vary for each dynamic object & hook. We will try and update this package periodically with new packages released by Fluid Framework and Live Share, as they are published.
 

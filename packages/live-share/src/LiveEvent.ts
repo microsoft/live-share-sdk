@@ -3,8 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
-import { IEvent } from "@fluidframework/common-definitions";
+import {
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
+import { IEvent } from "@fluidframework/core-interfaces";
 import {
     UserMeetingRole,
     IClientTimestamp,
@@ -13,7 +16,7 @@ import {
 } from "./interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
 import { LiveDataObject } from "./LiveDataObject";
 import { cloneValue } from "./internals";
 import {
@@ -21,6 +24,7 @@ import {
     LiveDataObjectNotInitializedError,
     UnexpectedError,
 } from "./errors";
+import { SharedObjectKind } from "fluid-framework";
 
 /**
  * Events supported by `LiveEvent` object.
@@ -68,7 +72,7 @@ export interface ILiveEventEvents<TEvent> extends IEvent {
  * `LiveEvents`. Use something like the `LiveState` class when syncing state.
  * @template TEvent Type of event to broadcast.
  */
-export class LiveEvent<TEvent = any> extends LiveDataObject<{
+export class LiveEventClass<TEvent = any> extends LiveDataObject<{
     Events: ILiveEventEvents<TEvent>;
 }> {
     private _eventTarget?: LiveEventTarget<TEvent>;
@@ -82,8 +86,8 @@ export class LiveEvent<TEvent = any> extends LiveDataObject<{
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveEvent.TypeName,
-        LiveEvent,
+        LiveEventClass.TypeName,
+        LiveEventClass,
         [],
         {}
     );
@@ -221,7 +225,15 @@ export class LiveEvent<TEvent = any> extends LiveDataObject<{
     }
 }
 
+export type LiveEvent<TEvent = any> = LiveEventClass<TEvent>;
+
+// eslint-disable-next-line no-redeclare
+export const LiveEvent = (() => {
+    const kind = createDataObjectKind(LiveEventClass);
+    return kind as typeof kind & SharedObjectKind<LiveEventClass>;
+})();
+
 /**
- * Register `LiveEvent` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveEvent` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
 DynamicObjectRegistry.registerObjectClass(LiveEvent, LiveEvent.TypeName);

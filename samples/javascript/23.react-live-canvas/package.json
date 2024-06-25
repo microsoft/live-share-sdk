@@ -8,7 +8,7 @@
         "@microsoft/live-share": "2.0.0-internal.5",
         "@microsoft/live-share-canvas": "2.0.0-internal.5",
         "@microsoft/teams-js": "^2.16.0",
-        "fluid-framework": "^2.0.0-rc.4.0.2",
+        "fluid-framework": "^2.0.0-rc.5.0.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-router": "^6.4.2",
@@ -17,7 +17,7 @@
         "web-vitals": "^3.1.1"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": "^2.0.0-rc.4.0.2",
+        "@fluidframework/test-runtime-utils": "^2.0.0-rc.5.0.1",
         "@testing-library/jest-dom": "^5.16.5",
         "@testing-library/react": "^13.4.0",
         "@testing-library/user-event": "^14.4.3",

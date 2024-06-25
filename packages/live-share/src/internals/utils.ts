@@ -144,14 +144,22 @@ export function timeoutRequest<TResult>(
  * @hidden
  */
 export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
+    const userId: () => string | undefined | null = () => {
+        try {
+            const userIdParam = new URL(
+                window.location.href
+            )?.searchParams?.get("userId");
+            return userIdParam;
+        } catch {
+            // window not available
+            return undefined;
+        }
+    };
     try {
         const { InsecureTokenProvider } =
             await require("@fluidframework/test-runtime-utils");
-        const userIdParam = new URL(window.location.href)?.searchParams?.get(
-            "userId"
-        );
         const tokenProvider = new InsecureTokenProvider("", {
-            id: userIdParam ?? uuid(),
+            id: userId() ?? uuid(),
             name: "Test User",
         });
         return tokenProvider as ITokenProvider;

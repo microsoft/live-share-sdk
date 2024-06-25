@@ -20,7 +20,12 @@ import {
     ExtendedMediaMetadata,
     MediaPlayerSynchronizer,
 } from "@microsoft/live-share-media";
-import { IFluidContainer } from "fluid-framework";
+import {
+    IFluidContainer,
+    ITree,
+    ImplicitFieldSchema,
+    TreeView,
+} from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
 import { IReceiveLiveEvent } from "../interfaces";
 import {
@@ -69,6 +74,20 @@ export interface IUseSharedMapResults<TData> {
      * The Fluid `SharedMap` object, should you want to use it directly.
      */
     sharedMap: SharedMap | undefined;
+}
+
+/**
+ * Return type of `useSharedMap` hook.
+ */
+export interface IUseSharedTreeResults<TSchema extends ImplicitFieldSchema> {
+    /**
+     * The Fluid `TreeView`.
+     */
+    treeView: TreeView<TSchema> | undefined;
+    /**
+     * The Fluid `SharedTree` object, should you want to use it directly.
+     */
+    sharedTree: ITree | undefined;
 }
 
 /**

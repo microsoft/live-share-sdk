@@ -3,16 +3,20 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
-import { LoadableObjectClass, IFluidContainer } from "fluid-framework";
 import {
-    IFluidHandle,
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
+import {
     FluidObject,
-    IFluidLoadable,
-} from "@fluidframework/core-interfaces";
+    IFluidContainer,
+    SharedObjectKind,
+} from "fluid-framework";
+import { IFluidHandle, IFluidLoadable } from "@fluidframework/core-interfaces";
 import { assert } from "@fluidframework/core-utils/internal";
 import { ConsensusRegisterCollection } from "@fluidframework/register-collection/internal";
-import { DynamicObjectRegistry, LiveDataObject } from "@microsoft/live-share";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { LiveDataObject } from "../LiveDataObject";
 
 // Register ConsensusRegisterCollection
 DynamicObjectRegistry.registerObjectClass(
@@ -28,7 +32,7 @@ const dynamicObjectsCollectionKey = "liveShareConsensusRegisterCollectionKey";
  * @remarks
  * If a DDS does not yet exist for a given key, a new one is created. Fluid `ConsensusRegisterCollection` is used to ensure that only one person will create the DDS.
  */
-export class DynamicObjectManager extends LiveDataObject {
+export class DynamicObjectManagerClass extends LiveDataObject {
     /**
      * ConsensusRegisterCollection instance that stores handles for a given key using FWW.
      */
@@ -48,8 +52,8 @@ export class DynamicObjectManager extends LiveDataObject {
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        DynamicObjectManager.TypeName,
-        DynamicObjectManager,
+        DynamicObjectManagerClass.TypeName,
+        DynamicObjectManagerClass,
         [ConsensusRegisterCollection.getFactory()],
         {}
     );
@@ -101,16 +105,18 @@ export class DynamicObjectManager extends LiveDataObject {
      *
      * @template T Type of Fluid object to load.
      * @param key unique key for the dynamic object
-     * @param loadableClass the Fluid LoadableObjectClass
+     * @param objectClass the Fluid SharedObjectKind
      * @param container Fluid container to load the DDS into
+     * @param onDidFirstInitialize Optional. Callback that is used when the object was initially created, regardless of whether it is confirmed via consensus or not.
      * @returns the DDS and whether or not it was created locally
      */
     public async getDDS<
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
     >(
         key: string,
-        loadableClass: LoadableObjectClass<T>,
-        container: IFluidContainer
+        objectClass: SharedObjectKind<T>,
+        container: IFluidContainer,
+        onDidFirstInitialize?: (dds: T) => void
     ): Promise<{
         dds: T;
         created: boolean;
@@ -125,9 +131,10 @@ export class DynamicObjectManager extends LiveDataObject {
         }
         // Create a new DDS to attempt to store it into consensusRegisterCollection. The localDDS may not be used if it has first been written by another client.
         // Fluid's garbage collector will clean up the DDS if it is not used.
-        const localDDS = await container.create(loadableClass);
+        const localDDS = await container.create(objectClass);
+        onDidFirstInitialize?.(localDDS);
         // Get the DDS with consensus
-        return this.loadDDSWithConsensus(key, localDDS);
+        return this.loadDDSWithConsensus<T>(key, localDDS);
     }
 
     /**
@@ -195,6 +202,22 @@ export class DynamicObjectManager extends LiveDataObject {
             };
         }
         // Fluid did not acknowledge the write, either because the container disconnected or someone else created the object already, so we need to try again
-        return await this.loadDDSWithConsensus(key, localDDS);
+        return await this.loadDDSWithConsensus<T>(key, localDDS);
     }
 }
+
+export type DynamicObjectManager = DynamicObjectManagerClass;
+
+// eslint-disable-next-line no-redeclare
+export const DynamicObjectManager = (() => {
+    const kind = createDataObjectKind(DynamicObjectManagerClass);
+    return kind as typeof kind & SharedObjectKind<DynamicObjectManagerClass>;
+})();
+
+/**
+ * Register `DynamicObjectManager` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share`.
+ */
+DynamicObjectRegistry.registerObjectClass(
+    DynamicObjectManager,
+    DynamicObjectManager.TypeName
+);

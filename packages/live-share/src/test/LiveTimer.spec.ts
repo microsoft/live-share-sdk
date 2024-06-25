@@ -11,7 +11,7 @@ import {
 } from "@fluidframework/test-utils/internal";
 import { LiveTimer } from "../LiveTimer";
 import { Deferred, waitForDelay } from "../internals";
-import { getLiveDataObjectClass } from "../schema-injection-utils";
+import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
 
@@ -23,11 +23,11 @@ async function getObjects(
     let liveRuntime1 = new MockLiveShareRuntime(false, updateInterval);
     let liveRuntime2 = new MockLiveShareRuntime(false, updateInterval);
 
-    let ObjectProxy1: any = getLiveDataObjectClass<LiveTimer>(
+    let ObjectProxy1: any = getLiveDataObjectKind<LiveTimer>(
         LiveTimer,
         liveRuntime1
     );
-    let ObjectProxy2: any = getLiveDataObjectClass<LiveTimer>(
+    let ObjectProxy2: any = getLiveDataObjectKind<LiveTimer>(
         LiveTimer,
         liveRuntime2
     );

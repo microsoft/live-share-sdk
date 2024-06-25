@@ -76,3 +76,25 @@ export class LiveDataObjectInitializeNotNeededError extends Error {
         );
     }
 }
+
+/**
+ * @hidden
+ * Use for generic expected errors. Use to get standard formatting of errors.
+ */
+export class ExpectedError extends Error {
+    constructor(prefix: string, message: string, helpText: string) {
+        super(
+            `${prefix} - ${message}.\n${helpText}\nIf you think you received this error by mistake, report an issue at ${LiveShareReportIssueLink}.`
+        );
+    }
+
+    static assert(
+        condition: boolean,
+        prefix: string,
+        message: string,
+        helpText: string
+    ): asserts condition {
+        if (condition) return;
+        throw new ExpectedError(prefix, message, helpText);
+    }
+}

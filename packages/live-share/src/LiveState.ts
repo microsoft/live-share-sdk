@@ -3,9 +3,12 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
+import {
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
 import { assert } from "@fluidframework/core-utils/internal";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 import {
     ILiveEvent,
     LiveDataObjectInitializeState,
@@ -20,8 +23,9 @@ import {
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
 import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
 import { LiveDataObject } from "./LiveDataObject";
+import { SharedObjectKind } from "fluid-framework";
 
 /**
  * Events supported by [LiveState` object.
@@ -67,7 +71,7 @@ export interface ILiveStateEvents<TState = any> extends IEvent {
  * changes.
  * @template TState Optional data object that's synchronized with the state.
  */
-export class LiveState<TState = any> extends LiveDataObject<{
+export class LiveStateClass<TState = any> extends LiveDataObject<{
     Events: ILiveStateEvents<TState>;
 }> {
     private _logger?: LiveTelemetryLogger;
@@ -84,8 +88,8 @@ export class LiveState<TState = any> extends LiveDataObject<{
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveState.TypeName,
-        LiveState,
+        LiveStateClass.TypeName,
+        LiveStateClass,
         [],
         {}
     );
@@ -276,7 +280,15 @@ export class LiveState<TState = any> extends LiveDataObject<{
     }
 }
 
+export type LiveState<TState = any> = LiveStateClass<TState>;
+
+// eslint-disable-next-line no-redeclare
+export const LiveState = (() => {
+    const kind = createDataObjectKind(LiveStateClass);
+    return kind as typeof kind & SharedObjectKind<LiveStateClass>;
+})();
+
 /**
- * Register `LiveState` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveState` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
 DynamicObjectRegistry.registerObjectClass(LiveState, LiveState.TypeName);

@@ -3,11 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ITelemetryLogger } from "@fluidframework/common-definitions";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
-import { MockLogger } from "@fluidframework/telemetry-utils";
+import { MockLogger } from "@fluidframework/telemetry-utils/internal";
 import { IRuntimeSignaler } from "../LiveEventScope";
 import { v4 } from "uuid";
+import { ITelemetryBaseLogger } from "@fluidframework/azure-client";
 
 export class MockRuntimeSignaler implements IRuntimeSignaler {
     private _connected: MockRuntimeSignaler[] = [];
@@ -25,7 +25,7 @@ export class MockRuntimeSignaler implements IRuntimeSignaler {
 
     public clientId: string | undefined;
     public connected: boolean;
-    public logger: ITelemetryLogger;
+    public logger: ITelemetryBaseLogger;
 
     public connect(): void {
         if (!this.connected) {

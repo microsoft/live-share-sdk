@@ -8,7 +8,6 @@
         "packages/live-share-acs",
         "packages/live-share-canvas",
         "packages/live-share-media",
-        "packages/live-share-turbo",
         "packages/live-share-react",
         "internal/test-utils",
         "samples/javascript/*",

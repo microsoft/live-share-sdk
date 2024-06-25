@@ -3,10 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LoadableObjectClass } from "fluid-framework";
+import { ITree, SharedObjectKind, SharedTree } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
 import { SharedDirectory } from "@fluidframework/map/internal";
 import { SharedString } from "@fluidframework/sequence/internal";
+import type { ISharedObjectKind } from "@fluidframework/shared-object-base/internal";
 
 /**
  * Key for window global reference to loadable objects.
@@ -23,25 +24,20 @@ const GLOBAL_WINDOW_KEY = "@microsoft/live-share:DYNAMIC-LOADABLE-OBJECTS";
  * aware of what every DDS is.
  */
 export class DynamicObjectRegistry {
-    private static _dynamicLoadableObjects: Map<
-        string,
-        LoadableObjectClass<any>
-    > = new Map<string, LoadableObjectClass<any>>();
+    private static _dynamicLoadableObjects: Map<string, SharedObjectKind<any>> =
+        new Map<string, SharedObjectKind<any>>();
     /**
      * Get all registered dynamic loadable objects
      */
     public static get dynamicLoadableObjects(): Map<
         string,
-        LoadableObjectClass<any>
+        SharedObjectKind<any>
     > {
         if (typeof window === "undefined") {
             return this._dynamicLoadableObjects;
         }
         return ((window as any)[GLOBAL_WINDOW_KEY] ||
-            this._dynamicLoadableObjects) as Map<
-            string,
-            LoadableObjectClass<any>
-        >;
+            this._dynamicLoadableObjects) as Map<string, SharedObjectKind<any>>;
     }
 
     /**
@@ -50,15 +46,15 @@ export class DynamicObjectRegistry {
      * @remarks
      * Duplicate classes will be ignored.
      *
-     * @param loadableObjectClass the Fluid loadable object class to register
+     * @param objectKind the Fluid loadable object class to register
      */
     public static registerObjectClass(
-        loadableObjectClass: LoadableObjectClass<any>,
+        objectClass: SharedObjectKind<any>,
         typeName: string
     ) {
         const loadableObjects = this.dynamicLoadableObjects;
         if (loadableObjects.has(typeName)) return;
-        loadableObjects.set(typeName, loadableObjectClass);
+        loadableObjects.set(typeName, objectClass);
         if (typeof window !== "undefined") {
             (window as any)[GLOBAL_WINDOW_KEY] = loadableObjects;
         }
@@ -80,4 +76,11 @@ DynamicObjectRegistry.registerObjectClass(
 DynamicObjectRegistry.registerObjectClass(
     SharedDirectory,
     SharedDirectory.getFactory().type
+);
+DynamicObjectRegistry.registerObjectClass(
+    SharedTree,
+    (
+        SharedTree as unknown as ISharedObjectKind<ITree> &
+            SharedObjectKind<ITree>
+    ).getFactory().type
 );

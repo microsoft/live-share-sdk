@@ -3,7 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
+import {
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import { IValueChanged, SharedMap } from "@fluidframework/map/internal";
 import { ISequencedDocumentMessage } from "@fluidframework/protocol-definitions";
@@ -49,6 +52,7 @@ import {
     IPointerMoveEvent,
     InputProvider,
 } from "../input";
+import { SharedObjectKind } from "fluid-framework";
 
 enum InkingEventNames {
     pointerMove = "PointerMove",
@@ -370,7 +374,7 @@ class BuiltInLiveCursor extends LiveCursor {
 /**
  * Enables live and collaborative inking.
  */
-export class LiveCanvas extends LiveDataObject {
+export class LiveCanvasClass extends LiveDataObject {
     private _logger?: LiveTelemetryLogger;
     private static readonly dryInkMapKey = "dryInk";
 
@@ -403,8 +407,8 @@ export class LiveCanvas extends LiveDataObject {
      * The object's Fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveCanvas.TypeName,
-        LiveCanvas,
+        LiveCanvasClass.TypeName,
+        LiveCanvasClass,
         [],
         {}
     );
@@ -1027,7 +1031,15 @@ function isClearEvent(value: any): boolean {
     );
 }
 
+export type LiveCanvas = LiveCanvasClass;
+
+// eslint-disable-next-line no-redeclare
+export const LiveCanvas = (() => {
+    const kind = createDataObjectKind(LiveCanvasClass);
+    return kind as typeof kind & SharedObjectKind<LiveCanvasClass>;
+})();
+
 /**
- * Register `LiveCanvas` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveCanvas` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
 DynamicObjectRegistry.registerObjectClass(LiveCanvas, LiveCanvas.TypeName);

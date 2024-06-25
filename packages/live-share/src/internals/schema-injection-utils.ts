@@ -3,14 +3,14 @@ import {
     IDataObjectProps,
 } from "@fluidframework/aqueduct/internal";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { DataObjectClass } from "@fluidframework/fluid-static/internal";
-import { LiveDataObject } from "./LiveDataObject";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LiveDataObject } from "../LiveDataObject";
+import { LiveShareRuntime } from "../LiveShareRuntime";
 import {
-    ContainerSchema,
-    LoadableObjectClass,
+    LoadableObjectCtor,
     LoadableObjectClassRecord,
-} from "fluid-framework";
+    DataObjectClass,
+} from "./fluid-duplicated";
+import { ContainerSchema, SharedObjectKind } from "fluid-framework";
 
 /**
  * A LiveObjectClass is a class that has a factory that can create a DDS (SharedObject) and a
@@ -19,7 +19,8 @@ import {
  */
 type LiveObjectClass<T extends IFluidLoadable> = {
     TypeName: string;
-} & DataObjectClass<T>;
+} & DataObjectClass<T> &
+    LoadableObjectCtor<T>;
 
 /**
  * Inject Live Share dependencies into your Fluid container schema.
@@ -39,14 +40,14 @@ export function getLiveContainerSchema(
 ): ContainerSchema {
     // Each container must proxy LiveDataObject classes separately.
     // This map is used to de-duplicate proxies for each class.
-    const injectedClasses = new Map<string, LoadableObjectClass<any>>();
+    const injectedClasses = new Map<string, SharedObjectKind<any>>();
 
     const initialObjectEntries = Object.entries(schema.initialObjects).map(
-        ([key, ObjectClass]) => {
+        ([key, objectClass]) => {
             return [
                 key,
-                getLiveDataObjectClass(
-                    ObjectClass,
+                getLiveDataObjectKind(
+                    objectClass,
                     liveRuntime,
                     injectedClasses
                 ),
@@ -58,21 +59,10 @@ export function getLiveContainerSchema(
 
     return {
         initialObjects: newInitialObjects,
-        dynamicObjectTypes: schema.dynamicObjectTypes?.map((ObjectClass) =>
-            getLiveDataObjectClass(ObjectClass, liveRuntime, injectedClasses)
+        dynamicObjectTypes: schema.dynamicObjectTypes?.map((objectClass) =>
+            getLiveDataObjectKind(objectClass, liveRuntime, injectedClasses)
         ),
     };
-}
-
-/**
- * @deprecated
- * Use {@link getLiveContainerSchema} instead.
- */
-export function getLiveContainerSchemaProxy(
-    schema: ContainerSchema,
-    liveRuntime: LiveShareRuntime
-): ContainerSchema {
-    return getLiveContainerSchema(schema, liveRuntime);
 }
 
 /**
@@ -82,35 +72,35 @@ export function getLiveContainerSchemaProxy(
  * @remarks
  * Can be used to follow the pattern of this package's unit tests for custom `LiveDataObject` implementations.
  *
- * @param ObjectClass a `LoadableObjectClass` instance to inject with the `liveRuntime` provided, if needed.
+ * @param ObjectKind a `SharedObjectKind` instance to inject with the `liveRuntime` provided, if needed.
  * @param liveRuntime the `LiveShareRuntime` instance to inject into provided `LiveDataObject` instances.
  * @param injectedClasses Optional. Map of classes that have already been injected. Default value is an empty map.
- * @returns the new `LoadableObjectClass` if injected, or the same `ObjectClass` passed in if not.
+ * @returns the new `SharedObjectKind` if injected, or the same `ObjectKind` passed in if not.
  */
-export function getLiveDataObjectClass<TClass extends IFluidLoadable>(
-    ObjectClass: LoadableObjectClass<any>,
+export function getLiveDataObjectKind<TClass extends IFluidLoadable>(
+    objectClass: SharedObjectKind<any>,
     liveRuntime: LiveShareRuntime,
-    injectedClasses: Map<string, LoadableObjectClass<any>> = new Map()
-): LoadableObjectClass<TClass> {
-    if (isLiveDataObject(ObjectClass)) {
+    injectedClasses: Map<string, SharedObjectKind<any>> = new Map()
+): SharedObjectKind<TClass> {
+    if (isLiveDataObject(objectClass)) {
         // We should only be proxying one Live Share DDS per type.
         // This is because Fluid attempts to de-duplicate by comparing classes, but we are dynamically creating proxies.
         // They then enforce this de-duplication using the factory type name, throwing an error in `parseDataObjectsFromSharedObjects`.
         // So, we ensure that we only create the proxy once per container.
-        const typeName = (ObjectClass as any).TypeName;
+        const typeName = (objectClass as any).TypeName;
         const CheckExisting = injectedClasses.get(typeName);
         if (CheckExisting !== undefined) {
             return CheckExisting;
         }
         // Create a new proxy for this type and insert it into proxiedClasses
         const NewProxy = getLiveDataObjectProxyClassInternal(
-            ObjectClass,
+            objectClass,
             liveRuntime
-        );
+        ) as unknown as SharedObjectKind<TClass>;
         injectedClasses.set(typeName, NewProxy);
         return NewProxy;
     }
-    return ObjectClass;
+    return objectClass;
 }
 
 /**

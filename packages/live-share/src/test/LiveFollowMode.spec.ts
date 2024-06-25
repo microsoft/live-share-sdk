@@ -16,7 +16,7 @@ import {
     LiveFollowMode,
 } from "../LiveFollowMode";
 import { Deferred, waitForDelay } from "../internals";
-import { getLiveDataObjectClass } from "../schema-injection-utils";
+import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 import { LivePresenceUser } from "../LivePresenceUser";
 import { describeCompat } from "@live-share-private/test-utils";
@@ -30,10 +30,10 @@ async function getObjects(getTestObjectProvider) {
     let liveRuntime1 = new MockLiveShareRuntime(false);
     let liveRuntime2 = new MockLiveShareRuntime(false);
 
-    let ObjectProxy1: any = getLiveDataObjectClass<
+    let ObjectProxy1: any = getLiveDataObjectKind<
         LiveFollowMode<TestFollowData>
     >(LiveFollowMode, liveRuntime1);
-    let ObjectProxy2: any = getLiveDataObjectClass<
+    let ObjectProxy2: any = getLiveDataObjectKind<
         LiveFollowMode<TestFollowData>
     >(LiveFollowMode, liveRuntime2);
 

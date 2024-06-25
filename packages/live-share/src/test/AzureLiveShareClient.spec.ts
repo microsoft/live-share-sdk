@@ -4,21 +4,19 @@
  */
 
 import { strict as assert } from "assert";
-import {
-    IFluidContainer,
-    LoadableObjectClassRecord,
-    SharedMap,
-} from "fluid-framework";
+import { ContainerSchema, IFluidContainer } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
+
 import {
     AzureContainerServices,
     AzureLocalConnectionConfig,
 } from "@fluidframework/azure-client";
-import { AzureTurboClient } from "../AzureTurboClient";
+import { AzureLiveShareClient } from "../AzureLiveShareClient";
 import {
     IInsecureUser,
     InsecureTokenProvider,
-} from "@fluidframework/test-runtime-utils";
-import { LiveEvent } from "@microsoft/live-share";
+} from "@fluidframework/test-runtime-utils/internal";
+import { LiveEvent, LiveState } from "@microsoft/live-share";
 import { v4 as uuid } from "uuid";
 
 function generateUser(): IInsecureUser {
@@ -31,20 +29,13 @@ function generateUser(): IInsecureUser {
 }
 
 describe("AzureTurboClient", () => {
-    (window.performance as any).mark = () => {
-        return {};
-    };
-    (window.performance as any).measure = () => {
-        return {};
-    };
-
     const connectionProps: AzureLocalConnectionConfig = {
         tokenProvider: new InsecureTokenProvider("fooBar", generateUser()),
         endpoint: "http://localhost:7070",
         type: "local",
     };
-    let client1: AzureTurboClient;
-    let client2: AzureTurboClient;
+    let client1: AzureLiveShareClient;
+    let client2: AzureLiveShareClient;
 
     const testMapKey = "TEST-MAP-KEY";
     const testLiveEventKey = "TEST-LIVE-EVENT-KEY";
@@ -58,18 +49,20 @@ describe("AzureTurboClient", () => {
     };
 
     beforeEach(async () => {
-        client1 = new AzureTurboClient({
+        client1 = new AzureLiveShareClient({
             connection: connectionProps,
         });
-        client2 = new AzureTurboClient({
+        client2 = new AzureLiveShareClient({
             connection: connectionProps,
         });
-        const initialObjects: LoadableObjectClassRecord = {
-            [testLiveEventKey]: LiveEvent,
+        const schema: ContainerSchema = {
+            initialObjects: {
+                [testLiveEventKey]: LiveEvent,
+            },
         };
-        results1 = await client1.createContainer(initialObjects);
+        results1 = await client1.createContainer(schema);
         const containerId = await results1.container.attach();
-        results2 = await client2.getContainer(containerId, initialObjects);
+        results2 = await client2.getContainer(containerId, schema);
     });
 
     it("Containers should be configured correctly", async () => {
@@ -81,6 +74,10 @@ describe("AzureTurboClient", () => {
             !!results1.container || !!results1.services,
             "client1 results container or services are not defined"
         );
+
+        // state map not initialized until dynamic features are used.
+        await client1.getDDS<LiveState>("test", LiveState);
+        await client2.getDDS<LiveState>("test", LiveState);
         assert(
             !!client1.stateMap || !!client2.stateMap,
             "stateMap is not defined"
@@ -120,10 +117,10 @@ describe("AzureTurboClient", () => {
             dds1 !== undefined && dds2 !== undefined,
             "test map(s) not defined"
         );
-        // Only one should be marked as created
+        // two should be marked as created, one gets discarded after consensus is reached
         assert(
             [object1Created, object2Created].filter((created) => created)
-                .length === 1,
+                .length === 2,
             "Incorrect number of objects created"
         );
     });

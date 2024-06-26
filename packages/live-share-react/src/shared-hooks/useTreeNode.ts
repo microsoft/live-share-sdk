@@ -78,8 +78,8 @@ function isRawNodeGetter<TNode extends TreeNode | undefined = TreeNode>(
     return typeof obj === "object" && obj !== null && rawTNodeKey in obj;
 }
 
-function buildProxy<TNode extends TreeNode | undefined = TreeNode>(
-    target: NonNullable<TNode>,
+function buildProxy<TNode extends TreeNode = TreeNode>(
+    target: TNode,
     handler: ProxyHandler<TreeNode>
 ): TNode {
     const proxy = new Proxy(target, handler);

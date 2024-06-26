@@ -114,3 +114,21 @@ button:focus-visible {
 .margin-bottom {
   margin-bottom: 12px;
 }
+
+.sticky-note {
+  width: 200px;
+  height: 200px;
+  border: 1px solid gray;
+  border-radius: 4px;
+  background-color: #FFFCB9;
+  padding: 8px;
+  margin-bottom: 12px;
+}
+
+.sticky-textarea {
+  margin-bottom: "12px",
+}
+
+.sticky-actions {
+  padding: 12px 12px;
+}

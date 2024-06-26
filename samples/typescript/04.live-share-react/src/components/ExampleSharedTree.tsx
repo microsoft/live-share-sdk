@@ -2,7 +2,7 @@ import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
 import { TreeViewConfiguration } from "fluid-framework";
 import { FC, memo } from "react";
 import { Note, Notes } from "./ExampleSharedTree-schema";
-import { Button, Textarea } from "@fluentui/react-components";
+import { Textarea } from "@fluentui/react-components";
 
 // Export the tree config appropriate for this schema.
 // This is passed into the SharedTree when it is initialized.
@@ -31,7 +31,7 @@ export const ExampleSharedTree: FC = () => {
     }
     return (
         <div>
-            <div className="flex row" style={{ padding: "12px 12px" }}>
+            <div className="flex row sticky-actions">
                 <h2>{"Notes"}</h2>
                 <button
                     onClick={() => {
@@ -43,38 +43,27 @@ export const ExampleSharedTree: FC = () => {
             </div>
             <div className="flex wrap row hAlign">
                 {notes.map((note) => (
-                    <MemoNoteSticky key={note.id} note={note} />
+                    <MemoNoteSticky key={note.id} noteNode={note} />
                 ))}
             </div>
         </div>
     );
 };
 
-interface IExampleNoteStickyProps {
-    note: Note;
+interface INoteStickyProps {
+    noteNode: Note;
 }
 
-const ExampleNoteSticky: FC<IExampleNoteStickyProps> = ({ note }) => {
-    const { node: noteNode } = useTreeNode(note, "treeChanged");
+const NoteSticky: FC<INoteStickyProps> = ({ noteNode }) => {
+    const { node: note } = useTreeNode(noteNode, "treeChanged");
     return (
-        <div
-            style={{
-                width: "200px",
-                height: "200px",
-                border: "1px solid gray",
-                borderRadius: "4px",
-                backgroundColor: "#FFFCB9",
-                padding: "8px",
-            }}
-        >
-            {`${noteNode.author} | ${noteNode.votes.length} votes`}
+        <div className="sticky-note">
+            {`${note.author} | ${note.votes.length} votes`}
             <Textarea
-                value={noteNode.text}
-                onChange={(ev, data) => {
-                    noteNode.text = data.value;
-                }}
-                style={{
-                    marginBottom: "12px",
+                value={note.text}
+                className="sticky-textarea"
+                onChange={(_, data) => {
+                    note.text = data.value;
                 }}
             />
             <button
@@ -87,4 +76,4 @@ const ExampleNoteSticky: FC<IExampleNoteStickyProps> = ({ note }) => {
         </div>
     );
 };
-const MemoNoteSticky = memo(ExampleNoteSticky);
+const MemoNoteSticky = memo(NoteSticky);

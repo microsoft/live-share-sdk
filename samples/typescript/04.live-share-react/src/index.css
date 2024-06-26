@@ -116,13 +116,18 @@ button:focus-visible {
 }
 
 .sticky-note {
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
   border: 1px solid gray;
   border-radius: 4px;
   background-color: #FFFCB9;
   padding: 8px;
   margin-bottom: 12px;
+}
+.sticky-note-color {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
 }
 
 .sticky-textarea {

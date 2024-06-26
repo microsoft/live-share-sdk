@@ -10,27 +10,82 @@ import { v4 as uuid } from "uuid";
 
 const sf = new SchemaFactory("fc1db2e8-0000-11ee-be57-0242ac120002");
 
-export interface INote {
-    /**
-     * Id to make building the React app simpler.
-     */
-    id: string;
-    text: string;
-    author: string;
-    /**
-     * Sequence of user ids to track which users have voted on this note.
-     */
-    votes: TreeArrayNode<
-        TreeNodeSchema<
-            "com.fluidframework.leaf.string",
-            NodeKind.Leaf,
-            string,
-            string
-        >
-    > &
-        WithType<`fc1db2e8-0000-11ee-be57-0242ac120002.Array<${string}>`>;
-    created: number;
-    lastChanged: number;
+// Schema for a list of Notes and Groups.
+export class NoteComment extends sf.object("NoteComment", {
+    id: sf.string,
+    author: sf.string,
+    votes: sf.array(sf.string),
+    text: sf.string,
+    created: sf.number,
+    lastChanged: sf.number,
+}) {
+    //
+}
+
+export class NoteComments extends sf.array("NoteComments", [
+    () => NoteComment,
+]) {
+    public addNode(author: string) {
+        const timeStamp = new Date().getTime();
+
+        // Define the note to add to the SharedTree - this must conform to
+        // the schema definition of a note
+        const newVote = new NoteComment({
+            id: uuid(),
+            text: "",
+            author,
+            votes: [],
+            created: timeStamp,
+            lastChanged: timeStamp,
+        });
+
+        // Insert the note into the SharedTree.
+        this.insertAtEnd(newVote);
+    }
+}
+
+export class NoteHeader extends sf.object("NoteHeader", {
+    color: sf.optional(sf.string),
+    emoji: sf.optional(sf.string),
+}) {
+    setRandomVibrantColor() {
+        const vibrantColors: string[] = [
+            "#FF5733", // Vibrant Red-Orange
+            "#FFBD33", // Vibrant Orange
+            "#FFD733", // Vibrant Yellow
+            "#33FF57", // Vibrant Green
+            "#33FFBD", // Vibrant Aqua
+            "#33D7FF", // Vibrant Sky Blue
+            "#3357FF", // Vibrant Blue
+            "#8D33FF", // Vibrant Purple
+            "#FF33BD", // Vibrant Pink
+            "#FF3357", // Vibrant Red
+        ];
+
+        const randomIndex: number = Math.floor(
+            Math.random() * vibrantColors.length
+        );
+        this.color = vibrantColors[randomIndex];
+    }
+    setRandomEmoji() {
+        const vibrantEmojis: string[] = [
+            "🌟", // Star
+            "🔥", // Fire
+            "🌈", // Rainbow
+            "🍓", // Strawberry
+            "🍊", // Tangerine
+            "🍋", // Lemon
+            "🍀", // Four Leaf Clover
+            "🌸", // Cherry Blossom
+            "🎨", // Palette
+            "🎉", // Party Popper
+        ];
+
+        const randomIndex: number = Math.floor(
+            Math.random() * vibrantEmojis.length
+        );
+        this.emoji = vibrantEmojis[randomIndex];
+    }
 }
 
 // Define the schema for the note object.
@@ -53,6 +108,8 @@ export class Note extends sf.object(
         votes: sf.array(sf.string),
         created: sf.number,
         lastChanged: sf.number,
+        header: NoteHeader,
+        comments: NoteComments,
     }
 ) {
     // Update the note text and also update the timestamp in the note
@@ -84,6 +141,8 @@ export class Note extends sf.object(
     }
 }
 
+export type INote = typeof Note;
+
 // Schema for a list of Notes and Groups.
 export class Notes extends sf.array("Notes", [() => Note]) {
     public addNode(author: string) {
@@ -98,6 +157,11 @@ export class Notes extends sf.array("Notes", [() => Note]) {
             votes: [],
             created: timeStamp,
             lastChanged: timeStamp,
+            comments: [],
+            header: new NoteHeader({
+                emoji: undefined,
+                color: undefined,
+            }),
         });
 
         // Insert the note into the SharedTree.

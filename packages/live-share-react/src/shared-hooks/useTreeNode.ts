@@ -83,7 +83,7 @@ function buildProxy<TNode extends TreeNode | undefined = TreeNode>(
     handler: ProxyHandler<TreeNode>
 ): TNode {
     const proxy = new Proxy(target, handler);
-    const proxyWithRaw = proxy as typeof proxy & RawNodeGetter;
+    const proxyWithRaw = proxy as TNode & RawNodeGetter;
     proxyWithRaw[rawTNodeKey] = target;
-    return proxyWithRaw as unknown as TNode;
+    return proxyWithRaw;
 }

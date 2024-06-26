@@ -2,25 +2,21 @@ import { Tree, TreeChangeEvents, TreeNode } from "fluid-framework";
 import { IUseTreeNodeResults } from "../types";
 import { useEffect, useState } from "react";
 
-const proxyMap: WeakMap<TreeNode, TreeNode> = new WeakMap();
-
 export function useTreeNode<TNode extends TreeNode | undefined = TreeNode>(
     node: TNode,
     listenerEventName: keyof TreeChangeEvents = "nodeChanged"
 ): IUseTreeNodeResults<TNode> {
-    const [proxyNode, setProxyNode] = useState<TNode>(
-        ((node ? proxyMap.get(node) : undefined) ?? node) as TNode
-    );
+    // When we return a proxied node to a developer, it's possible they will pass it back to us in this hook.
+    // We can't listen using Tree.on using a proxy node though...
+    // Thus, if we are already listening to a node from another instance of this hook, we look for the unproxied node.
+    const rawNode = (isRawNodeGetter(node) ? node[rawTNodeKey] : node) as TNode;
+    const [proxyNode, setProxyNode] = useState<TNode>(rawNode);
 
     useEffect(() => {
-        if (!node) return;
-        // TODO: this is hacky, let's see if this is possible to avoid...
-        // When we return a proxied node to a developer, it's possible they will pass it back to us in this hook.
-        // We can't listen using Tree.on using a proxy node though...
-        // Thus, if we are already listening to a node from another instance of this hook, we look for the unproxied node.
-        const rawNode = proxyMap.get(node) ?? node;
+        if (!rawNode) return;
+
         // Set default value
-        setProxyNode(rawNode as TNode);
+        setProxyNode(rawNode);
         const proxyHandler: ProxyHandler<TreeNode> = {
             get: (target, prop, receiver) => {
                 // pass in the rawNode so Fluid doesn't get confused by our proxy object and can find the flex node
@@ -47,19 +43,14 @@ export function useTreeNode<TNode extends TreeNode | undefined = TreeNode>(
             setPrototypeOf: (target, v) => {
                 return Reflect.setPrototypeOf(target, v);
             },
-            // apply: (target, thisArg, argArray) => {
-            //     return Reflect.apply( thisArg, argArray);
-            // },
         };
         function onNodeChanged() {
-            if (!node) return;
+            if (!rawNode) return;
 
             setProxyNode((prevValue) => {
-                proxyMap.delete(node);
-                const proxyNode = new Proxy(node, proxyHandler);
-                proxyMap.set(proxyNode, rawNode!);
+                const proxyNode = buildProxy(rawNode, proxyHandler);
                 // Force cast because TreeNode can never match TNode due to undefined type in generic
-                return proxyNode as TNode;
+                return proxyNode;
             });
         }
         // Listen to Fluid's base node from their TreeView so Fluid flex nodes continue to work
@@ -67,9 +58,32 @@ export function useTreeNode<TNode extends TreeNode | undefined = TreeNode>(
         return () => {
             unsubscribe();
         };
-    }, [node, listenerEventName]);
+    }, [rawNode, listenerEventName]);
 
     return {
         node: proxyNode,
     };
+}
+
+const rawTNodeKey = "[[TREE_NODE]]";
+
+interface RawNodeGetter<TNode extends TreeNode | undefined = TreeNode> {
+    [rawTNodeKey]: TNode;
+}
+
+// Type guard function
+function isRawNodeGetter<TNode extends TreeNode | undefined = TreeNode>(
+    obj: any
+): obj is RawNodeGetter<TNode> {
+    return typeof obj === "object" && obj !== null && rawTNodeKey in obj;
+}
+
+function buildProxy<TNode extends TreeNode | undefined = TreeNode>(
+    target: NonNullable<TNode>,
+    handler: ProxyHandler<TreeNode>
+): TNode {
+    const proxy = new Proxy(target, handler);
+    const proxyWithRaw = proxy as typeof proxy & RawNodeGetter;
+    proxyWithRaw[rawTNodeKey] = target;
+    return proxyWithRaw as unknown as TNode;
 }

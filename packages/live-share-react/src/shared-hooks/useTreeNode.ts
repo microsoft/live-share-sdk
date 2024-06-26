@@ -28,21 +28,6 @@ export function useTreeNode<TNode extends TreeNode | undefined = TreeNode>(
             set: (target, prop, value) => {
                 return Reflect.set(target, prop, value);
             },
-            has: (target, prop) => {
-                return Reflect.has(target, prop);
-            },
-            ownKeys: (target) => {
-                return Reflect.ownKeys(target);
-            },
-            getOwnPropertyDescriptor: (target, viewKeys) => {
-                return Reflect.getOwnPropertyDescriptor(target, viewKeys);
-            },
-            getPrototypeOf: (target) => {
-                return Reflect.getPrototypeOf(target);
-            },
-            setPrototypeOf: (target, v) => {
-                return Reflect.setPrototypeOf(target, v);
-            },
         };
         function onNodeChanged() {
             if (!rawNode) return;

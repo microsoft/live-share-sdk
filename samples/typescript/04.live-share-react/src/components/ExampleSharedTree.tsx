@@ -1,6 +1,6 @@
 import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
 import { TreeViewConfiguration } from "fluid-framework";
-import { FC } from "react";
+import { FC, memo } from "react";
 import { Note, Notes } from "./ExampleSharedTree-schema";
 import { Textarea } from "@fluentui/react-components";
 
@@ -43,7 +43,7 @@ export const ExampleSharedTree: FC = () => {
             </div>
             <div className="flex wrap row hAlign">
                 {notes.map((note) => (
-                    <ExampleNoteSticky key={note.id} note={note} />
+                    <MemoNoteSticky key={note.id} note={note} />
                 ))}
             </div>
         </div>
@@ -76,3 +76,4 @@ const ExampleNoteSticky: FC<IExampleNoteStickyProps> = ({ note }) => {
         </div>
     );
 };
+const MemoNoteSticky = memo(ExampleNoteSticky);

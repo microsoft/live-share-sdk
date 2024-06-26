@@ -15,7 +15,9 @@ export function useTreeNode<TNode extends TreeNode | undefined = TreeNode>(
             if (!node) return;
             setProxyNode(new Proxy(node, new TreeNodeProxyHandler()));
         }
-        Tree.on(node, listenerEventName, onNodeChanged);
+        setProxyNode(node);
+        const unsubscribe = Tree.on(node, listenerEventName, onNodeChanged);
+        return unsubscribe;
     }, [node, listenerEventName]);
 
     return {

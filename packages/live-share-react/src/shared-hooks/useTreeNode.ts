@@ -49,7 +49,6 @@ export function useTreeNode<TNode extends TreeNode | undefined = TreeNode>(
 
             setProxyNode((prevValue) => {
                 const proxyNode = buildProxy(rawNode, proxyHandler);
-                // Force cast because TreeNode can never match TNode due to undefined type in generic
                 return proxyNode;
             });
         }
@@ -83,6 +82,7 @@ function buildProxy<TNode extends TreeNode = TreeNode>(
     handler: ProxyHandler<TreeNode>
 ): TNode {
     const proxy = new Proxy(target, handler);
+    // Set raw node getter so we can access it before things like Tree.on
     const proxyWithRaw = proxy as TNode & RawNodeGetter;
     proxyWithRaw[rawTNodeKey] = target;
     return proxyWithRaw;

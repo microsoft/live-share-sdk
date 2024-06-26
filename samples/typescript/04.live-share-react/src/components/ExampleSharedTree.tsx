@@ -2,7 +2,7 @@ import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
 import { TreeViewConfiguration } from "fluid-framework";
 import { FC } from "react";
 import { Note, Notes } from "./ExampleSharedTree-schema";
-import { Button, Textarea } from "@fluentui/react-components";
+import { Textarea } from "@fluentui/react-components";
 
 // Export the tree config appropriate for this schema.
 // This is passed into the SharedTree when it is initialized.
@@ -13,9 +13,11 @@ export const appTreeConfiguration = new TreeViewConfiguration(
 
 const initialData = new Notes([]);
 
+export const EXAMPLE_SHARED_TREE_KEY = "MY-TREE";
+
 export const ExampleSharedTree: FC = () => {
     const { treeView } = useSharedTree(
-        "my-tree",
+        EXAMPLE_SHARED_TREE_KEY,
         appTreeConfiguration,
         initialData
     );
@@ -26,18 +28,21 @@ export const ExampleSharedTree: FC = () => {
     }
     return (
         <div>
-            <div>
-                <Button
+            <div className="flex row" style={{ padding: "12px 12px" }}>
+                <h2>{"Notes"}</h2>
+                <button
                     onClick={() => {
                         notes.addNode("Me");
                     }}
                 >
-                    {"Add note"}
-                </Button>
+                    {"+ Add note"}
+                </button>
             </div>
-            {notes.map((note) => (
-                <ExampleNoteSticky key={note.id} note={note} />
-            ))}
+            <div className="flex wrap row hAlign">
+                {notes.map((note) => (
+                    <ExampleNoteSticky key={note.id} note={note} />
+                ))}
+            </div>
         </div>
     );
 };
@@ -47,16 +52,24 @@ interface IExampleNoteStickyProps {
 }
 
 const ExampleNoteSticky: FC<IExampleNoteStickyProps> = ({ note }) => {
-    const { node: noteNode } = useTreeNode(note);
+    const { node: noteNode } = useTreeNode(note, "treeChanged");
     return (
-        <div>
+        <div
+            style={{
+                width: "200px",
+                height: "200px",
+                border: "1px solid gray",
+                borderRadius: "4px",
+                backgroundColor: "#FFFCB9",
+            }}
+        >
+            {`${noteNode.author} | ${noteNode.votes.length} votes`}
             <Textarea
                 value={noteNode.text}
                 onChange={(ev, data) => {
                     note.text = data.value;
                 }}
             />
-            {noteNode.author}
         </div>
     );
 };

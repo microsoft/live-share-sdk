@@ -1,6 +1,7 @@
 import { InsecureTokenProvider } from "@fluidframework/test-runtime-utils/internal";
 import { AzureProvider } from "@microsoft/live-share-react";
 import { SharedMap } from "fluid-framework/legacy";
+import { SharedTree } from "fluid-framework";
 import {
     ExampleSharedMap,
     ExampleSharedState,
@@ -27,12 +28,14 @@ export const AzureAutoJoin = () => {
             createOnLoad
             joinOnLoad
             containerId={window.location.hash.substring(1)}
-            initialObjects={{
-                /**
-                 * Optionally can defined custom objects and use them within their corresponding hook. See ExampleSharedMap to see
-                 * how this works.
-                 */
-                [EXAMPLE_SHARED_MAP_KEY]: SharedMap,
+            fluidContainerSchema={{
+                initialObjects: {
+                    /**
+                     * Optionally can defined custom objects and use them within their corresponding hook. See ExampleSharedMap to see
+                     * how this works.
+                     */
+                    [EXAMPLE_SHARED_MAP_KEY]: SharedMap,
+                },
             }}
         >
             <ExampleSharedState />

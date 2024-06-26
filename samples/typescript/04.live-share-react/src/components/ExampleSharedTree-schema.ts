@@ -4,7 +4,6 @@ import {
     Tree,
     TreeArrayNode,
     TreeNodeSchema,
-    ValidateRecursiveSchema,
     WithType,
 } from "fluid-framework";
 import { v4 as uuid } from "uuid";
@@ -88,7 +87,7 @@ export class Note extends sf.object(
 }
 
 // Schema for a list of Notes and Groups.
-export class Notes extends sf.arrayRecursive("Notes", [() => Note]) {
+export class Notes extends sf.array("Notes", [() => Note]) {
     public addNode(author: string) {
         const timeStamp = new Date().getTime();
 
@@ -106,11 +105,4 @@ export class Notes extends sf.arrayRecursive("Notes", [() => Note]) {
         // Insert the note into the SharedTree.
         this.insertAtEnd(newNote);
     }
-}
-
-{
-    // Due to limitations of TypeScript, recursive schema may not produce type errors when declared incorrectly.
-    // Using ValidateRecursiveSchema helps ensure that mistakes made in the definition of a recursive schema (like `Items`)
-    // will introduce a compile error.
-    type _check = ValidateRecursiveSchema<typeof Notes>;
 }

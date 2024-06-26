@@ -16,13 +16,16 @@ const initialData = new Notes([]);
 export const EXAMPLE_SHARED_TREE_KEY = "MY-TREE";
 
 export const ExampleSharedTree: FC = () => {
-    const { treeView } = useSharedTree(
+    const { root } = useSharedTree(
         EXAMPLE_SHARED_TREE_KEY,
         appTreeConfiguration,
         initialData
     );
-    const { node: notes } = useTreeNode(treeView?.root);
+    const { node: notes } = useTreeNode(root);
 
+    if (!root) {
+        return <>Loading root...</>;
+    }
     if (!notes) {
         return <>Loading notes...</>;
     }
@@ -67,7 +70,7 @@ const ExampleNoteSticky: FC<IExampleNoteStickyProps> = ({ note }) => {
             <Textarea
                 value={noteNode.text}
                 onChange={(ev, data) => {
-                    note.text = data.value;
+                    noteNode.text = data.value;
                 }}
             />
         </div>

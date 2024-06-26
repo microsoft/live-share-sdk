@@ -24,7 +24,7 @@ import {
     IFluidContainer,
     ITree,
     ImplicitFieldSchema,
-    TreeNode,
+    TreeFieldFromImplicitField,
     TreeView,
 } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
@@ -89,6 +89,10 @@ export interface IUseSharedTreeResults<TSchema extends ImplicitFieldSchema> {
      * The Fluid `SharedTree` object, should you want to use it directly.
      */
     sharedTree: ITree | undefined;
+    /**
+     * Root node
+     */
+    root: TreeFieldFromImplicitField<TSchema> | undefined;
 }
 
 /**

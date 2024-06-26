@@ -5,6 +5,7 @@ import {
     TreeView,
     ITree,
     InsertableTreeFieldFromImplicitField,
+    TreeFieldFromImplicitField,
 } from "fluid-framework";
 import { IUseSharedTreeResults } from "../types";
 import { useDynamicDDS } from "../shared-hooks";
@@ -18,6 +19,9 @@ export function useSharedTree<
     initialData: InsertableTreeFieldFromImplicitField<TSchema>
 ): IUseSharedTreeResults<TSchema> {
     const [treeView, setTreeView] = React.useState<TreeView<TSchema>>();
+    const [root, setRoot] =
+        React.useState<TreeFieldFromImplicitField<TSchema>>();
+
     const onFirstInitialize = React.useCallback(
         (newDDS: ITree): void => {
             try {
@@ -46,21 +50,42 @@ export function useSharedTree<
     );
 
     /**
-     * Sets the tree view
+     * Sets the tree view and root view
      */
     React.useEffect(() => {
         if (!sharedTree) return;
+        let _treeView: TreeView<TSchema> | undefined = undefined;
         try {
             // Create a `treeView` with the provided `treeViewConfiguration`
-            const _treeView = sharedTree.viewWith(treeViewConfiguration);
+            _treeView = sharedTree.viewWith(treeViewConfiguration);
             setTreeView(_treeView);
         } catch (err) {
             console.error(err);
         }
+
+        // Listen for changes to root view
+        const updateRoot = (): void => {
+            if (_treeView?.compatibility.canView) {
+                setRoot(_treeView.root);
+            } else {
+                setRoot(undefined);
+            }
+        };
+
+        updateRoot();
+        const unsubscribeToRoot = _treeView?.events.on(
+            "rootChanged",
+            updateRoot
+        );
+        return () => {
+            _treeView?.dispose();
+            unsubscribeToRoot?.();
+        };
     }, [sharedTree, treeViewConfiguration]);
 
     return {
         treeView,
         sharedTree,
+        root,
     };
 }

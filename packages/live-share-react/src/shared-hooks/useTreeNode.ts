@@ -17,23 +17,11 @@ export function useTreeNode<TNode extends TreeNode | undefined = TreeNode>(
 
         // Set default value
         setProxyNode(rawNode);
-        const proxyHandler: ProxyHandler<TreeNode> = {
-            get: (target, prop, receiver) => {
-                // pass in the rawNode so Fluid doesn't get confused by our proxy object and can find the flex node
-                const value = Reflect.get(target, prop, rawNode);
-                return typeof value === "function"
-                    ? value.bind(rawNode)
-                    : value;
-            },
-            set: (target, prop, value) => {
-                return Reflect.set(target, prop, value);
-            },
-        };
         function onNodeChanged() {
             if (!rawNode) return;
 
             setProxyNode((prevValue) => {
-                const proxyNode = buildProxy(rawNode, proxyHandler);
+                const proxyNode = buildProxy(rawNode);
                 return proxyNode;
             });
         }
@@ -62,13 +50,20 @@ function isRawNodeGetter<TNode extends TreeNode | undefined = TreeNode>(
     return typeof obj === "object" && obj !== null && rawTNodeKey in obj;
 }
 
-function buildProxy<TNode extends TreeNode = TreeNode>(
-    target: TNode,
-    handler: ProxyHandler<TreeNode>
-): TNode {
-    const proxy = new Proxy(target, handler);
+function buildProxy<TNode extends TreeNode = TreeNode>(rawNode: TNode): TNode {
+    const proxyHandler: ProxyHandler<TreeNode> = {
+        get: (target, prop, receiver) => {
+            // pass in the rawNode so Fluid doesn't get confused by our proxy object and can find the flex node
+            const value = Reflect.get(target, prop, rawNode);
+            return typeof value === "function" ? value.bind(rawNode) : value;
+        },
+        set: (target, prop, value) => {
+            return Reflect.set(target, prop, value);
+        },
+    };
+    const proxy = new Proxy(rawNode, proxyHandler);
     // Set raw node getter so we can access it before things like Tree.on
     const proxyWithRaw = proxy as TNode & RawNodeGetter;
-    proxyWithRaw[rawTNodeKey] = target;
+    proxyWithRaw[rawTNodeKey] = rawNode;
     return proxyWithRaw;
 }

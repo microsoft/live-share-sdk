@@ -68,8 +68,6 @@ export class Note extends sf.object(
         } else {
             this.votes.insertAtEnd(user);
         }
-
-        this.lastChanged = new Date().getTime();
     }
 
     /**

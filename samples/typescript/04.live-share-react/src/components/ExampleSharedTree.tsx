@@ -2,7 +2,7 @@ import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
 import { TreeViewConfiguration } from "fluid-framework";
 import { FC, memo } from "react";
 import { Note, Notes } from "./ExampleSharedTree-schema";
-import { Textarea } from "@fluentui/react-components";
+import { Button, Textarea } from "@fluentui/react-components";
 
 // Export the tree config appropriate for this schema.
 // This is passed into the SharedTree when it is initialized.
@@ -64,6 +64,7 @@ const ExampleNoteSticky: FC<IExampleNoteStickyProps> = ({ note }) => {
                 border: "1px solid gray",
                 borderRadius: "4px",
                 backgroundColor: "#FFFCB9",
+                padding: "8px",
             }}
         >
             {`${noteNode.author} | ${noteNode.votes.length} votes`}
@@ -72,7 +73,17 @@ const ExampleNoteSticky: FC<IExampleNoteStickyProps> = ({ note }) => {
                 onChange={(ev, data) => {
                     noteNode.text = data.value;
                 }}
+                style={{
+                    marginBottom: "12px",
+                }}
             />
+            <button
+                onClick={() => {
+                    note.toggleVote("Me");
+                }}
+            >
+                Vote
+            </button>
         </div>
     );
 };

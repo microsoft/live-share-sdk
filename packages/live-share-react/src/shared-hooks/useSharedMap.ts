@@ -8,6 +8,11 @@ import { isEntries, isJSON, isMap } from "../utils";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types";
 import { useDynamicDDS } from "./useDynamicDDS";
 import { SharedMap } from "fluid-framework/legacy";
+import {
+    ActionContainerNotJoinedError,
+    ActionLiveDataObjectUndefinedError,
+} from "../internal/errors";
+import { useFluidObjectsContext } from "../providers/AzureProvider";
 
 /**
  * React hook for using a Fluid `SharedMap`.
@@ -28,7 +33,7 @@ import { SharedMap } from "fluid-framework/legacy";
 export function useSharedMap<TData = any>(
     uniqueKey: string,
     initialData?: SharedMapInitialData<TData>
-): IUseSharedMapResults {
+): IUseSharedMapResults<TData> {
     const onFirstInitialize = React.useCallback(
         (newDDS: SharedMap): void => {
             /**
@@ -48,6 +53,74 @@ export function useSharedMap<TData = any>(
         uniqueKey,
         SharedMap,
         onFirstInitialize
+    );
+
+    const { container } = useFluidObjectsContext();
+
+    /**
+     * User facing: get a value from the Fluid `SharedMap`.
+     */
+    const getEntry = React.useCallback(
+        (key: string) => {
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "sharedMap",
+                    "getEntry"
+                );
+            }
+            if (sharedMap === undefined) {
+                throw new ActionLiveDataObjectUndefinedError(
+                    "sharedMap",
+                    "getEntry"
+                );
+            }
+            return sharedMap.get(key);
+        },
+        [container, sharedMap]
+    );
+
+    /**
+     * User facing: set a value to the Fluid `SharedMap`.
+     */
+    const setEntry = React.useCallback(
+        (key: string, value: TData) => {
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "sharedMap",
+                    "setEntry"
+                );
+            }
+            if (sharedMap === undefined) {
+                throw new ActionLiveDataObjectUndefinedError(
+                    "sharedMap",
+                    "setEntry"
+                );
+            }
+            sharedMap.set(key, value);
+        },
+        [container, sharedMap]
+    );
+
+    /**
+     * User facing: delete a value from the Fluid `SharedMap`.
+     */
+    const deleteEntry = React.useCallback(
+        (key: string) => {
+            if (!container) {
+                throw new ActionContainerNotJoinedError(
+                    "sharedMap",
+                    "deleteEntry"
+                );
+            }
+            if (sharedMap === undefined) {
+                throw new ActionLiveDataObjectUndefinedError(
+                    "sharedMap",
+                    "deleteEntry"
+                );
+            }
+            sharedMap.delete(key);
+        },
+        [container, sharedMap]
     );
 
     const [sharedMapProxy, setSharedMapProxy] = React.useState<SharedMap>();
@@ -77,6 +150,9 @@ export function useSharedMap<TData = any>(
 
     return {
         sharedMap: sharedMapProxy,
+        getEntry,
+        setEntry,
+        deleteEntry,
     };
 }
 

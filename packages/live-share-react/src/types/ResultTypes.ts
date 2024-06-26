@@ -58,11 +58,23 @@ export interface ILiveShareContainerResults extends IAzureContainerResults {
 /**
  * Return type of `useSharedMap` hook.
  */
-export interface IUseSharedMapResults {
+export interface IUseSharedMapResults<TData> {
     /**
      * The Fluid `SharedMap` object.
      */
-    sharedMap: SharedMap | undefined;
+    sharedMap: (Map<string, TData> & SharedMap) | undefined;
+    /**
+     * Callback method to get entries in the `SharedMap`.
+     */
+    getEntry: (key: string) => TData | undefined;
+    /**
+     * Callback method to set/replace new entries in the `SharedMap`.
+     */
+    setEntry: (key: string, value: TData) => void;
+    /**
+     * Callback method to delete an existing entry in the `SharedMap`.
+     */
+    deleteEntry: (key: string) => void;
 }
 
 /**

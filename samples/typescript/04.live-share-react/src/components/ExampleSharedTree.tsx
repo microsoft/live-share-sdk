@@ -22,6 +22,7 @@ export const ExampleSharedTree: FC = () => {
         initialData
     );
     // This helps us test passing our proxy node into useTreeNode
+    // Shouldn't be used in production
     const { node: testSelfReferenceNode } = useTreeNode(root);
     const { node: notes } = useTreeNode(testSelfReferenceNode);
 
@@ -57,6 +58,8 @@ interface INoteStickyProps {
 }
 
 const NoteSticky: FC<INoteStickyProps> = ({ noteNode }) => {
+    // "treeChanged" behavior currently re-proxies all children nodes
+    // shouldn't be used in production in current state
     const { node: note } = useTreeNode(noteNode, "treeChanged");
     return (
         <div className="sticky-note">

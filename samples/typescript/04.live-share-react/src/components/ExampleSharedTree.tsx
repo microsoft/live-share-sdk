@@ -60,15 +60,17 @@ const NoteSticky: FC<INoteStickyProps> = ({ noteNode }) => {
     const { node: note } = useTreeNode(noteNode, "treeChanged");
     return (
         <div className="sticky-note">
-            <MemoNoteHeaderView noteHeaderNode={noteNode.header} />
-            {`${note.author} | ${note.votes.length} votes`}
-            <Textarea
-                value={note.text}
-                className="sticky-textarea"
-                onChange={(_, data) => {
-                    note.text = data.value;
-                }}
-            />
+            <MemoNoteHeaderView noteHeaderNode={note.header} />
+            <div>{`${note.author} | ${note.votes.length} votes`}</div>
+            <div className="sticky-textarea-container">
+                <Textarea
+                    className="sticky-textarea"
+                    value={note.text}
+                    onChange={(_, data) => {
+                        note.text = data.value;
+                    }}
+                />
+            </div>
             <button
                 onClick={() => {
                     note.toggleVote("Me");
@@ -87,7 +89,7 @@ interface INoteHeaderProps {
 
 const NoteHeaderView: FC<INoteHeaderProps> = ({ noteHeaderNode }) => {
     return (
-        <div className="flex row">
+        <div className="flex row vAlign">
             {!noteHeaderNode.color && (
                 <button
                     onClick={() => {
@@ -110,6 +112,7 @@ const NoteHeaderView: FC<INoteHeaderProps> = ({ noteHeaderNode }) => {
             )}
             {noteHeaderNode.emoji && (
                 <div
+                    className="cursor-pointer"
                     onClick={() => {
                         noteHeaderNode.setRandomEmoji();
                     }}

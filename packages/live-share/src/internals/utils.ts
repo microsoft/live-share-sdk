@@ -62,10 +62,7 @@ export function waitForResult<TSuccessResult, TRequestResult>(
     fnValidateResponse: (result: TRequestResult) => {
         response: TSuccessResult;
     } | null,
-    fnTimeout: (reason: unknown) => Error,
     retrySchedule: number[],
-    fnRequestError?: (error: unknown) => Error | null,
-    lateFinish?: () => void,
     basedDelayMilliseconds: number = 1000
 ): Promise<TSuccessResult> {
     let retries: number = 0;
@@ -77,8 +74,7 @@ export function waitForResult<TSuccessResult, TRequestResult>(
                     Math.max(
                         basedDelayMilliseconds * (retries + 1),
                         basedDelayMilliseconds * 3
-                    ),
-                    lateFinish
+                    )
                 );
                 const validated = fnValidateResponse(result);
                 if (validated !== null) {
@@ -90,16 +86,8 @@ export function waitForResult<TSuccessResult, TRequestResult>(
                 }
             } catch (error: unknown) {
                 if (retries >= retrySchedule.length) {
-                    reject(fnTimeout(error));
+                    reject(error);
                     break;
-                }
-                // Check if this error is something that should cause us to skip the retry schedule
-                if (!!fnRequestError && !(error instanceof TimeoutError)) {
-                    const rejectNowError = fnRequestError(error);
-                    if (rejectNowError !== null) {
-                        reject(rejectNowError);
-                        break;
-                    }
                 }
             }
 
@@ -114,8 +102,7 @@ export function waitForResult<TSuccessResult, TRequestResult>(
  */
 export function timeoutRequest<TResult>(
     fnRequest: () => Promise<TResult>,
-    timeout: number,
-    lateFinish?: () => void
+    timeout: number
 ): Promise<TResult> {
     return new Promise<TResult>(async (resolve, reject) => {
         let hTimer: any = setTimeout(() => {
@@ -125,14 +112,8 @@ export function timeoutRequest<TResult>(
         try {
             const result = await fnRequest();
             resolve(result);
-            if (hTimer == null) {
-                lateFinish?.();
-            }
         } catch (error: unknown) {
             reject(error);
-            if (hTimer == null) {
-                lateFinish?.();
-            }
         }
         clearTimeout(hTimer);
     });

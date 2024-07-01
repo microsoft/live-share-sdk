@@ -10,9 +10,9 @@ import {
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils/internal";
 import { LiveState } from "../LiveState";
-import { Deferred } from "../internals";
+import { Deferred } from "../internals/Deferred";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
+import { MockLiveShareRuntime } from "../internals/test/MockLiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
 
 interface TestStateData {

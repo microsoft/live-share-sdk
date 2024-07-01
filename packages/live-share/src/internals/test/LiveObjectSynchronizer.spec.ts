@@ -6,7 +6,8 @@
 import { strict as assert } from "assert";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
 import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
-import { Deferred, waitForDelay } from "../internals";
+import { Deferred } from "../Deferred";
+import { waitForDelay } from "../utils";
 import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
 
 interface ITestState {

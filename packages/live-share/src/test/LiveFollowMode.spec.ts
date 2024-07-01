@@ -15,11 +15,12 @@ import {
     IFollowModeState,
     LiveFollowMode,
 } from "../LiveFollowMode";
-import { Deferred, waitForDelay } from "../internals";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
+import { MockLiveShareRuntime } from "../internals/test/MockLiveShareRuntime";
 import { LivePresenceUser } from "../LivePresenceUser";
 import { describeCompat } from "@live-share-private/test-utils";
+import { waitForDelay } from "../internals/utils";
+import { Deferred } from "../internals/Deferred";
 
 interface TestFollowData {
     page: string;

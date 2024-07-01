@@ -5,8 +5,8 @@
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IRuntimeSignaler } from "../LiveEventScope";
-import { LiveShareRuntime } from "../LiveShareRuntime";
+import { IRuntimeSignaler } from "./LiveEventScope";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";
 import { LiveEvent } from "../LiveEvent";
 import { IAzureAudience } from "@fluidframework/azure-client";

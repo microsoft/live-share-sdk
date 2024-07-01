@@ -3,7 +3,7 @@ import {
     LivePresenceReceivedEventData,
     PresenceState,
 } from "./LivePresenceUser";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime";
 import { TimeInterval } from "./TimeInterval";
 import { cloneValue } from "./internals/utils";
 

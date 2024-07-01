@@ -6,10 +6,10 @@
 import { strict as assert } from "assert";
 import { LiveEventScope } from "../LiveEventScope";
 import { LiveEventTarget } from "../LiveEventTarget";
-import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
+import { MockRuntimeSignaler } from "../test/MockRuntimeSignaler";
 import { LiveShareRuntime } from "../LiveShareRuntime";
-import { TestLiveShareHost } from "../TestLiveShareHost";
-import { LocalTimestampProvider } from "../LocalTimestampProvider";
+import { TestLiveShareHost } from "../../TestLiveShareHost";
+import { LocalTimestampProvider } from "../../LocalTimestampProvider";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();

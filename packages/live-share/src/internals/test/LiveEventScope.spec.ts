@@ -5,12 +5,12 @@
 
 import { strict as assert } from "assert";
 import { LiveEventScope } from "../LiveEventScope";
-import { UserMeetingRole } from "../interfaces";
+import { UserMeetingRole } from "../../interfaces";
 import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
-import { MockRoleVerifier } from "./MockRoleVerifier";
-import { MockTimestampProvider } from "./MockTimestampProvider";
-import { LocalTimestampProvider } from "../LocalTimestampProvider";
-import { TestLiveShareHost } from "../TestLiveShareHost";
+import { MockRoleVerifier } from "../../test/MockRoleVerifier";
+import { MockTimestampProvider } from "../../test/MockTimestampProvider";
+import { LocalTimestampProvider } from "../../LocalTimestampProvider";
+import { TestLiveShareHost } from "../../TestLiveShareHost";
 import { LiveShareRuntime } from "../LiveShareRuntime";
 
 function createConnectedSignalers() {

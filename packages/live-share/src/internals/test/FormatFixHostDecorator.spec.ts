@@ -1,6 +1,6 @@
 import { ILiveShareHost, UserMeetingRole, IClientInfo } from "../../interfaces";
 import { strict as assert } from "assert";
-import { FormatFixHostDecorator } from "..";
+import { FormatFixHostDecorator } from "../FormatFixHostDecorator";
 
 class HostWithAndroidBug {
     constructor(private result: unknown) {}

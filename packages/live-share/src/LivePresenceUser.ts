@@ -6,7 +6,7 @@
 import { LiveEvent } from "./LiveEvent";
 import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime";
 import { LivePresenceConnection } from "./LivePresenceConnection";
 import { cloneValue } from "./internals/utils";
 

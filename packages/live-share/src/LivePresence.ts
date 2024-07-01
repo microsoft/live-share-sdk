@@ -14,7 +14,7 @@ import {
     ILivePresenceEvent,
     LivePresenceReceivedEventData,
 } from "./LivePresenceUser";
-import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import {
     LiveDataObjectInitializeNotNeededError,
@@ -28,7 +28,7 @@ import {
     LiveDataObjectInitializeState,
     UserMeetingRole,
 } from "./interfaces";
-import { LiveDataObject } from "./LiveDataObject";
+import { LiveDataObject } from "./internals/LiveDataObject";
 import { SharedObjectKind } from "fluid-framework";
 import { cloneValue } from "./internals/utils";
 import { TelemetryEvents } from "./internals/consts";

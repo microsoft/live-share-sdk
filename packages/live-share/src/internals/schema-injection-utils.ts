@@ -3,8 +3,8 @@ import {
     IDataObjectProps,
 } from "@fluidframework/aqueduct/internal";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { LiveDataObject } from "../LiveDataObject";
-import { LiveShareRuntime } from "../LiveShareRuntime";
+import { LiveDataObject } from "./LiveDataObject";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 import {
     LoadableObjectCtor,
     LoadableObjectClassRecord,

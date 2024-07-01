@@ -14,10 +14,10 @@ import {
     ILiveEvent,
     LiveDataObjectInitializeState,
 } from "./interfaces";
-import { LiveEventScope } from "./LiveEventScope";
-import { LiveEventTarget } from "./LiveEventTarget";
+import { LiveEventScope } from "./internals/LiveEventScope";
+import { LiveEventTarget } from "./internals/LiveEventTarget";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
-import { LiveDataObject } from "./LiveDataObject";
+import { LiveDataObject } from "./internals/LiveDataObject";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,

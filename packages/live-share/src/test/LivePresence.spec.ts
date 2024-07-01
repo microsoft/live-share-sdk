@@ -9,10 +9,10 @@ import {
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils/internal";
-import { LivePresence, LivePresenceClass } from "../LivePresence";
+import { LivePresenceClass } from "../LivePresence";
 import { PresenceState } from "../LivePresenceUser";
-import { waitForDelay } from "../internals";
-import { Deferred } from "../internals";
+import { waitForDelay } from "../internals/utils";
+import { Deferred } from "../internals/Deferred";
 import {
     IClientInfo,
     IFluidContainerInfo,
@@ -23,7 +23,7 @@ import {
 } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
+import { MockLiveShareRuntime } from "../internals/test/MockLiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
 
 class TestLivePresence<

@@ -21,9 +21,9 @@ import {
 } from "./errors";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
 import { LiveEvent } from "./LiveEvent";
-import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
-import { LiveDataObject } from "./LiveDataObject";
+import { LiveDataObject } from "./internals/LiveDataObject";
 import { SharedObjectKind } from "fluid-framework";
 import { TelemetryEvents } from "./internals/consts";
 import { cloneValue } from "./internals/utils";

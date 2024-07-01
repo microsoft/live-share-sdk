@@ -14,7 +14,6 @@ import {
     LiveDataObjectInitializeState,
     UserMeetingRole,
 } from "./interfaces";
-import { cloneValue, TelemetryEvents } from "./internals";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
@@ -26,6 +25,8 @@ import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
 import { LiveDataObject } from "./LiveDataObject";
 import { SharedObjectKind } from "fluid-framework";
+import { TelemetryEvents } from "./internals/consts";
+import { cloneValue } from "./internals/utils";
 
 /**
  * Events supported by [LiveState` object.

@@ -22,7 +22,7 @@ import { IMediaPlayer } from "./IMediaPlayer";
 import { ITriggerActionEvent, TelemetryEvents } from "./internals";
 import { waitUntilConnected } from "@microsoft/live-share/bin/internals";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 
 /**
  * Event data returned by `MediaPlayerSynchronizer` object.

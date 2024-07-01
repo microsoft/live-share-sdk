@@ -8,16 +8,14 @@ import {
     UserMeetingRole,
     IContainerRuntimeSignaler,
 } from "./interfaces";
-import {
-    BackwardsCompatibilityHostDecorator,
-    LiveShareHostDecorator,
-    RoleVerifier,
-    isTimestampProvider,
-    LiveObjectManager,
-    FormatFixHostDecorator,
-} from "./internals";
 import { IAzureAudience } from "@fluidframework/azure-client";
 import { ILiveShareClientOptions } from "./LiveShareClient";
+import { isTimestampProvider } from "./internals/type-guards";
+import { LiveObjectManager } from "./internals/LiveObjectManager";
+import { RoleVerifier } from "./internals/RoleVerifier";
+import { BackwardsCompatibilityHostDecorator } from "./internals/BackwardsCompatibilityHostDecorator";
+import { LiveShareHostDecorator } from "./internals/LiveShareHostDecorator";
+import { FormatFixHostDecorator } from "./internals/FormatFixHostDecorator";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp

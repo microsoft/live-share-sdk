@@ -1,5 +1,5 @@
 import { IEvent } from "@microsoft/live-share";
-import { IEvent as IFluidEvent } from "@fluidframework/common-definitions";
+import { IEvent as IFluidEvent } from "@fluidframework/core-interfaces";
 import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions";
 
 /**

@@ -18,13 +18,13 @@ import { LiveEventScope } from "./LiveEventScope";
 import { LiveEventTarget } from "./LiveEventTarget";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
 import { LiveDataObject } from "./LiveDataObject";
-import { cloneValue } from "./internals";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
     UnexpectedError,
 } from "./errors";
 import { SharedObjectKind } from "fluid-framework";
+import { cloneValue } from "./internals/utils";
 
 /**
  * Events supported by `LiveEvent` object.

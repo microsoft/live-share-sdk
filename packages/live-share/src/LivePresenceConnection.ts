@@ -1,4 +1,3 @@
-import { cloneValue } from "./internals";
 import { LiveEvent } from "./LiveEvent";
 import {
     LivePresenceReceivedEventData,
@@ -6,6 +5,7 @@ import {
 } from "./LivePresenceUser";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { TimeInterval } from "./TimeInterval";
+import { cloneValue } from "./internals/utils";
 
 /**
  * A connection that presence is being tracked for.

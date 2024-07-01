@@ -38,7 +38,7 @@ import {
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
 import { isErrorLike } from "@microsoft/live-share/bin/internals";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 
 /**
  * Most recent state of the media session.

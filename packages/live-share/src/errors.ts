@@ -1,5 +1,5 @@
-import { LiveShareReportIssueLink } from "./internals";
 import { LiveDataObjectInitializeState } from "./interfaces";
+import { LiveShareReportIssueLink } from "./internals/consts";
 
 /**
  * @hidden

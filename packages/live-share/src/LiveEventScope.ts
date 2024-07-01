@@ -11,9 +11,10 @@ import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
 import { ILiveEvent, UserMeetingRole } from "./interfaces";
 import { LiveShareRuntime } from "./LiveShareRuntime";
-import { isILiveEvent, waitUntilConnected } from "./internals";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
+import { isILiveEvent } from "./internals/type-guards";
+import { waitUntilConnected } from "./internals/utils";
 
 /**
  * Live event callback.

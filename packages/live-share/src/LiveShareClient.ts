@@ -26,7 +26,7 @@ import { TestLiveShareHost } from "./TestLiveShareHost";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils";
 import { ExpectedError, UnexpectedError } from "./errors";
-import { FluidCompatibilityMode } from "./internals";
+import { FluidCompatibilityMode } from "./internals/consts";
 
 /**
  * @hidden

@@ -6,9 +6,9 @@
 import { LiveEvent } from "./LiveEvent";
 import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
-import { cloneValue } from "./internals";
 import { LiveShareRuntime } from "./LiveShareRuntime";
 import { LivePresenceConnection } from "./LivePresenceConnection";
+import { cloneValue } from "./internals/utils";
 
 /**
  * List of possible presence states.

@@ -7,7 +7,7 @@ import {
     INtpTimeInfo,
     UserMeetingRole,
 } from "./interfaces";
-import { Deferred } from "./internals";
+import { Deferred } from "./internals/Deferred";
 
 /**
  * @alpha

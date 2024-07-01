@@ -21,8 +21,6 @@ export * from "./TestLiveShareHost";
 export * from "./TimeInterval";
 export * from "./TimestampProvider";
 
-export * from "./LiveEventTimer"; // TODO: Delete LiveEventTime.ts
-
 // TODO: our package structure is such that things that need to be exposed at all for other live share libs
 // are in the root of the directory even if they are "internal". move some to internal again?
 export * from "./internals/BaseLiveShareClient";

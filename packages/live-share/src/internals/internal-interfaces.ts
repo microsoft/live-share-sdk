@@ -3,7 +3,7 @@ import {
     ILiveEvent,
     UpdateSynchronizationState,
 } from "../interfaces";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 
 /**
  * @hidden

@@ -1,4 +1,4 @@
-import { LiveDataObject } from "./LiveDataObject";
+import { LiveDataObject } from "./internals/LiveDataObject";
 import { LiveState } from "./LiveState";
 import { ILivePresenceEvents, LivePresence } from "./LivePresence";
 import {

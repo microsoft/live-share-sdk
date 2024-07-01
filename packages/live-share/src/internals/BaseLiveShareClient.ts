@@ -14,7 +14,7 @@ import { AzureContainerServices } from "@fluidframework/azure-client/internal";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
 import { DynamicObjectManager } from "./DynamicObjectManager";
-import { LiveShareRuntime } from "../LiveShareRuntime";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 import {
     getRootDataObject,
     getContainerRuntime,

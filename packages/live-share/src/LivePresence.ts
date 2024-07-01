@@ -7,16 +7,15 @@ import {
     DataObjectFactory,
     createDataObjectKind,
 } from "@fluidframework/aqueduct/internal";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 import {
     LivePresenceUser,
     PresenceState,
     ILivePresenceEvent,
     LivePresenceReceivedEventData,
 } from "./LivePresenceUser";
-import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
-import { cloneValue, TelemetryEvents } from "./internals";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
@@ -29,8 +28,10 @@ import {
     LiveDataObjectInitializeState,
     UserMeetingRole,
 } from "./interfaces";
-import { LiveDataObject } from "./LiveDataObject";
+import { LiveDataObject } from "./internals/LiveDataObject";
 import { SharedObjectKind } from "fluid-framework";
+import { cloneValue } from "./internals/utils";
+import { TelemetryEvents } from "./internals/consts";
 
 /**
  * Events supported by `LivePresence` object.

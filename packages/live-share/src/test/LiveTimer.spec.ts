@@ -10,10 +10,11 @@ import {
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils/internal";
 import { LiveTimer } from "../LiveTimer";
-import { Deferred, waitForDelay } from "../internals";
+import { Deferred } from "../internals/Deferred";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
+import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
+import { waitForDelay } from "../internals/utils";
 
 async function getObjects(
     getTestObjectProvider,

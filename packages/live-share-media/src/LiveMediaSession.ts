@@ -8,13 +8,15 @@ import {
     createDataObjectKind,
 } from "@fluidframework/aqueduct/internal";
 import {
-    DynamicObjectRegistry,
-    LiveDataObject,
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectInitializeState,
     LiveTelemetryLogger,
     UserMeetingRole,
 } from "@microsoft/live-share";
+import {
+    DynamicObjectRegistry,
+    LiveDataObject,
+} from "@microsoft/live-share/internal";
 import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer";
 import { ITriggerActionEvent, TelemetryEvents } from "./internals";
 import {

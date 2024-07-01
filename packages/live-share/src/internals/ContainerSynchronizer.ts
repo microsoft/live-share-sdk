@@ -1,5 +1,5 @@
-import { IRuntimeSignaler } from "../LiveEventScope";
-import { LiveShareRuntime } from "../LiveShareRuntime";
+import { IRuntimeSignaler } from "./LiveEventScope";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";
 import {
     GetAndUpdateStateHandlers,

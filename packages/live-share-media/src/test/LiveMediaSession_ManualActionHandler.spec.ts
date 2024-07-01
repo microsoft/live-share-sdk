@@ -4,7 +4,6 @@
  */
 
 import { TestLiveMediaSession, TestMediaTimeStampProvider } from "./TestUtils";
-import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { strict as assert } from "assert";
 import {
     ITestObjectProvider,
@@ -13,15 +12,18 @@ import {
 } from "@fluidframework/test-utils/internal";
 import {
     ITimestampProvider,
-    LiveEventScope,
-    LiveEventTarget,
     LocalTimestampProvider,
     UserMeetingRole,
+    TestLiveShareHost,
 } from "@microsoft/live-share";
-import { TestLiveShareHost } from "@microsoft/live-share";
-import { getLiveDataObjectKind } from "@microsoft/live-share";
-import { waitForDelay } from "@microsoft/live-share/src/internals";
-import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveShareRuntime";
+import {
+    getLiveDataObjectKind,
+    LiveEventScope,
+    LiveEventTarget,
+    MockLiveShareRuntime,
+    waitForDelay,
+    Deferred,
+} from "@microsoft/live-share/internal";
 import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionDetails,

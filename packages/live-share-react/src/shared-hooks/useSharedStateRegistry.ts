@@ -22,7 +22,7 @@ import {
     getRootDirectory,
     TurboDirectory,
     TurboStateMap,
-} from "@microsoft/live-share";
+} from "@microsoft/live-share/internal";
 
 /**
  * Response for the {@link useSharedStateRegistry} hook.

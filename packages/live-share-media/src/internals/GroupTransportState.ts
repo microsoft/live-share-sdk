@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveShareRuntime } from "@microsoft/live-share";
+import { LiveShareRuntime } from "@microsoft/live-share/internal";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import {

@@ -1,10 +1,10 @@
 import { strict as assert } from "assert";
 import {
-    timeoutRequest,
-    Deferred,
-    waitForResult,
     TimeoutError,
-} from "../internals";
+    timeoutRequest,
+    waitForResult,
+} from "../internals/utils";
+import { Deferred } from "../internals/Deferred";
 
 describe("timeoutRequest", function () {
     it("should return the result when request is successful within timeout", async () => {

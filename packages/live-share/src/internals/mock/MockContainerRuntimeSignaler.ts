@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
-import { IContainerRuntimeSignaler } from "../interfaces";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
+import { IContainerRuntimeSignaler } from "../../interfaces";
 import { v4 } from "uuid";
 
 export class MockContainerRuntimeSignaler implements IContainerRuntimeSignaler {

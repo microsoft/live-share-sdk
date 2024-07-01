@@ -1,5 +1,5 @@
 import { assert } from "@fluidframework/core-utils/internal";
-import { HostTimestampProvider } from "./HostTimestampProvider";
+import { HostTimestampProvider } from "../HostTimestampProvider";
 import {
     IClientInfo,
     ILiveShareHost,
@@ -7,17 +7,15 @@ import {
     ITimestampProvider,
     UserMeetingRole,
     IContainerRuntimeSignaler,
-} from "./interfaces";
-import {
-    BackwardsCompatibilityHostDecorator,
-    LiveShareHostDecorator,
-    RoleVerifier,
-    isTimestampProvider,
-    LiveObjectManager,
-    FormatFixHostDecorator,
-} from "./internals";
+} from "../interfaces";
 import { IAzureAudience } from "@fluidframework/azure-client";
-import { ILiveShareClientOptions } from "./LiveShareClient";
+import { ILiveShareClientOptions } from "../LiveShareClient";
+import { isTimestampProvider } from "./type-guards";
+import { LiveObjectManager } from "./LiveObjectManager";
+import { RoleVerifier } from "./RoleVerifier";
+import { BackwardsCompatibilityHostDecorator } from "./BackwardsCompatibilityHostDecorator";
+import { LiveShareHostDecorator } from "./LiveShareHostDecorator";
+import { FormatFixHostDecorator } from "./FormatFixHostDecorator";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp

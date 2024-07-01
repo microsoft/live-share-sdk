@@ -18,12 +18,11 @@ import {
     ICurrentPlaybackPosition,
     ITransportState,
 } from "../internals";
+import { TestLiveShareHost, TimeInterval } from "@microsoft/live-share";
 import {
     IRuntimeSignaler,
-    TestLiveShareHost,
-    TimeInterval,
-} from "@microsoft/live-share";
-import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveShareRuntime";
+    MockLiveShareRuntime,
+} from "@microsoft/live-share/internal";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 
 function createTransportUpdate(

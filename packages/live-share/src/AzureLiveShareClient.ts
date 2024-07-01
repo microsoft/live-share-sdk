@@ -9,10 +9,10 @@ import { AzureContainerServices } from "@fluidframework/azure-client/internal";
 import { BaseLiveShareClient } from "./internals/BaseLiveShareClient";
 import { ILiveShareHost } from "./interfaces";
 import { AzureLiveShareHost } from "./AzureLiveShareHost";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils";
 import { LiveShareClient } from "./LiveShareClient";
-import { LiveDataObject } from "./LiveDataObject";
+import { LiveDataObject } from "./internals/LiveDataObject";
 import { FluidCompatibilityMode } from "./internals/consts";
 
 /**

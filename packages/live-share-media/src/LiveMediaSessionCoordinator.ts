@@ -4,19 +4,21 @@
  */
 
 import {
-    LiveEventScope,
     LiveTelemetryLogger,
-    LiveEventTarget,
-    IRuntimeSignaler,
     TimeInterval,
     UserMeetingRole,
-    LiveShareRuntime,
     LiveDataObjectInitializeState,
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
-    LiveObjectSynchronizer,
     ILiveEvent,
 } from "@microsoft/live-share";
+import {
+    IRuntimeSignaler,
+    LiveEventScope,
+    LiveEventTarget,
+    LiveObjectSynchronizer,
+    LiveShareRuntime,
+} from "@microsoft/live-share/internal";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
@@ -36,9 +38,9 @@ import {
     IRateChangeCommandEvent,
 } from "./internals";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
-import { isErrorLike } from "@microsoft/live-share/bin/internals";
+import { isErrorLike } from "@microsoft/live-share/bin/internals/type-guards";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 
 /**
  * Most recent state of the media session.

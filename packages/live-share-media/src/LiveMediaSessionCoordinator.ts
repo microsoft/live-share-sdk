@@ -4,19 +4,21 @@
  */
 
 import {
-    LiveEventScope,
     LiveTelemetryLogger,
-    LiveEventTarget,
-    IRuntimeSignaler,
     TimeInterval,
     UserMeetingRole,
-    LiveShareRuntime,
     LiveDataObjectInitializeState,
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
-    LiveObjectSynchronizer,
     ILiveEvent,
 } from "@microsoft/live-share";
+import {
+    IRuntimeSignaler,
+    LiveEventScope,
+    LiveEventTarget,
+    LiveObjectSynchronizer,
+    LiveShareRuntime,
+} from "@microsoft/live-share/internal";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,

@@ -14,10 +14,8 @@ import {
     ISharedStateRegistryResponse,
     useSharedStateRegistry,
 } from "../shared-hooks";
-import {
-    BaseLiveShareClient,
-    AzureLiveShareClient,
-} from "@microsoft/live-share";
+import { AzureLiveShareClient } from "@microsoft/live-share";
+import { BaseLiveShareClient } from "@microsoft/live-share/internal";
 
 /**
  * React Context provider values for `<AzureProvider>` and `<LiveShareProvider>`.

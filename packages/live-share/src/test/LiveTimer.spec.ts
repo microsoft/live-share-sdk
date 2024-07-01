@@ -12,7 +12,7 @@ import {
 import { LiveTimer } from "../LiveTimer";
 import { Deferred } from "../internals/Deferred";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "../internals/test/MockLiveShareRuntime";
+import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
 import { waitForDelay } from "../internals/utils";
 

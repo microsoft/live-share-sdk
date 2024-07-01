@@ -23,7 +23,7 @@ import {
 } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "../internals/test/MockLiveShareRuntime";
+import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
 import { describeCompat } from "@live-share-private/test-utils";
 
 class TestLivePresence<

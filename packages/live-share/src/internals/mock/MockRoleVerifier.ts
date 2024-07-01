@@ -14,7 +14,7 @@ export class MockRoleVerifier implements IRoleVerifier {
 
     public blocked = false;
     public called = false;
-    public clientId: string;
+    public clientId: string = "";
 
     public verifyRolesAllowed(
         clientId: string,

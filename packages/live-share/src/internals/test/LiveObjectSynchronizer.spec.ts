@@ -5,10 +5,10 @@
 
 import { strict as assert } from "assert";
 import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
-import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
+import { MockRuntimeSignaler } from "../mock/MockRuntimeSignaler";
 import { Deferred } from "../Deferred";
 import { waitForDelay } from "../utils";
-import { MockLiveShareRuntime } from "./MockLiveShareRuntime";
+import { MockLiveShareRuntime } from "../mock/MockLiveShareRuntime";
 
 interface ITestState {
     client: "local" | "remote";

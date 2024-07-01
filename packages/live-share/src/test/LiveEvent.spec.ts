@@ -10,8 +10,8 @@ import {
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils/internal";
 import { LiveEvent } from "../LiveEvent";
-import { MockTimestampProvider } from "./MockTimestampProvider";
-import { MockRoleVerifier } from "../internals/test/MockRoleVerifier";
+import { MockTimestampProvider } from "../internals/mock/MockTimestampProvider";
+import { MockRoleVerifier } from "../internals/mock/MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";

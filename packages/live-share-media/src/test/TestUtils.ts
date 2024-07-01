@@ -4,13 +4,13 @@
  */
 
 import { IMediaPlayer } from "../IMediaPlayer";
-import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { LiveMediaSession } from "../LiveMediaSession";
+import { ITimestampProvider } from "@microsoft/live-share";
 import {
+    Deferred,
     IRuntimeSignaler,
-    ITimestampProvider,
     LiveShareRuntime,
-} from "@microsoft/live-share";
+} from "@microsoft/live-share/internal";
 
 export class TestMediaPlayer implements IMediaPlayer {
     private done = new Deferred<string>();

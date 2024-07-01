@@ -20,16 +20,3 @@ export * from "./LocalTimestampProvider";
 export * from "./TestLiveShareHost";
 export * from "./TimeInterval";
 export * from "./TimestampProvider";
-
-// Exposed for other live share libs, or advanced use cases.
-export * from "./internals/BaseLiveShareClient";
-export * from "./internals/DynamicObjectRegistry";
-export * from "./internals/DynamicObjectManager";
-export * from "./internals/LiveDataObject";
-export * from "./internals/LiveEventScope";
-export * from "./internals/LiveEventSource";
-export * from "./internals/LiveEventTarget";
-export * from "./internals/LiveObjectSynchronizer";
-export * from "./internals/LiveShareRuntime";
-export * from "./internals/schema-injection-utils";
-export * from "./internals/smuggle";

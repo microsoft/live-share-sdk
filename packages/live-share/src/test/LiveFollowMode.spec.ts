@@ -16,7 +16,7 @@ import {
     LiveFollowMode,
 } from "../LiveFollowMode";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "../internals/test/MockLiveShareRuntime";
+import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
 import { LivePresenceUser } from "../LivePresenceUser";
 import { describeCompat } from "@live-share-private/test-utils";
 import { waitForDelay } from "../internals/utils";

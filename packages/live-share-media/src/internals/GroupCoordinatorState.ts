@@ -6,11 +6,13 @@
 import {
     ILiveEvent,
     TimeInterval,
-    IRuntimeSignaler,
     LiveTelemetryLogger,
-    LiveShareRuntime,
     IEvent,
 } from "@microsoft/live-share";
+import {
+    IRuntimeSignaler,
+    LiveShareRuntime,
+} from "@microsoft/live-share/internal";
 import {
     ExtendedMediaMetadata,
     CoordinationWaitPoint,

@@ -3,11 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { TimeInterval } from "@microsoft/live-share";
 import {
     IRuntimeSignaler,
-    TimeInterval,
     LiveShareRuntime,
-} from "@microsoft/live-share";
+} from "@microsoft/live-share/internal";
 import { GroupTransportState } from "./GroupTransportState";
 import { GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
 import {

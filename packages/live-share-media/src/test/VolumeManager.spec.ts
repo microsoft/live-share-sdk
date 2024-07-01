@@ -1,8 +1,7 @@
 import { strict as assert } from "assert";
 import { IMediaPlayer } from "../IMediaPlayer";
 import { LimitLevelType, VolumeManager } from "../VolumeManager";
-import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
-import { waitForDelay } from "@microsoft/live-share/src/internals/utils";
+import { Deferred, waitForDelay } from "@microsoft/live-share/internal";
 
 // few millis more than max timeout callback in scheduleAnimationFrame
 const milliTolerance = 25;

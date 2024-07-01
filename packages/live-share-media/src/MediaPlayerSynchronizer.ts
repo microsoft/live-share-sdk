@@ -2,11 +2,8 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the Microsoft Live Share SDK License.
  */
-import {
-    LiveTelemetryLogger,
-    ILiveEvent,
-    IRuntimeSignaler,
-} from "@microsoft/live-share";
+import { LiveTelemetryLogger, ILiveEvent } from "@microsoft/live-share";
+import { IRuntimeSignaler } from "@microsoft/live-share/internal";
 import {
     ExtendedMediaSessionAction,
     ExtendedMediaSessionPlaybackState,

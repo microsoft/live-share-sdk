@@ -1,8 +1,8 @@
 import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
 import { TreeViewConfiguration } from "fluid-framework";
-import { FC, memo } from "react";
+import { FC, memo, useCallback, ChangeEvent } from "react";
 import { Note, NoteHeader, Notes } from "./ExampleSharedTree-schema";
-import { Textarea } from "@fluentui/react-components";
+import { Textarea, TextareaOnChangeData } from "@fluentui/react-components";
 
 // Export the tree config appropriate for this schema.
 // This is passed into the SharedTree when it is initialized.
@@ -61,6 +61,12 @@ const NoteSticky: FC<INoteStickyProps> = ({ noteNode }) => {
     // "treeChanged" behavior currently re-proxies all children nodes
     // shouldn't be used in production in current state
     const { node: note } = useTreeNode(noteNode, "treeChanged");
+    const onTextChange = useCallback(
+        (_: ChangeEvent, data: TextareaOnChangeData) => {
+            note.text = data.value;
+        },
+        [note]
+    );
     return (
         <div className="sticky-note">
             <MemoNoteHeaderView noteHeaderNode={note.header} />
@@ -69,9 +75,7 @@ const NoteSticky: FC<INoteStickyProps> = ({ noteNode }) => {
                 <Textarea
                     className="sticky-textarea"
                     value={note.text}
-                    onChange={(_, data) => {
-                        note.text = data.value;
-                    }}
+                    onChange={onTextChange}
                 />
             </div>
             <button

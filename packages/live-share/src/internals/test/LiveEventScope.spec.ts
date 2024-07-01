@@ -7,7 +7,7 @@ import { strict as assert } from "assert";
 import { LiveEventScope } from "../LiveEventScope";
 import { UserMeetingRole } from "../../interfaces";
 import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
-import { MockRoleVerifier } from "../../test/MockRoleVerifier";
+import { MockRoleVerifier } from "./MockRoleVerifier";
 import { MockTimestampProvider } from "../../test/MockTimestampProvider";
 import { LocalTimestampProvider } from "../../LocalTimestampProvider";
 import { TestLiveShareHost } from "../../TestLiveShareHost";

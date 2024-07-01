@@ -11,7 +11,7 @@ import {
 } from "@fluidframework/test-utils/internal";
 import { LiveEvent } from "../LiveEvent";
 import { MockTimestampProvider } from "./MockTimestampProvider";
-import { MockRoleVerifier } from "./MockRoleVerifier";
+import { MockRoleVerifier } from "../internals/test/MockRoleVerifier";
 import { LocalTimestampProvider } from "../LocalTimestampProvider";
 import { UserMeetingRole, ILiveEvent } from "../interfaces";
 import { TestLiveShareHost } from "../TestLiveShareHost";

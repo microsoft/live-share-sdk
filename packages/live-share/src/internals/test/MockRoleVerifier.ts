@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IRoleVerifier, UserMeetingRole } from "../interfaces";
+import { IRoleVerifier, UserMeetingRole } from "../../interfaces";
 
 export class MockRoleVerifier implements IRoleVerifier {
     private _sendersRoles: UserMeetingRole[];

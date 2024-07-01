@@ -20,7 +20,7 @@ import { VolumeManager } from "./VolumeManager";
 import { LiveMediaSession } from "./LiveMediaSession";
 import { IMediaPlayer } from "./IMediaPlayer";
 import { ITriggerActionEvent, TelemetryEvents } from "./internals";
-import { waitUntilConnected } from "@microsoft/live-share/bin/internals";
+import { waitUntilConnected } from "@microsoft/live-share/bin/internals/utils";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IEvent } from "@fluidframework/core-interfaces";
 

@@ -23,7 +23,7 @@ import {
     TestLiveShareHost,
     TimeInterval,
 } from "@microsoft/live-share";
-import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveShareRuntime";
+import { MockLiveShareRuntime } from "@microsoft/live-share/src/internals/test/MockLiveShareRuntime";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 
 function createTransportUpdate(

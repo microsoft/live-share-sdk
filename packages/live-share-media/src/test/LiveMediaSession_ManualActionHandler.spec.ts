@@ -20,8 +20,8 @@ import {
 } from "@microsoft/live-share";
 import { TestLiveShareHost } from "@microsoft/live-share";
 import { getLiveDataObjectKind } from "@microsoft/live-share";
-import { waitForDelay } from "@microsoft/live-share/src/internals";
-import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveShareRuntime";
+import { waitForDelay } from "@microsoft/live-share/src/internals/utils";
+import { MockLiveShareRuntime } from "@microsoft/live-share/src/internals/test/MockLiveShareRuntime";
 import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionDetails,

@@ -21,9 +21,10 @@ export const ExampleSharedTree: FC = () => {
         appTreeConfiguration,
         initialData
     );
+
+    const { node: testSelfReferenceNode } = useTreeNode(root);
     // This helps us test passing our proxy node into useTreeNode
     // Shouldn't be used in production
-    const { node: testSelfReferenceNode } = useTreeNode(root);
     const { node: notes } = useTreeNode(testSelfReferenceNode);
 
     if (!root) {

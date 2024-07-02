@@ -13,8 +13,11 @@ import {
     ActionLiveDataObjectUndefinedError,
 } from "../internal/errors";
 import { useFluidObjectsContext } from "../providers/AzureProvider";
+import { useSharedTree } from "./useSharedTree";
 
 /**
+ * @deprecated use {@link useSharedTree} instead.
+ *
  * React hook for using a Fluid `SharedMap`.
  *
  * @remarks

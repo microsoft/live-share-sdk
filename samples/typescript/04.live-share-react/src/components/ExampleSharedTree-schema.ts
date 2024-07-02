@@ -1,12 +1,4 @@
-import {
-    NodeKind,
-    SchemaFactory,
-    Tree,
-    TreeArrayNode,
-    TreeNodeSchema,
-    TreeViewConfiguration,
-    WithType,
-} from "fluid-framework";
+import { SchemaFactory, Tree, TreeViewConfiguration } from "fluid-framework";
 import { v4 as uuid } from "uuid";
 
 const sf = new SchemaFactory("fc1db2e8-0000-11ee-be57-0242ac120002");

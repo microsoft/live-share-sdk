@@ -28,6 +28,15 @@ import {
     TreeView,
 } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
+import { useSharedMap, useTreeNode, useSharedTree } from "../shared-hooks";
+import {
+    useLiveEvent,
+    useLivePresence,
+    useMediaSynchronizer,
+    useLiveTimer,
+    useLiveCanvas,
+    useLiveFollowMode,
+} from "../live-hooks";
 import { IReceiveLiveEvent } from "../interfaces";
 import {
     OnPauseTimerAction,
@@ -56,7 +65,9 @@ export interface ILiveShareContainerResults extends IAzureContainerResults {
 }
 
 /**
- * Return type of `useSharedMap` hook.
+ * @deprecated use {@link useSharedTree} instead.
+ *
+ * Return type of {@link useSharedMap} hook.
  */
 export interface IUseSharedMapResults<TData> {
     /**
@@ -78,7 +89,7 @@ export interface IUseSharedMapResults<TData> {
 }
 
 /**
- * Return type of `useSharedMap` hook.
+ * Return type of {@link useSharedTree} hook.
  */
 export interface IUseSharedTreeResults<TSchema extends ImplicitFieldSchema> {
     /**
@@ -96,17 +107,17 @@ export interface IUseSharedTreeResults<TSchema extends ImplicitFieldSchema> {
 }
 
 /**
- * Return type of `useSharedMap` hook.
+ * Return type of {@link useTreeNode} hook.
  */
 export interface IUseTreeNodeResults<TNode = any> {
     /**
-     * The Fluid `TreeView`.
+     * The Fluid `TreeNode`
      */
     node: TNode;
 }
 
 /**
- * Return type of `useLiveEvent` hook.
+ * Return type of {@link useLiveEvent} hook.
  */
 export interface IUseLiveEventResults<TEvent = any> {
     /**
@@ -130,7 +141,7 @@ export interface IUseLiveEventResults<TEvent = any> {
 }
 
 /**
- * Return type of `useLiveTimer` hook.
+ * Return type of {@link useLiveTimer} hook.
  */
 export interface IUseLiveTimerResults {
     /**
@@ -164,7 +175,7 @@ export interface IUseLiveTimerResults {
 }
 
 /**
- * Return type of `useLivePresence` hook.
+ * Return type of {@link useLivePresence} hook.
  */
 export interface IUseLivePresenceResults<TData extends object = object> {
     /**
@@ -193,7 +204,7 @@ export interface IUseLivePresenceResults<TData extends object = object> {
 }
 
 /**
- * Return type of `useMediaSynchronizer` hook.
+ * Return type of {@link useMediaSynchronizer} hook.
  */
 export interface IUseMediaSynchronizerResults {
     /**
@@ -243,7 +254,7 @@ export interface IUseMediaSynchronizerResults {
 }
 
 /**
- * Return type of `useLiveCanvas` hook.
+ * Return type of {@link useLiveCanvas} hook.
  */
 export interface IUseLiveCanvasResults {
     /**
@@ -257,7 +268,7 @@ export interface IUseLiveCanvasResults {
 }
 
 /**
- * Return type of `useLiveFollowMode` hook.
+ * Return type of {@link useLiveFollowMode} hook.
  */
 export interface IUseLiveFollowModeResults<TData = any> {
     /**

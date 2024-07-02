@@ -6,11 +6,76 @@ import {
     ITree,
     InsertableTreeFieldFromImplicitField,
     TreeFieldFromImplicitField,
+    SchemaFactory,
 } from "fluid-framework";
 import { IUseSharedTreeResults } from "../types";
-import { useDynamicDDS } from "../shared-hooks";
+import { useDynamicDDS, useTreeNode } from "../shared-hooks";
 import React from "react";
 
+const sf = new SchemaFactory("fc1db2e8-0000-11ee-be57-0242ac120002");
+export class YourObject extends sf.object("NoteComment", {
+    text: sf.string,
+    number: sf.number,
+    list: sf.array(sf.string),
+}) {
+    insert() {
+        this.list.insertAtEnd("some text");
+    }
+}
+
+/**
+ * Creates a new Fluid `SharedTree` instance if one doesn't already exist.
+ * @remarks
+ * Use the `root` variable from the {@link IUseSharedTreeResults} response from this hook with {@link useTreeNode}.
+ * This makes `root` stateful with React whenever a leaf of `root` changes.
+ *
+ * @param uniqueKey the unique key for the `SharedTree`. If one does not yet exist, a new `SharedTree` will be created.
+ * Otherwise it will use the existing one.
+ * @param treeViewConfiguration the tree view configuration that contains the `SharedTree` field schema.
+ * @param initialData the initial data to load into the `SharedTree` when it is first created.
+ * @returns the {@link IUseSharedTreeResults} with the `root` node.
+ *
+ * @example
+ * ```tsx
+ * import { SchemaFactory, TreeViewConfiguration } from "fluid-framework";
+ * import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
+ * // Declare a schema factory with your unique uuid
+ * const sf = new SchemaFactory("fc1db2e8-0000-11ee-be57-0242ac120002");
+ * class YourObject extends sf.object("YourObject", {
+ *  listChangedCount: sf.number,
+ *  list: sf.array(sf.string),
+ * }) {
+ *  // You can add your own utility functions
+ *  insert() {
+ *      this.list.insertAtEnd("some text");
+ *      this.listChangedCount += 1;
+ *  }
+ * }
+ * const config = new TreeViewConfiguration({ schema: YourObject });
+ * const initialData = new YourObject({
+ *  number: 0,
+ *  list: [],
+ * });
+ *
+ * // Must be child component of <LiveShareProvider> or <AzureProvider>
+ * export const YourComponent = () => {
+ *  // Get the root node of the `SharedTree` mapped to "some-unique-key"
+ *  const { root } = useSharedTree("some-unique-key", config, initialData);
+ *  // Makes root stateful / automatically update when the node changes (e.g., node.count)
+ *  const { node } = useTreeNode(root);
+ *  // node.list is its own TreeNode, so we make it stateful as well
+ *  const { node: list } = useTreeNode(node?.list);
+ *  if (!node || !list) return (<>"Loading"</>);
+ *  return (
+ *      <div>
+ *          <div>Changed: {node.listChangedCount}</div>
+ *          <button onClick={() => node.insert()}>Insert</button>
+ *          { list.map((item) => <div key={item}>{item}</div>) }
+ *      </div>
+ *  );
+ * }
+ * ```
+ */
 export function useSharedTree<
     TSchema extends ImplicitFieldSchema = ImplicitFieldSchema
 >(

@@ -3,12 +3,14 @@ import {
     useLiveShareContext,
     useLiveState,
 } from "@microsoft/live-share-react";
-import { UserMeetingRole, LiveShareClient } from "@microsoft/live-share";
+import { UserMeetingRole } from "@microsoft/live-share";
 import { FC, ReactNode, useState } from "react";
+import { ExampleSharedTree } from "./ExampleSharedTree";
 
 enum ExampleAppStatus {
     WAITING = "WAITING",
     START = "START",
+    SHAREDTREE = "SHAREDTREE",
 }
 
 interface ILiveStateData {
@@ -49,10 +51,40 @@ export const ExampleLiveState: FC<IExampleStateProps> = (props) => {
                     >
                         {"Start"}
                     </button>
+                    <button
+                        onClick={() => {
+                            setState({
+                                status: ExampleAppStatus.SHAREDTREE,
+                                timeStarted: timestampProvider?.getTimestamp(),
+                            });
+                        }}
+                    >
+                        {"Try SharedTree"}
+                    </button>
                     <BackgroundUpdates />
                 </div>
                 <h1>{"Welcome to Fluid React!"}</h1>
                 {props.waitingContent}
+            </div>
+        );
+    }
+    if (state.status === ExampleAppStatus.SHAREDTREE) {
+        return (
+            <div style={{ padding: "12px 12px" }}>
+                <div className="flex row">
+                    <h2>{`Time started: ${state.timeStarted}`}</h2>
+                    <button
+                        onClick={() => {
+                            setState({
+                                status: ExampleAppStatus.WAITING,
+                            });
+                        }}
+                    >
+                        {"End"}
+                    </button>
+                    <BackgroundUpdates />
+                </div>
+                <ExampleSharedTree />
             </div>
         );
     }

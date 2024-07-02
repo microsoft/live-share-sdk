@@ -24,9 +24,19 @@ import {
     IFluidContainer,
     ITree,
     ImplicitFieldSchema,
+    TreeFieldFromImplicitField,
     TreeView,
 } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
+import { useSharedMap, useTreeNode, useSharedTree } from "../shared-hooks";
+import {
+    useLiveEvent,
+    useLivePresence,
+    useMediaSynchronizer,
+    useLiveTimer,
+    useLiveCanvas,
+    useLiveFollowMode,
+} from "../live-hooks";
 import { IReceiveLiveEvent } from "../interfaces";
 import {
     OnPauseTimerAction,
@@ -55,13 +65,19 @@ export interface ILiveShareContainerResults extends IAzureContainerResults {
 }
 
 /**
- * Return type of `useSharedMap` hook.
+ * @deprecated use {@link useSharedTree} instead.
+ *
+ * Return type of {@link useSharedMap} hook.
  */
 export interface IUseSharedMapResults<TData> {
     /**
-     * Stateful map of most recent values from `SharedMap`.
+     * The Fluid `SharedMap` object.
      */
-    map: ReadonlyMap<string, TData>;
+    sharedMap: (Map<string, TData> & SharedMap) | undefined;
+    /**
+     * Callback method to get entries in the `SharedMap`.
+     */
+    getEntry: (key: string) => TData | undefined;
     /**
      * Callback method to set/replace new entries in the `SharedMap`.
      */
@@ -70,14 +86,10 @@ export interface IUseSharedMapResults<TData> {
      * Callback method to delete an existing entry in the `SharedMap`.
      */
     deleteEntry: (key: string) => void;
-    /**
-     * The Fluid `SharedMap` object, should you want to use it directly.
-     */
-    sharedMap: SharedMap | undefined;
 }
 
 /**
- * Return type of `useSharedMap` hook.
+ * Return type of {@link useSharedTree} hook.
  */
 export interface IUseSharedTreeResults<TSchema extends ImplicitFieldSchema> {
     /**
@@ -88,10 +100,24 @@ export interface IUseSharedTreeResults<TSchema extends ImplicitFieldSchema> {
      * The Fluid `SharedTree` object, should you want to use it directly.
      */
     sharedTree: ITree | undefined;
+    /**
+     * Root node
+     */
+    root: TreeFieldFromImplicitField<TSchema> | undefined;
 }
 
 /**
- * Return type of `useLiveEvent` hook.
+ * Return type of {@link useTreeNode} hook.
+ */
+export interface IUseTreeNodeResults<TNode = any> {
+    /**
+     * The Fluid `TreeNode`
+     */
+    node: TNode;
+}
+
+/**
+ * Return type of {@link useLiveEvent} hook.
  */
 export interface IUseLiveEventResults<TEvent = any> {
     /**
@@ -115,7 +141,7 @@ export interface IUseLiveEventResults<TEvent = any> {
 }
 
 /**
- * Return type of `useLiveTimer` hook.
+ * Return type of {@link useLiveTimer} hook.
  */
 export interface IUseLiveTimerResults {
     /**
@@ -149,7 +175,7 @@ export interface IUseLiveTimerResults {
 }
 
 /**
- * Return type of `useLivePresence` hook.
+ * Return type of {@link useLivePresence} hook.
  */
 export interface IUseLivePresenceResults<TData extends object = object> {
     /**
@@ -178,7 +204,7 @@ export interface IUseLivePresenceResults<TData extends object = object> {
 }
 
 /**
- * Return type of `useMediaSynchronizer` hook.
+ * Return type of {@link useMediaSynchronizer} hook.
  */
 export interface IUseMediaSynchronizerResults {
     /**
@@ -228,7 +254,7 @@ export interface IUseMediaSynchronizerResults {
 }
 
 /**
- * Return type of `useLiveCanvas` hook.
+ * Return type of {@link useLiveCanvas} hook.
  */
 export interface IUseLiveCanvasResults {
     /**
@@ -242,7 +268,7 @@ export interface IUseLiveCanvasResults {
 }
 
 /**
- * Return type of `useLiveFollowMode` hook.
+ * Return type of {@link useLiveFollowMode} hook.
  */
 export interface IUseLiveFollowModeResults<TData = any> {
     /**

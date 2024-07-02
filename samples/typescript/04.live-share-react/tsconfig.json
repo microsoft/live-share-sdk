@@ -3,7 +3,8 @@
   "include": ["./src"],
   "compilerOptions": {
     "jsx": "react-jsx",
-    "outDir": "/tmp"
+    "outDir": "/tmp",
+    "module": "esnext"
   },
   "files": ["src/main.tsx"]
 }

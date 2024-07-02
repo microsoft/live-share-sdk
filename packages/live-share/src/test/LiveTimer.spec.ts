@@ -13,11 +13,16 @@ import { LiveTimer } from "../LiveTimer";
 import { Deferred } from "../internals/Deferred";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
-import { describeCompat } from "@live-share-private/test-utils";
+import {
+    describeCompat,
+    ITestObjectProviderOptions,
+} from "@live-share-private/test-utils";
 import { waitForDelay } from "../internals/utils";
 
 async function getObjects(
-    getTestObjectProvider,
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider,
     updateInterval: number = 10000
 ) {
     // Temporarily change update interval

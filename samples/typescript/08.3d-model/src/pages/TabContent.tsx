@@ -115,11 +115,8 @@ const LiveObjectViewer: FC = () => {
     /**
      * Synchronized SharedMap for the color values that correspond to a material in the loaded .glb file
      */
-    const {
-        map: colorsMap,
-        setEntry: setMaterialColor,
-        sharedMap: sharedColorsMap,
-    } = useSharedMap("COLORS");
+    const { setEntry: setMaterialColor, sharedMap: colorsMap } =
+        useSharedMap("COLORS");
     /**
      * Selected material for the color picker UI
      */
@@ -228,7 +225,7 @@ const LiveObjectViewer: FC = () => {
      * Callback to update the material colors for the latest remote values
      */
     const applyRemoteColors = useCallback(() => {
-        colorsMap.forEach((value, key) => {
+        colorsMap?.forEach((value, key) => {
             if (!sceneRef.current) return;
             const material = sceneRef.current.getMaterialByName(key);
             if (material && material instanceof PBRMaterial) {
@@ -480,7 +477,7 @@ const LiveObjectViewer: FC = () => {
                     }
                 />
             )}
-            {!!sharedColorsMap && !!selectedMaterialName && (
+            {!!colorsMap && !!selectedMaterialName && (
                 <HexColorPicker
                     color={
                         selectedMaterialName

@@ -7,9 +7,13 @@ import { FC } from "react";
 export const EXAMPLE_SHARED_MAP_KEY = "CUSTOM-CARDS-MAP";
 
 export const ExampleSharedMap: FC = () => {
-    const { map, setEntry, deleteEntry } = useSharedMap<ISharedCardValue>(
+    const { sharedMap } = useSharedMap<ISharedCardValue>(
         EXAMPLE_SHARED_MAP_KEY
     );
+
+    if (!sharedMap) {
+        return <>Loading...</>;
+    }
 
     return (
         <div>
@@ -18,7 +22,7 @@ export const ExampleSharedMap: FC = () => {
                 <button
                     onClick={() => {
                         const id = uuid();
-                        setEntry(id, {
+                        sharedMap.set(id, {
                             id,
                             title: "Custom Card",
                         });
@@ -28,11 +32,11 @@ export const ExampleSharedMap: FC = () => {
                 </button>
             </div>
             <div className="flex wrap row hAlign">
-                {[...map.values()].map((cardValue) => (
+                {[...sharedMap.values()].map((cardValue) => (
                     <SharedCounterCard
                         key={cardValue.id}
                         card={cardValue}
-                        onDelete={deleteEntry}
+                        onDelete={sharedMap.delete}
                     />
                 ))}
             </div>

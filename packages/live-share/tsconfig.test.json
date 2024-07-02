@@ -1,0 +1,11 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"outDir": "./binTest",
+		"types": ["mocha", "node"],
+    "module": "CommonJS",
+    "moduleResolution": null,
+	},
+	"include": ["src/**/*"],
+	"exclude": []
+}

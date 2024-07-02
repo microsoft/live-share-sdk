@@ -1,27 +1,27 @@
 import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
-import { TreeViewConfiguration } from "fluid-framework";
 import { FC, memo, useCallback, ChangeEvent } from "react";
-import { Note, NoteHeader, Notes } from "./ExampleSharedTree-schema";
+import {
+    Note,
+    NoteHeader,
+    Notes,
+    appTreeConfiguration,
+} from "./ExampleSharedTree-schema";
 import { Textarea, TextareaOnChangeData } from "@fluentui/react-components";
-
-// Export the tree config appropriate for this schema.
-// This is passed into the SharedTree when it is initialized.
-export const appTreeConfiguration = new TreeViewConfiguration(
-    // Schema for the root
-    { schema: Notes }
-);
 
 const initialData = new Notes([]);
 
 export const EXAMPLE_SHARED_TREE_KEY = "MY-TREE";
 
 export const ExampleSharedTree: FC = () => {
+    // Live Share hook that creates a new SharedTree instance dynamically.
+    // `root` is of type `Notes`, which is just a list of `Note` nodes.
     const { root } = useSharedTree(
         EXAMPLE_SHARED_TREE_KEY,
         appTreeConfiguration,
         initialData
     );
 
+    // Live Share hook that makes the `root` value stateful.
     const { node: testSelfReferenceNode } = useTreeNode(root);
     // This helps us test passing our proxy node into useTreeNode
     // Shouldn't be used in production
@@ -59,6 +59,9 @@ interface INoteStickyProps {
 }
 
 const NoteSticky: FC<INoteStickyProps> = ({ noteNode }) => {
+    // Takes the `Note` node and makes it stateful, since it isn't by default for perf reasons
+    // Here we use the "treeChanged" prop, which will ensure all child nodes are stateful.
+    // Since this note is a pretty small component, it is pretty safe to do this here.
     const { node: note } = useTreeNode(noteNode, "treeChanged");
     const onTextChange = useCallback(
         (_: ChangeEvent, data: TextareaOnChangeData) => {
@@ -94,6 +97,7 @@ interface INoteHeaderProps {
 }
 
 const NoteHeaderView: FC<INoteHeaderProps> = ({ noteHeaderNode }) => {
+    // Since we used "treeChanged" in `NoteSticky`, we don't need to use `useTreeNode` here.
     return (
         <div className="flex row vAlign">
             {!noteHeaderNode.color && (

@@ -4,6 +4,7 @@ import {
     Tree,
     TreeArrayNode,
     TreeNodeSchema,
+    TreeViewConfiguration,
     WithType,
 } from "fluid-framework";
 import { v4 as uuid } from "uuid";
@@ -168,3 +169,10 @@ export class Notes extends sf.array("Notes", [() => Note]) {
         this.insertAtEnd(newNote);
     }
 }
+
+// Export the tree config appropriate for this schema.
+// This is passed into the SharedTree when it is initialized.
+export const appTreeConfiguration = new TreeViewConfiguration(
+    // Schema for the root
+    { schema: Notes }
+);

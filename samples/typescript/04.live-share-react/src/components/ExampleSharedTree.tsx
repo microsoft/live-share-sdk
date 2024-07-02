@@ -22,10 +22,8 @@ export const ExampleSharedTree: FC = () => {
     );
 
     // Live Share hook that makes the `root` value stateful.
-    const { node: testSelfReferenceNode } = useTreeNode(root);
-    // This helps us test passing our proxy node into useTreeNode
-    // Shouldn't be used in production
-    const { node: notes } = useTreeNode(testSelfReferenceNode);
+    // By default, all child nodes of `notes` are not stateful and must be passed into `useTreeNode`.
+    const { node: notes } = useTreeNode(root);
 
     if (!root) {
         return <>Loading root...</>;
@@ -59,8 +57,8 @@ interface INoteStickyProps {
 }
 
 const NoteSticky: FC<INoteStickyProps> = ({ noteNode }) => {
-    // Takes the `Note` node and makes it stateful, since it isn't by default for perf reasons
-    // Here we use the "treeChanged" prop, which will ensure all child nodes are stateful.
+    // Makes the `noteNode` value stateful to React.
+    // Here we use the "treeChanged" prop, which will ensure all child nodes are stateful also.
     // Since this note is a pretty small component, it is pretty safe to do this here.
     const { node: note } = useTreeNode(noteNode, "treeChanged");
     const onTextChange = useCallback(

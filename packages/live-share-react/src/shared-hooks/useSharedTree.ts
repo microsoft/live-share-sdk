@@ -6,22 +6,10 @@ import {
     ITree,
     InsertableTreeFieldFromImplicitField,
     TreeFieldFromImplicitField,
-    SchemaFactory,
 } from "fluid-framework";
 import { IUseSharedTreeResults } from "../types";
 import { useDynamicDDS, useTreeNode } from "../shared-hooks";
 import React from "react";
-
-const sf = new SchemaFactory("fc1db2e8-0000-11ee-be57-0242ac120002");
-export class YourObject extends sf.object("NoteComment", {
-    text: sf.string,
-    number: sf.number,
-    list: sf.array(sf.string),
-}) {
-    insert() {
-        this.list.insertAtEnd("some text");
-    }
-}
 
 /**
  * Creates a new Fluid `SharedTree` instance if one doesn't already exist.

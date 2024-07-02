@@ -16,8 +16,9 @@ import {
     IInsecureUser,
     InsecureTokenProvider,
 } from "@fluidframework/test-runtime-utils/internal";
-import { LiveEvent, LiveState } from "@microsoft/live-share";
 import { v4 as uuid } from "uuid";
+import { LiveEvent } from "../LiveEvent";
+import { LiveState } from "../LiveState";
 
 function generateUser(): IInsecureUser {
     const randomUser = {

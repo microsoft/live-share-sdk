@@ -58,8 +58,6 @@ interface INoteStickyProps {
 }
 
 const NoteSticky: FC<INoteStickyProps> = ({ noteNode }) => {
-    // "treeChanged" behavior currently re-proxies all children nodes
-    // shouldn't be used in production in current state
     const { node: note } = useTreeNode(noteNode, "treeChanged");
     const onTextChange = useCallback(
         (_: ChangeEvent, data: TextareaOnChangeData) => {

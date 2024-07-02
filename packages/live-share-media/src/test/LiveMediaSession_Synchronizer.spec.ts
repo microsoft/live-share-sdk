@@ -8,12 +8,11 @@ import {
     TestMediaPlayer,
     TestMediaTimeStampProvider,
 } from "./TestUtils";
-import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { strict as assert } from "assert";
 import {
-    ITestObjectProvider,
-    fluidEntryPoint,
     getContainerEntryPointBackCompat,
+    fluidEntryPoint,
+    ITestObjectProvider,
 } from "@fluidframework/test-utils/internal";
 import {
     ITimestampProvider,
@@ -21,10 +20,13 @@ import {
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { TestLiveShareHost } from "@microsoft/live-share";
-import { getLiveDataObjectKind } from "@microsoft/live-share";
-import { waitForDelay } from "@microsoft/live-share/src/internals";
-import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveShareRuntime";
-import { isErrorLike } from "@microsoft/live-share/bin/internals";
+import { getLiveDataObjectKind } from "@microsoft/live-share/internal";
+import {
+    Deferred,
+    isErrorLike,
+    MockLiveShareRuntime,
+    waitForDelay,
+} from "@microsoft/live-share/internal";
 import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionAction,

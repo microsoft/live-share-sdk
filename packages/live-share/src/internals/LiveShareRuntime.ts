@@ -1,5 +1,5 @@
 import { assert } from "@fluidframework/core-utils/internal";
-import { HostTimestampProvider } from "./HostTimestampProvider";
+import { HostTimestampProvider } from "../HostTimestampProvider";
 import {
     IClientInfo,
     ILiveShareHost,
@@ -7,17 +7,13 @@ import {
     ITimestampProvider,
     UserMeetingRole,
     IContainerRuntimeSignaler,
-} from "./interfaces";
-import {
-    BackwardsCompatibilityHostDecorator,
-    LiveShareHostDecorator,
-    RoleVerifier,
-    isTimestampProvider,
-    LiveObjectManager,
-    FormatFixHostDecorator,
-} from "./internals";
+} from "../interfaces";
 import { IAzureAudience } from "@fluidframework/azure-client";
-import { ILiveShareClientOptions } from "./LiveShareClient";
+import { ILiveShareClientOptions } from "../LiveShareClient";
+import { isTimestampProvider } from "./type-guards";
+import { LiveObjectManager } from "./LiveObjectManager";
+import { RoleVerifier } from "./RoleVerifier";
+import { LiveShareHostDecorator } from "./LiveShareHostDecorator";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp
@@ -44,13 +40,8 @@ export class LiveShareRuntime {
         options?: ILiveShareClientOptions,
         decorate: boolean = true
     ) {
-        // BackwardsCompatibilityHostDecorator is used for backwards compatibility with older versions of the Teams client.
         // LiveShareHostDecorator is used as a thin caching layer for some host APIs.
-        this._host = decorate
-            ? new BackwardsCompatibilityHostDecorator(
-                  new LiveShareHostDecorator(new FormatFixHostDecorator(host))
-              )
-            : host;
+        this._host = decorate ? new LiveShareHostDecorator(host) : host;
         this._timestampProvider =
             options?.timestampProvider ?? new HostTimestampProvider(this._host);
         this._roleVerifier =
@@ -157,13 +148,8 @@ export class LiveShareRuntime {
      * @param decorate choose whether or not to automatically decorate host with `BackwardsCompatibilityHostDecorator` and `LiveShareHostDecorator`
      */
     public setHost(host: ILiveShareHost, decorate: boolean = true) {
-        // BackwardsCompatibilityHostDecorator is used for backwards compatibility with older versions of the Teams client.
         // LiveShareHostDecorator is used as a thin caching layer for some host APIs.
-        this._host = decorate
-            ? new BackwardsCompatibilityHostDecorator(
-                  new LiveShareHostDecorator(host)
-              )
-            : host;
+        this._host = decorate ? new LiveShareHostDecorator(host) : host;
         if (this._timestampProvider instanceof HostTimestampProvider) {
             this._timestampProvider.stop();
             this.setTimestampProvider(new HostTimestampProvider(this._host));

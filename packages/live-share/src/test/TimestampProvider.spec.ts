@@ -6,7 +6,7 @@
 import { strict as assert } from "assert";
 import { INtpTimeInfo } from "../interfaces";
 import { TimestampProvider } from "../TimestampProvider";
-import { Deferred } from "../internals";
+import { Deferred } from "../internals/Deferred";
 
 class TestTimestampProvider extends TimestampProvider {
     private _onGetNtpTime: () => Promise<void>;

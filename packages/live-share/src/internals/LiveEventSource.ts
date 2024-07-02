@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveEvent } from "./interfaces";
+import { ILiveEvent } from "../interfaces";
 import { LiveEventScope } from "./LiveEventScope";
 
 /**

@@ -5,23 +5,22 @@
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IRuntimeSignaler } from "../LiveEventScope";
-import { LiveShareRuntime } from "../LiveShareRuntime";
+import { IRuntimeSignaler } from "./LiveEventScope";
+import { LiveShareRuntime } from "./LiveShareRuntime";
 import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";
 import { LiveEvent } from "../LiveEvent";
+import { IAzureAudience } from "@fluidframework/azure-client";
+import { isILiveEvent } from "./type-guards";
+import { ObjectSynchronizerEvents } from "./consts";
+import { cloneValue, waitUntilConnected } from "./utils";
+import { ContainerSynchronizer } from "./ContainerSynchronizer";
 import {
-    ContainerSynchronizer,
     GetAndUpdateStateHandlers,
     IContainerLiveObjectStoreEvents,
     ILiveClientEventMap,
     ILiveObjectStore,
-    ObjectSynchronizerEvents,
     StateSyncEventContent,
-    cloneValue,
-    isILiveEvent,
-    waitUntilConnected,
-} from "./";
-import { IAzureAudience } from "@fluidframework/azure-client";
+} from "./internal-interfaces";
 
 /**
  * @hidden

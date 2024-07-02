@@ -5,11 +5,11 @@
 
 import { strict as assert } from "assert";
 import { LiveEventScope } from "../LiveEventScope";
-import { LiveEventTarget } from "../LiveEventTarget";
-import { MockRuntimeSignaler } from "./MockRuntimeSignaler";
+import { LiveEventSource } from "../LiveEventSource";
+import { MockRuntimeSignaler } from "../mock/MockRuntimeSignaler";
 import { LiveShareRuntime } from "../LiveShareRuntime";
-import { TestLiveShareHost } from "../TestLiveShareHost";
-import { LocalTimestampProvider } from "../LocalTimestampProvider";
+import { TestLiveShareHost } from "../../TestLiveShareHost";
+import { LocalTimestampProvider } from "../../LocalTimestampProvider";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
@@ -18,7 +18,7 @@ function createConnectedSignalers() {
     return { localRuntime, remoteRuntime };
 }
 
-describe("LiveEventTarget", () => {
+describe("LiveEventSource", () => {
     let localLiveRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
         timestampProvider: new LocalTimestampProvider(),
     });
@@ -36,30 +36,23 @@ describe("LiveEventTarget", () => {
         });
     });
 
-    it("Should receive events", (done) => {
+    it("Should send events", (done) => {
         let triggered = 0;
         const signalers = createConnectedSignalers();
         const localScope = new LiveEventScope(
             signalers.localRuntime,
             localLiveRuntime
         );
-        const localTarget = new LiveEventTarget(
-            localScope,
-            "test",
-            (evt, local) => triggered++
-        );
+        localScope.onEvent("test", (evt, local) => triggered++);
 
         const remoteScope = new LiveEventScope(
             signalers.remoteRuntime,
             remoteLiveRuntime
         );
-        const remoteTarget = new LiveEventTarget(
-            remoteScope,
-            "test",
-            (evt, local) => triggered++
-        );
+        remoteScope.onEvent("test", (evt, local) => triggered++);
 
-        localTarget.sendEvent({});
+        const localSource = new LiveEventSource(localScope, "test");
+        localSource.sendEvent({});
 
         // Verify is an async operation so wait some
         setTimeout(() => {

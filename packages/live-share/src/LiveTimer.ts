@@ -7,7 +7,7 @@ import {
     DataObjectFactory,
     createDataObjectKind,
 } from "@fluidframework/aqueduct/internal";
-import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer";
 import {
     IClientTimestamp,
     ILiveEvent,
@@ -17,7 +17,7 @@ import {
 import { IEvent } from "@fluidframework/core-interfaces";
 import { LiveEvent } from "./LiveEvent";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
-import { LiveDataObject } from "./LiveDataObject";
+import { LiveDataObject } from "./internals/LiveDataObject";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,

@@ -23,10 +23,10 @@ import {
 import { BaseLiveShareClient } from "./internals/BaseLiveShareClient";
 import { LocalTimestampProvider } from "./LocalTimestampProvider";
 import { TestLiveShareHost } from "./TestLiveShareHost";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils";
 import { ExpectedError, UnexpectedError } from "./errors";
-import { FluidCompatibilityMode } from "./internals";
+import { FluidCompatibilityMode } from "./internals/consts";
 
 /**
  * @hidden

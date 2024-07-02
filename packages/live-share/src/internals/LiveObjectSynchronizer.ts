@@ -9,7 +9,7 @@ import {
     GetLocalUserCanSend,
     ILiveEvent,
     UpdateSynchronizationState,
-} from "./interfaces";
+} from "../interfaces";
 
 /**
  * @internal

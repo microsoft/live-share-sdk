@@ -2,11 +2,8 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the Microsoft Live Share SDK License.
  */
-import {
-    LiveTelemetryLogger,
-    ILiveEvent,
-    IRuntimeSignaler,
-} from "@microsoft/live-share";
+import { LiveTelemetryLogger, ILiveEvent } from "@microsoft/live-share";
+import { IRuntimeSignaler } from "@microsoft/live-share/internal";
 import {
     ExtendedMediaSessionAction,
     ExtendedMediaSessionPlaybackState,
@@ -20,9 +17,9 @@ import { VolumeManager } from "./VolumeManager";
 import { LiveMediaSession } from "./LiveMediaSession";
 import { IMediaPlayer } from "./IMediaPlayer";
 import { ITriggerActionEvent, TelemetryEvents } from "./internals";
-import { waitUntilConnected } from "@microsoft/live-share/bin/internals";
+import { waitUntilConnected } from "@microsoft/live-share/bin/internals/utils";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IEvent } from "@fluidframework/common-definitions";
+import { IEvent } from "@fluidframework/core-interfaces";
 
 /**
  * Event data returned by `MediaPlayerSynchronizer` object.

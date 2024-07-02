@@ -34,15 +34,17 @@ import {
 } from "./Geometry";
 import { IStroke, Stroke, StrokeType } from "./Stroke";
 import {
-    LiveEventScope,
-    LiveEventTarget,
     UserMeetingRole,
-    DynamicObjectRegistry,
-    LiveDataObject,
     LiveTelemetryLogger,
     ILiveEvent,
     LiveDataObjectInitializeState,
 } from "@microsoft/live-share";
+import {
+    LiveEventScope,
+    LiveEventTarget,
+    DynamicObjectRegistry,
+    LiveDataObject,
+} from "@microsoft/live-share/internal";
 import { IBrush } from "./Brush";
 import { BasicColors, IColor, lightenColor, toCssRgbaColor } from "./Colors";
 import { TelemetryEvents } from "./internals";

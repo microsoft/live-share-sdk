@@ -1,13 +1,9 @@
 import { InsecureTokenProvider } from "@fluidframework/test-runtime-utils/internal";
 import { AzureProvider } from "@microsoft/live-share-react";
 import { SharedMap } from "fluid-framework/legacy";
-import { SharedTree } from "fluid-framework";
-import {
-    ExampleSharedMap,
-    ExampleSharedState,
-    EXAMPLE_SHARED_MAP_KEY,
-} from "../components";
+import { ExampleSharedState, EXAMPLE_SHARED_MAP_KEY } from "../components";
 import { AzureClientProps } from "@fluidframework/azure-client";
+import { ExampleSharedTree } from "../components/ExampleSharedTree";
 
 // Replace this with your connection options from the Azure Fluid Relay portal
 const azureClientOptions: AzureClientProps = {
@@ -39,7 +35,7 @@ export const AzureAutoJoin = () => {
             }}
         >
             <ExampleSharedState />
-            <ExampleSharedMap />
+            <ExampleSharedTree />
         </AzureProvider>
     );
 };

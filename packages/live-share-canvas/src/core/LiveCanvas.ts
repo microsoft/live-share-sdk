@@ -168,93 +168,84 @@ export class LiveCanvasClass extends LiveDataObject {
 
     private setupWetInkProcessing(): void {
         // Setup outgoing events
-        if (this._inkingManager) {
-            const pointerEventListener = (
-                eventArgs: IPointerMovedEventArgs
-            ) => {
-                if (this.isCursorShared) {
-                    this.onLocalUserAllowed(async () => {
-                        try {
-                            // Send a pointer moved event with an undefined
-                            // point to indicated the cursor is not shared anymore
-                            this._pointerMovedEventTarget.sendEvent({
-                                position: eventArgs.position,
-                                pictureUri: this.getLocalUserPictureUrl(),
-                            });
-                        } catch (err) {
-                            this._logger?.sendErrorEvent(
-                                TelemetryEvents.LiveCanvas
-                                    .PointerMovedEventError,
-                                err
-                            );
-                        }
-                    });
-                }
-            };
-            this._inkingManager.on(PointerMovedEvent, pointerEventListener);
-            this._inkingManagerListeners.set(
-                PointerMovedEvent,
-                pointerEventListener
-            );
-            const beginStrokeListener = (eventArgs: IBeginStrokeEventArgs) => {
-                const liveStroke = new LiveStroke(
-                    eventArgs.strokeId,
-                    eventArgs.type,
-                    eventArgs.brush,
-                    LiveCanvas.wetStrokePointSimplificationThreshold
-                );
-
-                liveStroke.points.push(eventArgs.startPoint);
-
-                this._pendingLiveStrokes.set(liveStroke.id, liveStroke);
-
+        if (!this._inkingManager) return;
+        const pointerEventListener = (eventArgs: IPointerMovedEventArgs) => {
+            if (this.isCursorShared) {
                 this.onLocalUserAllowed(async () => {
-                    // Send the begin wet stroke event
                     try {
-                        this._beginWetStrokeEventTarget.sendEvent({
-                            isCursorShared: this.isCursorShared
-                                ? true
-                                : undefined,
+                        // Send a pointer moved event with an undefined
+                        // point to indicated the cursor is not shared anymore
+                        this._pointerMovedEventTarget.sendEvent({
+                            position: eventArgs.position,
                             pictureUri: this.getLocalUserPictureUrl(),
-                            ...eventArgs,
                         });
                     } catch (err) {
                         this._logger?.sendErrorEvent(
-                            TelemetryEvents.LiveCanvas.BeginWetStrokeError,
+                            TelemetryEvents.LiveCanvas.PointerMovedEventError,
                             err
                         );
                     }
                 });
-            };
-            this._inkingManager.on(BeginStrokeEvent, beginStrokeListener);
-            this._inkingManagerListeners.set(
-                BeginStrokeEvent,
-                beginStrokeListener
+            }
+        };
+        this._inkingManager.on(PointerMovedEvent, pointerEventListener);
+        this._inkingManagerListeners.set(
+            PointerMovedEvent,
+            pointerEventListener
+        );
+        const beginStrokeListener = (eventArgs: IBeginStrokeEventArgs) => {
+            const liveStroke = new LiveStroke(
+                eventArgs.strokeId,
+                eventArgs.type,
+                eventArgs.brush,
+                LiveCanvas.wetStrokePointSimplificationThreshold
             );
-            const addPointListener = (eventArgs: IAddPointsEventArgs) => {
-                const liveStroke = this._pendingLiveStrokes.get(
-                    eventArgs.strokeId
-                );
 
-                if (liveStroke !== undefined) {
-                    if (!eventArgs.endState && eventArgs.points.length > 0) {
-                        liveStroke.points.push(...eventArgs.points);
-                    }
+            liveStroke.points.push(eventArgs.startPoint);
 
-                    liveStroke.endState = eventArgs.endState;
+            this._pendingLiveStrokes.set(liveStroke.id, liveStroke);
 
-                    if (eventArgs.endState) {
-                        this._pendingLiveStrokes.delete(eventArgs.strokeId);
-                    }
-
-                    if (eventArgs.points.length > 0) {
-                        liveStroke.scheduleProcessing(this.liveStrokeProcessed);
-                    }
+            this.onLocalUserAllowed(async () => {
+                // Send the begin wet stroke event
+                try {
+                    this._beginWetStrokeEventTarget.sendEvent({
+                        isCursorShared: this.isCursorShared ? true : undefined,
+                        pictureUri: this.getLocalUserPictureUrl(),
+                        ...eventArgs,
+                    });
+                } catch (err) {
+                    this._logger?.sendErrorEvent(
+                        TelemetryEvents.LiveCanvas.BeginWetStrokeError,
+                        err
+                    );
                 }
-            };
-            this._inkingManager.on(AddPointsEvent, addPointListener);
-            this._inkingManagerListeners.set(AddPointsEvent, addPointListener);
-        }
+            });
+        };
+        this._inkingManager.on(BeginStrokeEvent, beginStrokeListener);
+        this._inkingManagerListeners.set(BeginStrokeEvent, beginStrokeListener);
+        const addPointListener = (eventArgs: IAddPointsEventArgs) => {
+            const liveStroke = this._pendingLiveStrokes.get(eventArgs.strokeId);
+
+            if (liveStroke !== undefined) {
+                if (!eventArgs.endState && eventArgs.points.length > 0) {
+                    liveStroke.points.push(...eventArgs.points);
+                }
+
+                liveStroke.endState = eventArgs.endState;
+
+                if (eventArgs.endState) {
+                    this._pendingLiveStrokes.delete(eventArgs.strokeId);
+                }
+
+                if (eventArgs.points.length > 0) {
+                    liveStroke.scheduleProcessing(this.liveStrokeProcessed);
+                }
+            }
+        };
+        this._inkingManager.on(AddPointsEvent, addPointListener);
+        this._inkingManagerListeners.set(AddPointsEvent, addPointListener);
+
+        if (this._pointerMovedEventTarget) return;
 
         // Setup incoming events
         const scope = new LiveEventScope(
@@ -698,15 +689,13 @@ export class LiveCanvasClass extends LiveDataObject {
         this.setupStorageProcessing(node);
         this.setupWetInkProcessing();
 
-        if (!this._liveCursorsHost) {
-            this._liveCursorsHost = document.createElement("div");
-            this._liveCursorsHost.style.position = "absolute";
-            this._liveCursorsHost.style.pointerEvents = "none";
-            this._liveCursorsHost.style.width = "100%";
-            this._liveCursorsHost.style.height = "100%";
-            this._liveCursorsHost.style.overflow = "hidden";
-            inkingManager.hostElement.appendChild(this._liveCursorsHost);
-        }
+        this._liveCursorsHost = document.createElement("div");
+        this._liveCursorsHost.style.position = "absolute";
+        this._liveCursorsHost.style.pointerEvents = "none";
+        this._liveCursorsHost.style.width = "100%";
+        this._liveCursorsHost.style.height = "100%";
+        this._liveCursorsHost.style.overflow = "hidden";
+        inkingManager.hostElement.appendChild(this._liveCursorsHost);
 
         // Update initialize state as succeeded
         this.initializeState = LiveDataObjectInitializeState.succeeded;
@@ -825,15 +814,6 @@ export class LiveCanvasClass extends LiveDataObject {
      */
     get allowedRoles(): UserMeetingRole[] {
         return this._allowedRoles;
-    }
-
-    /**
-     * Sets the list of roles that are allowed to emit wet stroke events.
-     */
-    set allowedRoles(value: UserMeetingRole[]) {
-        this._allowedRoles = value;
-
-        this.setupWetInkProcessing();
     }
 
     /**

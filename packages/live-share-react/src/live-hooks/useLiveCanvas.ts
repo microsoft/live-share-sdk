@@ -73,6 +73,14 @@ export function useLiveCanvas(
                 htmlElement = document.getElementById(canvasElementRef);
             }
             if (htmlElement === null) return;
+            // Clear out existing nodes
+            function removeAllChildren(node: HTMLElement | ChildNode) {
+                node.childNodes.forEach((childNode) => {
+                    removeAllChildren(childNode);
+                    childNode.remove();
+                });
+            }
+            removeAllChildren(htmlElement);
             // Create the InkingManager and initialize the liveCanvas with it
             const inkingManager = new InkingManager(htmlElement);
             setInkingManager(inkingManager);
@@ -83,9 +91,9 @@ export function useLiveCanvas(
                 inkingManager.removeAllListeners();
             };
         },
-        // Intentionally ommitting rawNode and props?.allowedRoles from deps because we only want to initialize once.
-        // whereas rawNode and props?.allowedRoles may change many times.
-        [liveCanvas]
+        // Intentionally ommitting rawNode from deps because we only want to initialize once,
+        // whereas rawNode may change many times.
+        [liveCanvas, props?.allowedRoles]
     );
 
     /**
@@ -100,19 +108,6 @@ export function useLiveCanvas(
             return;
         liveCanvas.setTreeNode(rawNode);
     }, [liveCanvas, rawNode]);
-
-    /**
-     * Update the allowed roles if it changes while initialized.
-     * If not initialized, we skip because it was already set during initialization.
-     */
-    React.useEffect(() => {
-        if (
-            liveCanvas?.initializeState !==
-            LiveDataObjectInitializeState.succeeded
-        )
-            return;
-        liveCanvas.allowedRoles = props?.allowedRoles ?? [];
-    }, [liveCanvas, props?.allowedRoles]);
 
     /**
      * Activate or deactivate the inkingManager based on the 'active' prop

@@ -11,13 +11,11 @@ export const ExampleLiveCanvas: FC = () => {
     const { inkingManager, liveCanvas } = useLiveCanvas(
         "CUSTOM-LIVE-CANVAS",
         liveCanvasRef,
-        active,
-        tool,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        isCursorShared
+        {
+            active,
+            tool,
+            isCursorShared,
+        }
     );
 
     return (

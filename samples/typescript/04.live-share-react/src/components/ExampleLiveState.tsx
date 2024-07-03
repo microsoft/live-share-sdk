@@ -80,6 +80,7 @@ export const ExampleLiveState: FC = () => {
                 </FlexColumn>
             </NavigationBar>
             <FlexColumn
+                scroll
                 fill="both"
                 style={{
                     padding: "24px",

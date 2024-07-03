@@ -65,10 +65,31 @@ export const ExampleLiveCanvas: FC = () => {
                     </button>
                     <button
                         onClick={() => {
+                            setTool(InkingTool.eraser);
+                        }}
+                    >
+                        {"Eraser"}
+                    </button>
+                    <button
+                        onClick={() => {
                             inkingManager?.clear();
                         }}
                     >
                         {"Clear"}
+                    </button>
+                    <button
+                        onClick={() => {
+                            liveCanvas?.undo();
+                        }}
+                    >
+                        {"Undo"}
+                    </button>
+                    <button
+                        onClick={() => {
+                            liveCanvas?.redo();
+                        }}
+                    >
+                        {"Redo"}
                     </button>
                 </div>
             )}

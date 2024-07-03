@@ -82,7 +82,6 @@ export function useLiveCanvas(
 
         // cleanup function to be called when the component is unmount
         return () => {
-            liveCanvas.dispose();
             inkingManager.removeAllListeners();
         };
     }, [liveCanvas]);

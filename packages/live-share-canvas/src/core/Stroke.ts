@@ -153,6 +153,14 @@ export interface IStroke {
      */
     deserialize(serializedStroke: string): void;
     /**
+     * Serialize points
+     */
+    serializePoints(): string;
+    /**
+     * Version
+     */
+    readonly version: number;
+    /**
      * The id of the stroke.
      */
     readonly id: string;
@@ -179,6 +187,7 @@ export interface IStroke {
  */
 export interface IStrokeCreationOptions {
     id?: string;
+    version?: number;
     clientId?: string;
     timeStamp?: number;
     brush?: IBrush;
@@ -191,11 +200,14 @@ export interface IStrokeCreationOptions {
 export class Stroke implements IStroke, Iterable<IPointerPoint> {
     private static readonly coordinateSerializationPrecision = 1;
     private static readonly pressureSerializationPrecision = 2;
+    private _version: number = 1;
 
     // Version is fixed at 1 for now. If/when we evolve the structure
     // of a stroke, we'll update the version number and the
     // serialization/deserialization logic
-    private _version: number = 1;
+    get version(): number {
+        return this._version;
+    }
 
     private _brush: IBrush = { ...DefaultPenBrush };
     private _points: IPointerPoint[];
@@ -218,7 +230,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
      *
      * @returns The serialized points.
      */
-    private serializePoints(): string {
+    public serializePoints(): string {
         let result = "";
 
         const coordinateMultiplier = Math.pow(
@@ -321,11 +333,12 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
      */
     constructor(options?: IStrokeCreationOptions) {
         const effectiveOptions: IStrokeCreationOptions = {
-            id: options ? options.id : undefined,
-            clientId: options ? options.clientId : undefined,
-            timeStamp: options ? options.timeStamp : undefined,
-            brush: options ? options.brush : undefined,
-            points: options ? options.points : undefined,
+            id: options?.id,
+            clientId: options?.clientId,
+            timeStamp: options?.timeStamp,
+            brush: options?.brush,
+            points: options?.points,
+            version: options?.version ?? 1,
         };
 
         this._id = effectiveOptions.id ?? generateUniqueId();
@@ -499,6 +512,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
                 clientId: this.clientId,
                 timeStamp: this.timeStamp,
                 brush: this.brush,
+                version: this.version,
             });
         };
 
@@ -598,7 +612,7 @@ export class Stroke implements IStroke, Iterable<IPointerPoint> {
      */
     serialize(): string {
         const strokeData: ISerializedStrokeData = {
-            v: this._version,
+            v: this.version,
             id: this.id,
             cId: this.clientId,
             t: this.timeStamp,

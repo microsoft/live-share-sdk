@@ -18,9 +18,7 @@ export class LiveCanvasColor extends sf.object("Color", {
     r: sf.number,
     g: sf.number,
     b: sf.number,
-}) {
-    //
-}
+}) {}
 
 /**
  * `SharedTree` schema for {@link IBrush}.
@@ -31,9 +29,7 @@ export class LiveCanvasBrush extends sf.object("Brush", {
     tip: sf.string,
     tipSize: sf.number,
     endArrow: sf.optional(sf.string),
-}) {
-    //
-}
+}) {}
 
 /**
  * `SharedTree` schema for {@link Stroke}.
@@ -109,16 +105,25 @@ export class LiveCanvasStroke extends sf.object("LiveCanvasStroke", {
 export class LiveCanvasStrokesMap extends sf.map(
     "LiveCanvasStrokesMap",
     LiveCanvasStroke
-) {}
+) {
+    /**
+     * Clear all strokes in the map
+     */
+    clear() {
+        Tree.runTransaction(this, (node) => {
+            node.forEach((child) => {
+                node.delete(child.id);
+            });
+        });
+    }
+}
 
 /**
  * `SharedTree` schema used by {@link LiveCanvas}
  */
 export class LiveCanvasTreeNode extends sf.object("LiveCanvasTree", {
     dryInkMap: LiveCanvasStrokesMap,
-}) {
-    //
-}
+}) {}
 
 /**
  * @hidden

@@ -9,7 +9,7 @@ import { ITimestampProvider } from "@microsoft/live-share";
 import {
     Deferred,
     IRuntimeSignaler,
-    LiveShareRuntime,
+    LiveShareRuntime
 } from "@microsoft/live-share/internal";
 
 export class TestMediaPlayer implements IMediaPlayer {
@@ -18,15 +18,15 @@ export class TestMediaPlayer implements IMediaPlayer {
     private _currentTime: number = 0;
     private _playbackRate: number = 1;
 
-    duration: number;
-    ended: boolean;
-    muted: boolean;
+    duration: number = 0;
+    ended: boolean = false;
+    muted: boolean = false;
     paused: boolean = true;
     src: string = "test";
-    currentSrc: string;
-    volume: number;
+    currentSrc: string = "";
+    volume: number = 1;
 
-    constructor(public onCurrentTimeSet?: (number) => void) {
+    constructor(public onCurrentTimeSet?: (number: number) => void) {
         setInterval(() => {
             if (!this.paused && this.playStartTime != 0) {
                 this._currentTime =

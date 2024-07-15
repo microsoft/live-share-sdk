@@ -3,7 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TestLiveMediaSession, TestMediaTimeStampProvider } from "./TestUtils";
+import {
+    TestLiveMediaSession,
+    TestMediaTimeStampProvider,
+} from "./TestUtils";
 import { strict as assert } from "assert";
 import {
     ITestObjectProvider,
@@ -23,16 +26,23 @@ import {
     MockLiveShareRuntime,
     waitForDelay,
     Deferred,
+    LiveShareRuntime,
+    MockLiveShareRuntime,
 } from "@microsoft/live-share/internal";
 import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionDetails,
 } from "../MediaSessionExtensions";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
-import { describeCompat } from "@live-share-private/test-utils";
+import {
+    ITestObjectProviderOptions,
+    describeCompat,
+} from "@live-share-private/test-utils";
 
 async function getObjects(
-    getTestObjectProvider,
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider,
     updateInterval: number = 10000,
     timestampProvider: ITimestampProvider = new LocalTimestampProvider()
 ) {
@@ -52,11 +62,11 @@ async function getObjects(
 
     let ObjectProxy1: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime1
+        liveRuntime1 as unknown as LiveShareRuntime
     );
     let ObjectProxy2: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime2
+        liveRuntime2 as unknown as LiveShareRuntime
     );
 
     await liveRuntime1.start();
@@ -234,9 +244,8 @@ describeCompat(
 
             await object1.coordinator.seekTo(30);
             object1.coordinator.sendPositionUpdate(positionState(30));
-
             object2.coordinator.beginSuspension();
-
+            await waitForDelay(1);
             object2.coordinator.sendPositionUpdate(positionState(200));
             await waitForDelay(1);
 

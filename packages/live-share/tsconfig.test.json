@@ -1,0 +1,9 @@
+{
+	"extends": "./tsconfig.cjs.json",
+	"compilerOptions": {
+		"outDir": "./bin/test",
+		"types": ["mocha", "node"],
+	},
+	"include": ["src/**/*"],
+	"exclude": []
+}

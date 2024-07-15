@@ -4,24 +4,48 @@
     "description": "Building collaborative experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/index.js",
-    "types": "./bin/index.d.ts",
+    "main": "./bin/esm/index.js",
+    "types": "./bin/esm/index.public.d.ts",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "tsc -p tsconfig.build.json",
+        "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
+        "build:test": "tsc -p tsconfig.test.json",
         "test": "start-server-and-test test:client:start:server 7070 test:run",
-        "test:run": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --timeout 10000",
-        "test:debug": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --inspect-brk",
+        "test:run": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.js --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
+        "test:debug": "npm run build:test && ts-mocha --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
         "test:race": "node test-for-race-conditions.js",
         "test:client:start:server": "npx tinylicious@latest > tinylicious.log 2>&1"
     },
     "scriptsComments": {
-        "test": "does additional local server setup that LiveShareClient.spec.ts and AzureLiveShareClient.spec.ts need, then runs all tests with test:run"
-      },
+        "test": "does additional local server setup that LiveShareClient.spec.ts and AzureLiveShareClient.spec.ts need, then runs all tests with test:run",
+        "todo": "npx rollup -c rollup.config.js --configPlugin typescript={tsconfig:\\'tsconfig.rollup.json\\'}"
+    },
+    "exports": {
+        ".": {
+            "require": {
+                "types": "./bin/cjs/index.public.d.ts",
+                "default": "./bin/cjs/index.js"
+            },
+            "import": {
+                "types": "./bin/esm/index.public.d.ts",
+                "default": "./bin/esm/index.js"
+            }
+        },
+        "./internal": {
+            "require": {
+                "types": "./bin/cjs/index.internal.d.ts",
+                "default": "./bin/cjs/index.js"
+            },
+            "import": {
+                "types": "./bin/esm/index.internal.d.ts",
+                "default": "./bin/esm/index.js"
+            }
+        }
+    },
     "dependencies": {
-        "uuid": "^9.0.0",
-        "@fluidframework/register-collection": "^2.0.0-rc || ^2.0.0-internal"
+        "@fluidframework/register-collection": "^2.0.0-rc || ^2.0.0-internal",
+        "uuid": "^9.0.0"
     },
     "devDependencies": {
         "@fluid-internal/client-utils": "^2.0.0-rc.5.0.1",
@@ -37,8 +61,9 @@
         "fluid-framework": "^2.0.0-rc.5.0.1",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
+        "start-server-and-test": "^2.0.4",
         "ts-mocha": "^10.0.0",
-        "typescript": "^5.0.4"
+        "typescript": "~5.5.3"
     },
     "peerDependencies": {
         "fluid-framework": "^2.0.0-rc || ^2.0.0-internal"

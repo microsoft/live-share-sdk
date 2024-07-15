@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./bin/cjs",
+    "module": "CommonJS",
+		"moduleResolution": null,
+    "downlevelIteration": true
+  },
+}

@@ -20,10 +20,11 @@ import {
     TestLiveShareHost,
     UserMeetingRole,
 } from "@microsoft/live-share";
-import { LiveShareRuntime, MockLiveShareRuntime, getLiveDataObjectKind } from "@microsoft/live-share/internal";
 import {
     Deferred,
+    getLiveDataObjectKind,
     isErrorLike,
+    LiveShareRuntime,
     MockLiveShareRuntime,
     waitForDelay,
 } from "@microsoft/live-share/internal";
@@ -993,7 +994,7 @@ async function assertExpectedEvents(
                     new Error(
                         `error for event: ${JSON.stringify(
                             evt
-                        )}, eventCount ${eventCount}, ${error}`,
+                        )}, eventCount ${eventCount}, ${error}`
                     )
                 );
             }

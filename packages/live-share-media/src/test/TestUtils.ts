@@ -9,7 +9,7 @@ import { ITimestampProvider } from "@microsoft/live-share";
 import {
     Deferred,
     IRuntimeSignaler,
-    LiveShareRuntime
+    LiveShareRuntime,
 } from "@microsoft/live-share/internal";
 
 export class TestMediaPlayer implements IMediaPlayer {

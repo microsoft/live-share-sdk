@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "./bin/cjs",
     "module": "CommonJS",
-		"moduleResolution": null,
+    "moduleResolution": null,
     "downlevelIteration": true
   },
 }

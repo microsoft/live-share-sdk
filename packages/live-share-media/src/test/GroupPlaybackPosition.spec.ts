@@ -19,9 +19,8 @@ import {
     ITransportState,
 } from "../internals";
 import { TestLiveShareHost, TimeInterval } from "@microsoft/live-share";
-import { IRuntimeSignaler } from "@microsoft/live-share/internal";
+import { IRuntimeSignaler, LiveShareRuntime, MockLiveShareRuntime } from "@microsoft/live-share/internal";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
-import { MockLiveShareRuntime } from "./TestUtils";
 
 function createTransportUpdate(
     runtime: IRuntimeSignaler,
@@ -119,13 +118,13 @@ async function getPlayBackPosition(
         playbackTrack,
         plybackRate,
         getMediaPlayerState,
-        liveRuntime
+        liveRuntime as unknown as LiveShareRuntime
     );
     const playbackPosition = new GroupPlaybackPosition(
         transportState,
         plybackRate,
         runtime1,
-        liveRuntime,
+        liveRuntime as unknown as LiveShareRuntime,
         updateInterval
     );
 

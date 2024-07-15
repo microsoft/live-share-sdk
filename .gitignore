@@ -368,4 +368,3 @@ coverage/
 nyc/
 .nyc_output/
 build-data.json
-binTest/

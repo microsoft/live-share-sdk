@@ -32,7 +32,7 @@
         "eslint-plugin-react": "^7.32.2",
         "eslint-plugin-react-hooks": "^4.6.0",
         "prettier": "^2.8.8",
-        "typedoc": "^0.24.6",
-        "typescript": "~5.1.6"
+        "typedoc": "^0.26.4",
+        "typescript": "~5.5.3"
     }
 }

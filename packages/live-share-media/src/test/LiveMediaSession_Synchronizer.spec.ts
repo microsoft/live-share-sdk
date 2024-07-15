@@ -4,7 +4,6 @@
  */
 
 import {
-    MockLiveShareRuntime,
     TestLiveMediaSession,
     TestMediaPlayer,
     TestMediaTimeStampProvider,
@@ -18,10 +17,10 @@ import {
 import {
     ITimestampProvider,
     LocalTimestampProvider,
+    TestLiveShareHost,
     UserMeetingRole,
 } from "@microsoft/live-share";
-import { TestLiveShareHost } from "@microsoft/live-share";
-import { getLiveDataObjectKind } from "@microsoft/live-share/internal";
+import { LiveShareRuntime, MockLiveShareRuntime, getLiveDataObjectKind } from "@microsoft/live-share/internal";
 import {
     Deferred,
     isErrorLike,
@@ -39,10 +38,15 @@ import {
     MediaPlayerSynchronizer,
     MediaPlayerSynchronizerEvents,
 } from "../MediaPlayerSynchronizer";
-import { describeCompat } from "@live-share-private/test-utils";
+import {
+    ITestObjectProviderOptions,
+    describeCompat,
+} from "@live-share-private/test-utils";
 
 async function getObjects(
-    getTestObjectProvider,
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider,
     updateInterval: number = 10000,
     timestampProvider: ITimestampProvider = new LocalTimestampProvider()
 ) {
@@ -62,11 +66,11 @@ async function getObjects(
 
     let ObjectProxy1: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime1
+        liveRuntime1 as unknown as LiveShareRuntime
     );
     let ObjectProxy2: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime2
+        liveRuntime2 as unknown as LiveShareRuntime
     );
 
     await liveRuntime1.start();
@@ -988,7 +992,7 @@ async function assertExpectedEvents(
                     new Error(
                         `error for event: ${JSON.stringify(
                             evt
-                        )}, eventCount ${eventCount}, ${error}`
+                        )}, eventCount ${eventCount}, ${error}`,
                     )
                 );
             }

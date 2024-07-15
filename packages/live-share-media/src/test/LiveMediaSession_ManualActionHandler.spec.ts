@@ -3,10 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    TestLiveMediaSession,
-    TestMediaTimeStampProvider,
-} from "./TestUtils";
+import { TestLiveMediaSession, TestMediaTimeStampProvider } from "./TestUtils";
 import { strict as assert } from "assert";
 import {
     ITestObjectProvider,
@@ -27,7 +24,6 @@ import {
     waitForDelay,
     Deferred,
     LiveShareRuntime,
-    MockLiveShareRuntime,
 } from "@microsoft/live-share/internal";
 import {
     ExtendedMediaMetadata,

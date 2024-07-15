@@ -4,7 +4,6 @@ import {
     timeoutRequest,
     waitForResult,
 } from "../internals/utils";
-import { Deferred } from "../internals/Deferred";
 
 describe("timeoutRequest", function () {
     it("should return the result when request is successful within timeout", async () => {

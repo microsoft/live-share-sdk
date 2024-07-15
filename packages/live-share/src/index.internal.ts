@@ -14,4 +14,4 @@ export * from "./internals/smuggle.js";
 
 export { waitForDelay, waitUntilConnected } from "./internals/utils.js";
 export { isErrorLike } from "./internals/type-guards.js";
-export { MockLiveShareRuntime } from "./internals/mock/MockLiveShareRuntime.js" 
+export { MockLiveShareRuntime } from "./internals/mock/MockLiveShareRuntime.js";

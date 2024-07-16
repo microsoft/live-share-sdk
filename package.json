@@ -21,7 +21,8 @@
         "test:packages": "node workspace-cmd-util.js test packages",
         "doctor": "npm run doctor:src && npm run doctor:json",
         "doctor:src": "eslint **/src/**/*.{j,t}s{,x} --fix",
-        "doctor:json": "eslint **/*.json --fix"
+        "doctor:json": "eslint **/*.json --fix",
+        "clean": "npm exec --workspaces -- npx rimraf node_modules && npx rimraf node_modules"
     },
     "author": "",
     "license": "Microsoft",

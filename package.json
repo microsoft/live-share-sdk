@@ -19,7 +19,9 @@
         "build:samples": "node workspace-cmd-util.js build samples/javascript samples/typescript",
         "build:docs": "typedoc packages/live-share packages/live-share-media packages/live-share-turbo packages/live-share-canvas",
         "test:packages": "node workspace-cmd-util.js test packages",
-        "doctor": "eslint **/src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
+        "doctor": "npm run doctor:src && npm run doctor:json",
+        "doctor:src": "eslint **/src/**/*.{j,t}s{,x} --fix",
+        "doctor:json": "eslint **/*.json --fix"
     },
     "author": "",
     "license": "Microsoft",

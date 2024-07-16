@@ -14,7 +14,7 @@
         "start:https": "vite --config vite.https-config.js",
         "start:server": "npx tinylicious@latest",
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern",
-        "postinstall":"node ../../../ensure-packages-built.js"
+        "postinstall": "node ../../../ensure-packages-built.js"
     },
     "dependencies": {
         "@microsoft/live-share": "2.0.0-internal.5",

@@ -83,16 +83,18 @@ async function getObjects(
     let container1 = await provider.createContainer(
         ObjectProxy1.factory as fluidEntryPoint
     );
-    let object1 = await getContainerEntryPointBackCompat<TestLiveMediaSession>(
-        container1
-    );
+    let object1 =
+        await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+            container1
+        );
     object1.coordinator.positionUpdateInterval = 0.02;
     let container2 = await provider.loadContainer(
         ObjectProxy2.factory as fluidEntryPoint
     );
-    let object2 = await getContainerEntryPointBackCompat<TestLiveMediaSession>(
-        container2
-    );
+    let object2 =
+        await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+            container2
+        );
     object2.coordinator.positionUpdateInterval = 0.02;
     // need to be connected to send signals
     if (!container1.connect) {

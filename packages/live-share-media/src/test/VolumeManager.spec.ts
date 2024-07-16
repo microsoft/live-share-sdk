@@ -47,11 +47,14 @@ describe("VolumeManager", () => {
         assert(player.volume == volumeManager.limitLevel);
         volumeManager.stopLimiting();
 
-        setTimeout(() => {
-            // check volume at halfway point
-            assert(player.volume > 0.4);
-            assert(player.volume < 0.6);
-        }, (volumeManager.volumeChangeDuration * 1000) / 2);
+        setTimeout(
+            () => {
+                // check volume at halfway point
+                assert(player.volume > 0.4);
+                assert(player.volume < 0.6);
+            },
+            (volumeManager.volumeChangeDuration * 1000) / 2
+        );
 
         // check volume at end with milliTollerance of leeway
         await waitForDelay(
@@ -89,11 +92,14 @@ describe("VolumeManager", () => {
         volumeManager.volumeChangeDuration = volumeChangeDuration;
 
         volumeManager.volume = 0.3;
-        setTimeout(() => {
-            // check volume at halfway point
-            assert(player.volume > 0.6);
-            assert(player.volume < 0.7);
-        }, (volumeManager.volumeChangeDuration * 1000) / 2);
+        setTimeout(
+            () => {
+                // check volume at halfway point
+                assert(player.volume > 0.6);
+                assert(player.volume < 0.7);
+            },
+            (volumeManager.volumeChangeDuration * 1000) / 2
+        );
 
         await waitForDelay(
             volumeManager.volumeChangeDuration * 1000 + milliTolerance
@@ -157,11 +163,14 @@ describe("VolumeManager", () => {
 
         volumeManager.startLimiting();
 
-        setTimeout(() => {
-            // check volume at halfway point
-            assert(player.volume > 0.7);
-            assert(player.volume < 0.8);
-        }, (volumeManager.volumeChangeDuration * 1000) / 2);
+        setTimeout(
+            () => {
+                // check volume at halfway point
+                assert(player.volume > 0.7);
+                assert(player.volume < 0.8);
+            },
+            (volumeManager.volumeChangeDuration * 1000) / 2
+        );
 
         // check volume at end with milliTolerance of leeway
         await waitForDelay(

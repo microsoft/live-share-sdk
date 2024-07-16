@@ -32,7 +32,7 @@ import { SharedObjectKind } from "fluid-framework";
 import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 
 class TestLivePresenceClass<
-    TData extends object = object
+    TData extends object = object,
 > extends LivePresenceClass<TData> {
     public async clientId(): Promise<string> {
         return await this.waitUntilConnected();
@@ -80,16 +80,18 @@ async function getObjects(
     let container1 = await provider.createContainer(
         ObjectProxy1.factory as fluidEntryPoint
     );
-    let object1 = await getContainerEntryPointBackCompat<
-        TestLivePresence<{ foo: string }>
-    >(container1);
+    let object1 =
+        await getContainerEntryPointBackCompat<
+            TestLivePresence<{ foo: string }>
+        >(container1);
 
     let container2 = await provider.loadContainer(
         ObjectProxy2.factory as fluidEntryPoint
     );
-    let object2 = await getContainerEntryPointBackCompat<
-        TestLivePresence<{ foo: string }>
-    >(container2);
+    let object2 =
+        await getContainerEntryPointBackCompat<
+            TestLivePresence<{ foo: string }>
+        >(container2);
     // need to be connected to send signals
     if (!container1.connect) {
         await new Promise((resolve) => container1.once("connected", resolve));

@@ -44,7 +44,7 @@
         "build": "vite build",
         "preview": "vite preview",
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern",
-        "postinstall":"node ../../../ensure-packages-built.js"
+        "postinstall": "node ../../../ensure-packages-built.js"
     },
     "browserslist": {
         "production": [

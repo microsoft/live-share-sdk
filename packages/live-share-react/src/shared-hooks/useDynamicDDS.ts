@@ -5,7 +5,7 @@
 
 import React from "react";
 import { FluidObject, IFluidLoadable } from "@fluidframework/core-interfaces";
-import { useFluidObjectsContext } from "../providers";
+import { useFluidObjectsContext } from "../providers/AzureProvider";
 import { SharedObjectKind } from "fluid-framework";
 
 /**

@@ -5,7 +5,7 @@
 
 import { strict as assert } from "assert";
 import { LiveEventScope } from "../LiveEventScope";
-import { UserMeetingRole } from "../../interfaces";
+import { ILiveEvent, UserMeetingRole } from "../../interfaces";
 import { MockRuntimeSignaler } from "../mock/MockRuntimeSignaler";
 import { MockRoleVerifier } from "../mock/MockRoleVerifier";
 import { MockTimestampProvider } from "../mock/MockTimestampProvider";
@@ -82,7 +82,8 @@ describe("LiveEventScope", () => {
             signalers.localRuntime,
             localLiveRuntime
         );
-        const handler = (evt, local) => triggered++;
+        const handler = (evt: ILiveEvent<string>, local: boolean) =>
+            triggered++;
         localScope.onEvent("test", handler);
 
         const remoteScope = new LiveEventScope(
@@ -151,7 +152,7 @@ describe("LiveEventScope", () => {
         try {
             await localScope.sendEvent("test", {});
             assert(false, "Event should not have been sent");
-        } catch (err) {
+        } catch (err: any) {
             assert(
                 err?.message.includes(
                     `The local user doesn't have a role of ["Organizer"]`

@@ -71,8 +71,10 @@ export function assertObjectsEqual(
     const propertyNames = Object.getOwnPropertyNames(expected);
 
     for (const p of propertyNames) {
+        const expectedCast = expected as any;
+        const actualCast = actual as any;
         assert(
-            expected[p] === actual[p],
+            expectedCast[p] === actualCast[p],
             errorMessage +
                 ` (expected = ${JSON.stringify(
                     expected

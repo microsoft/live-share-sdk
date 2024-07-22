@@ -18,6 +18,7 @@ import {
     LiveEventTarget,
     LiveObjectSynchronizer,
     LiveShareRuntime,
+    isErrorLike,
 } from "@microsoft/live-share/internal";
 import {
     CoordinationWaitPoint,
@@ -38,7 +39,6 @@ import {
     IRateChangeCommandEvent,
 } from "./internals";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
-import { isErrorLike } from "@microsoft/live-share/bin/internals/type-guards";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IEvent } from "@fluidframework/core-interfaces";
 

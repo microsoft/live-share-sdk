@@ -13,14 +13,21 @@ import { LiveState } from "../LiveState";
 import { Deferred } from "../internals/Deferred";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
-import { describeCompat } from "@live-share-private/test-utils";
+import {
+    describeCompat,
+    ITestObjectProviderOptions,
+} from "@live-share-private/test-utils";
 
 interface TestStateData {
     status: string;
     value: string;
 }
 
-async function getObjects(getTestObjectProvider) {
+async function getObjects(
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider
+) {
     // Temporarily change update interval
     let liveRuntime1 = new MockLiveShareRuntime(false);
     let liveRuntime2 = new MockLiveShareRuntime(false);
@@ -42,16 +49,18 @@ async function getObjects(getTestObjectProvider) {
     let container1 = await provider.createContainer(
         ObjectProxy1.factory as fluidEntryPoint
     );
-    let object1 = await getContainerEntryPointBackCompat<
-        LiveState<TestStateData>
-    >(container1);
+    let object1 =
+        await getContainerEntryPointBackCompat<LiveState<TestStateData>>(
+            container1
+        );
 
     let container2 = await provider.loadContainer(
         ObjectProxy2.factory as fluidEntryPoint
     );
-    let object2 = await getContainerEntryPointBackCompat<
-        LiveState<TestStateData>
-    >(container2);
+    let object2 =
+        await getContainerEntryPointBackCompat<LiveState<TestStateData>>(
+            container2
+        );
     // need to be connected to send signals
     if (!container1.connect) {
         await new Promise((resolve) => container1.once("connected", resolve));

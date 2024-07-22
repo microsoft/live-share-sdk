@@ -17,13 +17,14 @@ import {
 import {
     ITimestampProvider,
     LocalTimestampProvider,
+    TestLiveShareHost,
     UserMeetingRole,
 } from "@microsoft/live-share";
-import { TestLiveShareHost } from "@microsoft/live-share";
-import { getLiveDataObjectKind } from "@microsoft/live-share/internal";
 import {
     Deferred,
+    getLiveDataObjectKind,
     isErrorLike,
+    LiveShareRuntime,
     MockLiveShareRuntime,
     waitForDelay,
 } from "@microsoft/live-share/internal";
@@ -39,10 +40,15 @@ import {
     MediaPlayerSynchronizer,
     MediaPlayerSynchronizerEvents,
 } from "../MediaPlayerSynchronizer";
-import { describeCompat } from "@live-share-private/test-utils";
+import {
+    ITestObjectProviderOptions,
+    describeCompat,
+} from "@live-share-private/test-utils";
 
 async function getObjects(
-    getTestObjectProvider,
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider,
     updateInterval: number = 10000,
     timestampProvider: ITimestampProvider = new LocalTimestampProvider()
 ) {
@@ -62,11 +68,11 @@ async function getObjects(
 
     let ObjectProxy1: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime1
+        liveRuntime1 as unknown as LiveShareRuntime
     );
     let ObjectProxy2: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime2
+        liveRuntime2 as unknown as LiveShareRuntime
     );
 
     await liveRuntime1.start();
@@ -77,16 +83,18 @@ async function getObjects(
     let container1 = await provider.createContainer(
         ObjectProxy1.factory as fluidEntryPoint
     );
-    let object1 = await getContainerEntryPointBackCompat<TestLiveMediaSession>(
-        container1
-    );
+    let object1 =
+        await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+            container1
+        );
     object1.coordinator.positionUpdateInterval = 0.02;
     let container2 = await provider.loadContainer(
         ObjectProxy2.factory as fluidEntryPoint
     );
-    let object2 = await getContainerEntryPointBackCompat<TestLiveMediaSession>(
-        container2
-    );
+    let object2 =
+        await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+            container2
+        );
     object2.coordinator.positionUpdateInterval = 0.02;
     // need to be connected to send signals
     if (!container1.connect) {

@@ -17,7 +17,7 @@ import { waitUntilConnected } from "./utils";
  * Extends Fluid's DataObject class. Intended for use with Live Share custom DDS's that rely on a `ILiveShareHost`.
  */
 export abstract class LiveDataObject<
-    I extends DataObjectTypes = DataObjectTypes
+    I extends DataObjectTypes = DataObjectTypes,
 > extends DataObject<I> {
     /**
      * @hidden

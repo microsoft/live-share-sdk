@@ -13,21 +13,14 @@ import { LiveState } from "../LiveState";
 import { Deferred } from "../internals/Deferred";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
-import {
-    describeCompat,
-    ITestObjectProviderOptions,
-} from "@live-share-private/test-utils";
+import { describeCompat } from "@live-share-private/test-utils";
 
 interface TestStateData {
     status: string;
     value: string;
 }
 
-async function getObjects(
-    getTestObjectProvider: (
-        options?: ITestObjectProviderOptions
-    ) => ITestObjectProvider
-) {
+async function getObjects(getTestObjectProvider) {
     // Temporarily change update interval
     let liveRuntime1 = new MockLiveShareRuntime(false);
     let liveRuntime2 = new MockLiveShareRuntime(false);

@@ -3,4 +3,4 @@
  * Licensed under the MIT License.
  */
 
-export { describeCompat, ITestObjectProviderOptions } from "./describeCompat";
+export { describeCompat } from "./describeCompat";

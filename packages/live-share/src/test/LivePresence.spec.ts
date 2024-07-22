@@ -24,14 +24,9 @@ import {
 import { TestLiveShareHost } from "../TestLiveShareHost";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
-import {
-    describeCompat,
-    ITestObjectProviderOptions,
-} from "@live-share-private/test-utils";
-import { SharedObjectKind } from "fluid-framework";
-import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
+import { describeCompat } from "@live-share-private/test-utils";
 
-class TestLivePresenceClass<
+class TestLivePresence<
     TData extends object = object
 > extends LivePresenceClass<TData> {
     public async clientId(): Promise<string> {
@@ -39,19 +34,8 @@ class TestLivePresenceClass<
     }
 }
 
-export type TestLivePresence<TData extends object = object> =
-    TestLivePresenceClass<TData>;
-
-// eslint-disable-next-line no-redeclare
-export const TestLivePresence = (() => {
-    const kind = createDataObjectKind(TestLivePresenceClass<any>);
-    return kind as typeof kind & SharedObjectKind<TestLivePresenceClass<any>>;
-})();
-
 async function getObjects(
-    getTestObjectProvider: (
-        options?: ITestObjectProviderOptions
-    ) => ITestObjectProvider,
+    getTestObjectProvider,
     updateInterval: number = 10000,
     object2canSendBackgroundUpdates = true,
     customHost?: ILiveShareHost

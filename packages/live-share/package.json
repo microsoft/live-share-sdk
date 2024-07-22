@@ -8,11 +8,10 @@
     "types": "./bin/index.d.ts",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "tsc -p tsconfig.json",
-        "build:test": "tsc -p tsconfig.test.json",
+        "build": "tsc -p tsconfig.build.json",
         "test": "start-server-and-test test:client:start:server 7070 test:run",
-        "test:run": "npm run build:test && ts-mocha --config ./src/test/.mocharc.js --recursive \"./binTest/**/*.spec.js\" --timeout 10000",
-        "test:debug": "npm run build:test && ts-mocha --config ./src/test/.mocharc.js --recursive \"./binTest/**/*.spec.js\" --inspect-brk",
+        "test:run": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --timeout 10000",
+        "test:debug": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
         "test:race": "node test-for-race-conditions.js",
         "test:client:start:server": "npx tinylicious@latest > tinylicious.log 2>&1"

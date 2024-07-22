@@ -175,15 +175,15 @@ describe("VolumeManager", () => {
 
 // test implementation
 class TestMediaPlayer implements IMediaPlayer {
-    currentSrc: string = "";
-    currentTime: number = 0;
-    duration: number = 0;
-    ended: boolean = false;
-    muted: boolean = false;
-    paused: boolean = false;
-    playbackRate: number = 1.0;
-    src: string = "";
-    volume: number = 1;
+    currentSrc: string;
+    currentTime: number;
+    duration: number;
+    ended: boolean;
+    muted: boolean;
+    paused: boolean;
+    playbackRate: number;
+    src: string;
+    volume: number;
     load(): void {
         throw new Error("Method not implemented.");
     }

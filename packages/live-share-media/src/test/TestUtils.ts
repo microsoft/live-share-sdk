@@ -9,8 +9,13 @@ import { ITimestampProvider } from "@microsoft/live-share";
 import {
     Deferred,
     IRuntimeSignaler,
-    LiveShareRuntime
+    LiveShareRuntime,
 } from "@microsoft/live-share/internal";
+
+// import mock from binTest, does not exist in live share bin.
+// must call live-share npm run build:test for binTest to exist, or live-share tests must have been run before live-share-media tests
+import { MockLiveShareRuntime } from "@microsoft/live-share/binTest/internals/mock/MockLiveShareRuntime";
+export { MockLiveShareRuntime };
 
 export class TestMediaPlayer implements IMediaPlayer {
     private done = new Deferred<string>();
@@ -18,15 +23,15 @@ export class TestMediaPlayer implements IMediaPlayer {
     private _currentTime: number = 0;
     private _playbackRate: number = 1;
 
-    duration: number = 0;
-    ended: boolean = false;
-    muted: boolean = false;
+    duration: number;
+    ended: boolean;
+    muted: boolean;
     paused: boolean = true;
     src: string = "test";
-    currentSrc: string = "";
-    volume: number = 1;
+    currentSrc: string;
+    volume: number;
 
-    constructor(public onCurrentTimeSet?: (number: number) => void) {
+    constructor(public onCurrentTimeSet?: (number) => void) {
         setInterval(() => {
             if (!this.paused && this.playStartTime != 0) {
                 this._currentTime =

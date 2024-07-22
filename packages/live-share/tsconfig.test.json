@@ -1,8 +1,10 @@
 {
-	"extends": "./tsconfig.cjs.json",
+	"extends": "./tsconfig.json",
 	"compilerOptions": {
-		"outDir": "./bin/test",
+		"outDir": "./binTest",
 		"types": ["mocha", "node"],
+    "module": "CommonJS",
+    "moduleResolution": null,
 	},
 	"include": ["src/**/*"],
 	"exclude": []

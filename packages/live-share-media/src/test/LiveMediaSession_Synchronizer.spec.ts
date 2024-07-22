@@ -4,7 +4,6 @@
  */
 
 import {
-    MockLiveShareRuntime,
     TestLiveMediaSession,
     TestMediaPlayer,
     TestMediaTimeStampProvider,
@@ -25,6 +24,7 @@ import { getLiveDataObjectKind } from "@microsoft/live-share/internal";
 import {
     Deferred,
     isErrorLike,
+    MockLiveShareRuntime,
     waitForDelay,
 } from "@microsoft/live-share/internal";
 import {

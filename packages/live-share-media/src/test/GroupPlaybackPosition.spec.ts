@@ -19,9 +19,11 @@ import {
     ITransportState,
 } from "../internals";
 import { TestLiveShareHost, TimeInterval } from "@microsoft/live-share";
-import { IRuntimeSignaler } from "@microsoft/live-share/internal";
+import {
+    IRuntimeSignaler,
+    MockLiveShareRuntime,
+} from "@microsoft/live-share/internal";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
-import { MockLiveShareRuntime } from "./TestUtils";
 
 function createTransportUpdate(
     runtime: IRuntimeSignaler,

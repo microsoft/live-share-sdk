@@ -12,11 +12,6 @@ import {
     LiveShareRuntime,
 } from "@microsoft/live-share/internal";
 
-// import mock from binTest, does not exist in live share bin.
-// must call live-share npm run build:test for binTest to exist, or live-share tests must have been run before live-share-media tests
-import { MockLiveShareRuntime } from "@microsoft/live-share/binTest/internals/mock/MockLiveShareRuntime";
-export { MockLiveShareRuntime };
-
 export class TestMediaPlayer implements IMediaPlayer {
     private done = new Deferred<string>();
     private playStartTime = 0;

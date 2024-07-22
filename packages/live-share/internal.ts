@@ -13,4 +13,5 @@ export * from "./bin/internals/schema-injection-utils";
 export * from "./bin/internals/smuggle";
 
 export { waitForDelay, waitUntilConnected } from "./bin/internals/utils";
+export { MockLiveShareRuntime } from "./bin/internals/mock/MockLiveShareRuntime";
 export { isErrorLike } from "./bin/internals/type-guards";

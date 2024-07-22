@@ -8,7 +8,10 @@ import { InkingManager } from "../InkingManager";
 export class EphemeralCanvas extends DryCanvas {
     private _removalTimeout?: number;
 
-    constructor(readonly clientId: string, parentElement?: HTMLElement) {
+    constructor(
+        readonly clientId: string,
+        parentElement?: HTMLElement
+    ) {
         super(parentElement);
     }
 

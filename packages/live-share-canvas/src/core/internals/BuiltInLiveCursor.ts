@@ -55,8 +55,8 @@ export class BuiltInLiveCursor extends LiveCursor {
 
         let visualTemplate = `
             <svg viewbox="-${arrowStrokeWidth} -${arrowStrokeWidth} ${
-            2 * arrowStrokeWidth + arrowWidth
-        } ${2 * arrowStrokeWidth + arrowHeight}"
+                2 * arrowStrokeWidth + arrowWidth
+            } ${2 * arrowStrokeWidth + arrowHeight}"
                 width="${arrowWidth}" height="${arrowHeight}" style="filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, .7)">
                 <path d="${
                     this._arrowPathData
@@ -71,8 +71,8 @@ export class BuiltInLiveCursor extends LiveCursor {
                 visualTemplate += `
                     <div style="display: flex; align-items: center; box-shadow: 0 0 2px black; background-color: ${backgroundColor};
                         height: ${arrowHeight}px; color: ${textColor}; border-radius: ${
-                    arrowHeight / 2
-                }px / 50%;
+                            arrowHeight / 2
+                        }px / 50%;
                         border-top-left-radius: 4px; padding: 2px 8px; margin: ${
                             arrowHeight * 0.75
                         }px 0 0 -${arrowWidth * 0.25}px;
@@ -82,22 +82,22 @@ export class BuiltInLiveCursor extends LiveCursor {
             } else if (this.userInfo.pictureUri && !this.userInfo.displayName) {
                 visualTemplate += `
                     <img src="${this.userInfo.pictureUri}" style="width: ${
-                    arrowHeight * 1.1
-                }px; height: ${arrowHeight * 1.1}px;
+                        arrowHeight * 1.1
+                    }px; height: ${arrowHeight * 1.1}px;
                         border-radius: 50%; box-shadow: 0 0 2px black;
                         margin: ${arrowHeight * 0.75}px 0 0 -${
-                    arrowWidth * 0.25
-                }px;">`;
+                            arrowWidth * 0.25
+                        }px;">`;
             } else if (this.userInfo.pictureUri && this.userInfo.displayName) {
                 visualTemplate += `
                     <div style="display: flex; flex-direction: row; align-items: center; background-color: ${backgroundColor}; color: ${textColor};
                         border-radius: ${arrowHeight / 2}px / 50%; margin: ${
-                    arrowHeight * 0.75
-                }px 0 0 -${arrowWidth * 0.25}px;
+                            arrowHeight * 0.75
+                        }px 0 0 -${arrowWidth * 0.25}px;
                         padding: 2px; white-space: nowrap; font-size: 12px; font-family: sans-serif; box-shadow: 0 0 2px black">
                         <img src="${this.userInfo.pictureUri}" style="width: ${
-                    arrowHeight * 1.1
-                }px; height: ${arrowHeight * 1.1}px; border-radius: 50%;">
+                            arrowHeight * 1.1
+                        }px; height: ${arrowHeight * 1.1}px; border-radius: 50%;">
                         <div style="padding: 0 8px">${
                             this.userInfo.displayName
                         }</div>
@@ -118,7 +118,10 @@ export class BuiltInLiveCursor extends LiveCursor {
         return element;
     }
 
-    constructor(public clientId: string, _userInfo?: IUserInfo) {
+    constructor(
+        public clientId: string,
+        _userInfo?: IUserInfo
+    ) {
         const cursorColors: ICursorColor[] = [
             { backgroundColor: BasicColors.red, textColor: BasicColors.white },
             {

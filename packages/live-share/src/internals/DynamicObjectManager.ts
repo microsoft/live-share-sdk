@@ -111,7 +111,7 @@ export class DynamicObjectManagerClass extends LiveDataObject {
      * @returns the DDS and whether or not it was created locally
      */
     public async getDDS<
-        T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
+        T extends IFluidLoadable = FluidObject<any> & IFluidLoadable,
     >(
         key: string,
         objectClass: SharedObjectKind<T>,
@@ -144,7 +144,7 @@ export class DynamicObjectManagerClass extends LiveDataObject {
      * @returns existing DDS in the _dynamicObjectsMap or undefined if it does not exist
      */
     private async internalGetDDS<
-        T extends FluidObject<any> = FluidObject<any> & IFluidLoadable
+        T extends FluidObject<any> = FluidObject<any> & IFluidLoadable,
     >(key: string): Promise<T | undefined> {
         // Check if we already have the DDS / get DDS promise in memory
         const ddsInMemory = this._dynamicObjectsMap.get(key);
@@ -170,7 +170,7 @@ export class DynamicObjectManagerClass extends LiveDataObject {
      * @returns the DDS and whether or not it was created locally
      */
     private async loadDDSWithConsensus<
-        T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
+        T extends IFluidLoadable = FluidObject<any> & IFluidLoadable,
     >(
         key: string,
         localDDS: T

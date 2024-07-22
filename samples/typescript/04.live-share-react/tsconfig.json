@@ -1,10 +1,10 @@
 {
-  "extends": "../../../packages/live-share/tsconfig.json",
-  "include": ["./src"],
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "outDir": "/tmp",
-    "module": "esnext"
-  },
-  "files": ["src/main.tsx"]
+    "extends": "../../../packages/live-share/tsconfig.json",
+    "include": ["./src"],
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "outDir": "/tmp",
+        "module": "esnext"
+    },
+    "files": ["src/main.tsx"]
 }

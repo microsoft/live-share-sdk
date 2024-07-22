@@ -24,18 +24,34 @@ import {
 import { TestLiveShareHost } from "../TestLiveShareHost";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
 import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
-import { describeCompat } from "@live-share-private/test-utils";
+import {
+    describeCompat,
+    ITestObjectProviderOptions,
+} from "@live-share-private/test-utils";
+import { SharedObjectKind } from "fluid-framework";
+import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 
-class TestLivePresence<
-    TData extends object = object
+class TestLivePresenceClass<
+    TData extends object = object,
 > extends LivePresenceClass<TData> {
     public async clientId(): Promise<string> {
         return await this.waitUntilConnected();
     }
 }
 
+export type TestLivePresence<TData extends object = object> =
+    TestLivePresenceClass<TData>;
+
+// eslint-disable-next-line no-redeclare
+export const TestLivePresence = (() => {
+    const kind = createDataObjectKind(TestLivePresenceClass<any>);
+    return kind as typeof kind & SharedObjectKind<TestLivePresenceClass<any>>;
+})();
+
 async function getObjects(
-    getTestObjectProvider,
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider,
     updateInterval: number = 10000,
     object2canSendBackgroundUpdates = true,
     customHost?: ILiveShareHost
@@ -64,16 +80,18 @@ async function getObjects(
     let container1 = await provider.createContainer(
         ObjectProxy1.factory as fluidEntryPoint
     );
-    let object1 = await getContainerEntryPointBackCompat<
-        TestLivePresence<{ foo: string }>
-    >(container1);
+    let object1 =
+        await getContainerEntryPointBackCompat<
+            TestLivePresence<{ foo: string }>
+        >(container1);
 
     let container2 = await provider.loadContainer(
         ObjectProxy2.factory as fluidEntryPoint
     );
-    let object2 = await getContainerEntryPointBackCompat<
-        TestLivePresence<{ foo: string }>
-    >(container2);
+    let object2 =
+        await getContainerEntryPointBackCompat<
+            TestLivePresence<{ foo: string }>
+        >(container2);
     // need to be connected to send signals
     if (!container1.connect) {
         await new Promise((resolve) => container1.once("connected", resolve));

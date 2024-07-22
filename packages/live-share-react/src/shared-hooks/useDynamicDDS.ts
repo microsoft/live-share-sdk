@@ -5,7 +5,7 @@
 
 import React from "react";
 import { FluidObject, IFluidLoadable } from "@fluidframework/core-interfaces";
-import { useFluidObjectsContext } from "../providers";
+import { useFluidObjectsContext } from "../providers/AzureProvider";
 import { SharedObjectKind } from "fluid-framework";
 
 /**
@@ -21,7 +21,7 @@ import { SharedObjectKind } from "fluid-framework";
  * @returns the DDS object, which is of type T when loaded and undefined while loading
  */
 export function useDynamicDDS<
-    T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
+    T extends IFluidLoadable = FluidObject<any> & IFluidLoadable,
 >(
     uniqueKey: string,
     objectClass: SharedObjectKind<T>,

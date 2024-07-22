@@ -72,7 +72,7 @@ export interface ILivePresenceEvents<TData extends object = object>
  * @template TData Type of data object to share with clients.
  */
 export class LivePresenceClass<
-    TData extends object = object
+    TData extends object = object,
 > extends LiveDataObject<{
     Events: ILivePresenceEvents<TData>;
 }> {

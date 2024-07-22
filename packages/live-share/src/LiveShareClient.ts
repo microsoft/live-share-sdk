@@ -338,9 +338,8 @@ export class LiveShareClient extends BaseLiveShareClient {
         const newContainerId = await container.attach();
 
         // Attempt to save container ID mapping
-        const containerInfo = await this._host.setFluidContainerId(
-            newContainerId
-        );
+        const containerInfo =
+            await this._host.setFluidContainerId(newContainerId);
         if (containerInfo.containerState != ContainerState.added) {
             // Delete created container
             container.dispose();

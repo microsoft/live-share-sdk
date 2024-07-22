@@ -65,7 +65,7 @@ import React from "react";
  * ```
  */
 export function useSharedTree<
-    TSchema extends ImplicitFieldSchema = ImplicitFieldSchema
+    TSchema extends ImplicitFieldSchema = ImplicitFieldSchema,
 >(
     uniqueKey: string,
     treeViewConfiguration: TreeViewConfiguration<TSchema>,

@@ -1,0 +1,14 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./bin/cjs",
+        "module": "CommonJS",
+        "moduleResolution": null,
+        "downlevelIteration": true,
+        "paths": {
+            "@microsoft/live-share/internal": [
+                "../live-share/bin/esm/index.d.ts"
+            ]
+        }
+    }
+}

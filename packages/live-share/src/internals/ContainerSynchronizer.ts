@@ -296,9 +296,9 @@ export class ContainerSynchronizer {
                                 handlers.shouldUpdateTimestampPeriodically
                                     ? this._liveRuntime.getTimestamp()
                                     : evtType ===
-                                      ObjectSynchronizerEvents.connect
-                                    ? 0
-                                    : state.timestamp,
+                                        ObjectSynchronizerEvents.connect
+                                      ? 0
+                                      : state.timestamp,
                         };
                         continue;
                     }

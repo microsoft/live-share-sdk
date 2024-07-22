@@ -75,7 +75,7 @@ export function buildProxy<TNode extends TreeNode = TreeNode>(
  * @param setProxyNode setter to set the root proxy node listened to in useTreeNode
  */
 export function setUpListenersForNodeChildren<
-    TNode extends TreeNode = TreeNode
+    TNode extends TreeNode = TreeNode,
 >(
     parentRawNode: TreeNode,
     rootNodeForListener: TreeNode,

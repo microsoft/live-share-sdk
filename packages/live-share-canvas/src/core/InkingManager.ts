@@ -361,8 +361,8 @@ export class InkingManager extends TypedEventEmitter<IInkingManagerEvents> {
                     this.tool === InkingTool.line
                         ? StrokeMode.line
                         : e.ctrlKey && InkingManager.enableStrokeModifierHotKeys
-                        ? StrokeMode.line
-                        : StrokeMode.freeHand;
+                          ? StrokeMode.line
+                          : StrokeMode.freeHand;
                 // eslint-disable-next-line no-case-declarations
                 const brush = { ...this.getBrushForTool(this.tool) };
 
@@ -499,8 +499,8 @@ export class InkingManager extends TypedEventEmitter<IInkingManagerEvents> {
         options?: IAddRemoveStrokeOptions
     ) {
         const effectiveOptions: Required<IAddRemoveStrokeOptions> = {
-            forceReRender: options ? options.forceReRender ?? false : false,
-            addToChangeLog: options ? options.addToChangeLog ?? true : true,
+            forceReRender: options ? (options.forceReRender ?? false) : false,
+            addToChangeLog: options ? (options.addToChangeLog ?? true) : true,
         };
 
         if (effectiveOptions.forceReRender || this._strokes.has(stroke.id)) {
@@ -963,8 +963,12 @@ export class InkingManager extends TypedEventEmitter<IInkingManagerEvents> {
     public removeStroke(id: string, options?: IAddRemoveStrokeOptions) {
         if (this._strokes.delete(id)) {
             const effectiveOptions: Required<IAddRemoveStrokeOptions> = {
-                forceReRender: options ? options.forceReRender ?? false : false,
-                addToChangeLog: options ? options.addToChangeLog ?? true : true,
+                forceReRender: options
+                    ? (options.forceReRender ?? false)
+                    : false,
+                addToChangeLog: options
+                    ? (options.addToChangeLog ?? true)
+                    : true,
             };
 
             effectiveOptions.forceReRender

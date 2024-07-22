@@ -4,14 +4,27 @@
     "description": "Live Share extension library for collaborative inking.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/index.js",
-    "types": "./bin/index.d.ts",
+    "main": "./bin/esm/index.js",
+    "types": "./bin/esm/index.d.ts",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "tsc -p tsconfig.build.json",
-        "test": "ts-mocha src/**/*.spec.ts --timeout 10000",
+        "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
+        "build:test": "tsc -p tsconfig.test.json",
+        "test": "npm run build:test && ts-mocha -p tsconfig.test.json --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
         "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
+    },
+    "exports": {
+        ".": {
+            "require": {
+                "types": "./bin/cjs/index.d.ts",
+                "default": "./bin/cjs/index.js"
+            },
+            "import": {
+                "types": "./bin/esm/index.d.ts",
+                "default": "./bin/esm/index.js"
+            }
+        }
     },
     "devDependencies": {
         "@microsoft/live-share": "2.0.0-internal.5",
@@ -22,7 +35,7 @@
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
         "ts-mocha": "^10.0.0",
-        "typescript": "~5.1.6"
+        "typescript": "~5.5.3"
     },
     "peerDependencies": {
         "@microsoft/live-share": "2.0.0-internal.5",

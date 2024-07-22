@@ -12,6 +12,7 @@ import {
 import {
     IRuntimeSignaler,
     LiveShareRuntime,
+    waitUntilConnected,
 } from "@microsoft/live-share/internal";
 import {
     ExtendedMediaMetadata,
@@ -44,7 +45,6 @@ import {
     IPlaybackTrackDataChangeEvent,
 } from "./GroupPlaybackTrackData";
 import { TelemetryEvents } from "./consts";
-import { waitUntilConnected } from "@microsoft/live-share/bin/internals/utils";
 import {
     GroupPlaybackRate,
     IPlaybackRate,

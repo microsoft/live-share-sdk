@@ -115,7 +115,7 @@ function isLiveDataObject(value: any): value is typeof LiveDataObject {
  * Create a new class extending LiveDataObject to inject in _liveRuntime
  */
 function getLiveDataObjectProxyClassInternal<
-    I extends DataObjectTypes = DataObjectTypes
+    I extends DataObjectTypes = DataObjectTypes,
 >(
     BaseClass: typeof LiveDataObject<I>,
     runtime: LiveShareRuntime

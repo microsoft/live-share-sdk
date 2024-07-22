@@ -4,8 +4,8 @@
     "description": "Live Share classes that synchronize media playback across clients.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/esm/index.js",
-    "types": "./bin/esm/index.public.d.ts",
+    "main": "./bin/cjs/index.js",
+    "types": "./bin/cjs/index.public.d.ts",
     "scripts": {
         "clean": "npx shx rm -rf bin",
         "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",

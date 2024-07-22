@@ -23,7 +23,6 @@ import {
     TurboDynamicObjects,
     TurboStateMap,
 } from "./smuggle";
-import { isErrorLike } from "./type-guards";
 import { getFactoryName } from "./fluid-duplicated";
 import { ExpectedError } from "../errors";
 

@@ -37,6 +37,16 @@ export function useDynamicDDS<
      */
     const { container, clientRef } = useFluidObjectsContext();
 
+    const mountedRef = React.useRef(false);
+    React.useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
+
+    const getDDSPromisesRef = React.useRef<Map<string, Promise<T>>>(new Map());
+
     /**
      * Once container is available, this effect will register the setter method so that the DDS loaded
      * from `dynamicObjects` that matches `uniqueKey` can be passed back to this hook. If one does not yet exist,
@@ -45,16 +55,20 @@ export function useDynamicDDS<
      */
     React.useEffect(() => {
         if (container === undefined) return;
-        let mounted = true;
         // Callback method to set the `initialData` into the map when the DDS is first created.
         const onGetDDS = async () => {
             try {
-                const dds = await clientRef.current.getDDS<T>(
-                    uniqueKey,
-                    objectClass,
-                    onFirstInitialize
-                );
-                if (mounted) {
+                let getPromise = getDDSPromisesRef.current.get(uniqueKey);
+                if (!getPromise) {
+                    getPromise = clientRef.current.getDDS<T>(
+                        uniqueKey,
+                        objectClass,
+                        onFirstInitialize
+                    );
+                    getDDSPromisesRef.current.set(uniqueKey, getPromise);
+                }
+                const dds = await getPromise;
+                if (mountedRef.current) {
                     setDDS(dds);
                 }
             } catch (error: unknown) {
@@ -70,9 +84,6 @@ export function useDynamicDDS<
             }
         };
         onGetDDS();
-        return () => {
-            mounted = false;
-        };
     }, [container, uniqueKey, onFirstInitialize]);
 
     return {

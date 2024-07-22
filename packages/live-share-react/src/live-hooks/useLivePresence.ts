@@ -61,12 +61,16 @@ export function useLivePresence<TData extends object = object>(
     /**
      * User facing: list of non-local user's presence objects.
      */
-    const otherUsers = allUsers.filter((user) => !user.isLocalUser);
+    const otherUsers = React.useMemo(() => {
+        return allUsers.filter((user) => !user.isLocalUser);
+    }, [allUsers]);
 
     /**
      * User facing: local user's presence object.
      */
-    const localUser = allUsers.find((user) => user.isLocalUser);
+    const localUser = React.useMemo(() => {
+        return allUsers.find((user) => user.isLocalUser);
+    }, [allUsers]);
 
     const { container } = useFluidObjectsContext();
 

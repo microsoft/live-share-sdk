@@ -21,17 +21,7 @@ const IN_TEAMS = searchParams.get("inTeams") === "1";
 const root = document.getElementById("content");
 let theme = "light";
 
-// Define container schema
-const containerSchema = {
-    initialObjects: {
-        diceState: LiveState, // shared dice value, resets once all users close app
-        presence: LivePresence, // each user has their own dice value, resets once all users close app
-        storedDiceMap: SharedMap, // stored dice value that will last 6 hours from session creation
-    },
-};
-
 // STARTUP LOGIC
-
 async function start() {
     // Check for page to display
     let view = searchParams.get("view") || "stage";
@@ -51,8 +41,8 @@ async function start() {
     // Load the requested view
     switch (view) {
         case "content": {
-            const { container } = await joinContainer();
-            await renderMeetingSidePanel(container, root, theme);
+            const client = await getClient();
+            await renderMeetingSidePanel(client, root, theme);
             break;
         }
         case "config": {
@@ -61,14 +51,14 @@ async function start() {
         }
         case "stage":
         default: {
-            const { container } = await joinContainer();
-            await renderMeetingStage(container, root, theme);
+            const client = await getClient();
+            await renderMeetingStage(client, root, theme);
             break;
         }
     }
 }
 
-async function joinContainer() {
+async function getClient() {
     // Are we running in teams?
     const host = IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create();
 
@@ -76,7 +66,9 @@ async function joinContainer() {
     const client = new LiveShareClient(host);
 
     // Join container
-    return await client.joinContainer(containerSchema);
+    await client.join();
+
+    return client;
 }
 
 start().catch((error) => renderError(root, error, theme));

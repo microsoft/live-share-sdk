@@ -7,16 +7,16 @@ import {
     IClientInfo,
     LivePresence,
     LivePresenceUser,
+    LiveShareClient,
     LiveState,
     PresenceState,
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { getRandomDiceValue, stylizeDiceElem } from "./utils";
-import { IFluidContainer } from "fluid-framework";
 import { AppTheme, IPresenceData } from "./types-interfaces";
 
 export async function renderMeetingStage(
-    container: IFluidContainer,
+    client: LiveShareClient,
     elem: HTMLElement,
     theme: AppTheme
 ) {
@@ -30,15 +30,19 @@ export async function renderMeetingStage(
         <h2>Users:</h2>
     </div>
     `;
-    const { diceState, presence } = container.initialObjects;
+    const diceState = await client.getDDS<LiveState<number>>(
+        "dice",
+        LiveState<number>
+    );
+    const presence = await client.getDDS<LivePresence<IPresenceData>>(
+        "dice",
+        LivePresence
+    );
 
     elem.appendChild(stageTemplate.content.cloneNode(true));
     const wrapperElem = elem.querySelector<HTMLElement>(".wrapper")!;
-    await renderSharedDice(diceState as LiveState<number>, wrapperElem);
-    await renderPresenceDiceList(
-        presence as LivePresence<IPresenceData>,
-        wrapperElem
-    );
+    await renderSharedDice(diceState, wrapperElem);
+    await renderPresenceDiceList(presence, wrapperElem);
 }
 
 async function renderSharedDice(

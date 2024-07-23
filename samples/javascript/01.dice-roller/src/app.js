@@ -3,18 +3,12 @@
  * Licensed under the MIT License.
  */
 
-import {
-    LivePresence,
-    LiveShareClient,
-    LiveState,
-    TestLiveShareHost,
-} from "@microsoft/live-share";
+import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import { app, LiveShareHost } from "@microsoft/teams-js";
 import { renderMeetingStage } from "./renderMeetingStage";
 import { renderMeetingSidePanel } from "./renderMeetingSidePanel";
 import { renderTabConfig } from "./renderTabConfig";
 import { renderError } from "./renderError";
-import { SharedMap } from "fluid-framework/legacy";
 
 const searchParams = new URL(window.location.href).searchParams;
 const IN_TEAMS = searchParams.get("inTeams") === "1";

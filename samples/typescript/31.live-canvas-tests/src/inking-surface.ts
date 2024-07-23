@@ -25,9 +25,7 @@ export class InkingSurface {
     private async internalStart() {
         const client = new LiveShareClient(TestLiveShareHost.create());
 
-        this._container = (
-            await client.joinContainer(containerSchema)
-        ).container;
+        this._container = (await client.join(containerSchema)).container;
 
         const liveCanvas = this.getLiveCanvas();
 

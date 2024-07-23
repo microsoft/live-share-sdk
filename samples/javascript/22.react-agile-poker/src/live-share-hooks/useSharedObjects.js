@@ -82,7 +82,7 @@ export function useSharedObjects() {
         // Join Teams container
         const client = new LiveShareClient(host);
         client
-            .joinContainer(schema, onFirstInitialize)
+            .join(schema, onFirstInitialize)
             .then((results) => setResults(results))
             .catch((err) => setError(err));
     }, []);

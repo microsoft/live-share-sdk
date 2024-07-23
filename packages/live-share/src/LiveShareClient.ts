@@ -206,7 +206,7 @@ export class LiveShareClient extends BaseLiveShareClient {
                 if (!endpoint) {
                     UnexpectedError.assert(
                         serviceEndpointMap.has(frsTenantInfo.serviceEndpoint),
-                        "LiveShareClient:joinContainer",
+                        "LiveShareClient:join",
                         `unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
                     );
                     endpoint = serviceEndpointMap.get(

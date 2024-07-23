@@ -10,7 +10,6 @@ import {
     InkingTool,
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
-import { IFluidContainer } from "fluid-framework";
 import * as Utils from "./utils";
 import { View } from "./view";
 

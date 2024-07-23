@@ -86,7 +86,7 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         // Define container schema
         const schema = {
             initialObjects: {
-                presence: LivePresence<IUserData>,
+                presence: LivePresence,
                 mediaSession: LiveMediaSession,
                 notificationEvent: LiveEvent,
                 liveCanvas: LiveCanvas,

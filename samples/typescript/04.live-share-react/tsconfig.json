@@ -4,7 +4,7 @@
     "compilerOptions": {
         "jsx": "react-jsx",
         "outDir": "/tmp",
-        "module": "esnext"
+        "module": "ESNext"
     },
     "files": ["src/main.tsx"]
 }

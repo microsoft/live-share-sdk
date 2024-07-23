@@ -45,7 +45,7 @@ await app.initialize();
 // create space based on Teams context
 const host = LiveShareHost.create();
 const client = new LiveShareClient(host);
-const { container } = await client.join();
+await client.join();
 
 ...
 // listen to and send events on container.initialObjects.<DDS>

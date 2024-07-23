@@ -60,15 +60,9 @@ const appTemplate = `
         </div>
     </div>`;
 
-const containerSchema = {
-    initialObjects: {
-        liveCanvas: LiveCanvas,
-    },
-};
-
 export class StageView extends View {
     private _inkingManager!: InkingManager;
-    private _container!: IFluidContainer;
+    private _client!: LiveShareClient;
 
     private offsetBy(x: number, y: number) {
         this._inkingManager.offset = {
@@ -79,8 +73,8 @@ export class StageView extends View {
         this.updateBackgroundImagePosition();
     }
 
-    private getLiveCanvas(): LiveCanvas {
-        return this._container.initialObjects.liveCanvas as LiveCanvas;
+    private async getLiveCanvas(): Promise<LiveCanvas> {
+        return await this._client.getDDS<LiveCanvas>("liveCanvas", LiveCanvas);
     }
 
     private _hostResizeObserver!: ResizeObserver;
@@ -90,15 +84,13 @@ export class StageView extends View {
             ? Teams.LiveShareHost.create()
             : TestLiveShareHost.create();
         const client = new LiveShareClient(host);
-
-        this._container = (
-            await client.joinContainer(containerSchema)
-        ).container;
+        await client.join();
+        this._client = client;
 
         const inkingHost = document.getElementById("inkingHost");
 
         if (inkingHost) {
-            const liveCanvas = this.getLiveCanvas();
+            const liveCanvas = await this.getLiveCanvas();
 
             this._inkingManager = new InkingManager(inkingHost);
 
@@ -265,8 +257,8 @@ export class StageView extends View {
             this.updateBackgroundImagePosition();
         });
 
-        setupButton("btnToggleCursorShare", () => {
-            const liveCanvas = this.getLiveCanvas();
+        setupButton("btnToggleCursorShare", async () => {
+            const liveCanvas = await this.getLiveCanvas();
             const isCursorShared = liveCanvas.isCursorShared;
 
             liveCanvas.isCursorShared = !isCursorShared;

@@ -6,6 +6,7 @@
 const childProcess = require("child_process");
 const fs = require("fs");
 
+console.log("building live share SDK packages");
 ensurePackagesBuilt();
 /**
  * if packages are not built or if they are old builds then:

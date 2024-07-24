@@ -8,7 +8,7 @@
     "types": "./bin/esm/index.d.ts",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
+        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json\"",
         "build:test": "tsc -p tsconfig.test.json",
         "test": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.js --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
         "test:debug": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.js --recursive \"./bin/test/**/LiveMediaSession_Synchronizer.spec.js\" --inspect-brk",
@@ -36,6 +36,7 @@
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
+        "concurrently": "^8.2.2",
         "fluid-framework": "^2.0.0-rc.5.0.1",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",

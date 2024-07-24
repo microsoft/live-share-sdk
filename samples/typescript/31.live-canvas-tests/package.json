@@ -12,8 +12,7 @@
         "start:server": "npx tinylicious@latest",
         "start": "start-server-and-test start:server 7070 start:client",
         "test": "jest",
-        "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern",
-        "postinstall": "node ../../../ensure-packages-built.js"
+        "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
         "@fluidframework/azure-client": "^2.0.0-rc.5.0.1",

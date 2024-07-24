@@ -6,7 +6,7 @@
 const childProcess = require("child_process");
 const fs = require("fs");
 
-console.log("building live share SDK packages");
+console.log("Building live share SDK packages");
 ensurePackagesBuilt();
 /**
  * if packages are not built or if they are old builds then:
@@ -76,11 +76,15 @@ async function ensurePackagesBuilt() {
     // live-share-react uses all other live-share packages as dependencies
     async function npmInstallFromLiveShareReact() {
         return new Promise((resolve, reject) => {
-            const installProcess = childProcess.spawn("npm", ["install"], {
-                shell: true,
-                cwd: `${rootFolderPath}/packages/live-share-react`,
-                stdio: "inherit",
-            });
+            const installProcess = childProcess.spawn(
+                "npm",
+                ["install", " --ignore-scripts"],
+                {
+                    shell: true,
+                    cwd: `${rootFolderPath}/packages/live-share-react`,
+                    stdio: "inherit",
+                }
+            );
 
             installProcess.on("close", (code) => {
                 if (code == 0) {

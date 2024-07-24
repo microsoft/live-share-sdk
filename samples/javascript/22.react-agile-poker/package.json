@@ -43,8 +43,7 @@
         "start:https": "vite --config vite.https-config.js",
         "build": "vite build",
         "preview": "vite preview",
-        "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern",
-        "postinstall": "node ../../../ensure-packages-built.js"
+        "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "browserslist": {
         "production": [

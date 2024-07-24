@@ -48,8 +48,7 @@
         "start-https": "start-server-and-test start:server 7070 start:https",
         "start:client": "vite",
         "start:https": "vite --config vite.https-config.ts",
-        "start:server": "npx tinylicious@latest",
-        "postinstall": "node ../../../ensure-packages-built.js"
+        "start:server": "npx tinylicious@latest"
     },
     "browserslist": {
         "production": [

@@ -16,6 +16,7 @@
     "scripts": {
         "build": "node workspace-cmd-util.js build internal packages samples/javascript samples/typescript",
         "build:packages": "node workspace-cmd-util.js build internal packages",
+        "build:packages:fast": "concurrently \"npm run build -w=\"internal\"\" \"npm run build -w=\"packages/live-share\"\" && concurrently \"npm run build -w=\"packages/live-share-acs\"\" \"npm run build -w=\"packages/live-share-media\"\" \"npm run build -w=\"packages/live-share-canvas\"\" && npm run build -w=\"packages/live-share-react\"",
         "build:samples": "node workspace-cmd-util.js build samples/javascript samples/typescript",
         "build:docs": "typedoc packages/live-share packages/live-share-media packages/live-share-turbo packages/live-share-canvas",
         "test:packages": "node workspace-cmd-util.js test packages",
@@ -29,6 +30,7 @@
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^7.16.0",
         "@typescript-eslint/parser": "^7.16.0",
+        "concurrently": "^8.2.2",
         "eslint": "^8.56.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.1.3",

@@ -18,7 +18,6 @@
         "build:packages": "concurrently \"npm run build -w=\"internal\"\" \"npm run build -w=\"packages/live-share\"\" && concurrently \"npm run build -w=\"packages/live-share-acs\"\" \"npm run build -w=\"packages/live-share-media\"\" \"npm run build -w=\"packages/live-share-canvas\"\" && npm run build -w=\"packages/live-share-react\"",
         "build:samples": "npm run build -w=\"samples/javascript\" -w=\"samples/typescript\"",
         "build:docs": "typedoc packages/live-share packages/live-share-media packages/live-share-turbo packages/live-share-canvas",
-        "test:packages": "npm run test --if-presents -w=\"packages\"",
         "doctor": "npm run doctor:src && npm run doctor:json",
         "doctor:src": "eslint **/src/**/*.{j,t}s{,x} --fix",
         "doctor:json": "eslint **/*.json --fix",

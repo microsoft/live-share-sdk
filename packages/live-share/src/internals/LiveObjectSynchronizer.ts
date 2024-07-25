@@ -12,6 +12,23 @@ import {
 } from "../interfaces";
 
 /**
+ * Starts params for a `LiveObjectSynchronizer` instance.
+ *
+ * @param initialState The initial state for the local user. Does not impact remote state that has been set since connecting to the session.
+ * @param updateState A function called to process a state update received from a remote instance. This will be called anytime a "connect" or "update" message is received.
+ * @param getLocalUserCanSend A async function called to determine whether the local user can send a connect/update message. Return true if the user can send the update.
+ * @param shouldUpdateTimestampPeriodically flag for updating the timestamp whenever sending out a periodic update.
+ * @param enableBackgroundUpdates flag for enabling/disabling background updates. True by default.
+ */
+interface LiveObjectSynchronizerStartParams<TState> {
+    initialState: TState;
+    updateState: UpdateSynchronizationState<TState>;
+    getLocalUserCanSend: GetLocalUserCanSend;
+    shouldUpdateTimestampPeriodically?: boolean | undefined;
+    enableBackgroundUpdates?: boolean | undefined;
+}
+
+/**
  * @internal
  * @hidden
  *
@@ -74,18 +91,39 @@ export class LiveObjectSynchronizer<TState> {
     /**
      * Starts a `LiveObjectSynchronizer` instance.
      *
+     * @param {LiveObjectSynchronizerStartParams} params Start params for LiveObjectSynchronizer.
+     */
+    public start({
+        initialState,
+        updateState,
+        getLocalUserCanSend,
+        shouldUpdateTimestampPeriodically = false,
+        enableBackgroundUpdates = true,
+    }: LiveObjectSynchronizerStartParams<TState>): Promise<void> {
+        return this.startInternal(
+            initialState,
+            updateState,
+            getLocalUserCanSend,
+            shouldUpdateTimestampPeriodically,
+            enableBackgroundUpdates
+        );
+    }
+
+    /**
+     * Starts a `LiveObjectSynchronizer` instance.
+     *
      * @param initialState The initial state for the local user. Does not impact remote state that has been set since connecting to the session.
      * @param updateState A function called to process a state update received from a remote instance. This will be called anytime a "connect" or "update" message is received.
      * @param getLocalUserCanSend A async function called to determine whether the local user can send a connect/update message. Return true if the user can send the update.
      * @param shouldUpdateTimestampPeriodically flag for updating the timestamp whenever sending out a periodic update.
      * @param enableBackgroundUpdates flag for enabling/disabling background updates. True by default.
      */
-    public start(
+    private startInternal(
         initialState: TState,
         updateState: UpdateSynchronizationState<TState>,
         getLocalUserCanSend: GetLocalUserCanSend,
-        shouldUpdateTimestampPeriodically = false,
-        enableBackgroundUpdates = true
+        shouldUpdateTimestampPeriodically: boolean,
+        enableBackgroundUpdates: boolean
     ): Promise<void> {
         return this.liveRuntime.objectManager.registerObject<TState>(
             this.id,

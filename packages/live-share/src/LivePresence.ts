@@ -177,14 +177,14 @@ export class LivePresenceClass<
             ILivePresenceEvent<TData>
         >(this.id, this.runtime, this.liveRuntime);
         try {
-            await this._synchronizer!.start(
-                this._currentPresence!.data,
-                async (state, sender, local) => {
+            await this._synchronizer!.start({
+                initialState: this._currentPresence!.data,
+                updateState: async (state, sender, local) => {
                     // Add user to list
                     await this.updateMembersList(state, local);
                     return false;
                 },
-                async (connecting) => {
+                getLocalUserCanSend: async (connecting) => {
                     if (connecting) return true;
                     // If user has eligible roles, allow the update to be sent
                     try {
@@ -193,8 +193,8 @@ export class LivePresenceClass<
                         return false;
                     }
                 },
-                true // We want to update the timestamp periodically so that we know if a user is active
-            );
+                shouldUpdateTimestampPeriodically: true, // We want to update the timestamp periodically so that we know if a user is active
+            });
         } catch (error: unknown) {
             // Update initialize state as fatal error
             this.initializeState = LiveDataObjectInitializeState.fatalError;

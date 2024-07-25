@@ -15,14 +15,14 @@
     ],
     "scripts": {
         "build": "npm run build:packages && npm run build:samples",
-        "build:packages": "node concurrent-packages-build.js",
+        "build:packages": "node internal/build-tools/concurrent-packages-build.js",
         "build:samples": "npm run build -w=\"samples/javascript\" -w=\"samples/typescript\"",
         "build:docs": "typedoc packages/live-share packages/live-share-media packages/live-share-turbo packages/live-share-canvas",
         "doctor": "npm run doctor:src && npm run doctor:json",
         "doctor:src": "eslint **/src/**/*.{j,t}s{,x} --fix",
         "doctor:json": "eslint **/*.json --fix",
         "clean": "npm exec --workspaces -- npx rimraf node_modules && npx rimraf node_modules",
-        "prepare": "node ensure-packages-built.js"
+        "prepare": "node internal/build-tools/ensure-packages-built.js"
     },
     "author": "",
     "license": "Microsoft",

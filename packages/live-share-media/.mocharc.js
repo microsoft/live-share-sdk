@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-'use strict';
+"use strict";
 
 const packageDir = `${__dirname}/../..`;
 

@@ -5,7 +5,7 @@
 
 const childProcess = require("child_process");
 const fs = require("fs");
-const { getGitHash, getRootFolder } = require("./git-utils");
+const { getGitHash, getRootFolder, getPackageNames } = require("./utils");
 
 console.log("Ensuring local Live Share SDK packages have been built");
 ensurePackagesBuilt();
@@ -79,40 +79,17 @@ async function ensurePackagesBuilt() {
         });
     }
 
-    function doesNeedBuild() {
+    async function doesNeedBuild() {
         const isOldBuild = currentGitHash !== getBuildData()?.lastGitHashBuilt;
-
         if (isOldBuild) {
             return true;
         }
 
-        const liveShareBuilt = fs.existsSync(
-            `${rootFolderPath}/node_modules/@microsoft/live-share/bin`
-        );
-        const liveShareMediaBuilt = fs.existsSync(
-            `${rootFolderPath}/node_modules/@microsoft/live-share-media/bin`
-        );
-        const liveShareCanvasBuilt = fs.existsSync(
-            `${rootFolderPath}/node_modules/@microsoft/live-share-canvas/bin`
-        );
-        const liveShareReactBuilt = fs.existsSync(
-            `${rootFolderPath}/node_modules/@microsoft/live-share-react/bin`
-        );
-        const liveShareAcsBuilt = fs.existsSync(
-            `${rootFolderPath}/node_modules/@microsoft/live-share-acs/bin`
-        );
-        const testUtils = fs.existsSync(
-            `${rootFolderPath}/node_modules/@live-share-private/test-utils/bin`
-        );
-
-        return [
-            liveShareBuilt,
-            liveShareMediaBuilt,
-            liveShareCanvasBuilt,
-            liveShareReactBuilt,
-            liveShareAcsBuilt,
-            testUtils,
-        ].includes(false);
+        return (await getPackageNames())
+            .map((package) =>
+                fs.existsSync(`${rootFolderPath}/node_modules/${package}/bin`)
+            )
+            .includes(false);
     }
 
     function getBuildData() {

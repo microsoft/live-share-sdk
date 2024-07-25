@@ -17,7 +17,6 @@
         "build": "npm run build:packages && npm run build:samples",
         "build:packages": "node internal/build-tools/concurrent-packages-build.js",
         "build:samples": "npm run build -w=\"samples/javascript\" -w=\"samples/typescript\"",
-        "build:docs": "typedoc packages/live-share packages/live-share-media packages/live-share-turbo packages/live-share-canvas",
         "doctor": "npm run doctor:src && npm run doctor:json",
         "doctor:src": "eslint **/src/**/*.{j,t}s{,x} --fix",
         "doctor:json": "eslint **/*.json --fix",
@@ -37,7 +36,6 @@
         "eslint-plugin-react": "^7.34.4",
         "eslint-plugin-react-hooks": "^4.6.2",
         "prettier": "^3.3.3",
-        "typedoc": "^0.26.4",
         "typescript": "~5.5.3"
     }
 }

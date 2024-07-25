@@ -21,6 +21,8 @@
         "doctor": "npm run doctor:src && npm run doctor:json",
         "doctor:src": "eslint **/src/**/*.{j,t}s{,x} --fix",
         "doctor:json": "eslint **/*.json --fix",
+        "doctor:buildtools": "eslint internal/build-tools/*.js --fix",
+        "doctor:prettier": "prettier . --write",
         "clean": "npm exec --workspaces -- npx rimraf node_modules && npx rimraf node_modules",
         "prepare": "node internal/build-tools/ensure-packages-built.js"
     },

@@ -19,7 +19,7 @@ async function ensurePackagesBuilt() {
     const rootFolderPath = await getRootFolder();
     const currentGitHash = await getGitHash();
     const buildDataJsonPath = `${rootFolderPath}/internal/build-tools/build-data.json`;
-    
+
     if (doesNeedBuild()) {
         await npmInstallFromDirectory(rootFolderPath);
         await build();
@@ -104,14 +104,14 @@ async function ensurePackagesBuilt() {
         const testUtils = fs.existsSync(
             `${rootFolderPath}/node_modules/@live-share-private/test-utils/bin`
         );
-    
+
         return [
-            liveShareBuilt, 
-            liveShareMediaBuilt, 
-            liveShareCanvasBuilt, 
-            liveShareReactBuilt, 
-            liveShareAcsBuilt, 
-            testUtils
+            liveShareBuilt,
+            liveShareMediaBuilt,
+            liveShareCanvasBuilt,
+            liveShareReactBuilt,
+            liveShareAcsBuilt,
+            testUtils,
         ].includes(false);
     }
 

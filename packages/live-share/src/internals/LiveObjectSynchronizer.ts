@@ -12,7 +12,7 @@ import {
 } from "../interfaces";
 
 /**
- * Starts params for a `LiveObjectSynchronizer` instance.
+ * Start params for calling `LiveObjectSynchronizer.start` method.
  *
  * @param initialState The initial state for the local user. Does not impact remote state that has been set since connecting to the session.
  * @param updateState A function called to process a state update received from a remote instance. This will be called anytime a "connect" or "update" message is received.

@@ -38,7 +38,10 @@ const PlayerProgressBar = ({
     }, [onSeek, setIsSeeking, localCurrentTime]);
 
     // eslint-disable-next-line
-  const debouncedSeek = useCallback(debounce(onDidSeek, 200), [onDidSeek, localCurrentTime]);
+    const debouncedSeek = useCallback(debounce(onDidSeek, 200), [
+        onDidSeek,
+        localCurrentTime,
+    ]);
 
     useEffect(() => {
         if (!isSeeking && currentTime !== localCurrentTime) {

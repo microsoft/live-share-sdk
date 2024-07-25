@@ -56,9 +56,13 @@ const isLocal = ["link", "file"].includes(args[0]);
 if (isLocal) {
     console.log(`Configuring packages for local building and development...`);
 } else if (/^\d+\.\d+\.\d+(|\-.*)$/.test(version)) {
-    console.log(`Configuring packages as version '${version}' for publishing...`);
+    console.log(
+        `Configuring packages as version '${version}' for publishing...`
+    );
 } else {
-    console.error(`Invalid argument of '${version}'. Pass in a valid version number like '1.0.1' or '1.0.1-preview'`);
+    console.error(
+        `Invalid argument of '${version}'. Pass in a valid version number like '1.0.1' or '1.0.1-preview'`
+    );
     exit();
 }
 
@@ -66,7 +70,9 @@ if (isLocal) {
 const dependencies = isLocal ? localDependencies : publishDependencies;
 for (const package in dependencies) {
     // Read package.json file
-    let pjson = JSON.parse(fs.readFileSync(path.resolve(package, "package.json"), "utf-8"));
+    let pjson = JSON.parse(
+        fs.readFileSync(path.resolve(package, "package.json"), "utf-8")
+    );
 
     // Update package version
     if (!isLocal) {
@@ -80,7 +86,10 @@ for (const package in dependencies) {
     }
 
     // Save out file
-    fs.writeFileSync(path.resolve(package, "package.json"), JSON.stringify(pjson, null, 4));
+    fs.writeFileSync(
+        path.resolve(package, "package.json"),
+        JSON.stringify(pjson, null, 4)
+    );
     fs.writeFileSync(path.resolve("", ".npmrc"), npmrcContent);
     if (!isLocal) {
         fs.writeFileSync(path.resolve(package, ".npmrc"), npmrcContent);

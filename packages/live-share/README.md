@@ -31,7 +31,7 @@ This will use npm workspaces to hoist and build all dependencies.
 
 ## How to use this extension
 
-- Teams apps that use this package depend on [Teams JS SDK](https://docs.microsoft.com/javascript/api/overview/msteams-client?view=msteams-client-js-latest). The version of `@microsoft/teams-js` you use in your app must match the one used in this project (see the below version compatibility chart).
+-   Teams apps that use this package depend on [Teams JS SDK](https://docs.microsoft.com/javascript/api/overview/msteams-client?view=msteams-client-js-latest). The version of `@microsoft/teams-js` you use in your app must match the one used in this project (see the below version compatibility chart).
 
 ```javascript
 
@@ -56,12 +56,12 @@ await client.join();
 
 Live Share has several features that make building collaborative apps easier than ever, including:
 
-- `LiveShareClient`: Connect to a Fluid container associated with a Microsoft Teams meeting.
-- `LivePresence`: Track who is using your app during a meeting and associate custom metadata for each user (e.g., camera position).
-- `LiveState`: Synchronize a JSON-serializable value for maintaining consistent application state across clients.
-- `LiveTimer`: Build a collaborative countdown timer.
-- `LiveEvent`: Send one-time, stateless JSON-serializable values to each user in the session.
-- `LiveFollowMode` (beta): Easily integrate features to present to all, follow specific users, and suspend/resume following.
+-   `LiveShareClient`: Connect to a Fluid container associated with a Microsoft Teams meeting.
+-   `LivePresence`: Track who is using your app during a meeting and associate custom metadata for each user (e.g., camera position).
+-   `LiveState`: Synchronize a JSON-serializable value for maintaining consistent application state across clients.
+-   `LiveTimer`: Build a collaborative countdown timer.
+-   `LiveEvent`: Send one-time, stateless JSON-serializable values to each user in the session.
+-   `LiveFollowMode` (beta): Easily integrate features to present to all, follow specific users, and suspend/resume following.
 
 ## Code samples
 
@@ -76,18 +76,18 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 **It is critical that your app use the package dependencies listed in the table below.** Lookup the version of the `@microsoft/live-share` you're using and set any other dependencies in your package.json file to match:
 
-| @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
-| --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| ^1.0.0                  | ^2.11.0             | ^1.2.3          | ^1.0.0                      | ^1.0.0                       | ^2.5.0                        | ^2.5.0                          |
+| @microsoft/live-share | @microsoft/teams-js | fluid-framework | @microsoft/live-share-\* | @fluidframework/azure-client | @microsoft/TeamsFx | @microsoft/TeamsFx-react |
+| --------------------- | ------------------- | --------------- | ------------------------ | ---------------------------- | ------------------ | ------------------------ |
+| ^1.0.0                | ^2.11.0             | ^1.2.3          | ^1.0.0                   | ^1.0.0                       | ^2.5.0             | ^2.5.0                   |
 
 ## Contributing
 
 There are several ways you can [contribute](../../CONTRIBUTING.md) to this project:
 
-- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
-- Review the source code changes.
-- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
-- [Contribute bug fixes](../../CONTRIBUTING.md).
+-   [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+-   Review the source code changes.
+-   Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+-   [Contribute bug fixes](../../CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
 

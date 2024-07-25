@@ -1,36 +1,35 @@
 name: Build Live Share SDK samples
 
 on:
-  push:
-    branches: [ main, mainv2 ]
-  pull_request:
-    branches: [ main, mainv2 ]
+    push:
+        branches: [main, mainv2]
+    pull_request:
+        branches: [main, mainv2]
 
 jobs:
-  build:
+    build:
+        runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node-version: [18.x]
 
-    strategy:
-      matrix:
-        node-version: [18.x]
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - run: npm install
+            - run: npm install jest
+              working-directory: samples/javascript/02.react-video
 
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm install
-      - run: npm install jest
-        working-directory: samples/javascript/02.react-video
+            - name: "build packages and samples"
+              run: npm run build
 
-      - name: "build packages and samples"
-        run: npm run build
+            # TODO: get scenario_test.sh working
 
-      # TODO: get scenario_test.sh working
-      
-      # - name: "test 02.react-video sample"
-      #   shell: "bash"
-      #   run: sh ../../../.github/workflows/scenario_test.sh
-      #   working-directory: samples/javascript/02.react-video
+            # - name: "test 02.react-video sample"
+            #   shell: "bash"
+            #   run: sh ../../../.github/workflows/scenario_test.sh
+            #   working-directory: samples/javascript/02.react-video

@@ -18,4 +18,4 @@ updates:
           - dependency-name: "@fluidframework/azure-client"
           - dependency-name: "@microsoft/teams-js"
       # Updates both the package-lock and package.json, not just package-lock
-      versioning-strategy: increase
+      versioning-strategy: increase 

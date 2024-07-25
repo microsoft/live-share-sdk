@@ -1,6 +1,6 @@
 /**
  * This file is used to ensure that the live-share-sdk packages are built prior to being used by the samples.
- * postinstall step may be removed from sample package.json if the sample has been moved outside of the repository.
+ * This is executed after running `npm install` from the any of the packages or samples, or the root directory.
  */
 
 const childProcess = require("child_process");

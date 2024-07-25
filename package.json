@@ -15,7 +15,7 @@
     ],
     "scripts": {
         "build": "npm run build:packages && npm run build:samples",
-        "build:packages": "concurrently \"npm run build -w=\"internal\"\" \"npm run build -w=\"packages/live-share\"\" && concurrently \"npm run build -w=\"packages/live-share-acs\"\" \"npm run build -w=\"packages/live-share-media\"\" \"npm run build -w=\"packages/live-share-canvas\"\" && npm run build -w=\"packages/live-share-react\"",
+        "build:packages": "node concurrent-packages-build.js",
         "build:samples": "npm run build -w=\"samples/javascript\" -w=\"samples/typescript\"",
         "build:docs": "typedoc packages/live-share packages/live-share-media packages/live-share-turbo packages/live-share-canvas",
         "doctor": "npm run doctor:src && npm run doctor:json",
@@ -29,7 +29,6 @@
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^7.16.0",
         "@typescript-eslint/parser": "^7.16.0",
-        "concurrently": "^8.2.2",
         "eslint": "^8.56.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.1.3",

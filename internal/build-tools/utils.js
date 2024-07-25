@@ -42,23 +42,19 @@ async function getRootFolder() {
 }
 
 async function getPackageNames() {
-    try {
-        const packagePath = `${await getRootFolder()}/package.json`;
-        const packagePaths = require(packagePath).workspaces;
-        const packages = packagePaths
-            .filter((path) => path.includes("packages/"))
-            .map((path) => path.substring(path.indexOf("/") + 1))
-            .map((package) => `@microsoft/${package}`);
+    const packagePath = `${await getRootFolder()}/package.json`;
+    const packagePaths = require(packagePath).workspaces;
+    const packages = packagePaths
+        .filter((path) => path.includes("packages/"))
+        .map((path) => path.substring(path.indexOf("/") + 1))
+        .map((package) => `@microsoft/${package}`);
 
-        const internalPackages = packagePaths
-            .filter((path) => path.includes("internal/"))
-            .map((path) => path.substring(path.indexOf("/") + 1))
-            .map((package) => `@live-share-private/${package}`);
+    const internalPackages = packagePaths
+        .filter((path) => path.includes("internal/"))
+        .map((path) => path.substring(path.indexOf("/") + 1))
+        .map((package) => `@live-share-private/${package}`);
 
-        return packages.concat(internalPackages);
-    } catch {
-        return undefined;
-    }
+    return packages.concat(internalPackages);
 }
 
 module.exports = {

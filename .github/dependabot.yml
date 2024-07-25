@@ -1,21 +1,21 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-  # Only specify the root so dependabot will update all manifests once per package
-  # See https://github.com/dependabot/dependabot-core/issues/5226#issuecomment-1179434437
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    # Ignore the following packages because
-    # 1. Semver for these packages is not always followed
-    # 1. These packages MUST be updated all at the same time (same PR)
-    ignore:
-      - "fluid-framework",
-      - "@fluidframework/test-client-utils"
-      - "@fluidframework/test-utils"
-      - "@fluidframework/test-runtime-utils"
-      - "@fluidframework/azure-client",
-      - "@microsoft/teams-js"
-    # Updates both the package-lock and package.json, not just package-lock
-    versioning-strategy: increase
+    - package-ecosystem: "npm"
+      # Only specify the root so dependabot will update all manifests once per package
+      # See https://github.com/dependabot/dependabot-core/issues/5226#issuecomment-1179434437
+      directory: "/"
+      schedule:
+          interval: "weekly"
+          day: "monday"
+      # Ignore the following packages because
+      # 1. Semver for these packages is not always followed
+      # 1. These packages MUST be updated all at the same time (same PR)
+      ignore:
+          - dependency-name: "fluid-framework"
+          - dependency-name: "@fluidframework/test-client-utils"
+          - dependency-name: "@fluidframework/test-utils"
+          - dependency-name: "@fluidframework/test-runtime-utils"
+          - dependency-name: "@fluidframework/azure-client"
+          - dependency-name: "@microsoft/teams-js"
+      # Updates both the package-lock and package.json, not just package-lock
+      versioning-strategy: increase

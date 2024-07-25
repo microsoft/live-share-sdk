@@ -14,14 +14,16 @@
         "samples/typescript/*"
     ],
     "scripts": {
-        "build": "node workspace-cmd-util.js build internal packages samples/javascript samples/typescript",
-        "build:packages": "node workspace-cmd-util.js build internal packages",
-        "build:samples": "node workspace-cmd-util.js build samples/javascript samples/typescript",
-        "test:packages": "node workspace-cmd-util.js test packages",
+        "build": "npm run build:packages && npm run build:samples",
+        "build:packages": "node internal/build-tools/concurrent-packages-build.js",
+        "build:samples": "npm run build -w=\"samples/javascript\" -w=\"samples/typescript\"",
         "doctor": "npm run doctor:src && npm run doctor:json",
         "doctor:src": "eslint **/src/**/*.{j,t}s{,x} --fix",
         "doctor:json": "eslint **/*.json --fix",
-        "clean": "npm exec --workspaces -- npx rimraf node_modules && npx rimraf node_modules"
+        "doctor:buildtools": "eslint internal/build-tools/*.js --fix",
+        "doctor:prettier": "prettier . --write",
+        "clean": "npm exec --workspaces -- npx rimraf node_modules && npx rimraf node_modules",
+        "prepare": "node internal/build-tools/ensure-packages-built.js"
     },
     "author": "",
     "license": "Microsoft",

@@ -58,14 +58,9 @@ await microsoftTeams.app.initialize();
 // Setup the Fluid container
 const host = LiveShareHost.create();
 const client = new LiveShareClient(host);
-const schema = {
-  initialObjects: {
-    mediaSession: LiveMediaSession,
-    ...,
-  },
-};
-const { container } = await client.joinContainer(schema);
-const { mediaSession } = container.initialObjects;
+await client.join();
+
+const mediaSession = await client.getDDS<LiveMediaSession>("media-session-id", LiveMediaSession);
 
 // Get the player from your document and create synchronizer
 const player = document.getElementById("player");

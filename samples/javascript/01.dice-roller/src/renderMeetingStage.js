@@ -3,10 +3,15 @@
  * Licensed under the MIT License.
  */
 
-import { PresenceState, UserMeetingRole } from "@microsoft/live-share";
+import {
+    PresenceState,
+    UserMeetingRole,
+    LivePresence,
+    LiveState,
+} from "@microsoft/live-share";
 import { getRandomDiceValue, stylizeDiceElem } from "./utils";
 
-export async function renderMeetingStage(container, elem, theme) {
+export async function renderMeetingStage(client, elem, theme) {
     const stageTemplate = document.createElement("template");
     stageTemplate["innerHTML"] = `
     <div class="wrapper ${theme} stage">
@@ -17,7 +22,8 @@ export async function renderMeetingStage(container, elem, theme) {
         <h2>Users:</h2>
     </div>
     `;
-    const { diceState, presence } = container.initialObjects;
+    const diceState = await client.getDDS("dice", LiveState);
+    const presence = await client.getDDS("dice", LivePresence);
 
     elem.appendChild(stageTemplate.content.cloneNode(true));
     const wrapperElem = elem.querySelector(".wrapper");

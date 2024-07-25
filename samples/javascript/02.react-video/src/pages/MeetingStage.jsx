@@ -62,7 +62,7 @@ const MeetingStage = () => {
                 const schema = {
                     initialObjects: { mediaSession: LiveMediaSession },
                 };
-                const { container } = await client.joinContainer(schema);
+                const { container } = await client.join(schema);
                 const { mediaSession } = container.initialObjects;
                 synchronizer.current = mediaSession.synchronize(
                     videoElement.current

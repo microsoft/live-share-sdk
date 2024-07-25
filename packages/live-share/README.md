@@ -42,18 +42,10 @@ import { app, LiveShareHost } from "@microsoft/teams-js";
 // Initialize Teams Client SDK
 await app.initialize();
 
-// Define Fluid schema
-const schema = {
-    // Your initial SharedObject for your app
-    initialObjects: {
-        exampleMap: SharedMap,
-        ...,
-    },
-};
 // create space based on Teams context
 const host = LiveShareHost.create();
 const client = new LiveShareClient(host);
-const { container } = await client.joinContainer(schema);
+await client.join();
 
 ...
 // listen to and send events on container.initialObjects.<DDS>

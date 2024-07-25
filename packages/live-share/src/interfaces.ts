@@ -277,7 +277,7 @@ export interface ILiveShareHost {
 }
 
 /**
- * Response object from `.joinContainer()` in `LiveShareClient`
+ * Response object from `.join()` in `LiveShareClient`
  */
 export interface ILiveShareJoinResults {
     /**

@@ -13,8 +13,7 @@
         "start:client": "vite",
         "start:https": "vite --config vite.https-config.js",
         "start:server": "npx tinylicious@latest",
-        "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern",
-        "postinstall": "node ../../../ensure-packages-built.js"
+        "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
         "@microsoft/live-share": "2.0.0-internal.5",

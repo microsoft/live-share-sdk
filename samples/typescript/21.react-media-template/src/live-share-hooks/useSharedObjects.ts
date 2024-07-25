@@ -86,7 +86,7 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         // Define container schema
         const schema = {
             initialObjects: {
-                presence: LivePresence<IUserData>,
+                presence: LivePresence,
                 mediaSession: LiveMediaSession,
                 notificationEvent: LiveEvent,
                 liveCanvas: LiveCanvas,
@@ -105,7 +105,7 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         console.log("useSharedObjects: joining container");
         const client = new LiveShareClient(host);
         client
-            .joinContainer(schema, onFirstInitialize)
+            .join(schema, onFirstInitialize)
             .then((results) => {
                 console.log("useSharedObjects: joined container");
                 setResults(results);

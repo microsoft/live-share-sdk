@@ -53,8 +53,7 @@
         "start:server": "npx tinylicious@latest",
         "start:https": "vite --config vite.https-config.js",
         "test": "jest",
-        "preview": "vite preview",
-        "postinstall": "node ../../../ensure-packages-built.js"
+        "preview": "vite preview"
     },
     "browserslist": {
         "production": [

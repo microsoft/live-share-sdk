@@ -64,7 +64,7 @@ export const LiveCanvasPage = () => {
 
     const initialize = async () => {
         const client = new LiveShareClient(TestLiveShareHost.create());
-        const { container } = await client.joinContainer(containerSchema);
+        const { container } = await client.join(containerSchema);
         setliveCanvas(container.initialObjects.liveCanvas);
     };
 

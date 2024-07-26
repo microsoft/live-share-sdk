@@ -586,13 +586,12 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
 
         try {
             // start needs to happen after setting initializedState to "succeeded"
-            await this._synchronizer?.start(
-                undefined,
-                async (evt, sender, local) => false,
-                async (connecting) => true,
-                false,
-                false
-            );
+            await this._synchronizer?.start({
+                initialState: undefined,
+                updateState: async (evt, sender, local) => false,
+                getLocalUserCanSend: async (connecting) => true,
+                enableBackgroundUpdates: false,
+            });
         } catch (error: unknown) {
             // not a fatal error for LiveMediaSession, only used for "connect" event to send new clients position updates.
             this._logger.sendErrorEvent(

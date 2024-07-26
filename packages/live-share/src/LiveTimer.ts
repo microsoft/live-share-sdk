@@ -189,14 +189,14 @@ export class LiveTimerClass extends LiveDataObject<{
             this.liveRuntime
         );
         try {
-            await this._synchronizer.start(
-                this._currentConfig.data,
-                async (state, sender) => {
+            await this._synchronizer.start({
+                initialState: this._currentConfig.data,
+                updateState: async (state, sender) => {
                     // Check for state change.
                     // If it was valid, this will override the local user's previous value.
                     return await this.remoteConfigReceived(state, sender);
                 },
-                async (connecting) => {
+                getLocalUserCanSend: async (connecting) => {
                     if (connecting) return true;
                     // If user has eligible roles, allow the update to be sent
                     try {
@@ -204,8 +204,8 @@ export class LiveTimerClass extends LiveDataObject<{
                     } catch {
                         return false;
                     }
-                }
-            );
+                },
+            });
         } catch (error: unknown) {
             // Update initialize state as fatal error
             this.initializeState = LiveDataObjectInitializeState.fatalError;

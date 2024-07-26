@@ -29,9 +29,9 @@ describe("LiveObjectSynchronizer", () => {
             localRuntime,
             localLiveRuntime
         );
-        await localObject.start(
-            { client: "local" },
-            async (state, sender) => {
+        await localObject.start({
+            initialState: { client: "local" },
+            updateState: async (state, sender) => {
                 try {
                     assert(
                         typeof state.data == "object",
@@ -48,8 +48,8 @@ describe("LiveObjectSynchronizer", () => {
                 }
                 return true;
             },
-            () => Promise.resolve(true)
-        );
+            getLocalUserCanSend: () => Promise.resolve(true),
+        });
 
         const remoteRuntime = new MockRuntimeSignaler();
         const remoteObject = new LiveObjectSynchronizer<ITestState>(
@@ -57,11 +57,11 @@ describe("LiveObjectSynchronizer", () => {
             remoteRuntime,
             remoteLiveRuntime
         );
-        await remoteObject.start(
-            { client: "remote" },
-            (state, sender) => Promise.resolve(true),
-            () => Promise.resolve(true)
-        );
+        await remoteObject.start({
+            initialState: { client: "remote" },
+            updateState: (state, sender) => Promise.resolve(true),
+            getLocalUserCanSend: () => Promise.resolve(true),
+        });
 
         await done.promise;
         localObject.dispose();
@@ -84,9 +84,9 @@ describe("LiveObjectSynchronizer", () => {
             localRuntime,
             localLiveRuntime
         );
-        await localObject.start(
-            { client: "local" },
-            (state, sender) => {
+        await localObject.start({
+            initialState: { client: "local" },
+            updateState: (state, sender) => {
                 try {
                     assert(
                         typeof state.data == "object",
@@ -103,10 +103,10 @@ describe("LiveObjectSynchronizer", () => {
                 }
                 return Promise.resolve(true);
             },
-            () => {
+            getLocalUserCanSend: () => {
                 return Promise.resolve(true);
-            }
-        );
+            },
+        });
 
         const remoteRuntime = new MockRuntimeSignaler();
         const remoteObject = new LiveObjectSynchronizer<ITestState>(
@@ -114,19 +114,19 @@ describe("LiveObjectSynchronizer", () => {
             remoteRuntime,
             remoteLiveRuntime
         );
-        await remoteObject.start(
-            { client: "remote" },
-            (state, sender) => {
+        await remoteObject.start({
+            initialState: { client: "remote" },
+            updateState: (state, sender) => {
                 return Promise.resolve(true);
             },
-            () => {
+            getLocalUserCanSend: () => {
                 assert(
                     remoteRuntime.connected,
                     `remote: sending connect before connected`
                 );
                 return Promise.resolve(true);
-            }
-        );
+            },
+        });
 
         setTimeout(() => {
             localRuntime.connect();
@@ -156,9 +156,9 @@ describe("LiveObjectSynchronizer", () => {
             localRuntime,
             localLiveRuntime
         );
-        await localObject.start(
-            { client: "local" },
-            (state, sender) => {
+        await localObject.start({
+            initialState: { client: "local" },
+            updateState: (state, sender) => {
                 try {
                     assert(
                         typeof state.data == "object",
@@ -177,7 +177,7 @@ describe("LiveObjectSynchronizer", () => {
                 }
                 return Promise.resolve(true);
             },
-            (connecting) => {
+            getLocalUserCanSend: (connecting) => {
                 if (connecting) {
                     // counting updates not connects
                     return Promise.resolve(true);
@@ -189,8 +189,8 @@ describe("LiveObjectSynchronizer", () => {
                 }
                 // If this is called, it will send out an update
                 return Promise.resolve(true);
-            }
-        );
+            },
+        });
 
         const remoteRuntime = new MockRuntimeSignaler();
         const remoteObject = new LiveObjectSynchronizer<ITestState>(
@@ -198,13 +198,13 @@ describe("LiveObjectSynchronizer", () => {
             remoteRuntime,
             remoteLiveRuntime
         );
-        await remoteObject.start(
-            { client: "remote" },
-            (state, sender) => {
+        await remoteObject.start({
+            initialState: { client: "remote" },
+            updateState: (state, sender) => {
                 return Promise.resolve(true);
             },
-            () => Promise.resolve(true)
-        );
+            getLocalUserCanSend: () => Promise.resolve(true),
+        });
 
         await done.promise;
         localObject.dispose();
@@ -228,13 +228,13 @@ describe("LiveObjectSynchronizer", () => {
             localRuntime,
             localLiveRuntime
         );
-        await localObject.start(
-            { client: "local" },
-            (state, sender) => {
+        await localObject.start({
+            initialState: { client: "local" },
+            updateState: (state, sender) => {
                 done.reject();
                 return Promise.resolve(true);
             },
-            (connecting) => {
+            getLocalUserCanSend: (connecting) => {
                 if (connecting) {
                     // counting updates not connects
                     return Promise.resolve(true);
@@ -247,9 +247,8 @@ describe("LiveObjectSynchronizer", () => {
                 // If this is called, it will send out an update
                 return Promise.resolve(true);
             },
-            false,
-            false
-        );
+            enableBackgroundUpdates: false,
+        });
 
         const remoteRuntime = new MockRuntimeSignaler();
         const remoteObject = new LiveObjectSynchronizer<ITestState>(
@@ -257,15 +256,14 @@ describe("LiveObjectSynchronizer", () => {
             remoteRuntime,
             remoteLiveRuntime
         );
-        await remoteObject.start(
-            { client: "remote" },
-            (state, sender) => {
+        await remoteObject.start({
+            initialState: { client: "remote" },
+            updateState: (state, sender) => {
                 return Promise.resolve(true);
             },
-            () => Promise.resolve(true),
-            false,
-            false
-        );
+            getLocalUserCanSend: () => Promise.resolve(true),
+            enableBackgroundUpdates: false,
+        });
 
         await Promise.race([done.promise, waitForDelay(300)]);
         assert(sent == 0, `sent ${sent} updates when no updates was expected`);
@@ -292,12 +290,12 @@ describe("LiveObjectSynchronizer", () => {
             localRuntime,
             localLiveRuntime
         );
-        await localObject.start(
-            { client: "local" },
-            (state, sender) => {
+        await localObject.start({
+            initialState: { client: "local" },
+            updateState: (state, sender) => {
                 return Promise.resolve(true);
             },
-            async (connecting) => {
+            getLocalUserCanSend: async (connecting) => {
                 localSent++;
                 if (connecting) {
                     return true;
@@ -310,8 +308,8 @@ describe("LiveObjectSynchronizer", () => {
                 );
                 // If this is called, it will send out an update
                 return true;
-            }
-        );
+            },
+        });
 
         const remoteRuntime = new MockRuntimeSignaler();
         const remoteObject = new LiveObjectSynchronizer<ITestState>(
@@ -319,19 +317,19 @@ describe("LiveObjectSynchronizer", () => {
             remoteRuntime,
             remoteLiveRuntime
         );
-        await remoteObject.start(
-            { client: "remote" },
-            (state, sender) => {
+        await remoteObject.start({
+            initialState: { client: "remote" },
+            updateState: (state, sender) => {
                 return Promise.resolve(true);
             },
-            () => {
+            getLocalUserCanSend: () => {
                 remoteSent++;
                 if (remoteSent == 6) {
                     done.resolve();
                 }
                 return Promise.resolve(true);
-            }
-        );
+            },
+        });
 
         await done.promise;
         localObject.dispose();

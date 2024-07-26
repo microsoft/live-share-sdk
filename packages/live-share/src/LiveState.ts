@@ -150,14 +150,14 @@ export class LiveStateClass<TState = any> extends LiveDataObject<{
             this.liveRuntime
         );
         try {
-            await this._synchronizer.start(
+            await this._synchronizer.start({
                 initialState,
-                async (evt, sender, local) => {
+                updateState: async (evt, sender, local) => {
                     // Check for state change.
                     // If it was valid, this will override the local user's previous value.
                     return await this.onReceivedStateEvent(evt, sender, local);
                 },
-                async (connecting) => {
+                getLocalUserCanSend: async (connecting) => {
                     if (connecting) return true;
                     // If user has eligible roles, allow the update to be sent
                     try {
@@ -165,8 +165,8 @@ export class LiveStateClass<TState = any> extends LiveDataObject<{
                     } catch {
                         return false;
                     }
-                }
-            );
+                },
+            });
         } catch (error: unknown) {
             // Update initialize state as fatal error
             this.initializeState = LiveDataObjectInitializeState.fatalError;

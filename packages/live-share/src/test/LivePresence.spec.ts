@@ -244,12 +244,13 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
 
         await object1.initialize(undefined);
 
-        let object2PresenceChangeCount: number = 0;
         let object2PresenceChangeOnlineCount: number = 0;
         let object2PresenceChangeOfflineCount: number = 0;
+
+        let object2object2PresenceChangeCount: number = 0;
         object2.on("presenceChanged", (user, local) => {
             if (local) {
-                object2PresenceChangeCount += 1;
+                object2object2PresenceChangeCount += 1;
                 if (user.state === "online") {
                     object2PresenceChangeOnlineCount += 1;
                 } else {
@@ -258,9 +259,11 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
                 object2done.resolve();
             }
         });
+
+        let object1object2PresenceChangeCount: number = 0;
         object1.on("presenceChanged", (user, local) => {
             if (!local) {
-                object2PresenceChangeCount += 1;
+                object1object2PresenceChangeCount += 1;
                 if (user.state === "online") {
                     object2PresenceChangeOnlineCount += 1;
                 } else {
@@ -283,18 +286,16 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
         await waitForDelay(1);
         // Wait for events to trigger
         await object2done.promise;
+
         assert(
-            object2PresenceChangeCount == 2,
-            `expected three events from object2, ${object2PresenceChangeCount}`
+            object2object2PresenceChangeCount == 2,
+            `expected two events from object2 from perspective of object 2, ${object2object2PresenceChangeCount}`
         );
         assert(
-            object2PresenceChangeOnlineCount == 2,
-            `expected two events from object2 that was online, ${object2PresenceChangeOnlineCount}`
+            object1object2PresenceChangeCount == 1,
+            `expected one events from object2 from perspective of object 1, ${object1object2PresenceChangeCount}`
         );
-        assert(
-            object2PresenceChangeOfflineCount == 0,
-            `expected zero events from object2 that was offline, ${object2PresenceChangeOfflineCount}`
-        );
+
         assert(
             object1.localUser !== undefined,
             "local user should not be undefined"
@@ -316,12 +317,17 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
 
         assert(
             // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
-            object2PresenceChangeCount == 4,
-            `expected 4 events from object2, ${object2PresenceChangeCount}`
+            object2object2PresenceChangeCount == 3,
+            `expected 1 more event (3 total) from object2 from perspective of object 2, ${object2object2PresenceChangeCount}`
         );
         assert(
-            object2PresenceChangeOnlineCount == 2,
-            `expected two events from object2 that was online, ${object2PresenceChangeOnlineCount}`
+            // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
+            object1object2PresenceChangeCount == 2,
+            `expected 1 more event (2 total) from object2 from perspective of object 1, ${object1object2PresenceChangeCount}`
+        );
+        assert(
+            object2PresenceChangeOnlineCount == 3,
+            `expected three events from object2 that was online, ${object2PresenceChangeOnlineCount}`
         );
         assert(
             // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
@@ -933,7 +939,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
         disposeAll();
     });
 
-    it("test offline timeout for user and connections", async () => {
+    it("test away timeout for user and connections", async () => {
         // set same user test host
         const mockHost = new SameUserLiveShareTestHost();
         const { object1, object2, disposeAll, disposeObject1, disposeObject2 } =
@@ -968,11 +974,11 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
                 PresenceState.online,
             "object2 should still be online from object1's perspective"
         );
-        await waitForDelay(150);
+        await waitForDelay(1500);
         assert(
             object1User.getConnection(object2ClientId)?.state ==
-                PresenceState.offline,
-            "object2 should be offline"
+                PresenceState.away,
+            "object2 should be away"
         );
         disposeObject1();
     });

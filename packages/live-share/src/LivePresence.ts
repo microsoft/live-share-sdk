@@ -32,6 +32,7 @@ import { LiveDataObject } from "./internals/LiveDataObject";
 import { SharedObjectKind } from "fluid-framework";
 import { cloneValue } from "./internals/utils";
 import { TelemetryEvents } from "./internals/consts";
+import { AzureMember } from "@fluidframework/azure-client";
 
 /**
  * Events supported by `LivePresence` object.
@@ -154,6 +155,9 @@ export class LivePresenceClass<
             "LivePresence:initialize",
             "_synchronizer already set, which is an unexpected error."
         );
+
+        this.listenForAudienceMemberChanges();
+
         // Update initialize state as pending
         this.initializeState = LiveDataObjectInitializeState.pending;
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
@@ -222,6 +226,7 @@ export class LivePresenceClass<
         if (this._synchronizer) {
             this._synchronizer.dispose();
         }
+        this.disposeAudienceMemberChanges();
     }
 
     /**
@@ -322,9 +327,9 @@ export class LivePresenceClass<
              */
             const localOnlyEvent = {
                 data: evtToSend,
-                name: "",
+                name: "UpdatePresence",
                 clientId: await this.waitUntilConnected(),
-                timestamp: 1,
+                timestamp: this.liveRuntime.getTimestamp(),
             };
             await this.updateMembersList(localOnlyEvent, true);
         }
@@ -353,14 +358,6 @@ export class LivePresenceClass<
             // So if undefined
             if (!info) return false;
 
-            if (this.useTransientParticipantWorkaround(info)) {
-                return this.transientParticipantWorkaround(
-                    evt,
-                    localEvent,
-                    info
-                );
-            }
-            // normal flow
             return this.updateMembersListWithInfo(evt, localEvent, info);
         } catch (err) {
             this._logger?.sendErrorEvent(
@@ -369,47 +366,6 @@ export class LivePresenceClass<
             );
         }
         return false;
-    }
-
-    /**
-     * For some reason, for non local users, tmp roster transiently doesn't contain a meeting participant.
-     * When the particpant is missing the `info` matches `defaultUserInfo`.
-     * @returns true if the info matches the default user info
-     */
-    private useTransientParticipantWorkaround(info: IClientInfo): boolean {
-        const defaultUserInfo: IClientInfo = {
-            userId: info.userId,
-            roles: [UserMeetingRole.guest],
-            displayName: undefined,
-        };
-        return JSON.stringify(info) === JSON.stringify(defaultUserInfo);
-    }
-
-    /**
-     * Uses `updateMembersListWithInfo` with the latest value rather than using the incorrect default client info response.
-     * @returns true if user presence record was updated
-     */
-    private transientParticipantWorkaround(
-        evt: LivePresenceReceivedEventData<TData>,
-        localEvent: boolean,
-        info: IClientInfo
-    ): boolean {
-        // when participant is missing, use existing information instead.
-        const user = this._users.find((user) => user.userId === info.userId);
-        if (user) {
-            const existingInfo: IClientInfo = {
-                userId: user.userId,
-                roles: user.roles,
-                displayName: user.displayName,
-            };
-            return this.updateMembersListWithInfo(
-                evt,
-                localEvent,
-                existingInfo
-            );
-        }
-        // This user has not yet been inserted, so we attempt to insert it with defaultUserInfo
-        return this.updateMembersListWithInfo(evt, localEvent, info);
     }
 
     private updateMembersListWithInfo(
@@ -473,6 +429,69 @@ export class LivePresenceClass<
         this._users.push(newUser);
         emitEvent(newUser);
         return true;
+    }
+
+    private audienceCallbacks = {
+        memberAdded: async (clientId: string, member: AzureMember<any>) => {
+            this.audienceMemberChanged(clientId, PresenceState.online);
+        },
+        memberRemoved: async (clientId: string, member: AzureMember<any>) => {
+            this.audienceMemberChanged(clientId, PresenceState.offline);
+        },
+    };
+
+    private listenForAudienceMemberChanges() {
+        this.liveRuntime.audience?.on(
+            "memberAdded",
+            this.audienceCallbacks.memberAdded
+        );
+
+        this.liveRuntime.audience?.on(
+            "memberRemoved",
+            this.audienceCallbacks.memberRemoved
+        );
+    }
+
+    private disposeAudienceMemberChanges() {
+        this.liveRuntime.audience?.off(
+            "memberAdded",
+            this.audienceCallbacks.memberAdded
+        );
+
+        this.liveRuntime.audience?.off(
+            "memberRemoved",
+            this.audienceCallbacks.memberRemoved
+        );
+    }
+
+    /**
+     * Will not create new Presence Users but will update to online if they leave and come back, and offline when they leave.
+     */
+    private async audienceMemberChanged(
+        clientId: string,
+        state: PresenceState
+    ) {
+        const user = this.getUserForClient(clientId);
+
+        if (!user) {
+            return;
+        }
+        const connection = user?.getConnection(clientId);
+
+        const evtToSend = {
+            state,
+            data: connection?.data,
+        };
+        /**
+         * Create an event that is not sent to other clients, since all clients should create this event at the same time.
+         */
+        const localOnlyEvent = {
+            data: evtToSend,
+            name: "UpdatePresence",
+            clientId: clientId,
+            timestamp: this.liveRuntime.getTimestamp(),
+        };
+        await this.updateMembersList(localOnlyEvent, true);
     }
 }
 

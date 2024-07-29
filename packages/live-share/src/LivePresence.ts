@@ -254,6 +254,7 @@ export class LivePresenceClass<
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
+    // TODO: should state be updatable now that fluid audience is integrated?
     public async update(data?: TData, state?: PresenceState): Promise<void> {
         return await this.updateInternal(data, state);
     }
@@ -472,7 +473,6 @@ export class LivePresenceClass<
         state: PresenceState
     ) {
         const user = this.getUserForClient(clientId);
-
         if (!user) {
             return;
         }

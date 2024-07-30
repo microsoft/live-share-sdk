@@ -131,7 +131,6 @@ export class LivePresenceClass<
      * Initialize the object to begin sending/receiving presence updates through this DDS.
      *
      * @param data Optional. Custom data object to share. A deep copy of the data object is saved to avoid any accidental modifications.
-     * @param state Optional. Initial presence state. Defaults to `PresenceState.online`.
      * @param allowedRoles Optional. List of roles allowed to emit presence changes.
      *
      * @returns a void promise that resolves once complete.
@@ -142,7 +141,6 @@ export class LivePresenceClass<
      */
     public async initialize(
         data?: TData,
-        state = PresenceState.online,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
         LiveDataObjectInitializeNotNeededError.assert(
@@ -171,7 +169,7 @@ export class LivePresenceClass<
             name: "UpdatePresence",
             timestamp: 0,
             data: {
-                state,
+                state: PresenceState.online,
                 data,
             },
         };

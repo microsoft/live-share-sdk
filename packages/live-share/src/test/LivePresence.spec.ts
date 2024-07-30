@@ -974,7 +974,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
                 PresenceState.online,
             "object2 should still be online from object1's perspective"
         );
-        await waitForDelay(1500);
+        await waitForDelay(150);
         assert(
             object1User.getConnection(object2ClientId)?.state ==
                 PresenceState.away,

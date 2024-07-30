@@ -23,7 +23,6 @@ export enum PresenceState {
     /**
      * The user is away. Automatically set for users after their client has stopped sending
      * updates for a period of time. @see LivePresence.expirationPeriod.
-     *
      */
     away = "away",
 

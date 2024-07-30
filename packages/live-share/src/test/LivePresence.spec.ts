@@ -183,56 +183,6 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
         disposeAll();
     });
 
-    it("Should start in alternate state", async () => {
-        const { object1, object2, disposeAll } = await getObjects(
-            getTestObjectProvider
-        );
-        const object1done = new Deferred();
-        object1.on("presenceChanged", (user, local) => {
-            try {
-                if (local) {
-                    assert(
-                        user.state == PresenceState.away,
-                        `user1: Unexpected presence state of ${user.state}`
-                    );
-                    assert(
-                        user.data == undefined,
-                        `user1: Unexpected data object of ${user.data}`
-                    );
-                    object1done.resolve();
-                }
-            } catch (err) {
-                object1done.reject(err);
-            }
-        });
-        await object1.initialize(undefined, PresenceState.away);
-
-        const object2done = new Deferred();
-        object2.on("presenceChanged", (user, local) => {
-            try {
-                if (local) {
-                    assert(
-                        user.state == PresenceState.offline,
-                        `user2: Unexpected presence state of ${user.state}`
-                    );
-                    assert(
-                        user.data == undefined,
-                        `user2: Unexpected data object of ${user.data}`
-                    );
-                    object2done.resolve();
-                }
-            } catch (err) {
-                object2done.reject(err);
-            }
-        });
-        await object2.initialize(undefined, PresenceState.offline);
-
-        // Wait for events to trigger
-        await Promise.all([object1done.promise, object2done.promise]);
-
-        disposeAll();
-    });
-
     it("test canSendBackgroundUpdates only sends when true", async () => {
         const canSendBackgroundUpdatesObject2 = false;
         const { object1, object2, disposeAll } = await getObjects(
@@ -357,8 +307,8 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
                 object1done.reject(err);
             }
         });
-        await object1.initialize({ foo: "bar" }, PresenceState.away);
-        assert(object1.localUser?.state == PresenceState.away);
+        await object1.initialize({ foo: "bar" });
+        assert(object1.localUser?.state == PresenceState.online);
         assert(object1.localUser?.data?.foo == "bar");
 
         const object2done = new Deferred();
@@ -376,7 +326,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
                 object2done.reject(err);
             }
         });
-        await object2.initialize({ foo: "bar" }, PresenceState.offline);
+        await object2.initialize({ foo: "bar" });
 
         // Wait for events to trigger
         await Promise.all([object1done.promise, object2done.promise]);
@@ -452,7 +402,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined, PresenceState.away);
+        await object2.initialize(undefined);
 
         // Wait for ready and perform test
         let user1Found = false;
@@ -492,7 +442,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined, PresenceState.away);
+        await object2.initialize(undefined);
 
         // Wait for ready and perform test
         let user1Found = false;
@@ -529,7 +479,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             object1.getUsers().length === 1,
             "getUsers() should not start empty"
         );
-        await object2.initialize(undefined, PresenceState.away);
+        await object2.initialize(undefined);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -552,7 +502,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined, PresenceState.away);
+        await object2.initialize(undefined);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -574,7 +524,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined, PresenceState.away);
+        await object2.initialize(undefined);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -601,7 +551,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined, PresenceState.away);
+        await object2.initialize(undefined);
 
         // Wait for ready and perform test
         await ready.promise;
@@ -644,7 +594,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined, PresenceState.away);
+        await object2.initialize(undefined);
 
         // Wait for ready and get client ID's
         await ready.promise;

@@ -399,7 +399,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
                             user.data.foo == "bar",
                             `user1: Unexpected data object of ${user.data}`
                         );
-                        assert(user.state == PresenceState.offline);
+                        assert(user.state == PresenceState.online);
                         object1done.resolve();
                     } else {
                         triggered = true;
@@ -426,7 +426,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
         await object2Ready.promise;
 
         // Update presence
-        object2.update({ foo: "bar" }, PresenceState.offline);
+        object2.update({ foo: "bar" });
 
         // Wait for finish
         await object1done.promise;

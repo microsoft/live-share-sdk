@@ -241,22 +241,20 @@ export class LivePresenceClass<
     }
 
     /**
-     * Updates the local user's presence shared data object and/or state.
+     * Updates the local user's presence shared data object.
      *
      * @remarks
      * This will trigger the immediate broadcast of the users presence to all other clients.
      *
-     * @param data Optional. Data object to change. A deep copy of the data object is saved to avoid any future changes.
-     * @param state Optional. Presence state to change.
+     * @param data Data object to change. A deep copy of the data object is saved to avoid any future changes.
      *
      * @returns a void promise that resolves once the update event has been sent to the server.
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
-    // TODO: should state be updatable now that fluid audience is integrated?
-    public async update(data?: TData, state?: PresenceState): Promise<void> {
-        return await this.updateInternal(data, state);
+    public async update(data: TData): Promise<void> {
+        return await this.updateInternal(data);
     }
 
     /**

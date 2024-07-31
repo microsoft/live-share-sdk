@@ -4,7 +4,7 @@
  */
 
 import { TimeInterval } from "@microsoft/live-share";
-import { IMediaPlayer } from "./IMediaPlayer";
+import { IMediaPlayer } from "./IMediaPlayer.js";
 
 export enum LimitLevelType {
     fixed,

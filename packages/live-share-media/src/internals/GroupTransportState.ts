@@ -5,18 +5,18 @@
 
 import { LiveShareRuntime } from "@microsoft/live-share/internal";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator.js";
 import {
     ExtendedMediaSessionPlaybackState,
     ExtendedMediaSessionAction,
     ExtendedMediaSessionActionSource,
-} from "../MediaSessionExtensions";
+} from "../MediaSessionExtensions.js";
 import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
-} from "./GroupPlaybackTrack";
-import { IGenericTypedEvents, IGroupStateEvent } from "./interfaces";
-import { GroupPlaybackRate } from "./GroupPlaybackRate";
+} from "./GroupPlaybackTrack.js";
+import { IGenericTypedEvents, IGroupStateEvent } from "./interfaces.js";
+import { GroupPlaybackRate } from "./GroupPlaybackRate.js";
 
 /**
  * @hidden

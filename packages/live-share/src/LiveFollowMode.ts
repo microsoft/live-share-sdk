@@ -1,21 +1,24 @@
-import { LiveDataObject } from "./internals/LiveDataObject";
-import { LiveState } from "./LiveState";
-import { ILivePresenceEvents, LivePresence } from "./LivePresence";
+import { LiveDataObject } from "./internals/LiveDataObject.js";
+import { LiveState } from "./LiveState.js";
+import { ILivePresenceEvents, LivePresence } from "./LivePresence.js";
 import {
     DataObjectFactory,
     createDataObjectKind,
 } from "@fluidframework/aqueduct/internal";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import { assert } from "@fluidframework/core-utils/internal";
-import { LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
-import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
-import { LivePresenceUser, PresenceState } from "./LivePresenceUser";
-import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
+import {
+    LiveDataObjectInitializeState,
+    UserMeetingRole,
+} from "./interfaces.js";
+import { LiveTelemetryLogger } from "./LiveTelemetryLogger.js";
+import { LivePresenceUser, PresenceState } from "./LivePresenceUser.js";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
     UnexpectedError,
-} from "./errors";
+} from "./errors.js";
 import { SharedObjectKind } from "fluid-framework";
 
 /**

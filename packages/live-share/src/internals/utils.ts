@@ -5,7 +5,7 @@
 
 import { ITokenProvider } from "@fluidframework/azure-client";
 import { v4 as uuid } from "uuid";
-import { IRuntimeSignaler } from "./LiveEventScope";
+import { IRuntimeSignaler } from "./LiveEventScope.js";
 
 /**
  * @hidden

@@ -15,8 +15,8 @@ import {
 import { IFluidHandle, IFluidLoadable } from "@fluidframework/core-interfaces";
 import { assert } from "@fluidframework/core-utils/internal";
 import { ConsensusRegisterCollection } from "@fluidframework/register-collection/internal";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { LiveDataObject } from "./LiveDataObject";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry.js";
+import { LiveDataObject } from "./LiveDataObject.js";
 
 // Register ConsensusRegisterCollection
 DynamicObjectRegistry.registerObjectClass(

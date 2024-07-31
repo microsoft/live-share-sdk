@@ -12,9 +12,9 @@ import {
 import { SharedMap } from "fluid-framework/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client/internal";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { DynamicObjectManager } from "./DynamicObjectManager";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { DynamicObjectRegistry } from "./DynamicObjectRegistry.js";
+import { DynamicObjectManager } from "./DynamicObjectManager.js";
+import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import {
     getRootDataObject,
     getContainerRuntime,
@@ -22,9 +22,9 @@ import {
     TurboDirectory,
     TurboDynamicObjects,
     TurboStateMap,
-} from "./smuggle";
-import { getFactoryName } from "./fluid-duplicated";
-import { ExpectedError } from "../errors";
+} from "./smuggle.js";
+import { getFactoryName } from "./fluid-duplicated.js";
+import { ExpectedError } from "../errors.js";
 
 /**
  * Base class for building Fluid Turbo clients.

@@ -3,15 +3,15 @@ import {
     DataObjectTypes,
     IDataObjectProps,
 } from "@fluidframework/aqueduct/internal";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import { assert } from "@fluidframework/core-utils/internal";
 import {
     IClientInfo,
     LiveDataObjectInitializeState,
     UserMeetingRole,
-} from "../interfaces";
-import { LiveShareReportIssueLink } from "./consts";
-import { waitUntilConnected } from "./utils";
+} from "../interfaces.js";
+import { LiveShareReportIssueLink } from "./consts.js";
+import { waitUntilConnected } from "./utils.js";
 
 /**
  * Extends Fluid's DataObject class. Intended for use with Live Share custom DDS's that rely on a `ILiveShareHost`.

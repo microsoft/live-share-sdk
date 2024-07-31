@@ -3,13 +3,13 @@ import {
     IDataObjectProps,
 } from "@fluidframework/aqueduct/internal";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { LiveDataObject } from "./LiveDataObject";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { LiveDataObject } from "./LiveDataObject.js";
+import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import {
     LoadableObjectCtor,
     LoadableObjectClassRecord,
     DataObjectClass,
-} from "./fluid-duplicated";
+} from "./fluid-duplicated.js";
 import { ContainerSchema, SharedObjectKind } from "fluid-framework";
 
 /**

@@ -4,8 +4,8 @@
  */
 
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions";
-import { IGroupStateEvent, IGenericTypedEvents } from "./interfaces";
+import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions.js";
+import { IGroupStateEvent, IGenericTypedEvents } from "./interfaces.js";
 
 /**
  * @hidden

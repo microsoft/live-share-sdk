@@ -45,7 +45,7 @@
         "@fluidframework/sequence": "^2.1.0",
         "@fluidframework/server-local-server": "^5.0.0",
         "@fluidframework/telemetry-utils": "^2.1.0",
-        "@fluidframework/test-driver-definitions": "^2.1.0",
+        "@fluidframework/test-driver-definitions": "^1.4.0",
         "@fluidframework/test-utils": "^2.1.0"
     },
     "devDependencies": {

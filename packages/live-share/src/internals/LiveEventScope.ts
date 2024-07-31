@@ -9,12 +9,12 @@ import {
 } from "@fluidframework/core-interfaces";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
-import { ILiveEvent, UserMeetingRole } from "../interfaces";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { ILiveEvent, UserMeetingRole } from "../interfaces.js";
+import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import { IEvent } from "@fluidframework/core-interfaces";
-import { LiveTelemetryLogger } from "../LiveTelemetryLogger";
-import { isILiveEvent } from "./type-guards";
-import { waitUntilConnected } from "./utils";
+import { LiveTelemetryLogger } from "../LiveTelemetryLogger.js";
+import { isILiveEvent } from "./type-guards.js";
+import { waitUntilConnected } from "./utils.js";
 
 /**
  * Live event callback.

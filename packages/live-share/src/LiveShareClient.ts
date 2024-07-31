@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { getInsecureTokenProvider, waitForDelay } from "./internals/utils";
-import { LiveShareTokenProvider } from "./internals/LiveShareTokenProvider";
+import { getInsecureTokenProvider, waitForDelay } from "./internals/utils.js";
+import { LiveShareTokenProvider } from "./internals/LiveShareTokenProvider.js";
 import {
     AzureClient,
     AzureContainerServices,
@@ -19,14 +19,14 @@ import {
     ITimestampProvider,
     IRoleVerifier,
     ILiveShareJoinResults,
-} from "./interfaces";
-import { BaseLiveShareClient } from "./internals/BaseLiveShareClient";
-import { LocalTimestampProvider } from "./LocalTimestampProvider";
-import { TestLiveShareHost } from "./TestLiveShareHost";
-import { LiveShareRuntime } from "./internals/LiveShareRuntime";
-import { getLiveContainerSchema } from "./internals/schema-injection-utils";
-import { ExpectedError, UnexpectedError } from "./errors";
-import { FluidCompatibilityMode } from "./internals/consts";
+} from "./interfaces.js";
+import { BaseLiveShareClient } from "./internals/BaseLiveShareClient.js";
+import { LocalTimestampProvider } from "./LocalTimestampProvider.js";
+import { TestLiveShareHost } from "./TestLiveShareHost.js";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
+import { getLiveContainerSchema } from "./internals/schema-injection-utils.js";
+import { ExpectedError, UnexpectedError } from "./errors.js";
+import { FluidCompatibilityMode } from "./internals/consts.js";
 
 /**
  * @hidden

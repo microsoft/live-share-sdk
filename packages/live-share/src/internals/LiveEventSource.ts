@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveEvent } from "../interfaces";
-import { LiveEventScope } from "./LiveEventScope";
+import { ILiveEvent } from "../interfaces.js";
+import { LiveEventScope } from "./LiveEventScope.js";
 
 /**
  * Broadcasts live share events to all clients and can be received by an `LiveEventTarget`.

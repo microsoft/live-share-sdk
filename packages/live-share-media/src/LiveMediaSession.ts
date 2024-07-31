@@ -17,22 +17,23 @@ import {
     DynamicObjectRegistry,
     LiveDataObject,
 } from "@microsoft/live-share/internal";
-import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer";
-import { ITriggerActionEvent, TelemetryEvents } from "./internals";
+import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer.js";
+import { ITriggerActionEvent } from "./internals/GroupCoordinatorState.js";
 import {
     MediaSessionCoordinatorEvents,
     ExtendedMediaSessionAction,
     ExtendedMediaSessionActionDetails,
     ExtendedMediaSessionActionHandler,
-} from "./MediaSessionExtensions";
+} from "./MediaSessionExtensions.js";
 import {
     LiveMediaSessionCoordinator,
     IMediaPlayerState,
-} from "./LiveMediaSessionCoordinator";
-import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler";
-import { RepeatedActionThrottler } from "./RepeatedActionThrottler";
-import { IMediaPlayer } from "./IMediaPlayer";
+} from "./LiveMediaSessionCoordinator.js";
+import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler.js";
+import { RepeatedActionThrottler } from "./RepeatedActionThrottler.js";
+import { IMediaPlayer } from "./IMediaPlayer.js";
 import { SharedObjectKind } from "fluid-framework";
+import { TelemetryEvents } from "./internals/consts.js";
 
 /**
  * Live fluid object that synchronizes media playback across multiple clients.

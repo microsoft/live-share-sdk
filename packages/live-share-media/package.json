@@ -7,12 +7,13 @@
     "main": "./bin/cjs/index.js",
     "module": "./bin/esm/index.js",
     "types": "./bin/esm/index.d.ts",
+    "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
         "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json\"",
         "build:test": "tsc -p tsconfig.test.json",
-        "test": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.js --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
-        "test:debug": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.js --recursive \"./bin/test/**/LiveMediaSession_Synchronizer.spec.js\" --inspect-brk",
+        "test": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
+        "test:debug": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/LiveMediaSession_Synchronizer.spec.js\" --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
         "test:race": "node ./../live-share/test-for-race-conditions.js"
     },

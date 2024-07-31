@@ -1,11 +1,11 @@
-import { LiveShareRuntime } from "../LiveShareRuntime";
-import { TestLiveShareHost } from "../../TestLiveShareHost";
+import { LiveShareRuntime } from "../LiveShareRuntime.js";
+import { TestLiveShareHost } from "../../TestLiveShareHost.js";
 import {
     IContainerRuntimeSignaler,
     ITimestampProvider,
-} from "../../interfaces";
-import { MockContainerRuntimeSignaler } from "./MockContainerRuntimeSignaler";
-import { LocalTimestampProvider } from "../../LocalTimestampProvider";
+} from "../../interfaces.js";
+import { MockContainerRuntimeSignaler } from "./MockContainerRuntimeSignaler.js";
+import { LocalTimestampProvider } from "../../LocalTimestampProvider.js";
 
 export class MockLiveShareRuntime extends LiveShareRuntime {
     constructor(

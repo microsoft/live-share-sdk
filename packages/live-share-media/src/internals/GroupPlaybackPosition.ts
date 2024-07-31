@@ -8,13 +8,13 @@ import {
     IRuntimeSignaler,
     LiveShareRuntime,
 } from "@microsoft/live-share/internal";
-import { GroupTransportState } from "./GroupTransportState";
-import { GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
+import { GroupTransportState } from "./GroupTransportState.js";
+import { GroupPlaybackTrackEvents } from "./GroupPlaybackTrack.js";
 import {
     CoordinationWaitPoint,
     ExtendedMediaSessionPlaybackState,
-} from "../MediaSessionExtensions";
-import { GroupPlaybackRate } from "./GroupPlaybackRate";
+} from "../MediaSessionExtensions.js";
+import { GroupPlaybackRate } from "./GroupPlaybackRate.js";
 
 /**
  * Per client position

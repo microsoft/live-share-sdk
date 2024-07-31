@@ -6,8 +6,8 @@ import {
     ILiveShareHost,
     INtpTimeInfo,
     UserMeetingRole,
-} from "./interfaces";
-import { Deferred } from "./internals/Deferred";
+} from "./interfaces.js";
+import { Deferred } from "./internals/Deferred.js";
 
 /**
  * @alpha

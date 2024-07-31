@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { INtpTimeInfo, ITimestampProvider } from "./interfaces";
+import { INtpTimeInfo, ITimestampProvider } from "./interfaces.js";
 
 const IMPROVE_ACCURACY_INTERVAL = 5 * 1000;
 const IMPROVE_ACCURACY_ATTEMPTS = 5;

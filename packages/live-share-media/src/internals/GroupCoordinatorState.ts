@@ -20,39 +20,39 @@ import {
     ExtendedMediaSessionPlaybackState,
     ExtendedMediaSessionActionDetails,
     ExtendedMediaSessionActionSource,
-} from "../MediaSessionExtensions";
+} from "../MediaSessionExtensions.js";
 import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
     IPlaybackTrack,
     IPlaybackTrackChangeEvent,
-} from "./GroupPlaybackTrack";
+} from "./GroupPlaybackTrack.js";
 import {
     GroupTransportState,
     ITransportState,
     ITransportStateChangeEvent,
-} from "./GroupTransportState";
+} from "./GroupTransportState.js";
 import {
     GroupPlaybackPosition,
     ICurrentPlaybackPosition,
-} from "./GroupPlaybackPosition";
-import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
-import { GroupTransportStateEvents } from "./GroupTransportState";
+} from "./GroupPlaybackPosition.js";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator.js";
+import { GroupTransportStateEvents } from "./GroupTransportState.js";
 import {
     GroupPlaybackTrackData,
     PlaybackTrackDataEvents,
     IPlaybackTrackData,
     IPlaybackTrackDataChangeEvent,
-} from "./GroupPlaybackTrackData";
-import { TelemetryEvents } from "./consts";
+} from "./GroupPlaybackTrackData.js";
+import { TelemetryEvents } from "./consts.js";
 import {
     GroupPlaybackRate,
     IPlaybackRate,
     IPlaybackRateChangeEvent,
     PlaybackRateEvents,
-} from "./GroupPlaybackRate";
+} from "./GroupPlaybackRate.js";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IGenericTypedEvents } from "./interfaces";
+import { IGenericTypedEvents } from "./interfaces.js";
 
 /**
  * @hidden

@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveEventScope, LiveEventListener } from "./LiveEventScope";
-import { LiveEventSource } from "./LiveEventSource";
+import { LiveEventScope, LiveEventListener } from "./LiveEventScope.js";
+import { LiveEventSource } from "./LiveEventSource.js";
 
 /**
  * Receives events broadcast by an `LiveEventSource`.

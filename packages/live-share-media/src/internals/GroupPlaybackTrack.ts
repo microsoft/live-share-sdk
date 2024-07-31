@@ -3,13 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator.js";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionSource,
-} from "../MediaSessionExtensions";
-import { IGenericTypedEvents, IGroupStateEvent } from "./interfaces";
+} from "../MediaSessionExtensions.js";
+import { IGenericTypedEvents, IGroupStateEvent } from "./interfaces.js";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 
 /**

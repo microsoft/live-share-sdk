@@ -1,11 +1,11 @@
-import { LiveEvent } from "./LiveEvent";
+import { LiveEvent } from "./LiveEvent.js";
 import {
     LivePresenceReceivedEventData,
     PresenceState,
-} from "./LivePresenceUser";
-import { LiveShareRuntime } from "./internals/LiveShareRuntime";
-import { TimeInterval } from "./TimeInterval";
-import { cloneValue } from "./internals/utils";
+} from "./LivePresenceUser.js";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
+import { TimeInterval } from "./TimeInterval.js";
+import { cloneValue } from "./internals/utils.js";
 
 /**
  * A connection that presence is being tracked for.

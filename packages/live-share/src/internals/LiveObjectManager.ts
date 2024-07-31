@@ -5,22 +5,22 @@
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IRuntimeSignaler } from "./LiveEventScope";
-import { LiveShareRuntime } from "./LiveShareRuntime";
-import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";
-import { LiveEvent } from "../LiveEvent";
+import { IRuntimeSignaler } from "./LiveEventScope.js";
+import { LiveShareRuntime } from "./LiveShareRuntime.js";
+import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces.js";
+import { LiveEvent } from "../LiveEvent.js";
 import { IAzureAudience } from "@fluidframework/azure-client";
-import { isILiveEvent } from "./type-guards";
-import { ObjectSynchronizerEvents } from "./consts";
-import { cloneValue, waitUntilConnected } from "./utils";
-import { ContainerSynchronizer } from "./ContainerSynchronizer";
+import { isILiveEvent } from "./type-guards.js";
+import { ObjectSynchronizerEvents } from "./consts.js";
+import { cloneValue, waitUntilConnected } from "./utils.js";
+import { ContainerSynchronizer } from "./ContainerSynchronizer.js";
 import {
     GetAndUpdateStateHandlers,
     IContainerLiveObjectStoreEvents,
     ILiveClientEventMap,
     ILiveObjectStore,
     StateSyncEventContent,
-} from "./internal-interfaces";
+} from "./internal-interfaces.js";
 
 /**
  * @hidden

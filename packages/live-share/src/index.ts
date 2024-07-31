@@ -3,5 +3,5 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-export * from "./index.public";
-export * from "./index.internal";
+export * from "./index.public.js";
+export * from "./index.internal.js";

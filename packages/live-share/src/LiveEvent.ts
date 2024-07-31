@@ -13,18 +13,18 @@ import {
     IClientTimestamp,
     ILiveEvent,
     LiveDataObjectInitializeState,
-} from "./interfaces";
-import { LiveEventScope } from "./internals/LiveEventScope";
-import { LiveEventTarget } from "./internals/LiveEventTarget";
-import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
-import { LiveDataObject } from "./internals/LiveDataObject";
+} from "./interfaces.js";
+import { LiveEventScope } from "./internals/LiveEventScope.js";
+import { LiveEventTarget } from "./internals/LiveEventTarget.js";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
+import { LiveDataObject } from "./internals/LiveDataObject.js";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
     UnexpectedError,
-} from "./errors";
+} from "./errors.js";
 import { SharedObjectKind } from "fluid-framework";
-import { cloneValue } from "./internals/utils";
+import { cloneValue } from "./internals/utils.js";
 
 /**
  * Events supported by `LiveEvent` object.

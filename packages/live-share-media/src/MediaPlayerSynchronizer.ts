@@ -15,11 +15,12 @@ import {
     ExtendedMediaSessionActionDetails,
     MediaSessionCoordinatorEvents,
     MediaSessionCoordinatorSuspension,
-} from "./MediaSessionExtensions";
-import { VolumeManager } from "./VolumeManager";
-import { LiveMediaSession } from "./LiveMediaSession";
-import { IMediaPlayer } from "./IMediaPlayer";
-import { ITriggerActionEvent, TelemetryEvents } from "./internals";
+} from "./MediaSessionExtensions.js";
+import { VolumeManager } from "./VolumeManager.js";
+import { LiveMediaSession } from "./LiveMediaSession.js";
+import { IMediaPlayer } from "./IMediaPlayer.js";
+import { TelemetryEvents } from "./internals/consts.js";
+import { ITriggerActionEvent } from "./internals/GroupCoordinatorState.js";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IEvent } from "@fluidframework/core-interfaces";
 

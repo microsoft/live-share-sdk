@@ -7,22 +7,22 @@ import {
     DataObjectFactory,
     createDataObjectKind,
 } from "@fluidframework/aqueduct/internal";
-import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer";
+import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer.js";
 import {
     IClientTimestamp,
     ILiveEvent,
     LiveDataObjectInitializeState,
     UserMeetingRole,
-} from "./interfaces";
+} from "./interfaces.js";
 import { IEvent } from "@fluidframework/core-interfaces";
-import { LiveEvent } from "./LiveEvent";
-import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
-import { LiveDataObject } from "./internals/LiveDataObject";
+import { LiveEvent } from "./LiveEvent.js";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
+import { LiveDataObject } from "./internals/LiveDataObject.js";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
     UnexpectedError,
-} from "./errors";
+} from "./errors.js";
 import { SharedObjectKind } from "fluid-framework";
 
 export interface ITimerConfigData {

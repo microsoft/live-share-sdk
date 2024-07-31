@@ -13,20 +13,20 @@ import {
     ILiveEvent,
     LiveDataObjectInitializeState,
     UserMeetingRole,
-} from "./interfaces";
+} from "./interfaces.js";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
     UnexpectedError,
-} from "./errors";
-import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
-import { LiveEvent } from "./LiveEvent";
-import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer";
-import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
-import { LiveDataObject } from "./internals/LiveDataObject";
+} from "./errors.js";
+import { LiveTelemetryLogger } from "./LiveTelemetryLogger.js";
+import { LiveEvent } from "./LiveEvent.js";
+import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer.js";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
+import { LiveDataObject } from "./internals/LiveDataObject.js";
 import { SharedObjectKind } from "fluid-framework";
-import { TelemetryEvents } from "./internals/consts";
-import { cloneValue } from "./internals/utils";
+import { TelemetryEvents } from "./internals/consts.js";
+import { cloneValue } from "./internals/utils.js";
 
 /**
  * Events supported by [LiveState` object.

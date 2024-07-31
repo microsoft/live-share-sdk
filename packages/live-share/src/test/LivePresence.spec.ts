@@ -402,7 +402,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined);
+        await object2.initialize();
 
         // Wait for ready and perform test
         let user1Found = false;
@@ -424,7 +424,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
         disposeAll();
     });
 
-    it("Should filter users by state using forEach()", async () => {
+    it("Should filter users by state and iterate using forEach()", async () => {
         const { object1, object2, disposeAll } = await getObjects(
             getTestObjectProvider
         );
@@ -442,7 +442,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined);
+        await object2.initialize();
 
         // Wait for ready and perform test
         let user1Found = false;
@@ -459,7 +459,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
 
-        assert(user1Found && !user2Found);
+        assert(user1Found && user2Found);
 
         disposeAll();
     });
@@ -479,7 +479,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             object1.getUsers().length === 1,
             "getUsers() should not start empty"
         );
-        await object2.initialize(undefined);
+        await object2.initialize();
 
         // Wait for ready and perform test
         await ready.promise;
@@ -502,7 +502,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined);
+        await object2.initialize();
 
         // Wait for ready and perform test
         await ready.promise;
@@ -524,13 +524,13 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined);
+        await object2.initialize();
 
         // Wait for ready and perform test
         await ready.promise;
-        const cnt = object1.getUsers(PresenceState.away).length;
-
-        assert(cnt == 1);
+        assert(object1.getUsers(PresenceState.online).length == 2);
+        assert(object1.getUsers(PresenceState.away).length == 0);
+        assert(object1.getUsers(PresenceState.offline).length == 0);
 
         disposeAll();
     });
@@ -551,7 +551,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined);
+        await object2.initialize();
 
         // Wait for ready and perform test
         await ready.promise;
@@ -594,7 +594,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
             }
         });
         await object1.initialize();
-        await object2.initialize(undefined);
+        await object2.initialize();
 
         // Wait for ready and get client ID's
         await ready.promise;

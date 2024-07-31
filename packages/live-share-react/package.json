@@ -4,7 +4,8 @@
     "description": "Build collaborative React apps using Microsoft's Fluid & Live Share frameworks with ease.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/esm/index.js",
+    "main": "./bin/cjs/index.js",
+    "module": "./bin/esm/index.js",
     "types": "./bin/esm/index.d.ts",
     "scripts": {
         "clean": "npx shx rm -rf bin",
@@ -37,7 +38,7 @@
         "@types/uuid": "^9.0.1",
         "babel-loader": "^9.1.2",
         "concurrently": "^8.2.2",
-        "fluid-framework": "^2.0.0-rc.5.0.1",
+        "fluid-framework": "^2.1.0",
         "typescript": "~5.5.3"
     },
     "peerDependencies": {

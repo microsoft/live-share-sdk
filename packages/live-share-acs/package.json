@@ -4,7 +4,8 @@
     "description": "Live Share integration package for Azure Communication Services.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/esm/index.js",
+    "main": "./bin/cjs/index.js",
+    "module": "./bin/esm/index.js",
     "types": "./bin/esm/index.d.ts",
     "scripts": {
         "clean": "npx shx rm -rf bin",

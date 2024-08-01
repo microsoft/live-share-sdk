@@ -10,8 +10,8 @@
     "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json\"",
-        "build:test": "tsc -p tsconfig.test.json",
+        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json && tsc-alias -p tsconfig.cjs.json && echo '{\\\"type\\\":\\\"commonjs\\\"}' > ./bin/cjs/package.json\"",
+        "build:test": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json && echo '{\"type\":\"commonjs\"}' > ./bin/test/package.json",
         "test": "start-server-and-test test:client:start:server 7070 test:run",
         "test:run": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
         "test:debug": "npm run build:test && ts-mocha --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --inspect-brk",
@@ -24,6 +24,7 @@
         "todo": "npx rollup -c rollup.config.js --configPlugin typescript={tsconfig:\\'tsconfig.rollup.json\\'}"
     },
     "exports": {
+        "./package.json": "./package.json",
         ".": {
             "require": {
                 "types": "./bin/cjs/index.public.d.ts",
@@ -69,6 +70,7 @@
         "nyc": "^15.1.0",
         "start-server-and-test": "^2.0.4",
         "ts-mocha": "^10.0.0",
+        "tsc-alias": "^1.8.10",
         "typescript": "~5.5.3"
     },
     "peerDependencies": {

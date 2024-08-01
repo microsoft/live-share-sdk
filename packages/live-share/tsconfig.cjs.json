@@ -5,5 +5,16 @@
         "module": "CommonJS",
         "moduleResolution": null,
         "downlevelIteration": true
+    },
+    "tsc-alias": {
+        "verbose": false,
+        "resolveFullPaths": true,
+        "replacers": {
+            "resolveFullExtension": ".cjs",
+            "fileExtensions": {
+                "inputGlob": "{js,jsx,mjs}",
+                "outputCheck": ["js", "json", "jsx", "mjs"]
+            }
+        }
     }
 }

@@ -10,8 +10,8 @@
     "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json && tsc-alias -p tsconfig.cjs.json && echo '{\\\"type\\\":\\\"commonjs\\\"}' > ./bin/cjs/package.json\"",
-        "build:test": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json && echo '{\"type\":\"commonjs\"}' > ./bin/test/package.json",
+        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json && echo '{\\\"type\\\":\\\"commonjs\\\"}' > ./bin/cjs/package.json\"",
+        "build:test": "tsc -p tsconfig.test.json && echo '{\"type\":\"commonjs\"}' > ./bin/test/package.json",
         "test": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
         "test:debug": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/LiveMediaSession_Synchronizer.spec.js\" --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
@@ -44,7 +44,6 @@
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
         "ts-mocha": "^10.0.0",
-        "tsc-alias": "^1.8.10",
         "typescript": "~5.5.3"
     },
     "peerDependencies": {

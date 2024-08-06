@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ITimestampProvider } from "../../interfaces";
+import { ITimestampProvider } from "../../interfaces.js";
 
 export class MockTimestampProvider implements ITimestampProvider {
     public called = false;

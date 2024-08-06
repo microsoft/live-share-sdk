@@ -12,6 +12,7 @@
     "sideEffects": false,
     "main": "./bin/index.js",
     "types": "./bin/index.d.ts",
+    "type": "module",
     "scripts": {
         "build": "tsc -p tsconfig.json",
         "eslint": "eslint --format stylish src",
@@ -45,7 +46,7 @@
         "@fluidframework/sequence": "^2.1.0",
         "@fluidframework/server-local-server": "^5.0.0",
         "@fluidframework/telemetry-utils": "^2.1.0",
-        "@fluidframework/test-driver-definitions": "^1.4.0",
+        "@fluid-internal/test-driver-definitions": "^2.1.0",
         "@fluidframework/test-utils": "^2.1.0"
     },
     "devDependencies": {

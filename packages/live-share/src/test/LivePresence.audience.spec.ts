@@ -4,11 +4,11 @@
  */
 
 import { strict as assert } from "assert";
-import { TestLiveShareHost } from "../TestLiveShareHost";
-import { LiveShareClient } from "../LiveShareClient";
-import { LivePresence } from "../LivePresence";
-import { PresenceState } from "../LivePresenceUser";
-import { waitForDelay } from "../internals/utils";
+import { TestLiveShareHost } from "../TestLiveShareHost.js";
+import { LiveShareClient } from "../LiveShareClient.js";
+import { LivePresence } from "../LivePresence.js";
+import { PresenceState } from "../LivePresenceUser.js";
+import { waitForDelay } from "../internals/utils.js";
 
 describe("LivePresence Fluid Audience tests", () => {
     let containerId: string | undefined;

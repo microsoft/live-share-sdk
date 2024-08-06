@@ -4,12 +4,12 @@
  */
 
 import { strict as assert } from "assert";
-import { LiveEventScope } from "../LiveEventScope";
-import { LiveEventTarget } from "../LiveEventTarget";
-import { MockRuntimeSignaler } from "../mock/MockRuntimeSignaler";
-import { LiveShareRuntime } from "../LiveShareRuntime";
-import { TestLiveShareHost } from "../../TestLiveShareHost";
-import { LocalTimestampProvider } from "../../LocalTimestampProvider";
+import { LiveEventScope } from "../LiveEventScope.js";
+import { LiveEventTarget } from "../LiveEventTarget.js";
+import { MockRuntimeSignaler } from "../mock/MockRuntimeSignaler.js";
+import { LiveShareRuntime } from "../LiveShareRuntime.js";
+import { TestLiveShareHost } from "../../TestLiveShareHost.js";
+import { LocalTimestampProvider } from "../../LocalTimestampProvider.js";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();

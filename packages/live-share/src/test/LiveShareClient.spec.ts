@@ -7,10 +7,10 @@ import { strict as assert } from "assert";
 import { ContainerSchema, IFluidContainer } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client";
-import { TestLiveShareHost } from "../TestLiveShareHost";
-import { LiveShareClient } from "../LiveShareClient";
-import { LiveEvent } from "../LiveEvent";
-import { LiveState } from "../LiveState";
+import { TestLiveShareHost } from "../TestLiveShareHost.js";
+import { LiveShareClient } from "../LiveShareClient.js";
+import { LiveEvent } from "../LiveEvent.js";
+import { LiveState } from "../LiveState.js";
 
 describe("LiveShareClient dynamic objects", () => {
     let containerId: string | undefined;

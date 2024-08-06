@@ -9,18 +9,22 @@ import {
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils/internal";
-import { LiveEvent } from "../LiveEvent";
-import { MockTimestampProvider } from "../internals/mock/MockTimestampProvider";
-import { MockRoleVerifier } from "../internals/mock/MockRoleVerifier";
-import { LocalTimestampProvider } from "../LocalTimestampProvider";
-import { UserMeetingRole, ILiveEvent } from "../interfaces";
-import { TestLiveShareHost } from "../TestLiveShareHost";
-import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { LiveShareRuntime } from "../internals/LiveShareRuntime";
-import { describeCompat } from "@live-share-private/test-utils";
-import { Deferred } from "../internals/Deferred";
+import { LiveEvent } from "../LiveEvent.js";
+import { MockTimestampProvider } from "../internals/mock/MockTimestampProvider.js";
+import { MockRoleVerifier } from "../internals/mock/MockRoleVerifier.js";
+import { LocalTimestampProvider } from "../LocalTimestampProvider.js";
+import { UserMeetingRole, ILiveEvent } from "../interfaces.js";
+import { TestLiveShareHost } from "../TestLiveShareHost.js";
+import { getLiveDataObjectKind } from "../internals/schema-injection-utils.js";
+import { LiveShareRuntime } from "../internals/LiveShareRuntime.js";
+import { describeCompat, ITestObjectProviderOptions } from "@live-share-private/test-utils";
+import { Deferred } from "../internals/Deferred.js";
 
-describeCompat("LiveEvent", (getTestObjectProvider) => {
+describeCompat("LiveEvent", (
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider,
+) => {
     let provider: ITestObjectProvider;
     let object1: LiveEvent;
     let object2: LiveEvent;

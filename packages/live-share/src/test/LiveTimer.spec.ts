@@ -9,15 +9,15 @@ import {
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils/internal";
-import { LiveTimer } from "../LiveTimer";
-import { Deferred } from "../internals/Deferred";
-import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
+import { LiveTimer } from "../LiveTimer.js";
+import { Deferred } from "../internals/Deferred.js";
+import { getLiveDataObjectKind } from "../internals/schema-injection-utils.js";
+import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime.js";
 import {
     describeCompat,
     ITestObjectProviderOptions,
 } from "@live-share-private/test-utils";
-import { waitForDelay } from "../internals/utils";
+import { waitForDelay } from "../internals/utils.js";
 
 async function getObjects(
     getTestObjectProvider: (
@@ -75,7 +75,11 @@ async function getObjects(
 }
 const milliTolerance = 31;
 
-describeCompat("LiveTimer", (getTestObjectProvider) => {
+describeCompat("LiveTimer", (
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider
+) => {
     it("Should raise local and remote start events", async () => {
         const { object1, object2, dispose } = await getObjects(
             getTestObjectProvider

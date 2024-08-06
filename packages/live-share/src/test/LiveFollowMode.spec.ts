@@ -14,16 +14,16 @@ import {
     IFollowModePresenceUserData,
     IFollowModeState,
     LiveFollowMode,
-} from "../LiveFollowMode";
-import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
-import { LivePresenceUser } from "../LivePresenceUser";
+} from "../LiveFollowMode.js";
+import { getLiveDataObjectKind } from "../internals/schema-injection-utils.js";
+import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime.js";
+import { LivePresenceUser } from "../LivePresenceUser.js";
 import {
     describeCompat,
     ITestObjectProviderOptions,
 } from "@live-share-private/test-utils";
-import { waitForDelay } from "../internals/utils";
-import { Deferred } from "../internals/Deferred";
+import { waitForDelay } from "../internals/utils.js";
+import { Deferred } from "../internals/Deferred.js";
 
 interface TestFollowData {
     page: string;
@@ -88,410 +88,423 @@ const mockDefaultValue: TestFollowData = {
     page: "foo",
 };
 
-describeCompat("LiveFollowMode", (getTestObjectProvider) => {
-    it("Should initialize with correct defaults", async () => {
-        const { object1, object2, dispose } = await getObjects(
-            getTestObjectProvider
-        );
-        let init1 = object1.initialize(mockDefaultValue);
-        let init2 = object2.initialize(mockDefaultValue);
+describeCompat(
+    "LiveFollowMode",
+    (
+        getTestObjectProvider: (
+            options?: ITestObjectProviderOptions
+        ) => ITestObjectProvider
+    ) => {
+        it("Should initialize with correct defaults", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            let init1 = object1.initialize(mockDefaultValue);
+            let init2 = object2.initialize(mockDefaultValue);
 
-        await Promise.all([init1, init2]);
+            await Promise.all([init1, init2]);
 
-        function assertDefaultValues() {
-            // state should be defined
-            assert(
-                object1.state !== undefined,
-                "object1.state should be defined"
-            );
-            assert(
-                object2.state !== undefined,
-                "object2.state should be defined"
-            );
-
-            // local user should be defined
-            assert(
-                object1.localUser !== undefined,
-                "object1.localUser should be defined"
-            );
-            assert(
-                object2.localUser !== undefined,
-                "object2.localUser should be defined"
-            );
-
-            // local user should be following themselves to start
-            assert(
-                object1.state.followingUserId === object1.localUser.userId,
-                "object1 state should show followingUserId is equal to local user's id"
-            );
-            assert(
-                object2.state.followingUserId === object2.localUser.userId,
-                "object2 state should show followingUserId is equal to local user's id"
-            );
-
-            // state.type should be local
-            assert(
-                object1.state.type === FollowModeType.local,
-                `object1.state.type should be local, instead is ${object1.state.type}`
-            );
-            assert(
-                object2.state.type === FollowModeType.local,
-                `object2.state.type should be local, instead is ${object2.state.type}`
-            );
-
-            // state.isLocalValue should be true
-            assert(
-                object1.state.isLocalValue === true,
-                `object1.state.isLocalValue should be true`
-            );
-            assert(
-                object2.state.type === FollowModeType.local,
-                `object1.state.isLocalValue should be true`
-            );
-
-            // state.otherUsersCount should be 0
-            assert(
-                object1.state.otherUsersCount === 0,
-                `object1.state.otherUsersCount should be 0, instead is ${object1.state.otherUsersCount}`
-            );
-            assert(
-                object2.state.otherUsersCount === 0,
-                `object2.state.otherUsersCount should be 0, instead is ${object2.state.otherUsersCount}`
-            );
-
-            // state.value.page should be equal to mockDefaultValue.page
-            assert(
-                object1.state.value.page === mockDefaultValue.page,
-                `object1.state.value.page should be ${mockDefaultValue.page}, instead is ${object1.state.value.page}`
-            );
-            assert(
-                object2.state.value.page === mockDefaultValue.page,
-                `object2.state.value.page should be ${mockDefaultValue.page}, instead is ${object2.state.value.page}`
-            );
-        }
-        assertDefaultValues();
-
-        await waitForDelay(60);
-        // default values should remain unchanged once initial presence update is sent
-        assertDefaultValues();
-
-        const users1 = object1.getUsers();
-        const users2 = object2.getUsers();
-        const nonLocalUser1 = users1.find((u) => !u.isLocalUser);
-        const nonLocalUser2 = users2.find((u) => !u.isLocalUser);
-
-        // users should have correct length
-        assert(
-            users1.length === 2,
-            `users1.length should be 2, instead is ${users1.length}`
-        );
-        assert(
-            users2.length === 2,
-            `users2.length should be 2, instead is ${users2.length}`
-        );
-        // users should contain non-local user
-        assert(nonLocalUser1 !== undefined, "nonLocalUser1 should be defined");
-        assert(nonLocalUser2 !== undefined, "nonLocalUser2 should be defined");
-        // non-local user data should be defined
-        assert(
-            nonLocalUser1.data !== undefined,
-            "nonLocalUser1.data should be defined"
-        );
-        assert(
-            nonLocalUser2.data !== undefined,
-            "nonLocalUser2.data should be defined"
-        );
-        // non-local user should have correct default values
-        assert(
-            nonLocalUser1.data.stateValue.page === mockDefaultValue.page,
-            `nonLocalUser1.data.stateValue.page should be ${mockDefaultValue.page}, instead is ${nonLocalUser1.data.stateValue.page}`
-        );
-        assert(
-            nonLocalUser2.data.stateValue.page === mockDefaultValue.page,
-            `nonLocalUser2.data.stateValue.page should be ${mockDefaultValue.page}, instead is ${nonLocalUser2.data.stateValue.page}`
-        );
-
-        dispose();
-    });
-
-    it("Should correctly broadcast local user's state value", async () => {
-        const { object1, object2, dispose } = await getObjects(
-            getTestObjectProvider
-        );
-        let init1 = object1.initialize(mockDefaultValue);
-        let init2 = object2.initialize(mockDefaultValue);
-
-        await Promise.all([init1, init2]);
-
-        // allow remote presence to be received to make the test a bit cleaner
-        await waitForDelay(0);
-
-        const user1StateValue = {
-            page: "bananas",
-        };
-        const user2StateValue = {
-            page: "apples",
-        };
-
-        const object1StateDone = new Deferred();
-        object1.on("stateChanged", (state, local) => {
-            assert(
-                local,
-                "object1: should not receive non-local stateChanged event"
-            );
-            assert(
-                state.isLocalValue,
-                "object1: state should be isLocalValue true"
-            );
-            assert(
-                state.type === FollowModeType.local,
-                "object1: state should be type of local"
-            );
-            assert(
-                state.followingUserId === object1.localUser!.userId,
-                `object1: state should have followingUserId equal to local user, instead is ${state.followingUserId}`
-            );
-            assert(
-                state.otherUsersCount === 0,
-                `object1: state should have otherUsersCount equal to 0, instead is ${state.otherUsersCount}`
-            );
-            assert(
-                state.value.page === user1StateValue.page,
-                `object1: state should have value.page equal to ${user1StateValue.page}, instead is ${state.value.page}`
-            );
-            object1StateDone.resolve();
-        });
-        const object1PresenceDone = new Deferred();
-        let numPresence1Updates = 0;
-        object1.on("presenceChanged", (presence, local) => {
-            assert(
-                presence.data !== undefined,
-                "object1: presence.data should not be undefined"
-            );
-            if (local) {
+            function assertDefaultValues() {
+                // state should be defined
                 assert(
-                    presence.data.stateValue.page === user1StateValue.page,
-                    `object1: local presence should have data.page of ${user1StateValue.page}, instead is ${presence.data.stateValue.page}`
+                    object1.state !== undefined,
+                    "object1.state should be defined"
                 );
-            } else {
                 assert(
-                    presence.data.stateValue.page === user2StateValue.page,
-                    `object1: non-local presence should have data.page of ${user2StateValue.page}, instead is ${presence.data.stateValue.page}`
+                    object2.state !== undefined,
+                    "object2.state should be defined"
+                );
+
+                // local user should be defined
+                assert(
+                    object1.localUser !== undefined,
+                    "object1.localUser should be defined"
+                );
+                assert(
+                    object2.localUser !== undefined,
+                    "object2.localUser should be defined"
+                );
+
+                // local user should be following themselves to start
+                assert(
+                    object1.state.followingUserId === object1.localUser.userId,
+                    "object1 state should show followingUserId is equal to local user's id"
+                );
+                assert(
+                    object2.state.followingUserId === object2.localUser.userId,
+                    "object2 state should show followingUserId is equal to local user's id"
+                );
+
+                // state.type should be local
+                assert(
+                    object1.state.type === FollowModeType.local,
+                    `object1.state.type should be local, instead is ${object1.state.type}`
+                );
+                assert(
+                    object2.state.type === FollowModeType.local,
+                    `object2.state.type should be local, instead is ${object2.state.type}`
+                );
+
+                // state.isLocalValue should be true
+                assert(
+                    object1.state.isLocalValue === true,
+                    `object1.state.isLocalValue should be true`
+                );
+                assert(
+                    object2.state.type === FollowModeType.local,
+                    `object1.state.isLocalValue should be true`
+                );
+
+                // state.otherUsersCount should be 0
+                assert(
+                    object1.state.otherUsersCount === 0,
+                    `object1.state.otherUsersCount should be 0, instead is ${object1.state.otherUsersCount}`
+                );
+                assert(
+                    object2.state.otherUsersCount === 0,
+                    `object2.state.otherUsersCount should be 0, instead is ${object2.state.otherUsersCount}`
+                );
+
+                // state.value.page should be equal to mockDefaultValue.page
+                assert(
+                    object1.state.value.page === mockDefaultValue.page,
+                    `object1.state.value.page should be ${mockDefaultValue.page}, instead is ${object1.state.value.page}`
+                );
+                assert(
+                    object2.state.value.page === mockDefaultValue.page,
+                    `object2.state.value.page should be ${mockDefaultValue.page}, instead is ${object2.state.value.page}`
                 );
             }
-            numPresence1Updates += 1;
-            if (numPresence1Updates === 2) {
-                object1PresenceDone.resolve();
-            }
+            assertDefaultValues();
+
+            await waitForDelay(60);
+            // default values should remain unchanged once initial presence update is sent
+            assertDefaultValues();
+
+            const users1 = object1.getUsers();
+            const users2 = object2.getUsers();
+            const nonLocalUser1 = users1.find((u) => !u.isLocalUser);
+            const nonLocalUser2 = users2.find((u) => !u.isLocalUser);
+
+            // users should have correct length
+            assert(
+                users1.length === 2,
+                `users1.length should be 2, instead is ${users1.length}`
+            );
+            assert(
+                users2.length === 2,
+                `users2.length should be 2, instead is ${users2.length}`
+            );
+            // users should contain non-local user
+            assert(
+                nonLocalUser1 !== undefined,
+                "nonLocalUser1 should be defined"
+            );
+            assert(
+                nonLocalUser2 !== undefined,
+                "nonLocalUser2 should be defined"
+            );
+            // non-local user data should be defined
+            assert(
+                nonLocalUser1.data !== undefined,
+                "nonLocalUser1.data should be defined"
+            );
+            assert(
+                nonLocalUser2.data !== undefined,
+                "nonLocalUser2.data should be defined"
+            );
+            // non-local user should have correct default values
+            assert(
+                nonLocalUser1.data.stateValue.page === mockDefaultValue.page,
+                `nonLocalUser1.data.stateValue.page should be ${mockDefaultValue.page}, instead is ${nonLocalUser1.data.stateValue.page}`
+            );
+            assert(
+                nonLocalUser2.data.stateValue.page === mockDefaultValue.page,
+                `nonLocalUser2.data.stateValue.page should be ${mockDefaultValue.page}, instead is ${nonLocalUser2.data.stateValue.page}`
+            );
+
+            dispose();
         });
 
-        const object2StateDone = new Deferred();
-        object2.on("stateChanged", (state, local) => {
-            assert(
-                local,
-                "object2: should not receive non-local stateChanged event"
+        it("Should correctly broadcast local user's state value", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
             );
-            assert(
-                state.isLocalValue,
-                "object2: state should be isLocalValue true"
-            );
-            assert(
-                state.type === FollowModeType.local,
-                "object2: state should be type of local"
-            );
-            assert(
-                state.followingUserId === object2.localUser!.userId,
-                `object2: state should have followingUserId equal to local user, instead is ${state.followingUserId}`
-            );
-            assert(
-                state.otherUsersCount === 0,
-                `object2: state should have otherUsersCount equal to 0, instead is ${state.otherUsersCount}`
-            );
-            assert(
-                state.value.page === user2StateValue.page,
-                `object2: state should have value.page equal to ${user2StateValue.page}, instead is ${state.value.page}`
-            );
-            object1StateDone.resolve();
-        });
-        const object2PresenceDone = new Deferred();
-        let numPresence2Updates = 0;
-        object2.on("presenceChanged", (presence, local) => {
-            assert(
-                presence.data !== undefined,
-                "object2: presence.data should not be undefined"
-            );
-            if (local) {
+            let init1 = object1.initialize(mockDefaultValue);
+            let init2 = object2.initialize(mockDefaultValue);
+
+            await Promise.all([init1, init2]);
+
+            // allow remote presence to be received to make the test a bit cleaner
+            await waitForDelay(0);
+
+            const user1StateValue = {
+                page: "bananas",
+            };
+            const user2StateValue = {
+                page: "apples",
+            };
+
+            const object1StateDone = new Deferred();
+            object1.on("stateChanged", (state, local) => {
                 assert(
-                    presence.data.stateValue.page === user2StateValue.page,
-                    `object2: local presence should have data.page of ${user2StateValue.page}, instead is ${presence.data.stateValue.page}`
+                    local,
+                    "object1: should not receive non-local stateChanged event"
                 );
-            } else {
                 assert(
-                    presence.data.stateValue.page === user1StateValue.page,
-                    `object2: non-local presence should have data.page of ${user1StateValue.page}, instead is ${presence.data.stateValue.page}`
+                    state.isLocalValue,
+                    "object1: state should be isLocalValue true"
                 );
-            }
-            numPresence2Updates += 1;
-            if (numPresence2Updates === 2) {
-                object1PresenceDone.resolve();
-            }
+                assert(
+                    state.type === FollowModeType.local,
+                    "object1: state should be type of local"
+                );
+                assert(
+                    state.followingUserId === object1.localUser!.userId,
+                    `object1: state should have followingUserId equal to local user, instead is ${state.followingUserId}`
+                );
+                assert(
+                    state.otherUsersCount === 0,
+                    `object1: state should have otherUsersCount equal to 0, instead is ${state.otherUsersCount}`
+                );
+                assert(
+                    state.value.page === user1StateValue.page,
+                    `object1: state should have value.page equal to ${user1StateValue.page}, instead is ${state.value.page}`
+                );
+                object1StateDone.resolve();
+            });
+            const object1PresenceDone = new Deferred();
+            let numPresence1Updates = 0;
+            object1.on("presenceChanged", (presence, local) => {
+                assert(
+                    presence.data !== undefined,
+                    "object1: presence.data should not be undefined"
+                );
+                if (local) {
+                    assert(
+                        presence.data.stateValue.page === user1StateValue.page,
+                        `object1: local presence should have data.page of ${user1StateValue.page}, instead is ${presence.data.stateValue.page}`
+                    );
+                } else {
+                    assert(
+                        presence.data.stateValue.page === user2StateValue.page,
+                        `object1: non-local presence should have data.page of ${user2StateValue.page}, instead is ${presence.data.stateValue.page}`
+                    );
+                }
+                numPresence1Updates += 1;
+                if (numPresence1Updates === 2) {
+                    object1PresenceDone.resolve();
+                }
+            });
+
+            const object2StateDone = new Deferred();
+            object2.on("stateChanged", (state, local) => {
+                assert(
+                    local,
+                    "object2: should not receive non-local stateChanged event"
+                );
+                assert(
+                    state.isLocalValue,
+                    "object2: state should be isLocalValue true"
+                );
+                assert(
+                    state.type === FollowModeType.local,
+                    "object2: state should be type of local"
+                );
+                assert(
+                    state.followingUserId === object2.localUser!.userId,
+                    `object2: state should have followingUserId equal to local user, instead is ${state.followingUserId}`
+                );
+                assert(
+                    state.otherUsersCount === 0,
+                    `object2: state should have otherUsersCount equal to 0, instead is ${state.otherUsersCount}`
+                );
+                assert(
+                    state.value.page === user2StateValue.page,
+                    `object2: state should have value.page equal to ${user2StateValue.page}, instead is ${state.value.page}`
+                );
+                object1StateDone.resolve();
+            });
+            const object2PresenceDone = new Deferred();
+            let numPresence2Updates = 0;
+            object2.on("presenceChanged", (presence, local) => {
+                assert(
+                    presence.data !== undefined,
+                    "object2: presence.data should not be undefined"
+                );
+                if (local) {
+                    assert(
+                        presence.data.stateValue.page === user2StateValue.page,
+                        `object2: local presence should have data.page of ${user2StateValue.page}, instead is ${presence.data.stateValue.page}`
+                    );
+                } else {
+                    assert(
+                        presence.data.stateValue.page === user1StateValue.page,
+                        `object2: non-local presence should have data.page of ${user1StateValue.page}, instead is ${presence.data.stateValue.page}`
+                    );
+                }
+                numPresence2Updates += 1;
+                if (numPresence2Updates === 2) {
+                    object1PresenceDone.resolve();
+                }
+            });
+
+            const update1 = object1.update(user1StateValue);
+            const update2 = object2.update(user2StateValue);
+            await Promise.all([update1, update2]);
+            await Promise.all([
+                object1StateDone,
+                object1PresenceDone,
+                object2StateDone,
+                object2PresenceDone,
+            ]);
+
+            dispose();
         });
 
-        const update1 = object1.update(user1StateValue);
-        const update2 = object2.update(user2StateValue);
-        await Promise.all([update1, update2]);
-        await Promise.all([
-            object1StateDone,
-            object1PresenceDone,
-            object2StateDone,
-            object2PresenceDone,
-        ]);
+        it("Should be able to start/stop presenting", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            const user1StateValue = {
+                page: "bananas",
+            };
+            const user2StateValue = {
+                page: "apples",
+            };
+            let init1 = object1.initialize(user1StateValue);
+            let init2 = object2.initialize(user2StateValue);
 
-        dispose();
-    });
+            await Promise.all([init1, init2]);
 
-    it("Should be able to start/stop presenting", async () => {
-        const { object1, object2, dispose } = await getObjects(
-            getTestObjectProvider
-        );
-        const user1StateValue = {
-            page: "bananas",
-        };
-        const user2StateValue = {
-            page: "apples",
-        };
-        let init1 = object1.initialize(user1StateValue);
-        let init2 = object2.initialize(user2StateValue);
+            // allow remote presence to be received to make the test a bit cleaner
+            await waitForDelay(0);
 
-        await Promise.all([init1, init2]);
+            // Validate that object1 can become the presenter
+            await validateStartPresenting(object1, object2);
+            // Validate that object2 can take over as the presenter
+            await validateStartPresenting(object2, object1);
 
-        // allow remote presence to be received to make the test a bit cleaner
-        await waitForDelay(0);
+            // object2 will now be in control, validate stopPresenting
+            await validateStopPresenting(object2, object1);
 
-        // Validate that object1 can become the presenter
-        await validateStartPresenting(object1, object2);
-        // Validate that object2 can take over as the presenter
-        await validateStartPresenting(object2, object1);
+            dispose();
+        });
 
-        // object2 will now be in control, validate stopPresenting
-        await validateStopPresenting(object2, object1);
+        it("Should be able to start/stop suspension from presenter", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            const user1StateValue = {
+                page: "bananas",
+            };
+            const user2StateValue = {
+                page: "apples",
+            };
+            let init1 = object1.initialize(user1StateValue);
+            let init2 = object2.initialize(user2StateValue);
 
-        dispose();
-    });
+            await Promise.all([init1, init2]);
 
-    it("Should be able to start/stop suspension from presenter", async () => {
-        const { object1, object2, dispose } = await getObjects(
-            getTestObjectProvider
-        );
-        const user1StateValue = {
-            page: "bananas",
-        };
-        const user2StateValue = {
-            page: "apples",
-        };
-        let init1 = object1.initialize(user1StateValue);
-        let init2 = object2.initialize(user2StateValue);
+            // allow remote presence to be received to make the test a bit cleaner
+            await waitForDelay(0);
 
-        await Promise.all([init1, init2]);
+            // Validate that object1 can become the presenter
+            await validateStartPresenting(object1, object2);
 
-        // allow remote presence to be received to make the test a bit cleaner
-        await waitForDelay(0);
+            // Validate that object2 can suspend
+            await validateStartSuspensionPresenter(object1, object2);
+            // Validate that object2 can stop suspension
+            await validateEndSuspensionPresenter(object1, object2);
 
-        // Validate that object1 can become the presenter
-        await validateStartPresenting(object1, object2);
+            dispose();
+        });
 
-        // Validate that object2 can suspend
-        await validateStartSuspensionPresenter(object1, object2);
-        // Validate that object2 can stop suspension
-        await validateEndSuspensionPresenter(object1, object2);
+        it("Should be able to start/stop following", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            const user1StateValue = {
+                page: "bananas",
+            };
+            const user2StateValue = {
+                page: "apples",
+            };
+            let init1 = object1.initialize(user1StateValue);
+            let init2 = object2.initialize(user2StateValue);
 
-        dispose();
-    });
+            await Promise.all([init1, init2]);
 
-    it("Should be able to start/stop following", async () => {
-        const { object1, object2, dispose } = await getObjects(
-            getTestObjectProvider
-        );
-        const user1StateValue = {
-            page: "bananas",
-        };
-        const user2StateValue = {
-            page: "apples",
-        };
-        let init1 = object1.initialize(user1StateValue);
-        let init2 = object2.initialize(user2StateValue);
+            // allow remote presence to be received to make the test a bit cleaner
+            await waitForDelay(0);
 
-        await Promise.all([init1, init2]);
+            // Validate that object1 can follow object2
+            await validateStartFollowing(object1, object2);
+            // Validate that object1 can stop following object2
+            await validateStopFollowing(object1, object2);
+            // Validate that object2 can follow object1
+            await validateStartFollowing(object2, object1);
+            // Validate that object2 can stop following object1
+            await validateStopFollowing(object2, object1);
 
-        // allow remote presence to be received to make the test a bit cleaner
-        await waitForDelay(0);
+            dispose();
+        });
 
-        // Validate that object1 can follow object2
-        await validateStartFollowing(object1, object2);
-        // Validate that object1 can stop following object2
-        await validateStopFollowing(object1, object2);
-        // Validate that object2 can follow object1
-        await validateStartFollowing(object2, object1);
-        // Validate that object2 can stop following object1
-        await validateStopFollowing(object2, object1);
+        it("Should be able to start/end suspension while following", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            const user1StateValue = {
+                page: "bananas",
+            };
+            const user2StateValue = {
+                page: "apples",
+            };
+            let init1 = object1.initialize(user1StateValue);
+            let init2 = object2.initialize(user2StateValue);
 
-        dispose();
-    });
+            await Promise.all([init1, init2]);
 
-    it("Should be able to start/end suspension while following", async () => {
-        const { object1, object2, dispose } = await getObjects(
-            getTestObjectProvider
-        );
-        const user1StateValue = {
-            page: "bananas",
-        };
-        const user2StateValue = {
-            page: "apples",
-        };
-        let init1 = object1.initialize(user1StateValue);
-        let init2 = object2.initialize(user2StateValue);
+            // allow remote presence to be received to make the test a bit cleaner
+            await waitForDelay(0);
 
-        await Promise.all([init1, init2]);
+            // Validate that object1 can follow object2
+            await validateStartFollowing(object1, object2);
+            // Validate that object1 can suspend from following object 2
+            await validateStartSuspensionFollower(object1, object2);
+            // Validate that object1 can end suspension from following object 2
+            await validateEndSuspensionFollower(object1, object2);
 
-        // allow remote presence to be received to make the test a bit cleaner
-        await waitForDelay(0);
+            dispose();
+        });
 
-        // Validate that object1 can follow object2
-        await validateStartFollowing(object1, object2);
-        // Validate that object1 can suspend from following object 2
-        await validateStartSuspensionFollower(object1, object2);
-        // Validate that object1 can end suspension from following object 2
-        await validateEndSuspensionFollower(object1, object2);
+        it("Presenting should override following specific user", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            const user1StateValue = {
+                page: "bananas",
+            };
+            const user2StateValue = {
+                page: "apples",
+            };
+            let init1 = object1.initialize(user1StateValue);
+            let init2 = object2.initialize(user2StateValue);
 
-        dispose();
-    });
+            await Promise.all([init1, init2]);
 
-    it("Presenting should override following specific user", async () => {
-        const { object1, object2, dispose } = await getObjects(
-            getTestObjectProvider
-        );
-        const user1StateValue = {
-            page: "bananas",
-        };
-        const user2StateValue = {
-            page: "apples",
-        };
-        let init1 = object1.initialize(user1StateValue);
-        let init2 = object2.initialize(user2StateValue);
+            // allow remote presence to be received to make the test a bit cleaner
+            await waitForDelay(0);
 
-        await Promise.all([init1, init2]);
+            // Validate that object1 can follow object2
+            await validateStartFollowing(object1, object2);
+            // Validate that object1 can start presenting
+            await validateStartPresenting(object1, object2);
 
-        // allow remote presence to be received to make the test a bit cleaner
-        await waitForDelay(0);
-
-        // Validate that object1 can follow object2
-        await validateStartFollowing(object1, object2);
-        // Validate that object1 can start presenting
-        await validateStartPresenting(object1, object2);
-
-        dispose();
-    });
-});
+            dispose();
+        });
+    }
+);
 
 async function validateStartPresenting(
     objectToPresent: LiveFollowMode<TestFollowData>,

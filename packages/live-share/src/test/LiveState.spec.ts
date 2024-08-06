@@ -9,10 +9,10 @@ import {
     fluidEntryPoint,
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils/internal";
-import { LiveState } from "../LiveState";
-import { Deferred } from "../internals/Deferred";
-import { getLiveDataObjectKind } from "../internals/schema-injection-utils";
-import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime";
+import { LiveState } from "../LiveState.js";
+import { Deferred } from "../internals/Deferred.js";
+import { getLiveDataObjectKind } from "../internals/schema-injection-utils.js";
+import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime.js";
 import {
     describeCompat,
     ITestObjectProviderOptions,
@@ -88,167 +88,174 @@ const mockDefaultValue: TestStateData = {
     value: "defaultValue",
 };
 
-describeCompat("LiveState", (getTestObjectProvider) => {
-    it("Should changeState() to new state and value", async () => {
-        const { object1, object2, dispose } = await getObjects(
-            getTestObjectProvider
-        );
-        const object1done = new Deferred();
-        object1.on("stateChanged", (state, local) => {
-            try {
-                if (local) {
-                    assert(
-                        typeof state == "object",
-                        `object1: data is not an object`
-                    );
-                    assert(
-                        typeof state.status == "string",
-                        `object1: state.status is not a string`
-                    );
-                    assert(
-                        typeof state.value == "string",
-                        `object1: state.value is not a string`
-                    );
-                    assert(
-                        state.status === "newState",
-                        `object1: status == '${JSON.stringify(state.status)}'`
-                    );
-                    assert(
-                        state.value === "newValue",
-                        `object1: value == '${JSON.stringify(state.value)}'`
-                    );
-                    object1done.resolve();
+describeCompat(
+    "LiveState",
+    (
+        getTestObjectProvider: (
+            options?: ITestObjectProviderOptions
+        ) => ITestObjectProvider
+    ) => {
+        it("Should changeState() to new state and value", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            const object1done = new Deferred();
+            object1.on("stateChanged", (state, local) => {
+                try {
+                    if (local) {
+                        assert(
+                            typeof state == "object",
+                            `object1: data is not an object`
+                        );
+                        assert(
+                            typeof state.status == "string",
+                            `object1: state.status is not a string`
+                        );
+                        assert(
+                            typeof state.value == "string",
+                            `object1: state.value is not a string`
+                        );
+                        assert(
+                            state.status === "newState",
+                            `object1: status == '${JSON.stringify(state.status)}'`
+                        );
+                        assert(
+                            state.value === "newValue",
+                            `object1: value == '${JSON.stringify(state.value)}'`
+                        );
+                        object1done.resolve();
+                    }
+                } catch (err) {
+                    object1done.reject(err);
                 }
-            } catch (err) {
-                object1done.reject(err);
-            }
+            });
+
+            const object2done = new Deferred();
+            object2.on("stateChanged", (state, local) => {
+                try {
+                    if (!local) {
+                        assert(
+                            typeof state == "object",
+                            `object2: data is not an object`
+                        );
+                        assert(
+                            typeof state.status == "string",
+                            `object2: state.status is not a string`
+                        );
+                        assert(
+                            typeof state.value == "string",
+                            `object2: state.value is not a string`
+                        );
+                        assert(
+                            state.status == "newState",
+                            `object1: status == '${JSON.stringify(state)}'`
+                        );
+                        assert(
+                            state.value == "newValue",
+                            `object1: value == '${JSON.stringify(state)}'`
+                        );
+                        object2done.resolve();
+                    }
+                } catch (err) {
+                    object2done.reject(err);
+                }
+            });
+            let init1 = object1.initialize(mockDefaultValue);
+            let init2 = object2.initialize(mockDefaultValue);
+
+            await Promise.all([init1, init2]);
+
+            assert(
+                object1.state.status == mockDefaultValue.status,
+                `object1: status == '${object1.state.status}'`
+            );
+
+            await object1.set({ status: "newState", value: "newValue" });
+
+            // Wait for events to trigger
+            await Promise.all([object1done.promise, object2done.promise]);
+
+            dispose();
         });
 
-        const object2done = new Deferred();
-        object2.on("stateChanged", (state, local) => {
-            try {
-                if (!local) {
-                    assert(
-                        typeof state == "object",
-                        `object2: data is not an object`
-                    );
-                    assert(
-                        typeof state.status == "string",
-                        `object2: state.status is not a string`
-                    );
-                    assert(
-                        typeof state.value == "string",
-                        `object2: state.value is not a string`
-                    );
-                    assert(
-                        state.status == "newState",
-                        `object1: status == '${JSON.stringify(state)}'`
-                    );
-                    assert(
-                        state.value == "newValue",
-                        `object1: value == '${JSON.stringify(state)}'`
-                    );
-                    object2done.resolve();
+        it("Should changeState() to new value for same state", async () => {
+            const { object1, object2, dispose } = await getObjects(
+                getTestObjectProvider
+            );
+            const done = new Deferred();
+            object1.on("stateChanged", (state, local) => {
+                try {
+                    if (!local) {
+                        assert(
+                            typeof state == "object",
+                            `object1: data is not an object`
+                        );
+                        assert(
+                            typeof state.status == "string",
+                            `object1: state.status is not a string`
+                        );
+                        assert(
+                            typeof state.value == "string",
+                            `object1: state.value is not a string`
+                        );
+                        assert(
+                            state.status == "testState",
+                            `object1: status == '${state.status}'`
+                        );
+                        assert(
+                            state.value == "secondValue",
+                            `object1: value == '${state.value}'`
+                        );
+                        done.resolve();
+                    }
+                } catch (err) {
+                    done.reject(err);
                 }
-            } catch (err) {
-                object2done.reject(err);
-            }
-        });
-        let init1 = object1.initialize(mockDefaultValue);
-        let init2 = object2.initialize(mockDefaultValue);
+            });
+            const init1 = object1.initialize(mockDefaultValue);
 
-        await Promise.all([init1, init2]);
-
-        assert(
-            object1.state.status == mockDefaultValue.status,
-            `object1: status == '${object1.state.status}'`
-        );
-
-        await object1.set({ status: "newState", value: "newValue" });
-
-        // Wait for events to trigger
-        await Promise.all([object1done.promise, object2done.promise]);
-
-        dispose();
-    });
-
-    it("Should changeState() to new value for same state", async () => {
-        const { object1, object2, dispose } = await getObjects(
-            getTestObjectProvider
-        );
-        const done = new Deferred();
-        object1.on("stateChanged", (state, local) => {
-            try {
-                if (!local) {
-                    assert(
-                        typeof state == "object",
-                        `object1: data is not an object`
-                    );
-                    assert(
-                        typeof state.status == "string",
-                        `object1: state.status is not a string`
-                    );
-                    assert(
-                        typeof state.value == "string",
-                        `object1: state.value is not a string`
-                    );
-                    assert(
-                        state.status == "testState",
-                        `object1: status == '${state.status}'`
-                    );
-                    assert(
-                        state.value == "secondValue",
-                        `object1: value == '${state.value}'`
-                    );
-                    done.resolve();
+            object2.on("stateChanged", (state, local) => {
+                try {
+                    if (!local) {
+                        assert(
+                            typeof state == "object",
+                            `object2: data is not an object`
+                        );
+                        assert(
+                            typeof state.status == "string",
+                            `object2: state.status is not a string`
+                        );
+                        assert(
+                            typeof state.value == "string",
+                            `object2: state.value is not a string`
+                        );
+                        assert(
+                            state.status == "testState",
+                            `object2: status == '${state.status}'`
+                        );
+                        assert(
+                            state.value == "firstValue",
+                            `object2: value == '${state.value}'`
+                        );
+                        object2.set({
+                            status: "testState",
+                            value: "secondValue",
+                        });
+                    }
+                } catch (err) {
+                    done.reject(err);
                 }
-            } catch (err) {
-                done.reject(err);
-            }
+            });
+            const init2 = object2.initialize(mockDefaultValue);
+
+            await Promise.all([init1, init2]);
+
+            await object1.set({ status: "testState", value: "firstValue" });
+
+            // Wait for events to trigger
+            await done.promise;
+
+            dispose();
         });
-        const init1 = object1.initialize(mockDefaultValue);
-
-        object2.on("stateChanged", (state, local) => {
-            try {
-                if (!local) {
-                    assert(
-                        typeof state == "object",
-                        `object2: data is not an object`
-                    );
-                    assert(
-                        typeof state.status == "string",
-                        `object2: state.status is not a string`
-                    );
-                    assert(
-                        typeof state.value == "string",
-                        `object2: state.value is not a string`
-                    );
-                    assert(
-                        state.status == "testState",
-                        `object2: status == '${state.status}'`
-                    );
-                    assert(
-                        state.value == "firstValue",
-                        `object2: value == '${state.value}'`
-                    );
-                    object2.set({
-                        status: "testState",
-                        value: "secondValue",
-                    });
-                }
-            } catch (err) {
-                done.reject(err);
-            }
-        });
-        const init2 = object2.initialize(mockDefaultValue);
-
-        await Promise.all([init1, init2]);
-
-        await object1.set({ status: "testState", value: "firstValue" });
-
-        // Wait for events to trigger
-        await done.promise;
-
-        dispose();
-    });
-});
+    }
+);

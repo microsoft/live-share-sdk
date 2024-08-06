@@ -4,14 +4,14 @@
  */
 
 import { strict as assert } from "assert";
-import { LiveEventScope } from "../LiveEventScope";
-import { ILiveEvent, UserMeetingRole } from "../../interfaces";
-import { MockRuntimeSignaler } from "../mock/MockRuntimeSignaler";
-import { MockRoleVerifier } from "../mock/MockRoleVerifier";
-import { MockTimestampProvider } from "../mock/MockTimestampProvider";
-import { LocalTimestampProvider } from "../../LocalTimestampProvider";
-import { TestLiveShareHost } from "../../TestLiveShareHost";
-import { LiveShareRuntime } from "../LiveShareRuntime";
+import { LiveEventScope } from "../LiveEventScope.js";
+import { ILiveEvent, UserMeetingRole } from "../../interfaces.js";
+import { MockRuntimeSignaler } from "../mock/MockRuntimeSignaler.js";
+import { MockRoleVerifier } from "../mock/MockRoleVerifier.js";
+import { MockTimestampProvider } from "../mock/MockTimestampProvider.js";
+import { LocalTimestampProvider } from "../../LocalTimestampProvider.js";
+import { TestLiveShareHost } from "../../TestLiveShareHost.js";
+import { LiveShareRuntime } from "../LiveShareRuntime.js";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();

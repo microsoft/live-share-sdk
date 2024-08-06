@@ -3,7 +3,7 @@ import {
     TimeoutError,
     timeoutRequest,
     waitForResult,
-} from "../internals/utils";
+} from "../internals/utils.js";
 
 describe("timeoutRequest", function () {
     it("should return the result when request is successful within timeout", async () => {

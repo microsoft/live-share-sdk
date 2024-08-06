@@ -11,13 +11,13 @@ import {
     AzureContainerServices,
     AzureLocalConnectionConfig,
 } from "@fluidframework/azure-client";
-import { AzureLiveShareClient } from "../AzureLiveShareClient";
+import { AzureLiveShareClient } from "../AzureLiveShareClient.js";
 import {
     IInsecureUser,
     InsecureTokenProvider,
 } from "@fluidframework/test-runtime-utils/internal";
-import { LiveEvent } from "../LiveEvent";
-import { LiveState } from "../LiveState";
+import { LiveEvent } from "../LiveEvent.js";
+import { LiveState } from "../LiveState.js";
 import { v4 as uuid } from "uuid";
 
 function generateUser(): IInsecureUser {

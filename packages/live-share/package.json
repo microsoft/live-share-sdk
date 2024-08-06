@@ -4,8 +4,8 @@
     "description": "Building collaborative experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/cjs/index.js",
-    "module": "./bin/esm/index.js",
+    "main": "./bin/cjs/index.public.js",
+    "module": "./bin/esm/index.public.js",
     "types": "./bin/esm/index.public.d.ts",
     "type": "module",
     "scripts": {
@@ -28,21 +28,21 @@
         ".": {
             "require": {
                 "types": "./bin/cjs/index.public.d.ts",
-                "default": "./bin/cjs/index.js"
+                "default": "./bin/cjs/index.public.js"
             },
             "import": {
                 "types": "./bin/esm/index.public.d.ts",
-                "default": "./bin/esm/index.js"
+                "default": "./bin/esm/index.public.js"
             }
         },
         "./internal": {
             "require": {
                 "types": "./bin/cjs/index.internal.d.ts",
-                "default": "./bin/cjs/index.js"
+                "default": "./bin/cjs/index.internal.js"
             },
             "import": {
                 "types": "./bin/esm/index.internal.d.ts",
-                "default": "./bin/esm/index.js"
+                "default": "./bin/esm/index.internal.js"
             }
         }
     },

@@ -63,5 +63,5 @@
         "skipLibCheck": true /* Skip type checking of declaration files. */,
         "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
     },
-    "files": ["src/index.ts"]
+    "files": ["src/index.public.ts", "src/index.internal.ts"]
 }

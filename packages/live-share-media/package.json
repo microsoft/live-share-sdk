@@ -10,8 +10,8 @@
     "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json && echo '{\\\"type\\\":\\\"commonjs\\\"}' > ./bin/cjs/package.json\"",
-        "build:test": "tsc -p tsconfig.test.json && echo '{\"type\":\"commonjs\"}' > ./bin/test/package.json",
+        "build": "node  ../../internal/build-tools/build-esm-cjs.js cjs esm",
+        "build:test": "node  ../../internal/build-tools/build-esm-cjs.js test",
         "test": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
         "test:debug": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/LiveMediaSession_Synchronizer.spec.js\" --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
@@ -39,7 +39,6 @@
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
-        "concurrently": "^8.2.2",
         "fluid-framework": "^2.1.0",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",

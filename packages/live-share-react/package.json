@@ -10,7 +10,7 @@
     "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json && echo '{\\\"type\\\":\\\"commonjs\\\"}' > ./bin/cjs/package.json\"",
+        "build": "node  ../../internal/build-tools/build-esm-cjs.js cjs esm",
         "typecheck": "tsc"
     },
     "exports": {
@@ -39,7 +39,6 @@
         "@types/react-dom": "^18.0.0",
         "@types/uuid": "^9.0.1",
         "babel-loader": "^9.1.2",
-        "concurrently": "^8.2.2",
         "fluid-framework": "^2.1.0",
         "typescript": "~5.5.3"
     },

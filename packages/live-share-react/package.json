@@ -10,7 +10,7 @@
     "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "node  ../../internal/build-tools/build-esm-cjs.js cjs esm",
+        "build": "node  ../../internal/build-tools/build-package.js --cjs --esm",
         "typecheck": "tsc"
     },
     "exports": {

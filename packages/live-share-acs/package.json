@@ -10,7 +10,7 @@
     "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "node  ../../internal/build-tools/build-esm-cjs.js cjs esm",
+        "build": "node  ../../internal/build-tools/build-package.js --cjs --esm",
         "test": "ts-mocha src/**/*.spec.ts --timeout 10000",
         "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"

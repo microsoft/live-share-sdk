@@ -10,8 +10,8 @@
     "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "node  ../../internal/build-tools/build-esm-cjs.js cjs esm",
-        "build:test": "node  ../../internal/build-tools/build-esm-cjs.js test",
+        "build": "node  ../../internal/build-tools/build-package.js --cjs --esm",
+        "build:test": "node  ../../internal/build-tools/build-package.js --test",
         "test": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
         "test:debug": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/LiveMediaSession_Synchronizer.spec.js\" --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",

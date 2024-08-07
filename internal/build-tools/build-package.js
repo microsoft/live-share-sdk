@@ -36,7 +36,7 @@ async function build(tsConfig) {
 function addCJSPackageJsonOverride(type) {
     fs.writeFileSync(
         `./bin/${type}/package.json`,
-        JSON.stringify({ type: "Module" })
+        JSON.stringify({ type: "commonjs" })
     );
 }
 

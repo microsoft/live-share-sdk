@@ -7,7 +7,7 @@
         "downlevelIteration": true,
         "paths": {
             "@microsoft/live-share/internal": [
-                "../live-share/bin/esm/index.d.ts"
+                "../live-share/bin/esm/index.internal.d.ts"
             ]
         }
     }

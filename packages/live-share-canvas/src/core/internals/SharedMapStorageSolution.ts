@@ -7,9 +7,9 @@ import {
     LiveCanvasStorageSolution,
     StorageSolutionEvents,
     isClearEvent,
-} from ".";
-import { IStroke, Stroke } from "../Stroke";
-import { InkingManager } from "../InkingManager";
+} from "./index.js";
+import { IStroke, Stroke } from "../Stroke.js";
+import { InkingManager } from "../InkingManager.js";
 
 export class SharedMapStorageSolution extends LiveCanvasStorageSolution {
     private registeredListeners = new Map<string, Function>();

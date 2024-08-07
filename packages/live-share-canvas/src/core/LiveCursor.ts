@@ -1,5 +1,5 @@
-import { IPoint } from "./Geometry";
-import { IUserInfo } from "./LiveCanvas-interfaces";
+import { IPoint } from "./Geometry.js";
+import { IUserInfo } from "./LiveCanvas-interfaces.js";
 
 /**
  * Represents a live (shared) cursor. Applications that want to customize

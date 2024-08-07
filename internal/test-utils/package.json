@@ -12,7 +12,6 @@
     "sideEffects": false,
     "main": "./bin/index.js",
     "types": "./bin/index.d.ts",
-    "type": "module",
     "scripts": {
         "build": "tsc -p tsconfig.json",
         "eslint": "eslint --format stylish src",

@@ -1,8 +1,8 @@
-import { BasicColors, lightenColor, toCssRgbaColor } from "../Colors";
-import { IPoint, IRect, expandRect } from "../Geometry";
-import { IUserInfo } from "../LiveCanvas-interfaces";
-import { LiveCursor } from "../LiveCursor";
-import { ICursorColor } from "./LiveCanvas-interfaces-internal";
+import { BasicColors, lightenColor, toCssRgbaColor } from "../Colors.js";
+import { IPoint, IRect, expandRect } from "../Geometry.js";
+import { IUserInfo } from "../LiveCanvas-interfaces.js";
+import { LiveCursor } from "../LiveCursor.js";
+import { ICursorColor } from "./LiveCanvas-interfaces-internal.js";
 
 /**
  * @internal

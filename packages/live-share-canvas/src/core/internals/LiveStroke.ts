@@ -1,7 +1,7 @@
-import { IBrush } from "../Brush";
-import { IPointerPoint, getDistanceBetweenPoints } from "../Geometry";
-import { StrokeEndState } from "../InkingManager-constants";
-import { StrokeType } from "../Stroke";
+import { IBrush } from "../Brush.js";
+import { IPointerPoint, getDistanceBetweenPoints } from "../Geometry.js";
+import { StrokeEndState } from "../InkingManager-constants.js";
+import { StrokeType } from "../Stroke.js";
 
 /**
  * @internal

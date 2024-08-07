@@ -3,7 +3,7 @@ import {
     IPointerEvent,
     IPointerMoveEvent,
     InputProvider,
-} from "../../input";
+} from "../../input/index.js";
 
 /**
  * @internal

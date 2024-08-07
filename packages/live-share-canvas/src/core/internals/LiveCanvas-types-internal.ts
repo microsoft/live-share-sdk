@@ -2,9 +2,9 @@ import {
     IAddPointsEventArgs,
     IBeginStrokeEventArgs,
     IPointerMovedEventArgs,
-} from "../InkingManager-interfaces";
-import { IEventUserInfo } from "../LiveCanvas-interfaces";
-import { ISharedCursor } from "./LiveCanvas-interfaces-internal";
+} from "../InkingManager-interfaces.js";
+import { IEventUserInfo } from "../LiveCanvas-interfaces.js";
+import { ISharedCursor } from "./LiveCanvas-interfaces-internal.js";
 
 export type IBeginWetStrokeEvent = IBeginStrokeEventArgs &
     ISharedCursor &

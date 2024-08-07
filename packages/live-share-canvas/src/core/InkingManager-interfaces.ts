@@ -1,7 +1,7 @@
-import { IBrush } from "./Brush";
-import { IPoint, IPointerPoint } from "./Geometry";
-import { StrokeEndState } from "./InkingManager-constants";
-import { IStroke, StrokeMode, StrokeType } from "./Stroke";
+import { IBrush } from "./Brush.js";
+import { IPoint, IPointerPoint } from "./Geometry.js";
+import { StrokeEndState } from "./InkingManager-constants.js";
+import { IStroke, StrokeMode, StrokeType } from "./Stroke.js";
 
 /**
  * Defines the arguments of the PointerMovedEvent.

@@ -9,11 +9,11 @@ import {
     AzureClientProps,
     AzureContainerServices,
 } from "@fluidframework/azure-client";
-import { IAzureContainerResults } from "../types";
+import { IAzureContainerResults } from "../types/index.js";
 import {
     ISharedStateRegistryResponse,
     useSharedStateRegistry,
-} from "../shared-hooks";
+} from "../shared-hooks/index.js";
 import { AzureLiveShareClient } from "@microsoft/live-share";
 import { BaseLiveShareClient } from "@microsoft/live-share/internal";
 

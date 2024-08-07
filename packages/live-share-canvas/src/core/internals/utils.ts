@@ -13,7 +13,7 @@ import {
     ISegment,
     getPressureAdjustedSize,
     toCssRgbaColor,
-} from "..";
+} from "../index.js";
 
 /**
  * Pre-calculated Pi x 2.

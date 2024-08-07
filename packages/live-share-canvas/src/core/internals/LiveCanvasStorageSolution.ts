@@ -1,6 +1,6 @@
 import { IEvent } from "@fluidframework/core-interfaces";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IStroke } from "../Stroke";
+import { IStroke } from "../Stroke.js";
 
 export enum StorageSolutionEvents {
     strokeChanged = "strokeChanged",

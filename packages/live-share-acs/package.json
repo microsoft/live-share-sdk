@@ -7,14 +7,16 @@
     "main": "./bin/cjs/index.js",
     "module": "./bin/esm/index.js",
     "types": "./bin/esm/index.d.ts",
+    "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json\"",
+        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json && echo '{\\\"type\\\":\\\"commonjs\\\"}' > ./bin/cjs/package.json\"",
         "test": "ts-mocha src/**/*.spec.ts --timeout 10000",
         "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
     },
     "exports": {
+        "./package.json": "./package.json",
         ".": {
             "require": {
                 "types": "./bin/cjs/index.d.ts",

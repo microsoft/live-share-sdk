@@ -1,10 +1,10 @@
-import { proxiedChildrenKey, rawTNodeKey } from "./tree-node-constants";
+import { proxiedChildrenKey, rawTNodeKey } from "./tree-node-constants.js";
 import {
     ICustomProxyHandler,
     isCustomProxyHandler,
     isTreeNode,
     isProxy,
-} from "./tree-node-types";
+} from "./tree-node-types.js";
 import { TreeNode, Tree } from "fluid-framework";
 import { Dispatch, SetStateAction } from "react";
 

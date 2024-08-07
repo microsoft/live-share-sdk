@@ -14,15 +14,15 @@ import {
     IUseLiveEventResults,
     OnReceivedLiveEventAction,
     SendLiveEventAction,
-} from "../types";
-import { IReceiveLiveEvent } from "../interfaces";
-import { useDynamicDDS } from "../shared-hooks";
+} from "../types/index.js";
+import { IReceiveLiveEvent } from "../interfaces/index.js";
+import { useDynamicDDS } from "../shared-hooks/index.js";
 import {
     ActionContainerNotJoinedError,
     ActionLiveDataObjectInitializedError,
     ActionLiveDataObjectUndefinedError,
-} from "../internal";
-import { useFluidObjectsContext } from "../providers";
+} from "../internal/index.js";
+import { useFluidObjectsContext } from "../providers/index.js";
 
 /**
  * React hook for using a Live Share `LiveEvent`.

@@ -5,10 +5,13 @@
 
 import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import React from "react";
-import { useDynamicDDS } from "../shared-hooks";
-import { IUseLiveCanvasOptionalProps, IUseLiveCanvasResults } from "../types";
-import { isRefObject } from "../utils";
-import { getRawNode } from "../shared-hooks/internals/tree-node-utils";
+import { useDynamicDDS } from "../shared-hooks/index.js";
+import {
+    IUseLiveCanvasOptionalProps,
+    IUseLiveCanvasResults,
+} from "../types/index.js";
+import { isRefObject } from "../utils/index.js";
+import { getRawNode } from "../shared-hooks/internals/tree-node-utils.js";
 import { LiveDataObjectInitializeState } from "@microsoft/live-share";
 
 /**

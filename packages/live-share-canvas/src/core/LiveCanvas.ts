@@ -9,9 +9,9 @@ import {
 } from "@fluidframework/aqueduct/internal";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import { SharedMap } from "@fluidframework/map/internal";
-import { InkingManager } from "./InkingManager";
-import { IPoint } from "./Geometry";
-import { IStroke, StrokeType } from "./Stroke";
+import { InkingManager } from "./InkingManager.js";
+import { IPoint } from "./Geometry.js";
+import { IStroke, StrokeType } from "./Stroke.js";
 import {
     UserMeetingRole,
     LiveTelemetryLogger,
@@ -41,7 +41,7 @@ import {
     StorageSolutionEvents,
     createUndoRedoStacks,
     undoRedo,
-} from "./internals";
+} from "./internals/index.js";
 import { ITree, SharedObjectKind, SharedTree, TreeView } from "fluid-framework";
 import {
     IAddPointsEventArgs,
@@ -49,7 +49,7 @@ import {
     IBeginStrokeEventArgs,
     IPointerMovedEventArgs,
     IWetStroke,
-} from "./InkingManager-interfaces";
+} from "./InkingManager-interfaces.js";
 import {
     AddPointsEvent,
     BeginStrokeEvent,
@@ -58,15 +58,15 @@ import {
     StrokeEndState,
     StrokesAddedEvent,
     StrokesRemovedEvent,
-} from "./InkingManager-constants";
-import { IEventUserInfo, IUserInfo } from "./LiveCanvas-interfaces";
-import { LiveCursor } from "./LiveCursor";
+} from "./InkingManager-constants.js";
+import { IEventUserInfo, IUserInfo } from "./LiveCanvas-interfaces.js";
+import { LiveCursor } from "./LiveCursor.js";
 import type { ISharedObjectKind } from "@fluidframework/shared-object-base/internal";
 import {
     LiveCanvasStrokesMap,
     LiveCanvasTreeNode,
     treeViewConfiguration,
-} from "./LiveCanvasTreeSchema";
+} from "./LiveCanvasTreeSchema.js";
 
 /**
  * Enables live and collaborative inking.

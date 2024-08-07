@@ -3,7 +3,7 @@
     "compilerOptions": {
         "outDir": "./bin/cjs",
         "module": "CommonJS",
-        "moduleResolution": null,
+        "moduleResolution": "Node10",
         "downlevelIteration": true,
         "paths": {
             "@microsoft/live-share/internal": [

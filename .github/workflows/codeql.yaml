@@ -13,10 +13,10 @@ name: "CodeQL"
 
 on:
     push:
-        branches: ["main", main*]
+        branches: [main, mainv2]
     pull_request:
         # The branches below must be a subset of the branches above
-        branches: ["main", "main*"]
+        branches: [main, mainv2, jameshunt/presence-with-audience-state]
     schedule:
         - cron: "0 2 * * 6"
     workflow_dispatch:

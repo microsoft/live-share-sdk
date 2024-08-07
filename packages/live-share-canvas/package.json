@@ -42,7 +42,7 @@
     },
     "peerDependencies": {
         "@microsoft/live-share": "2.0.0-internal.5",
-        "fluid-framework": "^2.0.0-rc || ^2.0.0-internal"
+        "fluid-framework": "^2.0.0"
     },
     "repository": {
         "directory": "packages/live-share-canvas",

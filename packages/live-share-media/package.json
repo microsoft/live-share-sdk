@@ -47,7 +47,7 @@
     },
     "peerDependencies": {
         "@microsoft/live-share": "2.0.0-internal.5",
-        "fluid-framework": "^2.1.0"
+        "fluid-framework": "^2.0.0"
     },
     "repository": {
         "directory": "packages/live-share-media",

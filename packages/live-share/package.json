@@ -72,7 +72,7 @@
         "typescript": "~5.5.3"
     },
     "peerDependencies": {
-        "fluid-framework": "^2.1.0"
+        "fluid-framework": "^2.0.0"
     },
     "repository": {
         "directory": "packages/live-share",

@@ -5,5 +5,5 @@
         "module": "CommonJS",
         "moduleResolution": "Node10",
         "downlevelIteration": true
-    },
+    }
 }

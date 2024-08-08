@@ -49,13 +49,13 @@
     "dependencies": {
         "@fluid-internal/client-utils": "^2.1.0",
         "@fluidframework/aqueduct": "^2.1.0",
+        "@fluidframework/azure-client": "^2.1.0",
         "@fluidframework/core-interfaces": "^2.1.0",
         "@fluidframework/core-utils": "^2.1.0",
         "@fluidframework/register-collection": "^2.1.0",
         "uuid": "^9.0.0"
     },
     "devDependencies": {
-        "@fluidframework/azure-client": "^2.1.0",
         "@fluidframework/mocha-test-setup": "^2.0.0-rc.1.0.9",
         "@fluidframework/test-runtime-utils": "^2.1.0",
         "@fluidframework/test-utils": "^2.1.0",

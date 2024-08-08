@@ -137,8 +137,9 @@ export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
         }
     };
     try {
-        const { InsecureTokenProvider } =
-            await require("@fluidframework/test-runtime-utils");
+        const { InsecureTokenProvider } = await import(
+            "@fluidframework/test-runtime-utils/internal"
+        );
         const tokenProvider = new InsecureTokenProvider("", {
             id: userId() ?? uuid(),
             name: "Test User",

@@ -34,3 +34,12 @@ jobs:
             - name: "test live-share-media"
               run: npm run test
               working-directory: packages/live-share-media
+
+            - uses: pnpm/action-setup@v4
+              name: Install pnpm
+              with:
+                  version: 9
+                  run_install: false
+            - name: "test live-share with pnpm"
+              run: bash test.sh
+              working-directory: internal/pnpm-test

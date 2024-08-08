@@ -36,7 +36,7 @@ jobs:
               working-directory: packages/live-share-media
 
             - uses: pnpm/action-setup@v4
-              name: Install pnpm
+              name: Install pnpm for next step
               with:
                   version: 9
                   run_install: false

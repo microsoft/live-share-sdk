@@ -12,7 +12,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@microsoft/live-share": "file:/../../packages/live-share",
+        "@microsoft/live-share": "file:/../../../packages/live-share",
         "fluid-framework": "2.1.0"
     },
     "devDependencies": {

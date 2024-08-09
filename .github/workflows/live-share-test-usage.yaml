@@ -25,11 +25,11 @@ jobs:
 
             - name: "test live-share with cjs app"
               run: npm run test
-              working-directory: internal/cjs-test
+              working-directory: internal/usage-test/cjs-test
 
             - name: "test live-share with esm app"
               run: npm run test
-              working-directory: internal/esm-test
+              working-directory: internal/usage-test/esm-test
 
             - uses: pnpm/action-setup@v4
               name: Install pnpm for next step
@@ -38,4 +38,4 @@ jobs:
                   run_install: false
             - name: "test live-share with pnpm typescript esm app"
               run: pnpm run test
-              working-directory: internal/pnpm-test
+              working-directory: internal/usage-test/pnpm-test

@@ -1,0 +1,20 @@
+{
+    "name": "live-share-cjs-test",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/index.js",
+    "type": "commonjs",
+    "scripts": {
+        "test": "npm install && node src/index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@microsoft/live-share": "file:/../../packages/live-share",
+        "fluid-framework": "2.1.0"
+    },
+    "devDependencies": {
+        "@fluidframework/test-runtime-utils": "^2.1.0"
+    }
+}

@@ -1,4 +1,4 @@
-name: Test Live Share SDK packages
+name: Test Usage of Live Share SDK packages in different JS environments
 
 on:
     push:
@@ -23,14 +23,19 @@ jobs:
                   node-version: ${{ matrix.node-version }}
             - run: npm install # install will trigger a build of all packages
 
-            - name: "test live-share"
+            - name: "test live-share with cjs app"
               run: npm run test
-              working-directory: packages/live-share
+              working-directory: internal/cjs-test
 
-            - name: "test live-share-canvas"
+            - name: "test live-share with esm app"
               run: npm run test
-              working-directory: packages/live-share-canvas
+              working-directory: internal/esm-test
 
-            - name: "test live-share-media"
-              run: npm run test
-              working-directory: packages/live-share-media
+            - uses: pnpm/action-setup@v4
+              name: Install pnpm for next step
+              with:
+                  version: 9
+                  run_install: false
+            - name: "test live-share with pnpm typescript esm app"
+              run: pnpm run test
+              working-directory: internal/pnpm-test

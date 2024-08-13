@@ -27,11 +27,9 @@ export const ExampleLivePresence = () => {
             <button
                 onClick={() => {
                     if (!localUser) return;
-                    updatePresence(
-                        {
-                            toggleCount: localUser.data.toggleCount + 1,
-                        }
-                    );
+                    updatePresence({
+                        toggleCount: localUser.data.toggleCount + 1,
+                    });
                 }}
             >
                 {`Go ${

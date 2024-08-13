@@ -16,7 +16,7 @@ on:
         branches: [main, mainv2]
     pull_request:
         # The branches below must be a subset of the branches above
-        branches: [main, mainv2, jameshunt/presence-with-audience-state]
+        branches: [main, mainv2]
     schedule:
         - cron: "0 2 * * 6"
     workflow_dispatch:

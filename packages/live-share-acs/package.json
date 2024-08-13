@@ -4,16 +4,19 @@
     "description": "Live Share integration package for Azure Communication Services.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/esm/index.js",
+    "main": "./bin/cjs/index.js",
+    "module": "./bin/esm/index.js",
     "types": "./bin/esm/index.d.ts",
+    "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "concurrently \"tsc -p tsconfig.json\" \"tsc -p tsconfig.cjs.json\"",
+        "build": "node  ../../internal/build-tools/build-package.js --cjs --esm",
         "test": "ts-mocha src/**/*.spec.ts --timeout 10000",
         "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
     },
     "exports": {
+        "./package.json": "./package.json",
         ".": {
             "require": {
                 "types": "./bin/cjs/index.d.ts",
@@ -27,11 +30,10 @@
     },
     "devDependencies": {
         "@microsoft/live-share": "2.0.0-internal.5",
-        "@azure/communication-calling": "^1.14.0",
+        "@azure/communication-calling": "^1.27.3",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
-        "@types/node": "^18.11.18",
-        "concurrently": "^8.2.2",
+        "@types/node": "^20.2.3",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
         "ts-mocha": "^10.0.0",

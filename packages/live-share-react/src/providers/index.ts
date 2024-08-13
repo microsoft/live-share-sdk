@@ -1,2 +1,2 @@
-export * from "./AzureProvider";
-export * from "./LiveShareProvider";
+export * from "./AzureProvider.js";
+export * from "./LiveShareProvider.js";

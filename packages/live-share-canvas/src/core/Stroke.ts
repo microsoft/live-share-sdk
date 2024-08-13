@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IBrush, DefaultPenBrush } from "./Brush";
+import { IBrush, DefaultPenBrush } from "./Brush.js";
 import {
     getSquaredDistanceBetweenPoints,
     IPoint,
@@ -11,7 +11,7 @@ import {
     IRect,
     ISegment,
     expandRect,
-} from "./Geometry";
+} from "./Geometry.js";
 import {
     doRectanglesOverlap,
     getSegmentIntersectionsWithRectangle,
@@ -20,7 +20,7 @@ import {
     isRectangleInsideRectangle,
     segmentMayIntersectWithRectangle,
     generateUniqueId,
-} from "./internals";
+} from "./internals/index.js";
 
 /**
  * Field names on this interface are intentionally short to minimize

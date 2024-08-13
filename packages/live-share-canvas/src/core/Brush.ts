@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { BasicColors, HighlighterColors, IColor, PenColors } from "./Colors";
+import { BasicColors, HighlighterColors, IColor, PenColors } from "./Colors.js";
 
 /**
  * Defines the shape of a brush's tip.

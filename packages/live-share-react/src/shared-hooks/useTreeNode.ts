@@ -1,11 +1,11 @@
 import { Tree, TreeChangeEvents, TreeNode } from "fluid-framework";
-import { IUseTreeNodeResults } from "../types";
+import { IUseTreeNodeResults } from "../types/index.js";
 import { useEffect, useRef, useState } from "react";
 import {
     getRawNode,
     buildProxy,
     setUpListenersForNodeChildren,
-} from "./internals/tree-node-utils";
+} from "./internals/tree-node-utils.js";
 
 /**
  * Makes a provided Fluid `TreeNode` stateful in React.

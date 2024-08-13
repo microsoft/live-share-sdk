@@ -5,7 +5,7 @@
 
 import React from "react";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { ITimerConfig, ILiveEvent, PresenceState } from "@microsoft/live-share";
+import { ITimerConfig, ILiveEvent } from "@microsoft/live-share";
 import { SharedObjectKind } from "fluid-framework";
 
 // React actions

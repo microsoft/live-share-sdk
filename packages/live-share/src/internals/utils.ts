@@ -5,7 +5,7 @@
 
 import { ITokenProvider } from "@fluidframework/azure-client";
 import { v4 as uuid } from "uuid";
-import { IRuntimeSignaler } from "./LiveEventScope";
+import { IRuntimeSignaler } from "./LiveEventScope.js";
 
 /**
  * @hidden
@@ -137,8 +137,9 @@ export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
         }
     };
     try {
-        const { InsecureTokenProvider } =
-            await require("@fluidframework/test-runtime-utils");
+        const { InsecureTokenProvider } = await import(
+            "@fluidframework/test-runtime-utils/internal"
+        );
         const tokenProvider = new InsecureTokenProvider("", {
             id: userId() ?? uuid(),
             name: "Test User",

@@ -25,20 +25,23 @@ import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionPlaybackState,
     MediaSessionCoordinatorSuspension,
-} from "./MediaSessionExtensions";
+} from "./MediaSessionExtensions.js";
 import {
-    TelemetryEvents,
     ITransportCommandEvent,
     ISetTrackEvent,
     IPositionUpdateEvent,
     GroupCoordinatorState,
     GroupCoordinatorStateEvents,
     ISetTrackDataEvent,
+    IRateChangeCommandEvent,
+} from "./internals/GroupCoordinatorState.js";
+import { TelemetryEvents } from "./internals/consts.js";
+import {
     TrackMetadataNotSetError,
     ActionBlockedError,
-    IRateChangeCommandEvent,
-} from "./internals";
-import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
+} from "./internals/errors.js";
+
+import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension.js";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IEvent } from "@fluidframework/core-interfaces";
 

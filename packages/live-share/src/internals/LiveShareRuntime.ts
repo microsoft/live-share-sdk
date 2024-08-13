@@ -1,5 +1,5 @@
 import { assert } from "@fluidframework/core-utils/internal";
-import { HostTimestampProvider } from "../HostTimestampProvider";
+import { HostTimestampProvider } from "../HostTimestampProvider.js";
 import {
     IClientInfo,
     ILiveShareHost,
@@ -7,13 +7,13 @@ import {
     ITimestampProvider,
     UserMeetingRole,
     IContainerRuntimeSignaler,
-} from "../interfaces";
+} from "../interfaces.js";
 import { IAzureAudience } from "@fluidframework/azure-client";
-import { ILiveShareClientOptions } from "../LiveShareClient";
-import { isTimestampProvider } from "./type-guards";
-import { LiveObjectManager } from "./LiveObjectManager";
-import { RoleVerifier } from "./RoleVerifier";
-import { LiveShareHostDecorator } from "./LiveShareHostDecorator";
+import { ILiveShareClientOptions } from "../LiveShareClient.js";
+import { isTimestampProvider } from "./type-guards.js";
+import { LiveObjectManager } from "./LiveObjectManager.js";
+import { RoleVerifier } from "./RoleVerifier.js";
+import { LiveShareHostDecorator } from "./LiveShareHostDecorator.js";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp

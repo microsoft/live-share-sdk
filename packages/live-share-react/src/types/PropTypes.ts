@@ -11,7 +11,7 @@ import {
     InkingTool,
     LiveCanvasTreeNode,
 } from "@microsoft/live-share-canvas";
-import { useLiveCanvas } from "../live-hooks";
+import { useLiveCanvas } from "../live-hooks/index.js";
 
 export type SharedMapInitialData<T> =
     | Map<string, T>

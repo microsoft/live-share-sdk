@@ -21,14 +21,14 @@ import {
     OnTimerDidPlayAction,
     OnTimerDidStartAction,
     OnTimerTickAction,
-} from "../types";
-import { useDynamicDDS } from "../shared-hooks";
-import { useFluidObjectsContext } from "../providers";
+} from "../types/index.js";
+import { useDynamicDDS } from "../shared-hooks/index.js";
+import { useFluidObjectsContext } from "../providers/index.js";
 import {
     ActionContainerNotJoinedError,
     ActionLiveDataObjectInitializedError,
     ActionLiveDataObjectUndefinedError,
-} from "../internal";
+} from "../internal/index.js";
 
 /**
  * React hook for using Live Share's `LiveTimer` DDS.

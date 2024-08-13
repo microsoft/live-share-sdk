@@ -1,5 +1,5 @@
 import { TreeNode, Tree } from "fluid-framework";
-import { proxiedChildrenKey, rawTNodeKey } from "./tree-node-constants";
+import { proxiedChildrenKey, rawTNodeKey } from "./tree-node-constants.js";
 
 export interface ICustomProxyHandler<TNode extends TreeNode = TreeNode> {
     [rawTNodeKey]: TNode;

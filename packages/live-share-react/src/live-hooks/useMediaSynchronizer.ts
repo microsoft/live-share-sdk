@@ -16,14 +16,18 @@ import {
     MediaPlayerSynchronizer,
     MediaSessionCoordinatorSuspension,
 } from "@microsoft/live-share-media";
-import { isExtendedMediaMetadata, isMediaElement, isRefObject } from "../utils";
-import { useDynamicDDS } from "../shared-hooks";
-import { IUseMediaSynchronizerResults } from "../types";
-import { useFluidObjectsContext } from "../providers";
+import {
+    isExtendedMediaMetadata,
+    isMediaElement,
+    isRefObject,
+} from "../utils/index.js";
+import { useDynamicDDS } from "../shared-hooks/index.js";
+import { IUseMediaSynchronizerResults } from "../types/index.js";
+import { useFluidObjectsContext } from "../providers/index.js";
 import {
     ActionContainerNotJoinedError,
     ActionLiveDataObjectUndefinedError,
-} from "../internal";
+} from "../internal/index.js";
 
 /**
  * React hook for using a Live Share media `MediaPlayerSynchronizer`.

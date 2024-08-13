@@ -4,11 +4,11 @@
  */
 
 import { strict as assert } from "assert";
-import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer";
-import { MockRuntimeSignaler } from "../mock/MockRuntimeSignaler";
-import { Deferred } from "../Deferred";
-import { waitForDelay } from "../utils";
-import { MockLiveShareRuntime } from "../mock/MockLiveShareRuntime";
+import { LiveObjectSynchronizer } from "../LiveObjectSynchronizer.js";
+import { MockRuntimeSignaler } from "../mock/MockRuntimeSignaler.js";
+import { Deferred } from "../Deferred.js";
+import { waitForDelay } from "../utils.js";
+import { MockLiveShareRuntime } from "../mock/MockLiveShareRuntime.js";
 
 interface ITestState {
     client: "local" | "remote";

@@ -5,6 +5,7 @@ on:
         branches: [main, mainv2]
     pull_request:
         branches: [main, mainv2]
+    workflow_dispatch:
 
 jobs:
     build:
@@ -20,8 +21,7 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-            - run: npm install
-            - run: npm run build:packages
+            - run: npm install # install will trigger a build of all packages
 
             - name: "test live-share"
               run: npm run test

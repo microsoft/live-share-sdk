@@ -4,16 +4,16 @@
  */
 
 import React from "react";
-import { isEntries, isJSON, isMap } from "../utils";
-import { IUseSharedMapResults, SharedMapInitialData } from "../types";
-import { useDynamicDDS } from "./useDynamicDDS";
+import { isEntries, isJSON, isMap } from "../utils/index.js";
+import { IUseSharedMapResults, SharedMapInitialData } from "../types/index.js";
+import { useDynamicDDS } from "./useDynamicDDS.js";
 import { SharedMap } from "fluid-framework/legacy";
 import {
     ActionContainerNotJoinedError,
     ActionLiveDataObjectUndefinedError,
-} from "../internal/errors";
-import { useFluidObjectsContext } from "../providers/AzureProvider";
-import { useSharedTree } from "./useSharedTree";
+} from "../internal/errors.js";
+import { useFluidObjectsContext } from "../providers/AzureProvider.js";
+import { useSharedTree } from "./useSharedTree.js";
 
 /**
  * @deprecated use {@link useSharedTree} instead.

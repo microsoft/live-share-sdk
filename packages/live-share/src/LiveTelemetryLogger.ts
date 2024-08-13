@@ -8,8 +8,8 @@ import {
     ITelemetryBaseProperties,
     LogLevel,
 } from "@fluidframework/core-interfaces";
-import { IRuntimeSignaler } from "./internals/LiveEventScope";
-import { LiveShareRuntime } from "./internals/LiveShareRuntime";
+import { IRuntimeSignaler } from "./internals/LiveEventScope.js";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 
 /**
  * Properties included on all events sent by `LiveTelemetryLogger`.

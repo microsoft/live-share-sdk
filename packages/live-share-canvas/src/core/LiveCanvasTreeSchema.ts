@@ -1,8 +1,8 @@
 import { SchemaFactory, Tree, TreeViewConfiguration } from "fluid-framework";
-import { LiveCanvas } from "./LiveCanvas";
-import { IBrush } from "./Brush";
-import { IStroke, Stroke } from "./Stroke";
-import { IColor } from "./Colors";
+import { LiveCanvas } from "./LiveCanvas.js";
+import { IBrush } from "./Brush.js";
+import { IStroke, Stroke } from "./Stroke.js";
+import { IColor } from "./Colors.js";
 
 /**
  * The `SchemaFactory` used in the `SharedTree` instance of {@link LiveCanvas}.

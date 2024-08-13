@@ -12,12 +12,13 @@ import {
 } from "../MediaSessionExtensions";
 import {
     GroupPlaybackPosition,
-    GroupPlaybackRate,
-    GroupPlaybackTrack,
-    GroupTransportState,
     ICurrentPlaybackPosition,
+} from "../internals/GroupPlaybackPosition";
+import { GroupPlaybackRate } from "../internals/GroupPlaybackRate";
+import {
+    GroupTransportState,
     ITransportState,
-} from "../internals";
+} from "../internals/GroupTransportState";
 import { TestLiveShareHost, TimeInterval } from "@microsoft/live-share";
 import {
     IRuntimeSignaler,
@@ -25,6 +26,7 @@ import {
     MockLiveShareRuntime,
 } from "@microsoft/live-share/internal";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import { GroupPlaybackTrack } from "../internals/GroupPlaybackTrack";
 
 function createTransportUpdate(
     runtime: IRuntimeSignaler,

@@ -7,8 +7,8 @@ import {
     InsertableTreeFieldFromImplicitField,
     TreeFieldFromImplicitField,
 } from "fluid-framework";
-import { IUseSharedTreeResults } from "../types";
-import { useDynamicDDS, useTreeNode } from "../shared-hooks";
+import { IUseSharedTreeResults } from "../types/index.js";
+import { useDynamicDDS, useTreeNode } from "../shared-hooks/index.js";
 import React from "react";
 
 /**

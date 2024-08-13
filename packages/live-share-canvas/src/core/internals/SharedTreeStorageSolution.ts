@@ -1,8 +1,11 @@
-import { IStroke } from "../Stroke";
-import { LiveCanvasStroke, LiveCanvasTreeNode } from "../LiveCanvasTreeSchema";
+import { IStroke } from "../Stroke.js";
+import {
+    LiveCanvasStroke,
+    LiveCanvasTreeNode,
+} from "../LiveCanvasTreeSchema.js";
 import { Tree, TreeStatus } from "fluid-framework";
-import { InkingManager } from "../InkingManager";
-import { LiveCanvasStorageSolution, StorageSolutionEvents } from ".";
+import { InkingManager } from "../InkingManager.js";
+import { LiveCanvasStorageSolution, StorageSolutionEvents } from "./index.js";
 
 export class SharedTreeStorageSolution extends LiveCanvasStorageSolution {
     private unsubscribeListeners: (() => void)[] = [];

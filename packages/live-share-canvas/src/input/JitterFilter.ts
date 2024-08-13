@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { InputFilter } from "./InputFilter";
-import { IPointerPoint } from "../core";
+import { InputFilter } from "./InputFilter.js";
+import { IPointerPoint } from "../core/index.js";
 
 /**
  * Implements a jitter reduction filter, which straightens stroke by ignoring

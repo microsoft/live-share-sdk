@@ -10,7 +10,7 @@ import {
     DryCanvas,
     WetCanvas,
     LaserPointerCanvas,
-} from "../canvas";
+} from "../canvas/index.js";
 import {
     IPoint,
     IPointerPoint,
@@ -18,7 +18,7 @@ import {
     screenToViewport,
     combineRects,
     viewportToScreen,
-} from "./Geometry";
+} from "./Geometry.js";
 import {
     Stroke,
     IStroke,
@@ -26,7 +26,7 @@ import {
     StrokeType,
     StrokeMode,
     IRawStroke,
-} from "./Stroke";
+} from "./Stroke.js";
 import {
     InputFilter,
     InputFilterCollection,
@@ -35,14 +35,14 @@ import {
     InputProvider,
     PointerInputProvider,
     IPointerMoveEvent,
-} from "../input";
+} from "../input/index.js";
 import {
     DefaultHighlighterBrush,
     DefaultLaserPointerBrush,
     DefaultLineBrush,
     DefaultPenBrush,
     IBrush,
-} from "./Brush";
+} from "./Brush.js";
 import {
     makeRectangle,
     generateUniqueId,
@@ -54,7 +54,7 @@ import {
     WetLineStroke,
     WetStroke,
     WetFreehandStroke,
-} from "./internals";
+} from "./internals/index.js";
 import { IEvent } from "@fluidframework/core-interfaces";
 import {
     AddPointsEvent,
@@ -65,14 +65,14 @@ import {
     StrokeEndState,
     StrokesAddedEvent,
     StrokesRemovedEvent,
-} from "./InkingManager-constants";
+} from "./InkingManager-constants.js";
 import {
     IAddPointsEventArgs,
     IAddRemoveStrokeOptions,
     IBeginStrokeEventArgs,
     IPointerMovedEventArgs,
     IWetStroke,
-} from "./InkingManager-interfaces";
+} from "./InkingManager-interfaces.js";
 
 type StrokeBasedTool =
     | InkingTool.pen

@@ -368,3 +368,4 @@ coverage/
 nyc/
 .nyc_output/
 build-data.json
+tsconfig.tsbuildinfo

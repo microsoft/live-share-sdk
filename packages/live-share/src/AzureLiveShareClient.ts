@@ -4,16 +4,16 @@
  */
 
 import { ContainerSchema, IFluidContainer } from "fluid-framework";
-import { AzureClient, AzureClientProps } from "@fluidframework/azure-client";
 import { AzureContainerServices } from "@fluidframework/azure-client/internal";
-import { BaseLiveShareClient } from "./internals/BaseLiveShareClient";
-import { ILiveShareHost } from "./interfaces";
-import { AzureLiveShareHost } from "./AzureLiveShareHost";
-import { LiveShareRuntime } from "./internals/LiveShareRuntime";
-import { getLiveContainerSchema } from "./internals/schema-injection-utils";
-import { LiveShareClient } from "./LiveShareClient";
-import { LiveDataObject } from "./internals/LiveDataObject";
-import { FluidCompatibilityMode } from "./internals/consts";
+import { AzureClient, AzureClientProps } from "@fluidframework/azure-client";
+import { BaseLiveShareClient } from "./internals/BaseLiveShareClient.js";
+import { ILiveShareHost } from "./interfaces.js";
+import { AzureLiveShareHost } from "./AzureLiveShareHost.js";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
+import { getLiveContainerSchema } from "./internals/schema-injection-utils.js";
+import { LiveShareClient } from "./LiveShareClient.js";
+import { LiveDataObject } from "./internals/LiveDataObject.js";
+import { FluidCompatibilityMode } from "./internals/consts.js";
 
 /**
  * The `AzureLiveShareClient` implementation `BaseLiveShareClient`.

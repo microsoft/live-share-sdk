@@ -28,7 +28,11 @@ import {
     TreeView,
 } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
-import { useSharedMap, useTreeNode, useSharedTree } from "../shared-hooks";
+import {
+    useSharedMap,
+    useTreeNode,
+    useSharedTree,
+} from "../shared-hooks/index.js";
 import {
     useLiveEvent,
     useLivePresence,
@@ -36,15 +40,15 @@ import {
     useLiveTimer,
     useLiveCanvas,
     useLiveFollowMode,
-} from "../live-hooks";
-import { IReceiveLiveEvent } from "../interfaces";
+} from "../live-hooks/index.js";
+import { IReceiveLiveEvent } from "../interfaces/index.js";
 import {
     OnPauseTimerAction,
     OnPlayTimerAction,
     OnStartTimerAction,
     OnUpdateLivePresenceAction,
     SendLiveEventAction,
-} from "./ActionTypes";
+} from "./ActionTypes.js";
 
 export interface IAzureContainerResults {
     /**

@@ -1,5 +1,5 @@
-import { LiveDataObjectInitializeState } from "./interfaces";
-import { LiveShareReportIssueLink } from "./internals/consts";
+import { LiveDataObjectInitializeState } from "./interfaces.js";
+import { LiveShareReportIssueLink } from "./internals/consts.js";
 
 /**
  * @hidden

@@ -10,14 +10,17 @@ import {
     LiveDataObjectInitializeState,
 } from "@microsoft/live-share";
 import React from "react";
-import { IUseLivePresenceResults, OnUpdateLivePresenceAction } from "../types";
-import { useDynamicDDS } from "../shared-hooks";
-import { useFluidObjectsContext } from "../providers";
+import {
+    IUseLivePresenceResults,
+    OnUpdateLivePresenceAction,
+} from "../types/index.js";
+import { useDynamicDDS } from "../shared-hooks/index.js";
+import { useFluidObjectsContext } from "../providers/index.js";
 import {
     ActionContainerNotJoinedError,
     ActionLiveDataObjectInitializedError,
     ActionLiveDataObjectUndefinedError,
-} from "../internal";
+} from "../internal/index.js";
 
 /**
  * React hook for using a Live Share `LivePresence`.
@@ -75,7 +78,7 @@ export function useLivePresence<TData extends object = object>(
      * User facing: callback to update the local user's presence.
      */
     const updatePresence: OnUpdateLivePresenceAction<TData> = React.useCallback(
-        async (data: TData | undefined | null) => {
+        async (data: TData) => {
             if (!container) {
                 throw new ActionContainerNotJoinedError(
                     "livePresence",

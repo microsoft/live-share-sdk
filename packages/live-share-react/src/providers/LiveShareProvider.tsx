@@ -5,7 +5,7 @@
 
 import { ContainerSchema, IFluidContainer } from "fluid-framework";
 import React from "react";
-import { useSharedStateRegistry } from "../shared-hooks";
+import { useSharedStateRegistry } from "../shared-hooks/index.js";
 import {
     ILiveShareClientOptions,
     ILiveShareHost,
@@ -13,8 +13,8 @@ import {
     ITimestampProvider,
     LiveShareClient,
 } from "@microsoft/live-share";
-import { FluidContext, useFluidObjectsContext } from "./AzureProvider";
-import { isITeamsJsSdkError } from "../internal";
+import { FluidContext, useFluidObjectsContext } from "./AzureProvider.js";
+import { isITeamsJsSdkError } from "../internal/index.js";
 
 /**
  * React Context provider values for `<LiveShareProvider>`.

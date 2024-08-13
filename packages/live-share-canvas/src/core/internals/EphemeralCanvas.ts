@@ -1,5 +1,5 @@
-import { DryCanvas } from "../../canvas";
-import { InkingManager } from "../InkingManager";
+import { DryCanvas } from "../../canvas/index.js";
+import { InkingManager } from "../InkingManager.js";
 
 /**
  * @internal

@@ -13,25 +13,25 @@ import {
     PresenceState,
     ILivePresenceEvent,
     LivePresenceReceivedEventData,
-} from "./LivePresenceUser";
-import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer";
-import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
+} from "./LivePresenceUser.js";
+import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer.js";
+import { LiveTelemetryLogger } from "./LiveTelemetryLogger.js";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
     UnexpectedError,
-} from "./errors";
-import { TimeInterval } from "./TimeInterval";
-import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry";
+} from "./errors.js";
+import { TimeInterval } from "./TimeInterval.js";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
 import {
     IClientInfo,
     LiveDataObjectInitializeState,
     UserMeetingRole,
-} from "./interfaces";
-import { LiveDataObject } from "./internals/LiveDataObject";
+} from "./interfaces.js";
+import { LiveDataObject } from "./internals/LiveDataObject.js";
 import { SharedObjectKind } from "fluid-framework";
-import { cloneValue } from "./internals/utils";
-import { TelemetryEvents } from "./internals/consts";
+import { cloneValue } from "./internals/utils.js";
+import { TelemetryEvents } from "./internals/consts.js";
 import { AzureMember } from "@fluidframework/azure-client";
 
 /**

@@ -3,13 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveEvent } from "./LiveEvent";
-import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
-import { TimeInterval } from "./TimeInterval";
-import { LiveShareRuntime } from "./internals/LiveShareRuntime";
-import { LivePresenceConnection } from "./LivePresenceConnection";
-import { LivePresence } from "./LivePresence";
-import { cloneValue } from "./internals/utils";
+import { LiveEvent } from "./LiveEvent.js";
+import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces.js";
+import { TimeInterval } from "./TimeInterval.js";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
+import { LivePresenceConnection } from "./LivePresenceConnection.js";
+import { LivePresence } from "./LivePresence.js";
+import { cloneValue } from "./internals/utils.js";
 
 /**
  * List of possible presence states.

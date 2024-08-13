@@ -1,5 +1,5 @@
-import { IStroke } from "../Stroke";
-import { InkingManager } from "../InkingManager";
+import { IStroke } from "../Stroke.js";
+import { InkingManager } from "../InkingManager.js";
 
 /**
  * @internal

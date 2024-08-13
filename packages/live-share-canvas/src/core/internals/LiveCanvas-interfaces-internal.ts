@@ -1,4 +1,4 @@
-import { IColor } from "../Colors";
+import { IColor } from "../Colors.js";
 
 export interface ISharedCursor {
     isCursorShared?: boolean;

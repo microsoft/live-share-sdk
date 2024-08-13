@@ -6,9 +6,9 @@
 import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
-} from "./GroupPlaybackTrack";
-import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions";
-import { IGenericTypedEvents, IGroupStateEvent } from "./interfaces";
+} from "./GroupPlaybackTrack.js";
+import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions.js";
+import { IGenericTypedEvents, IGroupStateEvent } from "./interfaces.js";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 
 /**

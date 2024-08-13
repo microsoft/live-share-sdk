@@ -9,15 +9,15 @@ import {
     UserMeetingRole,
 } from "@microsoft/live-share";
 import React from "react";
-import { SetLiveStateAction } from "../types";
-import { useDynamicDDS } from "../shared-hooks";
-import { useFluidObjectsContext } from "../providers";
+import { SetLiveStateAction } from "../types/index.js";
+import { useDynamicDDS } from "../shared-hooks/index.js";
+import { useFluidObjectsContext } from "../providers/index.js";
 import {
     ActionContainerNotJoinedError,
     ActionLiveDataObjectInitializedError,
     ActionLiveDataObjectUndefinedError,
     isPrevStateCallback,
-} from "../internal";
+} from "../internal/index.js";
 
 /**
  * React hook for using a Live Share `LiveState`.

@@ -3,13 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IRuntimeSignaler } from "./LiveEventScope";
-import { LiveShareRuntime } from "./LiveShareRuntime";
+import { IRuntimeSignaler } from "./LiveEventScope.js";
+import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import {
     GetLocalUserCanSend,
     ILiveEvent,
     UpdateSynchronizationState,
-} from "../interfaces";
+} from "../interfaces.js";
 
 /**
  * Start params for calling `LiveObjectSynchronizer.start` method.

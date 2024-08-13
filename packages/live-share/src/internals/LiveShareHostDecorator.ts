@@ -3,16 +3,15 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { UserMeetingRole, IClientInfo } from "../interfaces";
-import { BaseHostDecorator } from "./BaseHostDecorator";
-import { RequestCache } from "./RequestCache";
+import { UserMeetingRole, IClientInfo } from "../interfaces.js";
+import { BaseHostDecorator } from "./BaseHostDecorator.js";
+import { RequestCache } from "./RequestCache.js";
 import {
-    isErrorLike,
     isIClientInfo,
     isMobileWorkaroundRolesResponse,
     isClientRolesResponse,
-} from "./type-guards";
-import { waitForResult } from "./utils";
+} from "./type-guards.js";
+import { waitForResult } from "./utils.js";
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
 const CACHE_LIFETIME = 4 * 1000;

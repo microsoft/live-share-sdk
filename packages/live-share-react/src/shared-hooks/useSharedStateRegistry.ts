@@ -16,7 +16,7 @@ import {
     SetLocalStateAction,
     UnregisterSharedSetStateAction,
     UpdateSharedStateAction,
-} from "../types";
+} from "../types/index.js";
 import {
     getRootDataObject,
     getRootDirectory,

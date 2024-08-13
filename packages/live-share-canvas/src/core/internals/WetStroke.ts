@@ -3,11 +3,11 @@ import {
     Stroke,
     StrokeMode,
     StrokeType,
-} from "../Stroke";
-import { InkingCanvas } from "../../canvas";
-import { IWetStroke } from "../InkingManager-interfaces";
-import { IPointerPoint } from "../Geometry";
-import { computeEndArrow } from "./utils";
+} from "../Stroke.js";
+import { InkingCanvas } from "../../canvas/index.js";
+import { IWetStroke } from "../InkingManager-interfaces.js";
+import { IPointerPoint } from "../Geometry.js";
+import { computeEndArrow } from "./utils.js";
 
 /**
  * @internal

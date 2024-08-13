@@ -21,8 +21,7 @@
         "test:client:start:server": "npx tinylicious@latest > tinylicious.log 2>&1"
     },
     "scriptsComments": {
-        "test": "does additional local server setup that LiveShareClient.spec.ts and AzureLiveShareClient.spec.ts need, then runs all tests with test:run",
-        "todo": "npx rollup -c rollup.config.js --configPlugin typescript={tsconfig:\\'tsconfig.rollup.json\\'}"
+        "test": "does additional local server setup that LiveShareClient.spec.ts and AzureLiveShareClient.spec.ts need, then runs all tests with test:run"
     },
     "exports": {
         "./package.json": "./package.json",

@@ -4,7 +4,7 @@ on:
     push:
         branches: [main, mainv2]
     pull_request:
-        branches: [main, mainv2, jameshunt/presence-with-audience-state]
+        branches: [main, mainv2]
     workflow_dispatch:
 
 jobs:

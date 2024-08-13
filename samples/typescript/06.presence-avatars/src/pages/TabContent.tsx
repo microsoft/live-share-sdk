@@ -69,12 +69,9 @@ const LiveAvatars: FC = () => {
     });
 
     const onChangeFavoriteFood: InputProps["onChange"] = (ev, data) => {
-        updatePresence(
-            {
-                favoriteFood: data.value,
-            },
-            localUser?.state
-        );
+        updatePresence({
+            favoriteFood: data.value,
+        });
     };
 
     return (
@@ -130,12 +127,7 @@ const LiveAvatars: FC = () => {
             </AvatarGroup>
             <Button
                 onClick={() => {
-                    updatePresence(
-                        undefined,
-                        localUser?.state === PresenceState.online
-                            ? PresenceState.away
-                            : PresenceState.online
-                    );
+                    updatePresence(undefined);
                 }}
             >
                 Toggle status

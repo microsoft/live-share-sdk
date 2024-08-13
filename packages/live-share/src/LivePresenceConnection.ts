@@ -46,7 +46,13 @@ export class LivePresenceConnection<TData = object> {
      * for a period of time.
      */
     public get state(): PresenceState {
-        return this.hasExpired() ? PresenceState.offline : this._evt.data.state;
+        if (this._evt.data.state !== PresenceState.online) {
+            return this._evt.data.state;
+        } else if (this.hasExpired()) {
+            return PresenceState.away;
+        }
+
+        return this._evt.data.state;
     }
 
     /**

@@ -5,7 +5,6 @@
 
 import {
     LivePresenceUser,
-    PresenceState,
     LivePresence,
     UserMeetingRole,
     LiveDataObjectInitializeState,
@@ -32,7 +31,6 @@ import {
  * @template TData Optional typing for the custom user presence data object. Default is `object` type.
  * @param uniqueKey The unique key for `LivePresence`. If one does not yet exist, a new one will be created.
  * @param initialData Optional. Initial presence data object for the user. Can be value or a function to get the value.
- * @param initialPresenceState Optional. Initial status of the user's presence. Default is online.
  * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state
  * will be created, otherwise it will use the existing one. Default value is ":<dds-default>"
  * @returns stateful `localUser`, `otherUsers` list, and `allUsers` list. Also returns a callback method
@@ -41,7 +39,6 @@ import {
 export function useLivePresence<TData extends object = object>(
     uniqueKey: string,
     initialData?: TData | (() => TData) | undefined,
-    initialPresenceState: PresenceState = PresenceState.online,
     allowedRoles?: UserMeetingRole[]
 ): IUseLivePresenceResults<TData> {
     /**
@@ -78,7 +75,7 @@ export function useLivePresence<TData extends object = object>(
      * User facing: callback to update the local user's presence.
      */
     const updatePresence: OnUpdateLivePresenceAction<TData> = React.useCallback(
-        async (data?: TData | undefined, state?: PresenceState | undefined) => {
+        async (data: TData | undefined | null) => {
             if (!container) {
                 throw new ActionContainerNotJoinedError(
                     "livePresence",
@@ -97,7 +94,7 @@ export function useLivePresence<TData extends object = object>(
                     "updatePresence"
                 );
             }
-            return await livePresence.update(data, state);
+            return await livePresence.update(data);
         },
         [container, livePresence]
     );
@@ -125,7 +122,6 @@ export function useLivePresence<TData extends object = object>(
                 isInitialDataCallback<TData>(initialData)
                     ? initialData()
                     : initialData,
-                initialPresenceState,
                 allowedRoles
             );
         }

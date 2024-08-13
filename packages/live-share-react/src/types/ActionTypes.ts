@@ -112,8 +112,7 @@ export type OnReceivedLiveEventAction<TEvent> = (
  * (data?: TData | undefined, state?: PresenceState | undefined) => Promise<void>
  */
 export type OnUpdateLivePresenceAction<TData extends object = object> = (
-    data?: TData | undefined,
-    state?: PresenceState | undefined
+    data: TData
 ) => Promise<void>;
 
 /**

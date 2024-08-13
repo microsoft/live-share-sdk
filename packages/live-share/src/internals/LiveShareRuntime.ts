@@ -76,6 +76,13 @@ export class LiveShareRuntime {
     }
 
     /**
+     * `IAzureAudience` instance
+     */
+    public get audience(): IAzureAudience | undefined {
+        return this._audience;
+    }
+
+    /**
      * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
      * Default value is `true`.
      *

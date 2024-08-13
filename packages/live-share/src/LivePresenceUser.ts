@@ -8,6 +8,7 @@ import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
 import { TimeInterval } from "./TimeInterval";
 import { LiveShareRuntime } from "./internals/LiveShareRuntime";
 import { LivePresenceConnection } from "./LivePresenceConnection";
+import { LivePresence } from "./LivePresence";
 import { cloneValue } from "./internals/utils";
 
 /**
@@ -20,13 +21,13 @@ export enum PresenceState {
     online = "online",
 
     /**
-     * The user is away. Applications can set this state based on the users activity.
+     * The user is away. Automatically set for users after their client has stopped sending
+     * updates for a period of time. @see LivePresence.expirationPeriod.
      */
     away = "away",
 
     /**
-     * The user is offline. Automatically set for users after their client has stopped sending
-     * updates for a period of time.
+     * The user is offline.
      */
     offline = "offline",
 }
@@ -95,7 +96,13 @@ export class LivePresenceUser<TData = object> {
      * for a period of time.
      */
     public get state(): PresenceState {
-        return this.hasExpired() ? PresenceState.offline : this._evt.data.state;
+        if (this._evt.data.state !== PresenceState.online) {
+            return this._evt.data.state;
+        } else if (this.hasExpired()) {
+            return PresenceState.away;
+        }
+
+        return this._evt.data.state;
     }
 
     /**
@@ -161,15 +168,19 @@ export class LivePresenceUser<TData = object> {
         const currentEvent = this._evt;
         const currentClientInfo = this._clientInfo;
         if (LiveEvent.isNewer(currentEvent, evt)) {
-            // Save updated event
-            this._evt = evt;
+            // Save updated event, but change state of LivePresenceUser to reflect aggregate of connection states.
+            const aggregateState = this.aggregateConnectionState();
+            const aggregateStateEvent = cloneValue(evt);
+            aggregateStateEvent.data.state = aggregateState;
+
+            this._evt = aggregateStateEvent;
             this._clientInfo = info;
             this._lastUpdateTime = this._liveRuntime.getTimestamp();
 
             // Has anything changed?
             return (
                 remoteUserConvertedToLocal ||
-                evt.data.state != currentEvent.data.state ||
+                aggregateStateEvent.data.state != currentEvent.data.state ||
                 JSON.stringify(info) != JSON.stringify(currentClientInfo) ||
                 JSON.stringify(evt.data.data) !=
                     JSON.stringify(currentEvent.data.data)
@@ -177,6 +188,25 @@ export class LivePresenceUser<TData = object> {
         }
 
         return remoteUserConvertedToLocal;
+    }
+
+    private aggregateConnectionState(): PresenceState {
+        return Array.from(this._connections.entries())
+            .map((c) => c[1].state)
+            .reduce<PresenceState>((previous, current) => {
+                if (
+                    previous === PresenceState.online ||
+                    current === PresenceState.online
+                ) {
+                    return PresenceState.online;
+                } else if (
+                    previous === PresenceState.away ||
+                    current === PresenceState.away
+                ) {
+                    return PresenceState.away;
+                }
+                return PresenceState.offline;
+            }, PresenceState.offline);
     }
 
     /**

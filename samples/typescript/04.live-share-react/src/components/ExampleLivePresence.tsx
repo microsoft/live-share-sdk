@@ -27,15 +27,9 @@ export const ExampleLivePresence: FC = () => {
             </div>
             <button
                 onClick={() => {
-                    updatePresence(
-                        {
-                            toggleCount:
-                                (localUser?.data?.toggleCount ?? 0) + 1,
-                        },
-                        localUser?.state === PresenceState.offline
-                            ? PresenceState.online
-                            : PresenceState.offline
-                    );
+                    updatePresence({
+                        toggleCount: (localUser?.data?.toggleCount ?? 0) + 1,
+                    });
                 }}
             >
                 {`Go ${

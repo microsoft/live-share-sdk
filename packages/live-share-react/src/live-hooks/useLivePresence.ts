@@ -75,7 +75,7 @@ export function useLivePresence<TData extends object = object>(
      * User facing: callback to update the local user's presence.
      */
     const updatePresence: OnUpdateLivePresenceAction<TData> = React.useCallback(
-        async (data: TData) => {
+        async (data: TData | undefined | null) => {
             if (!container) {
                 throw new ActionContainerNotJoinedError(
                     "livePresence",

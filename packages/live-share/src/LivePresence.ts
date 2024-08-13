@@ -210,7 +210,6 @@ export class LivePresenceClass<
         // Throttled so that a developer can have multiple presence instances in their app in a performant manner.
         await this.updateInternal(
             this._currentPresence!.data.data,
-            this._currentPresence!.data.state,
             true,
             true
         ).catch(() => {});
@@ -251,7 +250,7 @@ export class LivePresenceClass<
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
-    public async update(data: TData): Promise<void> {
+    public async update(data: TData | undefined | null): Promise<void> {
         return await this.updateInternal(data);
     }
 
@@ -281,8 +280,7 @@ export class LivePresenceClass<
      * Internal method to send an update, with optional ability to throttle.
      */
     private async updateInternal(
-        data?: TData,
-        state?: PresenceState,
+        data: TData | undefined | null,
         throttle: boolean = false,
         background: boolean = false
     ): Promise<void> {
@@ -304,7 +302,7 @@ export class LivePresenceClass<
 
         // Broadcast state change
         const evtToSend = {
-            state: state ?? this._currentPresence.data.state,
+            state: this._currentPresence.data.state,
             data: cloneValue(data) ?? this._currentPresence.data.data,
         };
 

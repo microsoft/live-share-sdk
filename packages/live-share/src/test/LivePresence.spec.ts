@@ -194,56 +194,42 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
 
         await object1.initialize(undefined);
 
-        let object2PresenceChangeOnlineCount: number = 0;
-        let object2PresenceChangeOfflineCount: number = 0;
+        let object2PresenceChangeTotalCount: number = 0;
 
-        let object2object2PresenceChangeCount: number = 0;
+        let object2FromObject2PerspectivePresenceChangeCount: number = 0;
         object2.on("presenceChanged", (user, local) => {
             if (local) {
-                object2object2PresenceChangeCount += 1;
-                if (user.state === "online") {
-                    object2PresenceChangeOnlineCount += 1;
-                } else {
-                    object2PresenceChangeOfflineCount += 1;
-                }
+                object2FromObject2PerspectivePresenceChangeCount += 1;
+                object2PresenceChangeTotalCount += 1;
                 object2done.resolve();
             }
         });
 
-        let object1object2PresenceChangeCount: number = 0;
+        let object1FromObject2PerspectivePresenceChangeCount: number = 0;
         object1.on("presenceChanged", (user, local) => {
             if (!local) {
-                object1object2PresenceChangeCount += 1;
-                if (user.state === "online") {
-                    object2PresenceChangeOnlineCount += 1;
-                } else {
-                    object2PresenceChangeOfflineCount += 1;
-                }
+                object1FromObject2PerspectivePresenceChangeCount += 1;
+                object2PresenceChangeTotalCount += 1;
             }
         });
         await object2.initialize(undefined);
 
         // as any to access private updateInternal, set background to true
         // should not cause an event to be sent
-        const backgroundUpdate1 = true;
-        (object2 as any).updateInternal(
-            "hello",
-            object2.localUser?.state,
-            false,
-            backgroundUpdate1
-        );
+        const backgroundUpdate = true;
+        (object2 as any).updateInternal("hello", false, backgroundUpdate);
 
         await waitForDelay(1);
         // Wait for events to trigger
         await object2done.promise;
 
         assert(
-            object2object2PresenceChangeCount == 2,
-            `expected two events from object2 from perspective of object 2, ${object2object2PresenceChangeCount}`
+            object2FromObject2PerspectivePresenceChangeCount == 2,
+            `expected two events from object2 from perspective of object 2, ${object2FromObject2PerspectivePresenceChangeCount}`
         );
         assert(
-            object1object2PresenceChangeCount == 1,
-            `expected one events from object2 from perspective of object 1, ${object1object2PresenceChangeCount}`
+            object1FromObject2PerspectivePresenceChangeCount == 1,
+            `expected one events from object2 from perspective of object 1, ${object1FromObject2PerspectivePresenceChangeCount}`
         );
 
         assert(
@@ -258,8 +244,7 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
         // should update as not a background update
         const backgroundUpdateFalse = false;
         (object2 as any).updateInternal(
-            "hello",
-            "offline",
+            "hello there",
             false,
             backgroundUpdateFalse
         );
@@ -267,22 +252,17 @@ describeCompat("LivePresence", (getTestObjectProvider) => {
 
         assert(
             // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
-            object2object2PresenceChangeCount == 3,
-            `expected 1 more event (3 total) from object2 from perspective of object 2, ${object2object2PresenceChangeCount}`
+            object2FromObject2PerspectivePresenceChangeCount == 3,
+            `expected 1 more event (3 total) from object2 from perspective of object 2, ${object2FromObject2PerspectivePresenceChangeCount}`
         );
         assert(
             // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
-            object1object2PresenceChangeCount == 2,
-            `expected 1 more event (2 total) from object2 from perspective of object 1, ${object1object2PresenceChangeCount}`
+            object1FromObject2PerspectivePresenceChangeCount == 2,
+            `expected 1 more event (2 total) from object2 from perspective of object 1, ${object1FromObject2PerspectivePresenceChangeCount}`
         );
         assert(
-            object2PresenceChangeOnlineCount == 3,
-            `expected three events from object2 that was online, ${object2PresenceChangeOnlineCount}`
-        );
-        assert(
-            // @ts-ignore invalid, assersion earlier in test is making the linter think this assertion is unintentional.
-            object2PresenceChangeOfflineCount == 2,
-            `expected two events from object2 that was offline, ${object2PresenceChangeOfflineCount}`
+            object2PresenceChangeTotalCount == 5,
+            `expected three events from object2 that was online, ${object2PresenceChangeTotalCount}`
         );
 
         disposeAll();

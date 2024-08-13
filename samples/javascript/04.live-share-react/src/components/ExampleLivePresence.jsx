@@ -30,10 +30,7 @@ export const ExampleLivePresence = () => {
                     updatePresence(
                         {
                             toggleCount: localUser.data.toggleCount + 1,
-                        },
-                        localUser.state === PresenceState.offline
-                            ? PresenceState.online
-                            : PresenceState.offline
+                        }
                     );
                 }}
             >

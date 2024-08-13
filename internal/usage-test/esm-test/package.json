@@ -12,9 +12,9 @@
     "license": "ISC",
     "dependencies": {
         "@microsoft/live-share": "file:/../../../packages/live-share",
-        "fluid-framework": "2.1.0"
+        "fluid-framework": "^2.0.0"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": "^2.1.0"
+        "@fluidframework/test-runtime-utils": "^2.0.0"
     }
 }

@@ -15,13 +15,13 @@
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
-        "@fluidframework/azure-client": "^2.1.0",
+        "@fluidframework/azure-client": "^2.0.0",
         "@microsoft/live-share": "2.0.0-internal.5",
         "@microsoft/live-share-canvas": "2.0.0-internal.5",
-        "fluid-framework": "^2.1.0"
+        "fluid-framework": "^2.0.0"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": "^2.1.0",
+        "@fluidframework/test-runtime-utils": "^2.0.0",
         "buffer": "^6.0.3",
         "start-server-and-test": "^2.0.0",
         "vite": "^4.0.4"

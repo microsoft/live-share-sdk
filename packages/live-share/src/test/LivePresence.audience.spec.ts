@@ -57,8 +57,8 @@ describe("LivePresence Fluid Audience tests", () => {
         // Wait for dds to to be created
         const [dds1, dds2] = await Promise.all([promise1, promise2]);
 
-        await dds1.initialize();
-        await dds2.initialize();
+        await dds1.initialize(undefined);
+        await dds2.initialize(undefined);
 
         client1.results?.container.disconnect();
 

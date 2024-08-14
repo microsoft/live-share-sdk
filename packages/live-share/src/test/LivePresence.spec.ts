@@ -32,14 +32,14 @@ import { SharedObjectKind } from "fluid-framework";
 import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 
 class TestLivePresenceClass<
-    TData extends object = object,
+    TData extends object | undefined | null = object,
 > extends LivePresenceClass<TData> {
     public async clientId(): Promise<string> {
         return await this.waitUntilConnected();
     }
 }
 
-export type TestLivePresence<TData extends object = object> =
+export type TestLivePresence<TData extends object | undefined | null = object> =
     TestLivePresenceClass<TData>;
 
 // eslint-disable-next-line no-redeclare
@@ -66,10 +66,10 @@ async function getObjects(
     liveRuntime2.canSendBackgroundUpdates = object2canSendBackgroundUpdates;
 
     let ObjectProxy1: any = getLiveDataObjectKind<
-        TestLivePresence<{ foo: string }>
+        TestLivePresence<{ foo: string } | undefined>
     >(TestLivePresence, liveRuntime1);
     let ObjectProxy2: any = getLiveDataObjectKind<
-        TestLivePresence<{ foo: string }>
+        TestLivePresence<{ foo: string } | undefined>
     >(TestLivePresence, liveRuntime2);
 
     await liveRuntime1.start();
@@ -82,7 +82,7 @@ async function getObjects(
     );
     let object1 =
         await getContainerEntryPointBackCompat<
-            TestLivePresence<{ foo: string }>
+            TestLivePresence<{ foo: string } | undefined>
         >(container1);
 
     let container2 = await provider.loadContainer(
@@ -90,7 +90,7 @@ async function getObjects(
     );
     let object2 =
         await getContainerEntryPointBackCompat<
-            TestLivePresence<{ foo: string }>
+            TestLivePresence<{ foo: string } | undefined>
         >(container2);
     // need to be connected to send signals
     if (!container1.connect) {
@@ -159,7 +159,7 @@ describeCompat(
             });
 
             assert(!object1.isInitialized, `presence already initialized`);
-            await object1.initialize();
+            await object1.initialize(undefined);
             assert(object1.isInitialized, `presence not initialized`);
 
             const object2done = new Deferred();
@@ -181,7 +181,7 @@ describeCompat(
                     object2done.reject(err);
                 }
             });
-            await object2.initialize();
+            await object2.initialize(undefined);
 
             // Wait for events to trigger
             await Promise.all([object1done.promise, object2done.promise]);
@@ -349,13 +349,13 @@ describeCompat(
                     object1done.reject(err);
                 }
             });
-            await object1.initialize();
+            await object1.initialize(undefined);
 
             const object2Ready = new Deferred();
             object2.on("presenceChanged", (user, local) => {
                 object2Ready.resolve();
             });
-            await object2.initialize();
+            await object2.initialize(undefined);
 
             // Wait for everything to start
             await object2Ready.promise;
@@ -386,8 +386,8 @@ describeCompat(
                     ready.resolve();
                 }
             });
-            await object1.initialize();
-            await object2.initialize();
+            await object1.initialize(undefined);
+            await object2.initialize(undefined);
 
             // Wait for ready and perform test
             let user1Found = false;
@@ -426,8 +426,8 @@ describeCompat(
                     ready.resolve();
                 }
             });
-            await object1.initialize();
-            await object2.initialize();
+            await object1.initialize(undefined);
+            await object2.initialize(undefined);
 
             // Wait for ready and perform test
             let user1Found = false;
@@ -459,12 +459,12 @@ describeCompat(
                     ready.resolve();
                 }
             });
-            await object1.initialize();
+            await object1.initialize(undefined);
             assert(
                 object1.getUsers().length === 1,
                 "getUsers() should not start empty"
             );
-            await object2.initialize();
+            await object2.initialize(undefined);
 
             // Wait for ready and perform test
             await ready.promise;
@@ -486,8 +486,8 @@ describeCompat(
                     ready.resolve();
                 }
             });
-            await object1.initialize();
-            await object2.initialize();
+            await object1.initialize(undefined);
+            await object2.initialize(undefined);
 
             // Wait for ready and perform test
             await ready.promise;
@@ -508,8 +508,8 @@ describeCompat(
                     ready.resolve();
                 }
             });
-            await object1.initialize();
-            await object2.initialize();
+            await object1.initialize(undefined);
+            await object2.initialize(undefined);
 
             // Wait for ready and perform test
             await ready.promise;
@@ -535,8 +535,8 @@ describeCompat(
                     ready.resolve();
                 }
             });
-            await object1.initialize();
-            await object2.initialize();
+            await object1.initialize(undefined);
+            await object2.initialize(undefined);
 
             // Wait for ready and perform test
             await ready.promise;
@@ -578,8 +578,8 @@ describeCompat(
                     ready.resolve();
                 }
             });
-            await object1.initialize();
-            await object2.initialize();
+            await object1.initialize(undefined);
+            await object2.initialize(undefined);
 
             // Wait for ready and get client ID's
             await ready.promise;
@@ -641,10 +641,10 @@ describeCompat(
                 }
             });
             object1.expirationPeriod = 0.2;
-            await object1.initialize();
+            await object1.initialize(undefined);
 
             object2.expirationPeriod = 0.2;
-            await object2.initialize();
+            await object2.initialize(undefined);
 
             // Wait for ready and then delay
             await ready.promise;
@@ -722,8 +722,8 @@ describeCompat(
             });
 
             assert(!object1.isInitialized, `presence already initialized`);
-            const init1 = object1.initialize();
-            const init2 = object2.initialize();
+            const init1 = object1.initialize(undefined);
+            const init2 = object2.initialize(undefined);
             await Promise.all([init1, init2]);
             assert(object1.isInitialized, `presence not initialized`);
 
@@ -786,8 +786,8 @@ describeCompat(
             });
 
             assert(!object1.isInitialized, `presence already initialized`);
-            const init1 = object1.initialize();
-            const init2 = object2.initialize();
+            const init1 = object1.initialize(undefined);
+            const init2 = object2.initialize(undefined);
             await Promise.all([init1, init2]);
             assert(object1.isInitialized, `presence not initialized`);
 
@@ -892,8 +892,8 @@ describeCompat(
             } = await getObjects(getTestObjectProvider, 10000, true, mockHost);
 
             assert(!object1.isInitialized, `presence already initialized`);
-            const init1 = object1.initialize();
-            const init2 = object2.initialize();
+            const init1 = object1.initialize(undefined);
+            const init2 = object2.initialize(undefined);
             await Promise.all([init1, init2]);
             assert(object1.isInitialized, `presence not initialized`);
 

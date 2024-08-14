@@ -111,9 +111,9 @@ export type OnReceivedLiveEventAction<TEvent> = (
  * Callback for OnUpdateLivePresenceAction<TData extends object = object>.
  * (data?: TData | undefined, state?: PresenceState | undefined) => Promise<void>
  */
-export type OnUpdateLivePresenceAction<TData extends object = object> = (
-    data: TData
-) => Promise<void>;
+export type OnUpdateLivePresenceAction<
+    TData extends object | undefined | null = any,
+> = (data: TData) => Promise<void>;
 
 /**
  * Callback for OnStartTimerAction.

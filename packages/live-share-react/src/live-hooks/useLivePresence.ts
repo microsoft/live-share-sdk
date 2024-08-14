@@ -33,15 +33,15 @@ import {
  *
  * @template TData Optional typing for the custom user presence data object. Default is `object` type.
  * @param uniqueKey The unique key for `LivePresence`. If one does not yet exist, a new one will be created.
- * @param initialData Optional. Initial presence data object for the user. Can be value or a function to get the value.
+ * @param initialData Initial presence data object for the user. Can be value or a function to get the value.
  * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state
  * will be created, otherwise it will use the existing one. Default value is ":<dds-default>"
  * @returns stateful `localUser`, `otherUsers` list, and `allUsers` list. Also returns a callback method
  * to update the local user's presence and the `LivePresence` Fluid object.
  */
-export function useLivePresence<TData extends object = object>(
+export function useLivePresence<TData extends object | undefined | null = any>(
     uniqueKey: string,
-    initialData?: TData | (() => TData) | undefined,
+    initialData: TData | (() => TData),
     allowedRoles?: UserMeetingRole[]
 ): IUseLivePresenceResults<TData> {
     /**
@@ -144,6 +144,8 @@ export function useLivePresence<TData extends object = object>(
     };
 }
 
-function isInitialDataCallback<TData>(value: any): value is () => TData {
+function isInitialDataCallback<TData extends object | undefined | null>(
+    value: any
+): value is () => TData {
     return typeof value === "function";
 }

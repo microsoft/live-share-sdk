@@ -181,7 +181,9 @@ export interface IUseLiveTimerResults {
 /**
  * Return type of {@link useLivePresence} hook.
  */
-export interface IUseLivePresenceResults<TData extends object = object> {
+export interface IUseLivePresenceResults<
+    TData extends object | undefined | null = any,
+> {
     /**
      * The local user's presence object.
      */
@@ -200,8 +202,7 @@ export interface IUseLivePresenceResults<TData extends object = object> {
     livePresence: LivePresence<TData> | undefined;
     /**
      * Callback method to update the local user's presence.
-     * @param data Optional. TData to set for user.
-     * @param state Optional. PresenceState to set for user.
+     * @param data TData to set for user.
      * @returns void promise that will throw when user does not have required roles
      */
     updatePresence: OnUpdateLivePresenceAction<TData>;

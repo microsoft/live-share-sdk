@@ -4,7 +4,8 @@
     "compilerOptions": {
         "jsx": "react-jsx",
         "outDir": "/tmp",
-        "module": "ESNext"
+        "module": "ESNext",
+        "moduleResolution": "Bundler"
     },
     "files": ["src/main.tsx"]
 }

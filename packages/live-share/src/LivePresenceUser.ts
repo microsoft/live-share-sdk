@@ -35,22 +35,24 @@ export enum PresenceState {
 /**
  * @hidden
  */
-export interface ILivePresenceEvent<TData = object> {
+export interface ILivePresenceEvent<
+    TData extends object | undefined | null = any,
+> {
     state: PresenceState;
-    data?: TData;
+    data: TData;
 }
 
 /**
  * @hidden
  */
-export type LivePresenceReceivedEventData<TData = object> = ILiveEvent<
-    ILivePresenceEvent<TData>
->;
+export type LivePresenceReceivedEventData<
+    TData extends object | undefined | null = any,
+> = ILiveEvent<ILivePresenceEvent<TData>>;
 
 /**
  * A user that presence is being tracked for.
  */
-export class LivePresenceUser<TData = object> {
+export class LivePresenceUser<TData extends object | undefined | null = any> {
     private _lastUpdateTime: number;
     private _connections: Map<string, LivePresenceConnection<TData>> =
         new Map();
@@ -109,7 +111,7 @@ export class LivePresenceUser<TData = object> {
      * Optional data shared by the user. Returns data from connection with most recent event.
      * Client connection specific data is available from each connection.
      */
-    public get data(): TData | undefined {
+    public get data(): TData {
         return cloneValue(this._evt.data.data);
     }
 

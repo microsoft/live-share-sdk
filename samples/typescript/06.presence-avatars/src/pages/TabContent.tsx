@@ -49,8 +49,9 @@ interface IUserData {
 const PRESENCE_KEY = "PRESENCE_AVATARS";
 
 const LiveAvatars: FC = () => {
-    const { allUsers, localUser, updatePresence } =
-        useLivePresence<IUserData>(PRESENCE_KEY);
+    const { allUsers, localUser, updatePresence } = useLivePresence<
+        IUserData | undefined
+    >(PRESENCE_KEY, undefined);
     const onlineOrAwayUsers = allUsers.filter(
         (user) =>
             user.displayName &&

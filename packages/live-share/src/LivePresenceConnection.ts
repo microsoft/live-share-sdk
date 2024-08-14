@@ -13,7 +13,9 @@ import { cloneValue } from "./internals/utils.js";
  * A user can join from multiple devices. If they do, they will have multiple connections and a distinct clientId on each device.
  * If the client is disconnected for any reason, and they have to reconnect, they will get a new clientId and thus a new connection.
  */
-export class LivePresenceConnection<TData = object> {
+export class LivePresenceConnection<
+    TData extends object | undefined | null = any,
+> {
     /**
      * @hidden
      */
@@ -58,7 +60,7 @@ export class LivePresenceConnection<TData = object> {
     /**
      * Optional data shared by the user.
      */
-    public get data(): TData | undefined {
+    public get data(): TData {
         return cloneValue(this._evt.data.data);
     }
 

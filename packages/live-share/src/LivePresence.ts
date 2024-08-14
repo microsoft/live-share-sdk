@@ -48,8 +48,9 @@ export enum LivePresenceEvents {
  * Event typings for `LivePresence` class.
  * @template TData Type of data object to share with clients.
  */
-export interface ILivePresenceEvents<TData extends object = object>
-    extends IEvent {
+export interface ILivePresenceEvents<
+    TData extends object | undefined | null = any,
+> extends IEvent {
     /**
      * The presence information for the local or a remote user has changed.
      * @param event Name of event.
@@ -73,7 +74,7 @@ export interface ILivePresenceEvents<TData extends object = object>
  * @template TData Type of data object to share with clients.
  */
 export class LivePresenceClass<
-    TData extends object = object,
+    TData extends object | undefined | null = any,
 > extends LiveDataObject<{
     Events: ILivePresenceEvents<TData>;
 }> {
@@ -130,7 +131,7 @@ export class LivePresenceClass<
     /**
      * Initialize the object to begin sending/receiving presence updates through this DDS.
      *
-     * @param data Optional. Custom data object to share. A deep copy of the data object is saved to avoid any accidental modifications.
+     * @param data Custom data object to share. A deep copy of the data object is saved to avoid any accidental modifications.
      * @param allowedRoles Optional. List of roles allowed to emit presence changes.
      *
      * @returns a void promise that resolves once complete.
@@ -140,7 +141,7 @@ export class LivePresenceClass<
      * This is most common when using dynamic objects through Fluid.
      */
     public async initialize(
-        data?: TData,
+        data: TData,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
         LiveDataObjectInitializeNotNeededError.assert(
@@ -250,7 +251,7 @@ export class LivePresenceClass<
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
      */
-    public async update(data: TData | undefined | null): Promise<void> {
+    public async update(data: TData): Promise<void> {
         return await this.updateInternal(data);
     }
 
@@ -280,7 +281,7 @@ export class LivePresenceClass<
      * Internal method to send an update, with optional ability to throttle.
      */
     private async updateInternal(
-        data: TData | undefined | null,
+        data: TData | undefined,
         throttle: boolean = false,
         background: boolean = false
     ): Promise<void> {
@@ -471,10 +472,11 @@ export class LivePresenceClass<
             return;
         }
         const connection = user?.getConnection(clientId);
+        if (!connection) return;
 
         const evtToSend = {
             state,
-            data: connection?.data,
+            data: connection.data,
         };
         /**
          * Create an event that is not sent to other clients, since all clients should create this event at the same time.
@@ -489,7 +491,7 @@ export class LivePresenceClass<
     }
 }
 
-export type LivePresence<TData extends object = object> =
+export type LivePresence<TData extends object | undefined | null = any> =
     LivePresenceClass<TData>;
 
 // eslint-disable-next-line no-redeclare

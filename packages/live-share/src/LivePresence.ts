@@ -37,7 +37,13 @@ import { AzureMember } from "@fluidframework/azure-client";
 /**
  * Valid types of custom data for a {@link LivePresence} user.
  */
-export type LivePresenceData = object | string | number | undefined | null;
+export type LivePresenceData =
+    | object
+    | string
+    | number
+    | boolean
+    | undefined
+    | null;
 
 /**
  * Events supported by `LivePresence` object.
@@ -148,25 +154,20 @@ export class LivePresenceClass<
         import { LiveShareClient, LivePresence, LivePresenceUser } from "@microsoft/live-share";
         import { LiveShareHost } from "@microsoft/teams-js";
 
-        // Delcare interface for custom presence data
-        interface IPresenceData {
-            favoriteColor: string;
-        }
-
         // Join the Fluid container and create the LivePresence instance
         const host = LiveShareHost.create();
         const client = new LiveShareClient(host);
         await client.join();
-        const presence = await client.getDDS("unique-id", LivePresence<IPresenceData>);
+        const presence = await client.getDDS("unique-id", LivePresence<boolean>);
         
         // Listen for changes to presence prior to calling initialize
-        presence.on("presenceChanged", async (user: LivePresenceUser<IPresenceData>, local: boolean) => {
+        presence.on("presenceChanged", async (user: LivePresenceUser<boolean>, local: boolean) => {
             console.log(user);
         });
         // Initialize LivePresence with initial presence data for local user
-        await presence.initialize({ favoriteColor: "red" });
+        await presence.initialize(true);
         // Update presence after calling initialize
-        await presence.update({ favoriteColor: "blue" });
+        await presence.update(false);
      ```
      */
     public async initialize(

@@ -24,6 +24,7 @@ import {
     UnexpectedError,
 } from "./errors.js";
 import { SharedObjectKind } from "fluid-framework";
+import { isEventNewer } from "./index.internal.js";
 
 export interface ITimerConfigData {
     /**
@@ -351,10 +352,7 @@ export class LiveTimerClass extends LiveDataObject<{
                 clientId: this._currentConfig.clientId,
             };
 
-            const isConfigNewer = LiveEvent.isNewer(
-                currentClientTimestamp,
-                config
-            );
+            const isConfigNewer = isEventNewer(currentClientTimestamp, config);
 
             const currentTime = this.liveRuntime.getTimestamp();
             const endTime = this.endTimeFromConfig(config);

@@ -3,13 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveEvent } from "./LiveEvent.js";
 import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces.js";
 import { TimeInterval } from "./TimeInterval.js";
 import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 import { LivePresenceConnection } from "./LivePresenceConnection.js";
-import { LivePresence } from "./LivePresence.js";
-import { cloneValue } from "./internals/utils.js";
+import { cloneValue, isNewerEvent } from "./internals/utils.js";
 
 /**
  * List of possible presence states.
@@ -169,7 +167,7 @@ export class LivePresenceUser<TData extends object | undefined | null = any> {
         const remoteUserConvertedToLocal = this.updateClients(evt, localEvent);
         const currentEvent = this._evt;
         const currentClientInfo = this._clientInfo;
-        if (LiveEvent.isNewer(currentEvent, evt)) {
+        if (isNewerEvent(currentEvent, evt)) {
             // Save updated event, but change state of LivePresenceUser to reflect aggregate of connection states.
             const aggregateState = this.aggregateConnectionState();
             const aggregateStateEvent = cloneValue(evt);

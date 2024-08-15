@@ -20,13 +20,12 @@ import {
     UnexpectedError,
 } from "./errors.js";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger.js";
-import { LiveEvent } from "./LiveEvent.js";
 import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer.js";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
 import { LiveDataObject } from "./internals/LiveDataObject.js";
 import { SharedObjectKind } from "fluid-framework";
 import { TelemetryEvents } from "./internals/consts.js";
-import { cloneValue } from "./internals/utils.js";
+import { cloneValue, isNewerEvent } from "./internals/utils.js";
 
 /**
  * Events supported by [LiveState` object.
@@ -241,8 +240,7 @@ export class LiveStateClass<TState = any> extends LiveDataObject<{
                 this._allowedRoles
             );
             // Ensure that state is allowed, newer, and not the initial state.
-            if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt))
-                return false;
+            if (!allowed || !isNewerEvent(this.latestEvent, evt)) return false;
             if (
                 JSON.stringify(this.latestEvent.data) ===
                 JSON.stringify(evt.data)

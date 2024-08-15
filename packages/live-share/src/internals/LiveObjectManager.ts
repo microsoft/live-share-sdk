@@ -8,11 +8,10 @@ import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IRuntimeSignaler } from "./LiveEventScope.js";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces.js";
-import { LiveEvent } from "../LiveEvent.js";
 import { IAzureAudience } from "@fluidframework/azure-client";
 import { isILiveEvent } from "./type-guards.js";
 import { ObjectSynchronizerEvents } from "./consts.js";
-import { cloneValue, waitUntilConnected } from "./utils.js";
+import { cloneValue, isNewerEvent, waitUntilConnected } from "./utils.js";
 import { ContainerSynchronizer } from "./ContainerSynchronizer.js";
 import {
     GetAndUpdateStateHandlers,
@@ -307,7 +306,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             const existingEvent = clientMap.get(event.clientId);
             if (existingEvent) {
                 // We already have an event for this user, so we update it if it is newer
-                if (!LiveEvent.isNewer(existingEvent, event)) return false;
+                if (!isNewerEvent(existingEvent, event)) return false;
             }
             clientMap.set(event.clientId, event);
             if (!existingEvent) {

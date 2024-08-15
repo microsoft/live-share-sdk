@@ -1,11 +1,10 @@
-import { LiveEvent } from "./LiveEvent.js";
 import {
     LivePresenceReceivedEventData,
     PresenceState,
 } from "./LivePresenceUser.js";
 import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 import { TimeInterval } from "./TimeInterval.js";
-import { cloneValue } from "./internals/utils.js";
+import { cloneValue, isNewerEvent } from "./internals/utils.js";
 
 /**
  * A connection that presence is being tracked for.
@@ -73,7 +72,7 @@ export class LivePresenceConnection<
                 `LivePresenceConnection.updateConnection called with event with different clientId`
             );
         }
-        if (!LiveEvent.isNewer(this._evt, evt)) return;
+        if (!isNewerEvent(this._evt, evt)) return;
         this._evt = evt;
     }
 

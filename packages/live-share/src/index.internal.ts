@@ -12,6 +12,10 @@ export * from "./internals/LiveShareRuntime.js";
 export * from "./internals/schema-injection-utils.js";
 export * from "./internals/smuggle.js";
 
-export { waitForDelay, waitUntilConnected } from "./internals/utils.js";
+export {
+    waitForDelay,
+    waitUntilConnected,
+    isNewerEvent as isEventNewer,
+} from "./internals/utils.js";
 export { isErrorLike } from "./internals/type-guards.js";
 export { MockLiveShareRuntime } from "./internals/mock/MockLiveShareRuntime.js";

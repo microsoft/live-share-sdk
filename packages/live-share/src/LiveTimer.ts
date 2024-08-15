@@ -15,7 +15,6 @@ import {
     UserMeetingRole,
 } from "./interfaces.js";
 import { IEvent } from "@fluidframework/core-interfaces";
-import { LiveEvent } from "./LiveEvent.js";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
 import { LiveDataObject } from "./internals/LiveDataObject.js";
 import {

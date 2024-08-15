@@ -10,7 +10,6 @@ import {
 import { IEvent } from "@fluidframework/core-interfaces";
 import {
     UserMeetingRole,
-    IClientTimestamp,
     ILiveEvent,
     LiveDataObjectInitializeState,
 } from "./interfaces.js";

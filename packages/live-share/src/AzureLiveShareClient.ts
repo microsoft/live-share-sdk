@@ -16,6 +16,7 @@ import { LiveDataObject } from "./internals/LiveDataObject.js";
 import { FluidCompatibilityMode } from "./internals/consts.js";
 
 /**
+ * @alpha
  * The `AzureLiveShareClient` implementation `BaseLiveShareClient`.
  * @see BaseLiveShareClient
  *

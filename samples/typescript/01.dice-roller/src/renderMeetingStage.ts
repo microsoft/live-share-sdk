@@ -9,7 +9,7 @@ import {
     LivePresenceUser,
     LiveShareClient,
     LiveState,
-    PresenceState,
+    PresenceStatus,
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { getRandomDiceValue, stylizeDiceElem } from "./utils";
@@ -108,7 +108,7 @@ async function renderUserDice(
     const userDiceElementId = `user-dice-${userPresence.userId}`;
     let userDiceElement = document.getElementById(userDiceElementId);
     // If the user's state is not offline, remove it from the DOM
-    if (userPresence.state !== PresenceState.online) {
+    if (userPresence.status !== PresenceStatus.online) {
         userDiceElement?.remove();
         return;
     }

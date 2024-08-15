@@ -12,7 +12,7 @@ import {
     UserMeetingRole,
 } from "./interfaces.js";
 import { LiveTelemetryLogger } from "./LiveTelemetryLogger.js";
-import { LivePresenceUser, PresenceState } from "./LivePresenceUser.js";
+import { LivePresenceUser, PresenceStatus } from "./LivePresenceUser.js";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
 import {
     LiveDataObjectInitializeNotNeededError,
@@ -237,7 +237,7 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
         if (presentingUser && presentingUser.data) {
             // Count is all online users minus the presenting user
             const otherUsersCount =
-                this.getUsers(PresenceState.online).length - 1;
+                this.getUsers(PresenceStatus.online).length - 1;
             if (presentingUser.isLocalUser) {
                 // The local user is the presenter
                 return {
@@ -275,7 +275,7 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
             const otherUsersCount =
                 this.getUserFollowers(
                     followingUser.userId,
-                    PresenceState.online
+                    PresenceStatus.online
                 ).length - 1;
             if (this._suspended) {
                 // Local user is following specific user but is suspended
@@ -299,7 +299,7 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
 
         const userCountFollowingLocalUser = this.getUserFollowers(
             localUser.userId,
-            PresenceState.online
+            PresenceStatus.online
         ).length;
         if (userCountFollowingLocalUser > 0) {
             // User is being followed by other users
@@ -318,7 +318,7 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
             type: FollowModeType.local,
             otherUsersCount: this.getUserFollowers(
                 localUser.userId,
-                PresenceState.online
+                PresenceStatus.online
             ).length,
             isLocalValue: true,
         };
@@ -628,7 +628,7 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
      * @param filter Optional. Presence state to filter enumeration to.
      * @returns Array of presence objects.
      */
-    public getUsers(filter?: PresenceState): FollowModePresenceUser<TData>[] {
+    public getUsers(filter?: PresenceStatus): FollowModePresenceUser<TData>[] {
         return this.presence.getUsers(filter);
     }
 
@@ -660,7 +660,7 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
      */
     public getUserFollowers(
         userId: string,
-        stateFilter?: PresenceState
+        stateFilter?: PresenceStatus
     ): FollowModePresenceUser<TData>[] {
         const users = this.getUsers(stateFilter);
         return users.filter((user) => user.data?.followingUserId === userId);

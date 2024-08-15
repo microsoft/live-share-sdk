@@ -15,7 +15,7 @@ export const ExampleLivePresence: FC = () => {
                     <div
                         key={user.userId}
                         style={{
-                            color: user?.state === "offline" ? "red" : "green",
+                            color: user?.status === "offline" ? "red" : "green",
                         }}
                     >{`${user.displayName}, isLocalUser: ${user.isLocalUser}, count: ${user.data?.count}`}</div>
                 ))}

@@ -10,7 +10,7 @@ import {
 import { IEvent } from "@fluidframework/core-interfaces";
 import {
     LivePresenceUser,
-    PresenceState,
+    PresenceStatus,
     ILivePresenceEvent,
     LivePresenceReceivedEventData,
 } from "./LivePresenceUser.js";
@@ -81,7 +81,7 @@ export class LivePresenceClass<
     private _logger?: LiveTelemetryLogger;
     private _expirationPeriod = new TimeInterval(20000);
     private _users: LivePresenceUser<TData>[] = [];
-    private _lastEmitPresenceStateMap = new Map<string, PresenceState>();
+    private _lastEmitPresenceStateMap = new Map<string, PresenceStatus>();
     private _currentPresence?: LivePresenceReceivedEventData<TData>;
 
     private _synchronizer?: LiveObjectSynchronizer<ILivePresenceEvent<TData>>;
@@ -170,7 +170,7 @@ export class LivePresenceClass<
             name: "UpdatePresence",
             timestamp: 0,
             data: {
-                state: PresenceState.online,
+                status: PresenceStatus.online,
                 data,
             },
         };
@@ -233,9 +233,9 @@ export class LivePresenceClass<
      * @param filter Optional. Presence state to filter enumeration to.
      * @returns Array of presence objects.
      */
-    public getUsers(filter?: PresenceState): LivePresenceUser<TData>[] {
+    public getUsers(filter?: PresenceStatus): LivePresenceUser<TData>[] {
         if (!filter) return this._users;
-        return this._users.filter((user) => user.state == filter);
+        return this._users.filter((user) => user.status == filter);
     }
 
     /**
@@ -303,7 +303,7 @@ export class LivePresenceClass<
 
         // Broadcast state change
         const evtToSend = {
-            state: this._currentPresence.data.state,
+            status: this._currentPresence.data.status,
             data: cloneValue(data) ?? this._currentPresence.data.data,
         };
 
@@ -370,7 +370,7 @@ export class LivePresenceClass<
         info: IClientInfo
     ): boolean {
         const emitEvent = (user: LivePresenceUser<TData>) => {
-            this._lastEmitPresenceStateMap.set(user.userId, user.state);
+            this._lastEmitPresenceStateMap.set(user.userId, user.status);
             this.emit(
                 LivePresenceEvents.presenceChanged,
                 user,
@@ -405,7 +405,7 @@ export class LivePresenceClass<
                 isNewUser = false;
             } else if (
                 this._lastEmitPresenceStateMap.get(checkUser.userId) !==
-                checkUser.state
+                checkUser.status
             ) {
                 // The user's PresenceState has changed
                 emitEvent(checkUser);
@@ -429,10 +429,10 @@ export class LivePresenceClass<
 
     private audienceCallbacks = {
         memberAdded: async (clientId: string, member: AzureMember<any>) => {
-            this.audienceMemberChanged(clientId, PresenceState.online);
+            this.audienceMemberChanged(clientId, PresenceStatus.online);
         },
         memberRemoved: async (clientId: string, member: AzureMember<any>) => {
-            this.audienceMemberChanged(clientId, PresenceState.offline);
+            this.audienceMemberChanged(clientId, PresenceStatus.offline);
         },
     };
 
@@ -465,7 +465,7 @@ export class LivePresenceClass<
      */
     private async audienceMemberChanged(
         clientId: string,
-        state: PresenceState
+        status: PresenceStatus
     ) {
         const user = this.getUserForClient(clientId);
         if (!user) {
@@ -475,7 +475,7 @@ export class LivePresenceClass<
         if (!connection) return;
 
         const evtToSend = {
-            state,
+            status,
             data: connection.data,
         };
         /**

@@ -1,6 +1,6 @@
 import {
     LivePresenceReceivedEventData,
-    PresenceState,
+    PresenceStatus,
 } from "./LivePresenceUser.js";
 import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 import { TimeInterval } from "./TimeInterval.js";
@@ -40,20 +40,29 @@ export class LivePresenceConnection<
     }
 
     /**
-     * Connections current state.
+     * Connections current status.
      *
      * @remarks
-     * This is automatically set to `PresenceState.offline` if the users client hasn't sent updates
+     * This is automatically set to `PresenceStatus.offline` if the users client hasn't sent updates
      * for a period of time.
      */
-    public get state(): PresenceState {
-        if (this._evt.data.state !== PresenceState.online) {
-            return this._evt.data.state;
+    public get status(): PresenceStatus {
+        if (this._evt.data.status !== PresenceStatus.online) {
+            return this._evt.data.status;
         } else if (this.hasExpired()) {
-            return PresenceState.away;
+            return PresenceStatus.away;
         }
 
-        return this._evt.data.state;
+        return this._evt.data.status;
+    }
+
+    /**
+     * @deprecated
+     * Please use {@link LivePresenceConnection.status} instead.
+     * This will be removed in a future release.
+     */
+    public get state(): PresenceStatus {
+        return this.status;
     }
 
     /**

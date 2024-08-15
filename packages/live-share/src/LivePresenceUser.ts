@@ -10,9 +10,9 @@ import { LivePresenceConnection } from "./LivePresenceConnection.js";
 import { cloneValue, isNewerEvent } from "./internals/utils.js";
 
 /**
- * List of possible presence states.
+ * List of possible presence status states.
  */
-export enum PresenceState {
+export enum PresenceStatus {
     /**
      * The user is online. Default state while user has at least one client connected.
      */
@@ -31,12 +31,18 @@ export enum PresenceState {
 }
 
 /**
+ * @deprecated
+ * Use {@link PresenceStatus} instead.
+ */
+export const PresenceState = PresenceStatus;
+
+/**
  * @hidden
  */
 export interface ILivePresenceEvent<
     TData extends object | undefined | null = any,
 > {
-    state: PresenceState;
+    status: PresenceStatus;
     data: TData;
 }
 
@@ -92,17 +98,26 @@ export class LivePresenceUser<TData extends object | undefined | null = any> {
      * Users current state.
      *
      * @remarks
-     * This is automatically set to `PresenceState.offline` if the users client hasn't sent updates
+     * This is automatically set to `PresenceStatus.offline` if the users client hasn't sent updates
      * for a period of time.
      */
-    public get state(): PresenceState {
-        if (this._evt.data.state !== PresenceState.online) {
-            return this._evt.data.state;
+    public get status(): PresenceStatus {
+        if (this._evt.data.status !== PresenceStatus.online) {
+            return this._evt.data.status;
         } else if (this.hasExpired()) {
-            return PresenceState.away;
+            return PresenceStatus.away;
         }
 
-        return this._evt.data.state;
+        return this._evt.data.status;
+    }
+
+    /**
+     * @deprecated
+     * Please use {@link LivePresenceConnection.status} instead.
+     * This will be removed in a future release.
+     */
+    public get state(): PresenceStatus {
+        return this.status;
     }
 
     /**
@@ -125,12 +140,12 @@ export class LivePresenceUser<TData extends object | undefined | null = any> {
      * See {@link LivePresenceConnection}
      */
     public getConnections(
-        filter?: PresenceState
+        filter?: PresenceStatus
     ): LivePresenceConnection<TData>[] {
         const list: LivePresenceConnection<TData>[] = [];
         this._connections.forEach((connection) => {
             // Ensure connection matches filter
-            if (filter == undefined || connection.state == filter) {
+            if (filter == undefined || connection.status == filter) {
                 list.push(connection);
             }
         });
@@ -171,7 +186,7 @@ export class LivePresenceUser<TData extends object | undefined | null = any> {
             // Save updated event, but change state of LivePresenceUser to reflect aggregate of connection states.
             const aggregateState = this.aggregateConnectionState();
             const aggregateStateEvent = cloneValue(evt);
-            aggregateStateEvent.data.state = aggregateState;
+            aggregateStateEvent.data.status = aggregateState;
 
             this._evt = aggregateStateEvent;
             this._clientInfo = info;
@@ -180,7 +195,7 @@ export class LivePresenceUser<TData extends object | undefined | null = any> {
             // Has anything changed?
             return (
                 remoteUserConvertedToLocal ||
-                aggregateStateEvent.data.state != currentEvent.data.state ||
+                aggregateStateEvent.data.status != currentEvent.data.status ||
                 JSON.stringify(info) != JSON.stringify(currentClientInfo) ||
                 JSON.stringify(evt.data.data) !=
                     JSON.stringify(currentEvent.data.data)
@@ -190,23 +205,23 @@ export class LivePresenceUser<TData extends object | undefined | null = any> {
         return remoteUserConvertedToLocal;
     }
 
-    private aggregateConnectionState(): PresenceState {
+    private aggregateConnectionState(): PresenceStatus {
         return Array.from(this._connections.entries())
-            .map((c) => c[1].state)
-            .reduce<PresenceState>((previous, current) => {
+            .map((c) => c[1].status)
+            .reduce<PresenceStatus>((previous, current) => {
                 if (
-                    previous === PresenceState.online ||
-                    current === PresenceState.online
+                    previous === PresenceStatus.online ||
+                    current === PresenceStatus.online
                 ) {
-                    return PresenceState.online;
+                    return PresenceStatus.online;
                 } else if (
-                    previous === PresenceState.away ||
-                    current === PresenceState.away
+                    previous === PresenceStatus.away ||
+                    current === PresenceStatus.away
                 ) {
-                    return PresenceState.away;
+                    return PresenceStatus.away;
                 }
-                return PresenceState.offline;
-            }, PresenceState.offline);
+                return PresenceStatus.offline;
+            }, PresenceStatus.offline);
     }
 
     /**

@@ -129,6 +129,21 @@ export abstract class BaseLiveShareClient {
      *
      * @throws error if you have not already joined the Fluid container.
      * @throws error if you are using a legacy container created prior to Live Share version 2.0.0 or greater.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LivePresence } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        // Create a LivePresence instance
+        const presence = await client.getDDS("unique-id", LivePresence, (dds) => {
+            console.log("first created dds", dds);
+        });
+     ```
      */
     public async getDDS<
         T extends IFluidLoadable = FluidObject<any> & IFluidLoadable,

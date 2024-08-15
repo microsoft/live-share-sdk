@@ -49,9 +49,10 @@ interface IUserData {
 const PRESENCE_KEY = "PRESENCE_AVATARS";
 
 const LiveAvatars: FC = () => {
-    const { allUsers, localUser, updatePresence } = useLivePresence<
-        IUserData | undefined
-    >(PRESENCE_KEY, undefined);
+    const { allUsers, localUser, updatePresence } = useLivePresence<IUserData>(
+        PRESENCE_KEY,
+        { favoriteFood: "Unknown" }
+    );
     const onlineOrAwayUsers = allUsers.filter(
         (user) =>
             user.displayName &&
@@ -104,9 +105,7 @@ const LiveAvatars: FC = () => {
                                         </Text>
                                     </FlexRow>
                                     <FlexRow>
-                                        <Text>
-                                            {user.data?.favoriteFood ?? "N/A"}
-                                        </Text>
+                                        <Text>{user.data.favoriteFood}</Text>
                                     </FlexRow>
                                 </FlexColumn>
                             </PopoverSurface>
@@ -126,15 +125,8 @@ const LiveAvatars: FC = () => {
                     </AvatarGroupPopover>
                 )}
             </AvatarGroup>
-            <Button
-                onClick={() => {
-                    updatePresence(undefined);
-                }}
-            >
-                Toggle status
-            </Button>
             <Input
-                value={localUser?.data?.favoriteFood}
+                value={localUser?.data.favoriteFood}
                 placeholder="Enter your favorite food..."
                 onChange={onChangeFavoriteFood}
                 style={{

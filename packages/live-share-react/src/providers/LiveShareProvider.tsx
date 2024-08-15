@@ -139,7 +139,7 @@ export function LiveShareApp() {
 // LiveCheckbox.jsx
 import { useLiveState } from "@microsoft/live-share-react";
 
-export function SharedCheckbox() {
+export function LiveCheckbox() {
   const [checked, setChecked] = useLiveState("MY-UNIQUE-ID", false);
   return (
     <input

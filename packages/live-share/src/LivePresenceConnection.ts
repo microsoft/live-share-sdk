@@ -5,6 +5,7 @@ import {
 import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 import { TimeInterval } from "./TimeInterval.js";
 import { cloneValue, isNewerEvent } from "./internals/utils.js";
+import { LivePresenceData } from "./LivePresence.js";
 
 /**
  * A connection that presence is being tracked for.
@@ -12,9 +13,7 @@ import { cloneValue, isNewerEvent } from "./internals/utils.js";
  * A user can join from multiple devices. If they do, they will have multiple connections and a distinct clientId on each device.
  * If the client is disconnected for any reason, and they have to reconnect, they will get a new clientId and thus a new connection.
  */
-export class LivePresenceConnection<
-    TData extends object | undefined | null = any,
-> {
+export class LivePresenceConnection<TData extends LivePresenceData = any> {
     /**
      * @hidden
      */

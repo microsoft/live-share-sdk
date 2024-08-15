@@ -35,6 +35,11 @@ import { TelemetryEvents } from "./internals/consts.js";
 import { AzureMember } from "@fluidframework/azure-client";
 
 /**
+ * Valid types of custom data for a {@link LivePresence} user.
+ */
+export type LivePresenceData = object | string | number | undefined | null;
+
+/**
  * Events supported by `LivePresence` object.
  */
 export enum LivePresenceEvents {
@@ -48,9 +53,8 @@ export enum LivePresenceEvents {
  * Event typings for `LivePresence` class.
  * @template TData Type of data object to share with clients.
  */
-export interface ILivePresenceEvents<
-    TData extends object | undefined | null = any,
-> extends IEvent {
+export interface ILivePresenceEvents<TData extends LivePresenceData = any>
+    extends IEvent {
     /**
      * The presence information for the local or a remote user has changed.
      * @param event Name of event.
@@ -71,10 +75,10 @@ export interface ILivePresenceEvents<
 
 /**
  * Live fluid object that synchronizes presence information for the user with other clients.
- * @template TData Type of data object to share with clients.
+ * @template TData Type of data object to share with clients. Can be any serializable JSON value.
  */
 export class LivePresenceClass<
-    TData extends object | undefined | null = any,
+    TData extends LivePresenceData = any,
 > extends LiveDataObject<{
     Events: ILivePresenceEvents<TData>;
 }> {
@@ -603,7 +607,7 @@ export class LivePresenceClass<
     }
 }
 
-export type LivePresence<TData extends object | undefined | null = any> =
+export type LivePresence<TData extends LivePresenceData = any> =
     LivePresenceClass<TData>;
 
 // eslint-disable-next-line no-redeclare

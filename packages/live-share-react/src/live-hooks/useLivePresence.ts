@@ -8,6 +8,7 @@ import {
     LivePresence,
     UserMeetingRole,
     LiveDataObjectInitializeState,
+    LivePresenceData,
 } from "@microsoft/live-share";
 import React from "react";
 import {
@@ -39,7 +40,7 @@ import {
  * @returns stateful `localUser`, `otherUsers` list, and `allUsers` list. Also returns a callback method
  * to update the local user's presence and the `LivePresence` Fluid object.
  */
-export function useLivePresence<TData extends object | undefined | null = any>(
+export function useLivePresence<TData extends LivePresenceData = any>(
     uniqueKey: string,
     initialData: TData | (() => TData),
     allowedRoles?: UserMeetingRole[]
@@ -144,7 +145,7 @@ export function useLivePresence<TData extends object | undefined | null = any>(
     };
 }
 
-function isInitialDataCallback<TData extends object | undefined | null>(
+function isInitialDataCallback<TData extends LivePresenceData>(
     value: any
 ): value is () => TData {
     return typeof value === "function";

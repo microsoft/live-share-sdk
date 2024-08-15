@@ -13,6 +13,7 @@ import {
     IFollowModeState,
     FollowModePresenceUser,
     LiveFollowMode,
+    LivePresenceData,
 } from "@microsoft/live-share";
 import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import {
@@ -181,9 +182,7 @@ export interface IUseLiveTimerResults {
 /**
  * Return type of {@link useLivePresence} hook.
  */
-export interface IUseLivePresenceResults<
-    TData extends object | undefined | null = any,
-> {
+export interface IUseLivePresenceResults<TData extends LivePresenceData = any> {
     /**
      * The local user's presence object.
      */

@@ -8,6 +8,7 @@ import { TimeInterval } from "./TimeInterval.js";
 import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 import { LivePresenceConnection } from "./LivePresenceConnection.js";
 import { cloneValue, isNewerEvent } from "./internals/utils.js";
+import { LivePresenceData } from "./LivePresence.js";
 
 /**
  * List of possible presence status states.
@@ -39,9 +40,7 @@ export const PresenceState = PresenceStatus;
 /**
  * @hidden
  */
-export interface ILivePresenceEvent<
-    TData extends object | undefined | null = any,
-> {
+export interface ILivePresenceEvent<TData extends LivePresenceData = any> {
     status: PresenceStatus;
     data: TData;
 }
@@ -50,13 +49,13 @@ export interface ILivePresenceEvent<
  * @hidden
  */
 export type LivePresenceReceivedEventData<
-    TData extends object | undefined | null = any,
+    TData extends LivePresenceData = any,
 > = ILiveEvent<ILivePresenceEvent<TData>>;
 
 /**
  * A user that presence is being tracked for.
  */
-export class LivePresenceUser<TData extends object | undefined | null = any> {
+export class LivePresenceUser<TData extends LivePresenceData = any> {
     private _lastUpdateTime: number;
     private _connections: Map<string, LivePresenceConnection<TData>> =
         new Map();

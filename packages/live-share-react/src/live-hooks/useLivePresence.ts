@@ -39,6 +39,57 @@ import {
  * will be created, otherwise it will use the existing one. Default value is ":<dds-default>"
  * @returns stateful `localUser`, `otherUsers` list, and `allUsers` list. Also returns a callback method
  * to update the local user's presence and the `LivePresence` Fluid object.
+ * 
+ * @example
+ ```jsx
+import { useLivePresence } from "@microsoft/live-share-react";
+
+// Define a unique key that differentiates this usage of `useLivePresence` from others in your app
+const MY_UNIQUE_KEY = "presence-key";
+
+// Example component for using useLivePresence
+export const MyCustomPresence = () => {
+    const {
+        allUsers,
+        localUser,
+        livePresence,
+        updatePresence,
+    } = useLivePresence(MY_UNIQUE_KEY, {
+        picture: "DEFAULT_PROFILE_PICTURE_URL",
+        readyToStart: false,
+    });
+
+    // Callback to update the user's presence
+    const onToggleReady = () => {
+        updatePresence({
+            ...localUser.data,
+            readyToStart: !localUser.data.readyToStart,
+        });
+    }
+
+    // Render loading UI while loading LivePresence for first time
+    if (!livePresence) return <>Loading...</>;
+
+    // Render presence UI
+    return (
+        {allUsers.map((user) => (
+            <div key={user.userId}>
+                <div>
+                    {user.displayName}
+                </div>
+                <div>
+                    {`Ready: ${user.data.readyToStart}`}
+                </div>
+                {user.isLocalUser && (
+                    <button onClick={onToggleReady}>
+                        {"Toggle ready"}
+                    </button>
+                )}
+            </div>
+        ))}
+    );
+}
+ ```
  */
 export function useLivePresence<TData extends LivePresenceData = any>(
     uniqueKey: string,

@@ -114,6 +114,44 @@ export interface ILiveShareProviderProps {
 
 /**
  * React Context provider component for using Live Share data objects & joining a Live Share session using `LiveShareClient`.
+ * 
+ * @example
+ ```jsx
+// LiveShareApp.jsx
+import { LiveShareProvider } from "@microsoft/live-share-react";
+import { LiveShareHost } from "@microsoft/teams-js";
+
+const host = LiveShareHost.create();
+
+export function LiveShareApp() {
+  // Call app.initialize() from teams-js before rendering LiveShareProvider
+
+  return (
+    <LiveShareProvider
+      joinOnLoad={true}
+      host={host}
+    >
+      <LiveCheckbox />
+    </LiveShareProvider>
+  );
+}
+
+// LiveCheckbox.jsx
+import { useLiveState } from "@microsoft/live-share-react";
+
+export function SharedCheckbox() {
+  const [checked, setChecked] = useLiveState("MY-UNIQUE-ID", false);
+  return (
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={() => {
+        setChecked(!checked);
+      }}
+    />
+  );
+}
+ ```
  */
 export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
     const startedRef = React.useRef(false);

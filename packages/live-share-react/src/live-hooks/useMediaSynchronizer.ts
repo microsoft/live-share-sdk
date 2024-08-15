@@ -43,6 +43,67 @@ import {
  * @param viewOnly Optional. Flag for whether or not the media synchronizer should be in viewOnly mode.
  * @param canSendPositionUpdates Optional. Controls whether or not the local client is allowed to send position updates to the group.
  * @returns IUseMediaSynchronizerResults object.
+ * 
+ * @example
+ ```jsx
+import { useMediaSynchronizer } from "@microsoft/live-share-react";
+import { UserMeetingRole } from "@microsoft/live-share";
+import { MediaPlayerSynchronizerEvents } from "@microsoft/live-share-media";
+import { useRef, useEffect } from "react";
+
+const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter];
+
+const INITIAL_TRACK = "<YOUR_VIDEO_URL>";
+
+// Define a unique key that distinguishes this `useMediaSynchronizer` from others in your app
+const UNIQUE_KEY = "MEDIA-SESSION-ID";
+
+export function VideoPlayer() {
+  const videoRef = useRef(null);
+  const { play, pause, seekTo, mediaSynchronizer } = useMediaSynchronizer(
+    UNIQUE_KEY,
+    videoRef,
+    INITIAL_TRACK,
+    ALLOWED_ROLES
+  );
+
+  // Listen for groupaction events (optional)
+  useEffect(() => {
+    // Listen for player group actions for errors (e.g., play error)
+    const onGroupAction = (evt: IMediaPlayerSynchronizerEvent) => {
+      // See which user made the change (e.g., to display a notification)
+      const clientInfo = await synchronizer.mediaSession.getClientInfo(evt.details.clientId);
+    };
+    mediaSynchronizer?.addEventListener(
+      MediaPlayerSynchronizerEvents.groupaction,
+      onGroupAction
+    );
+    return () => {
+      mediaSynchronizer?.removeEventListener(
+        MediaPlayerSynchronizerEvents.groupaction,
+        onGroupAction
+      );
+    };
+  }, [mediaSynchronizer]);
+
+  return (
+    <div>
+      <video ref={videoRef} />
+      <button onClick={play}>
+        Play
+      </button>
+      <button onClick={pause}>
+        Pause
+      </button>
+      <button onClick={() => {
+        seekTo(0);
+      }}>
+        Start over
+      </button>
+    </div>
+  );
+}
+ ```
  */
 export function useMediaSynchronizer(
     uniqueKey: string,

@@ -38,6 +38,53 @@ import { LiveDataObjectInitializeState } from "@microsoft/live-share";
  * @param allowedRoles Optional. The user roles that are allowed to start/stop/pause the timer.
  *
  * @returns `IUseLiveCanvasResults` object that contains the `liveCanvas` data object and `inkingManager`.
+ * 
+ * @example
+ ```jsx
+import { useLiveCanvas } from "@microsoft/live-share-react";
+import { InkingTool } from "@microsoft/live-share-canvas";
+import { useRef } from "react";
+
+// Unique identifier that distinguishes this useLiveCanvas from others in your app
+const UNIQUE_KEY = "CUSTOM-LIVE-CANVAS";
+
+// Example component
+export function ExampleLiveCanvas() {
+    const liveCanvasRef = useRef(null);
+    const { liveCanvas, inkingManager } = useLiveCanvas(
+        "CUSTOM-LIVE-CANVAS",
+        liveCanvasRef,
+    );
+
+    return (
+        <div style={{ position: "absolute"}}>
+            <div
+                ref={liveCanvasRef}
+                // Best practice is to not define inline styles
+                style={{ width: "556px", height: "224px" }}
+            />
+            {!!liveCanvas && (
+                <div>
+                    <button
+                        onClick={() => {
+                            inkingManager.tool = InkingTool.pen;
+                        }}
+                    >
+                        {"Pen"}
+                    </button>
+                    <button
+                        onClick={() => {
+                            inkingManager.tool = InkingTool.laserPointer;
+                        }}
+                    >
+                        {"Laser pointer"}
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+ ```
  */
 export function useLiveCanvas(
     uniqueKey: string,

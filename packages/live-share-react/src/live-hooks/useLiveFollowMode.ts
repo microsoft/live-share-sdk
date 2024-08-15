@@ -36,6 +36,145 @@ import { IUseLiveFollowModeResults } from "../types/index.js";
  * @param initialData The initial value for the local user's `stateValue`.
  * @param allowedRoles Optional. The user roles that are allowed to present to use `startPresenting()` or `stopPresenting()`.
  * @returns `IUseLiveFollowModeResults` results, which contains React stateful objects and callbacks.
+ * 
+ * @example
+ ```jsx
+ import { FollowModeType } from "@microsoft/live-share";
+import { useLiveFollowMode } from "@microsoft/live-share-react";
+// As an example, we will use a fake component to denote what a 3D viewer might look like in an app
+import { Example3DModelViewer } from "./components";
+
+// Define a unique key that differentiates this usage of `useLiveFollowMode` from others in your app
+const MY_UNIQUE_KEY = "follow-mode-key";
+
+// Define the initial stateValue for the local user (optional).
+const startingCameraPosition = {
+    x: 0,
+    y: 0,
+    z: 0,
+};
+
+// Example component for using useLiveFollowMode
+export function MyLiveFollowMode() {
+    const {
+        state,
+        localUser,
+        otherUsers,
+        allUsers,
+        liveFollowMode,
+        update,
+        startPresenting,
+        stopPresenting,
+        beginSuspension,
+        endSuspension,
+        followUser,
+        stopFollowing,
+    } = useLiveFollowMode(MY_UNIQUE_KEY, startingCameraPosition);
+
+    // Example of an event listener for a camera position changed event.
+    // For something like a camera change event, you should use a debounce function.
+    function onCameraPositionChanged(position, isUserAction) {
+        // Broadcast change to other users so that they have their latest camera position
+        update(position);
+        // If the local user changed the position while following another user, we want to suspend.
+        // Note: helps to distinguish changes initiated by the local user (e.g., drag mouse) separately from other change events.
+        if (!isUserAction) return;
+        switch (state.type) {
+            case FollowModeType.followPresenter:
+            case FollowModeType.followUser: {
+                // This will trigger a "stateChanged" event update for the local user only.
+                followMode.beginSuspension();
+                break;
+            }
+            default: {
+                // No need to suspend for other types
+                break;
+            }
+        }
+    }
+
+    // Can optionally get the relevant user's presence object
+    const followingUser = liveFollowMode?.getUser(state.followingUserId);
+
+    // Render loading UI when creating LiveFollowMode instance for first time
+    if (!liveFollowMode) return <>Loading...</>;
+
+    // Render UI
+    return (
+        <div>
+            {state.type === FollowModeType.local && (
+                <div>
+                    <p>{""}</p>
+                    <button onClick={startPresenting}>
+                        {"Start presenting"}
+                    </button>
+                </div>
+            )}
+            {state.type === FollowModeType.activeFollowers && (
+                <div>
+                    <p>{`${state.otherUsersCount} users are following you`}</p>
+                    <button onClick={startPresenting}>
+                        {"Present to all"}
+                    </button>
+                </div>
+            )}
+            {state.type === FollowModeType.activePresenter && (
+                <div>
+                    <p>{`You are actively presenting to everyone`}</p>
+                    <button onClick={stopPresenting}>
+                        {"Stop presenting"}
+                    </button>
+                </div>
+            )}
+            {state.type === FollowModeType.followPresenter && (
+                <div>
+                    <p>{`${followingUser?.displayName} is presenting to everyone`}</p>
+                    <button onClick={startPresenting}>{"Take control"}</button>
+                </div>
+            )}
+            {state.type === FollowModeType.suspendFollowPresenter && (
+                <div>
+                    <p>{`${followingUser?.displayName} is presenting to everyone`}</p>
+                    <button onClick={endSuspension}>
+                        {"Sync to presenter"}
+                    </button>
+                </div>
+            )}
+            {state.type === FollowModeType.followUser && (
+                <div>
+                    <p>{`You are following ${followingUser?.displayName}`}</p>
+                    <button onClick={stopFollowing}>{"Stop following"}</button>
+                </div>
+            )}
+            {state.type === FollowModeType.suspendFollowUser && (
+                <div>
+                    <p>{`You were following ${followingUser?.displayName}`}</p>
+                    <button onClick={stopFollowing}>
+                        {"Resume following"}
+                    </button>
+                </div>
+            )}
+            <div>
+                <p>{"Follow a specific user:"}</p>
+                {otherUsers.map((user) => (
+                    <button
+                        onClick={() => {
+                            followUser(user.userId);
+                        }}
+                        key={user.userId}
+                    >
+                        {user.displayName}
+                    </button>
+                ))}
+            </div>
+            <Example3DModelViewer
+                cameraPosition={state.value}
+                onCameraPositionChanged={onCameraPositionChanged}
+            />
+        </div>
+    );
+};
+ ```
  */
 export function useLiveFollowMode<TData = any>(
     uniqueKey: string,

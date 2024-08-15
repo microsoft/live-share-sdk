@@ -72,6 +72,57 @@ export const LiveShareContext = React.createContext<ILiveShareContext>(
  * See `useFluidObjectsContext` for other information related to the Live Share session, such as the `container`.
  *
  * @returns current state of `LiveShareContext`
+ * 
+ * @example
+ ```jsx
+// LiveShareApp.jsx
+import { LiveShareProvider } from "@microsoft/live-share-react";
+import { LiveShareHost } from "@microsoft/teams-js";
+
+const host = LiveShareHost.create();
+
+export function LiveShareApp() {
+    // Call app.initialize() from teams-js before rendering LiveShareProvider
+
+    return (
+        <LiveShareProvider
+            joinOnLoad={true}
+            host={host}
+        >
+            <LiveShareLoader>
+                <LiveCheckbox />
+            </LiveShareLoader>
+        </LiveShareProvider>
+    );
+}
+
+// LiveShareLoader.jsx
+import { useLiveShareContext } from "@microsoft/live-share-react";
+
+export function LiveShareLoader({ children }) {
+    const { joined, joinError } = useLiveShareContext();
+
+    if (joinError) return <>{joinError.message}</>;
+    if (!joined) return <>Joining Live Share session...</>;
+    return <>{children}</>
+}
+
+// LiveCheckbox.jsx
+import { useLiveState } from "@microsoft/live-share-react";
+
+export function LiveCheckbox() {
+    const [checked, setChecked] = useLiveState("MY-UNIQUE-ID", false);
+    return (
+        <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => {
+                setChecked(!checked);
+            }}
+        />
+    );
+}
+ ```
  */
 export const useLiveShareContext = (): ILiveShareContext => {
     const context = React.useContext(LiveShareContext);
@@ -124,32 +175,45 @@ import { LiveShareHost } from "@microsoft/teams-js";
 const host = LiveShareHost.create();
 
 export function LiveShareApp() {
-  // Call app.initialize() from teams-js before rendering LiveShareProvider
+    // Call app.initialize() from teams-js before rendering LiveShareProvider
 
-  return (
-    <LiveShareProvider
-      joinOnLoad={true}
-      host={host}
-    >
-      <LiveCheckbox />
-    </LiveShareProvider>
-  );
+    return (
+        <LiveShareProvider
+            joinOnLoad={true}
+            host={host}
+        >
+            <LiveShareLoader>
+                <LiveCheckbox />
+            </LiveShareLoader>
+        </LiveShareProvider>
+    );
+}
+
+// LiveShareLoader.jsx
+import { useLiveShareContext } from "@microsoft/live-share-react";
+
+export function LiveShareLoader({ children }) {
+    const { joined, joinError } = useLiveShareContext();
+
+    if (joinError) return <>{joinError.message}</>;
+    if (!joined) return <>Joining Live Share session...</>;
+    return <>{children}</>
 }
 
 // LiveCheckbox.jsx
 import { useLiveState } from "@microsoft/live-share-react";
 
 export function LiveCheckbox() {
-  const [checked, setChecked] = useLiveState("MY-UNIQUE-ID", false);
-  return (
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={() => {
-        setChecked(!checked);
-      }}
-    />
-  );
+    const [checked, setChecked] = useLiveState("MY-UNIQUE-ID", false);
+    return (
+        <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => {
+                setChecked(!checked);
+            }}
+        />
+    );
 }
  ```
  */

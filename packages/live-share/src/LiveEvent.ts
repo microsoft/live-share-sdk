@@ -104,6 +104,30 @@ export class LiveEventClass<TEvent = any> extends LiveDataObject<{
      * @returns a void promise that resolves once complete.
      *
      * @throws error when `.initialize()` has already been called for this class instance.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LiveEvent } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+
+        // Join the Fluid container and create LiveEvent instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const messages = await client.getDDS("unique-id", LiveEvent<string>);
+
+        // Register listener to receive events sent through this object.
+        messages.on("received", async (event: string, local: boolean, clientId: string) => {
+            console.log("Received message:", event, "from clientId", clientId);
+        });
+
+        // Initialize LiveEvent
+        await messages.initialize();
+
+        // Can now safely send events
+        await messages.send("Hello world");
+     ```
      */
     public initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
         LiveDataObjectInitializeNotNeededError.assert(
@@ -150,6 +174,36 @@ export class LiveEventClass<TEvent = any> extends LiveDataObject<{
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LiveEvent } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Declare interface for type of custom data for user
+        interface ICustomReaction {
+            emoji: string;
+            forUserId: string;
+        }
+
+        // Join the Fluid container and create LiveEvent instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const reactions = await client.getDDS("unique-id", LiveEvent<ICustomReaction>);
+
+        // Register listener to receive events sent through this object.
+        reactions.on("received", async (event: ICustomReaction, local: boolean, clientId: string) => {
+            console.log("Received reaction:", event, "from clientId", clientId);
+        });
+
+        // Initialize LiveEvent prior to sending event
+        await reactions.initialize();
+        await reactions.send({
+            emoji: "❤️",
+            forUserId: "SOME_OTHER_USER_ID",
+        });
+     ```
      */
     public async send(evt: TEvent): Promise<ILiveEvent<TEvent>> {
         LiveDataObjectNotInitializedError.assert(

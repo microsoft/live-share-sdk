@@ -107,6 +107,20 @@ export class LiveShareClient extends BaseLiveShareClient {
      * Creates a new `LiveShareClient` instance.
      * @param host Host for the current Live Share session.
      * @param options Optional. Configuration options for the client.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LivePresence } from "@microsoft/live-share";
+        // Import ILiveShareHost instance. Most common option is using the teams-js SDK
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+
+        // TODO: start collab logic
+     ```
      */
     constructor(host: ILiveShareHost, options?: ILiveShareClientOptions) {
         // Validate host passed in
@@ -157,7 +171,8 @@ export class LiveShareClient extends BaseLiveShareClient {
     public maxContainerLookupTries = 3;
 
     /**
-     * @deprecated Use {@link LiveShareClient.join} instead.
+     * @deprecated
+     * Use {@link LiveShareClient.join} instead.
      */
     public async joinContainer(
         fluidContainerSchema?: ContainerSchema,
@@ -176,6 +191,45 @@ export class LiveShareClient extends BaseLiveShareClient {
      * @param fluidContainerSchema Fluid objects to create.
      * @param onContainerFirstCreated Optional. Callback that's called when the container is first created.
      * @returns the results of join container.
+     * 
+     * @example
+     * The following is an example using no optional props:
+     ```ts
+        import { LiveShareClient, LivePresence } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+
+        // Create a DDS
+        const presence = await client.getDDS("unique-id", LivePresence, (dds) => {
+            console.log("first created dds", dds);
+        });
+     ```
+     * @example
+     * The following is an example using the optional props:
+     ```ts
+        import { LiveShareClient, LivePresence, LiveState } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        const schema = {
+            initialObjects: {
+                presence: LivePresence
+            }
+        };
+        const { container } = await client.join(schema, (container) => {
+            console.log("First created container", container);
+        });
+        const presence = container.initialObjects.presence as unknown as LivePresence;
+
+        // Can still dynamically get DDS's that were not in schema
+        const counter = await client.getDDS("unique-id", LiveState<number>);
+     ```
      */
     public async join(
         fluidContainerSchema?: ContainerSchema,

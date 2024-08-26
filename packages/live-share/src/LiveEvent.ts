@@ -10,7 +10,6 @@ import {
 import { IEvent } from "@fluidframework/core-interfaces";
 import {
     UserMeetingRole,
-    IClientTimestamp,
     ILiveEvent,
     LiveDataObjectInitializeState,
 } from "./interfaces.js";
@@ -104,6 +103,30 @@ export class LiveEventClass<TEvent = any> extends LiveDataObject<{
      * @returns a void promise that resolves once complete.
      *
      * @throws error when `.initialize()` has already been called for this class instance.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LiveEvent } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+
+        // Join the Fluid container and create LiveEvent instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const messages = await client.getDDS("unique-id", LiveEvent<string>);
+
+        // Register listener to receive events sent through this object.
+        messages.on("received", async (event: string, local: boolean, clientId: string) => {
+            console.log("Received message:", event, "from clientId", clientId);
+        });
+
+        // Initialize LiveEvent
+        await messages.initialize();
+
+        // Can now safely send events
+        await messages.send("Hello world");
+     ```
      */
     public initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
         LiveDataObjectInitializeNotNeededError.assert(
@@ -150,6 +173,36 @@ export class LiveEventClass<TEvent = any> extends LiveDataObject<{
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LiveEvent } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Declare interface for type of custom data for user
+        interface ICustomReaction {
+            emoji: string;
+            forUserId: string;
+        }
+
+        // Join the Fluid container and create LiveEvent instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const reactions = await client.getDDS("unique-id", LiveEvent<ICustomReaction>);
+
+        // Register listener to receive events sent through this object.
+        reactions.on("received", async (event: ICustomReaction, local: boolean, clientId: string) => {
+            console.log("Received reaction:", event, "from clientId", clientId);
+        });
+
+        // Initialize LiveEvent prior to sending event
+        await reactions.initialize();
+        await reactions.send({
+            emoji: "❤️",
+            forUserId: "SOME_OTHER_USER_ID",
+        });
+     ```
      */
     public async send(evt: TEvent): Promise<ILiveEvent<TEvent>> {
         LiveDataObjectNotInitializedError.assert(
@@ -164,64 +217,6 @@ export class LiveEventClass<TEvent = any> extends LiveDataObject<{
         );
 
         return await this._eventTarget.sendEvent(evt);
-    }
-
-    /**
-     * Returns true if a received event is newer then the current event.
-     *
-     * @remarks
-     * Used when building new Live objects to process state change events. The `isNewer()`
-     * method implements an algorithm that deals with conflicting events that have the same timestamp
-     * and older events that should have debounced the current event.
-     *
-     * - When the received event has the same timestamp as the current event, each events clientId
-     *   will be used as a tie breaker. The clientId containing the lower sort order wins any ties.
-     * - Older events are generally ignored unless a debounce period is specified. An older event
-     *   that should have debounced the current event will be considered newer.
-     *
-     * The algorithm employed by isNewer() helps ensure that all clients will eventually reach a
-     * consistent state with one other.
-     * @param current Current event to compare received event against.
-     * @param received Received event.
-     * @param debouncePeriod Optional. Time in milliseconds to ignore any new events for. Defaults to 0 ms.
-     * @returns True if the received event is newer then the current event and should replace the current one.
-     */
-    public static isNewer(
-        current: IClientTimestamp | undefined,
-        received: IClientTimestamp,
-        debouncePeriod = 0
-    ): boolean {
-        if (current) {
-            if (current.timestamp == received.timestamp) {
-                // In a case where both clientId's are blank that's the local client in a disconnected state
-                const cmp = (current.clientId || "").localeCompare(
-                    received.clientId || ""
-                );
-                if (cmp <= 0) {
-                    // - cmp == 0 is same user. We use to identify events for same user as newer but
-                    //   that was causing us to fire duplicate state & presence change events. The better
-                    //   approach is to update the timestamp provider to never return the same timestamp
-                    //   twice.  (Comparison was changed on 8/2/2022)
-                    // - cmp > 0 is a tie breaker so we'll take that event as well (comparing 'a' with 'c'
-                    //   will result in a negative value).
-                    return false;
-                }
-            } else if (current.timestamp > received.timestamp) {
-                // Did we receive an older event that should have caused us to debounce the current one?
-                const delta = current.timestamp - received.timestamp;
-                if (delta > debouncePeriod) {
-                    return false;
-                }
-            } else {
-                // Is the new event within the debounce period?
-                const delta = received.timestamp - current.timestamp;
-                if (delta < debouncePeriod) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 }
 

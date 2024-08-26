@@ -10,7 +10,7 @@ import {
 import { IEvent } from "@fluidframework/core-interfaces";
 import {
     LivePresenceUser,
-    PresenceState,
+    PresenceStatus,
     ILivePresenceEvent,
     LivePresenceReceivedEventData,
 } from "./LivePresenceUser.js";
@@ -35,6 +35,17 @@ import { TelemetryEvents } from "./internals/consts.js";
 import { AzureMember } from "@fluidframework/azure-client";
 
 /**
+ * Valid types of custom data for a {@link LivePresence} user.
+ */
+export type LivePresenceData =
+    | object
+    | string
+    | number
+    | boolean
+    | undefined
+    | null;
+
+/**
  * Events supported by `LivePresence` object.
  */
 export enum LivePresenceEvents {
@@ -48,9 +59,8 @@ export enum LivePresenceEvents {
  * Event typings for `LivePresence` class.
  * @template TData Type of data object to share with clients.
  */
-export interface ILivePresenceEvents<
-    TData extends object | undefined | null = any,
-> extends IEvent {
+export interface ILivePresenceEvents<TData extends LivePresenceData = any>
+    extends IEvent {
     /**
      * The presence information for the local or a remote user has changed.
      * @param event Name of event.
@@ -71,17 +81,17 @@ export interface ILivePresenceEvents<
 
 /**
  * Live fluid object that synchronizes presence information for the user with other clients.
- * @template TData Type of data object to share with clients.
+ * @template TData Type of data object to share with clients. Can be any serializable JSON value.
  */
 export class LivePresenceClass<
-    TData extends object | undefined | null = any,
+    TData extends LivePresenceData = any,
 > extends LiveDataObject<{
     Events: ILivePresenceEvents<TData>;
 }> {
     private _logger?: LiveTelemetryLogger;
     private _expirationPeriod = new TimeInterval(20000);
     private _users: LivePresenceUser<TData>[] = [];
-    private _lastEmitPresenceStateMap = new Map<string, PresenceState>();
+    private _lastEmitPresenceStateMap = new Map<string, PresenceStatus>();
     private _currentPresence?: LivePresenceReceivedEventData<TData>;
 
     private _synchronizer?: LiveObjectSynchronizer<ILivePresenceEvent<TData>>;
@@ -131,7 +141,7 @@ export class LivePresenceClass<
     /**
      * Initialize the object to begin sending/receiving presence updates through this DDS.
      *
-     * @param data Custom data object to share. A deep copy of the data object is saved to avoid any accidental modifications.
+     * @param data Custom data object to share for local user. A deep copy of the data object is saved to avoid any accidental modifications.
      * @param allowedRoles Optional. List of roles allowed to emit presence changes.
      *
      * @returns a void promise that resolves once complete.
@@ -139,6 +149,26 @@ export class LivePresenceClass<
      * @throws error when `.initialize()` has already been called for this class instance.
      * @throws fatal error when `.initialize()` has already been called for an object of same id but with a different class instance.
      * This is most common when using dynamic objects through Fluid.
+     * @example
+     ```ts
+        import { LiveShareClient, LivePresence, LivePresenceUser } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const presence = await client.getDDS("unique-id", LivePresence<boolean>);
+        
+        // Listen for changes to presence prior to calling initialize
+        presence.on("presenceChanged", async (user: LivePresenceUser<boolean>, local: boolean) => {
+            console.log(user);
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await presence.initialize(true);
+        // Update presence after calling initialize
+        await presence.update(false);
+     ```
      */
     public async initialize(
         data: TData,
@@ -170,7 +200,7 @@ export class LivePresenceClass<
             name: "UpdatePresence",
             timestamp: 0,
             data: {
-                state: PresenceState.online,
+                status: PresenceStatus.online,
                 data,
             },
         };
@@ -230,12 +260,32 @@ export class LivePresenceClass<
     /**
      * Returns a snapshot of the current list of presence objects being tracked.
      * See {@link LivePresenceUser}
-     * @param filter Optional. Presence state to filter enumeration to.
+     * @param filter Optional. Presence status to filter enumeration to.
      * @returns Array of presence objects.
+     *
+     * @example
+     ```ts
+        import { LiveShareClient, LivePresence, PresenceStatus } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const presence = await client.getDDS("unique-id", LivePresence<null>);
+        // Initialize LivePresence
+        await presence.initialize(null);
+
+        // Get online users
+        const onlineUsers = presence.getUsers(PresenceStatus.online);
+
+        // Get all users
+        const allUsers = presence.getUsers();
+     ```
      */
-    public getUsers(filter?: PresenceState): LivePresenceUser<TData>[] {
+    public getUsers(filter?: PresenceStatus): LivePresenceUser<TData>[] {
         if (!filter) return this._users;
-        return this._users.filter((user) => user.state == filter);
+        return this._users.filter((user) => user.status == filter);
     }
 
     /**
@@ -250,6 +300,32 @@ export class LivePresenceClass<
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LivePresence, LivePresenceUser } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Delcare interface for custom presence data
+        interface IPresenceData {
+            favoriteColor: string;
+        }
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const presence = await client.getDDS("unique-id", LivePresence<IPresenceData>);
+        
+        // Listen for changes to presence prior to calling initialize
+        presence.on("presenceChanged", async (user: LivePresenceUser<IPresenceData>, local: boolean) => {
+            console.log(user);
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await presence.initialize({ favoriteColor: "red" });
+        // Update presence after calling initialize
+        await presence.update({ favoriteColor: "blue" });
+     ```
      */
     public async update(data: TData): Promise<void> {
         return await this.updateInternal(data);
@@ -260,6 +336,31 @@ export class LivePresenceClass<
      * See {@link LivePresenceUser}
      * @param clientId The ID of the client to retrieve.
      * @returns The current presence information for the client if they've connected to the space.
+     * 
+     * @example
+     * Using this function, `LivePresence` can easily integrate with other Live Share features.
+     ```ts
+        import { LiveShareClient, LiveState, LivePresence } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the DDS instances
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const presence = await client.getDDS("unique-id-1", LivePresence<null>);
+        const counter = await client.getDDS("unique-id-2", LiveState<number>);
+
+        // Initialize LivePresence
+        await presence.initialize(null);
+
+        // Listen for changes to LiveState and get presence object for user that made change
+        counter.on("stateChanged", (count: number, local: boolean, clientId: string) => {
+            const user = presence.getUserForClient(clientId);
+            console.log("user", user, "changed the count to", count);
+        });
+        // Initialize counter LiveState instance
+        await counter.initialize(0);
+     ```
      */
     public getUserForClient(
         clientId: string
@@ -272,6 +373,22 @@ export class LivePresenceClass<
      * See {@link LivePresenceUser}
      * @param userId The ID of the user to retrieve.
      * @returns The current presence information for the user if they've connected to the space.
+     * @example
+     * Using this function, `LivePresence` can easily integrate with other Teams features, such as Microsoft Graph.
+     ```ts
+        import { LiveShareClient, LiveState, LivePresence } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container, create LivePresence, and initialize it
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const presence = await client.getDDS("unique-id", LivePresence<null>);
+        await presence.initialize(null);
+
+        // Get the user by user id
+        const user = presence.getUser("some-teams-user-id");
+     ```
      */
     public getUser(userId: string): LivePresenceUser<TData> | undefined {
         return this._users.find((user) => user.userId == userId);
@@ -303,7 +420,7 @@ export class LivePresenceClass<
 
         // Broadcast state change
         const evtToSend = {
-            state: this._currentPresence.data.state,
+            status: this._currentPresence.data.status,
             data: cloneValue(data) ?? this._currentPresence.data.data,
         };
 
@@ -370,7 +487,7 @@ export class LivePresenceClass<
         info: IClientInfo
     ): boolean {
         const emitEvent = (user: LivePresenceUser<TData>) => {
-            this._lastEmitPresenceStateMap.set(user.userId, user.state);
+            this._lastEmitPresenceStateMap.set(user.userId, user.status);
             this.emit(
                 LivePresenceEvents.presenceChanged,
                 user,
@@ -405,7 +522,7 @@ export class LivePresenceClass<
                 isNewUser = false;
             } else if (
                 this._lastEmitPresenceStateMap.get(checkUser.userId) !==
-                checkUser.state
+                checkUser.status
             ) {
                 // The user's PresenceState has changed
                 emitEvent(checkUser);
@@ -429,10 +546,10 @@ export class LivePresenceClass<
 
     private audienceCallbacks = {
         memberAdded: async (clientId: string, member: AzureMember<any>) => {
-            this.audienceMemberChanged(clientId, PresenceState.online);
+            this.audienceMemberChanged(clientId, PresenceStatus.online);
         },
         memberRemoved: async (clientId: string, member: AzureMember<any>) => {
-            this.audienceMemberChanged(clientId, PresenceState.offline);
+            this.audienceMemberChanged(clientId, PresenceStatus.offline);
         },
     };
 
@@ -465,7 +582,7 @@ export class LivePresenceClass<
      */
     private async audienceMemberChanged(
         clientId: string,
-        state: PresenceState
+        status: PresenceStatus
     ) {
         const user = this.getUserForClient(clientId);
         if (!user) {
@@ -475,7 +592,7 @@ export class LivePresenceClass<
         if (!connection) return;
 
         const evtToSend = {
-            state,
+            status,
             data: connection.data,
         };
         /**
@@ -491,7 +608,7 @@ export class LivePresenceClass<
     }
 }
 
-export type LivePresence<TData extends object | undefined | null = any> =
+export type LivePresence<TData extends LivePresenceData = any> =
     LivePresenceClass<TData>;
 
 // eslint-disable-next-line no-redeclare

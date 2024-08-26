@@ -4,7 +4,7 @@
  */
 
 import {
-    PresenceState,
+    PresenceStatus,
     UserMeetingRole,
     LivePresence,
     LiveState,
@@ -79,8 +79,8 @@ async function renderPresenceDiceList(presence, wrapperElem) {
 async function renderUserDice(presence, userPresence, local, wrapperElem) {
     const userDiceElementId = `user-dice-${userPresence.userId}`;
     let userDiceElement = document.getElementById(userDiceElementId);
-    // If the user's state is not offline, remove it from the DOM
-    if (userPresence.state !== PresenceState.online) {
+    // If the user's status is not offline, remove it from the DOM
+    if (userPresence.status !== PresenceStatus.online) {
         userDiceElement?.remove();
         return;
     }

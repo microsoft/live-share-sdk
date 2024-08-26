@@ -5,7 +5,11 @@
 
 import React from "react";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { ITimerConfig, ILiveEvent } from "@microsoft/live-share";
+import {
+    ITimerConfig,
+    ILiveEvent,
+    LivePresenceData,
+} from "@microsoft/live-share";
 import { SharedObjectKind } from "fluid-framework";
 
 // React actions
@@ -111,9 +115,9 @@ export type OnReceivedLiveEventAction<TEvent> = (
  * Callback for OnUpdateLivePresenceAction<TData extends object = object>.
  * (data?: TData | undefined, state?: PresenceState | undefined) => Promise<void>
  */
-export type OnUpdateLivePresenceAction<
-    TData extends object | undefined | null = any,
-> = (data: TData) => Promise<void>;
+export type OnUpdateLivePresenceAction<TData extends LivePresenceData = any> = (
+    data: TData
+) => Promise<void>;
 
 /**
  * Callback for OnStartTimerAction.

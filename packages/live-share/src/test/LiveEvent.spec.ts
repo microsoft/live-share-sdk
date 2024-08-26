@@ -22,6 +22,7 @@ import {
     ITestObjectProviderOptions,
 } from "@live-share-private/test-utils";
 import { Deferred } from "../internals/Deferred.js";
+import { isNewerEvent } from "../internals/utils.js";
 
 describeCompat(
     "LiveEvent",
@@ -212,7 +213,7 @@ describeCompat(
                 data: undefined,
             };
 
-            const allowed = LiveEvent.isNewer(current, received);
+            const allowed = isNewerEvent(current, received);
             assert(allowed, `event blocked`);
         });
 
@@ -231,7 +232,7 @@ describeCompat(
                 data: undefined,
             };
 
-            const allowed = LiveEvent.isNewer(current, received);
+            const allowed = isNewerEvent(current, received);
             assert(!allowed, `event allowed`);
         });
 
@@ -250,7 +251,7 @@ describeCompat(
                 data: undefined,
             };
 
-            const allowed = LiveEvent.isNewer(current, received);
+            const allowed = isNewerEvent(current, received);
             assert(!allowed, `event allowed`);
         });
 
@@ -269,7 +270,7 @@ describeCompat(
                 data: undefined,
             };
 
-            const allowed = LiveEvent.isNewer(current, received);
+            const allowed = isNewerEvent(current, received);
             assert(allowed, `event blocked`);
         });
 
@@ -288,7 +289,7 @@ describeCompat(
                 data: undefined,
             };
 
-            const allowed = LiveEvent.isNewer(current, received);
+            const allowed = isNewerEvent(current, received);
             assert(!allowed, `event allowed`);
         });
 
@@ -307,7 +308,7 @@ describeCompat(
                 data: undefined,
             };
 
-            const allowed = LiveEvent.isNewer(current, received, 100);
+            const allowed = isNewerEvent(current, received, 100);
             assert(!allowed, `event allowed`);
         });
 
@@ -326,7 +327,7 @@ describeCompat(
                 data: undefined,
             };
 
-            const allowed = LiveEvent.isNewer(current, received, 100);
+            const allowed = isNewerEvent(current, received, 100);
             assert(allowed, `event blocked`);
         });
     }

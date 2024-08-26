@@ -7,7 +7,7 @@ import { strict as assert } from "assert";
 import { TestLiveShareHost } from "../TestLiveShareHost.js";
 import { LiveShareClient } from "../LiveShareClient.js";
 import { LivePresence } from "../LivePresence.js";
-import { PresenceState } from "../LivePresenceUser.js";
+import { PresenceStatus } from "../LivePresenceUser.js";
 import { waitForDelay } from "../internals/utils.js";
 
 describe("LivePresence Fluid Audience tests", () => {
@@ -66,10 +66,10 @@ describe("LivePresence Fluid Audience tests", () => {
 
         const onlineFromObject2Perpsective = dds2
             .getUsers()
-            .filter((u) => u.state == PresenceState.online).length;
+            .filter((u) => u.status == PresenceStatus.online).length;
         const offlineFromObject2Perpsective = dds2
             .getUsers()
-            .filter((u) => u.state == PresenceState.offline).length;
+            .filter((u) => u.status == PresenceStatus.offline).length;
 
         assert(
             onlineFromObject2Perpsective === 1,

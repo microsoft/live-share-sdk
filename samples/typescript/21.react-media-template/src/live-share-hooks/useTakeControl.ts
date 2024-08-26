@@ -19,7 +19,7 @@ export const useTakeControl = (
         const mappedUsers = users.map((user) => {
             return {
                 userId: user.userId,
-                state: user.state,
+                state: user.status,
                 data: user.data,
                 lastInControlTimestamp: user.userId
                     ? history.get(user.userId)

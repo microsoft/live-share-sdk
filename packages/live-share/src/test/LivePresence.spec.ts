@@ -10,7 +10,7 @@ import {
     getContainerEntryPointBackCompat,
 } from "@fluidframework/test-utils/internal";
 import { LivePresenceClass } from "../LivePresence.js";
-import { PresenceState } from "../LivePresenceUser.js";
+import { PresenceStatus } from "../LivePresenceUser.js";
 import { waitForDelay } from "../internals/utils.js";
 import { Deferred } from "../internals/Deferred.js";
 import {
@@ -144,8 +144,8 @@ describeCompat(
                     if (!local) {
                         assert(user != null, `user2: Null user arg`);
                         assert(
-                            user.state == PresenceState.online,
-                            `user2: Unexpected presence state of ${user.state}`
+                            user.status == PresenceStatus.online,
+                            `user2: Unexpected presence state of ${user.status}`
                         );
                         assert(
                             user.data == undefined,
@@ -168,8 +168,8 @@ describeCompat(
                     if (!local) {
                         assert(user != null, `user1: Null user arg`);
                         assert(
-                            user.state == PresenceState.online,
-                            `user1: Unexpected presence state of ${user.state}`
+                            user.status == PresenceStatus.online,
+                            `user1: Unexpected presence state of ${user.status}`
                         );
                         assert(
                             user.data == undefined,
@@ -293,7 +293,7 @@ describeCompat(
                 }
             });
             await object1.initialize({ foo: "bar" });
-            assert(object1.localUser?.state == PresenceState.online);
+            assert(object1.localUser?.status == PresenceStatus.online);
             assert(object1.localUser?.data?.foo == "bar");
 
             const object2done = new Deferred();
@@ -334,7 +334,7 @@ describeCompat(
                                 user.data.foo == "bar",
                                 `user1: Unexpected data object of ${user.data}`
                             );
-                            assert(user.state == PresenceState.online);
+                            assert(user.status == PresenceStatus.online);
                             object1done.resolve();
                         } else {
                             triggered = true;
@@ -342,7 +342,7 @@ describeCompat(
                                 !user.data,
                                 `user1: data object passed when it shouldn't be`
                             );
-                            assert(user.state == PresenceState.online);
+                            assert(user.status == PresenceStatus.online);
                         }
                     }
                 } catch (err) {
@@ -433,7 +433,7 @@ describeCompat(
             let user1Found = false;
             let user2Found = false;
             await ready.promise;
-            object1.getUsers(PresenceState.online).forEach((user) => {
+            object1.getUsers(PresenceStatus.online).forEach((user) => {
                 switch (user.userId) {
                     case object1UserId:
                         user1Found = true;
@@ -513,9 +513,9 @@ describeCompat(
 
             // Wait for ready and perform test
             await ready.promise;
-            assert(object1.getUsers(PresenceState.online).length == 2);
-            assert(object1.getUsers(PresenceState.away).length == 0);
-            assert(object1.getUsers(PresenceState.offline).length == 0);
+            assert(object1.getUsers(PresenceStatus.online).length == 2);
+            assert(object1.getUsers(PresenceStatus.away).length == 0);
+            assert(object1.getUsers(PresenceStatus.offline).length == 0);
 
             disposeAll();
         });
@@ -655,8 +655,8 @@ describeCompat(
             object1.getUsers().forEach((user) => {
                 count++;
                 assert(
-                    user.state == PresenceState.online,
-                    `user[${user.userId}] is ${user.state}`
+                    user.status == PresenceStatus.online,
+                    `user[${user.userId}] is ${user.status}`
                 );
             });
 
@@ -680,8 +680,8 @@ describeCompat(
                 try {
                     assert(user != null, `user1: Null user arg`);
                     assert(
-                        user.state == PresenceState.online,
-                        `user1: Unexpected presence state of ${user.state}`
+                        user.status == PresenceStatus.online,
+                        `user1: Unexpected presence state of ${user.status}`
                     );
                     assert(
                         user.data == undefined,
@@ -703,8 +703,8 @@ describeCompat(
                 try {
                     assert(user != null, `user1: Null user arg`);
                     assert(
-                        user.state == PresenceState.online,
-                        `user1: Unexpected presence state of ${user.state}`
+                        user.status == PresenceStatus.online,
+                        `user1: Unexpected presence state of ${user.status}`
                     );
                     assert(
                         user.data == undefined,
@@ -922,14 +922,14 @@ describeCompat(
             disposeObject2();
             object1.expirationPeriod = 0.1;
             assert(
-                object1User.getConnection(object2ClientId)?.state ==
-                    PresenceState.online,
+                object1User.getConnection(object2ClientId)?.status ==
+                    PresenceStatus.online,
                 "object2 should still be online from object1's perspective"
             );
             await waitForDelay(150);
             assert(
-                object1User.getConnection(object2ClientId)?.state ==
-                    PresenceState.away,
+                object1User.getConnection(object2ClientId)?.status ==
+                    PresenceStatus.away,
                 "object2 should be away"
             );
             disposeObject1();

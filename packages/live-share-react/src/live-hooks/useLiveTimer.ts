@@ -46,6 +46,61 @@ import {
  * @param onPlay Optional. event handler callback for when the timer is resumed.
  * @param onFinish Optional. event handler callback for when the timer finishes.
  * @returns results and callbacks exposed via the hook.
+ * 
+ * @example
+ ```jsx
+import { useLiveTimer } from "@microsoft/live-share-react";
+
+// Define a unique key that differentiates this usage of `useLiveTimer` from others in your app
+const MY_UNIQUE_KEY = "timer-key";
+
+// Example component for using useLiveTimer
+export function CountdownTimer() {
+    const {
+        milliRemaining,
+        timerConfig,
+        liveTimer,
+        start,
+        pause,
+        play,
+    } = useLiveTimer("TIMER-ID");
+
+    // Render loading UI when creating LiveTimer instance for first time
+    if (!liveTimer) return <>Loading...</>;
+
+    return (
+        <div>
+            <button
+                onClick={() => {
+                    start(60 * 1000);
+                }}
+            >
+                {timerConfig === undefined ? "Start" : "Reset"}
+            </button>
+            {timerConfig !== undefined && (
+                <button
+                    onClick={() => {
+                        if (timerConfig.running) {
+                            pause();
+                        } else {
+                            play();
+                        }
+                    }}
+                >
+                    {timerConfig.running ? "Pause" : "Play"}
+                </button>
+            )}
+            {milliRemaining !== undefined && (
+                <p>
+                {`${Math.round(milliRemaining / 1000)} / ${
+                    Math.round(timerConfig.duration) / 1000
+                }`}
+                </p>
+            )}
+        </div>
+    );
+}
+ ```
  */
 export function useLiveTimer(
     uniqueKey: string,

@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share",
-    "version": "2.0.0-internal.5",
+    "version": "2.0.0",
     "description": "Building collaborative experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -59,7 +59,7 @@
         "@fluidframework/mocha-test-setup": "^2.0.0-rc.1.0.9",
         "@fluidframework/test-runtime-utils": "^2.0.0",
         "@fluidframework/test-utils": "^2.0.0",
-        "@live-share-private/test-utils": "^2.0.0-internal.2",
+        "@live-share-private/test-utils": "^1.0.0",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",

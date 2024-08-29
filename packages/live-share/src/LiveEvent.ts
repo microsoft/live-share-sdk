@@ -229,6 +229,6 @@ export const LiveEvent = (() => {
 })();
 
 /**
- * Register `LiveEvent` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveEvent` as an available `SharedObjectKind` for use in dynamic object loading.
  */
 DynamicObjectRegistry.registerObjectClass(LiveEvent, LiveEvent.TypeName);

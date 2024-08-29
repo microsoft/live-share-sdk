@@ -618,6 +618,6 @@ export const LivePresence = (() => {
 })();
 
 /**
- * Register `LivePresence` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LivePresence` as an available `SharedObjectKind` for use in dynamic object loading.
  */
 DynamicObjectRegistry.registerObjectClass(LivePresence, LivePresence.TypeName);

@@ -18,10 +18,9 @@ import type { ISharedObjectKind } from "@fluidframework/shared-object-base/inter
 const GLOBAL_WINDOW_KEY = "@microsoft/live-share:DYNAMIC-LOADABLE-OBJECTS";
 
 /**
- * Static registry class for loadable projects for use in frameworks like `@microsoft/live-share-turbo`. All Live Share packages and extension
- * frameworks (e.g., `LiveMediaSession` in our media package) will register their classes from within their main files. Goal of this class is for
- * all Live Share packages that a developer has installed will be registered as available dynamic objects without the core package needing to be
- * aware of what every DDS is.
+ * Static registry class for loadable objects. All Live Share packages and extension frameworks (e.g., `LiveMediaSession` in our media package)
+ * will register their classes from within their main files. Goal of this class is for all Live Share packages that a developer has installed
+ * will be registered as available dynamic objects without the core package needing to be aware of what every DDS is.
  */
 export class DynamicObjectRegistry {
     private static _dynamicLoadableObjects: Map<string, SharedObjectKind<any>> =

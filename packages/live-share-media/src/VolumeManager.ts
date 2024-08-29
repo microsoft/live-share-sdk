@@ -4,7 +4,7 @@
  */
 
 import { TimeInterval } from "@microsoft/live-share";
-import { IMediaPlayer } from "./IMediaPlayer";
+import { IMediaPlayer } from "./IMediaPlayer.js";
 
 export enum LimitLevelType {
     fixed,
@@ -61,12 +61,12 @@ export class VolumeManager {
      *
      * @remarks
      * Expressed as a value between 0.0 and 1.0. The value is applied based upon the configured
-     * `levelType`. The default value is 0.1.
+     * @see LimitLevelType. The default value is 0.1.
      *
-     * For a level type of `LevelType.fixed` the value is the exact level the volume will be
+     * For a level type of @see LimitLevelType.fixed the value is the exact level the volume will be
      * lowered to. The default value of 0.1 would cause the volume to be lowered to 0.1.
      *
-     * For a level type of `LevelType.percentage` the value is the percentage by which the volume
+     * For a level type of @see LimitLevelType.percentage the value is the percentage by which the volume
      * level should be lowered to. The default value of 0.1 would cause the volume to be lowered
      * to 10% of its starting value.
      */
@@ -118,8 +118,8 @@ export class VolumeManager {
 
     /**
      * Limits volume based on `limitLevel` and `limitLevelType` properties.
-     * @see `limitLevel`
-     * @see `limitLevelType`
+     * @see limitLevel
+     * @see limitLevelType
      */
     public startLimiting(): void {
         this._isLimiting = true;

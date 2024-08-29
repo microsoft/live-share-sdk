@@ -12,19 +12,21 @@ import {
 } from "../MediaSessionExtensions";
 import {
     GroupPlaybackPosition,
-    GroupPlaybackRate,
-    GroupPlaybackTrack,
-    GroupTransportState,
     ICurrentPlaybackPosition,
+} from "../internals/GroupPlaybackPosition";
+import { GroupPlaybackRate } from "../internals/GroupPlaybackRate";
+import {
+    GroupTransportState,
     ITransportState,
-} from "../internals";
+} from "../internals/GroupTransportState";
+import { TestLiveShareHost, TimeInterval } from "@microsoft/live-share";
 import {
     IRuntimeSignaler,
-    TestLiveShareHost,
-    TimeInterval,
-} from "@microsoft/live-share";
-import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveShareRuntime";
+    LiveShareRuntime,
+    MockLiveShareRuntime,
+} from "@microsoft/live-share/internal";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import { GroupPlaybackTrack } from "../internals/GroupPlaybackTrack";
 
 function createTransportUpdate(
     runtime: IRuntimeSignaler,
@@ -122,13 +124,13 @@ async function getPlayBackPosition(
         playbackTrack,
         plybackRate,
         getMediaPlayerState,
-        liveRuntime
+        liveRuntime as unknown as LiveShareRuntime
     );
     const playbackPosition = new GroupPlaybackPosition(
         transportState,
         plybackRate,
         runtime1,
-        liveRuntime,
+        liveRuntime as unknown as LiveShareRuntime,
         updateInterval
     );
 

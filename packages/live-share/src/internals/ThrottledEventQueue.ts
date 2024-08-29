@@ -1,9 +1,9 @@
-import { ILiveEvent } from "../interfaces";
-import { ContainerSynchronizer } from "./ContainerSynchronizer";
-import { Deferred } from "./Deferred";
-import { ObjectSynchronizerEvents } from "./consts";
-import { UnexpectedError } from "../errors";
-import { StateSyncEventContent } from "./internal-interfaces";
+import { ILiveEvent } from "../interfaces.js";
+import { ContainerSynchronizer } from "./ContainerSynchronizer.js";
+import { Deferred } from "./Deferred.js";
+import { ObjectSynchronizerEvents } from "./consts.js";
+import { UnexpectedError } from "../errors.js";
+import { StateSyncEventContent } from "./internal-interfaces.js";
 
 /**
  * @hidden
@@ -17,7 +17,7 @@ export class ThrottledEventQueue {
     private _events: StateSyncEventContent = {};
     private _throttleIntervalMilli: number;
     private _deferred: Deferred<ILiveEvent<StateSyncEventContent>> | undefined;
-    private _hTimer: NodeJS.Timeout | undefined;
+    private _hTimer?: any;
     /**
      * @hidden
      * Queue for grouping multiple signal events together.

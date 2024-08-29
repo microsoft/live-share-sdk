@@ -1,5 +1,5 @@
-import { TimestampProvider } from "../TimestampProvider";
-import { IClientInfo, ILiveEvent, UserMeetingRole } from "../interfaces";
+import { TimestampProvider } from "../TimestampProvider.js";
+import { IClientInfo, ILiveEvent, UserMeetingRole } from "../interfaces.js";
 
 interface IMobileWorkaroundRolesResponse {
     userRoles: UserMeetingRole[];

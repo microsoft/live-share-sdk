@@ -1,41 +1,78 @@
 {
     "name": "@microsoft/live-share",
-    "version": "1.4.0",
+    "version": "2.0.0-internal.5",
     "description": "Building collaborative experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/index.js",
-    "types": "./bin/index.d.ts",
+    "main": "./bin/cjs/index.public.js",
+    "module": "./bin/esm/index.public.js",
+    "types": "./bin/esm/index.public.d.ts",
+    "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "tsc -p tsconfig.build.json",
-        "test": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --timeout 10000",
-        "test:debug": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --inspect-brk",
+        "build": "node  ../../internal/build-tools/build-package.js --cjs --esm",
+        "build:test": "node  ../../internal/build-tools/build-package.js --test",
+        "test": "npm run build:test && start-server-and-test test:client:start:server 7070 test:run",
+        "test:run": "ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
+        "test:debug": "npm run build:test && ts-mocha --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
-        "test:race": "node test-for-race-conditions.js"
+        "test:race": "npm run build:test && start-server-and-test test:client:start:server 7070 test:race:run",
+        "test:race:run": "node test-for-race-conditions.js",
+        "test:client:start:server": "npx tinylicious@latest > tinylicious.log 2>&1"
+    },
+    "scriptsComments": {
+        "test": "does additional local server setup that LiveShareClient.spec.ts and AzureLiveShareClient.spec.ts need, then runs all tests with test:run"
+    },
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "require": {
+                "types": "./bin/cjs/index.public.d.ts",
+                "default": "./bin/cjs/index.public.js"
+            },
+            "import": {
+                "types": "./bin/esm/index.public.d.ts",
+                "default": "./bin/esm/index.public.js"
+            }
+        },
+        "./internal": {
+            "require": {
+                "types": "./bin/cjs/index.internal.d.ts",
+                "default": "./bin/cjs/index.internal.js"
+            },
+            "import": {
+                "types": "./bin/esm/index.internal.d.ts",
+                "default": "./bin/esm/index.internal.js"
+            }
+        }
     },
     "dependencies": {
+        "@fluid-internal/client-utils": "^2.0.0",
+        "@fluidframework/aqueduct": "^2.0.0",
+        "@fluidframework/azure-client": "^2.0.0",
+        "@fluidframework/core-interfaces": "^2.0.0",
+        "@fluidframework/core-utils": "^2.0.0",
+        "@fluidframework/register-collection": "^2.0.0",
         "uuid": "^9.0.0"
     },
     "devDependencies": {
-        "@fluidframework/azure-client": "^1.1.1",
-        "@fluidframework/test-client-utils": "^1.3.6",
-        "@fluidframework/test-runtime-utils": "^1.3.6",
-        "@fluidframework/test-utils": "^1.3.6",
-        "@fluidframework/test-version-utils": "^1.3.6",
+        "@fluidframework/mocha-test-setup": "^2.0.0-rc.1.0.9",
+        "@fluidframework/test-runtime-utils": "^2.0.0",
+        "@fluidframework/test-utils": "^2.0.0",
+        "@live-share-private/test-utils": "^2.0.0-internal.2",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
         "@types/uuid": "9.0.1",
-        "fluid-framework": "^1.3.6",
+        "fluid-framework": "^2.0.0",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
+        "start-server-and-test": "^2.0.4",
         "ts-mocha": "^10.0.0",
-        "typescript": "^5.0.4"
+        "typescript": "~5.5.3"
     },
     "peerDependencies": {
-        "@fluidframework/azure-client": "^1.0.0",
-        "fluid-framework": "^1.2.3"
+        "fluid-framework": "^2.0.0"
     },
     "repository": {
         "directory": "packages/live-share",

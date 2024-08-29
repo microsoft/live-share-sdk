@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ITimestampProvider } from "@microsoft/live-share";
-// eslint-disable-next-line
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 
 /**
  * @param {boolean} localUserIsEligiblePresenter boolean that is true when local user is eligible presenter
@@ -32,7 +31,7 @@ export const useTakeControl = (
         const mappedUsers = users.map((user) => {
             return {
                 userId: user.userId,
-                state: user.state,
+                state: user.status,
                 data: user.data,
                 lastInControlTimestamp: user.userId
                     ? history.get(user.userId)

@@ -365,5 +365,7 @@ docs/assets/main.js
 
 # Testing files
 coverage/
+nyc/
 .nyc_output/
 build-data.json
+tsconfig.tsbuildinfo

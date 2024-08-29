@@ -3,23 +3,27 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct";
-import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
+import {
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
+import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer.js";
 import {
     IClientTimestamp,
     ILiveEvent,
     LiveDataObjectInitializeState,
     UserMeetingRole,
-} from "./interfaces";
-import { IEvent } from "@fluidframework/common-definitions";
-import { LiveEvent } from "./LiveEvent";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { LiveDataObject } from "./LiveDataObject";
+} from "./interfaces.js";
+import { IEvent } from "@fluidframework/core-interfaces";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
+import { LiveDataObject } from "./internals/LiveDataObject.js";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
     UnexpectedError,
-} from "./errors";
+} from "./errors.js";
+import { SharedObjectKind } from "fluid-framework";
+import { isEventNewer } from "./index.internal.js";
 
 export interface ITimerConfigData {
     /**
@@ -100,7 +104,7 @@ export interface ILiveTimerEvents extends IEvent {
     (event: "onTick", listener: (milliRemaining: number) => void): any;
 }
 
-export class LiveTimer extends LiveDataObject<{
+export class LiveTimerClass extends LiveDataObject<{
     Events: ILiveTimerEvents;
 }> {
     private _currentConfig: ITimerConfigEvent = {
@@ -125,8 +129,8 @@ export class LiveTimer extends LiveDataObject<{
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveTimer.TypeName,
-        LiveTimer,
+        LiveTimerClass.TypeName,
+        LiveTimerClass,
         [],
         {}
     );
@@ -160,6 +164,62 @@ export class LiveTimer extends LiveDataObject<{
      * @throws error when `.initialize()` has already been called for this class instance.
      * @throws fatal error when `.initialize()` has already been called for an object of same id but with a different class instance.
      * This is most common when using dynamic objects through Fluid.
+     * 
+     * @example
+     ```ts
+    import {
+        LiveShareClient,
+        LiveTimer,
+        LiveTimerEvents,
+        ITimerConfig,
+    } from "@microsoft/live-share";
+    import { LiveShareHost } from "@microsoft/teams-js";
+
+    // Join the Fluid container and create LiveTimer instance
+    const host = LiveShareHost.create();
+    const client = new LiveShareClient(host);
+    await client.join();
+    const timer = await client.getDDS("unique-id", LiveTimer);
+
+    // Register listeners for timer changes before initializing
+
+    // Register listener for when the timer starts its countdown
+    timer.on(LiveTimerEvents.started, (config: ITimerConfig, local: boolean) => {
+        // Update UI to show timer has started
+    });
+
+    // Register listener for when a paused timer has resumed
+    timer.on(LiveTimerEvents.played, (config: ITimerConfig, local: boolean) => {
+        // Update UI to show timer has resumed
+    });
+
+    // Register listener for when a playing timer has paused
+    timer.on(LiveTimerEvents.paused, (config: ITimerConfig, local: boolean) => {
+        // Update UI to show timer has paused
+    });
+
+    // Register listener for when a playing timer has finished
+    timer.on(LiveTimerEvents.finished, (config: ITimerConfig) => {
+        // Update UI to show timer is finished
+    });
+
+    // Register listener for the timer progressed by 20 milliseconds
+    timer.on(LiveTimerEvents.onTick, (milliRemaining: number) => {
+        // Update UI to show remaining time
+    });
+
+    // Initialize to begin synchronizing timer events
+    await timer.initialize();
+
+    // Start a 60 second timer for users in session
+    await timer.start(1000 * 60);
+
+    // Pause the timer for users in session
+    await timer.pause();
+
+    // Resume the timer for users in session
+    await timer.play();
+     ```
      */
     public async initialize(allowedRoles?: UserMeetingRole[]): Promise<void> {
         LiveDataObjectInitializeNotNeededError.assert(
@@ -185,14 +245,14 @@ export class LiveTimer extends LiveDataObject<{
             this.liveRuntime
         );
         try {
-            await this._synchronizer.start(
-                this._currentConfig.data,
-                async (state, sender) => {
+            await this._synchronizer.start({
+                initialState: this._currentConfig.data,
+                updateState: async (state, sender) => {
                     // Check for state change.
                     // If it was valid, this will override the local user's previous value.
                     return await this.remoteConfigReceived(state, sender);
                 },
-                async (connecting) => {
+                getLocalUserCanSend: async (connecting) => {
                     if (connecting) return true;
                     // If user has eligible roles, allow the update to be sent
                     try {
@@ -200,8 +260,8 @@ export class LiveTimer extends LiveDataObject<{
                     } catch {
                         return false;
                     }
-                }
-            );
+                },
+            });
         } catch (error: unknown) {
             // Update initialize state as fatal error
             this.initializeState = LiveDataObjectInitializeState.fatalError;
@@ -234,6 +294,34 @@ export class LiveTimer extends LiveDataObject<{
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
+     * 
+     * @example
+     ```ts
+    import {
+        LiveShareClient,
+        LiveTimer,
+        LiveTimerEvents,
+        ITimerConfig,
+    } from "@microsoft/live-share";
+    import { LiveShareHost } from "@microsoft/teams-js";
+
+    // Join the Fluid container and create LiveTimer instance
+    const host = LiveShareHost.create();
+    const client = new LiveShareClient(host);
+    await client.join();
+    const timer = await client.getDDS("unique-id", LiveTimer);
+
+    // Register listener for when the timer starts its countdown
+    timer.on(LiveTimerEvents.started, (config: ITimerConfig, local: boolean) => {
+        // Update UI to show timer has started
+    });
+
+    // Initialize to begin synchronizing timer events
+    await timer.initialize();
+
+    // Start a 60 second timer for users in session
+    await timer.start(1000 * 60);
+     ```
      */
     public async start(duration: number): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -255,6 +343,62 @@ export class LiveTimer extends LiveDataObject<{
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
+     * 
+     * @example
+     ```ts
+    import {
+        LiveShareClient,
+        LiveTimer,
+        LiveTimerEvents,
+        ITimerConfig,
+    } from "@microsoft/live-share";
+    import { LiveShareHost } from "@microsoft/teams-js";
+
+    // Join the Fluid container and create LiveTimer instance
+    const host = LiveShareHost.create();
+    const client = new LiveShareClient(host);
+    await client.join();
+    const timer = await client.getDDS("unique-id", LiveTimer);
+
+    // Register listeners for timer changes before initializing
+
+    // Register listener for when the timer starts its countdown
+    timer.on(LiveTimerEvents.started, (config: ITimerConfig, local: boolean) => {
+        // Update UI to show timer has started
+    });
+
+    // Register listener for when a paused timer has resumed
+    timer.on(LiveTimerEvents.played, (config: ITimerConfig, local: boolean) => {
+        // Update UI to show timer has resumed
+    });
+
+    // Register listener for when a playing timer has paused
+    timer.on(LiveTimerEvents.paused, (config: ITimerConfig, local: boolean) => {
+        // Update UI to show timer has paused
+    });
+
+    // Register listener for when a playing timer has finished
+    timer.on(LiveTimerEvents.finished, (config: ITimerConfig) => {
+        // Update UI to show timer is finished
+    });
+
+    // Register listener for the timer progressed by 20 milliseconds
+    timer.on(LiveTimerEvents.onTick, (milliRemaining: number) => {
+        // Update UI to show remaining time
+    });
+
+    // Initialize to begin synchronizing timer events
+    await timer.initialize();
+
+    // Start a 60 second timer for users in session
+    await timer.start(1000 * 60);
+
+    // Pause the timer for users in session
+    await timer.pause();
+
+    // Resume the timer for users in session
+    await timer.play();
+     ```
      */
     public async play(): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -304,6 +448,44 @@ export class LiveTimer extends LiveDataObject<{
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
+     * 
+     * @example
+     ```ts
+    import {
+        LiveShareClient,
+        LiveTimer,
+        LiveTimerEvents,
+        ITimerConfig,
+    } from "@microsoft/live-share";
+    import { LiveShareHost } from "@microsoft/teams-js";
+
+    // Join the Fluid container and create LiveTimer instance
+    const host = LiveShareHost.create();
+    const client = new LiveShareClient(host);
+    await client.join();
+    const timer = await client.getDDS("unique-id", LiveTimer);
+
+    // Register listeners for timer changes before initializing
+
+    // Register listener for when the timer starts its countdown
+    timer.on(LiveTimerEvents.started, (config: ITimerConfig, local: boolean) => {
+        // Update UI to show timer has started
+    });
+
+    // Register listener for when a playing timer has paused
+    timer.on(LiveTimerEvents.paused, (config: ITimerConfig, local: boolean) => {
+        // Update UI to show timer has paused
+    });
+
+    // Initialize to begin synchronizing timer events
+    await timer.initialize();
+
+    // Start a 60 second timer for users in session
+    await timer.start(1000 * 60);
+
+    // Pause the timer for users in session
+    await timer.pause();
+     ```
      */
     public async pause(): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -347,10 +529,7 @@ export class LiveTimer extends LiveDataObject<{
                 clientId: this._currentConfig.clientId,
             };
 
-            const isConfigNewer = LiveEvent.isNewer(
-                currentClientTimestamp,
-                config
-            );
+            const isConfigNewer = isEventNewer(currentClientTimestamp, config);
 
             const currentTime = this.liveRuntime.getTimestamp();
             const endTime = this.endTimeFromConfig(config);
@@ -464,7 +643,15 @@ export class LiveTimer extends LiveDataObject<{
     }
 }
 
+export type LiveTimer = LiveTimerClass;
+
+// eslint-disable-next-line no-redeclare
+export const LiveTimer = (() => {
+    const kind = createDataObjectKind(LiveTimerClass);
+    return kind as typeof kind & SharedObjectKind<LiveTimerClass>;
+})();
+
 /**
- * Register `LiveTimer` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveTimer` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
 DynamicObjectRegistry.registerObjectClass(LiveTimer, LiveTimer.TypeName);

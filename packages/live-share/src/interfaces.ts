@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidContainer } from "fluid-framework";
 
@@ -277,7 +277,7 @@ export interface ILiveShareHost {
 }
 
 /**
- * Response object from `.joinContainer()` in `LiveShareClient`
+ * Response object from `.join()` in `LiveShareClient`
  */
 export interface ILiveShareJoinResults {
     /**

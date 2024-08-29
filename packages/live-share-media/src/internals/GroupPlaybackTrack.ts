@@ -3,14 +3,14 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import EventEmitter from "events";
-import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator.js";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionSource,
-} from "../MediaSessionExtensions";
-import { IGroupStateEvent } from "./interfaces";
+} from "../MediaSessionExtensions.js";
+import { IGenericTypedEvents, IGroupStateEvent } from "./interfaces.js";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
 
 /**
  * @hidden
@@ -39,7 +39,7 @@ export interface IPlaybackTrackChangeEvent extends IGroupStateEvent {
 /**
  * @hidden
  */
-export class GroupPlaybackTrack extends EventEmitter {
+export class GroupPlaybackTrack extends TypedEventEmitter<IGenericTypedEvents> {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _current: IPlaybackTrack;
 

@@ -3,25 +3,23 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
-import { TypedEventEmitter } from "@fluidframework/common-utils";
-import { IRuntimeSignaler } from "../LiveEventScope";
-import { LiveShareRuntime } from "../LiveShareRuntime";
-import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";
-import { LiveEvent } from "../LiveEvent";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
+import { IRuntimeSignaler } from "./LiveEventScope.js";
+import { LiveShareRuntime } from "./LiveShareRuntime.js";
+import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces.js";
+import { IAzureAudience } from "@fluidframework/azure-client";
+import { isILiveEvent } from "./type-guards.js";
+import { ObjectSynchronizerEvents } from "./consts.js";
+import { cloneValue, isNewerEvent, waitUntilConnected } from "./utils.js";
+import { ContainerSynchronizer } from "./ContainerSynchronizer.js";
 import {
-    ContainerSynchronizer,
     GetAndUpdateStateHandlers,
     IContainerLiveObjectStoreEvents,
     ILiveClientEventMap,
     ILiveObjectStore,
-    ObjectSynchronizerEvents,
     StateSyncEventContent,
-    cloneValue,
-    isILiveEvent,
-    waitUntilConnected,
-} from "./";
-import { IAzureAudience } from "@fluidframework/azure-client";
+} from "./internal-interfaces.js";
 
 /**
  * @hidden
@@ -308,7 +306,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             const existingEvent = clientMap.get(event.clientId);
             if (existingEvent) {
                 // We already have an event for this user, so we update it if it is newer
-                if (!LiveEvent.isNewer(existingEvent, event)) return false;
+                if (!isNewerEvent(existingEvent, event)) return false;
             }
             clientMap.set(event.clientId, event);
             if (!existingEvent) {

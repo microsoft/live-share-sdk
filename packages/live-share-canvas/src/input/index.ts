@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-export * from "./InputFilter";
-export * from "./InputProvider";
-export * from "./JitterFilter";
-export * from "./PointerInputProvider";
+export * from "./InputFilter.js";
+export * from "./InputProvider.js";
+export * from "./JitterFilter.js";
+export * from "./PointerInputProvider.js";

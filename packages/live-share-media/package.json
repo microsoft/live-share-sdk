@@ -1,37 +1,53 @@
 {
     "name": "@microsoft/live-share-media",
-    "version": "1.4.0",
+    "version": "2.0.0-internal.5",
     "description": "Live Share classes that synchronize media playback across clients.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/index.js",
-    "types": "./bin/index.d.ts",
+    "main": "./bin/cjs/index.js",
+    "module": "./bin/esm/index.js",
+    "types": "./bin/esm/index.d.ts",
+    "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "tsc -p tsconfig.build.json",
-        "test": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --timeout 10000",
-        "test:debug": "ts-mocha --config ./src/test/.mocharc.js src/**/*.spec.ts --inspect-brk",
+        "build": "node  ../../internal/build-tools/build-package.js --cjs --esm",
+        "build:test": "node  ../../internal/build-tools/build-package.js --test",
+        "test": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/*.spec.js\" --timeout 10000",
+        "test:debug": "npm run build:test && ts-mocha -p tsconfig.test.json --config .mocharc.cjs --recursive \"./bin/test/**/LiveMediaSession_Synchronizer.spec.js\" --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
         "test:race": "node ./../live-share/test-for-race-conditions.js"
     },
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "require": {
+                "types": "./bin/cjs/index.d.ts",
+                "default": "./bin/cjs/index.js"
+            },
+            "import": {
+                "types": "./bin/esm/index.d.ts",
+                "default": "./bin/esm/index.js"
+            }
+        }
+    },
     "devDependencies": {
-        "@microsoft/live-share": "1.4.0",
-        "@fluidframework/test-client-utils": "^1.3.6",
-        "@fluidframework/test-runtime-utils": "^1.3.6",
-        "@fluidframework/test-utils": "^1.3.6",
-        "@fluidframework/test-version-utils": "^1.3.6",
+        "@microsoft/live-share": "2.0.0-internal.5",
+        "@fluidframework/mocha-test-setup": "^2.0.0-rc.1.0.9",
+        "@fluidframework/test-runtime-utils": "^2.0.0",
+        "@fluidframework/test-utils": "^2.0.0",
+        "@live-share-private/test-utils": "^2.0.0-internal.2",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
-        "fluid-framework": "^1.3.6",
+        "fluid-framework": "^2.0.0",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
         "ts-mocha": "^10.0.0",
-        "typescript": "^5.0.4"
+        "typescript": "~5.5.3"
     },
     "peerDependencies": {
-        "@microsoft/live-share": "1.4.0",
-        "fluid-framework": "^1.2.3"
+        "@microsoft/live-share": "2.0.0-internal.5",
+        "fluid-framework": "^2.0.0"
     },
     "repository": {
         "directory": "packages/live-share-media",

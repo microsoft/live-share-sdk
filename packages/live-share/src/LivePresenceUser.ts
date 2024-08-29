@@ -3,53 +3,59 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveEvent } from "./LiveEvent";
-import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces";
-import { TimeInterval } from "./TimeInterval";
-import { cloneValue } from "./internals";
-import { LiveShareRuntime } from "./LiveShareRuntime";
-import { LivePresenceConnection } from "./LivePresenceConnection";
+import { IClientInfo, ILiveEvent, UserMeetingRole } from "./interfaces.js";
+import { TimeInterval } from "./TimeInterval.js";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
+import { LivePresenceConnection } from "./LivePresenceConnection.js";
+import { cloneValue, isNewerEvent } from "./internals/utils.js";
+import { LivePresenceData } from "./LivePresence.js";
 
 /**
- * List of possible presence states.
+ * List of possible presence status states.
  */
-export enum PresenceState {
+export enum PresenceStatus {
     /**
      * The user is online. Default state while user has at least one client connected.
      */
     online = "online",
 
     /**
-     * The user is away. Applications can set this state based on the users activity.
+     * The user is away. Automatically set for users after their client has stopped sending
+     * updates for a period of time. @see LivePresence.expirationPeriod.
      */
     away = "away",
 
     /**
-     * The user is offline. Automatically set for users after their client has stopped sending
-     * updates for a period of time.
+     * The user is offline.
      */
     offline = "offline",
 }
 
 /**
+ * @deprecated
+ * Use {@link PresenceStatus} instead.
+ */
+export const PresenceState = PresenceStatus;
+
+/**
  * @hidden
  */
-export interface ILivePresenceEvent<TData = object> {
-    state: PresenceState;
-    data?: TData;
+export interface ILivePresenceEvent<TData extends LivePresenceData = any> {
+    status: PresenceStatus;
+    data: TData;
 }
 
 /**
  * @hidden
  */
-export type LivePresenceReceivedEventData<TData = object> = ILiveEvent<
-    ILivePresenceEvent<TData>
->;
+export type LivePresenceReceivedEventData<
+    TData extends LivePresenceData = any,
+> = ILiveEvent<ILivePresenceEvent<TData>>;
 
 /**
  * A user that presence is being tracked for.
  */
-export class LivePresenceUser<TData = object> {
+export class LivePresenceUser<TData extends LivePresenceData = any> {
     private _lastUpdateTime: number;
     private _connections: Map<string, LivePresenceConnection<TData>> =
         new Map();
@@ -91,18 +97,33 @@ export class LivePresenceUser<TData = object> {
      * Users current state.
      *
      * @remarks
-     * This is automatically set to `PresenceState.offline` if the users client hasn't sent updates
+     * This is automatically set to `PresenceStatus.offline` if the users client hasn't sent updates
      * for a period of time.
      */
-    public get state(): PresenceState {
-        return this.hasExpired() ? PresenceState.offline : this._evt.data.state;
+    public get status(): PresenceStatus {
+        if (this._evt.data.status !== PresenceStatus.online) {
+            return this._evt.data.status;
+        } else if (this.hasExpired()) {
+            return PresenceStatus.away;
+        }
+
+        return this._evt.data.status;
+    }
+
+    /**
+     * @deprecated
+     * Please use {@link LivePresenceConnection.status} instead.
+     * This will be removed in a future release.
+     */
+    public get state(): PresenceStatus {
+        return this.status;
     }
 
     /**
      * Optional data shared by the user. Returns data from connection with most recent event.
      * Client connection specific data is available from each connection.
      */
-    public get data(): TData | undefined {
+    public get data(): TData {
         return cloneValue(this._evt.data.data);
     }
 
@@ -118,12 +139,12 @@ export class LivePresenceUser<TData = object> {
      * See {@link LivePresenceConnection}
      */
     public getConnections(
-        filter?: PresenceState
+        filter?: PresenceStatus
     ): LivePresenceConnection<TData>[] {
         const list: LivePresenceConnection<TData>[] = [];
         this._connections.forEach((connection) => {
             // Ensure connection matches filter
-            if (filter == undefined || connection.state == filter) {
+            if (filter == undefined || connection.status == filter) {
                 list.push(connection);
             }
         });
@@ -160,16 +181,20 @@ export class LivePresenceUser<TData = object> {
         const remoteUserConvertedToLocal = this.updateClients(evt, localEvent);
         const currentEvent = this._evt;
         const currentClientInfo = this._clientInfo;
-        if (LiveEvent.isNewer(currentEvent, evt)) {
-            // Save updated event
-            this._evt = evt;
+        if (isNewerEvent(currentEvent, evt)) {
+            // Save updated event, but change state of LivePresenceUser to reflect aggregate of connection states.
+            const aggregateState = this.aggregateConnectionState();
+            const aggregateStateEvent = cloneValue(evt);
+            aggregateStateEvent.data.status = aggregateState;
+
+            this._evt = aggregateStateEvent;
             this._clientInfo = info;
             this._lastUpdateTime = this._liveRuntime.getTimestamp();
 
             // Has anything changed?
             return (
                 remoteUserConvertedToLocal ||
-                evt.data.state != currentEvent.data.state ||
+                aggregateStateEvent.data.status != currentEvent.data.status ||
                 JSON.stringify(info) != JSON.stringify(currentClientInfo) ||
                 JSON.stringify(evt.data.data) !=
                     JSON.stringify(currentEvent.data.data)
@@ -177,6 +202,25 @@ export class LivePresenceUser<TData = object> {
         }
 
         return remoteUserConvertedToLocal;
+    }
+
+    private aggregateConnectionState(): PresenceStatus {
+        return Array.from(this._connections.entries())
+            .map((c) => c[1].status)
+            .reduce<PresenceStatus>((previous, current) => {
+                if (
+                    previous === PresenceStatus.online ||
+                    current === PresenceStatus.online
+                ) {
+                    return PresenceStatus.online;
+                } else if (
+                    previous === PresenceStatus.away ||
+                    current === PresenceStatus.away
+                ) {
+                    return PresenceStatus.away;
+                }
+                return PresenceStatus.offline;
+            }, PresenceStatus.offline);
     }
 
     /**

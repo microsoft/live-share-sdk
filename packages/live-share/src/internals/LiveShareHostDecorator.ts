@@ -3,17 +3,15 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { UserMeetingRole, IClientInfo } from "../interfaces";
-import { BackwardsCompatibilityGetClientInfoRetrySchedule } from "./BackwardsCompatibilityHostDecorator";
-import { BaseHostDecorator } from "./BaseHostDecorator";
-import { RequestCache } from "./RequestCache";
+import { UserMeetingRole, IClientInfo } from "../interfaces.js";
+import { BaseHostDecorator } from "./BaseHostDecorator.js";
+import { RequestCache } from "./RequestCache.js";
 import {
-    isErrorLike,
     isIClientInfo,
     isMobileWorkaroundRolesResponse,
     isClientRolesResponse,
-} from "./type-guards";
-import { waitForResult } from "./utils";
+} from "./type-guards.js";
+import { waitForResult } from "./utils.js";
 
 const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
 const CACHE_LIFETIME = 4 * 1000;
@@ -22,10 +20,7 @@ const CACHE_LIFETIME = 4 * 1000;
  * @hidden
  * Live Share Host decorator used to reduce rapid duplicate requests.
  */
-export class LiveShareHostDecorator
-    extends BaseHostDecorator
-    implements BackwardsCompatibilityGetClientInfoRetrySchedule
-{
+export class LiveShareHostDecorator extends BaseHostDecorator {
     private readonly _registerRequestCache: RequestCache<UserMeetingRole[]> =
         new RequestCache(CACHE_LIFETIME);
     private readonly _userInfoRequestCache: RequestCache<
@@ -63,26 +58,7 @@ export class LiveShareHostDecorator
                     }
                     return null;
                 },
-                (error: unknown) => {
-                    return new Error(
-                        `LiveShareHostDecorator: getting client info for a remote client ID for reason: ${
-                            isErrorLike(error) ? error.message : "unknown"
-                        }`
-                    );
-                },
-                retrySchedule ?? EXPONENTIAL_BACKOFF_SCHEDULE,
-                (error: unknown) => {
-                    // Errors here do not include any timeout errors, so if it is an error from "fakeId", we immediately reject it
-                    if (clientId === "fakeId") {
-                        return new Error(
-                            isErrorLike(error)
-                                ? error.message
-                                : "an unknown error occurred"
-                        );
-                    }
-                    return null;
-                },
-                lateFinish // TODO: delete (not a breaking change to remove, see InternalDontUseGetClientInfoRetryPolyfill)
+                retrySchedule ?? EXPONENTIAL_BACKOFF_SCHEDULE
             );
         });
     }
@@ -106,13 +82,6 @@ export class LiveShareHostDecorator
                         };
                     }
                     return null;
-                },
-                (reason: unknown) => {
-                    return new Error(
-                        `LiveShareHostDecorator: registering local client ID for reason: ${
-                            isErrorLike(reason) ? reason.message : "unknown"
-                        }`
-                    );
                 },
                 EXPONENTIAL_BACKOFF_SCHEDULE
             );

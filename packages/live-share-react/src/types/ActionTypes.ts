@@ -5,8 +5,12 @@
 
 import React from "react";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
-import { LoadableObjectClass } from "fluid-framework";
-import { ITimerConfig, ILiveEvent, PresenceState } from "@microsoft/live-share";
+import {
+    ITimerConfig,
+    ILiveEvent,
+    LivePresenceData,
+} from "@microsoft/live-share";
+import { SharedObjectKind } from "fluid-framework";
 
 // React actions
 
@@ -25,12 +29,12 @@ export type SetLocalStateAction = React.Dispatch<React.SetStateAction<any>>;
 
 /**
  * Callback for UnregisterDDSSetStateAction.
- * <T extends IFluidLoadable>(uniqueKey: string, componentId: string, objectClass: LoadableObjectClass<T>, setLocalStateAction: SetLocalStateAction, onDidFirstInitialize?: (dds: T) => void) => void
+ * <T extends IFluidLoadable>(uniqueKey: string, componentId: string, objectClass: SharedObjectKind<T>, setLocalStateAction: SetLocalStateAction, onDidFirstInitialize?: (dds: T) => void) => void
  */
 export type RegisterDDSSetStateAction = <T extends IFluidLoadable>(
     uniqueKey: string,
     componentId: string,
-    objectClass: LoadableObjectClass<T>,
+    objectClass: SharedObjectKind<T>,
     setLocalStateAction: SetLocalStateAction,
     onDidFirstInitialize?: (dds: T) => void
 ) => void;
@@ -111,9 +115,8 @@ export type OnReceivedLiveEventAction<TEvent> = (
  * Callback for OnUpdateLivePresenceAction<TData extends object = object>.
  * (data?: TData | undefined, state?: PresenceState | undefined) => Promise<void>
  */
-export type OnUpdateLivePresenceAction<TData extends object = object> = (
-    data?: TData | undefined,
-    state?: PresenceState | undefined
+export type OnUpdateLivePresenceAction<TData extends LivePresenceData = any> = (
+    data: TData
 ) => Promise<void>;
 
 /**

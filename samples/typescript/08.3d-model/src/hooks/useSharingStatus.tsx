@@ -22,7 +22,7 @@ export const useSharingStatus = (
             };
         }
     );
-    const intervalIdRef = useRef<NodeJS.Timeout>();
+    const intervalIdRef = useRef<any>();
     const context = useTeamsContext();
 
     useEffect(() => {

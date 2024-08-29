@@ -14,15 +14,15 @@ import {
     IUseLiveEventResults,
     OnReceivedLiveEventAction,
     SendLiveEventAction,
-} from "../types";
-import { IReceiveLiveEvent } from "../interfaces";
-import { useDynamicDDS } from "../shared-hooks";
+} from "../types/index.js";
+import { IReceiveLiveEvent } from "../interfaces/index.js";
+import { useDynamicDDS } from "../shared-hooks/index.js";
 import {
     ActionContainerNotJoinedError,
     ActionLiveDataObjectInitializedError,
     ActionLiveDataObjectUndefinedError,
-} from "../internal";
-import { useFluidObjectsContext } from "../providers";
+} from "../internal/index.js";
+import { useFluidObjectsContext } from "../providers/index.js";
 
 /**
  * React hook for using a Live Share `LiveEvent`.
@@ -38,6 +38,42 @@ import { useFluidObjectsContext } from "../providers";
  * @param allowedRoles Optional. The meeting roles eligible to send events through this object.
  * @param onReceivedEvent Optional. Callback method to be called when a new notification is received.
  * @returns stateful `latestEvent` & `allEvents` list, `sendEvent` callback, and the `liveEvent` object.
+ * 
+ * @example
+ ```jsx
+import { useLiveEvent } from "@microsoft/live-share-react";
+
+const emojis = ["❤️", "😂", "👍", "👎"];
+
+// Define a unique key that differentiates this usage of `useLiveEvent` from others in your app
+const MY_UNIQUE_KEY = "event-key";
+
+// Example component for using useLiveEvent
+export const MyCustomEvent = () => {
+  const { latestEvent, liveEvent, sendEvent } = useLiveEvent(MY_UNIQUE_KEY);
+
+  // Render loading UI when creating LiveEvent instance for first time
+  if (!liveEvent) return <>Loading...</>;
+
+  // Render UI
+  return (
+    <div>
+      {`Latest event: ${latestEvent?.value}, from local user: ${latestEvent?.local}`}
+      {"Select a planet below:"}
+      {emojis.map((emoji) => (
+        <button
+          key={emoji}
+          onClick={() => {
+            sendEvent(emoji);
+          }}
+        >
+          {emoji}
+        </button>
+      ))}
+    </div>
+  );
+};
+ ```
  */
 export function useLiveEvent<TEvent = any>(
     uniqueKey: string,

@@ -5,8 +5,8 @@
 
 import React from "react";
 import { FluidObject, IFluidLoadable } from "@fluidframework/core-interfaces";
-import { useFluidObjectsContext } from "../providers";
-import { LoadableObjectClass } from "fluid-framework";
+import { useFluidObjectsContext } from "../providers/AzureProvider.js";
+import { SharedObjectKind } from "fluid-framework";
 
 /**
  * Hook to gets or creates a DDS that corresponds to a given uniqueKey string.
@@ -14,17 +14,17 @@ import { LoadableObjectClass } from "fluid-framework";
  * @remarks
  * This hook can only be used in a child component of `<LiveShareProvider>` or `<AzureProvider>`.
  *
- * @template T Type of Fluid LoadableObjectClass type to load. Must conform to IFluidLoadable interface.
+ * @template T Type of Fluid SharedObjectKind type to load. Must conform to IFluidLoadable interface.
  * @param uniqueKey uniqueKey value for the data object
- * @param loadableObjectClass Fluid LoadableObjectClass<T> to create/load.
+ * @param objectKind Fluid SharedObjectKind<T> to create/load.
  * @param onFirstInitialize Optional. Callback function for when the DDS is first loaded
  * @returns the DDS object, which is of type T when loaded and undefined while loading
  */
 export function useDynamicDDS<
-    T extends IFluidLoadable = FluidObject<any> & IFluidLoadable
+    T extends IFluidLoadable = FluidObject<any> & IFluidLoadable,
 >(
     uniqueKey: string,
-    loadableObjectClass: LoadableObjectClass<T>,
+    objectClass: SharedObjectKind<T>,
     onFirstInitialize?: (dds: T) => void
 ): {
     dds: T | undefined;
@@ -37,6 +37,16 @@ export function useDynamicDDS<
      */
     const { container, clientRef } = useFluidObjectsContext();
 
+    const mountedRef = React.useRef(false);
+    React.useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
+
+    const getDDSPromisesRef = React.useRef<Map<string, Promise<T>>>(new Map());
+
     /**
      * Once container is available, this effect will register the setter method so that the DDS loaded
      * from `dynamicObjects` that matches `uniqueKey` can be passed back to this hook. If one does not yet exist,
@@ -45,16 +55,20 @@ export function useDynamicDDS<
      */
     React.useEffect(() => {
         if (container === undefined) return;
-        let mounted = true;
         // Callback method to set the `initialData` into the map when the DDS is first created.
         const onGetDDS = async () => {
             try {
-                const dds = await clientRef.current.getDDS<T>(
-                    uniqueKey,
-                    loadableObjectClass,
-                    onFirstInitialize
-                );
-                if (mounted) {
+                let getPromise = getDDSPromisesRef.current.get(uniqueKey);
+                if (!getPromise) {
+                    getPromise = clientRef.current.getDDS<T>(
+                        uniqueKey,
+                        objectClass,
+                        onFirstInitialize
+                    );
+                    getDDSPromisesRef.current.set(uniqueKey, getPromise);
+                }
+                const dds = await getPromise;
+                if (mountedRef.current) {
                     setDDS(dds);
                 }
             } catch (error: unknown) {
@@ -70,9 +84,6 @@ export function useDynamicDDS<
             }
         };
         onGetDDS();
-        return () => {
-            mounted = false;
-        };
     }, [container, uniqueKey, onFirstInitialize]);
 
     return {

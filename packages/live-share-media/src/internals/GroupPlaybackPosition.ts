@@ -3,18 +3,18 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { TimeInterval } from "@microsoft/live-share";
 import {
     IRuntimeSignaler,
-    TimeInterval,
     LiveShareRuntime,
-} from "@microsoft/live-share";
-import { GroupTransportState } from "./GroupTransportState";
-import { GroupPlaybackTrackEvents } from "./GroupPlaybackTrack";
+} from "@microsoft/live-share/internal";
+import { GroupTransportState } from "./GroupTransportState.js";
+import { GroupPlaybackTrackEvents } from "./GroupPlaybackTrack.js";
 import {
     CoordinationWaitPoint,
     ExtendedMediaSessionPlaybackState,
-} from "../MediaSessionExtensions";
-import { GroupPlaybackRate } from "./GroupPlaybackRate";
+} from "../MediaSessionExtensions.js";
+import { GroupPlaybackRate } from "./GroupPlaybackRate.js";
 
 /**
  * Per client position

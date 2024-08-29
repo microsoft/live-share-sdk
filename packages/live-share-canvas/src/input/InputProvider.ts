@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IPointerPoint } from "../core";
+import { IPointerPoint } from "../core/index.js";
 
 /**
  * Represents a pointer event such as up, down or enter.

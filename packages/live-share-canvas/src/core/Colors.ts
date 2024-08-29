@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { forceIntoRange } from "./internals";
+import { forceIntoRange } from "./internals/index.js";
 
 /**
  * Defines an RGB color

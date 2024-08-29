@@ -4,40 +4,46 @@
  */
 
 import {
-    LiveEventScope,
     LiveTelemetryLogger,
-    LiveEventTarget,
-    IRuntimeSignaler,
     TimeInterval,
     UserMeetingRole,
-    LiveShareRuntime,
     LiveDataObjectInitializeState,
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
-    LiveObjectSynchronizer,
     ILiveEvent,
 } from "@microsoft/live-share";
+import {
+    IRuntimeSignaler,
+    LiveEventScope,
+    LiveEventTarget,
+    LiveObjectSynchronizer,
+    LiveShareRuntime,
+    isErrorLike,
+} from "@microsoft/live-share/internal";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
     ExtendedMediaSessionPlaybackState,
     MediaSessionCoordinatorSuspension,
-} from "./MediaSessionExtensions";
+} from "./MediaSessionExtensions.js";
 import {
-    TelemetryEvents,
     ITransportCommandEvent,
     ISetTrackEvent,
     IPositionUpdateEvent,
     GroupCoordinatorState,
     GroupCoordinatorStateEvents,
     ISetTrackDataEvent,
+    IRateChangeCommandEvent,
+} from "./internals/GroupCoordinatorState.js";
+import { TelemetryEvents } from "./internals/consts.js";
+import {
     TrackMetadataNotSetError,
     ActionBlockedError,
-    IRateChangeCommandEvent,
-} from "./internals";
-import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
-import EventEmitter from "events";
-import { isErrorLike } from "@microsoft/live-share/bin/internals";
+} from "./internals/errors.js";
+
+import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension.js";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
+import { IEvent } from "@fluidframework/core-interfaces";
 
 /**
  * Most recent state of the media session.
@@ -68,11 +74,24 @@ export interface IMediaPlayerState {
 }
 
 /**
+ * @hidden
+ */
+export interface ILiveMediaSessionCoordinatorEvents extends IEvent {
+    /**
+     * Event listener for events emitted
+     * @param event update
+     * @param listener listener function
+     * @param listener.event the event instance
+     */
+    (event: string, listener: (event: any) => void): void;
+}
+
+/**
  * The `LiveMediaSessionCoordinator` tracks the playback & position state of all other
  * clients being synchronized with. It is responsible for keeping the local media player
  * in sync with the group.
  */
-export class LiveMediaSessionCoordinator extends EventEmitter {
+export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSessionCoordinatorEvents> {
     private readonly _id: string;
     private readonly _runtime: IRuntimeSignaler;
     private readonly _liveRuntime: LiveShareRuntime;
@@ -570,13 +589,12 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
 
         try {
             // start needs to happen after setting initializedState to "succeeded"
-            await this._synchronizer?.start(
-                undefined,
-                async (evt, sender, local) => false,
-                async (connecting) => true,
-                false,
-                false
-            );
+            await this._synchronizer?.start({
+                initialState: undefined,
+                updateState: async (evt, sender, local) => false,
+                getLocalUserCanSend: async (connecting) => true,
+                enableBackgroundUpdates: false,
+            });
         } catch (error: unknown) {
             // not a fatal error for LiveMediaSession, only used for "connect" event to send new clients position updates.
             this._logger.sendErrorEvent(

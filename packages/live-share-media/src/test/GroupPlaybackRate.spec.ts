@@ -5,7 +5,7 @@
 
 import "mocha";
 import { strict as assert } from "assert";
-import { GroupPlaybackRate } from "../internals";
+import { GroupPlaybackRate } from "../internals/GroupPlaybackRate";
 
 describe("GroupPlaybackRate", () => {
     it("updatePlaybackRate should return false for older events", () => {

@@ -1,18 +1,25 @@
-import { LiveDataObject } from "./LiveDataObject";
-import { LiveState } from "./LiveState";
-import { ILivePresenceEvents, LivePresence } from "./LivePresence";
-import { DataObjectFactory } from "@fluidframework/aqueduct";
+import { LiveDataObject } from "./internals/LiveDataObject.js";
+import { LiveState } from "./LiveState.js";
+import { ILivePresenceEvents, LivePresence } from "./LivePresence.js";
+import {
+    DataObjectFactory,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
-import { assert } from "@fluidframework/common-utils";
-import { LiveDataObjectInitializeState, UserMeetingRole } from "./interfaces";
-import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
-import { LivePresenceUser, PresenceState } from "./LivePresenceUser";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
+import { assert } from "@fluidframework/core-utils/internal";
+import {
+    LiveDataObjectInitializeState,
+    UserMeetingRole,
+} from "./interfaces.js";
+import { LiveTelemetryLogger } from "./LiveTelemetryLogger.js";
+import { LivePresenceUser, PresenceStatus } from "./LivePresenceUser.js";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
     UnexpectedError,
-} from "./errors";
+} from "./errors.js";
+import { SharedObjectKind } from "fluid-framework";
 
 /**
  * Events supported by `LiveFollowMode` object.
@@ -172,7 +179,7 @@ const livePresenceKey = "@microsoft/live-share:LiveFollowMode:LivePresence";
  *
  * @template TData Type of data value to share with clients for each user (e.g., the user's camera position in a 3D scene).
  */
-export class LiveFollowMode<TData = any> extends LiveDataObject<{
+export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
     Events: ILiveFollowModeEvents<TData>;
 }> {
     private _logger?: LiveTelemetryLogger;
@@ -203,8 +210,8 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveFollowMode.TypeName,
-        LiveFollowMode,
+        LiveFollowModeClass.TypeName,
+        LiveFollowModeClass,
         [],
         {},
         new Map<string, Promise<any>>([
@@ -230,7 +237,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
         if (presentingUser && presentingUser.data) {
             // Count is all online users minus the presenting user
             const otherUsersCount =
-                this.getUsers(PresenceState.online).length - 1;
+                this.getUsers(PresenceStatus.online).length - 1;
             if (presentingUser.isLocalUser) {
                 // The local user is the presenter
                 return {
@@ -268,7 +275,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
             const otherUsersCount =
                 this.getUserFollowers(
                     followingUser.userId,
-                    PresenceState.online
+                    PresenceStatus.online
                 ).length - 1;
             if (this._suspended) {
                 // Local user is following specific user but is suspended
@@ -292,7 +299,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
 
         const userCountFollowingLocalUser = this.getUserFollowers(
             localUser.userId,
-            PresenceState.online
+            PresenceStatus.online
         ).length;
         if (userCountFollowingLocalUser > 0) {
             // User is being followed by other users
@@ -311,7 +318,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
             type: FollowModeType.local,
             otherUsersCount: this.getUserFollowers(
                 localUser.userId,
-                PresenceState.online
+                PresenceStatus.online
             ).length,
             isLocalValue: true,
         };
@@ -350,7 +357,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
     /**
      * Initialize the object to begin sending/receiving state updates through this DDS.
      *
-     * @param initialState Initial state value
+     * @param initialUserStateValue Initial state value for the local user
      * @param allowedRoles Optional. List of roles allowed to make state changes.
      *
      * @returns a void promise that resolves once complete
@@ -358,9 +365,42 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error when `.initialize()` has already been called for this class instance.
      * @throws fatal error when `.initialize()` has already been called for an object of same id but with a different class instance.
      * This is most common when using dynamic objects through Fluid.
+     * 
+     * @example
+     ```ts
+        import {
+            LiveShareClient,
+            LiveFollowMode,
+            IFollowModeState,
+            FollowModePresenceUser,
+        } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const followCursors = await client.getDDS("unique-id", LiveFollowMode<number>);
+        
+        // Listen for changes to presence & state prior to calling initialize
+        followCursors.on("presenceChanged", async (user: FollowModePresenceUser<number>, local: boolean) => {
+            // Update UI to reflect new user value
+        });
+        followCursors.on("stateChanged", async (state: IFollowModeState<number>, local: boolean) => {
+            // Update UI to reflect new state
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await followCursors.initialize(0);
+        
+        // Update local user's cursor position when they select new text position in editor
+        await followCursors.update(1);
+
+        // Start presenting to other users
+        await followCursors.startPresenting();
+     ```
      */
     public async initialize(
-        initialState: TData,
+        initialUserStateValue: TData,
         allowedRoles?: UserMeetingRole[]
     ): Promise<void> {
         LiveDataObjectInitializeNotNeededError.assert(
@@ -388,7 +428,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
             await Promise.all([
                 this.presentingUserIdState.initialize(undefined, allowedRoles),
                 this.presence.initialize({
-                    stateValue: initialState,
+                    stateValue: initialUserStateValue,
                     followingUserId: undefined,
                 }),
             ]);
@@ -415,6 +455,36 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @returns a void promise that resolves once the update event has been sent to the server.
      *
      * @throws error if initialization has not yet succeeded.
+     * 
+     * @example
+     ```ts
+        import {
+            LiveShareClient,
+            LiveFollowMode,
+            IFollowModeState,
+            FollowModePresenceUser,
+        } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const followCursors = await client.getDDS("unique-id", LiveFollowMode<number>);
+        
+        // Listen for changes to presence & state prior to calling initialize
+        followCursors.on("presenceChanged", async (user: FollowModePresenceUser<number>, local: boolean) => {
+            // Update UI to reflect new user value
+        });
+        followCursors.on("stateChanged", async (state: IFollowModeState<number>, local: boolean) => {
+            // Update UI to reflect new state
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await followCursors.initialize(0);
+        
+        // Update local user's cursor position when they select new text position in editor
+        await followCursors.update(1);
+     ```
      */
     public async update(newValue: TData): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -448,6 +518,40 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user is already the presenter.
      * @throws error if the local user does not have the required roles to present.
+     * 
+     * @example
+     ```ts
+        import {
+            LiveShareClient,
+            LiveFollowMode,
+            IFollowModeState,
+            FollowModePresenceUser,
+        } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const followCursors = await client.getDDS("unique-id", LiveFollowMode<number>);
+        
+        // Listen for changes to presence & state prior to calling initialize
+        followCursors.on("presenceChanged", async (user: FollowModePresenceUser<number>, local: boolean) => {
+            // Update UI to reflect new user value
+        });
+        followCursors.on("stateChanged", async (state: IFollowModeState<number>, local: boolean) => {
+            // Update UI to reflect new state
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await followCursors.initialize(0);
+
+        // Start presenting to other users
+        await followCursors.startPresenting();
+
+        // Update local user's cursor position to broadcast to trigger "stateChanged" for all remote following clients.
+        // This is in addition to the "presenceChanged" that will be emitted.
+        await followCursors.update(1);
+     ```
      */
     public async startPresenting(): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -482,6 +586,39 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles to stop presenting.
+     * 
+     * @example
+     ```ts
+        import {
+            LiveShareClient,
+            LiveFollowMode,
+            IFollowModeState,
+            FollowModePresenceUser,
+        } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const followCursors = await client.getDDS("unique-id", LiveFollowMode<number>);
+        
+        // Listen for changes to presence & state prior to calling initialize
+        followCursors.on("presenceChanged", async (user: FollowModePresenceUser<number>, local: boolean) => {
+            // Update UI to reflect new user value
+        });
+        followCursors.on("stateChanged", async (state: IFollowModeState<number>, local: boolean) => {
+            // Update UI to reflect new state
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await followCursors.initialize(0);
+
+        // Start presenting to other users
+        await followCursors.startPresenting();
+
+        // Stop presenting to other users
+        await followCursors.stopPresenting();
+     ```
      */
     public async stopPresenting(): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -504,6 +641,44 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @returns a void promise once the operation succeeds.
      *
      * @throws error if initialization has not yet succeeded.
+     * 
+     * @example
+     ```ts
+        import {
+            LiveShareClient,
+            LiveFollowMode,
+            IFollowModeState,
+            FollowModePresenceUser,
+            FollowModeType,
+        } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const followCursors = await client.getDDS("unique-id", LiveFollowMode<number>);
+        
+        // Listen for changes to presence & state prior to calling initialize
+        followCursors.on("presenceChanged", async (user: FollowModePresenceUser<number>, local: boolean) => {
+            // Update UI to reflect new user value
+        });
+        followCursors.on("stateChanged", async (state: IFollowModeState<number>, local: boolean) => {
+            // Update UI to reflect new state
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await followCursors.initialize(0);
+
+        // Example function that would be applied whenever the local user changes their text cursor in an editor
+        async function onTextEditorPositionChanged(newPosition: number) {
+            await followCursors.update(newPosition);
+            // If following another user/presenter, suspend following since the user changed to their own position
+            if ([FollowModeType.followPresenter, FollowModeType.followUser].includes(followCursors.state.type)) {
+                await followCursors.beginSuspension();
+                // TODO: update UI with a "Sync to presenter" button
+            }
+        }
+     ```
      */
     public async beginSuspension(): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -526,6 +701,41 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @returns a void promise once the operation succeeds.
      *
      * @throws error if initialization has not yet succeeded.
+     * 
+     * @example
+     ```ts
+        import {
+            LiveShareClient,
+            LiveFollowMode,
+            IFollowModeState,
+            FollowModePresenceUser,
+        } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const followCursors = await client.getDDS("unique-id", LiveFollowMode<number>);
+        
+        // Listen for changes to presence & state prior to calling initialize
+        followCursors.on("presenceChanged", async (user: FollowModePresenceUser<number>, local: boolean) => {
+            // Update UI to reflect new user value
+        });
+        followCursors.on("stateChanged", async (state: IFollowModeState<number>, local: boolean) => {
+            // Update UI to reflect new state
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await followCursors.initialize(0);
+
+        // Start suspension
+        await followCursors.beginSuspension();
+
+        // Example function for when a suspended user clicks "Sync to presenter" in your app
+        async function onClickSyncToPresenter() {
+            await followCursors.endSuspension();
+        }
+     ```
      */
     public async endSuspension(): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -555,6 +765,38 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @throws error if initialization has not yet succeeded.
      * @throws error if attempting to follow a user that is not recognized by this object's `LivePresence` instance.
      * @throws error if the `userId` provided is equal to the local user's `userId`.
+     * 
+     * @example
+     ```ts
+        import {
+            LiveShareClient,
+            LiveFollowMode,
+            IFollowModeState,
+            FollowModePresenceUser,
+        } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const followCursors = await client.getDDS("unique-id", LiveFollowMode<number>);
+        
+        // Listen for changes to presence & state prior to calling initialize
+        followCursors.on("presenceChanged", async (user: FollowModePresenceUser<number>, local: boolean) => {
+            // Update UI to reflect new user value
+        });
+        followCursors.on("stateChanged", async (state: IFollowModeState<number>, local: boolean) => {
+            // Update UI to reflect new state
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await followCursors.initialize(0);
+
+        // Example function that would be applied whenever the local user clicks on another user to follow
+        async function onClickFollowUser(user: FollowModePresenceUser<number>) {
+            await followCursors.followUser(user.userId);
+        }
+     ```
      */
     public async followUser(userId: string): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -592,6 +834,37 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the user is not already following another user.
+     * 
+     * @example
+     ```ts
+        import {
+            LiveShareClient,
+            LiveFollowMode,
+            IFollowModeState,
+            FollowModePresenceUser,
+        } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const followCursors = await client.getDDS("unique-id", LiveFollowMode<number>);
+        
+        // Listen for changes to presence & state prior to calling initialize
+        followCursors.on("presenceChanged", async (user: FollowModePresenceUser<number>, local: boolean) => {
+            // Update UI to reflect new user value
+        });
+        followCursors.on("stateChanged", async (state: IFollowModeState<number>, local: boolean) => {
+            // Update UI to reflect new state
+        });
+        // Initialize LivePresence with initial presence data for local user
+        await followCursors.initialize(0);
+
+        // Start and stop following a user
+        await followCursors.followUser("some-user-id");
+        await followCursors.stopFollowing();
+     ```
      */
     public async stopFollowing(): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -621,7 +894,7 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
      * @param filter Optional. Presence state to filter enumeration to.
      * @returns Array of presence objects.
      */
-    public getUsers(filter?: PresenceState): FollowModePresenceUser<TData>[] {
+    public getUsers(filter?: PresenceStatus): FollowModePresenceUser<TData>[] {
         return this.presence.getUsers(filter);
     }
 
@@ -647,15 +920,54 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
 
     /**
      * Get the users that are following a given userId.
+     * 
+     * @remarks
+     * Only includes users that called {@link followUser} for the given `userId`.
+     * Does not apply to cases where user called {@link startPresenting}.
      *
      * @param userId the userId of the person being followed.
-     * @param stateFilter the presence state to filter results by.
+     * @param statusFilter the presence state to filter results by.
+     * 
+     * @example
+     ```ts
+        import {
+            LiveShareClient,
+            LiveFollowMode,
+            IFollowModeState,
+            FollowModePresenceUser,
+            PresenceStatus,
+        } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LivePresence instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const followCursors = await client.getDDS("unique-id", LiveFollowMode<number>);
+
+        // Initialize LivePresence with initial presence data for local user
+        await followCursors.initialize(0);
+
+        // Start following a user
+        await followCursors.followUser("some-user-id");
+
+        // Get all online users that are following that user.
+        // This list will include the local user.
+        const followers = await followCursors.getUserFollowers("some-user-id", PresenceStatus.online);
+
+        // Stop following the user
+        await followCursors.stopFollowing();
+
+        // Get all users that are following that user.
+        // This list will NOT include the local user.
+        const allFollowers = await followCursors.getUserFollowers("some-user-id");
+     ```
      */
     public getUserFollowers(
         userId: string,
-        stateFilter?: PresenceState
+        statusFilter?: PresenceStatus
     ): FollowModePresenceUser<TData>[] {
-        const users = this.getUsers(stateFilter);
+        const users = this.getUsers(statusFilter);
         return users.filter((user) => user.data?.followingUserId === userId);
     }
 
@@ -732,8 +1044,16 @@ export class LiveFollowMode<TData = any> extends LiveDataObject<{
     }
 }
 
+export type LiveFollowMode<TData = any> = LiveFollowModeClass<TData>;
+
+// eslint-disable-next-line no-redeclare
+export const LiveFollowMode = (() => {
+    const kind = createDataObjectKind(LiveFollowModeClass);
+    return kind as typeof kind & SharedObjectKind<LiveFollowModeClass>;
+})();
+
 /**
- * Register `LiveFollowMode` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveFollowMode` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
  */
 DynamicObjectRegistry.registerObjectClass(
     LiveFollowMode,

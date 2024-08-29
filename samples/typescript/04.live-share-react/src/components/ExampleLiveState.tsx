@@ -3,30 +3,51 @@ import {
     useLiveShareContext,
     useLiveState,
 } from "@microsoft/live-share-react";
-import { UserMeetingRole, LiveShareClient } from "@microsoft/live-share";
-import { FC, ReactNode, useState } from "react";
+import { UserMeetingRole } from "@microsoft/live-share";
+import { FC, ReactNode, useMemo, useState } from "react";
+import { ExampleSharedTree } from "./ExampleSharedTree";
+import { FlexColumn } from "./internals/flex";
+import { NavigationBar } from "./internals/NavigationBar";
+import {
+    Dropdown,
+    Option,
+    useId,
+    DropdownProps,
+    Title1,
+    Caption1,
+} from "@fluentui/react-components";
+import { ExampleLiveCanvas } from "./ExampleLiveCanvas";
+import { ExampleLiveEvent } from "./ExampleLiveEvent";
+import { ExampleLivePresence } from "./ExampleLivePresence";
+import { ExampleLiveTimer } from "./ExampleLiveTimer";
+import { ExampleMediaSynchronizer } from "./ExampleMediaSynchronizer";
+import { ExampleSharedMap } from "./ExampleSharedMap";
+import { ExampleSharedState } from "./ExampleSharedState";
 
-enum ExampleAppStatus {
-    WAITING = "WAITING",
-    START = "START",
+enum OpenDDS {
+    useLiveCanvas = "useLiveCanvas",
+    useLiveEvent = "useLiveEvent",
+    useMediaSynchronizer = "useMediaSynchronizer",
+    useSharedState = "useSharedState",
+    useSharedTree = "useSharedTree",
+    useLiveTimer = "useLiveTimer",
+    useLivePresence = "useLivePresence",
+    useSharedMap = "useSharedMap",
 }
+const options = Object.keys(OpenDDS);
 
 interface ILiveStateData {
-    status: ExampleAppStatus;
+    status: OpenDDS | null;
     timeStarted?: number;
 }
 
 const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter];
 const INITIAL_STATE: ILiveStateData = {
-    status: ExampleAppStatus.WAITING,
+    status: null,
 };
 
-interface IExampleStateProps {
-    waitingContent: ReactNode;
-    startContent: ReactNode;
-}
-
-export const ExampleLiveState: FC<IExampleStateProps> = (props) => {
+export const ExampleLiveState: FC = () => {
+    const dropdownId = useId("dropdown-default");
     const [state, setState] = useLiveState<ILiveStateData>(
         "CUSTOM-STATE-ID",
         INITIAL_STATE,
@@ -34,45 +55,65 @@ export const ExampleLiveState: FC<IExampleStateProps> = (props) => {
     );
     const { timestampProvider } = useLiveShareContext();
 
-    if (state.status === ExampleAppStatus.WAITING) {
-        return (
-            <div style={{ padding: "12px 12px" }}>
-                <div className="flex row">
-                    <h2>{`Start round:`}</h2>
-                    <button
-                        onClick={() => {
-                            setState({
-                                status: ExampleAppStatus.START,
-                                timeStarted: timestampProvider?.getTimestamp(),
-                            });
-                        }}
-                    >
-                        {"Start"}
-                    </button>
-                    <BackgroundUpdates />
-                </div>
-                <h1>{"Welcome to Fluid React!"}</h1>
-                {props.waitingContent}
-            </div>
-        );
-    }
+    const onOptionSelect: DropdownProps["onOptionSelect"] = (ev, data) => {
+        if (!data.optionText || !(data.optionText in OpenDDS)) return;
+        setState({
+            timeStarted: timestampProvider?.getTimestamp(),
+            status: data.optionText as OpenDDS,
+        });
+    };
+
     return (
-        <div style={{ padding: "12px 12px" }}>
-            <div className="flex row">
-                <h2>{`Time started: ${state.timeStarted}`}</h2>
-                <button
-                    onClick={() => {
-                        setState({
-                            status: ExampleAppStatus.WAITING,
-                        });
-                    }}
-                >
-                    {"End"}
-                </button>
-                <BackgroundUpdates />
-            </div>
-            {props.startContent}
-        </div>
+        <FlexColumn fill="view-height">
+            <NavigationBar>
+                <FlexColumn>
+                    <Dropdown
+                        aria-labelledby={dropdownId}
+                        placeholder="Select a DDS to test..."
+                        value={state.status ?? ""}
+                        onOptionSelect={onOptionSelect}
+                    >
+                        {options.map((option) => (
+                            <Option key={option}>{option}</Option>
+                        ))}
+                    </Dropdown>
+                </FlexColumn>
+            </NavigationBar>
+            <FlexColumn
+                scroll
+                fill="both"
+                style={{
+                    padding: "24px",
+                }}
+            >
+                {state.status === null && (
+                    <FlexColumn gap="small">
+                        <Title1>{"Welcome to Live Share React!"}</Title1>
+                        <Caption1>
+                            {"Pick a hook to test from the dropdown above"}
+                        </Caption1>
+                    </FlexColumn>
+                )}
+                {state.status === OpenDDS.useLiveCanvas && (
+                    <ExampleLiveCanvas />
+                )}
+                {state.status === OpenDDS.useLiveEvent && <ExampleLiveEvent />}
+                {state.status === OpenDDS.useLivePresence && (
+                    <ExampleLivePresence />
+                )}
+                {state.status === OpenDDS.useLiveTimer && <ExampleLiveTimer />}
+                {state.status === OpenDDS.useMediaSynchronizer && (
+                    <ExampleMediaSynchronizer />
+                )}
+                {state.status === OpenDDS.useSharedMap && <ExampleSharedMap />}
+                {state.status === OpenDDS.useSharedState && (
+                    <ExampleSharedState />
+                )}
+                {state.status === OpenDDS.useSharedTree && (
+                    <ExampleSharedTree />
+                )}
+            </FlexColumn>
+        </FlexColumn>
     );
 };
 

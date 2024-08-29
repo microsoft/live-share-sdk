@@ -1053,7 +1053,7 @@ export const LiveFollowMode = (() => {
 })();
 
 /**
- * Register `LiveFollowMode` as an available `SharedObjectKind` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveFollowMode` as an available `SharedObjectKind` for use in dynamic object loading.
  */
 DynamicObjectRegistry.registerObjectClass(
     LiveFollowMode,

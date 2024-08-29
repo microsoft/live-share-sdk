@@ -1,6 +1,6 @@
 {
     "name": "@live-share-private/test-utils",
-    "version": "2.0.0-internal.5",
+    "version": "1.0.0",
     "description": "testing utils for live share",
     "repository": {
         "type": "git",

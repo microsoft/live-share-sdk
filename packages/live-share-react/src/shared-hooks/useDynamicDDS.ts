@@ -51,7 +51,7 @@ export function useDynamicDDS<
      * Once container is available, this effect will register the setter method so that the DDS loaded
      * from `dynamicObjects` that matches `uniqueKey` can be passed back to this hook. If one does not yet exist,
      * a new DDS is automatically created. If multiple users try to create a DDS at the same time when this component first
-     * mounts, `live-share-turbo` ensures it will ultimately self correct using last-writer wins.
+     * mounts, `live-share` ensures it will ultimately self correct using last-writer wins.
      */
     React.useEffect(() => {
         if (container === undefined) return;

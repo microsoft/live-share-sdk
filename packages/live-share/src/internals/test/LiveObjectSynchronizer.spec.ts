@@ -11,7 +11,7 @@ import { waitForDelay } from "../utils.js";
 import { MockLiveShareRuntime } from "../mock/MockLiveShareRuntime.js";
 
 interface ITestState {
-    client: "local" | "remote";
+    client: string;
 }
 
 describe("LiveObjectSynchronizer", () => {
@@ -336,5 +336,170 @@ describe("LiveObjectSynchronizer", () => {
         remoteObject.dispose();
         localLiveRuntime.stop();
         remoteLiveRuntime.stop();
+    });
+
+    it("Should only emit connect response to user that connected", async () => {
+        // We use targeted signals so that when a user first connects to LiveObjectSynchronizer,
+        // ach user responds back with their state only to the user that connects.
+        const localLiveRuntime = new MockLiveShareRuntime(true, 20);
+        const remoteLiveRuntime1 = new MockLiveShareRuntime(true, 20);
+        const remoteLiveRuntime2 = new MockLiveShareRuntime(true, 20);
+        localLiveRuntime.connectToOtherRuntime(
+            remoteLiveRuntime1,
+            remoteLiveRuntime2
+        );
+        await localLiveRuntime.start();
+        await remoteLiveRuntime1.start();
+        await remoteLiveRuntime2.start();
+
+        const localDone = new Deferred();
+        const localRuntime = new MockRuntimeSignaler();
+        const localObject = new LiveObjectSynchronizer<ITestState>(
+            "test",
+            localRuntime,
+            localLiveRuntime
+        );
+        let localEmitCount = 0;
+        await localObject.start({
+            initialState: { client: "local" },
+            updateState: async (state) => {
+                if (localEmitCount === 0) {
+                    // The first emit we receive the initial state for remote1
+                    try {
+                        assert(
+                            state.data.client == "remote1",
+                            `local: invalid state received: ${state}`
+                        );
+                    } catch (err) {
+                        localDone.reject(err);
+                    }
+                } else if (localEmitCount === 1) {
+                    // The second emit we receive the initial state for remote2
+                    try {
+                        assert(
+                            state.data.client == "remote2",
+                            `local: invalid state received: ${state}`
+                        );
+                        localDone.resolve();
+                    } catch (err) {
+                        localDone.reject(err);
+                    }
+                }
+
+                localEmitCount += 1;
+
+                return false;
+            },
+            getLocalUserCanSend: () => Promise.resolve(true),
+        });
+
+        await waitForDelay(5);
+
+        const remote1Done = new Deferred();
+        const remoteRuntime1 = new MockRuntimeSignaler();
+        const remoteObject1 = new LiveObjectSynchronizer<ITestState>(
+            "test",
+            remoteRuntime1,
+            remoteLiveRuntime1
+        );
+        let remote1EmitCount = 0;
+        await remoteObject1.start({
+            initialState: { client: "remote1" },
+            updateState: async (state, sender) => {
+                if (remote1EmitCount === 0) {
+                    // The first emit we receive a response to their connect event with local's current state.
+                    try {
+                        assert(
+                            state.data.client == "local",
+                            `local: invalid state received: ${state}`
+                        );
+                    } catch (err) {
+                        remote1Done.reject(err);
+                    }
+                } else if (remote1EmitCount === 1) {
+                    // The second emit we receive the initial state from remote2.
+                    try {
+                        assert(
+                            state.data.client == "remote2",
+                            `local: invalid state received: ${state}`
+                        );
+                        remote1Done.resolve();
+                    } catch (err) {
+                        remote1Done.reject(err);
+                    }
+                }
+                remote1EmitCount += 1;
+                return false;
+            },
+            getLocalUserCanSend: () => Promise.resolve(true),
+        });
+
+        await waitForDelay(5);
+
+        const remote2Done = new Deferred();
+        const remoteRuntime2 = new MockRuntimeSignaler();
+        const remoteObject2 = new LiveObjectSynchronizer<ITestState>(
+            "test",
+            remoteRuntime2,
+            remoteLiveRuntime2
+        );
+        let remote2EmitCount = 0;
+        await remoteObject2.start({
+            initialState: { client: "remote2" },
+            updateState: async (state, sender) => {
+                if (remote2EmitCount === 0) {
+                    // The first emit we receive a response to their connect event with local's current state.
+                    try {
+                        assert(
+                            state.data.client == "local",
+                            `local: invalid state received: ${state}`
+                        );
+                    } catch (err) {
+                        remote2Done.reject(err);
+                    }
+                } else if (remote2EmitCount === 1) {
+                    // The second emit we receive a response to their connect event with remote1's current state.
+                    try {
+                        assert(
+                            state.data.client == "remote1",
+                            `local: invalid state received: ${state}`
+                        );
+                        remote2Done.resolve();
+                    } catch (err) {
+                        remote2Done.reject(err);
+                    }
+                }
+                remote2EmitCount += 1;
+                return false;
+            },
+            getLocalUserCanSend: () => Promise.resolve(true),
+        });
+
+        await Promise.all([
+            localDone.promise,
+            remote1Done.promise,
+            remote2Done.promise,
+        ]);
+
+        await waitForDelay(10);
+        assert(
+            localEmitCount == 2,
+            `Local object should have only received 2 emits, instead received ${localEmitCount}`
+        );
+        assert(
+            remote1EmitCount == 2,
+            `remote object 1 should have received 2 emits, instead received ${remote1EmitCount}`
+        );
+        assert(
+            remote2EmitCount == 2,
+            `remote object 2 should have received 2 emits, instead received ${remote2EmitCount}`
+        );
+
+        localObject.dispose();
+        remoteObject1.dispose();
+        remoteObject2.dispose();
+        localLiveRuntime.stop();
+        remoteLiveRuntime1.stop();
+        remoteLiveRuntime2.stop();
     });
 });

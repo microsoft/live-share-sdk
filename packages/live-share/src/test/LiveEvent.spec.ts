@@ -34,6 +34,7 @@ describeCompat(
         let provider: ITestObjectProvider;
         let object1: LiveEvent;
         let object2: LiveEvent;
+        let object3: LiveEvent;
         let liveRuntime1: LiveShareRuntime = new LiveShareRuntime(
             TestLiveShareHost.create(),
             {
@@ -54,6 +55,16 @@ describeCompat(
             LiveEvent,
             liveRuntime2
         );
+        let liveRuntime3: LiveShareRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(),
+            {
+                timestampProvider: new LocalTimestampProvider(),
+            }
+        );
+        let LiveEventProxy3: any = getLiveDataObjectKind<LiveEvent>(
+            LiveEvent,
+            liveRuntime3
+        );
 
         beforeEach(async () => {
             provider = getTestObjectProvider();
@@ -70,6 +81,12 @@ describeCompat(
             object2 =
                 await getContainerEntryPointBackCompat<LiveEvent>(container2);
 
+            const container3 = await provider.loadContainer(
+                LiveEventProxy3.factory as fluidEntryPoint
+            );
+            object3 =
+                await getContainerEntryPointBackCompat<LiveEvent>(container3);
+
             // need to be connected to send signals
             if (!container1.connect) {
                 await new Promise((resolve) =>
@@ -81,12 +98,18 @@ describeCompat(
                     container2.once("connected", resolve)
                 );
             }
+            if (!container3.connect) {
+                await new Promise((resolve) =>
+                    container2.once("connected", resolve)
+                );
+            }
         });
 
         afterEach(async () => {
             // restore defaults
             liveRuntime1.setTimestampProvider(new LocalTimestampProvider());
             liveRuntime2.setTimestampProvider(new LocalTimestampProvider());
+            liveRuntime3.setTimestampProvider(new LocalTimestampProvider());
         });
 
         it("Should raise local and remote events", async () => {
@@ -329,6 +352,88 @@ describeCompat(
 
             const allowed = isNewerEvent(current, received, 100);
             assert(allowed, `event blocked`);
+        });
+
+        it("Targeting specific clients should only emit updates to the target client", async () => {
+            let object1ClientId: string;
+            let object2ClientId: string;
+            let object3ClientId: string;
+
+            const object1done = new Deferred();
+            object1.on("received", (evt, local, clientId, timestamp) => {
+                try {
+                    assert(local == true, `Not a local event`);
+                    assert(
+                        clientId === object1ClientId,
+                        `Unexpected clientId ${clientId}, should be local object1ClientId ${object1ClientId}`
+                    );
+                    object1done.resolve();
+                } catch (err) {
+                    object1done.reject(err);
+                }
+            });
+            await object1.initialize();
+
+            const object2done = new Deferred();
+            let emitCount = 0;
+            object2.on("received", (evt, local, clientId, timestamp) => {
+                if (emitCount === 0) {
+                    try {
+                        assert(local == false, `Unexpected local event`);
+                        assert(
+                            clientId === object1ClientId,
+                            `Unexpected clientId ${clientId}, should be remote object1ClientId ${object1ClientId}`
+                        );
+                    } catch (err) {
+                        object2done.reject(err);
+                    }
+                } else if (emitCount === 1) {
+                    try {
+                        assert(local == true, `Not a local event`);
+                        assert(
+                            clientId === object2ClientId,
+                            `Unexpected clientId ${clientId}, should be local object2ClientId ${object2ClientId}`
+                        );
+                        object2done.resolve();
+                    } catch (err) {
+                        object2done.reject(err);
+                    }
+                }
+                emitCount += 1;
+            });
+            await object2.initialize();
+
+            const object3done = new Deferred();
+            object3.on("received", (evt, local, clientId, timestamp) => {
+                try {
+                    assert(local == false, `Unexpected local event`);
+                    assert(
+                        clientId === object2ClientId,
+                        `Unexpected clientId ${clientId}, should be remote object2ClientId ${object2ClientId}`
+                    );
+                    object3done.resolve();
+                } catch (err) {
+                    object3done.reject(err);
+                }
+            });
+            await object3.initialize();
+
+            // @ts-ignore-next-line
+            object1ClientId = object1.runtime.clientId;
+            // @ts-ignore-next-line
+            object2ClientId = object2.runtime.clientId;
+            // @ts-ignore-next-line
+            object3ClientId = object3.runtime.clientId;
+
+            await object1.send({}, object2ClientId);
+            await object2.send({}, object3ClientId);
+
+            // Wait for events to trigger
+            await Promise.all([
+                object1done.promise,
+                object2done.promise,
+                object3done.promise,
+            ]);
         });
     }
 );

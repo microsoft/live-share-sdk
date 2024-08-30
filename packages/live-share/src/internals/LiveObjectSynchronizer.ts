@@ -192,6 +192,7 @@ export class LiveObjectSynchronizer<TState> {
     /**
      * Sends a one-time event through the synchronizer
      * @param data the date for the event to send
+     * @param targetClientId Optional. When specified, the signal is only sent to the provided client id.
      * @returns the event that was sent
      */
     public sendEvent<TState = any>(data: TState): Promise<ILiveEvent<TState>> {

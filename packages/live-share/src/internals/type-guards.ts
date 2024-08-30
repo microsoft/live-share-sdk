@@ -48,6 +48,8 @@ export function isILiveEvent(value: any): value is ILiveEvent {
     return (
         typeof value === "object" &&
         typeof value.clientId === "string" &&
+        (typeof value.targetClientId === "string" ||
+            value.targetClientId === undefined) &&
         typeof value.timestamp === "number" &&
         typeof value.name === "string"
     );

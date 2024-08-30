@@ -260,7 +260,9 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         );
         // If the non-local user is connecting for the first time
         if (message.type === ObjectSynchronizerEvents.connect) {
-            this._synchronizer?.onSendBackgroundUpdates();
+            // Sent with a targetClientId so that only the user connecting receives the signal.
+            // This reduces the cost & server burden of connect messages, particularly in larger session sizes.
+            this._synchronizer?.onSendBackgroundUpdates(message.clientId);
         }
     }
 

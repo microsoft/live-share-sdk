@@ -167,6 +167,7 @@ export class LiveEventClass<TEvent = any> extends LiveDataObject<{
      * The event will be queued for delivery if the client isn't currently connected.
      *
      * @param evt Event to send. If omitted, an event will still be sent but it won't include any custom event data.
+     * @param targetClientId Optional. When specified, the signal is only sent to the provided client id.
      *
      * @returns A promise with the full event object that was sent, including the timestamp of when the event was sent and the clientId if known.
      * The clientId will be `undefined` if the client is disconnected at time of delivery.
@@ -204,7 +205,10 @@ export class LiveEventClass<TEvent = any> extends LiveDataObject<{
         });
      ```
      */
-    public async send(evt: TEvent): Promise<ILiveEvent<TEvent>> {
+    public async send(
+        evt: TEvent,
+        targetClientId?: string
+    ): Promise<ILiveEvent<TEvent>> {
         LiveDataObjectNotInitializedError.assert(
             "LiveEvent:send",
             "send",
@@ -216,7 +220,7 @@ export class LiveEventClass<TEvent = any> extends LiveDataObject<{
             "`this._eventTarget` is undefined, implying there was an error during initialization that should not occur."
         );
 
-        return await this._eventTarget.sendEvent(evt);
+        return await this._eventTarget.sendEvent(evt, targetClientId);
     }
 }
 

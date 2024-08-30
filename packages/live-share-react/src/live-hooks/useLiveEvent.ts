@@ -104,7 +104,7 @@ export function useLiveEvent<TEvent = any>(
      * User facing: callback to send event through `LiveEvent`
      */
     const sendEvent: SendLiveEventAction<TEvent> = React.useCallback(
-        async (event: TEvent) => {
+        async (event: TEvent, targetClientId?: string) => {
             if (!container) {
                 throw new ActionContainerNotJoinedError(
                     "liveEvent",
@@ -123,7 +123,7 @@ export function useLiveEvent<TEvent = any>(
                     "sendEvent"
                 );
             }
-            return await liveEvent.send(event);
+            return await liveEvent.send(event, targetClientId);
         },
         [container, liveEvent]
     );

@@ -110,15 +110,20 @@ export class ContainerSynchronizer {
     /**
      * On send background updates handler
      *
+     * @param targetClientId Optional. When specified, the signal is only sent to the provided client id.
+     *
      * @returns void promise once the events were sent (unless skipped)
      */
-    public async onSendBackgroundUpdates(): Promise<void> {
+    public async onSendBackgroundUpdates(
+        targetClientId?: string
+    ): Promise<void> {
         if (!this._liveRuntime.canSendBackgroundUpdates) return;
         await this.sendGroupEvent(
             this._connectedKeys.filter((key) =>
                 this._ddsBackgroundUpdateEnabled.has(key)
             ),
-            ObjectSynchronizerEvents.update
+            ObjectSynchronizerEvents.update,
+            targetClientId
         ).catch((err) => console.error(err));
     }
 
@@ -199,11 +204,13 @@ export class ContainerSynchronizer {
      * Send a batch of events
      * @param updates updates to send
      * @param evtType type of event
+     * @param targetClientId Optional. When specified, the signal is only sent to the provided client id.
      * @returns event where data is then StateSyncEventContent containing the batched events that were sent.
      */
     public async sendEventUpdates(
         updates: StateSyncEventContent,
-        evtType: string
+        evtType: string,
+        targetClientId?: string
     ): Promise<ILiveEvent<StateSyncEventContent> | undefined> {
         const updateKeys = Object.keys(updates);
         // Send event if we have any updates to broadcast
@@ -218,7 +225,11 @@ export class ContainerSynchronizer {
                         : this._liveRuntime.getTimestamp(),
                 name: evtType,
             };
-            this._containerRuntime.submitSignal(evtType, content);
+            this._containerRuntime.submitSignal(
+                evtType,
+                content,
+                targetClientId
+            );
             return content;
         }
     }
@@ -264,7 +275,8 @@ export class ContainerSynchronizer {
 
     private async sendGroupEvent(
         keys: string[],
-        evtType: string
+        evtType: string,
+        targetClientId?: string
     ): Promise<{
         sent: string[];
         skipped: string[];
@@ -314,7 +326,7 @@ export class ContainerSynchronizer {
         const updateKeys = Object.keys(updates);
         // Send event if we have any updates to broadcast
         // - `send` is only set if at least one component returns an update.
-        await this.sendEventUpdates(updates, evtType);
+        await this.sendEventUpdates(updates, evtType, targetClientId);
         return {
             sent: updateKeys,
             skipped: skipKeys,

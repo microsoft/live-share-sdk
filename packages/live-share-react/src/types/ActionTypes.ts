@@ -96,10 +96,11 @@ export type SetLiveStateAction<TState = undefined> = (
 
 /**
  * Callback for SendLiveEventAction<TEvent>.
- * (event: TEvent) => Promise<void>
+ * (event: TEvent, targetClientId?: string) => Promise<void>
  */
 export type SendLiveEventAction<TEvent> = (
-    event: TEvent
+    event: TEvent,
+    targetClientId?: string
 ) => Promise<ILiveEvent<TEvent>>;
 
 /**

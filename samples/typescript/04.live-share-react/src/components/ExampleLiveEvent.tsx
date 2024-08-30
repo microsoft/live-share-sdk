@@ -1,9 +1,10 @@
 import { useLiveEvent } from "@microsoft/live-share-react";
-import { FC } from "react";
+import { FC, useState } from "react";
 
 export const ExampleLiveEvent: FC = () => {
     const { latestEvent, allEvents, sendEvent } =
         useLiveEvent<string>("EVENT-ID");
+    const [targetClientId, setTargetClientId] = useState("");
 
     return (
         <div style={{ marginTop: "12px" }}>
@@ -30,9 +31,24 @@ export const ExampleLiveEvent: FC = () => {
                 >
                     {"😂"}
                 </button>
+                <input
+                    placeholder="Enter targetClientId..."
+                    value={targetClientId}
+                    onChange={(ev) => {
+                        setTargetClientId(ev.target.value);
+                    }}
+                />
+                <button
+                    disabled={!targetClientId}
+                    onClick={() => {
+                        sendEvent("🎯", targetClientId);
+                    }}
+                >
+                    {"🎯"}
+                </button>
                 {/* Show latest reaction */}
                 {latestEvent?.local === false && (
-                    <div>{`Received: ${latestEvent?.value}`}</div>
+                    <div>{`Received: ${latestEvent?.value}, From: ${latestEvent?.clientId}`}</div>
                 )}
                 {latestEvent?.local === true && (
                     <div>{`Sent: ${latestEvent?.value}`}</div>

@@ -311,6 +311,7 @@ export interface ILiveShareJoinResults {
  * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
  */
 export interface IContainerRuntimeSignaler {
+    clientId?: string;
     on(
         event: "signal",
         listener: (message: IInboundSignalMessage, local: boolean) => void

@@ -252,6 +252,16 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             typeof message.content.data !== "object"
         )
             return;
+        // While the Fluid odsp-driver currently supports targeted signals, it isn't guaranteed in other drivers.
+        // As of Fluid v2.2.0, azure-client and tinylicious do not support it currently.
+        // For consistency, we return early when the local client is not the targeted one.
+        if (
+            // If we have message.targetClientId, our fluid driver supports targeting and thus will always be from the right client.
+            !message.targetClientId &&
+            message.content.targetClientId &&
+            message.content.targetClientId !== this._containerRuntime.clientId
+        )
+            return;
         this.dispatchUpdates(
             ObjectSynchronizerEvents.update,
             message.clientId,
@@ -262,6 +272,9 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         if (message.type === ObjectSynchronizerEvents.connect) {
             // Sent with a targetClientId so that only the user connecting receives the signal.
             // This reduces the cost & server burden of connect messages, particularly in larger session sizes.
+            // This perf/COGS benefit only applies if the Fluid driver / service supports targeting (e.g., ODSP).
+            // Otherwise, it will still send the signal to all clients, but only dispatch the update to the targeted client.
+            // If/when the driver later supports targeting, the benefit will get picked up automatically with no update to this code.
             this._synchronizer?.onSendBackgroundUpdates(message.clientId);
         }
     }

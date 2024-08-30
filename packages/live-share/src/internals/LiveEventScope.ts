@@ -133,14 +133,14 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
                 // While the Fluid odsp-driver currently supports targeted signals, it isn't guaranteed in other drivers.
                 // As of Fluid v2.2.0, azure-client and tinylicious do not support it currently.
                 // For consistency, we return early when the local client is not the targeted one.
-                if (message.targetClientId && message.content.targetClientId) {
+                if (message.targetClientId && content.targetClientId) {
                     // If we know the true targetClientId, we are in a supported driver so we override it
-                    message.content.targetClientId = message.targetClientId;
+                    content.targetClientId = message.targetClientId;
                 }
                 if (
                     !local &&
-                    message.content.targetClientId &&
-                    message.content.targetClientId !== this._runtime.clientId
+                    content.targetClientId &&
+                    content.targetClientId !== this._runtime.clientId
                 )
                     return;
                 content.clientId = clientId;

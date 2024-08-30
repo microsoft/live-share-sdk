@@ -37,10 +37,12 @@ export class MockLiveShareRuntime extends LiveShareRuntime {
             return this._containerRuntime;
         return undefined;
     }
-    connectToOtherRuntime(otherLiveRuntime: MockLiveShareRuntime) {
+    connectToOtherRuntime(...otherLiveRuntimes: MockLiveShareRuntime[]) {
         MockContainerRuntimeSignaler.connectContainers([
             this.getLocalMockContainer()!,
-            otherLiveRuntime.getLocalMockContainer()!,
+            ...otherLiveRuntimes.map(
+                (runtime) => runtime.getLocalMockContainer()!
+            ),
         ]);
     }
 }

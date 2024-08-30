@@ -31,13 +31,21 @@ export class LiveEventSource<TEvent> {
     /**
      * Broadcasts an event to any listening `LiveEventTarget` instances.
      * @param evt Optional. Partial event object to send. The `ILiveEvent.name`,
+     * @param targetClientId Optional. When specified, the signal is only sent to the provided client id.
      * `ILiveEvent.timestamp`, and `ILiveEvent.clientId`
      * fields will be automatically populated prior to sending.
      * @returns The full event, including `ILiveEvent.name`,
      * `ILiveEvent.timestamp`, and `ILiveEvent.clientId` fields if known.
      */
-    public async sendEvent(evt: TEvent): Promise<ILiveEvent<TEvent>> {
-        return await this._scope.sendEvent<TEvent>(this._eventName, evt);
+    public async sendEvent(
+        evt: TEvent,
+        targetClientId?: string
+    ): Promise<ILiveEvent<TEvent>> {
+        return await this._scope.sendEvent<TEvent>(
+            this._eventName,
+            evt,
+            targetClientId
+        );
     }
 
     /**

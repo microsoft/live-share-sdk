@@ -621,7 +621,10 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
      * @hidden
      * Called by MediaSession to trigger the sending of a position update.
      */
-    public sendPositionUpdate(state: IMediaPlayerState): void {
+    public sendPositionUpdate(
+        state: IMediaPlayerState,
+        targetClientId?: string
+    ): void {
         LiveDataObjectNotInitializedError.assert(
             "LiveMediaSessionCoordinator:sendPositionUpdate",
             "sendPositionUpdate",
@@ -631,12 +634,15 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
         if (this.canSendPositionUpdates) {
             // Send position update event
             const evt = this._groupState!.createPositionUpdateEvent(state);
-            this._positionUpdateEvent?.sendEvent(evt).catch((err) => {
-                this._logger.sendErrorEvent(
-                    TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
-                    err
-                );
-            });
+            this._positionUpdateEvent
+                ?.sendEvent(evt, targetClientId)
+                .catch((err) => {
+                    this._logger.sendErrorEvent(
+                        TelemetryEvents.SessionCoordinator
+                            .PositionUpdateEventError,
+                        err
+                    );
+                });
         } else if (this.isSuspended) {
             // send a local only position update event that was not sent as a signal, and use to handle local
             // position update for clients that have canSendPositionUpdates==false, but are suspending
@@ -748,7 +754,9 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
             // Immediately send a position update
             try {
                 const state = this._getPlayerState();
-                this.sendPositionUpdate(state);
+                // Send only to the user that joined the session using the targetClientId prop.
+                // This ensures that only the user that connected receives this one-time position update, minimizing costs.
+                this.sendPositionUpdate(state, clientId);
             } catch (err: any) {
                 // if player is not setup yet, local client might have also just joined and can't send its position.
                 const playerNotSetup =

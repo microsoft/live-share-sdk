@@ -41,7 +41,17 @@ export interface IRuntimeSignaler {
         event: "signal",
         listener: (message: IInboundSignalMessage, local: boolean) => void
     ): this;
-    submitSignal(type: string, content: any): void;
+    /**
+     * Submits the signal to be sent to other clients.
+     * @param type Type of the signal.
+     * @param content Content of the signal. Should be a JSON serializable object or primitive.
+     * @param targetClientId Optional. When specified, the signal is only sent to the provided client id.
+     */
+    submitSignal: (
+        type: string,
+        content: unknown,
+        targetClientId?: string
+    ) => void;
 }
 
 /**
@@ -120,6 +130,19 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
 
             if (isILiveEvent(message.content)) {
                 const content = message.content;
+                // While the Fluid odsp-driver currently supports targeted signals, it isn't guaranteed in other drivers.
+                // As of Fluid v2.2.0, azure-client and tinylicious do not support it currently.
+                // For consistency, we return early when the local client is not the targeted one.
+                if (message.targetClientId && content.targetClientId) {
+                    // If we know the true targetClientId, we are in a supported driver so we override it
+                    content.targetClientId = message.targetClientId;
+                }
+                if (
+                    !local &&
+                    content.targetClientId &&
+                    content.targetClientId !== this._runtime.clientId
+                )
+                    return;
                 content.clientId = clientId;
                 this.emitToListeners(clientId, content, local);
             }
@@ -182,6 +205,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      * @template TEvent Type of event to send.
      * @param eventName Name of the event to send.
      * @param evt Optional. Partial event object to send. The `ILiveEvent.name`,
+     * @param targetClientId Optional. When specified, the signal is only sent to the provided client id.
      * `ILiveEvent.timestamp`, and `ILiveEvent.clientId`
      * fields will be automatically populated prior to sending.
      * @returns The full event, including `ILiveEvent.name`,
@@ -189,11 +213,12 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
      */
     public async sendEvent<TEvent>(
         eventName: string,
-        evt: TEvent
+        evt: TEvent,
+        targetClientId?: string
     ): Promise<ILiveEvent<TEvent>> {
-        const event = await this.createEvent(eventName, evt);
+        const event = await this.createEvent(eventName, evt, targetClientId);
         // Send event
-        this._runtime.submitSignal(eventName, event);
+        this._runtime.submitSignal(eventName, event, targetClientId);
         return event;
     }
 
@@ -219,7 +244,8 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
 
     private async createEvent<TEvent>(
         eventName: string,
-        evt: TEvent
+        evt: TEvent,
+        targetClientId?: string
     ): Promise<ILiveEvent<TEvent>> {
         const clientId = await this.waitUntilConnected();
         const isAllowed = await this._liveRuntime.verifyRolesAllowed(
@@ -236,6 +262,7 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
         // Clone passed in event and fill out required props.
         const clone: ILiveEvent<TEvent> = {
             clientId,
+            targetClientId,
             name: eventName,
             timestamp: this._liveRuntime.getTimestamp(),
             data: evt,

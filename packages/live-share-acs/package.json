@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-acs",
-    "version": "2.0.0",
+    "version": "2.0.0-internal.6",
     "description": "Live Share integration package for Azure Communication Services.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -29,7 +29,7 @@
         }
     },
     "devDependencies": {
-        "@microsoft/live-share": "2.0.0",
+        "@microsoft/live-share": "2.0.0-internal.6",
         "@azure/communication-calling": "^1.27.3",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
@@ -40,7 +40,7 @@
         "typescript": "~5.5.3"
     },
     "peerDependencies": {
-        "@microsoft/live-share": "2.0.0",
+        "@microsoft/live-share": "2.0.0-internal.6",
         "@azure/communication-calling": "^1.14.0"
     },
     "repository": {

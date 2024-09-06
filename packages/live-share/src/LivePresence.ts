@@ -420,7 +420,8 @@ export class LivePresenceClass<
 
         // Broadcast state change
         const evtToSend = {
-            status: this._currentPresence.data.status,
+            // replace user status with online, update indicates active user.
+            status: PresenceStatus.online,
             data: cloneValue(data) ?? this._currentPresence.data.data,
         };
 

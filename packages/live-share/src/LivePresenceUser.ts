@@ -205,8 +205,8 @@ export class LivePresenceUser<TData extends LivePresenceData = any> {
     }
 
     private aggregateConnectionState(): PresenceStatus {
-        return Array.from(this._connections.entries())
-            .map((c) => c[1].status)
+        return Array.from(this._connections.values())
+            .map((c) => c.status)
             .reduce<PresenceStatus>((previous, current) => {
                 if (
                     previous === PresenceStatus.online ||

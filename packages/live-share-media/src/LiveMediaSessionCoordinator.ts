@@ -259,7 +259,7 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
 
     /**
      * Max amount of playback drift allowed in seconds.
-     * This will scale automatically according to the number of participants in the session when {@link shouldScalePositionUpdateInterval} is true.
+     * This will scale automatically according to the number of participants in the session when {@link shouldScaleMaxPlaybackDrift} is true.
      *
      * @remarks
      * Should the local clients playback position lag by more than the specified value, the coordinator will trigger a `catchup` action.

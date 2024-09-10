@@ -40,7 +40,7 @@ import {
     TrackMetadataNotSetError,
     ActionBlockedError,
 } from "./internals/errors.js";
-
+import { PriorityTimeInterval } from "./internals/PriorityTimeInterval.js";
 import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension.js";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IEvent } from "@fluidframework/core-interfaces";
@@ -97,8 +97,27 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
     private readonly _liveRuntime: LiveShareRuntime;
     private readonly _logger: LiveTelemetryLogger;
     private readonly _getPlayerState: () => IMediaPlayerState;
-    private _positionUpdateInterval = new TimeInterval(2000);
-    private _maxPlaybackDrift = new TimeInterval(1000);
+    private _positionUpdateInterval = new PriorityTimeInterval(
+        2000,
+        // Scale by function
+        () => {
+            const audience = this._liveRuntime.audience;
+            if (!audience) return 1;
+            // As the audience size gets bigger, we relax the update interval, since more variance is expected
+            const count = audience.getMembers().size;
+            return 1 + count / 5;
+        }
+    );
+    private _maxPlaybackDrift = new PriorityTimeInterval(
+        1500, // Scale by function
+        () => {
+            const audience = this._liveRuntime.audience;
+            if (!audience) return 1;
+            // As the audience size gets bigger, we relax the playback drift, since more variance is expected
+            const count = audience.getMembers().size;
+            return 1 + count / 25;
+        }
+    );
     private _lastWaitPoint?: CoordinationWaitPoint;
     private initializeState: LiveDataObjectInitializeState =
         LiveDataObjectInitializeState.needed;
@@ -222,13 +241,29 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
     }
 
     /**
-     * Max amount of playback drift allowed in seconds.
+     * Controls whether or not to scale {@link maxPlaybackDrift} by the number of users in the session.
      *
      * @remarks
-     * Should the local clients playback position lag by more than the specified value, the
-     * coordinator will trigger a `catchup` action.
+     * As more clients join a session, it is more likely that some users will fall behind the presenter.
+     * It is also less likely that users will notice drift as more clients are added.
+     * It is usually helpful to be more lenient as more clients are added so everyone can watch all the content.
+     * Default value is true.
+     */
+    public get shouldScaleMaxPlaybackDrift(): boolean {
+        return this._maxPlaybackDrift.shouldPrioritize;
+    }
+
+    public set shouldScaleMaxPlaybackDrift(value: boolean) {
+        this._maxPlaybackDrift.shouldPrioritize = value;
+    }
+
+    /**
+     * Max amount of playback drift allowed in seconds.
+     * This will scale automatically according to the number of participants in the session when {@link shouldScalePositionUpdateInterval} is true.
      *
-     * Defaults to a value of `1` second.
+     * @remarks
+     * Should the local clients playback position lag by more than the specified value, the coordinator will trigger a `catchup` action.
+     * Default value is `1.5` seconds.
      */
     public get maxPlaybackDrift(): number {
         return this._maxPlaybackDrift.seconds;
@@ -239,11 +274,30 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
     }
 
     /**
-     * Frequency with which position updates are broadcast to the rest of the group in
-     * seconds.
+     * Controls whether or not to compute position update interval based on whether user has initiated a playback command.
+     * Default value is true.
      *
      * @remarks
-     * Defaults to a value of `2` seconds.
+     * When true, users that are simply watching but not controlling playback will report their positions less frequently.
+     * When a user has sent a transport command, they will begin sending position updates more frequently.
+     * Most Live Share apps have a concept of a primary presenter, and don't allow anyone to pause/play for the group.
+     * By ensuring only one/few users broadcast updates frequently, the server load is reduced considerably.
+     */
+    public get shouldScalePositionUpdateInterval(): boolean {
+        return this._positionUpdateInterval.shouldPrioritize;
+    }
+
+    public set shouldScalePositionUpdateInterval(value: boolean) {
+        this._positionUpdateInterval.shouldPrioritize = value;
+    }
+
+    /**
+     * Frequency with which position updates are broadcast to the rest of the group in seconds.
+     * When {@link shouldScalePositionUpdateInterval} is set to `true`, the value set is the minimum value.
+     * The value returned is the actual value used to send updates by the local user, which may be larger than the value set.
+     *
+     * @remarks
+     * Defaults to a minimum value of `2` seconds.
      */
     public get positionUpdateInterval(): number {
         return this._positionUpdateInterval.seconds;
@@ -293,6 +347,10 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
             track: this._groupState.playbackTrack.current,
             position: position,
         });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**
@@ -335,6 +393,10 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
             track: this._groupState.playbackTrack.current,
             position: position,
         });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**
@@ -375,6 +437,10 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
                 track: this._groupState.playbackTrack.current,
                 position: time,
             });
+            if (this.canSendPositionUpdates) {
+                // User has taken initiative to send event, give priority for sending position updates
+                this._positionUpdateInterval.hasPriority = true;
+            }
         } catch (err) {
             await this._groupState!.syncLocalMediaSession();
             throw err;
@@ -400,6 +466,10 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
             { playbackRate }
         );
         await this._rateChangeEvent!.sendEvent({ playbackRate });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**
@@ -436,6 +506,10 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
             metadata: metadata,
             waitPoints: waitPoints || [],
         });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**
@@ -470,6 +544,10 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
         await this._setTrackDataEvent!.sendEvent({
             data: data,
         });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**

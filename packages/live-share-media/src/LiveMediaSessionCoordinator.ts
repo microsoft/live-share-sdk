@@ -447,6 +447,14 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
         }
     }
 
+    /**
+     * Sets the playback rate for everyone in the session.
+     *
+     * @param playbackRate the playback rate to set.
+     *
+     * @throws
+     * Throws an exception if the session/coordinator hasn't been initialized or {@link canSetPlaybackRate} is false.
+     */
     public async setPlaybackRate(playbackRate: number): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
             "LiveMediaSessionCoordinator:setPlaybackRate",

@@ -274,7 +274,7 @@ export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSes
     }
 
     /**
-     * Controls whether or not to compute position update interval based on whether user has initiated a playback command.
+     * Controls whether or not to compute {@link positionUpdateInterval} based on whether user has initiated a playback command.
      * Default value is true.
      *
      * @remarks

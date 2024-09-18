@@ -192,6 +192,10 @@ export interface IUseLivePresenceResults<TData extends LivePresenceData = any> {
      */
     otherUsers: LivePresenceUser<TData>[];
     /**
+     * List of all online users.
+     */
+    onlineUsers: LivePresenceUser<TData>[];
+    /**
      * List of all user's presence objects.
      */
     allUsers: LivePresenceUser<TData>[];

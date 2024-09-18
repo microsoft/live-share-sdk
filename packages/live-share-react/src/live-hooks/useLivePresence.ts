@@ -9,6 +9,7 @@ import {
     UserMeetingRole,
     LiveDataObjectInitializeState,
     LivePresenceData,
+    PresenceStatus,
 } from "@microsoft/live-share";
 import React from "react";
 import {
@@ -124,6 +125,10 @@ export function useLivePresence<TData extends LivePresenceData = any>(
         return allUsers.find((user) => user.isLocalUser);
     }, [allUsers]);
 
+    const onlineUsers = React.useMemo(() => {
+        return allUsers.filter((user) => user.status === PresenceStatus.online);
+    }, [allUsers]);
+
     const { container } = useFluidObjectsContext();
 
     /**
@@ -191,6 +196,7 @@ export function useLivePresence<TData extends LivePresenceData = any>(
         localUser,
         otherUsers,
         allUsers,
+        onlineUsers,
         livePresence,
         updatePresence,
     };

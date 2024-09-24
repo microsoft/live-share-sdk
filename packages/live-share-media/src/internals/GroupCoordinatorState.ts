@@ -53,6 +53,7 @@ import {
 } from "./GroupPlaybackRate.js";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IGenericTypedEvents } from "./interfaces.js";
+import { PriorityTimeInterval } from "./PriorityTimeInterval.js";
 
 /**
  * @hidden
@@ -145,7 +146,7 @@ export class GroupCoordinatorState extends TypedEventEmitter<IGenericTypedEvents
         runtime: IRuntimeSignaler,
         liveRuntime: LiveShareRuntime,
         maxPlaybackDrift: TimeInterval,
-        positionUpdateInterval: TimeInterval,
+        positionUpdateInterval: PriorityTimeInterval,
         getMediaPlayerState: () => IMediaPlayerState
     ) {
         super();

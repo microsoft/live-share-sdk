@@ -19,7 +19,7 @@ import {
     GroupTransportState,
     ITransportState,
 } from "../internals/GroupTransportState";
-import { TestLiveShareHost, TimeInterval } from "@microsoft/live-share";
+import { TestLiveShareHost } from "@microsoft/live-share";
 import {
     IRuntimeSignaler,
     LiveShareRuntime,
@@ -27,6 +27,7 @@ import {
 } from "@microsoft/live-share/internal";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import { GroupPlaybackTrack } from "../internals/GroupPlaybackTrack";
+import { PriorityTimeInterval } from "../internals/PriorityTimeInterval";
 
 function createTransportUpdate(
     runtime: IRuntimeSignaler,
@@ -103,7 +104,7 @@ async function getObjects(updateInterval: number = 10000) {
 async function getPlayBackPosition(
     liveRuntime: MockLiveShareRuntime,
     runtime1: IRuntimeSignaler,
-    updateInterval = new TimeInterval(10)
+    updateInterval = new PriorityTimeInterval(10, () => 1)
 ) {
     const track1 = {
         trackIdentifier: "track1",
@@ -288,7 +289,7 @@ describe("GroupPlaybackPosition", () => {
     });
 
     it("should enumerate client positions", async () => {
-        const updateInterval = new TimeInterval(10);
+        const updateInterval = new PriorityTimeInterval(10, () => 1);
         const { liveRuntime, runtime1, runtime2, dispose } = await getObjects();
         const { playbackPosition } = await getPlayBackPosition(
             liveRuntime,
@@ -327,7 +328,7 @@ describe("GroupPlaybackPosition", () => {
     });
 
     it("should ignore stale positions", async () => {
-        const updateInterval = new TimeInterval(10);
+        const updateInterval = new PriorityTimeInterval(10, () => 1);
         const { liveRuntime, runtime1, runtime2, dispose } = await getObjects();
         const { playbackPosition } = await getPlayBackPosition(
             liveRuntime,
@@ -370,7 +371,7 @@ describe("GroupPlaybackPosition", () => {
         const { playbackPosition } = await getPlayBackPosition(
             liveRuntime,
             runtime1,
-            new TimeInterval(1000)
+            new PriorityTimeInterval(1000, () => 1)
         );
 
         try {
@@ -405,7 +406,7 @@ describe("GroupPlaybackPosition", () => {
         const { playbackPosition, transportState } = await getPlayBackPosition(
             liveRuntime,
             runtime1,
-            new TimeInterval(1000)
+            new PriorityTimeInterval(1000, () => 1)
         );
 
         try {
@@ -436,7 +437,7 @@ describe("GroupPlaybackPosition", () => {
         const { playbackPosition, transportState } = await getPlayBackPosition(
             liveRuntime,
             runtime1,
-            new TimeInterval(1000)
+            new PriorityTimeInterval(1000, () => 1)
         );
 
         try {
@@ -478,7 +479,7 @@ describe("GroupPlaybackPosition", () => {
         const { playbackPosition, transportState } = await getPlayBackPosition(
             liveRuntime,
             runtime1,
-            new TimeInterval(1000)
+            new PriorityTimeInterval(1000, () => 1)
         );
 
         try {
@@ -531,7 +532,7 @@ describe("GroupPlaybackPosition", () => {
         const { playbackPosition, transportState } = await getPlayBackPosition(
             liveRuntime,
             runtime1,
-            new TimeInterval(1000)
+            new PriorityTimeInterval(1000, () => 1)
         );
 
         try {
@@ -574,7 +575,7 @@ describe("GroupPlaybackPosition", () => {
         const { playbackPosition, transportState } = await getPlayBackPosition(
             liveRuntime,
             runtime1,
-            new TimeInterval(1000)
+            new PriorityTimeInterval(1000, () => 1)
         );
 
         try {
@@ -610,7 +611,7 @@ describe("GroupPlaybackPosition", () => {
         const { playbackPosition, transportState } = await getPlayBackPosition(
             liveRuntime,
             runtime1,
-            new TimeInterval(1000)
+            new PriorityTimeInterval(1000, () => 1)
         );
 
         try {

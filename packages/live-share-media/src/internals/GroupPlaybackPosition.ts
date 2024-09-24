@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TimeInterval } from "@microsoft/live-share";
 import {
     IRuntimeSignaler,
     LiveShareRuntime,
@@ -15,6 +14,7 @@ import {
     ExtendedMediaSessionPlaybackState,
 } from "../MediaSessionExtensions.js";
 import { GroupPlaybackRate } from "./GroupPlaybackRate.js";
+import { PriorityTimeInterval } from "./PriorityTimeInterval.js";
 
 /**
  * Per client position
@@ -37,7 +37,7 @@ export class GroupPlaybackPosition {
     private _playbackRate: GroupPlaybackRate;
     private _runtime: IRuntimeSignaler;
     private _liveRuntime: LiveShareRuntime;
-    private _updateInterval: TimeInterval;
+    private _updateInterval: PriorityTimeInterval;
     private _positions: Map<string, ICurrentPlaybackPosition>;
 
     constructor(
@@ -45,7 +45,7 @@ export class GroupPlaybackPosition {
         playbackRate: GroupPlaybackRate,
         runtime: IRuntimeSignaler,
         liveRuntime: LiveShareRuntime,
-        updateInterval: TimeInterval
+        updateInterval: PriorityTimeInterval
     ) {
         this._transportState = transportState;
         this._playbackRate = playbackRate;
@@ -171,7 +171,7 @@ export class GroupPlaybackPosition {
         ) => void
     ): void {
         const now = this._liveRuntime.getTimestamp();
-        const ignoreBefore = now - this._updateInterval.milliseconds * 2;
+        const ignoreBefore = now - this._updateInterval.maxMilliseconds * 2;
         const shouldProject = !this._transportState.track.metadata?.liveStream;
         this._positions.forEach((position, _) => {
             // Ignore any old updates

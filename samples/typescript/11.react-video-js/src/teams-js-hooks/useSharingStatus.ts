@@ -17,7 +17,7 @@ export const useSharingStatus = (): ISharingStatus | undefined => {
             };
         }
     );
-    const intervalIdRef = useRef<NodeJS.Timer>();
+    const intervalIdRef = useRef<any>();
 
     useEffect(() => {
         if (!inTeams()) return;

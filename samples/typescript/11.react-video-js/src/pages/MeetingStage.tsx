@@ -10,7 +10,7 @@ import {
     LiveSharePage,
     MediaPlayerContainer,
 } from "../components";
-import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
+// import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
 import { useTeamsContext } from "../teams-js-hooks/useTeamsContext";
 import { LiveShareProvider } from "@microsoft/live-share-react";
 import { AppConfiguration, IN_TEAMS } from "../constants";
@@ -23,10 +23,12 @@ import {
     ISharingStatus,
     useSharingStatus,
 } from "../teams-js-hooks/useSharingStatus";
-import { getInitialMediaItem } from "../utils/media-list";
+import videojs from "video.js";
+import { VideoJSDelegate } from "../utils/VideoJSDelegate";
+import "video.js/dist/video-js.css";
 
 const LIVE_SHARE_OPTIONS: ILiveShareClientOptions = {
-    canSendBackgroundUpdates: false, // default to false so we can wait to see
+    canSendBackgroundUpdates: true, // default to false so we can wait to see
 };
 
 const MeetingStage: FC = () => {
@@ -71,7 +73,8 @@ interface IMeetingStateContentProps {
     shareStatus: ISharingStatus;
 }
 
-const SELECTED_MEDIA_ITEM = getInitialMediaItem();
+const SELECTED_MEDIA_ITEM =
+    "https://storage.googleapis.com/media-session/big-buck-bunny/trailer.mov";
 
 const MeetingStageContent: FC<IMeetingStateContentProps> = ({
     context,
@@ -80,7 +83,7 @@ const MeetingStageContent: FC<IMeetingStateContentProps> = ({
     // Element ref for inking canvas
     const canvasRef = useRef<HTMLDivElement | null>(null);
     // Media player
-    const [player, setPlayer] = useState<AzureMediaPlayer | null>(null);
+    const [player, setPlayer] = useState<VideoJSDelegate | null>(null);
     // Flag tracking whether player setup has started
     const playerSetupStarted = useRef(false);
 
@@ -124,15 +127,94 @@ const MeetingStageContent: FC<IMeetingStateContentProps> = ({
     useEffect(() => {
         if (player || playerSetupStarted.current) return;
         playerSetupStarted.current = true;
-        // Setup Azure Media Player
-        const amp = new AzureMediaPlayer("video", SELECTED_MEDIA_ITEM.src);
-        // Set player when AzureMediaPlayer is ready to go
-        const onReady = () => {
-            setPlayer(amp);
-            amp.removeEventListener("ready", onReady);
+        const options: any = {
+            src: "https://storage.googleapis.com/media-session/big-buck-bunny/trailer.mov",
+            preload: "auto",
+            poster: "https://images4.alphacoders.com/247/247356.jpg",
+            sources: [
+                {
+                    src: "https://storage.googleapis.com/media-session/big-buck-bunny/trailer.mov",
+                    type: "video/mp4",
+                },
+            ],
+            controls: true,
+            controlBar: {
+                lockShowing: true,
+            },
         };
-        amp.addEventListener("ready", onReady);
+        videojs("video", options, function () {
+            const videojsDelegate = new VideoJSDelegate(this);
+            setPlayer(videojsDelegate);
+        });
     }, [player, setPlayer]);
+
+    useEffect(() => {
+        if (!player) return;
+        const controlBar = player.getChild("controlBar");
+        const children = player.children();
+        if (children.length === 0) return;
+        const videoEl = children[0];
+        const unsubscribes: Function[] = [];
+        const togglePlayPause = () => {
+            // inverse because we assume the state already changed by the time this emits
+            if (!player.paused) {
+                play().catch((err) => console.error(err));
+            } else {
+                pause().catch((err) => console.error(err));
+            }
+        };
+        videoEl.onclick = togglePlayPause;
+        unsubscribes.push(() => {
+            videoEl.onclick = undefined;
+        });
+
+        const poster = player.getChild("PosterImage");
+        if (poster) {
+            poster.on("click", togglePlayPause);
+            unsubscribes.push(() => {
+                poster.off("click", togglePlayPause);
+            });
+        }
+
+        if (controlBar) {
+            const playToggle = controlBar.getChild("playToggle");
+            if (playToggle) {
+                playToggle.on("click", togglePlayPause);
+                unsubscribes.push(() => {
+                    playToggle.off("click", togglePlayPause);
+                });
+            }
+            const progressControl = controlBar.getChild("ProgressControl");
+            if (progressControl) {
+                const handler = (evt: any) => {
+                    seekTo(player.currentTime).catch((err) =>
+                        console.error(err)
+                    );
+                };
+                progressControl.on("mouseup", handler);
+                progressControl.on("touchend", handler);
+                unsubscribes.push(() => {
+                    progressControl.off("mouseup", handler);
+                    progressControl.off("touchend", handler);
+                });
+            }
+        }
+        const bigPlayButton = player.getChild("BigPlayButton");
+        if (bigPlayButton) {
+            const handler = (evt: any) => {
+                play();
+                evt.stopPropagation();
+            };
+            bigPlayButton.on("click", handler);
+            unsubscribes.push(() => {
+                bigPlayButton.off("click", handler);
+            });
+        }
+
+        return () => {
+            unsubscribes.forEach((unsub) => unsub());
+        };
+    }, [player, play, pause, seekTo]);
 
     return (
         <>
@@ -152,10 +234,7 @@ const MeetingStageContent: FC<IMeetingStateContentProps> = ({
                 endSuspension={endSuspension}
             >
                 {/* // Render video */}
-                <video
-                    id="video"
-                    className="azuremediaplayer amp-default-skin amp-big-play-centered"
-                />
+                <video id="video" className="video-js" />
             </MediaPlayerContainer>
         </>
     );

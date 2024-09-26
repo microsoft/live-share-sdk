@@ -21,7 +21,8 @@
         "react-router-dom": "^6.4.2",
         "use-resize-observer": "^9.1.0",
         "uuid": "^9.0.0",
-        "web-vitals": "^3.1.1"
+        "web-vitals": "^3.1.1",
+        "video.js": "^8.17.4"
     },
     "devDependencies": {
         "@fluidframework/test-runtime-utils": "^2.0.0",

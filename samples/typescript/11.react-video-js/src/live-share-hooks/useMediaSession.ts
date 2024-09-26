@@ -5,11 +5,11 @@
 
 import {
     ExtendedMediaMetadata,
+    IMediaPlayer,
     IMediaPlayerSynchronizerEvent,
     MediaPlayerSynchronizerEvents,
 } from "@microsoft/live-share-media";
 import { useEffect, useCallback } from "react";
-import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
 import { MediaItem } from "../utils/media-list";
 import { useMediaSynchronizer } from "@microsoft/live-share-react";
 import {
@@ -34,8 +34,8 @@ export const useMediaSession = (
     threadId: string,
     localUserIsPresenting: boolean,
     isShareInitiator: boolean,
-    player: AzureMediaPlayer | null,
-    selectedMediaItem: MediaItem | undefined,
+    player: IMediaPlayer | null,
+    selectedMediaItem: string | undefined,
     displayNotification: DisplayNotificationCallback
 ) => {
     const canSendPositionUpdates = AppConfiguration.isFullyLargeMeetingOptimized
@@ -45,7 +45,7 @@ export const useMediaSession = (
         useMediaSynchronizer(
             `${threadId}/${UNIQUE_KEYS.media}`, // unique key for meeting + media
             player,
-            selectedMediaItem?.src ?? null,
+            selectedMediaItem ?? null,
             ACCEPT_PLAYBACK_CHANGES_FROM,
             !localUserIsPresenting, // viewOnly for can play/pause/seek/setTrack
             canSendPositionUpdates // canSendPositionUpdates for large meeting optimizations
@@ -61,7 +61,7 @@ export const useMediaSession = (
                 album: "",
                 artist: "",
                 artwork: [],
-                title: selectedMediaItem ? selectedMediaItem?.title : "",
+                title: "",
             };
             mediaSynchronizer?.setTrack(metadata);
         },
@@ -148,14 +148,9 @@ export const useMediaSession = (
         if (!localUserIsPresenting) return;
         if (!selectedMediaItem) return;
         const currentSrc = mediaSynchronizer.player.src;
-        if (currentSrc && currentSrc === selectedMediaItem?.src) return;
-        setTrack(selectedMediaItem.src);
-    }, [
-        localUserIsPresenting,
-        mediaSynchronizer,
-        selectedMediaItem?.src,
-        setTrack,
-    ]);
+        if (currentSrc && currentSrc === selectedMediaItem) return;
+        setTrack(selectedMediaItem);
+    }, [localUserIsPresenting, mediaSynchronizer, selectedMediaItem, setTrack]);
 
     // Register audio ducking
     useEffect(() => {
@@ -180,19 +175,19 @@ export const useMediaSession = (
             let displayText: string;
             switch (evt.details.action) {
                 case "play": {
-                    displayText = `played the ${selectedMediaItem?.type}`;
+                    displayText = `played the video`;
                     break;
                 }
                 case "pause": {
-                    displayText = `paused the ${selectedMediaItem?.type}`;
+                    displayText = `paused the video`;
                     break;
                 }
                 case "seekto": {
-                    displayText = `seeked the ${selectedMediaItem?.type}`;
+                    displayText = `seeked the video`;
                     break;
                 }
                 case "settrack": {
-                    displayText = `changed the ${selectedMediaItem?.type}`;
+                    displayText = `changed the video`;
                     break;
                 }
                 default: {
@@ -222,6 +217,12 @@ export const useMediaSession = (
         localUserIsPresenting,
         displayNotification,
     ]);
+
+    useEffect(() => {
+        if (!mediaSynchronizer) return;
+        // Disable blocking unexpected player events
+        mediaSynchronizer.blockUnexpectedPlayerEvents = false;
+    }, [mediaSynchronizer]);
 
     // Return relevant objects and callbacks UI layer
     return {

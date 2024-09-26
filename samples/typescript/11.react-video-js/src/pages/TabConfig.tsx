@@ -13,7 +13,7 @@ const TabConfig: FC = () => {
         pages.config.registerOnSaveHandler(function (saveEvent) {
             pages.config.setConfig({
                 suggestedDisplayName: "Contoso",
-                contentUrl: `${window.location.origin}/sidepanel?inTeams=true`,
+                contentUrl: `${window.location.origin}/?inTeams=true`,
             });
             saveEvent.notifySuccess();
         });

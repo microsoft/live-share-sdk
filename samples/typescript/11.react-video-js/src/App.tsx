@@ -13,7 +13,6 @@ import * as microsoftTeams from "@microsoft/teams-js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import MeetingStage from "./pages/MeetingStage";
-import SidePanel from "./pages/SidePanel";
 import TabConfig from "./pages/TabConfig";
 import { inTeams } from "./utils/inTeams";
 
@@ -93,7 +92,6 @@ export const App = () => {
                 <Router window={window} basename="/">
                     <Routes>
                         <Route path={"/"} element={<MeetingStage />} />
-                        <Route path={"/sidepanel"} element={<SidePanel />} />
                         <Route path={"/config"} element={<TabConfig />} />
                     </Routes>
                 </Router>

@@ -64,49 +64,6 @@ export const PlayerControls: FC<IPlayerControlsProps> = ({
                 minWidth: "0px",
             }}
         >
-            <FlexRow vAlign="center" gap="smaller">
-                {/* Play Button */}
-                <Button
-                    icon={
-                        playerState.isPlaying ? (
-                            <Pause24Filled />
-                        ) : (
-                            <Play24Filled />
-                        )
-                    }
-                    appearance="transparent"
-                    title={playerState.isPlaying ? "Pause" : "Play"}
-                    onClick={togglePlayPause}
-                />
-                {/* Next Track Button */}
-                {localUserIsPresenting && !!nextTrack && (
-                    <Button
-                        icon={<Next20Filled />}
-                        appearance="transparent"
-                        title={"Next track"}
-                        onClick={nextTrack}
-                    />
-                )}
-                {/* Mute Button */}
-                <Button
-                    icon={
-                        playerState.muted ? (
-                            <SpeakerMute20Filled />
-                        ) : (
-                            <Speaker220Filled />
-                        )
-                    }
-                    appearance="transparent"
-                    title={playerState.muted ? "Unmute" : "Mute"}
-                    onClick={toggleMute}
-                />
-                {/* Formatted Time Value */}
-                <Text size={300} weight="medium">
-                    {formatTimeValue(playerState.currentTime)}
-                    {" / "}
-                    {formatTimeValue(playerState.duration)}
-                </Text>
-            </FlexRow>
             <FlexRow vAlign="center">
                 {suspended && (
                     <Button
@@ -175,65 +132,29 @@ export const PlayerControls: FC<IPlayerControlsProps> = ({
                             </div>
                         </Button>
                     )}
-                    {/* Divider */}
-                    <div
-                        style={{
-                            width: "1px",
-                            height: "20px",
-                            backgroundColor: "white",
-                            opacity: "0.6",
-                            marginLeft: "12px",
-                            marginRight: "4px",
-                        }}
-                    />
+
                     {/* Ink Toggle */}
                     {localUserIsPresenting && inkingManager && liveCanvas && (
-                        <InkingControls
-                            inkingManager={inkingManager}
-                            liveCanvas={liveCanvas}
-                            isEnabled={inkActive}
-                            setIsEnabled={setInkActive}
-                        />
-                    )}
-                    {/* Info Popover */}
-                    <Popover>
-                        <PopoverTrigger>
-                            <Button
-                                icon={<Info24Regular />}
-                                appearance="transparent"
-                                title={"Info"}
+                        <>
+                            {/* Divider */}
+                            <div
+                                style={{
+                                    width: "1px",
+                                    height: "20px",
+                                    backgroundColor: "white",
+                                    opacity: "0.6",
+                                    marginLeft: "12px",
+                                    marginRight: "4px",
+                                }}
                             />
-                        </PopoverTrigger>
-                        <PopoverSurface aria-label="video info">
-                            <FlexColumn>
-                                {playerState.currentPlaybackBitrate && (
-                                    <div>
-                                        <Text size={300}>
-                                            {`Bitrate: ${
-                                                playerState.currentPlaybackBitrate /
-                                                1000
-                                            }kbps`}
-                                        </Text>
-                                    </div>
-                                )}
-                                <div>
-                                    <Text size={300}>
-                                        {`Resolution: ${playerState.resolution}`}
-                                    </Text>
-                                </div>
-                                <div>
-                                    <Text size={300}>
-                                        {`Heuristic Profile: ${playerState.currentHeuristicProfile}`}
-                                    </Text>
-                                </div>
-                                <div>
-                                    <Text
-                                        size={300}
-                                    >{`Volume: ${playerState.volume}`}</Text>
-                                </div>
-                            </FlexColumn>
-                        </PopoverSurface>
-                    </Popover>
+                            <InkingControls
+                                inkingManager={inkingManager}
+                                liveCanvas={liveCanvas}
+                                isEnabled={inkActive}
+                                setIsEnabled={setInkActive}
+                            />
+                        </>
+                    )}
                 </FlexRow>
             </FlexRow>
         </FlexRow>

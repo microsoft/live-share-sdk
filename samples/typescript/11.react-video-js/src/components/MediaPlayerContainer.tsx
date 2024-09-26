@@ -26,10 +26,11 @@ import {
     getVideoStyle,
 } from "../styles/styles";
 import { InkCanvas } from "./InkCanvas";
-import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
 import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
 import { PlayerControls } from "./PlayerControls";
+import { IMediaPlayer } from "@microsoft/live-share-media";
+import { VideoJSDelegate } from "../utils/VideoJSDelegate";
 
 const events = [
     "loadstart",
@@ -51,13 +52,10 @@ export interface IPlayerState {
     currentTime: number;
     muted: boolean;
     volume: number;
-    currentPlaybackBitrate?: number;
-    currentHeuristicProfile?: string;
-    resolution?: string;
 }
 
 interface IMediaPlayerContainerProps {
-    player: AzureMediaPlayer | null;
+    player: VideoJSDelegate | null;
     liveCanvas?: LiveCanvas;
     localUserIsPresenting: boolean;
     localUserIsEligiblePresenter: boolean;
@@ -98,9 +96,6 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
         currentTime: 0,
         muted: false,
         volume: 1,
-        currentPlaybackBitrate: undefined,
-        currentHeuristicProfile: undefined,
-        resolution: undefined,
     });
     const { ref: resizeRef, width = 1, height = 1 } = useResizeObserver();
     const videoSize = useVisibleVideoSize(width, height);
@@ -150,9 +145,6 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
                 currentTime: player.currentTime || 0,
                 muted: player.muted,
                 volume: player.volume,
-                currentPlaybackBitrate: player.currentPlaybackBitrate,
-                currentHeuristicProfile: player.currentHeuristicProfile,
-                resolution: player.resolution,
             });
         };
 
@@ -172,15 +164,19 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
     }, [player]);
 
     useEffect(() => {
-        if (player && togglePlayPause) {
-            document.body.onkeyup = function (e) {
-                e.preventDefault();
-                if (e.key === " " || e.code === "Space") {
-                    togglePlayPause();
-                }
-            };
-        }
-    }, [player, togglePlayPause]);
+        player?.height(videoSize?.height);
+    }, [player, videoSize]);
+
+    // useEffect(() => {
+    //     if (player && togglePlayPause) {
+    //         document.body.onkeyup = function (e) {
+    //             e.preventDefault();
+    //             if (e.key === " " || e.code === "Space") {
+    //                 togglePlayPause();
+    //             }
+    //         };
+    //     }
+    // }, [player, togglePlayPause]);
 
     const flexRowStyles = getFlexRowStyles();
     const flexColumnStyles = getFlexColumnStyles();
@@ -206,7 +202,7 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
             <div className={resizeReferenceStyles.root} ref={resizeRef} />
             <div
                 className={videoStyle.root}
-                onClick={togglePlayPause}
+                // onClick={togglePlayPause}
                 style={{
                     left: `${videoSize?.xOffset || 0}px`,
                     top: `${videoSize?.yOffset || 0}px`,
@@ -238,13 +234,6 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
                         "linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.4))",
                 }}
             >
-                {/* Seek Progress Bar */}
-                <PlayerProgressBar
-                    currentTime={playerState.currentTime}
-                    duration={playerState.duration}
-                    isPlaybackDisabled={!playerState.playbackStarted}
-                    onSeek={seekTo}
-                />
                 <PlayerControls
                     endSuspension={endSuspension}
                     inkActive={inkActive}

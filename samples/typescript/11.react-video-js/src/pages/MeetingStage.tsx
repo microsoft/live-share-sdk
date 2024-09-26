@@ -28,7 +28,7 @@ import { VideoJSDelegate } from "../utils/VideoJSDelegate";
 import "video.js/dist/video-js.css";
 
 const LIVE_SHARE_OPTIONS: ILiveShareClientOptions = {
-    canSendBackgroundUpdates: true, // default to false so we can wait to see
+    canSendBackgroundUpdates: false, // default to false so we can wait to see
 };
 
 const MeetingStage: FC = () => {

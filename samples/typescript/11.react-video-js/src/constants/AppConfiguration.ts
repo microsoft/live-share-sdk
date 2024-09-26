@@ -5,5 +5,6 @@ export interface IAppConfiguration {
     isFullyLargeMeetingOptimized: boolean;
 }
 export const AppConfiguration: IAppConfiguration = {
+    // Set to false to disable large meeting optimizations
     isFullyLargeMeetingOptimized: true,
 };

@@ -27,13 +27,9 @@ interface IPlayerControlsProps {
     liveCanvas: LiveCanvas | undefined;
     localUserIsEligiblePresenter: boolean;
     localUserIsPresenting: boolean;
-    nextTrack?: () => void;
-    playerState: IPlayerState;
     setInkActive: Dispatch<SetStateAction<boolean>>;
     suspended: boolean;
     takeControl: () => void;
-    toggleMute: () => void;
-    togglePlayPause: () => void;
 }
 
 export const PlayerControls: FC<IPlayerControlsProps> = ({
@@ -43,13 +39,9 @@ export const PlayerControls: FC<IPlayerControlsProps> = ({
     liveCanvas,
     localUserIsEligiblePresenter,
     localUserIsPresenting,
-    nextTrack,
-    playerState,
     setInkActive,
     suspended,
     takeControl,
-    toggleMute,
-    togglePlayPause,
 }) => {
     return (
         <FlexRow

@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { LiveDataObject } from "@microsoft/live-share";
+import { LiveDataObject } from "@microsoft/live-share/internal";
 import { useCallback, useState } from "react";
 
 export type DisplayNotificationCallback = (

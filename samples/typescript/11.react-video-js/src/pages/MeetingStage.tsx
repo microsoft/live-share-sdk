@@ -227,9 +227,6 @@ const MeetingStageContent: FC<IMeetingStateContentProps> = ({
                 localUserIsEligiblePresenter={localUserIsEligiblePresenter}
                 suspended={suspended}
                 canvasRef={canvasRef}
-                play={play}
-                pause={pause}
-                seekTo={seekTo}
                 takeControl={takeControl}
                 endSuspension={endSuspension}
             >

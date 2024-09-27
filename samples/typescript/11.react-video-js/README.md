@@ -1,9 +1,6 @@
 # TypeScript: React Video.js Sample
 
-This repository contains a simple app that enables all connected clients to watch videos together, build a shared playlist, transfer who is in control, and annotate over the video.
-
-You can use this sample as a template to build a robust media synchronization feature into your app, or use it as an example.
-Each `SharedObject` in our schema (as defined in the `/src/live-share-hooks/useSharedObjects.js` file) has a correlating hook in the live-share-hooks folder.
+This repository contains a simple app that enables all connected clients to watch videos together using the `live-share-react` package and Video.js.
 
 We have found this structure to be very useful in composing advanced applications with Live Share using Functional React components, but you can compose this differently for your app.
 
@@ -14,7 +11,7 @@ After cloning the repository, you must first set up the npm workspace from the r
 ```bash
 npm install
 npm run build:packages # Build Live Share packages
-cd samples/t*/22*
+cd samples/t*/11*
 ```
 
 _Note:_ Do not run `npm start` before running `npm run build:packages` from the root of the project, unless you first move the sample out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
@@ -33,8 +30,6 @@ Upon loading, if there is no `/#{id}` in the URL, it will create one and insert 
 
 You can copy this URL and paste it into new browser tabs to test Live Share using a local server.
 
-To test the side panel & video queue, you can replace your URL with `/sidepanel#{id}`.
-
 _Note:_ if testing with HTTPS, such as when using a tunneling service like Ngrok, instead use the command `npm run start-https`.
 
 ### Known issues when testing in browser
@@ -48,8 +43,6 @@ Tab configuration page doesn't do anything in browser.
 ## Testing the app in Teams
 
 There are two options for testing this sample in Teams. The first is to use ngrok to serve and tunnel the app locally, before zipping the app package.
-
-Alternatively, you can use our ready-to-use [demo app package](../demo-manifests/ContosoMedia.zip). After downloading the zip file and setting up ngrok, you can skip ahead to the [Test it out](#test-it-out) section.
 
 ### Create a ngrok tunnel to allow Teams to reach your tab app
 

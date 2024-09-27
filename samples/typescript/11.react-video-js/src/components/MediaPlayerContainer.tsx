@@ -12,14 +12,9 @@ import {
     MutableRefObject,
 } from "react";
 import useResizeObserver from "use-resize-observer";
-import PlayerProgressBar from "./PlayerProgressBar";
 import { debounce } from "lodash";
 import { mergeClasses, tokens } from "@fluentui/react-components";
-import {
-    getFlexColumnStyles,
-    getFlexItemStyles,
-    getFlexRowStyles,
-} from "../styles/layouts";
+import { getFlexColumnStyles } from "../styles/layouts";
 import {
     getPlayerControlStyles,
     getResizeReferenceStyles,
@@ -29,7 +24,6 @@ import { InkCanvas } from "./InkCanvas";
 import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import { useVisibleVideoSize } from "../utils/useVisibleVideoSize";
 import { PlayerControls } from "./PlayerControls";
-import { IMediaPlayer } from "@microsoft/live-share-media";
 import { VideoJSDelegate } from "../utils/VideoJSDelegate";
 
 const events = [
@@ -60,12 +54,8 @@ interface IMediaPlayerContainerProps {
     localUserIsPresenting: boolean;
     localUserIsEligiblePresenter: boolean;
     suspended: boolean;
-    play: () => void;
-    pause: () => void;
-    seekTo: (time: number) => void;
     takeControl: () => void;
     endSuspension: () => void;
-    nextTrack?: () => void; // todo?
     canvasRef: MutableRefObject<HTMLDivElement | null>;
     inkingManager?: InkingManager;
     children: ReactNode;
@@ -77,12 +67,8 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
     localUserIsPresenting,
     localUserIsEligiblePresenter,
     suspended,
-    play,
-    pause,
-    seekTo,
     takeControl,
     endSuspension,
-    nextTrack,
     canvasRef,
     inkingManager,
     children,
@@ -107,24 +93,6 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
     const debouncedHideControls = useCallback(debounce(hideControls, 2500), [
         hideControls,
     ]);
-
-    const togglePlayPause = useCallback(() => {
-        if (!player) {
-            return;
-        }
-        if (player.paused) {
-            play();
-        } else {
-            pause();
-        }
-    }, [player, play, pause]);
-
-    const toggleMute = useCallback(() => {
-        if (!player) {
-            return;
-        }
-        player.muted = !player.muted;
-    }, [player]);
 
     useEffect(() => {
         if (!localUserIsPresenting) {
@@ -167,20 +135,7 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
         player?.height(videoSize?.height);
     }, [player, videoSize]);
 
-    // useEffect(() => {
-    //     if (player && togglePlayPause) {
-    //         document.body.onkeyup = function (e) {
-    //             e.preventDefault();
-    //             if (e.key === " " || e.code === "Space") {
-    //                 togglePlayPause();
-    //             }
-    //         };
-    //     }
-    // }, [player, togglePlayPause]);
-
-    const flexRowStyles = getFlexRowStyles();
     const flexColumnStyles = getFlexColumnStyles();
-    const flexItemStyles = getFlexItemStyles();
     const playerControlStyles = getPlayerControlStyles();
     const videoStyle = getVideoStyle();
     const resizeReferenceStyles = getResizeReferenceStyles();
@@ -202,7 +157,6 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
             <div className={resizeReferenceStyles.root} ref={resizeRef} />
             <div
                 className={videoStyle.root}
-                // onClick={togglePlayPause}
                 style={{
                     left: `${videoSize?.xOffset || 0}px`,
                     top: `${videoSize?.yOffset || 0}px`,
@@ -241,13 +195,9 @@ export const MediaPlayerContainer: FC<IMediaPlayerContainerProps> = ({
                     liveCanvas={liveCanvas}
                     localUserIsEligiblePresenter={localUserIsEligiblePresenter}
                     localUserIsPresenting={localUserIsPresenting}
-                    nextTrack={nextTrack}
-                    playerState={playerState}
                     setInkActive={setInkActive}
                     suspended={suspended}
                     takeControl={takeControl}
-                    toggleMute={toggleMute}
-                    togglePlayPause={togglePlayPause}
                 />
             </div>
         </div>

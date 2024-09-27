@@ -220,7 +220,7 @@ export const useMediaSession = (
 
     useEffect(() => {
         if (!mediaSynchronizer) return;
-        // Disable blocking unexpected player events
+        // Disable blocking unexpected player events, since video.js built in buttons don't allow overriding the onclick behavior of their buttons
         mediaSynchronizer.blockUnexpectedPlayerEvents = false;
     }, [mediaSynchronizer]);
 

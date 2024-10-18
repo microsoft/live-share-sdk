@@ -5,9 +5,9 @@
 
 import { ITree, SharedObjectKind, SharedTree } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
-import { SharedDirectory } from "@fluidframework/map/internal";
-import { SharedString } from "@fluidframework/sequence/internal";
-import type { ISharedObjectKind } from "@fluidframework/shared-object-base/internal";
+import { SharedDirectory } from "@fluidframework/map/legacy";
+import { SharedString } from "@fluidframework/sequence/legacy";
+import type { ISharedObjectKind } from "@fluidframework/shared-object-base/legacy";
 
 /**
  * Key for window global reference to loadable objects.

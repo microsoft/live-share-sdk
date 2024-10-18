@@ -1,12 +1,10 @@
 import { LiveDataObject } from "./internals/LiveDataObject.js";
 import { LiveState } from "./LiveState.js";
 import { ILivePresenceEvents, LivePresence } from "./LivePresence.js";
-import {
-    DataObjectFactory,
-    createDataObjectKind,
-} from "@fluidframework/aqueduct/internal";
+import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
+import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
-import { assert } from "@fluidframework/core-utils/internal";
+import { assert } from "@fluidframework/core-utils/legacy";
 import {
     LiveDataObjectInitializeState,
     UserMeetingRole,

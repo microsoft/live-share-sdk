@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/legacy";
 import { IContainerRuntimeSignaler } from "../../interfaces.js";
 import { v4 } from "uuid";
 

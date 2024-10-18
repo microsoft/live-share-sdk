@@ -8,7 +8,7 @@ import {
     ITelemetryBaseLogger,
 } from "@fluidframework/core-interfaces";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/legacy";
 import { ILiveEvent, UserMeetingRole } from "../interfaces.js";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import { IEvent } from "@fluidframework/core-interfaces";

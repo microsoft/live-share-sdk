@@ -6,7 +6,7 @@ import { IRequest } from "@fluidframework/core-interfaces";
 import {
     IDocumentServiceFactory,
     IUrlResolver,
-} from "@fluidframework/driver-definitions/internal";
+} from "@fluidframework/driver-definitions/legacy";
 import {
     ILocalDeltaConnectionServer,
     LocalDeltaConnectionServer,

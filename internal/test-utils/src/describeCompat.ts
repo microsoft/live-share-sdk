@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import { createChildLogger } from "@fluidframework/telemetry-utils/internal";
+import { createChildLogger } from "@fluidframework/telemetry-utils/legacy";
 import {
     getUnexpectedLogErrorException,
     ITestObjectProvider,

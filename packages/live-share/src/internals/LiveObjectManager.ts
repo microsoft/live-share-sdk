@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/legacy";
 import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import { IRuntimeSignaler } from "./LiveEventScope.js";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";

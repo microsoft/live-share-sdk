@@ -1,6 +1,6 @@
-import { DataObject } from "@fluidframework/aqueduct/internal";
-import { type ISharedDirectory } from "@fluidframework/map/internal";
-import { type IFluidDataStoreRuntime } from "@fluidframework/datastore-definitions/internal";
+import { DataObject } from "@fluidframework/aqueduct/legacy";
+import { type ISharedDirectory } from "@fluidframework/map/legacy";
+import { type IFluidDataStoreRuntime } from "@fluidframework/datastore-definitions/legacy";
 import { IFluidContainer } from "@fluidframework/fluid-static";
 
 /**

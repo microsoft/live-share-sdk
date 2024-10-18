@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
-import { MockLogger } from "@fluidframework/telemetry-utils/internal";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/legacy";
+import { MockLogger } from "@fluidframework/telemetry-utils/legacy";
 import { IRuntimeSignaler } from "../LiveEventScope.js";
 import { v4 } from "uuid";
 import { ITelemetryBaseLogger } from "@fluidframework/azure-client";

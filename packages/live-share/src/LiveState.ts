@@ -3,11 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    DataObjectFactory,
-    createDataObjectKind,
-} from "@fluidframework/aqueduct/internal";
-import { assert } from "@fluidframework/core-utils/internal";
+import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
+import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
+import { assert } from "@fluidframework/core-utils/legacy";
 import { IEvent } from "@fluidframework/core-interfaces";
 import {
     ILiveEvent,

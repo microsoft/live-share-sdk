@@ -1,7 +1,7 @@
 import {
     DataObjectTypes,
     IDataObjectProps,
-} from "@fluidframework/aqueduct/internal";
+} from "@fluidframework/aqueduct/legacy";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { LiveDataObject } from "./LiveDataObject.js";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";

@@ -3,12 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    DataObjectFactory,
-    createDataObjectKind,
-} from "@fluidframework/aqueduct/internal";
+import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
+import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
-import { SharedMap } from "@fluidframework/map/internal";
+import { SharedMap } from "@fluidframework/map/legacy";
 import { InkingManager } from "./InkingManager.js";
 import { IPoint } from "./Geometry.js";
 import { IStroke, StrokeType } from "./Stroke.js";
@@ -61,7 +59,7 @@ import {
 } from "./InkingManager-constants.js";
 import { IEventUserInfo, IUserInfo } from "./LiveCanvas-interfaces.js";
 import { LiveCursor } from "./LiveCursor.js";
-import type { ISharedObjectKind } from "@fluidframework/shared-object-base/internal";
+import type { ISharedObjectKind } from "@fluidframework/shared-object-base/legacy";
 import {
     LiveCanvasStrokesMap,
     LiveCanvasTreeNode,

@@ -1,5 +1,5 @@
-import { type IFluidDataStoreFactory } from "@fluidframework/runtime-definitions/internal";
-import { type IChannelFactory } from "@fluidframework/datastore-definitions/internal";
+import { type IFluidDataStoreFactory } from "@fluidframework/runtime-definitions/legacy";
+import { type IChannelFactory } from "@fluidframework/datastore-definitions/legacy";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import type { SharedObjectKind } from "@fluidframework/shared-object-base";
 /**

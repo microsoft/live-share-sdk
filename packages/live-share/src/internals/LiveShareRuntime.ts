@@ -1,4 +1,4 @@
-import { assert } from "@fluidframework/core-utils/internal";
+import { assert } from "@fluidframework/core-utils/legacy";
 import { HostTimestampProvider } from "../HostTimestampProvider.js";
 import {
     IClientInfo,

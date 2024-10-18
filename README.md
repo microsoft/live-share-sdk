@@ -1,8 +1,12 @@
 # Live Share SDK
 
-The Live Share SDK builds on the [Fluid Framework](https://fluidframework.com/) to enable the creation of collaborative experiences for Microsoft Teams and Microsoft 365. This package focuses on building collaborative meeting applications for Microsoft Teams using Fluid. The SDK provides a `LiveShareClient` class for connecting to a special Fluid Container associated with each meeting. A collection of Live Share specific Distributed Data Structure (DDS) classes are also provided to simplify building applications for common meeting scenarios like shared media playback.
+![Image showing the Live Share SDK used in a Teams meeting to connect two users together via a virtual white board.](assets/readme-banner.png)
 
-To get started, we recommend first familiarizing yourself with the [Fluid Framework](https://fluidframework.com/docs/) and [Live Share overview](https://aka.ms/teamsliveshare). You can then follow our [Quick Start Guide](https://learn.microsoft.com/microsoftteams/platform/apps-in-teams-meetings/teams-live-share-quick-start) to build your first Teams Meeting App that uses Live Share.
+The Live Share SDK enables building collaborative applications for Microsoft Teams. The SDK provides a `LiveShareClient` class for connecting to a collaborative session associated with each meeting. It provides a mixture of turn-key collaborative scenarios like media synchronization and inking + cursors, as well as flexible primitive API's to enable synchronizing any state in your application.
+
+The Live Share SDK builds on [Fluid Framework](https://fluidframework.com/) to enable the creation of collaborative experiences for Microsoft Teams and Microsoft 365. A collection of Live Share specific Distributed Data Structure (DDS) classes are also provided to simplify building applications for common meeting scenarios like shared media playback.
+
+To get started, you may want to first read our [Live Share docs](https://aka.ms/teamsliveshare) and [Fluid Framework docs](https://fluidframework.com/docs/). You can then follow our [Quick Start Guide](https://learn.microsoft.com/microsoftteams/platform/apps-in-teams-meetings/teams-live-share-quick-start) to build your first Teams Meeting App that uses Live Share.
 
 You can find our detailed API reference documentation at [Live Share reference docs](https://docs.microsoft.com/javascript/api/@microsoft/live-share/) and [Live Share Media reference docs](https://docs.microsoft.com/javascript/api/@microsoft/live-share-media/).
 
@@ -10,30 +14,30 @@ You can find our detailed API reference documentation at [Live Share reference d
 
 [Live Share](/packages/live-share/README.md) has several features that make building collaborative apps easier than ever, including:
 
-- `LiveShareClient`: Connect to a Fluid container associated with a Microsoft Teams meeting.
-- `LivePresence`: Track who is using your app during a meeting and associate custom metadata for each user (e.g., camera position).
-- `LiveState`: Synchronize a JSON-serializable value for maintaining consistent application state across clients.
-- `LiveTimer`: Build a collaborative countdown timer.
-- `LiveEvent`: Send one-time, stateless JSON-serializable values to each user in the session.
-- `LiveFollowMode` (beta): Easily integrate features to present to all, follow specific users, and suspend/resume following.
+-   `LiveShareClient`: Connect to a Fluid container associated with a Microsoft Teams meeting.
+-   `LivePresence`: Track who is using your app during a meeting and associate custom metadata for each user (e.g., camera position).
+-   `LiveState`: Synchronize a JSON-serializable value for maintaining consistent application state across clients.
+-   `LiveFollowMode` (beta): Easily integrate features to present to all, follow specific users, and suspend/resume following.
+-   `LiveTimer`: Build a collaborative countdown timer.
+-   `LiveEvent`: Send one-time, stateless JSON-serializable values to each user in the session.
 
 [Live Share Canvas](/packages/live-share-canvas/README.md) is an optional extension that allows any app to add a collaborative whiteboard as an app overlay. Key classes include:
 
-- `InkingManager`: Utilizes the HTML `<canvas>` element for turn-key pen, highlighter, laser pointer, and eraser tools.
-- `LiveCanvas`: Synchronizes the `InkingManager` strokes and adds remote cursors for users in the session.
+-   `InkingManager`: Utilizes the HTML `<canvas>` element for turn-key pen, highlighter, laser pointer, and eraser tools.
+-   `LiveCanvas`: Synchronizes the `InkingManager` strokes and adds remote cursors for users in the session.
 
 [Live Share Media](/packages/live-share-media/README.md) is an optional extension that makes it easy to add co-watch support to any video or audio player. Key classes include:
 
-- `LiveMediaSession`: Synchronizes player state for everyone in the session.
-- `MediaPlayerSynchronizer`: Delegate interface used with `LiveMediaSession` to execute playback commands against a media player; matches the HTML5 `IMediaPlayer` interface for `<video>` or `<audio>` elements.
+-   `LiveMediaSession`: Synchronizes player state for everyone in the session.
+-   `MediaPlayerSynchronizer`: Delegate interface used with `LiveMediaSession` to execute playback commands against a media player; matches the HTML5 `IMediaPlayer` interface for `<video>` or `<audio>` elements.
 
 [Live Share React](/packages/live-share-react/README.md) (beta) is an optional integration for React, providing a `<LiveShareProvider>` context provider component and a series of custom React hooks that correspond with each Live Share and Fluid DDS.
 
 [Fluid Framework](https://fluidframework.com/) also offers some useful collaborative features, each of which is compatible with Live Share, including:
 
-- `SharedMap`: The DDS equivalent to a JavaScript `Map`, which is useful for synchronizing a collection of objects.
-- `SharedString`: Synchronize a string text value, useful for building real-time text editors.
-- `SharedTree` (alpha): Synchronize a complex tree of intersecting nodes.
+-   `SharedTree`: Synchronize any object simply by using objects like you normally would in JS/TS.
+-   `SharedMap` (legacy): The DDS equivalent to a JavaScript `Map`, which is useful for synchronizing a collection of objects.
+-   `SharedString` (legacy): Synchronize a string text value, useful for building real-time text editors.
 
 ## Package Compatibility
 
@@ -41,9 +45,10 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 **It is critical that your app use the package dependencies listed in the table below.** Lookup the version of the `@microsoft/live-share` you're using and set any other dependencies in your package.json file to match:
 
-| @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
-| --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| ^1.0.0                  | ^2.11.0             | ^1.2.3          | ^1.0.0                      | ^1.0.0                       | ^2.5.0                        | ^2.5.0                          |
+| @microsoft/live-share | @microsoft/teams-js | fluid-framework | @microsoft/live-share-\* | @fluidframework/azure-client | @microsoft/TeamsFx | @microsoft/TeamsFx-react |
+| --------------------- | ------------------- | --------------- | ------------------------ | ---------------------------- | ------------------ | ------------------------ |
+| ^2.0.0                | ^2.11.0             | ^2.0.0          | ^2.0.0                   | ^2.0.0                       | ^2.5.0             | ^2.5.0                   |
+| ^1.0.0                | ^2.11.0             | ^1.2.3          | ^1.0.0                   | ^1.0.0                       | ^2.5.0             | ^2.5.0                   |
 
 ## Installing
 
@@ -107,11 +112,11 @@ yarn add @microsoft/live-share-react
 
 There are several ways you can [contribute](./CONTRIBUTING.md) to this project:
 
-- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
-  - (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
-- Review the source code changes.
-- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
-- [Contribute bug fixes](./CONTRIBUTING.md).
+-   [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+    -   (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
+-   Review the source code changes.
+-   Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+-   [Contribute bug fixes](./CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.
 
@@ -163,11 +168,11 @@ There are several code samples available to use:
 | Sample name           | Description                                                                                                                               | Javascript                                            | TypeScript                                            |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------- |
 | Dice Roller           | Enable all connected clients to roll a dice and view the result.                                                                          | [View](./samples/javascript/01.dice-roller/)          | [View](./samples/typescript/01.dice-roller/)          |
-| React Video           | Basic example showing how the `LiveMediaSession` class works with HTML5 video.                                                            | [View](./samples/javascript/02.react-video/)          |           |
+| React Video           | Basic example showing how the `LiveMediaSession` class works with HTML5 video.                                                            | [View](./samples/javascript/02.react-video/)          |                                                       |
 | Live Canvas demo      | Synchronized pens, laser pointers, cursors, and more via Live Share Canvas.                                                               | [View](./samples/javascript/03.live-canvas-demo/)     | [View](./samples/typescript/03.live-canvas-demo/)     |
 | Live Share React demo | Example of using the Live Share React package.                                                                                            | [View](./samples/javascript/04.live-share-react/)     | [View](./samples/typescript/04.live-share-react/)     |
 | React Media Template  | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](./samples/javascript/21.react-media-template/) | [View](./samples/typescript/21.react-media-template/) |
-| Agile Poker           | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](./samples/javascript/22.react-agile-poker/)    |           |
+| Agile Poker           | Enable all connected clients to play an Agile Poker planning activity.                                                                    | [View](./samples/javascript/22.react-agile-poker/)    |                                                       |
 
 ## Reporting Security Issues
 
@@ -177,8 +182,8 @@ Security issues and bugs should be reported privately, via email, to the Microso
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-Live Share, Live Share media, and Live Share canvas are licensed under a special [Microsoft Live Share SDK license](./LICENSE).
+Live Share, Live Share media, Live Share canvas, and Live Share React are licensed under a special [Microsoft Live Share SDK license](./LICENSE).
 
-Live Share Turbo and Live Share React are licensed under a special [Microsoft Live Share SDK - Pre-Release Version license](./packages/live-share-turbo/LICENSE).
+Live Share ACS is licensed under a special [Microsoft Live Share SDK - Pre-Release Version license](./packages/live-share-acs/LICENSE).
 
 Code samples are licensed separately under [MIT license](./samples/LICENSE).

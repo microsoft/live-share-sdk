@@ -11,7 +11,8 @@ module.exports = async function () {
     console.log(chalk.green("Setup Puppeteer"));
     const browser = await puppeteer.launch({
         headless: false,
-        executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        executablePath:
+            "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
         // if you are an OS user, please use "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     });
     // This global is not available inside tests but only in global teardown

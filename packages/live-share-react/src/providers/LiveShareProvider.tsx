@@ -3,18 +3,18 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
+import { ContainerSchema, IFluidContainer } from "fluid-framework";
 import React from "react";
-import { useSharedStateRegistry } from "../shared-hooks";
+import { useSharedStateRegistry } from "../shared-hooks/index.js";
 import {
     ILiveShareClientOptions,
     ILiveShareHost,
     ILiveShareJoinResults,
     ITimestampProvider,
+    LiveShareClient,
 } from "@microsoft/live-share";
-import { FluidContext, useFluidObjectsContext } from "./AzureProvider";
-import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
-import { isITeamsJsSdkError } from "../internal";
+import { FluidContext, useFluidObjectsContext } from "./AzureProvider.js";
+import { isITeamsJsSdkError } from "../internal/index.js";
 
 /**
  * React Context provider values for `<LiveShareProvider>`.
@@ -52,7 +52,7 @@ export interface ILiveShareContext {
      * @returns Promise with `ILiveShareJoinResults`, which includes the Fluid container
      */
     join: (
-        initialObjects?: LoadableObjectClassRecord,
+        fluidContainerSchema?: ContainerSchema,
         onInitializeContainer?: (container: IFluidContainer) => void
     ) => Promise<ILiveShareJoinResults>;
 }
@@ -72,6 +72,57 @@ export const LiveShareContext = React.createContext<ILiveShareContext>(
  * See `useFluidObjectsContext` for other information related to the Live Share session, such as the `container`.
  *
  * @returns current state of `LiveShareContext`
+ * 
+ * @example
+ ```jsx
+// LiveShareApp.jsx
+import { LiveShareProvider } from "@microsoft/live-share-react";
+import { LiveShareHost } from "@microsoft/teams-js";
+
+const host = LiveShareHost.create();
+
+export function LiveShareApp() {
+    // Call app.initialize() from teams-js before rendering LiveShareProvider
+
+    return (
+        <LiveShareProvider
+            joinOnLoad={true}
+            host={host}
+        >
+            <LiveShareLoader>
+                <LiveCheckbox />
+            </LiveShareLoader>
+        </LiveShareProvider>
+    );
+}
+
+// LiveShareLoader.jsx
+import { useLiveShareContext } from "@microsoft/live-share-react";
+
+export function LiveShareLoader({ children }) {
+    const { joined, joinError } = useLiveShareContext();
+
+    if (joinError) return <>{joinError.message}</>;
+    if (!joined) return <>Joining Live Share session...</>;
+    return <>{children}</>
+}
+
+// LiveCheckbox.jsx
+import { useLiveState } from "@microsoft/live-share-react";
+
+export function LiveCheckbox() {
+    const [checked, setChecked] = useLiveState("MY-UNIQUE-ID", false);
+    return (
+        <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => {
+                setChecked(!checked);
+            }}
+        />
+    );
+}
+ ```
  */
 export const useLiveShareContext = (): ILiveShareContext => {
     const context = React.useContext(LiveShareContext);
@@ -103,9 +154,9 @@ export interface ILiveShareProviderProps {
      */
     host: ILiveShareHost;
     /**
-     * The initial object schema to use when {@link joinOnLoad} is true.
+     * The schema to use when {@link joinOnLoad} is true.
      */
-    initialObjects?: LoadableObjectClassRecord;
+    fluidContainerSchema?: ContainerSchema;
     /**
      * Optional. Flag to determine whether to join Fluid container on load.
      */
@@ -114,11 +165,62 @@ export interface ILiveShareProviderProps {
 
 /**
  * React Context provider component for using Live Share data objects & joining a Live Share session using `LiveShareClient`.
+ * 
+ * @example
+ ```jsx
+// LiveShareApp.jsx
+import { LiveShareProvider } from "@microsoft/live-share-react";
+import { LiveShareHost } from "@microsoft/teams-js";
+
+const host = LiveShareHost.create();
+
+export function LiveShareApp() {
+    // Call app.initialize() from teams-js before rendering LiveShareProvider
+
+    return (
+        <LiveShareProvider
+            joinOnLoad={true}
+            host={host}
+        >
+            <LiveShareLoader>
+                <LiveCheckbox />
+            </LiveShareLoader>
+        </LiveShareProvider>
+    );
+}
+
+// LiveShareLoader.jsx
+import { useLiveShareContext } from "@microsoft/live-share-react";
+
+export function LiveShareLoader({ children }) {
+    const { joined, joinError } = useLiveShareContext();
+
+    if (joinError) return <>{joinError.message}</>;
+    if (!joined) return <>Joining Live Share session...</>;
+    return <>{children}</>
+}
+
+// LiveCheckbox.jsx
+import { useLiveState } from "@microsoft/live-share-react";
+
+export function LiveCheckbox() {
+    const [checked, setChecked] = useLiveState("MY-UNIQUE-ID", false);
+    return (
+        <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => {
+                setChecked(!checked);
+            }}
+        />
+    );
+}
+ ```
  */
 export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
     const startedRef = React.useRef(false);
     const clientRef = React.useRef(
-        new LiveShareTurboClient(props.host, props.clientOptions)
+        new LiveShareClient(props.host, props.clientOptions)
     );
     const [results, setResults] = React.useState<
         ILiveShareJoinResults | undefined
@@ -132,12 +234,12 @@ export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
      */
     const join = React.useCallback(
         async (
-            initialObjects?: LoadableObjectClassRecord,
+            fluidContainerSchema?: ContainerSchema,
             onInitializeContainer?: (container: IFluidContainer) => void
         ): Promise<ILiveShareJoinResults> => {
             startedRef.current = true;
             const results = await clientRef.current.join(
-                initialObjects,
+                fluidContainerSchema,
                 onInitializeContainer
             );
             setResults(results);
@@ -155,7 +257,7 @@ export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
         // We are not doing this here for backwards compatibility. View the README for more information.
         if (results !== undefined || startedRef.current || !props.joinOnLoad)
             return;
-        join(props.initialObjects).catch((error) => {
+        join(props.fluidContainerSchema).catch((error) => {
             console.error(error);
             if (error instanceof Error) {
                 setJoinError(error);
@@ -178,7 +280,7 @@ export const LiveShareProvider: React.FC<ILiveShareProviderProps> = (props) => {
                 );
             }
         });
-    }, [results, props.joinOnLoad, props.initialObjects, join]);
+    }, [results, props.joinOnLoad, props.fluidContainerSchema, join]);
 
     return (
         <LiveShareContext.Provider

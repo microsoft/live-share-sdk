@@ -11,7 +11,7 @@ import {
     IPlaybackTrackChangeEvent,
 } from "../internals/GroupPlaybackTrack";
 import { ExtendedMediaMetadata } from "../MediaSessionExtensions";
-import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
+import { Deferred } from "@microsoft/live-share/internal";
 
 describe("GroupPlaybackTrack", () => {
     const track1 = {

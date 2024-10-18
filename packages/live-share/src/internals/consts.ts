@@ -3,6 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { CompatibilityMode } from "@fluidframework/azure-client";
+
 /**
  * List of telemetry events.
  * @hidden
@@ -41,3 +43,8 @@ export const ObjectSynchronizerEvents = {
  * @hidden
  */
 export const LiveShareReportIssueLink = "https://aka.ms/teamsliveshare/issue";
+
+/**
+ * @hidden
+ */
+export const FluidCompatibilityMode: CompatibilityMode = "2";

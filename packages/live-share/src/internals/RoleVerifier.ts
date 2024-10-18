@@ -3,7 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ILiveShareHost, IRoleVerifier, UserMeetingRole } from "../interfaces";
+import {
+    ILiveShareHost,
+    IRoleVerifier,
+    UserMeetingRole,
+} from "../interfaces.js";
 /**
  * @hidden
  */

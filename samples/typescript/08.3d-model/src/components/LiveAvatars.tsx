@@ -3,7 +3,7 @@ import {
     IFollowModePresenceUserData,
     IFollowModeState,
     LivePresenceUser,
-    PresenceState,
+    PresenceStatus,
 } from "@microsoft/live-share";
 import { FC, ReactElement } from "react";
 import { ICustomFollowData } from "../pages";
@@ -40,8 +40,8 @@ export const LiveAvatars: FC<ILiveAvatarsProps> = ({
     const onlineOrAwayUsers = allUsers.filter(
         (user) =>
             user.displayName &&
-            (user.state === PresenceState.online ||
-                user.state === PresenceState.away)
+            (user.status === PresenceStatus.online ||
+                user.status === PresenceStatus.away)
     );
     const { inlineItems, overflowItems } = partitionAvatarGroupItems({
         items: onlineOrAwayUsers.map((user) => {
@@ -160,12 +160,12 @@ const AvatarItemPopover: FC<IAvatarPopoverProps> = ({
 function presenceStateToFluentStatus(
     user: LivePresenceUser
 ): PresenceBadgeStatus {
-    switch (user.state) {
-        case PresenceState.online:
+    switch (user.status) {
+        case PresenceStatus.online:
             return "available";
-        case PresenceState.offline:
+        case PresenceStatus.offline:
             return "offline";
-        case PresenceState.away:
+        case PresenceStatus.away:
             return "away";
         default:
             return "offline";

@@ -3,25 +3,27 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct";
-import { assert } from "@fluidframework/common-utils";
-import { IEvent } from "@fluidframework/common-definitions";
+import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
+import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
+import { assert } from "@fluidframework/core-utils/legacy";
+import { IEvent } from "@fluidframework/core-interfaces";
 import {
     ILiveEvent,
     LiveDataObjectInitializeState,
     UserMeetingRole,
-} from "./interfaces";
-import { cloneValue, TelemetryEvents } from "./internals";
+} from "./interfaces.js";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
     UnexpectedError,
-} from "./errors";
-import { LiveTelemetryLogger } from "./LiveTelemetryLogger";
-import { LiveEvent } from "./LiveEvent";
-import { LiveObjectSynchronizer } from "./LiveObjectSynchronizer";
-import { DynamicObjectRegistry } from "./DynamicObjectRegistry";
-import { LiveDataObject } from "./LiveDataObject";
+} from "./errors.js";
+import { LiveTelemetryLogger } from "./LiveTelemetryLogger.js";
+import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer.js";
+import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
+import { LiveDataObject } from "./internals/LiveDataObject.js";
+import { SharedObjectKind } from "fluid-framework";
+import { TelemetryEvents } from "./internals/consts.js";
+import { cloneValue, isNewerEvent } from "./internals/utils.js";
 
 /**
  * Events supported by [LiveState` object.
@@ -67,7 +69,7 @@ export interface ILiveStateEvents<TState = any> extends IEvent {
  * changes.
  * @template TState Optional data object that's synchronized with the state.
  */
-export class LiveState<TState = any> extends LiveDataObject<{
+export class LiveStateClass<TState = any> extends LiveDataObject<{
     Events: ILiveStateEvents<TState>;
 }> {
     private _logger?: LiveTelemetryLogger;
@@ -84,8 +86,8 @@ export class LiveState<TState = any> extends LiveDataObject<{
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveState.TypeName,
-        LiveState,
+        LiveStateClass.TypeName,
+        LiveStateClass,
         [],
         {}
     );
@@ -108,6 +110,27 @@ export class LiveState<TState = any> extends LiveDataObject<{
      * @throws error when `.initialize()` has already been called for this class instance.
      * @throws fatal error when `.initialize()` has already been called for an object of same id but with a different class instance.
      * This is most common when using dynamic objects through Fluid.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LiveState } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LiveState instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const counter = await client.getDDS("unique-id", LiveState<number>);
+        
+        // Listen for changes to state prior to calling initialize
+        counter.on("stateChanged", async (count: number, local: boolean, clientId: string) => {
+            console.log(count);
+        });
+        // Initialize LiveState with initial state
+        await counter.initialize(0);
+        // Set changes to state after calling initialize
+        await counter.set(counter.state + 1);
+     ```
      */
     public async initialize(
         initialState: TState,
@@ -145,14 +168,14 @@ export class LiveState<TState = any> extends LiveDataObject<{
             this.liveRuntime
         );
         try {
-            await this._synchronizer.start(
+            await this._synchronizer.start({
                 initialState,
-                async (evt, sender, local) => {
+                updateState: async (evt, sender, local) => {
                     // Check for state change.
                     // If it was valid, this will override the local user's previous value.
                     return await this.onReceivedStateEvent(evt, sender, local);
                 },
-                async (connecting) => {
+                getLocalUserCanSend: async (connecting) => {
                     if (connecting) return true;
                     // If user has eligible roles, allow the update to be sent
                     try {
@@ -160,8 +183,8 @@ export class LiveState<TState = any> extends LiveDataObject<{
                     } catch {
                         return false;
                     }
-                }
-            );
+                },
+            });
         } catch (error: unknown) {
             // Update initialize state as fatal error
             this.initializeState = LiveDataObjectInitializeState.fatalError;
@@ -191,6 +214,27 @@ export class LiveState<TState = any> extends LiveDataObject<{
      *
      * @throws error if initialization has not yet succeeded.
      * @throws error if the local user does not have the required roles defined through the `allowedRoles` prop in `.initialize()`.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LiveState } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container and create the LiveState instance
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+        const counter = await client.getDDS("unique-id", LiveState<number>);
+        
+        // Listen for changes to state prior to calling initialize
+        counter.on("stateChanged", async (count: number, local: boolean, clientId: string) => {
+            console.log(count);
+        });
+        // Initialize LiveState with initial state
+        await counter.initialize(0);
+        // Set changes to state after calling initialize
+        await counter.set(counter.state + 1);
+     ```
      */
     public async set(state: TState): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
@@ -236,8 +280,7 @@ export class LiveState<TState = any> extends LiveDataObject<{
                 this._allowedRoles
             );
             // Ensure that state is allowed, newer, and not the initial state.
-            if (!allowed || !LiveEvent.isNewer(this.latestEvent, evt))
-                return false;
+            if (!allowed || !isNewerEvent(this.latestEvent, evt)) return false;
             if (
                 JSON.stringify(this.latestEvent.data) ===
                 JSON.stringify(evt.data)
@@ -276,7 +319,15 @@ export class LiveState<TState = any> extends LiveDataObject<{
     }
 }
 
+export type LiveState<TState = any> = LiveStateClass<TState>;
+
+// eslint-disable-next-line no-redeclare
+export const LiveState = (() => {
+    const kind = createDataObjectKind(LiveStateClass);
+    return kind as typeof kind & SharedObjectKind<LiveStateClass>;
+})();
+
 /**
- * Register `LiveState` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveState` as an available `SharedObjectKind` for use in dynamic object loading.
  */
 DynamicObjectRegistry.registerObjectClass(LiveState, LiveState.TypeName);

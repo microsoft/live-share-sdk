@@ -3,8 +3,11 @@
  * Licensed under the MIT License.
  */
 
-import { TestLiveShareHost, LiveState } from "@microsoft/live-share";
-import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
+import {
+    TestLiveShareHost,
+    LiveState,
+    LiveShareClient,
+} from "@microsoft/live-share";
 import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
 const searchParams = new URL(window.location.href).searchParams;
@@ -58,7 +61,7 @@ async function join() {
         : TestLiveShareHost.create();
 
     // Create client & join session
-    const client = new LiveShareTurboClient(host);
+    const client = new LiveShareClient(host);
     await client.join();
     return client;
 }
@@ -81,7 +84,7 @@ stageTemplate["innerHTML"] = `
   </div>
 `;
 
-async function renderStage(client: LiveShareTurboClient, elem: HTMLElement) {
+async function renderStage(client: LiveShareClient, elem: HTMLElement) {
     elem.appendChild(stageTemplate.content.cloneNode(true));
     const wrapper = elem.querySelector<HTMLDivElement>(".wrapper")!;
     const diceListEl = wrapper.querySelector<HTMLDivElement>(".dice-list")!;
@@ -125,7 +128,7 @@ async function renderStage(client: LiveShareTurboClient, elem: HTMLElement) {
 }
 
 async function renderDiceElement(
-    client: LiveShareTurboClient,
+    client: LiveShareClient,
     wrapper: HTMLElement,
     diceIndex: number
 ) {

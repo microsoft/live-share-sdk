@@ -4,8 +4,8 @@ This repository contains a simple app to demo Live Canvas with Inking capability
 Contains useLiveCanvas hook that provides easy way to add and start the Inking canvas.
 It takes in two paramters:
 
-- `liveCanvas`: Fluid LiveCanvas Data object from the container attached.
-- `hostElement`: HTML Element where the canvas needs to be attached.
+-   `liveCanvas`: Fluid LiveCanvas Data object from the container attached.
+-   `hostElement`: HTML Element where the canvas needs to be attached.
 
 useLiveCanvas hook will insert the canvas as a child of hosting element
 and starts the Live Inking session.It returns set of callbacks for clearing

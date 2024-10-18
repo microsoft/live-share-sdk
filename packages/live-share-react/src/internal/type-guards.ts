@@ -1,4 +1,4 @@
-import { ITeamsJsSdkError } from "./errors";
+import { ITeamsJsSdkError } from "./errors.js";
 
 /**
  * @hidden

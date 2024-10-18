@@ -11,7 +11,7 @@ import {
     ContainerState,
     UserMeetingRole,
     IClientInfo,
-} from "./interfaces";
+} from "./interfaces.js";
 
 /**
  * Live Share Host implementation used for local testing.

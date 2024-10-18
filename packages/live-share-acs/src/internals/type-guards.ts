@@ -12,7 +12,7 @@ import {
     IFluidTenantInfoResponse,
     IFluidTokenResponse,
     IGetClientInfoResponse,
-} from "./interfaces";
+} from "./interfaces.js";
 
 /**
  * @hidden

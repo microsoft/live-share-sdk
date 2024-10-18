@@ -3,14 +3,14 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { EventEmitter } from "events";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
 import {
     CanvasReferencePoint,
     InkingCanvas,
     DryCanvas,
     WetCanvas,
     LaserPointerCanvas,
-} from "../canvas";
+} from "../canvas/index.js";
 import {
     IPoint,
     IPointerPoint,
@@ -18,7 +18,7 @@ import {
     screenToViewport,
     combineRects,
     viewportToScreen,
-} from "./Geometry";
+} from "./Geometry.js";
 import {
     Stroke,
     IStroke,
@@ -26,7 +26,7 @@ import {
     StrokeType,
     StrokeMode,
     IRawStroke,
-} from "./Stroke";
+} from "./Stroke.js";
 import {
     InputFilter,
     InputFilterCollection,
@@ -35,34 +35,44 @@ import {
     InputProvider,
     PointerInputProvider,
     IPointerMoveEvent,
-} from "../input";
+} from "../input/index.js";
 import {
     DefaultHighlighterBrush,
     DefaultLaserPointerBrush,
     DefaultLineBrush,
     DefaultPenBrush,
     IBrush,
-} from "./Brush";
+} from "./Brush.js";
 import {
     makeRectangle,
     generateUniqueId,
-    computeEndArrow,
     isPointInsideRectangle,
     computeQuadPath,
     renderQuadPathToSVG,
-} from "./internals";
-
-/**
- * Defines available inking tools.
- */
-export enum InkingTool {
-    pen = 0,
-    laserPointer = 1,
-    highlighter = 2,
-    eraser = 3,
-    pointEraser = 4,
-    line = 5,
-}
+    ChangeLog,
+    EphemeralCanvas,
+    WetLineStroke,
+    WetStroke,
+    WetFreehandStroke,
+} from "./internals/index.js";
+import { IEvent } from "@fluidframework/core-interfaces";
+import {
+    AddPointsEvent,
+    BeginStrokeEvent,
+    ClearEvent,
+    InkingTool,
+    PointerMovedEvent,
+    StrokeEndState,
+    StrokesAddedEvent,
+    StrokesRemovedEvent,
+} from "./InkingManager-constants.js";
+import {
+    IAddPointsEventArgs,
+    IAddRemoveStrokeOptions,
+    IBeginStrokeEventArgs,
+    IPointerMovedEventArgs,
+    IWetStroke,
+} from "./InkingManager-interfaces.js";
 
 type StrokeBasedTool =
     | InkingTool.pen
@@ -71,351 +81,64 @@ type StrokeBasedTool =
     | InkingTool.highlighter;
 
 /**
- * The event emitted by InkingManager when the canvas is cleared.
+ * Events emitted by the `InkingManager` class.
  */
-export const ClearEvent = "Clear";
-/**
- * The event emitted by InkingManager when a stroked is added.
- */
-export const StrokesAddedEvent = "StrokesAdded";
-/**
- * The event emitted by InkingManager when a stroked is removed.
- */
-export const StrokesRemovedEvent = "StrokesRemoved";
-
-/**
- * Defines the arguments of the PointerMovedEvent.
- */
-export interface IPointerMovedEventArgs {
-    position?: IPoint;
-}
-
-/**
- * The event emitted by InkingManager when the pointer moves over the canvas.
- */
-export const PointerMovedEvent = "PointerMoved";
-
-/**
- * Defines the arguments of the BeginStrokeEvent.
- */
-export interface IBeginStrokeEventArgs {
+export interface IInkingManagerEvents extends IEvent {
     /**
-     * The id of the new stroke.
+     * Event listener for when the user's pointer is moved over the canvas element
+     * @param event update
+     * @param listener listener function
+     * @param listener.event the `IPointerMovedEventArgs` event
      */
-    strokeId: string;
+    (
+        event: "PointerMoved",
+        listener: (event: IPointerMovedEventArgs) => void
+    ): void;
     /**
-     * The type of the new stroke.
+     * Event listener for when strokes are added to the canvas element
+     * @param event update
+     * @param listener listener function
+     * @param listener.strokes list of strokes that were added
      */
-    type: StrokeType;
+    (event: "StrokesAdded", listener: (strokes: IStroke[]) => void): void;
     /**
-     * The stroke's mode.
+     * Event listener for when strokes are removed from the canvas element
+     * @param event update
+     * @param listener listener function
+     * @param listener.strokeIds list of stroke ids that were removed
      */
-    mode: StrokeMode;
+    (event: "StrokesRemoved", listener: (strokeIds: string[]) => void): void;
     /**
-     * The brush of the new stroke.
+     * Event listener for when all strokes are cleared from the canvas element.
+     * @see InkingManager.clear
+     * @param event update
+     * @param listener listener function
      */
-    brush: IBrush;
+    (event: "Clear", listener: () => void): void;
     /**
-     * The starting point of the new stroke.
+     * Event listener for when a stroke begins.
+     * @param event update
+     * @param listener listener function
+     * @param listener.event event object with information about the stroke that begun
      */
-    startPoint: IPointerPoint;
-}
-
-/**
- * The event emitted by InkingManager when a stroke begins.
- */
-export const BeginStrokeEvent = "BeginStroke";
-
-export enum StrokeEndState {
-    ended,
-    cancelled,
-}
-
-/**
- * Defines the arguments of the AddPointsEvent.
- */
-export interface IAddPointsEventArgs {
+    (
+        event: "BeginStroke",
+        listener: (event: IBeginStrokeEventArgs) => void
+    ): void;
     /**
-     * The id of the stroke a point has been added to.
+     * Event listener for when points are added to a stroke.
+     * Also called when the stroke ends.
+     * @param event update
+     * @param listener listener function
+     * @param listener.event event object with information about the added points
      */
-    strokeId: string;
-    /**
-     * The points that were added to the stroke.
-     */
-    points: IPointerPoint[];
-    /**
-     * Indicates whether the stroke has ended (i.e. if the points
-     * were the last ones.)
-     */
-    endState?: StrokeEndState;
-}
-
-/**
- * The event emitted by InkingManager when points are added to
- * the current stroke.
- */
-export const AddPointsEvent = "AddPoints";
-
-/**
- * Defines a "wet" stroke, i.e. a stroke as it's being drawn.
- */
-export interface IWetStroke extends IStroke {
-    /**
-     * The type of the wet stroke.
-     */
-    readonly type: StrokeType;
-    /**
-     * The wet stroke's mode.
-     */
-    readonly mode: StrokeMode;
-    /**
-     * Straightens a point so that the line it forms with the previous
-     * point is straight (either horizontal or vertical).
-     * @param p The point to update
-     */
-    straighten(p: IPointerPoint): IPointerPoint;
-    /**
-     * Ends the wet stroke.
-     * @param p Optional. The points at which the stroke ends. If not specified,
-     * the stroke ends at the last added point.
-     */
-    end(): void;
-    /**
-     * Cancels the wet stroke.
-     */
-    cancel(): void;
-}
-
-class ChangeLog {
-    private _addedStrokes: Map<string, IStroke> = new Map<string, IStroke>();
-    private _removedStrokes: Set<string> = new Set<string>();
-
-    public clear() {
-        this._addedStrokes.clear();
-        this._removedStrokes.clear();
-    }
-
-    public mergeChanges(changes: ChangeLog) {
-        for (let id of changes._removedStrokes) {
-            if (!this._addedStrokes.delete(id)) {
-                this._removedStrokes.add(id);
-            }
-        }
-
-        changes._addedStrokes.forEach((value: IStroke) => {
-            this._addedStrokes.set(value.id, value);
-        });
-    }
-
-    public addStroke(stroke: IStroke) {
-        this._addedStrokes.set(stroke.id, stroke);
-    }
-
-    public removeStroke(id: string) {
-        this._removedStrokes.add(id);
-    }
-
-    public getRemovedStrokes(): string[] {
-        return [...this._removedStrokes];
-    }
-
-    public getAddedStrokes(): IStroke[] {
-        return [...this._addedStrokes.values()];
-    }
-
-    get hasChanges(): boolean {
-        return this._addedStrokes.size > 0 || this._removedStrokes.size > 0;
-    }
-}
-
-class EphemeralCanvas extends DryCanvas {
-    private _removalTimeout?: number;
-
-    constructor(readonly clientId: string, parentElement?: HTMLElement) {
-        super(parentElement);
-    }
-
-    scheduleRemoval(onRemoveCallback: (canvas: EphemeralCanvas) => void) {
-        if (this._removalTimeout) {
-            window.clearTimeout(this._removalTimeout);
-        }
-
-        this._removalTimeout = window.setTimeout(() => {
-            this.fadeOut();
-
-            onRemoveCallback(this);
-        }, InkingManager.ephemeralCanvasRemovalDelay);
-    }
-}
-
-/**
- * Defines options used by `InkingManager.addStroke` and `InkingManager.removeStroke`.
- */
-export interface IAddRemoveStrokeOptions {
-    /**
-     * Optional. Indicates if the canvas must be fully re-rendered at once after the
-     * stroke has been added or removed. Defaults to `false`.
-     */
-    forceReRender?: boolean;
-    /**
-     * Optional. Indicates whether the add or remove operation should be added to the
-     * change log, which in turn will lead to `StrokeAddedEvent` or `StrokeRemovedEvent`
-     * begin emitted. Defaults to `true`.
-     */
-    addToChangeLog?: boolean;
-}
-
-abstract class WetStroke extends Stroke implements IWetStroke {
-    protected notifyStrokeEnded(isCancelled: boolean) {
-        if (this.onStrokeEnded) {
-            this.onStrokeEnded(this, isCancelled);
-        }
-    }
-
-    onStrokeEnded?: (sender: WetStroke, isCancelled: boolean) => void;
-
-    constructor(
-        private _canvas: InkingCanvas,
-        readonly type: StrokeType,
-        readonly mode: StrokeMode,
-        options?: IStrokeCreationOptions
-    ) {
-        super(options);
-
-        this._canvas.setBrush(this.brush);
-    }
-
-    straighten(p: IPointerPoint): IPointerPoint {
-        return p;
-    }
-
-    end() {
-        this._canvas.removeFromDOM();
-        this._canvas.endStroke();
-
-        this.notifyStrokeEnded(false);
-    }
-
-    cancel() {
-        this._canvas.removeFromDOM();
-        this._canvas.cancelStroke();
-
-        this.notifyStrokeEnded(true);
-    }
-
-    get canvas(): InkingCanvas {
-        return this._canvas;
-    }
-}
-
-class WetFreehandStroke extends WetStroke {
-    addPoints(...points: IPointerPoint[]): boolean {
-        const currentLength = this.length;
-        const result = super.addPoints(...points);
-
-        if (result) {
-            let startIndex = currentLength;
-
-            if (startIndex === 0) {
-                this.canvas.beginStroke(this.getPointAt(0));
-
-                startIndex = 1;
-            }
-
-            for (let i = startIndex; i < this.length; i++) {
-                this.canvas.addPoint(this.getPointAt(i));
-            }
-        }
-
-        return result;
-    }
-
-    end() {
-        if (this.length > 1 && this.brush.endArrow === "open") {
-            const penultimatePoint = this.getPointAt(this.length - 2);
-            const lastPoint = this.getPointAt(this.length - 1);
-
-            const arrowPath = computeEndArrow(penultimatePoint, lastPoint);
-
-            for (let i = 0; i < arrowPath.length; i++) {
-                const p = { ...arrowPath[i], pressure: lastPoint.pressure };
-
-                this.addPoint(p);
-            }
-        }
-
-        super.end();
-    }
-}
-
-class WetLineStroke extends WetStroke {
-    straighten(p: IPointerPoint): IPointerPoint {
-        const result = { ...p };
-
-        if (this.length > 0) {
-            const firstPoint = this.getPointAt(0);
-
-            if (
-                Math.abs(result.x - firstPoint.x) >
-                Math.abs(result.y - firstPoint.y)
-            ) {
-                result.y = firstPoint.y;
-            } else {
-                result.x = firstPoint.x;
-            }
-        }
-
-        return result;
-    }
-
-    addPoints(...points: IPointerPoint[]): boolean {
-        if (this.length === 0) {
-            this.addPoint(points[0]);
-
-            if (points.length > 1) {
-                this.addPoint(points[points.length - 1]);
-            }
-        } else {
-            const firstPoint = this.getPointAt(0);
-
-            this.clear();
-
-            this.addPoint(firstPoint);
-            this.addPoint(points[points.length - 1]);
-        }
-
-        this.canvas.cancelStroke();
-        this.canvas.beginStroke(this.getPointAt(0));
-
-        if (this.length > 1) {
-            this.canvas.addPoint(this.getPointAt(1));
-
-            if (this.brush.endArrow === "open") {
-                const arrowPath = computeEndArrow(
-                    this.getPointAt(0),
-                    this.getPointAt(1)
-                );
-
-                for (let i = 0; i < arrowPath.length; i++) {
-                    const p = {
-                        ...arrowPath[i],
-                        pressure: this.getPointAt(1).pressure,
-                    };
-
-                    this.addPoint(p);
-                    this.canvas.addPoint(p);
-                }
-            }
-        }
-
-        return true;
-    }
+    (event: "AddPoints", listener: (event: IAddPointsEventArgs) => void): void;
 }
 
 /**
  * Handles user interaction with a canvas, and manages the rendering of wet and dry strokes.
  */
-export class InkingManager extends EventEmitter {
+export class InkingManager extends TypedEventEmitter<IInkingManagerEvents> {
     /**
      * Configures the amount of time to wait before sending a pointer moved event. This delay
      * allows for the elimination of fast, consecutive pointer move events, and only send the
@@ -530,7 +253,7 @@ export class InkingManager extends EventEmitter {
         this._dryCanvas.offset = this._offset;
         this._dryCanvas.scale = this._scale;
 
-        const sortedStrokes = [...this._strokes.values()].sort(
+        const sortedStrokes = Array.from(this._strokes.values()).sort(
             (stroke1: IStroke, stroke2: IStroke) => {
                 return stroke1.timeStamp - stroke2.timeStamp;
             }
@@ -561,8 +284,8 @@ export class InkingManager extends EventEmitter {
         }
 
         if (this._changeLog.hasChanges) {
-            this.notifyStrokesRemoved(...this._changeLog.getRemovedStrokes());
-            this.notifyStrokesAdded(...this._changeLog.getAddedStrokes());
+            this.notifyStrokesRemoved(this._changeLog.getRemovedStrokes());
+            this.notifyStrokesAdded(this._changeLog.getAddedStrokes());
 
             this._changeLog.clear();
         }
@@ -638,8 +361,8 @@ export class InkingManager extends EventEmitter {
                     this.tool === InkingTool.line
                         ? StrokeMode.line
                         : e.ctrlKey && InkingManager.enableStrokeModifierHotKeys
-                        ? StrokeMode.line
-                        : StrokeMode.freeHand;
+                          ? StrokeMode.line
+                          : StrokeMode.freeHand;
                 // eslint-disable-next-line no-case-declarations
                 const brush = { ...this.getBrushForTool(this.tool) };
 
@@ -776,8 +499,8 @@ export class InkingManager extends EventEmitter {
         options?: IAddRemoveStrokeOptions
     ) {
         const effectiveOptions: Required<IAddRemoveStrokeOptions> = {
-            forceReRender: options ? options.forceReRender ?? false : false,
-            addToChangeLog: options ? options.addToChangeLog ?? true : true,
+            forceReRender: options ? (options.forceReRender ?? false) : false,
+            addToChangeLog: options ? (options.addToChangeLog ?? true) : true,
         };
 
         if (effectiveOptions.forceReRender || this._strokes.has(stroke.id)) {
@@ -913,13 +636,13 @@ export class InkingManager extends EventEmitter {
         this.emit(PointerMovedEvent, eventArgs);
     }
 
-    private notifyStrokesAdded(...strokes: IStroke[]) {
+    private notifyStrokesAdded(strokes: IStroke[]) {
         if (strokes.length > 0) {
             this.emit(StrokesAddedEvent, strokes);
         }
     }
 
-    private notifyStrokesRemoved(...strokeIds: string[]) {
+    private notifyStrokesRemoved(strokeIds: string[]) {
         if (strokeIds.length > 0) {
             this.emit(StrokesRemovedEvent, strokeIds);
         }
@@ -1156,6 +879,7 @@ export class InkingManager extends EventEmitter {
                 brush: rawStroke.brush,
                 points: rawStroke.points,
                 clientId: InkingManager.localClientId,
+                version: 1,
             });
 
             this.addStroke(stroke);
@@ -1239,8 +963,12 @@ export class InkingManager extends EventEmitter {
     public removeStroke(id: string, options?: IAddRemoveStrokeOptions) {
         if (this._strokes.delete(id)) {
             const effectiveOptions: Required<IAddRemoveStrokeOptions> = {
-                forceReRender: options ? options.forceReRender ?? false : false,
-                addToChangeLog: options ? options.addToChangeLog ?? true : true,
+                forceReRender: options
+                    ? (options.forceReRender ?? false)
+                    : false,
+                addToChangeLog: options
+                    ? (options.addToChangeLog ?? true)
+                    : true,
             };
 
             effectiveOptions.forceReRender

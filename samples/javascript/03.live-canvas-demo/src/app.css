@@ -1,6 +1,6 @@
 * {
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -19,7 +19,15 @@ body {
     flex: 1 1 100%;
     position: relative;
     overflow: hidden;
-    background-image:  linear-gradient(#444cf7 0.6000000000000001px, transparent 0.6000000000000001px), linear-gradient(to right, #444cf7 0.6000000000000001px, transparent 0.6000000000000001px);
+    background-image: linear-gradient(
+            #444cf7 0.6000000000000001px,
+            transparent 0.6000000000000001px
+        ),
+        linear-gradient(
+            to right,
+            #444cf7 0.6000000000000001px,
+            transparent 0.6000000000000001px
+        );
     background-size: 12px 12px;
 }
 
@@ -51,21 +59,21 @@ body {
     font-weight: 600;
     padding: 2px 10px 3px 10px;
     -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none;
-    background-color: #EEEEEE;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: #eeeeee;
     color: black;
     border: 1px solid #888888;
     border-radius: 2px;
 }
 
 .toolbar > button:hover {
-    background-color: #DDDDDD;
+    background-color: #dddddd;
     border: 1px solid #777777;
 }
 
 .toolbar > button:active {
-    background-color: #CCCCCC;
+    background-color: #cccccc;
     border: 1px solid #777777;
 }

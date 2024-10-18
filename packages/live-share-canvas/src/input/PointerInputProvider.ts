@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { InputProvider, IPointerEvent } from "./InputProvider";
+import { InputProvider, IPointerEvent } from "./InputProvider.js";
 
 function pointerEventToIPointerEvent(e: PointerEvent): IPointerEvent {
     return {

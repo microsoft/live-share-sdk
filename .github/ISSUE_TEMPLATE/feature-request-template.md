@@ -8,7 +8,7 @@ assignees: ""
 
 ### Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!
 
-- [ ] I have reviewed the FAQ and known issues and did not find my topic
+-   [ ] I have reviewed the FAQ and known issues and did not find my topic
 
 **Please note: any submissions with insufficient reproducible information will be marked as 'Waiting for customer input' and may be closed is there is no response**
 

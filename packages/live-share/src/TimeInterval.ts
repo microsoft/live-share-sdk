@@ -8,25 +8,25 @@
  * Manages converting time intervals from seconds-to-milliseconds and vice versa.
  */
 export class TimeInterval {
-    private _value: number;
+    protected _milliseconds: number;
 
     constructor(defaultMilliseconds: number) {
-        this._value = defaultMilliseconds;
+        this._milliseconds = defaultMilliseconds;
     }
 
     public get milliseconds(): number {
-        return this._value;
+        return this._milliseconds;
     }
 
     public set milliseconds(value: number) {
-        this._value = value;
+        this._milliseconds = value;
     }
 
     public get seconds(): number {
-        return this._value / 1000;
+        return this.milliseconds / 1000;
     }
 
     public set seconds(value: number) {
-        this._value = Math.floor(value * 1000);
+        this.milliseconds = Math.floor(value * 1000);
     }
 }

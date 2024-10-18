@@ -3,8 +3,11 @@
  * Licensed under the MIT License.
  */
 
-import { TestLiveShareHost, LiveState } from "@microsoft/live-share";
-import { LiveShareTurboClient } from "@microsoft/live-share-turbo";
+import {
+    TestLiveShareHost,
+    LiveState,
+    LiveShareClient,
+} from "@microsoft/live-share";
 import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
 
 const searchParams = new URL(window.location).searchParams;
@@ -60,7 +63,7 @@ async function join() {
         : TestLiveShareHost.create();
 
     // Create client & join session
-    const client = new LiveShareTurboClient(host);
+    const client = new LiveShareClient(host);
     await client.join();
     return client;
 }

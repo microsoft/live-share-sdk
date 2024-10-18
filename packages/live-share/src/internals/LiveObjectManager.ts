@@ -3,25 +3,23 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
-import { TypedEventEmitter } from "@fluidframework/common-utils";
-import { IRuntimeSignaler } from "../LiveEventScope";
-import { LiveShareRuntime } from "../LiveShareRuntime";
-import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces";
-import { LiveEvent } from "../LiveEvent";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/legacy";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
+import { IRuntimeSignaler } from "./LiveEventScope.js";
+import { LiveShareRuntime } from "./LiveShareRuntime.js";
+import { IContainerRuntimeSignaler, ILiveEvent } from "../interfaces.js";
+import { IAzureAudience } from "@fluidframework/azure-client";
+import { isILiveEvent } from "./type-guards.js";
+import { ObjectSynchronizerEvents } from "./consts.js";
+import { cloneValue, isNewerEvent, waitUntilConnected } from "./utils.js";
+import { ContainerSynchronizer } from "./ContainerSynchronizer.js";
 import {
-    ContainerSynchronizer,
     GetAndUpdateStateHandlers,
     IContainerLiveObjectStoreEvents,
     ILiveClientEventMap,
     ILiveObjectStore,
-    ObjectSynchronizerEvents,
     StateSyncEventContent,
-    cloneValue,
-    isILiveEvent,
-    waitUntilConnected,
-} from "./";
-import { IAzureAudience } from "@fluidframework/azure-client";
+} from "./internal-interfaces.js";
 
 /**
  * @hidden
@@ -254,6 +252,16 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             typeof message.content.data !== "object"
         )
             return;
+        // While the Fluid odsp-driver currently supports targeted signals, it isn't guaranteed in other drivers.
+        // As of Fluid v2.2.0, azure-client and tinylicious do not support it currently.
+        // For consistency, we return early when the local client is not the targeted one.
+        if (
+            // If we have message.targetClientId, our fluid driver supports targeting and thus will always be from the right client.
+            !message.targetClientId &&
+            message.content.targetClientId &&
+            message.content.targetClientId !== this._containerRuntime.clientId
+        )
+            return;
         this.dispatchUpdates(
             ObjectSynchronizerEvents.update,
             message.clientId,
@@ -262,7 +270,12 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
         );
         // If the non-local user is connecting for the first time
         if (message.type === ObjectSynchronizerEvents.connect) {
-            this._synchronizer?.onSendBackgroundUpdates();
+            // Sent with a targetClientId so that only the user connecting receives the signal.
+            // This reduces the cost & server burden of connect messages, particularly in larger session sizes.
+            // This perf/COGS benefit only applies if the Fluid driver / service supports targeting (e.g., ODSP).
+            // Otherwise, it will still send the signal to all clients, but only dispatch the update to the targeted client.
+            // If/when the driver later supports targeting, the benefit will get picked up automatically with no update to this code.
+            this._synchronizer?.onSendBackgroundUpdates(message.clientId);
         }
     }
 
@@ -308,7 +321,7 @@ export class LiveObjectManager extends TypedEventEmitter<IContainerLiveObjectSto
             const existingEvent = clientMap.get(event.clientId);
             if (existingEvent) {
                 // We already have an event for this user, so we update it if it is newer
-                if (!LiveEvent.isNewer(existingEvent, event)) return false;
+                if (!isNewerEvent(existingEvent, event)) return false;
             }
             clientMap.set(event.clientId, event);
             if (!existingEvent) {

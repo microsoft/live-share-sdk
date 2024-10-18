@@ -3,20 +3,20 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveShareRuntime } from "@microsoft/live-share";
-import EventEmitter from "events";
-import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import { LiveShareRuntime } from "@microsoft/live-share/internal";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator.js";
 import {
     ExtendedMediaSessionPlaybackState,
     ExtendedMediaSessionAction,
     ExtendedMediaSessionActionSource,
-} from "../MediaSessionExtensions";
+} from "../MediaSessionExtensions.js";
 import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
-} from "./GroupPlaybackTrack";
-import { IGroupStateEvent } from "./interfaces";
-import { GroupPlaybackRate } from "./GroupPlaybackRate";
+} from "./GroupPlaybackTrack.js";
+import { IGenericTypedEvents, IGroupStateEvent } from "./interfaces.js";
+import { GroupPlaybackRate } from "./GroupPlaybackRate.js";
 
 /**
  * @hidden
@@ -46,7 +46,7 @@ export interface ITransportStateChangeEvent extends IGroupStateEvent {
 /**
  * @hidden
  */
-export class GroupTransportState extends EventEmitter {
+export class GroupTransportState extends TypedEventEmitter<IGenericTypedEvents> {
     private readonly _getMediaPlayerState: () => IMediaPlayerState;
     private _track: GroupPlaybackTrack;
     private _playbackRate: GroupPlaybackRate;

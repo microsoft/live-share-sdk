@@ -7,7 +7,7 @@ import {
     ITokenProvider,
     ITokenResponse,
 } from "@fluidframework/routerlicious-driver";
-import { ILiveShareHost } from "../interfaces";
+import { ILiveShareHost } from "../interfaces.js";
 
 /**
  * @hidden

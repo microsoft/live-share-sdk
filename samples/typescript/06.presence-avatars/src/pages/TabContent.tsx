@@ -1,6 +1,6 @@
 import {
     LivePresenceUser,
-    PresenceState,
+    PresenceStatus,
     TestLiveShareHost,
 } from "@microsoft/live-share";
 import {
@@ -49,13 +49,15 @@ interface IUserData {
 const PRESENCE_KEY = "PRESENCE_AVATARS";
 
 const LiveAvatars: FC = () => {
-    const { allUsers, localUser, updatePresence } =
-        useLivePresence<IUserData>(PRESENCE_KEY);
+    const { allUsers, localUser, updatePresence } = useLivePresence<IUserData>(
+        PRESENCE_KEY,
+        { favoriteFood: "Unknown" }
+    );
     const onlineOrAwayUsers = allUsers.filter(
         (user) =>
             user.displayName &&
-            (user.state === PresenceState.online ||
-                user.state === PresenceState.away)
+            (user.status === PresenceStatus.online ||
+                user.status === PresenceStatus.away)
     );
     const { inlineItems, overflowItems } = partitionAvatarGroupItems({
         items: onlineOrAwayUsers.map((user) => {
@@ -69,12 +71,9 @@ const LiveAvatars: FC = () => {
     });
 
     const onChangeFavoriteFood: InputProps["onChange"] = (ev, data) => {
-        updatePresence(
-            {
-                favoriteFood: data.value,
-            },
-            localUser?.state
-        );
+        updatePresence({
+            favoriteFood: data.value,
+        });
     };
 
     return (
@@ -106,9 +105,7 @@ const LiveAvatars: FC = () => {
                                         </Text>
                                     </FlexRow>
                                     <FlexRow>
-                                        <Text>
-                                            {user.data?.favoriteFood ?? "N/A"}
-                                        </Text>
+                                        <Text>{user.data.favoriteFood}</Text>
                                     </FlexRow>
                                 </FlexColumn>
                             </PopoverSurface>
@@ -128,20 +125,8 @@ const LiveAvatars: FC = () => {
                     </AvatarGroupPopover>
                 )}
             </AvatarGroup>
-            <Button
-                onClick={() => {
-                    updatePresence(
-                        undefined,
-                        localUser?.state === PresenceState.online
-                            ? PresenceState.away
-                            : PresenceState.online
-                    );
-                }}
-            >
-                Toggle status
-            </Button>
             <Input
-                value={localUser?.data?.favoriteFood}
+                value={localUser?.data.favoriteFood}
                 placeholder="Enter your favorite food..."
                 onChange={onChangeFavoriteFood}
                 style={{
@@ -156,12 +141,12 @@ const LiveAvatars: FC = () => {
 function presenceStateToFluentStatus(
     user: LivePresenceUser
 ): PresenceBadgeStatus {
-    switch (user.state) {
-        case PresenceState.online:
+    switch (user.status) {
+        case PresenceStatus.online:
             return "available";
-        case PresenceState.offline:
+        case PresenceStatus.offline:
             return "offline";
-        case PresenceState.away:
+        case PresenceStatus.away:
             return "away";
         default:
             return "offline";

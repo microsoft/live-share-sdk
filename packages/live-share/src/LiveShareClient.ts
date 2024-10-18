@@ -3,7 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { LiveShareTokenProvider, getInsecureTokenProvider } from "./internals";
+import { getInsecureTokenProvider, waitForDelay } from "./internals/utils.js";
+import { LiveShareTokenProvider } from "./internals/LiveShareTokenProvider.js";
 import {
     AzureClient,
     AzureContainerServices,
@@ -18,11 +19,14 @@ import {
     ITimestampProvider,
     IRoleVerifier,
     ILiveShareJoinResults,
-} from "./interfaces";
-import { LocalTimestampProvider } from "./LocalTimestampProvider";
-import { TestLiveShareHost } from "./TestLiveShareHost";
-import { LiveShareRuntime } from "./LiveShareRuntime";
-import { getLiveContainerSchema } from "./schema-injection-utils";
+} from "./interfaces.js";
+import { BaseLiveShareClient } from "./internals/BaseLiveShareClient.js";
+import { LocalTimestampProvider } from "./LocalTimestampProvider.js";
+import { TestLiveShareHost } from "./TestLiveShareHost.js";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
+import { getLiveContainerSchema } from "./internals/schema-injection-utils.js";
+import { ExpectedError, UnexpectedError } from "./errors.js";
+import { FluidCompatibilityMode } from "./internals/consts.js";
 
 /**
  * @hidden
@@ -86,32 +90,53 @@ export interface ILiveShareClientOptions {
 /**
  * Client used to connect to fluid containers within a Microsoft Teams context.
  */
-export class LiveShareClient {
+export class LiveShareClient extends BaseLiveShareClient {
     private _host: ILiveShareHost = TestLiveShareHost.create(
         undefined,
         undefined
     );
     private readonly _options: ILiveShareClientOptions;
-    private readonly _runtime: LiveShareRuntime;
     private _results: ILiveShareJoinResults | undefined;
+
+    /**
+     * @hidden
+     */
+    protected getDDSErrorJoinFunctionText: string = "join";
 
     /**
      * Creates a new `LiveShareClient` instance.
      * @param host Host for the current Live Share session.
      * @param options Optional. Configuration options for the client.
+     * 
+     * @example
+     ```ts
+        import { LiveShareClient, LivePresence } from "@microsoft/live-share";
+        // Import ILiveShareHost instance. Most common option is using the teams-js SDK
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+
+        // TODO: start collab logic
+     ```
      */
     constructor(host: ILiveShareHost, options?: ILiveShareClientOptions) {
         // Validate host passed in
-        if (!host) {
-            throw new Error(
-                `LiveShareClient: prop \`host\` is \`${host}\` when it is expected to be a non-optional value of type \`ILiveShareHost\`. Please ensure \`host\` is defined before initializing \`LiveShareClient\`.`
-            );
-        }
-        if (typeof host.getFluidTenantInfo != "function") {
-            throw new Error(
-                `LiveShareClient: \`host.getFluidTenantInfo\` is of type \`${typeof host.getFluidTenantInfo}\` when it is expected to be a type of \`function\`. For more information, review the \`ILiveShareHost\` interface.`
-            );
-        }
+        ExpectedError.assert(
+            !!host,
+            "LiveShareClient:constructor",
+            `prop \`host\` is \`${host}\` when it is expected to be a non-optional value of type \`ILiveShareHost\`.`,
+            "Please ensure `host` is defined before initializing `LiveShareClient`."
+        );
+        ExpectedError.assert(
+            typeof host.getFluidTenantInfo === "function",
+            "LiveShareClient:constructor",
+            `\`host.getFluidTenantInfo\` is of type \`${typeof host.getFluidTenantInfo}\` when it is expected to be a type of \`function\`.`,
+            "For more information, review the `ILiveShareHost` interface."
+        );
+        super(new LiveShareRuntime(host, options, true));
         this._host = host;
         // Save options
         this._options = {
@@ -121,6 +146,15 @@ export class LiveShareClient {
                 : options?.timestampProvider,
         };
         this._runtime = new LiveShareRuntime(this._host, this._options, true);
+    }
+
+    /**
+     * @remarks
+     * Includes additional information, such as whether the local user created the container.
+     * See {@link BaseLiveShareClient.results} for more information.
+     */
+    public get results(): ILiveShareJoinResults | undefined {
+        return this._results;
     }
 
     /**
@@ -137,27 +171,18 @@ export class LiveShareClient {
     public maxContainerLookupTries = 3;
 
     /**
-     * Setting for whether `LiveDataObject` instances using `LiveObjectSynchronizer` can send background updates.
-     * Default value is `true`.
-     *
-     * @remarks
-     * This is useful for scenarios where there are a large number of participants in a session, since service performance degrades as more socket connections are opened.
-     * Intended for use when a small number of users are intended to be "in control", such as the `LiveFollowMode` class's `startPresenting()` feature.
-     * There should always be at least one user in the session that has `canSendBackgroundUpdates` set to true.
-     * Set to true when the user is eligible to send background updates (e.g., "in control"), or false when that user is not in control.
-     * This setting will not prevent the local user from explicitly changing the state of objects using `LiveObjectSynchronizer`, such as `.set()` in `LiveState`.
-     * Impacts background updates of `LiveState`, `LivePresence`, `LiveTimer`, and `LiveFollowMode`.
+     * @deprecated
+     * Use {@link LiveShareClient.join} instead.
      */
-    public get canSendBackgroundUpdates(): boolean {
-        return this._runtime.canSendBackgroundUpdates;
-    }
-
-    public set canSendBackgroundUpdates(value: boolean) {
-        this._runtime.canSendBackgroundUpdates = value;
+    public async joinContainer(
+        fluidContainerSchema?: ContainerSchema,
+        onContainerFirstCreated?: (container: IFluidContainer) => void
+    ): Promise<ILiveShareJoinResults> {
+        return this.join(fluidContainerSchema, onContainerFirstCreated);
     }
 
     /**
-     * Connects to the fluid container for the current teams context.
+     * Connects to the Fluid container for the relevant context (e.g., a Teams meeting).
      *
      * @remarks
      * The first client joining the container will create the container resulting in the
@@ -166,9 +191,48 @@ export class LiveShareClient {
      * @param fluidContainerSchema Fluid objects to create.
      * @param onContainerFirstCreated Optional. Callback that's called when the container is first created.
      * @returns the results of join container.
+     * 
+     * @example
+     * The following is an example using no optional props:
+     ```ts
+        import { LiveShareClient, LivePresence } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        await client.join();
+
+        // Create a DDS
+        const presence = await client.getDDS("unique-id", LivePresence, (dds) => {
+            console.log("first created dds", dds);
+        });
+     ```
+     * @example
+     * The following is an example using the optional props:
+     ```ts
+        import { LiveShareClient, LivePresence, LiveState } from "@microsoft/live-share";
+        import { LiveShareHost } from "@microsoft/teams-js";
+
+        // Join the Fluid container
+        const host = LiveShareHost.create();
+        const client = new LiveShareClient(host);
+        const schema = {
+            initialObjects: {
+                presence: LivePresence
+            }
+        };
+        const { container } = await client.join(schema, (container) => {
+            console.log("First created container", container);
+        });
+        const presence = container.initialObjects.presence as unknown as LivePresence;
+
+        // Can still dynamically get DDS's that were not in schema
+        const counter = await client.getDDS("unique-id", LiveState<number>);
+     ```
      */
-    public async joinContainer(
-        fluidContainerSchema: ContainerSchema,
+    public async join(
+        fluidContainerSchema?: ContainerSchema,
         onContainerFirstCreated?: (container: IFluidContainer) => void
     ): Promise<ILiveShareJoinResults> {
         performance.mark(`TeamsSync: join container`);
@@ -178,7 +242,7 @@ export class LiveShareClient {
 
             // Apply runtime to ContainerSchema
             const schema = getLiveContainerSchema(
-                fluidContainerSchema,
+                this.getContainerSchema(fluidContainerSchema),
                 this._runtime
             );
 
@@ -194,15 +258,14 @@ export class LiveShareClient {
                 let endpoint: string | undefined =
                     frsTenantInfo.serviceEndpoint;
                 if (!endpoint) {
-                    if (serviceEndpointMap.has(frsTenantInfo.serviceEndpoint)) {
-                        endpoint = serviceEndpointMap.get(
-                            frsTenantInfo.serviceEndpoint
-                        );
-                    } else {
-                        throw new Error(
-                            `LiveShareClient:joinContainer - unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
-                        );
-                    }
+                    UnexpectedError.assert(
+                        serviceEndpointMap.has(frsTenantInfo.serviceEndpoint),
+                        "LiveShareClient:join",
+                        `unable to find fluid endpoint for: ${frsTenantInfo.serviceEndpoint}`
+                    );
+                    endpoint = serviceEndpointMap.get(
+                        frsTenantInfo.serviceEndpoint
+                    );
                 }
 
                 // Is this a local config?
@@ -281,14 +344,15 @@ export class LiveShareClient {
                 created: false,
                 ...(await client.getContainer(
                     containerInfo.containerId,
-                    fluidContainerSchema
+                    fluidContainerSchema,
+                    FluidCompatibilityMode
                 )),
             };
         } else if (
             tries < this.maxContainerLookupTries &&
             containerInfo.retryAfter > 0
         ) {
-            await this.wait(containerInfo.retryAfter);
+            await waitForDelay(containerInfo.retryAfter);
             return await this.getOrCreateContainer(
                 client,
                 fluidContainerSchema,
@@ -314,8 +378,12 @@ export class LiveShareClient {
     }> {
         // Create and initialize container
         const { container, services } = await client.createContainer(
-            fluidContainerSchema
+            fluidContainerSchema,
+            FluidCompatibilityMode
         );
+
+        await this.addTurboFolder(container);
+
         if (onInitializeContainer) {
             onInitializeContainer(container);
         }
@@ -324,9 +392,8 @@ export class LiveShareClient {
         const newContainerId = await container.attach();
 
         // Attempt to save container ID mapping
-        const containerInfo = await this._host.setFluidContainerId(
-            newContainerId
-        );
+        const containerInfo =
+            await this._host.setFluidContainerId(newContainerId);
         if (containerInfo.containerState != ContainerState.added) {
             // Delete created container
             container.dispose();
@@ -336,18 +403,13 @@ export class LiveShareClient {
                 created: false,
                 ...(await client.getContainer(
                     containerInfo.containerId!,
-                    fluidContainerSchema
+                    fluidContainerSchema,
+                    FluidCompatibilityMode
                 )),
             };
         } else {
             return { container, services, created: true };
         }
-    }
-
-    private wait(delay: number): Promise<void> {
-        return new Promise((resolve) => {
-            setTimeout(() => resolve(), delay);
-        });
     }
 }
 

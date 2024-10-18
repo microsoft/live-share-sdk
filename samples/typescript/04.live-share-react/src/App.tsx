@@ -9,6 +9,7 @@ import {
     TabConfig,
 } from "./pages";
 import { AppRoutes } from "./constants";
+import { FluentProvider, teamsLightTheme } from "@fluentui/react-components";
 
 const IN_TEAMS = inTeams();
 
@@ -42,7 +43,7 @@ export default function App() {
     const appReady = (IN_TEAMS && initialized) || !IN_TEAMS;
 
     return (
-        <>
+        <FluentProvider theme={teamsLightTheme}>
             {appReady && (
                 <Router window={window} basename="/">
                     <Routes>
@@ -74,6 +75,6 @@ export default function App() {
                     </Routes>
                 </Router>
             )}
-        </>
+        </FluentProvider>
     );
 }

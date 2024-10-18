@@ -59,17 +59,17 @@ export default function App() {
                             break;
                     }
                 });
-                microsoftTeams.app.registerOnThemeChangeHandler(function (
-                    theme
-                ) {
-                    if (theme == "dark") {
-                        setTeamsTheme(teamsDarkTheme);
-                    } else if (theme == "contrast") {
-                        setTeamsTheme(teamsHighContrastTheme);
-                    } else {
-                        setTeamsTheme(teamsLightTheme);
+                microsoftTeams.app.registerOnThemeChangeHandler(
+                    function (theme) {
+                        if (theme == "dark") {
+                            setTeamsTheme(teamsDarkTheme);
+                        } else if (theme == "contrast") {
+                            setTeamsTheme(teamsHighContrastTheme);
+                        } else {
+                            setTeamsTheme(teamsLightTheme);
+                        }
                     }
-                });
+                );
             } else {
                 setInitialized(true);
             }

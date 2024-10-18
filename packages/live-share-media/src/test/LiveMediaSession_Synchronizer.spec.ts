@@ -8,21 +8,26 @@ import {
     TestMediaPlayer,
     TestMediaTimeStampProvider,
 } from "./TestUtils";
-import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { strict as assert } from "assert";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
-import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import {
+    getContainerEntryPointBackCompat,
+    fluidEntryPoint,
+    ITestObjectProvider,
+} from "@fluidframework/test-utils/internal";
 import {
     ITimestampProvider,
     LocalTimestampProvider,
+    TestLiveShareHost,
     UserMeetingRole,
 } from "@microsoft/live-share";
-import { TestLiveShareHost } from "@microsoft/live-share";
-import { getLiveDataObjectClass } from "@microsoft/live-share";
-import { waitForDelay } from "@microsoft/live-share/src/internals";
-import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveShareRuntime";
-import { isErrorLike } from "@microsoft/live-share/bin/internals";
+import {
+    Deferred,
+    getLiveDataObjectKind,
+    isErrorLike,
+    LiveShareRuntime,
+    MockLiveShareRuntime,
+    waitForDelay,
+} from "@microsoft/live-share/internal";
 import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionAction,
@@ -35,9 +40,15 @@ import {
     MediaPlayerSynchronizer,
     MediaPlayerSynchronizerEvents,
 } from "../MediaPlayerSynchronizer";
+import {
+    ITestObjectProviderOptions,
+    describeCompat,
+} from "@live-share-private/test-utils";
 
 async function getObjects(
-    getTestObjectProvider,
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider,
     updateInterval: number = 10000,
     timestampProvider: ITimestampProvider = new LocalTimestampProvider()
 ) {
@@ -55,13 +66,13 @@ async function getObjects(
         timestampProvider
     );
 
-    let ObjectProxy1: any = getLiveDataObjectClass<TestLiveMediaSession>(
+    let ObjectProxy1: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime1
+        liveRuntime1 as unknown as LiveShareRuntime
     );
-    let ObjectProxy2: any = getLiveDataObjectClass<TestLiveMediaSession>(
+    let ObjectProxy2: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime2
+        liveRuntime2 as unknown as LiveShareRuntime
     );
 
     await liveRuntime1.start();
@@ -69,18 +80,21 @@ async function getObjects(
 
     let provider: ITestObjectProvider = getTestObjectProvider();
 
-    let container1 = await provider.createContainer(ObjectProxy1.factory);
-    let object1 = await requestFluidObject<TestLiveMediaSession>(
-        container1,
-        "default"
+    let container1 = await provider.createContainer(
+        ObjectProxy1.factory as fluidEntryPoint
     );
+    let object1 =
+        await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+            container1
+        );
     object1.coordinator.positionUpdateInterval = 0.02;
-
-    let container2 = await provider.loadContainer(ObjectProxy2.factory);
-    let object2 = await requestFluidObject<TestLiveMediaSession>(
-        container2,
-        "default"
+    let container2 = await provider.loadContainer(
+        ObjectProxy2.factory as fluidEntryPoint
     );
+    let object2 =
+        await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+            container2
+        );
     object2.coordinator.positionUpdateInterval = 0.02;
     // need to be connected to send signals
     if (!container1.connect) {
@@ -111,7 +125,7 @@ async function getObjects(
     };
 }
 
-describeNoCompat(
+describeCompat(
     "LiveMediaSession Using MediaPlayerSynchronizer",
     (getTestObjectProvider) => {
         it("should play and pause on both", async () => {

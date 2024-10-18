@@ -7,7 +7,7 @@ import "mocha";
 import { strict as assert } from "assert";
 import { GroupPlaybackTrack } from "../internals/GroupPlaybackTrack";
 import { ExtendedMediaMetadata } from "../MediaSessionExtensions";
-import { GroupPlaybackTrackData } from "../internals";
+import { GroupPlaybackTrackData } from "../internals/GroupPlaybackTrackData";
 
 describe("GroupPlaybackTrackData", () => {
     const track1 = {

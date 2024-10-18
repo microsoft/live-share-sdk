@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ITimestampProvider, LivePresenceUser } from "@microsoft/live-share";
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { IUserData } from "./usePresence";
 
 export const useTakeControl = (
@@ -19,7 +19,7 @@ export const useTakeControl = (
         const mappedUsers = users.map((user) => {
             return {
                 userId: user.userId,
-                state: user.state,
+                state: user.status,
                 data: user.data,
                 lastInControlTimestamp: user.userId
                     ? history.get(user.userId)

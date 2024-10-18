@@ -3,376 +3,76 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct";
+import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
+import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
-import { IValueChanged, SharedMap } from "@fluidframework/map";
-import { ISequencedDocumentMessage } from "@fluidframework/protocol-definitions";
+import { SharedMap } from "@fluidframework/map/legacy";
+import { InkingManager } from "./InkingManager.js";
+import { IPoint } from "./Geometry.js";
+import { IStroke, StrokeType } from "./Stroke.js";
+import {
+    UserMeetingRole,
+    LiveTelemetryLogger,
+    ILiveEvent,
+    LiveDataObjectInitializeState,
+    ExpectedError,
+    UnexpectedError,
+} from "@microsoft/live-share";
+import {
+    LiveEventScope,
+    LiveEventTarget,
+    DynamicObjectRegistry,
+    LiveDataObject,
+} from "@microsoft/live-share/internal";
+import {
+    BuiltInLiveCursor,
+    IAddWetStrokePointsEvent,
+    IBeginWetStrokeEvent,
+    IPointerMovedEvent,
+    InkingEventNames,
+    LivePointerInputProvider,
+    LiveStroke,
+    TelemetryEvents,
+    LiveCanvasStorageSolution,
+    SharedTreeStorageSolution,
+    SharedMapStorageSolution,
+    StorageSolutionEvents,
+    createUndoRedoStacks,
+    undoRedo,
+} from "./internals/index.js";
+import { ITree, SharedObjectKind, SharedTree, TreeView } from "fluid-framework";
+import {
+    IAddPointsEventArgs,
+    IAddRemoveStrokeOptions,
+    IBeginStrokeEventArgs,
+    IPointerMovedEventArgs,
+    IWetStroke,
+} from "./InkingManager-interfaces.js";
 import {
     AddPointsEvent,
     BeginStrokeEvent,
     ClearEvent,
-    IAddPointsEventArgs,
-    IAddRemoveStrokeOptions,
-    IBeginStrokeEventArgs,
-    InkingManager,
-    IPointerMovedEventArgs,
-    IWetStroke,
     PointerMovedEvent,
     StrokeEndState,
     StrokesAddedEvent,
     StrokesRemovedEvent,
-} from "./InkingManager";
+} from "./InkingManager-constants.js";
+import { IEventUserInfo, IUserInfo } from "./LiveCanvas-interfaces.js";
+import { LiveCursor } from "./LiveCursor.js";
+import type { ISharedObjectKind } from "@fluidframework/shared-object-base/legacy";
 import {
-    IPointerPoint,
-    getDistanceBetweenPoints,
-    IPoint,
-    IRect,
-    expandRect,
-} from "./Geometry";
-import { IStroke, Stroke, StrokeType } from "./Stroke";
-import {
-    LiveEventScope,
-    LiveEventTarget,
-    UserMeetingRole,
-    DynamicObjectRegistry,
-    LiveDataObject,
-    LiveTelemetryLogger,
-    ILiveEvent,
-    LiveDataObjectInitializeState,
-} from "@microsoft/live-share";
-import { IBrush } from "./Brush";
-import { BasicColors, IColor, lightenColor, toCssRgbaColor } from "./Colors";
-import { TelemetryEvents } from "./internals";
-import {
-    IMulticastEvent,
-    IPointerEvent,
-    IPointerMoveEvent,
-    InputProvider,
-} from "../input";
-
-enum InkingEventNames {
-    pointerMove = "PointerMove",
-    beginWetStroke = "BeginWetStroke",
-    addWetStrokePoints = "AddWetStrokePoint",
-}
-
-/**
- * Encapsulates information about a user that is okay to be sent through events.
- */
-interface IEventUserInfo {
-    /**
-     * Optional. The URI to the user's picture.
-     */
-    pictureUri?: string;
-}
-
-/**
- * Encapsulates information about a user.
- */
-export interface IUserInfo extends IEventUserInfo {
-    /**
-     * Optional. The user's display name.
-     */
-    displayName?: string;
-}
-
-type IPointerMovedEvent = IPointerMovedEventArgs & IEventUserInfo;
-
-interface ISharedCursor {
-    isCursorShared?: boolean;
-}
-
-type IBeginWetStrokeEvent = IBeginStrokeEventArgs &
-    ISharedCursor &
-    IEventUserInfo;
-
-type IAddWetStrokePointsEvent = IAddPointsEventArgs &
-    ISharedCursor &
-    IEventUserInfo;
-
-class LiveStroke {
-    /**
-     * Configures the delay before wet stroke events are emitted, to greatly reduce the
-     * number of events emitted and improve performance.
-     */
-    private static readonly wetStrokeEventsStreamDelay = 60;
-
-    private _points: IPointerPoint[] = [];
-    private _processTimeout?: number;
-
-    private process() {
-        if (this.type !== StrokeType.persistent) {
-            return;
-        }
-
-        let index = 0;
-
-        while (index + 2 < this._points.length) {
-            const p1 = this._points[index];
-            const p2 = this._points[index + 1];
-            const p3 = this._points[index + 2];
-
-            const p1p2 = getDistanceBetweenPoints(p1, p2);
-            const p2p3 = getDistanceBetweenPoints(p2, p3);
-            const p1p3 = getDistanceBetweenPoints(p1, p3);
-
-            const threshold = (p1p2 + p2p3) * (100 / p1p3);
-
-            if (threshold < this.simplificationThreshold) {
-                this._points.splice(index + 1, 1);
-            } else {
-                index++;
-            }
-        }
-    }
-
-    endState?: StrokeEndState;
-
-    constructor(
-        readonly id: string,
-        readonly type: StrokeType,
-        readonly brush: IBrush,
-        readonly simplificationThreshold: number
-    ) {}
-
-    get points(): IPointerPoint[] {
-        return this._points;
-    }
-
-    clear() {
-        this._points = [];
-    }
-
-    scheduleProcessing(onProcessedCallback: (stroke: LiveStroke) => void) {
-        if (this._processTimeout === undefined) {
-            this._processTimeout = window.setTimeout(() => {
-                this.process();
-
-                this._processTimeout = undefined;
-
-                onProcessedCallback(this);
-            }, LiveStroke.wetStrokeEventsStreamDelay);
-        }
-    }
-}
-
-/**
- * Represents a live (shared) cursor. Applications that want to customize
- * the appearance of cursors on the screen should extend `LiveCursor` and
- * override its `renderedElement` property to return a custom HTML element.
- */
-export abstract class LiveCursor {
-    private _renderedElement?: HTMLElement;
-    private _lastUpdated = Date.now();
-    private _userInfo?: IUserInfo;
-
-    protected abstract internalRender(): HTMLElement;
-
-    /**
-     * Initializes a new instance of `LiveCursor`.
-     * @param info The cursor info.
-     */
-    constructor(public readonly clientId: string, _userInfo?: IUserInfo) {
-        this._userInfo = _userInfo;
-    }
-
-    /**
-     * Updates the position of the cursor.
-     * @param position The new position of the cursor.
-     */
-    setPosition(position: IPoint) {
-        this._lastUpdated = Date.now();
-
-        if (this.renderedElement) {
-            this.renderedElement.style.left = position.x + "px";
-            this.renderedElement.style.top = position.y + "px";
-        }
-    }
-
-    /**
-     * @hidden
-     * Overwrite the user info used for rendering displayName.
-     * Normally should let LiveCanvas set this value, which comes from the host and is trusted.
-     * Values set here will be overwritten by values from the host
-     */
-    public set userInfo(value: IUserInfo | undefined) {
-        this._userInfo = value;
-    }
-
-    public get userInfo(): IUserInfo | undefined {
-        return this._userInfo;
-    }
-
-    /**
-     * Gets the amount of time the cursor has been idle.
-     */
-    get idleTime() {
-        return Date.now() - this._lastUpdated;
-    }
-
-    /**
-     * Returns an HTML element representing the cursor. Applications
-     * that extend `LiveCursor` must override `get renderedElement`
-     * to return a custom built HTML element.
-     */
-    get renderedElement(): HTMLElement {
-        if (!this._renderedElement) {
-            this._renderedElement = this.internalRender();
-        }
-
-        return this._renderedElement;
-    }
-}
-
-interface ICursorColor {
-    readonly backgroundColor: IColor;
-    readonly textColor: IColor;
-}
-
-class BuiltInLiveCursor extends LiveCursor {
-    private static cursorColors: ICursorColor[] = [
-        { backgroundColor: BasicColors.red, textColor: BasicColors.white },
-        { backgroundColor: BasicColors.green, textColor: BasicColors.white },
-        { backgroundColor: BasicColors.blue, textColor: BasicColors.white },
-        { backgroundColor: BasicColors.purple, textColor: BasicColors.white },
-        { backgroundColor: BasicColors.magenta, textColor: BasicColors.white },
-        { backgroundColor: BasicColors.violet, textColor: BasicColors.white },
-        { backgroundColor: BasicColors.gray, textColor: BasicColors.white },
-        { backgroundColor: BasicColors.silver, textColor: BasicColors.black },
-    ];
-    private static currentColorIndex = 0;
-
-    private _color: ICursorColor;
-    private _arrowPathData?: string;
-    private _arrowBounds?: IRect;
-
-    protected internalRender(): HTMLElement {
-        const arrowPath: IPoint[] = [
-            { x: 0, y: 0 },
-            { x: 10, y: 30 },
-            { x: 17, y: 17 },
-            { x: 30, y: 10 },
-        ];
-
-        if (!this._arrowPathData || !this._arrowBounds) {
-            this._arrowPathData = "";
-
-            this._arrowBounds = {
-                left: Number.MAX_VALUE,
-                top: Number.MAX_VALUE,
-                right: Number.MIN_VALUE,
-                bottom: Number.MIN_VALUE,
-            };
-
-            for (let i = 0; i < arrowPath.length; i++) {
-                const p = arrowPath[i];
-
-                this._arrowBounds = expandRect(this._arrowBounds, p);
-
-                this._arrowPathData += `${i === 0 ? "M" : "L"} ${p.x} ${p.y} `;
-            }
-
-            this._arrowPathData += "Z";
-        }
-
-        const arrowWidth = this._arrowBounds.right - this._arrowBounds.left;
-        const arrowHeight = this._arrowBounds.bottom - this._arrowBounds.top;
-        const arrowStrokeWidth = 10;
-
-        const textColor = toCssRgbaColor(this._color.textColor);
-        const arrowBorderColor = toCssRgbaColor(
-            lightenColor(this._color.backgroundColor, 80)
-        );
-        const backgroundColor = toCssRgbaColor(this._color.backgroundColor);
-
-        let visualTemplate = `
-            <svg viewbox="-${arrowStrokeWidth} -${arrowStrokeWidth} ${
-            2 * arrowStrokeWidth + arrowWidth
-        } ${2 * arrowStrokeWidth + arrowHeight}"
-                width="${arrowWidth}" height="${arrowHeight}" style="filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, .7)">
-                <path d="${
-                    this._arrowPathData
-                }" stroke="${arrowBorderColor}" stroke-width="10" stroke-linejoin="round" stroke-opacity="0.90"/>
-                <path d="${
-                    this._arrowPathData
-                }" fill="${backgroundColor}" stroke="${backgroundColor}" stroke-width="2" stroke-linejoin="round"/>
-            </svg>`;
-
-        if (this.userInfo) {
-            if (this.userInfo.displayName && !this.userInfo.pictureUri) {
-                visualTemplate += `
-                    <div style="display: flex; align-items: center; box-shadow: 0 0 2px black; background-color: ${backgroundColor};
-                        height: ${arrowHeight}px; color: ${textColor}; border-radius: ${
-                    arrowHeight / 2
-                }px / 50%;
-                        border-top-left-radius: 4px; padding: 2px 8px; margin: ${
-                            arrowHeight * 0.75
-                        }px 0 0 -${arrowWidth * 0.25}px;
-                        white-space: nowrap; font-size: 12px; font-family: sans-serif">
-                        ${this.userInfo.displayName}
-                    </div>`;
-            } else if (this.userInfo.pictureUri && !this.userInfo.displayName) {
-                visualTemplate += `
-                    <img src="${this.userInfo.pictureUri}" style="width: ${
-                    arrowHeight * 1.1
-                }px; height: ${arrowHeight * 1.1}px;
-                        border-radius: 50%; box-shadow: 0 0 2px black;
-                        margin: ${arrowHeight * 0.75}px 0 0 -${
-                    arrowWidth * 0.25
-                }px;">`;
-            } else if (this.userInfo.pictureUri && this.userInfo.displayName) {
-                visualTemplate += `
-                    <div style="display: flex; flex-direction: row; align-items: center; background-color: ${backgroundColor}; color: ${textColor};
-                        border-radius: ${arrowHeight / 2}px / 50%; margin: ${
-                    arrowHeight * 0.75
-                }px 0 0 -${arrowWidth * 0.25}px;
-                        padding: 2px; white-space: nowrap; font-size: 12px; font-family: sans-serif; box-shadow: 0 0 2px black">
-                        <img src="${this.userInfo.pictureUri}" style="width: ${
-                    arrowHeight * 1.1
-                }px; height: ${arrowHeight * 1.1}px; border-radius: 50%;">
-                        <div style="padding: 0 8px">${
-                            this.userInfo.displayName
-                        }</div>
-                    </div>`;
-            }
-        }
-
-        const template = document.createElement("template");
-        template["innerHTML"] = visualTemplate;
-
-        const element = document.createElement("div");
-        element.style.position = "absolute";
-        element.style.display = "flex";
-        element.style.flexDirection = "row";
-
-        element.appendChild(template.content.cloneNode(true));
-
-        return element;
-    }
-
-    constructor(public clientId: string, _userInfo?: IUserInfo) {
-        super(clientId, _userInfo);
-
-        this._color =
-            BuiltInLiveCursor.cursorColors[BuiltInLiveCursor.currentColorIndex];
-
-        BuiltInLiveCursor.currentColorIndex++;
-
-        if (
-            BuiltInLiveCursor.currentColorIndex >=
-            BuiltInLiveCursor.cursorColors.length
-        ) {
-            BuiltInLiveCursor.currentColorIndex = 0;
-        }
-    }
-}
+    LiveCanvasStrokesMap,
+    LiveCanvasTreeNode,
+    treeViewConfiguration,
+} from "./LiveCanvasTreeSchema.js";
 
 /**
  * Enables live and collaborative inking.
  */
-export class LiveCanvas extends LiveDataObject {
+export class LiveCanvasClass extends LiveDataObject {
     private _logger?: LiveTelemetryLogger;
     private static readonly dryInkMapKey = "dryInk";
+    private static readonly treeKey = "treeKey";
 
     /**
      * In order to limit the number of points being sent over the wire, wet strokes are
@@ -403,15 +103,24 @@ export class LiveCanvas extends LiveDataObject {
      * The object's Fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveCanvas.TypeName,
-        LiveCanvas,
-        [],
+        LiveCanvasClass.TypeName,
+        LiveCanvasClass,
+        [
+            (
+                SharedTree as unknown as ISharedObjectKind<ITree> &
+                    SharedObjectKind<ITree>
+            ).getFactory(),
+        ],
         {}
     );
 
     private _inkingManager?: InkingManager;
     private _processingIncomingChanges = false;
     private _dryInkMap!: SharedMap;
+    private _tree?: ITree;
+    private _treeView?: TreeView<typeof LiveCanvasTreeNode>;
+    private _treeUndoRedo?: undoRedo;
+    private _storageSolution?: LiveCanvasStorageSolution;
     private _wetStrokes: Map<string, IWetStroke> = new Map<
         string,
         IWetStroke
@@ -424,9 +133,11 @@ export class LiveCanvas extends LiveDataObject {
         LiveStroke
     >();
     private _liveCursorsMap = new Map<string, LiveCursor>();
-    private _liveCursorsHost!: HTMLElement;
+    private _liveCursorsHost?: HTMLElement;
     private _isCursorShared: boolean = false;
     private _liveCursorSweepTimeout?: number;
+    private _storageListeners: Map<string, Function> = new Map();
+    private _inkingManagerListeners: Map<string, Function> = new Map();
 
     private liveStrokeProcessed = (liveStroke: LiveStroke) => {
         this.onLocalUserAllowed(async () => {
@@ -455,93 +166,84 @@ export class LiveCanvas extends LiveDataObject {
 
     private setupWetInkProcessing(): void {
         // Setup outgoing events
-        if (this._inkingManager) {
-            this._inkingManager.on(
-                PointerMovedEvent,
-                (eventArgs: IPointerMovedEventArgs) => {
-                    if (this.isCursorShared) {
-                        this.onLocalUserAllowed(async () => {
-                            try {
-                                // Send a pointer moved event with an undefined
-                                // point to indicated the cursor is not shared anymore
-                                this._pointerMovedEventTarget.sendEvent({
-                                    position: eventArgs.position,
-                                    pictureUri: this.getLocalUserPictureUrl(),
-                                });
-                            } catch (err) {
-                                this._logger?.sendErrorEvent(
-                                    TelemetryEvents.LiveCanvas
-                                        .PointerMovedEventError,
-                                    err
-                                );
-                            }
+        if (!this._inkingManager) return;
+        const pointerEventListener = (eventArgs: IPointerMovedEventArgs) => {
+            if (this.isCursorShared) {
+                this.onLocalUserAllowed(async () => {
+                    try {
+                        // Send a pointer moved event with an undefined
+                        // point to indicated the cursor is not shared anymore
+                        this._pointerMovedEventTarget.sendEvent({
+                            position: eventArgs.position,
+                            pictureUri: this.getLocalUserPictureUrl(),
                         });
+                    } catch (err) {
+                        this._logger?.sendErrorEvent(
+                            TelemetryEvents.LiveCanvas.PointerMovedEventError,
+                            err
+                        );
                     }
-                }
+                });
+            }
+        };
+        this._inkingManager.on(PointerMovedEvent, pointerEventListener);
+        this._inkingManagerListeners.set(
+            PointerMovedEvent,
+            pointerEventListener
+        );
+        const beginStrokeListener = (eventArgs: IBeginStrokeEventArgs) => {
+            const liveStroke = new LiveStroke(
+                eventArgs.strokeId,
+                eventArgs.type,
+                eventArgs.brush,
+                LiveCanvas.wetStrokePointSimplificationThreshold
             );
-            this._inkingManager.on(
-                BeginStrokeEvent,
-                (eventArgs: IBeginStrokeEventArgs) => {
-                    const liveStroke = new LiveStroke(
-                        eventArgs.strokeId,
-                        eventArgs.type,
-                        eventArgs.brush,
-                        LiveCanvas.wetStrokePointSimplificationThreshold
-                    );
 
-                    liveStroke.points.push(eventArgs.startPoint);
+            liveStroke.points.push(eventArgs.startPoint);
 
-                    this._pendingLiveStrokes.set(liveStroke.id, liveStroke);
+            this._pendingLiveStrokes.set(liveStroke.id, liveStroke);
 
-                    this.onLocalUserAllowed(async () => {
-                        // Send the begin wet stroke event
-                        try {
-                            this._beginWetStrokeEventTarget.sendEvent({
-                                isCursorShared: this.isCursorShared
-                                    ? true
-                                    : undefined,
-                                pictureUri: this.getLocalUserPictureUrl(),
-                                ...eventArgs,
-                            });
-                        } catch (err) {
-                            this._logger?.sendErrorEvent(
-                                TelemetryEvents.LiveCanvas.BeginWetStrokeError,
-                                err
-                            );
-                        }
+            this.onLocalUserAllowed(async () => {
+                // Send the begin wet stroke event
+                try {
+                    this._beginWetStrokeEventTarget.sendEvent({
+                        isCursorShared: this.isCursorShared ? true : undefined,
+                        pictureUri: this.getLocalUserPictureUrl(),
+                        ...eventArgs,
                     });
-                }
-            );
-            this._inkingManager.on(
-                AddPointsEvent,
-                (eventArgs: IAddPointsEventArgs) => {
-                    const liveStroke = this._pendingLiveStrokes.get(
-                        eventArgs.strokeId
+                } catch (err) {
+                    this._logger?.sendErrorEvent(
+                        TelemetryEvents.LiveCanvas.BeginWetStrokeError,
+                        err
                     );
-
-                    if (liveStroke !== undefined) {
-                        if (
-                            !eventArgs.endState &&
-                            eventArgs.points.length > 0
-                        ) {
-                            liveStroke.points.push(...eventArgs.points);
-                        }
-
-                        liveStroke.endState = eventArgs.endState;
-
-                        if (eventArgs.endState) {
-                            this._pendingLiveStrokes.delete(eventArgs.strokeId);
-                        }
-
-                        if (eventArgs.points.length > 0) {
-                            liveStroke.scheduleProcessing(
-                                this.liveStrokeProcessed
-                            );
-                        }
-                    }
                 }
-            );
-        }
+            });
+        };
+        this._inkingManager.on(BeginStrokeEvent, beginStrokeListener);
+        this._inkingManagerListeners.set(BeginStrokeEvent, beginStrokeListener);
+        const addPointListener = (eventArgs: IAddPointsEventArgs) => {
+            const liveStroke = this._pendingLiveStrokes.get(eventArgs.strokeId);
+
+            if (liveStroke !== undefined) {
+                if (!eventArgs.endState && eventArgs.points.length > 0) {
+                    liveStroke.points.push(...eventArgs.points);
+                }
+
+                liveStroke.endState = eventArgs.endState;
+
+                if (eventArgs.endState) {
+                    this._pendingLiveStrokes.delete(eventArgs.strokeId);
+                }
+
+                if (eventArgs.points.length > 0) {
+                    liveStroke.scheduleProcessing(this.liveStrokeProcessed);
+                }
+            }
+        };
+        this._inkingManager.on(AddPointsEvent, addPointListener);
+        this._inkingManagerListeners.set(AddPointsEvent, addPointListener);
+
+        if (this._pointerMovedEventTarget) return;
 
         // Setup incoming events
         const scope = new LiveEventScope(
@@ -580,6 +282,7 @@ export class LiveCanvas extends LiveDataObject {
                             clientId: evt.clientId,
                             timeStamp: evt.timestamp,
                             brush: evt.data.brush,
+                            version: 1,
                         }
                     );
 
@@ -652,105 +355,143 @@ export class LiveCanvas extends LiveDataObject {
         );
     }
 
-    private setupStorageProcessing(): void {
+    private setupStorageProcessing(node?: LiveCanvasTreeNode): void {
         if (this._inkingManager) {
             const inkingManager = this._inkingManager;
+            const treeNode = node ?? this._treeView?.root;
+            if (treeNode) {
+                this._storageSolution = new SharedTreeStorageSolution(
+                    treeNode,
+                    inkingManager
+                );
+            } else {
+                this._storageSolution = new SharedMapStorageSolution(
+                    this._dryInkMap,
+                    inkingManager
+                );
+            }
 
             // Setup incoming dry ink changes
-            this._dryInkMap.forEach((value: string) => {
-                const stroke = new Stroke();
-                stroke.deserialize(value);
-
+            this._storageSolution.forEach((stroke: IStroke) => {
                 inkingManager.addStroke(stroke);
             });
 
-            this._dryInkMap.on(
-                "valueChanged",
-                (changed: IValueChanged, local: boolean): void => {
-                    this._processingIncomingChanges = true;
-
-                    try {
-                        if (!local) {
-                            const serializedStroke: string | undefined =
-                                this._dryInkMap.get(changed.key);
-                            const addRemoveOptions: IAddRemoveStrokeOptions = {
-                                forceReRender: true,
-                                addToChangeLog: false,
-                            };
-
-                            if (serializedStroke !== undefined) {
-                                const stroke =
-                                    inkingManager.getStroke(changed.key) ??
-                                    new Stroke();
-                                stroke.deserialize(serializedStroke);
-
-                                // If we received a stroke that happens to be an ongoing wet stroke,
-                                // cancel the wet stroke so it's removed from the screen and replace
-                                // it with the full fidelity version we just received.
-                                const wetStroke = this._wetStrokes.get(
-                                    stroke.id
-                                );
-
-                                if (wetStroke) {
-                                    wetStroke.cancel();
-
-                                    this._wetStrokes.delete(wetStroke.id);
-                                }
-
-                                inkingManager.addStroke(
-                                    stroke,
-                                    addRemoveOptions
-                                );
-                            } else {
-                                inkingManager.removeStroke(
-                                    changed.key,
-                                    addRemoveOptions
-                                );
-                            }
-                        }
-                    } finally {
-                        this._processingIncomingChanges = false;
-                    }
+            const onStrokeRemovedListener = (
+                strokeId: string,
+                local: boolean
+            ) => {
+                if (local) return;
+                this._processingIncomingChanges = true;
+                try {
+                    const addRemoveOptions: IAddRemoveStrokeOptions = {
+                        forceReRender: true,
+                        addToChangeLog: false,
+                    };
+                    inkingManager.removeStroke(strokeId, addRemoveOptions);
+                } finally {
+                    this._processingIncomingChanges = false;
                 }
+            };
+            this._storageSolution.on(
+                StorageSolutionEvents.strokeRemoved,
+                onStrokeRemovedListener
+            );
+            this._storageListeners.set(
+                StorageSolutionEvents.strokeRemoved,
+                onStrokeRemovedListener
             );
 
-            this._dryInkMap.on(
-                "op",
-                (op: ISequencedDocumentMessage, local: boolean): void => {
-                    this._processingIncomingChanges = true;
+            const onStrokeChangedListener = (
+                stroke: IStroke,
+                local: boolean
+            ): void => {
+                if (local) return;
+                this._processingIncomingChanges = true;
 
-                    try {
-                        if (!local) {
-                            if (op.contents.type === "clear") {
-                                inkingManager.clear();
-                            }
-                        }
-                    } finally {
-                        this._processingIncomingChanges = false;
+                try {
+                    const addRemoveOptions: IAddRemoveStrokeOptions = {
+                        forceReRender: true,
+                        addToChangeLog: false,
+                    };
+                    // If we received a stroke that happens to be an ongoing wet stroke,
+                    // cancel the wet stroke so it's removed from the screen and replace
+                    // it with the full fidelity version we just received.
+                    const wetStroke = this._wetStrokes.get(stroke.id);
+
+                    if (wetStroke) {
+                        wetStroke.cancel();
+
+                        this._wetStrokes.delete(wetStroke.id);
                     }
+
+                    inkingManager.addStroke(stroke, addRemoveOptions);
+                } finally {
+                    this._processingIncomingChanges = false;
                 }
+            };
+            this._storageSolution.on(
+                StorageSolutionEvents.strokeChanged,
+                onStrokeChangedListener
+            );
+            this._storageListeners.set(
+                StorageSolutionEvents.strokeChanged,
+                onStrokeChangedListener
+            );
+
+            const onStrokesClearedListener = (local: boolean): void => {
+                if (local) return;
+                this._processingIncomingChanges = true;
+
+                try {
+                    inkingManager.clear();
+                } finally {
+                    this._processingIncomingChanges = false;
+                }
+            };
+            this._storageSolution.on(
+                StorageSolutionEvents.strokesCleared,
+                onStrokesClearedListener
+            );
+            this._storageListeners.set(
+                StorageSolutionEvents.strokesCleared,
+                onStrokesClearedListener
             );
 
             // Setup outgoing dry ink changes.
-            inkingManager.on(StrokesAddedEvent, (strokes: IStroke[]): void => {
+            const onStrokesAddedListener = (strokes: IStroke[]): void => {
                 if (!this._processingIncomingChanges) {
                     for (let stroke of strokes) {
-                        this._dryInkMap.set(stroke.id, stroke.serialize());
+                        this._storageSolution?.set(stroke);
                     }
                 }
-            });
-            inkingManager.on(StrokesRemovedEvent, (ids: string[]): void => {
+            };
+            inkingManager.on(StrokesAddedEvent, onStrokesAddedListener);
+            this._inkingManagerListeners.set(
+                StrokesAddedEvent,
+                onStrokesAddedListener
+            );
+            const onStrokesRemovedEventListener = (ids: string[]): void => {
                 if (!this._processingIncomingChanges) {
                     for (let id of ids) {
-                        this._dryInkMap.delete(id);
+                        this._storageSolution?.delete(id);
                     }
                 }
-            });
-            inkingManager.on(ClearEvent, (): void => {
+            };
+            inkingManager.on(
+                StrokesRemovedEvent,
+                onStrokesRemovedEventListener
+            );
+            this._inkingManagerListeners.set(
+                StrokesRemovedEvent,
+                onStrokesRemovedEventListener
+            );
+            const onClearEventListener = (): void => {
                 if (!this._processingIncomingChanges) {
-                    this._dryInkMap.clear();
+                    this._storageSolution?.clear();
                 }
-            });
+            };
+            inkingManager.on(ClearEvent, onClearEventListener);
+            this._inkingManagerListeners.set(ClearEvent, onClearEventListener);
         }
     }
 
@@ -795,8 +536,8 @@ export class LiveCanvas extends LiveDataObject {
             liveCursor.userInfo = userInfo;
         }
 
-        if (!this._liveCursorsHost.contains(liveCursor.renderedElement)) {
-            this._liveCursorsHost.appendChild(liveCursor.renderedElement);
+        if (!this._liveCursorsHost?.contains(liveCursor.renderedElement)) {
+            this._liveCursorsHost?.appendChild(liveCursor.renderedElement);
         }
 
         this.scheduleLiveCursorSweep();
@@ -808,7 +549,7 @@ export class LiveCanvas extends LiveDataObject {
         const liveCursor = this._liveCursorsMap.get(clientId);
 
         if (liveCursor) {
-            if (this._liveCursorsHost.contains(liveCursor.renderedElement)) {
+            if (this._liveCursorsHost?.contains(liveCursor.renderedElement)) {
                 this._liveCursorsHost.removeChild(liveCursor.renderedElement);
             }
         }
@@ -842,26 +583,58 @@ export class LiveCanvas extends LiveDataObject {
         }
     }
 
+    private clearListeners() {
+        this._storageListeners.forEach((listener, key) => {
+            this._storageSolution?.off(key, listener as any);
+        });
+        this._inkingManagerListeners.forEach((listener, key) => {
+            this._inkingManager?.off(key, listener as any);
+        });
+    }
+
     protected async initializingFirstTime(): Promise<void> {
         this._dryInkMap = SharedMap.create(
             this.runtime,
             LiveCanvas.dryInkMapKey
         );
+        this._tree = (
+            SharedTree as unknown as ISharedObjectKind<ITree> &
+                SharedObjectKind<ITree>
+        ).create(this.runtime, LiveCanvas.treeKey);
+        const view = this._tree.viewWith(treeViewConfiguration);
+        view.initialize(
+            new LiveCanvasTreeNode({
+                dryInkMap: new LiveCanvasStrokesMap([]),
+            })
+        );
+        view.dispose();
 
         this.root.set(LiveCanvas.dryInkMapKey, this._dryInkMap.handle);
+        this.root.set(LiveCanvas.treeKey, this._tree.handle);
     }
 
     protected async hasInitialized(): Promise<void> {
-        const handle = this.root.get<IFluidHandle<SharedMap>>(
+        const mapHandle = this.root.get<IFluidHandle<SharedMap>>(
             LiveCanvas.dryInkMapKey
         );
 
-        if (handle) {
-            this._dryInkMap = await handle.get();
+        if (mapHandle) {
+            this._dryInkMap = await mapHandle.get();
         } else {
             throw new Error(
                 `Unable to get SharedMap with key "${LiveCanvas.dryInkMapKey}"`
             );
+        }
+
+        const treeHandle = this.root.get<IFluidHandle<ITree>>(
+            LiveCanvas.treeKey
+        );
+        if (treeHandle) {
+            // Legacy containers will not have `_tree` and will have to fall back to `_dryInkMap`
+            this._tree = await treeHandle.get();
+            this._treeView = this._tree.viewWith(treeViewConfiguration);
+            this._treeUndoRedo = createUndoRedoStacks(this._treeView.events);
+            // TODO: listen for changes to root, pretty minor since we don't ever set it outside of the first time
         }
     }
 
@@ -883,13 +656,21 @@ export class LiveCanvas extends LiveDataObject {
      * Initializes the live inking session.
      *
      * @param inkingManager The InkingManager instance providing the drawing and events that will be synchronized across clients.
+     * @param allowedRoles Optional. Roles who are allowed to draw strokes
+     * @param node Optional. A Fluid `LiveCanvasTree` `TreeNode` instance to swap out the underlying storage solution for strokes.
+     * To learn more, look at Fluid's [SharedTree](https://fluidframework.com/docs/data-structures/tree/) documentation.
      *
      * @returns a void promise that resolves once complete.
      */
     async initialize(
         inkingManager: InkingManager,
-        allowedRoles?: UserMeetingRole[]
+        allowedRoles?: UserMeetingRole[],
+        node?: LiveCanvasTreeNode
     ) {
+        // Cleanup if already
+        this.clearListeners();
+        this._storageSolution?.dispose();
+
         // Update initialize state as pending
         this.initializeState = LiveDataObjectInitializeState.pending;
 
@@ -903,7 +684,7 @@ export class LiveCanvas extends LiveDataObject {
         );
         this._logger = new LiveTelemetryLogger(this.runtime, this.liveRuntime);
 
-        this.setupStorageProcessing();
+        this.setupStorageProcessing(node);
         this.setupWetInkProcessing();
 
         this._liveCursorsHost = document.createElement("div");
@@ -912,11 +693,87 @@ export class LiveCanvas extends LiveDataObject {
         this._liveCursorsHost.style.width = "100%";
         this._liveCursorsHost.style.height = "100%";
         this._liveCursorsHost.style.overflow = "hidden";
-
         inkingManager.hostElement.appendChild(this._liveCursorsHost);
 
         // Update initialize state as succeeded
         this.initializeState = LiveDataObjectInitializeState.succeeded;
+    }
+
+    /**
+     * Changes the underlying {@link LiveCanvasTreeNode} node used for storing inking strokes.
+     * To learn more, look at Fluid's [SharedTree](https://fluidframework.com/docs/data-structures/tree/) documentation.
+     * @remarks
+     * There is a default `LiveCanvasTree` node that is created for each `LiveCanvas`.
+     * The purpose of this is to allow you to use a single `LiveCanvas` instance with an interchangable data source.
+     * This will not cause the default `LiveCanvasTree` node to be deleted.
+     */
+    setTreeNode(node: LiveCanvasTreeNode) {
+        // Legacy containers that only have _dryInkMap are not supported
+        ExpectedError.assert(
+            !this._treeView,
+            "LiveCanvas:setTreeNode",
+            "Cannot call `setTreeNode` on a 1.0 `LiveCanvas` instance using `SharedMap`.",
+            'To fix this issue, create a new Fluid container or `LiveCanvas` instance. You can also proactively check if this API is available using `LiveCanvas.ddsVersion === "2.0"`.'
+        );
+        // Cleanup existing
+        this._storageSolution?.dispose();
+        this.clearListeners();
+        this._inkingManager?.clear();
+        // Resetup storage & inking
+        this.setupStorageProcessing(node);
+        this.setupWetInkProcessing();
+    }
+
+    /**
+     * Undo the most recent stroke in this `LiveCanvas` instance's {@link LiveCanvasTreeNode} node.
+     *
+     * @remarks
+     * Only works in {@link ddsVersion} 2.0 and when using the default {@link LiveCanvasTreeNode} node as the data source.
+     * If you use your own `node` to {@link initialize} or {@link setTreeNode}, undo/redo must be handled via your root `TreeView`.
+     */
+    undo() {
+        ExpectedError.assert(
+            this.ddsVersion === "2.0",
+            "LiveCanvas:undo",
+            "Cannot call `undo` on a 1.0 `LiveCanvas` instance using `SharedMap`.",
+            'To fix this issue, create a new Fluid container or `LiveCanvas` instance. You can also proactively check if this API is available using `LiveCanvas.ddsVersion === "2.0"`.'
+        );
+        UnexpectedError.assert(
+            !!this._treeUndoRedo,
+            "LiveCanvas:undo",
+            "`this._treeUndoRedo` is unexpectedly undefined despite `this.ddsVersion` being 2.0, which is a valid version."
+        );
+        this._treeUndoRedo.undo();
+    }
+
+    /**
+     * Redo the most recent stroke in this `LiveCanvas` instance's {@link LiveCanvasTreeNode} node.
+     *
+     * @remarks
+     * Only works in {@link ddsVersion} 2.0 and when using the default {@link LiveCanvasTreeNode} node as the data source.
+     * If you use your own `node` to {@link initialize} or {@link setTreeNode}, undo/redo must be handled via your root `TreeView`.
+     */
+    redo() {
+        ExpectedError.assert(
+            this.ddsVersion === "2.0",
+            "LiveCanvas:redo",
+            "Cannot call `redo` on a 1.0 `LiveCanvas` instance using `SharedMap`.",
+            'To fix this issue, create a new Fluid container or `LiveCanvas` instance. You can also proactively check if this API is available using `LiveCanvas.ddsVersion === "2.0"`.'
+        );
+        UnexpectedError.assert(
+            !!this._treeUndoRedo,
+            "LiveCanvas:redo",
+            "`this._treeUndoRedo` is unexpectedly undefined despite `this.ddsVersion` being 2.0, which is a valid version."
+        );
+        this._treeUndoRedo.redo();
+    }
+
+    override dispose() {
+        this.clearListeners();
+        this._treeView?.dispose();
+        this._storageSolution?.dispose();
+        this._treeUndoRedo?.dispose();
+        super.dispose();
     }
 
     /**
@@ -958,67 +815,32 @@ export class LiveCanvas extends LiveDataObject {
     }
 
     /**
-     * Sets the list of roles that are allowed to emit wet stroke events.
+     * Returns 2.0 if the `LiveCanvas` instance was created in `@microsoft/live-share-canvas` >=2.0.0.
+     * Otherwise, returns 1.0.
+     * @remarks
+     * Intended to know when it is safe to set the `node` prop in {@link initialize} or {@link setTreeNode}.
+     * Also helpful for knowing whether {@link undo} or {@link redo} will work.
      */
-    set allowedRoles(value: UserMeetingRole[]) {
-        this._allowedRoles = value;
-
-        this.setupWetInkProcessing();
+    get ddsVersion(): "1.0" | "2.0" {
+        if (!this._treeView) {
+            return "1.0";
+        }
+        return "2.0";
     }
 }
 
 /**
- * @hidden
- * Decorator for InputProvider that ensures local user has correct
- * roles before activating delegate input provider.
+ * Enables live and collaborative inking.
  */
-class LivePointerInputProvider extends InputProvider {
-    constructor(
-        private delegate: InputProvider,
-        private verifyLocalUserRoles: () => Promise<boolean>
-    ) {
-        super();
-    }
-    activate() {
-        this.verifyLocalUserRoles().then((allowed) => {
-            if (allowed) {
-                this.delegate.activate();
-            } else {
-                this.delegate.deactivate();
-            }
-        });
-    }
+export type LiveCanvas = LiveCanvasClass;
 
-    deactivate() {
-        this.delegate.deactivate();
-    }
-
-    get isActive(): boolean {
-        return this.delegate.isActive;
-    }
-
-    get pointerDown(): IMulticastEvent<IPointerEvent> {
-        return this.delegate.pointerDown;
-    }
-
-    get pointerMove(): IMulticastEvent<IPointerMoveEvent> {
-        return this.delegate.pointerMove;
-    }
-
-    get pointerUp(): IMulticastEvent<IPointerEvent> {
-        return this.delegate.pointerUp;
-    }
-
-    get pointerEnter(): IMulticastEvent<IPointerEvent> {
-        return this.delegate.pointerEnter;
-    }
-
-    get pointerLeave(): IMulticastEvent<IPointerEvent> {
-        return this.delegate.pointerLeave;
-    }
-}
+// eslint-disable-next-line no-redeclare
+export const LiveCanvas = (() => {
+    const kind = createDataObjectKind(LiveCanvasClass);
+    return kind as typeof kind & SharedObjectKind<LiveCanvasClass>;
+})();
 
 /**
- * Register `LiveCanvas` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Register `LiveCanvas` as an available `SharedObjectKind` for use in dynamic object loading.
  */
 DynamicObjectRegistry.registerObjectClass(LiveCanvas, LiveCanvas.TypeName);

@@ -14,32 +14,29 @@ import { LiveShareHost } from "@microsoft/teams-js";
 const host = LiveShareHost.create();
 
 export function LiveShareApp() {
-  // Call app.initialize() from teams-js before rendering LiveShareProvider
+    // Call app.initialize() from teams-js before rendering LiveShareProvider
 
-  return (
-    <LiveShareProvider
-      joinOnLoad={true}
-      host={host}
-    >
-      <SharedCheckbox />
-    </LiveShareProvider>
-  );
+    return (
+        <LiveShareProvider joinOnLoad={true} host={host}>
+            <SharedCheckbox />
+        </LiveShareProvider>
+    );
 }
 
 // SharedCheckbox.jsx
 import { useSharedState } from "@microsoft/live-share-react";
 
 export function SharedCheckbox() {
-  const [checked, setChecked] = useSharedState("MY-UNIQUE-ID", false);
-  return (
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={() => {
-        setChecked(!checked);
-      }}
-    />
-  );
+    const [checked, setChecked] = useSharedState("MY-UNIQUE-ID", false);
+    return (
+        <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => {
+                setChecked(!checked);
+            }}
+        />
+    );
 }
 ```
 
@@ -102,31 +99,31 @@ The following example shows how `useSharedState` can be used to dynamically crea
 import { useSharedState } from "@microsoft/live-share-react";
 
 export function CounterCard({ card, onDelete }) {
-  const [count, setCount, disposeCount] = useSharedState(
-    `card-count:${card.id}`,
-    0
-  );
-  return (
-    <div className="card">
-      <h3>{card.title}</h3>
-      <button
-        onClick={() => {
-          setCount(count + 1);
-        }}
-      >
-        {"+1"}
-      </button>
-      <span>{`${count} `}</span>
-      <button
-        onClick={() => {
-          onDelete(card.id);
-          disposeCount();
-        }}
-      >
-        {"Delete"}
-      </button>
-    </div>
-  );
+    const [count, setCount, disposeCount] = useSharedState(
+        `card-count:${card.id}`,
+        0
+    );
+    return (
+        <div className="card">
+            <h3>{card.title}</h3>
+            <button
+                onClick={() => {
+                    setCount(count + 1);
+                }}
+            >
+                {"+1"}
+            </button>
+            <span>{`${count} `}</span>
+            <button
+                onClick={() => {
+                    onDelete(card.id);
+                    disposeCount();
+                }}
+            >
+                {"Delete"}
+            </button>
+        </div>
+    );
 }
 ```
 
@@ -143,32 +140,32 @@ import { useSharedMap } from "@microsoft/live-share-react";
 import { v4 as uuid } from "uuid";
 
 export function CardList() {
-  const { map, setEntry, deleteEntry } = useSharedMap("CUSTOM-MAP-ID");
-  return (
-    <div>
-      <h2>{"Cards"}</h2>
-      <button
-        onClick={() => {
-          const id = uuid();
-          setEntry(id, {
-            id,
-            title: "Custom Card",
-          });
-        }}
-      >
-        {"+ Add card"}
-      </button>
-      <div className="flex wrap row hAlign">
-        {[...map.values()].map((cardValue) => (
-          <CounterCard
-            key={cardValue.id}
-            card={cardValue}
-            onDelete={deleteEntry}
-          />
-        ))}
-      </div>
-    </div>
-  );
+    const { map, setEntry, deleteEntry } = useSharedMap("CUSTOM-MAP-ID");
+    return (
+        <div>
+            <h2>{"Cards"}</h2>
+            <button
+                onClick={() => {
+                    const id = uuid();
+                    setEntry(id, {
+                        id,
+                        title: "Custom Card",
+                    });
+                }}
+            >
+                {"+ Add card"}
+            </button>
+            <div className="flex wrap row hAlign">
+                {[...map.values()].map((cardValue) => (
+                    <CounterCard
+                        key={cardValue.id}
+                        card={cardValue}
+                        onDelete={deleteEntry}
+                    />
+                ))}
+            </div>
+        </div>
+    );
 }
 ```
 
@@ -270,34 +267,34 @@ Here is a simple example:
 import { useLiveEvent } from "@microsoft/live-share-react";
 
 export function Reactions() {
-  const { latestEvent, sendEvent } = useLiveEvent("EVENT-ID");
+    const { latestEvent, sendEvent } = useLiveEvent("EVENT-ID");
 
-  return (
-    <div>
-      {/* Buttons for sending reactions */}
-      <button
-        onClick={() => {
-          sendEvent({ emoji: "❤️" });
-        }}
-      >
-        {"❤️"}
-      </button>
-      <button
-        onClick={() => {
-          sendEvent({ emoji: "😂" });
-        }}
-      >
-        {"😂"}
-      </button>
-      {/* Show latest reaction */}
-      {latestEvent?.local === false && (
-        <div>{`Received: ${latestEvent?.value.emoji}`}</div>
-      )}
-      {latestEvent?.local === true && (
-        <div>{`Sent: ${latestEvent?.value.emoji}`}</div>
-      )}
-    </div>
-  );
+    return (
+        <div>
+            {/* Buttons for sending reactions */}
+            <button
+                onClick={() => {
+                    sendEvent({ emoji: "❤️" });
+                }}
+            >
+                {"❤️"}
+            </button>
+            <button
+                onClick={() => {
+                    sendEvent({ emoji: "😂" });
+                }}
+            >
+                {"😂"}
+            </button>
+            {/* Show latest reaction */}
+            {latestEvent?.local === false && (
+                <div>{`Received: ${latestEvent?.value.emoji}`}</div>
+            )}
+            {latestEvent?.local === true && (
+                <div>{`Sent: ${latestEvent?.value.emoji}`}</div>
+            )}
+        </div>
+    );
 }
 ```
 
@@ -311,37 +308,38 @@ Here is a simple example:
 import { useLiveTimer } from "@microsoft/live-share-react";
 
 export function CountdownTimer() {
-  const { milliRemaining, timerConfig, start, pause, play } = useLiveTimer("TIMER-ID");
+    const { milliRemaining, timerConfig, start, pause, play } =
+        useLiveTimer("TIMER-ID");
 
-  return (
-    <div>
-      <button
-        onClick={() => {
-          start(60 * 1000);
-        }}
-      >
-        { timerConfig === undefined ? "Start" : "Reset" }
-      </button>
-      { timerConfig !== undefined && (
-        <button
-          onClick={() => {
-            if (timerConfig.running) {
-              pause();
-            } else {
-              play();
-            }
-          }}
-        >
-          {timerConfig.running ? "Pause" : "Play" }
-        </button>
-      )}
-      { milliRemaining !== undefined && (
-        <p>
-          { `${Math.round(milliRemaining / 1000)} / ${Math.round(timerConfig.duration) / 1000}` }
-        </p>
-      )}
-    </div>
-  );
+    return (
+        <div>
+            <button
+                onClick={() => {
+                    start(60 * 1000);
+                }}
+            >
+                {timerConfig === undefined ? "Start" : "Reset"}
+            </button>
+            {timerConfig !== undefined && (
+                <button
+                    onClick={() => {
+                        if (timerConfig.running) {
+                            pause();
+                        } else {
+                            play();
+                        }
+                    }}
+                >
+                    {timerConfig.running ? "Pause" : "Play"}
+                </button>
+            )}
+            {milliRemaining !== undefined && (
+                <p>
+                    {`${Math.round(milliRemaining / 1000)} / ${Math.round(timerConfig.duration) / 1000}`}
+                </p>
+            )}
+        </div>
+    );
 }
 ```
 
@@ -359,24 +357,24 @@ import { useRef } from "react";
 const ALLOWED_ROLES = [UserMeetingRole.organizer, UserMeetingRole.presenter];
 
 const INITIAL_TRACK =
-  "https://storage.googleapis.com/media-session/big-buck-bunny/trailer.mov";
+    "https://storage.googleapis.com/media-session/big-buck-bunny/trailer.mov";
 
 export function VideoPlayer() {
-  const videoRef = useRef(null);
-  const { play, pause } = useMediaSynchronizer(
-    "MEDIA-SESSION-ID",
-    videoRef,
-    INITIAL_TRACK,
-    ALLOWED_ROLES
-  );
+    const videoRef = useRef(null);
+    const { play, pause } = useMediaSynchronizer(
+        "MEDIA-SESSION-ID",
+        videoRef,
+        INITIAL_TRACK,
+        ALLOWED_ROLES
+    );
 
-  return (
-    <div>
-      <video ref={videoRef} />
-      <button onClick={play}>{"Play"}</button>
-      <button onClick={pause}>{"Pause"}</button>
-    </div>
-  );
+    return (
+        <div>
+            <video ref={videoRef} />
+            <button onClick={play}>{"Play"}</button>
+            <button onClick={pause}>{"Pause"}</button>
+        </div>
+    );
 }
 ```
 
@@ -440,10 +438,7 @@ import { useTaskManager } from "@microsoft/live-share-react";
 
 export const ExampleTaskManager = () => {
     const [taskId, setTaskId] = useState(undefined);
-    const { lockedTask } = useTaskManager(
-        "CUSTOM-TASK-MANAGER",
-        taskId,
-    );
+    const { lockedTask } = useTaskManager("CUSTOM-TASK-MANAGER", taskId);
 
     const displayText = lockedTask
         ? "You are assigned the task"
@@ -454,19 +449,19 @@ export const ExampleTaskManager = () => {
             {!taskId && (
                 <button
                     onClick={() => {
-                        setTaskId("task-id")
+                        setTaskId("task-id");
                     }}
                 >
-                    {'Join task queue'}
+                    {"Join task queue"}
                 </button>
             )}
             {taskId && (
                 <button
                     onClick={() => {
-                        setTaskId(undefined)
+                        setTaskId(undefined);
                     }}
                 >
-                    {'Leave task queue'}
+                    {"Leave task queue"}
                 </button>
             )}
             <p>{displayText}</p>
@@ -477,7 +472,7 @@ export const ExampleTaskManager = () => {
 
 ### Custom Fluid object hooks
 
-If you want to dynamically load a custom Fluid object in your app, use the `useDynamicDDS` to create a custom hook. This is the same hook that Live Share React uses internally within our custom hooks, such as `useLiveEvent`. If you made a custom data object or are using one of Fluid's experimental data structures, you also must register your Fluid `LoadableObjectClass` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
+If you want to dynamically load a custom Fluid object in your app, use the `useDynamicDDS` to create a custom hook. This is the same hook that Live Share React uses internally within our custom hooks, such as `useLiveEvent`. If you made a custom data object or are using one of Fluid's experimental data structures, you also must register your Fluid `SharedObjectKind` with `DynamicObjectRegistry.registerObjectClass` to `@microsoft/live-share`, if it is not already.
 
 Implementations may vary for each dynamic object & hook. We will try and update this package periodically with new packages released by Fluid Framework and Live Share, as they are published.
 
@@ -487,19 +482,25 @@ Example:
 import React from "react";
 import { useDynamicDDS } from "@microsoft/live-share-react";
 import { DynamicObjectRegistry } from "@microsoft/live-share";
-import { TaskManager  } from "@fluid-experimental/task-manager";
+import { TaskManager } from "@fluid-experimental/task-manager";
 
 // Register TaskManager as dynamic object
-DynamicObjectRegistry.registerObjectClass(TaskManager, TaskManager.getFactory().type);
+DynamicObjectRegistry.registerObjectClass(
+    TaskManager,
+    TaskManager.getFactory().type
+);
 
 /**
  * A hook for joining a queue to lock tasks for a given id. Guaranteed to have only one user assigned to a task at a time.
- * 
+ *
  * @param uniqueKey the unique key for the TaskManager DDS
  * @param taskId the task id to lock
  * @returns stateful data about the status of the task lock
  */
-export const useTaskManager = (uniqueKey: string, taskId?: string): {
+export const useTaskManager = (
+    uniqueKey: string,
+    taskId?: string
+): {
     lockedTask: boolean;
     taskManager: TaskManager | undefined;
 } => {
@@ -515,7 +516,10 @@ export const useTaskManager = (uniqueKey: string, taskId?: string): {
     /**
      * User facing: dynamically load the TaskManager DDS for the given unique key.
      */
-    const { dds: taskManager } = useDynamicDDS<TaskManager>(uniqueKey, TaskManager);
+    const { dds: taskManager } = useDynamicDDS<TaskManager>(
+        uniqueKey,
+        TaskManager
+    );
 
     /**
      * When the task id changes, lock the task. When the task id is undefined, abandon the task.
@@ -541,7 +545,7 @@ export const useTaskManager = (uniqueKey: string, taskId?: string): {
                             currentTaskIdRef.current = undefined;
                         }
                     }
-                }
+                };
                 onLockTask();
             } else if (!taskId && currentTaskIdRef.current) {
                 taskManager.abandon(currentTaskIdRef.current);
@@ -558,7 +562,7 @@ export const useTaskManager = (uniqueKey: string, taskId?: string): {
                 taskManager?.abandon(currentTaskIdRef.current);
             }
             currentTaskIdRef.current = undefined;
-        }
+        };
     }, [taskManager, taskId]);
 
     return {
@@ -570,9 +574,9 @@ export const useTaskManager = (uniqueKey: string, taskId?: string): {
 
 ## Code samples
 
-| Sample name       | Description                                                             | Javascript                                            |
-| ----------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
-| Live Share React  | Simple example with each of our custom Live Share React hooks.          | [View](../../samples/javascript/04.live-share-react)  |
+| Sample name      | Description                                                    | Javascript                                           |
+| ---------------- | -------------------------------------------------------------- | ---------------------------------------------------- |
+| Live Share React | Simple example with each of our custom Live Share React hooks. | [View](../../samples/javascript/04.live-share-react) |
 
 ## React version compatibility
 
@@ -584,18 +588,19 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 **It is critical that your app use the package dependencies listed in the table below.** Lookup the version of the `@microsoft/live-share` you're using and set any other dependencies in your package.json file to match:
 
-| @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
-| --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| ^1.0.0                  | ^2.11.0             | ^1.2.3          | ^1.0.0                      | ^1.0.0                       | ^2.5.0                        | ^2.5.0                          |
+| @microsoft/live-share | @microsoft/teams-js | fluid-framework | @microsoft/live-share-\* | @fluidframework/azure-client | @microsoft/TeamsFx | @microsoft/TeamsFx-react |
+| --------------------- | ------------------- | --------------- | ------------------------ | ---------------------------- | ------------------ | ------------------------ |
+| ^2.0.0                | ^2.11.0             | ^2.0.0          | ^2.0.0                   | ^2.0.0                       | ^2.5.0             | ^2.5.0                   |
+| ^1.0.0                | ^2.11.0             | ^1.2.3          | ^1.0.0                   | ^1.0.0                       | ^2.5.0             | ^2.5.0                   |
 
 ## Contributing
 
 There are several ways you can [contribute](../../CONTRIBUTING.md) to this project:
 
-- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
-- Review the source code changes.
-- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
-- [Contribute bug fixes](../../CONTRIBUTING.md).
+-   [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+-   Review the source code changes.
+-   Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+-   [Contribute bug fixes](../../CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
 

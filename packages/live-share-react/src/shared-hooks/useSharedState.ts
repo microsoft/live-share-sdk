@@ -4,10 +4,13 @@
  */
 
 import React from "react";
-import { useFluidObjectsContext } from "../providers";
-import { DisposeSharedStateAction, SetSharedStateAction } from "../types";
+import { useFluidObjectsContext } from "../providers/index.js";
+import {
+    DisposeSharedStateAction,
+    SetSharedStateAction,
+} from "../types/index.js";
 import { v4 as uuid } from "uuid";
-import { isPrevStateCallback } from "../internal";
+import { isPrevStateCallback } from "../internal/index.js";
 
 /**
  * Inspired by React's `useState` hook, `useSharedState` makes it easy to synchronize state in your app.

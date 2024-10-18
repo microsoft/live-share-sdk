@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { PresenceState } from "@microsoft/live-share";
+import { PresenceStatus } from "@microsoft/live-share";
 import { getRandomAvatar } from "../utils/random-avatar";
 import { useStateRef } from "../utils/useStateRef";
 
@@ -60,7 +60,7 @@ export const usePresence = (presence, context) => {
             if (local) {
                 const localUser = {
                     userId: userPresence.userId,
-                    state: userPresence.state,
+                    state: userPresence.status,
                     data: userPresence.data,
                     name: userPresence.displayName,
                     roles: userPresence.roles,
@@ -69,10 +69,10 @@ export const usePresence = (presence, context) => {
             }
             // Update our local state
             const updatedUsers = presence
-                .getUsers(PresenceState.online)
+                .getUsers(PresenceStatus.online)
                 .map((userPresence) => ({
                     userId: userPresence.userId,
-                    state: userPresence.state,
+                    state: userPresence.status,
                     data: userPresence.data,
                     name: userPresence.displayName,
                     roles: userPresence.roles,
@@ -86,7 +86,7 @@ export const usePresence = (presence, context) => {
                     avatarIndex: defaultAvatarInformation.avatarIndex,
                     ready: false,
                 },
-                PresenceState.online
+                PresenceStatus.online
             )
             .then(() => {
                 setPresenceStarted(true);

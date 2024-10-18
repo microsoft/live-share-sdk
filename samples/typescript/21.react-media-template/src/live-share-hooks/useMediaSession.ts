@@ -3,7 +3,10 @@
  * Licensed under the MIT License.
  */
 
-import { UserMeetingRole } from "@microsoft/live-share";
+import {
+    LiveDataObjectInitializeState,
+    UserMeetingRole,
+} from "@microsoft/live-share";
 import {
     ExtendedMediaMetadata,
     LiveMediaSession,
@@ -173,7 +176,8 @@ export const useMediaSession = (
     useEffect(() => {
         if (
             !mediaSession ||
-            mediaSession.isInitialized ||
+            mediaSession.initializeState ==
+                LiveDataObjectInitializeState.succeeded ||
             synchronizerRef.current ||
             !selectedMediaItem ||
             !player ||

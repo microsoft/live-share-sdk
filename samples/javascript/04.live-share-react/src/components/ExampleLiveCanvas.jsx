@@ -8,17 +8,11 @@ export const ExampleLiveCanvas = () => {
     const [active, setActive] = useState(true);
     const [tool, setTool] = useState(InkingTool.pen);
     const [isCursorShared, setIsCursorShared] = useState(true);
-    const { liveCanvas } = useLiveCanvas(
-        "CUSTOM-LIVE-CANVAS",
-        liveCanvasRef,
+    const { liveCanvas } = useLiveCanvas("CUSTOM-LIVE-CANVAS", liveCanvasRef, {
         active,
         tool,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        isCursorShared
-    );
+        isCursorShared,
+    });
 
     return (
         <div style={{ position: "absolute" }}>

@@ -4,30 +4,41 @@
  */
 
 import { TestLiveMediaSession, TestMediaTimeStampProvider } from "./TestUtils";
-import { Deferred } from "@microsoft/live-share/src/internals/Deferred";
 import { strict as assert } from "assert";
-import { requestFluidObject } from "@fluidframework/runtime-utils";
-import { ITestObjectProvider } from "@fluidframework/test-utils";
-import { describeNoCompat } from "@fluidframework/test-version-utils";
+import {
+    ITestObjectProvider,
+    fluidEntryPoint,
+    getContainerEntryPointBackCompat,
+} from "@fluidframework/test-utils/internal";
 import {
     ITimestampProvider,
-    LiveEventScope,
-    LiveEventTarget,
     LocalTimestampProvider,
     UserMeetingRole,
+    TestLiveShareHost,
 } from "@microsoft/live-share";
-import { TestLiveShareHost } from "@microsoft/live-share";
-import { getLiveDataObjectClass } from "@microsoft/live-share";
-import { waitForDelay } from "@microsoft/live-share/src/internals";
-import { MockLiveShareRuntime } from "@microsoft/live-share/src/test/MockLiveShareRuntime";
+import {
+    getLiveDataObjectKind,
+    LiveEventScope,
+    LiveEventTarget,
+    MockLiveShareRuntime,
+    waitForDelay,
+    Deferred,
+    LiveShareRuntime,
+} from "@microsoft/live-share/internal";
 import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionDetails,
 } from "../MediaSessionExtensions";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+import {
+    ITestObjectProviderOptions,
+    describeCompat,
+} from "@live-share-private/test-utils";
 
 async function getObjects(
-    getTestObjectProvider,
+    getTestObjectProvider: (
+        options?: ITestObjectProviderOptions
+    ) => ITestObjectProvider,
     updateInterval: number = 10000,
     timestampProvider: ITimestampProvider = new LocalTimestampProvider()
 ) {
@@ -45,13 +56,13 @@ async function getObjects(
         timestampProvider
     );
 
-    let ObjectProxy1: any = getLiveDataObjectClass<TestLiveMediaSession>(
+    let ObjectProxy1: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime1
+        liveRuntime1 as unknown as LiveShareRuntime
     );
-    let ObjectProxy2: any = getLiveDataObjectClass<TestLiveMediaSession>(
+    let ObjectProxy2: any = getLiveDataObjectKind<TestLiveMediaSession>(
         TestLiveMediaSession,
-        liveRuntime2
+        liveRuntime2 as unknown as LiveShareRuntime
     );
 
     await liveRuntime1.start();
@@ -59,18 +70,21 @@ async function getObjects(
 
     let provider: ITestObjectProvider = getTestObjectProvider();
 
-    let container1 = await provider.createContainer(ObjectProxy1.factory);
-    let object1 = await requestFluidObject<TestLiveMediaSession>(
-        container1,
-        "default"
+    let container1 = await provider.createContainer(
+        ObjectProxy1.factory as fluidEntryPoint
     );
+    let object1 =
+        await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+            container1
+        );
     object1.coordinator.positionUpdateInterval = 0.02;
-
-    let container2 = await provider.loadContainer(ObjectProxy2.factory);
-    let object2 = await requestFluidObject<TestLiveMediaSession>(
-        container2,
-        "default"
+    let container2 = await provider.loadContainer(
+        ObjectProxy2.factory as fluidEntryPoint
     );
+    let object2 =
+        await getContainerEntryPointBackCompat<TestLiveMediaSession>(
+            container2
+        );
     object2.coordinator.positionUpdateInterval = 0.02;
 
     const track1 = {
@@ -119,7 +133,7 @@ async function getObjects(
     };
 }
 
-describeNoCompat(
+describeCompat(
     "LiveMediaSession Manual Action Handlers (mostly testing coordinator)",
     (getTestObjectProvider) => {
         it("should send 'positionUpdate' event when someone joins.", async () => {
@@ -228,9 +242,8 @@ describeNoCompat(
 
             await object1.coordinator.seekTo(30);
             object1.coordinator.sendPositionUpdate(positionState(30));
-
             object2.coordinator.beginSuspension();
-
+            await waitForDelay(1);
             object2.coordinator.sendPositionUpdate(positionState(200));
             await waitForDelay(1);
 

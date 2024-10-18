@@ -47,15 +47,15 @@ export default function App() {
                         setWebTheme(webLightTheme);
                         break;
                 }
-                microsoftTeams.app.registerOnThemeChangeHandler(function (
-                    theme
-                ) {
-                    if (theme == "dark") {
-                        setWebTheme(webDarkTheme);
-                    } else {
-                        setWebTheme(webLightTheme);
+                microsoftTeams.app.registerOnThemeChangeHandler(
+                    function (theme) {
+                        if (theme == "dark") {
+                            setWebTheme(webDarkTheme);
+                        } else {
+                            setWebTheme(webLightTheme);
+                        }
                     }
-                });
+                );
             } catch (error) {
                 console.error(error);
             }

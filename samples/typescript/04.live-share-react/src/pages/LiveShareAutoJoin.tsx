@@ -1,16 +1,7 @@
 import { TestLiveShareHost } from "@microsoft/live-share";
 import { LiveShareProvider } from "@microsoft/live-share-react";
 import { LiveShareHost } from "@microsoft/teams-js";
-import {
-    ExampleLiveCanvas,
-    ExampleLiveEvent,
-    ExampleLivePresence,
-    ExampleLiveState,
-    ExampleLiveTimer,
-    ExampleMediaSynchronizer,
-    ExampleSharedMap,
-    ExampleSharedState,
-} from "../components";
+import { ExampleLiveState } from "../components";
 import { inTeams } from "../utils/inTeams";
 import { FC, useState } from "react";
 
@@ -22,23 +13,7 @@ export const LiveShareAutoJoin: FC = () => {
     );
     return (
         <LiveShareProvider joinOnLoad host={host}>
-            <ExampleLiveState
-                waitingContent={
-                    <>
-                        <ExampleMediaSynchronizer />
-                        <ExampleLiveEvent />
-                        <ExampleLiveCanvas />
-                    </>
-                }
-                startContent={
-                    <>
-                        <ExampleLiveTimer />
-                        <ExampleSharedState />
-                        <ExampleLivePresence />
-                        <ExampleSharedMap />
-                    </>
-                }
-            />
+            <ExampleLiveState />
         </LiveShareProvider>
     );
 };

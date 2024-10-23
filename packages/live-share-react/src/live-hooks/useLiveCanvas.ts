@@ -89,7 +89,7 @@ export function ExampleLiveCanvas() {
 export function useLiveCanvas(
     uniqueKey: string,
     canvasElementRef: React.RefObject<HTMLElement | null> | string,
-    props: IUseLiveCanvasOptionalProps
+    props?: IUseLiveCanvasOptionalProps
 ): IUseLiveCanvasResults {
     /**
      * User facing: inking manager instance

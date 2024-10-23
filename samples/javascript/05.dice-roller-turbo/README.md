@@ -12,11 +12,8 @@ After cloning the repository, you must first set up the npm workspace from the r
 
 ```bash
 npm install
-npm run build:packages # Build Live Share packages
 cd samples/j*/05*
 ```
-
-_Note:_ Do not run `npm start` before running `npm run build:packages` from the root of the project, unless you first move the sample out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
 
 ## Testing locally in browser
 

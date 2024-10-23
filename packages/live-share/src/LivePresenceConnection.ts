@@ -1,11 +1,11 @@
-import { cloneValue } from "./internals";
-import { LiveEvent } from "./LiveEvent";
 import {
     LivePresenceReceivedEventData,
-    PresenceState,
-} from "./LivePresenceUser";
-import { LiveShareRuntime } from "./LiveShareRuntime";
-import { TimeInterval } from "./TimeInterval";
+    PresenceStatus,
+} from "./LivePresenceUser.js";
+import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
+import { TimeInterval } from "./TimeInterval.js";
+import { cloneValue, isNewerEvent } from "./internals/utils.js";
+import { LivePresenceData } from "./LivePresence.js";
 
 /**
  * A connection that presence is being tracked for.
@@ -13,7 +13,7 @@ import { TimeInterval } from "./TimeInterval";
  * A user can join from multiple devices. If they do, they will have multiple connections and a distinct clientId on each device.
  * If the client is disconnected for any reason, and they have to reconnect, they will get a new clientId and thus a new connection.
  */
-export class LivePresenceConnection<TData = object> {
+export class LivePresenceConnection<TData extends LivePresenceData = any> {
     /**
      * @hidden
      */
@@ -39,20 +39,35 @@ export class LivePresenceConnection<TData = object> {
     }
 
     /**
-     * Connections current state.
+     * Connections current status.
      *
      * @remarks
-     * This is automatically set to `PresenceState.offline` if the users client hasn't sent updates
+     * This is automatically set to `PresenceStatus.offline` if the users client hasn't sent updates
      * for a period of time.
      */
-    public get state(): PresenceState {
-        return this.hasExpired() ? PresenceState.offline : this._evt.data.state;
+    public get status(): PresenceStatus {
+        if (this._evt.data.status !== PresenceStatus.online) {
+            return this._evt.data.status;
+        } else if (this.hasExpired()) {
+            return PresenceStatus.away;
+        }
+
+        return this._evt.data.status;
+    }
+
+    /**
+     * @deprecated
+     * Please use {@link LivePresenceConnection.status} instead.
+     * This will be removed in a future release.
+     */
+    public get state(): PresenceStatus {
+        return this.status;
     }
 
     /**
      * Optional data shared by the user.
      */
-    public get data(): TData | undefined {
+    public get data(): TData {
         return cloneValue(this._evt.data.data);
     }
 
@@ -65,7 +80,7 @@ export class LivePresenceConnection<TData = object> {
                 `LivePresenceConnection.updateConnection called with event with different clientId`
             );
         }
-        if (!LiveEvent.isNewer(this._evt, evt)) return;
+        if (!isNewerEvent(this._evt, evt)) return;
         this._evt = evt;
     }
 

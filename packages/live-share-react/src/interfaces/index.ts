@@ -1,1 +1,1 @@
-export * from "./LiveInterfaceExtensions";
+export * from "./LiveInterfaceExtensions.js";

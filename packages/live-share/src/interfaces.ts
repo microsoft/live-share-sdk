@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidContainer } from "fluid-framework";
 
@@ -15,6 +15,10 @@ export interface IEvent {
      * Name of the event.
      */
     name: string;
+    /**
+     * Optional. When specified, the signal is only sent to the provided client id.
+     */
+    targetClientId?: string;
 }
 
 /**
@@ -277,7 +281,7 @@ export interface ILiveShareHost {
 }
 
 /**
- * Response object from `.joinContainer()` in `LiveShareClient`
+ * Response object from `.join()` in `LiveShareClient`
  */
 export interface ILiveShareJoinResults {
     /**
@@ -307,6 +311,7 @@ export interface ILiveShareJoinResults {
  * just pass `this.context.containerRuntime` to any class that takes an `IContainerRuntimeSignaler`.
  */
 export interface IContainerRuntimeSignaler {
+    clientId?: string;
     on(
         event: "signal",
         listener: (message: IInboundSignalMessage, local: boolean) => void
@@ -315,7 +320,13 @@ export interface IContainerRuntimeSignaler {
         event: "signal",
         listener: (message: IInboundSignalMessage, local: boolean) => void
     ): this;
-    submitSignal(type: string, content: any): void;
+    /**
+     * Submits the signal to be sent to other clients.
+     * @param type - Type of the signal.
+     * @param content - Content of the signal. Should be a JSON serializable object or primitive.
+     * @param targetClientId Optional. When specified, the signal is only sent to the provided client id.
+     */
+    submitSignal(type: string, content: any, targetClientId?: string): void;
 }
 
 /**

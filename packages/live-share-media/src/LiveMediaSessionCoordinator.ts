@@ -4,40 +4,46 @@
  */
 
 import {
-    LiveEventScope,
     LiveTelemetryLogger,
-    LiveEventTarget,
-    IRuntimeSignaler,
     TimeInterval,
     UserMeetingRole,
-    LiveShareRuntime,
     LiveDataObjectInitializeState,
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectNotInitializedError,
-    LiveObjectSynchronizer,
     ILiveEvent,
 } from "@microsoft/live-share";
+import {
+    IRuntimeSignaler,
+    LiveEventScope,
+    LiveEventTarget,
+    LiveObjectSynchronizer,
+    LiveShareRuntime,
+    isErrorLike,
+} from "@microsoft/live-share/internal";
 import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
     ExtendedMediaSessionPlaybackState,
     MediaSessionCoordinatorSuspension,
-} from "./MediaSessionExtensions";
+} from "./MediaSessionExtensions.js";
 import {
-    TelemetryEvents,
     ITransportCommandEvent,
     ISetTrackEvent,
     IPositionUpdateEvent,
     GroupCoordinatorState,
     GroupCoordinatorStateEvents,
     ISetTrackDataEvent,
+    IRateChangeCommandEvent,
+} from "./internals/GroupCoordinatorState.js";
+import { TelemetryEvents } from "./internals/consts.js";
+import {
     TrackMetadataNotSetError,
     ActionBlockedError,
-    IRateChangeCommandEvent,
-} from "./internals";
-import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension";
-import EventEmitter from "events";
-import { isErrorLike } from "@microsoft/live-share/bin/internals";
+} from "./internals/errors.js";
+import { PriorityTimeInterval } from "./internals/PriorityTimeInterval.js";
+import { LiveMediaSessionCoordinatorSuspension } from "./LiveMediaSessionCoordinatorSuspension.js";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
+import { IEvent } from "@fluidframework/core-interfaces";
 
 /**
  * Most recent state of the media session.
@@ -68,18 +74,50 @@ export interface IMediaPlayerState {
 }
 
 /**
+ * @hidden
+ */
+export interface ILiveMediaSessionCoordinatorEvents extends IEvent {
+    /**
+     * Event listener for events emitted
+     * @param event update
+     * @param listener listener function
+     * @param listener.event the event instance
+     */
+    (event: string, listener: (event: any) => void): void;
+}
+
+/**
  * The `LiveMediaSessionCoordinator` tracks the playback & position state of all other
  * clients being synchronized with. It is responsible for keeping the local media player
  * in sync with the group.
  */
-export class LiveMediaSessionCoordinator extends EventEmitter {
+export class LiveMediaSessionCoordinator extends TypedEventEmitter<ILiveMediaSessionCoordinatorEvents> {
     private readonly _id: string;
     private readonly _runtime: IRuntimeSignaler;
     private readonly _liveRuntime: LiveShareRuntime;
     private readonly _logger: LiveTelemetryLogger;
     private readonly _getPlayerState: () => IMediaPlayerState;
-    private _positionUpdateInterval = new TimeInterval(2000);
-    private _maxPlaybackDrift = new TimeInterval(1000);
+    private _positionUpdateInterval = new PriorityTimeInterval(
+        2000,
+        // Scale by function
+        () => {
+            const audience = this._liveRuntime.audience;
+            if (!audience) return 1;
+            // As the audience size gets bigger, we relax the update interval, since more variance is expected
+            const count = audience.getMembers().size;
+            return 1 + count / 5;
+        }
+    );
+    private _maxPlaybackDrift = new PriorityTimeInterval(
+        1500, // Scale by function
+        () => {
+            const audience = this._liveRuntime.audience;
+            if (!audience) return 1;
+            // As the audience size gets bigger, we relax the playback drift, since more variance is expected
+            const count = audience.getMembers().size;
+            return 1 + count / 25;
+        }
+    );
     private _lastWaitPoint?: CoordinationWaitPoint;
     private initializeState: LiveDataObjectInitializeState =
         LiveDataObjectInitializeState.needed;
@@ -203,13 +241,29 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     }
 
     /**
-     * Max amount of playback drift allowed in seconds.
+     * Controls whether or not to scale {@link maxPlaybackDrift} by the number of users in the session.
      *
      * @remarks
-     * Should the local clients playback position lag by more than the specified value, the
-     * coordinator will trigger a `catchup` action.
+     * As more clients join a session, it is more likely that some users will fall behind the presenter.
+     * It is also less likely that users will notice drift as more clients are added.
+     * It is usually helpful to be more lenient as more clients are added so everyone can watch all the content.
+     * Default value is true.
+     */
+    public get shouldScaleMaxPlaybackDrift(): boolean {
+        return this._maxPlaybackDrift.shouldPrioritize;
+    }
+
+    public set shouldScaleMaxPlaybackDrift(value: boolean) {
+        this._maxPlaybackDrift.shouldPrioritize = value;
+    }
+
+    /**
+     * Max amount of playback drift allowed in seconds.
+     * This will scale automatically according to the number of participants in the session when {@link shouldScaleMaxPlaybackDrift} is true.
      *
-     * Defaults to a value of `1` second.
+     * @remarks
+     * Should the local clients playback position lag by more than the specified value, the coordinator will trigger a `catchup` action.
+     * Default value is `1.5` seconds.
      */
     public get maxPlaybackDrift(): number {
         return this._maxPlaybackDrift.seconds;
@@ -220,11 +274,30 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
     }
 
     /**
-     * Frequency with which position updates are broadcast to the rest of the group in
-     * seconds.
+     * Controls whether or not to compute {@link positionUpdateInterval} based on whether user has initiated a playback command.
+     * Default value is true.
      *
      * @remarks
-     * Defaults to a value of `2` seconds.
+     * When true, users that are simply watching but not controlling playback will report their positions less frequently.
+     * When a user has sent a transport command, they will begin sending position updates more frequently.
+     * Most Live Share apps have a concept of a primary presenter, and don't allow anyone to pause/play for the group.
+     * By ensuring only one/few users broadcast updates frequently, the server load is reduced considerably.
+     */
+    public get shouldScalePositionUpdateInterval(): boolean {
+        return this._positionUpdateInterval.shouldPrioritize;
+    }
+
+    public set shouldScalePositionUpdateInterval(value: boolean) {
+        this._positionUpdateInterval.shouldPrioritize = value;
+    }
+
+    /**
+     * Frequency with which position updates are broadcast to the rest of the group in seconds.
+     * When {@link shouldScalePositionUpdateInterval} is set to `true`, the value set is the minimum value.
+     * The value returned is the actual value used to send updates by the local user, which may be larger than the value set.
+     *
+     * @remarks
+     * Defaults to a minimum value of `2` seconds.
      */
     public get positionUpdateInterval(): number {
         return this._positionUpdateInterval.seconds;
@@ -274,6 +347,10 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             track: this._groupState.playbackTrack.current,
             position: position,
         });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**
@@ -316,6 +393,10 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             track: this._groupState.playbackTrack.current,
             position: position,
         });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**
@@ -356,12 +437,24 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
                 track: this._groupState.playbackTrack.current,
                 position: time,
             });
+            if (this.canSendPositionUpdates) {
+                // User has taken initiative to send event, give priority for sending position updates
+                this._positionUpdateInterval.hasPriority = true;
+            }
         } catch (err) {
             await this._groupState!.syncLocalMediaSession();
             throw err;
         }
     }
 
+    /**
+     * Sets the playback rate for everyone in the session.
+     *
+     * @param playbackRate the playback rate to set.
+     *
+     * @throws
+     * Throws an exception if the session/coordinator hasn't been initialized or {@link canSetPlaybackRate} is false.
+     */
     public async setPlaybackRate(playbackRate: number): Promise<void> {
         LiveDataObjectNotInitializedError.assert(
             "LiveMediaSessionCoordinator:setPlaybackRate",
@@ -381,6 +474,10 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             { playbackRate }
         );
         await this._rateChangeEvent!.sendEvent({ playbackRate });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**
@@ -417,6 +514,10 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             metadata: metadata,
             waitPoints: waitPoints || [],
         });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**
@@ -451,6 +552,10 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         await this._setTrackDataEvent!.sendEvent({
             data: data,
         });
+        if (this.canSendPositionUpdates) {
+            // User has taken initiative to send event, give priority for sending position updates
+            this._positionUpdateInterval.hasPriority = true;
+        }
     }
 
     /**
@@ -570,13 +675,12 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
 
         try {
             // start needs to happen after setting initializedState to "succeeded"
-            await this._synchronizer?.start(
-                undefined,
-                async (evt, sender, local) => false,
-                async (connecting) => true,
-                false,
-                false
-            );
+            await this._synchronizer?.start({
+                initialState: undefined,
+                updateState: async (evt, sender, local) => false,
+                getLocalUserCanSend: async (connecting) => true,
+                enableBackgroundUpdates: false,
+            });
         } catch (error: unknown) {
             // not a fatal error for LiveMediaSession, only used for "connect" event to send new clients position updates.
             this._logger.sendErrorEvent(
@@ -603,7 +707,10 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
      * @hidden
      * Called by MediaSession to trigger the sending of a position update.
      */
-    public sendPositionUpdate(state: IMediaPlayerState): void {
+    public sendPositionUpdate(
+        state: IMediaPlayerState,
+        targetClientId?: string
+    ): void {
         LiveDataObjectNotInitializedError.assert(
             "LiveMediaSessionCoordinator:sendPositionUpdate",
             "sendPositionUpdate",
@@ -613,12 +720,15 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
         if (this.canSendPositionUpdates) {
             // Send position update event
             const evt = this._groupState!.createPositionUpdateEvent(state);
-            this._positionUpdateEvent?.sendEvent(evt).catch((err) => {
-                this._logger.sendErrorEvent(
-                    TelemetryEvents.SessionCoordinator.PositionUpdateEventError,
-                    err
-                );
-            });
+            this._positionUpdateEvent
+                ?.sendEvent(evt, targetClientId)
+                .catch((err) => {
+                    this._logger.sendErrorEvent(
+                        TelemetryEvents.SessionCoordinator
+                            .PositionUpdateEventError,
+                        err
+                    );
+                });
         } else if (this.isSuspended) {
             // send a local only position update event that was not sent as a signal, and use to handle local
             // position update for clients that have canSendPositionUpdates==false, but are suspending
@@ -730,7 +840,9 @@ export class LiveMediaSessionCoordinator extends EventEmitter {
             // Immediately send a position update
             try {
                 const state = this._getPlayerState();
-                this.sendPositionUpdate(state);
+                // Send only to the user that joined the session using the targetClientId prop.
+                // This ensures that only the user that connected receives this one-time position update, minimizing costs.
+                this.sendPositionUpdate(state, clientId);
             } catch (err: any) {
                 // if player is not setup yet, local client might have also just joined and can't send its position.
                 const playerNotSetup =

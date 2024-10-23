@@ -3,10 +3,15 @@
  * Licensed under the MIT License.
  */
 
-import { PresenceState, UserMeetingRole } from "@microsoft/live-share";
+import {
+    PresenceStatus,
+    UserMeetingRole,
+    LivePresence,
+    LiveState,
+} from "@microsoft/live-share";
 import { getRandomDiceValue, stylizeDiceElem } from "./utils";
 
-export async function renderMeetingStage(container, elem, theme) {
+export async function renderMeetingStage(client, elem, theme) {
     const stageTemplate = document.createElement("template");
     stageTemplate["innerHTML"] = `
     <div class="wrapper ${theme} stage">
@@ -17,7 +22,8 @@ export async function renderMeetingStage(container, elem, theme) {
         <h2>Users:</h2>
     </div>
     `;
-    const { diceState, presence } = container.initialObjects;
+    const diceState = await client.getDDS("dice", LiveState);
+    const presence = await client.getDDS("dice", LivePresence);
 
     elem.appendChild(stageTemplate.content.cloneNode(true));
     const wrapperElem = elem.querySelector(".wrapper");
@@ -73,8 +79,8 @@ async function renderPresenceDiceList(presence, wrapperElem) {
 async function renderUserDice(presence, userPresence, local, wrapperElem) {
     const userDiceElementId = `user-dice-${userPresence.userId}`;
     let userDiceElement = document.getElementById(userDiceElementId);
-    // If the user's state is not offline, remove it from the DOM
-    if (userPresence.state !== PresenceState.online) {
+    // If the user's status is not offline, remove it from the DOM
+    if (userPresence.status !== PresenceStatus.online) {
         userDiceElement?.remove();
         return;
     }

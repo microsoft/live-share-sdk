@@ -1,5 +1,5 @@
-import { LiveShareReportIssueLink } from "./internals";
-import { LiveDataObjectInitializeState } from "./interfaces";
+import { LiveDataObjectInitializeState } from "./interfaces.js";
+import { LiveShareReportIssueLink } from "./internals/consts.js";
 
 /**
  * @hidden
@@ -74,5 +74,27 @@ export class LiveDataObjectInitializeNotNeededError extends Error {
             prefix,
             initializeState
         );
+    }
+}
+
+/**
+ * @hidden
+ * Use for generic expected errors. Use to get standard formatting of errors.
+ */
+export class ExpectedError extends Error {
+    constructor(prefix: string, message: string, helpText: string) {
+        super(
+            `${prefix} - ${message}.\n${helpText}\nIf you think you received this error by mistake, report an issue at ${LiveShareReportIssueLink}.`
+        );
+    }
+
+    static assert(
+        condition: boolean,
+        prefix: string,
+        message: string,
+        helpText: string
+    ): asserts condition {
+        if (condition) return;
+        throw new ExpectedError(prefix, message, helpText);
     }
 }

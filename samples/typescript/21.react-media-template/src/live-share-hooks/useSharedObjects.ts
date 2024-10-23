@@ -12,7 +12,8 @@ import {
 } from "@microsoft/live-share";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
-import { IFluidContainer, SharedMap } from "fluid-framework";
+import { IFluidContainer } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { useEffect, useState, useRef } from "react";
 import { mediaList } from "../utils/media-list";
 import { LiveShareHost } from "@microsoft/teams-js";
@@ -85,7 +86,7 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         // Define container schema
         const schema = {
             initialObjects: {
-                presence: LivePresence<IUserData>,
+                presence: LivePresence,
                 mediaSession: LiveMediaSession,
                 notificationEvent: LiveEvent,
                 liveCanvas: LiveCanvas,
@@ -104,7 +105,7 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         console.log("useSharedObjects: joining container");
         const client = new LiveShareClient(host);
         client
-            .joinContainer(schema, onFirstInitialize)
+            .join(schema, onFirstInitialize)
             .then((results) => {
                 console.log("useSharedObjects: joined container");
                 setResults(results);

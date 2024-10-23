@@ -4,8 +4,8 @@ This repository contains a simple app to demo Live Canvas with Inking capability
 Contains useLiveCanvas hook that provides easy way to add and start the Inking canvas.
 It takes in two paramters:
 
-- `liveCanvas`: Fluid LiveCanvas Data object from the container attached.
-- `hostElement`: HTML Element where the canvas needs to be attached.
+-   `liveCanvas`: Fluid LiveCanvas Data object from the container attached.
+-   `hostElement`: HTML Element where the canvas needs to be attached.
 
 useLiveCanvas hook will insert the canvas as a child of hosting element
 and starts the Live Inking session.It returns set of callbacks for clearing
@@ -17,11 +17,8 @@ After cloning the repository, you must first set up the npm workspace from the r
 
 ```bash
 npm install
-npm run build:packages # Build Live Share packages
 cd samples/j*/22*
 ```
-
-_Note:_ Do not run `npm start` before running `npm run build:packages` from the root of the project, unless you first move the sample out of this npm workspace. When using our samples, you are testing the packages using symlinks, and not the Live Share SDK versions published to npm.
 
 ## Testing locally in browser
 

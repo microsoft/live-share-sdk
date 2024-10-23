@@ -35,15 +35,15 @@ This will use npm workspaces to hoist and build all dependencies.
 
 ```html
 <body>
-  <video id="player">
-    <source src="YOUR_VIDEO_SRC" type="video/mp4" />
-  </video>
-  <div class="player-controls">
-    <button id="play-button">Play</button>
-    <button id="pause-button">Pause</button>
-    <button id="restart-button">Restart</button>
-    <button id="change-track-button">Change track</button>
-  </div>
+    <video id="player">
+        <source src="YOUR_VIDEO_SRC" type="video/mp4" />
+    </video>
+    <div class="player-controls">
+        <button id="play-button">Play</button>
+        <button id="pause-button">Pause</button>
+        <button id="restart-button">Restart</button>
+        <button id="change-track-button">Change track</button>
+    </div>
 </body>
 ```
 
@@ -58,14 +58,12 @@ await microsoftTeams.app.initialize();
 // Setup the Fluid container
 const host = LiveShareHost.create();
 const client = new LiveShareClient(host);
-const schema = {
-  initialObjects: {
-    mediaSession: LiveMediaSession,
-    ...,
-  },
-};
-const { container } = await client.joinContainer(schema);
-const { mediaSession } = container.initialObjects;
+await client.join();
+
+const mediaSession =
+    (await client.getDDS) <
+    LiveMediaSession >
+    ("media-session-id", LiveMediaSession);
 
 // Get the player from your document and create synchronizer
 const player = document.getElementById("player");
@@ -78,21 +76,21 @@ await mediaSession.initialize(allowedRoles);
 // Intercept user play, pause, seek, and set track actions through synchronizer
 
 document.getElementById("play-button").onclick = () => {
-  synchronizer.play();
+    synchronizer.play();
 };
 
 document.getElementById("pause-button").onclick = () => {
-  synchronizer.pause();
+    synchronizer.pause();
 };
 
 document.getElementById("restart-button").onclick = () => {
-  synchronizer.seekTo(0);
+    synchronizer.seekTo(0);
 };
 
 document.getElementById("change-track-button").onclick = () => {
-  synchronizer.setTrack({
-    trackIdentifier: "SOME_OTHER_VIDEO_SRC",
-  });
+    synchronizer.setTrack({
+        trackIdentifier: "SOME_OTHER_VIDEO_SRC",
+    });
 };
 ```
 
@@ -102,7 +100,7 @@ There are several code samples that are hosted in a separate GitHub repository.
 
 | Sample name          | Description                                                                                                                               | Javascript                                     |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| React Video          | Basic example showing how the LiveMediaSession object works with HTML5 video.                                                        | [View](https://aka.ms/liveshare-reactvideo)    |
+| React Video          | Basic example showing how the LiveMediaSession object works with HTML5 video.                                                             | [View](https://aka.ms/liveshare-reactvideo)    |
 | React Media Template | Enable all connected clients to watch videos together, build a shared playlist, transfer whom is in control, and annotate over the video. | [View](https://aka.ms/liveshare-mediatemplate) |
 
 ## Package Compatibility
@@ -111,18 +109,19 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 **It is critical that your app use the package dependencies listed in the table below.** Lookup the version of the `@microsoft/live-share` you're using and set any other dependencies in your package.json file to match:
 
-| @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
-| --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| ^1.0.0                  | ^2.11.0             | ^1.2.3          | ^1.0.0                      | ^1.0.0                       | ^2.5.0                        | ^2.5.0                          |
+| @microsoft/live-share | @microsoft/teams-js | fluid-framework | @microsoft/live-share-\* | @fluidframework/azure-client | @microsoft/TeamsFx | @microsoft/TeamsFx-react |
+| --------------------- | ------------------- | --------------- | ------------------------ | ---------------------------- | ------------------ | ------------------------ |
+| ^2.0.0                | ^2.11.0             | ^2.0.0          | ^2.0.0                   | ^2.0.0                       | ^2.5.0             | ^2.5.0                   |
+| ^1.0.0                | ^2.11.0             | ^1.2.3          | ^1.0.0                   | ^1.0.0                       | ^2.5.0             | ^2.5.0                   |
 
 ## Contributing
 
 There are several ways you can [contribute](../../CONTRIBUTING.md) to this project:
 
-- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
-- Review the source code changes.
-- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
-- [Contribute bug fixes](../../CONTRIBUTING.md).
+-   [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+-   Review the source code changes.
+-   Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+-   [Contribute bug fixes](../../CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
 

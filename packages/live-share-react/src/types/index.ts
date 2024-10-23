@@ -1,3 +1,3 @@
-export * from "./ActionTypes";
-export * from "./ResultTypes";
-export * from "./PropTypes";
+export * from "./ActionTypes.js";
+export * from "./ResultTypes.js";
+export * from "./PropTypes.js";

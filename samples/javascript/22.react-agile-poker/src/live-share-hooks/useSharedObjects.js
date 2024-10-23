@@ -11,7 +11,7 @@ import {
     TestLiveShareHost,
 } from "@microsoft/live-share";
 import { LiveTimer } from "@microsoft/live-share";
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 import { LiveShareHost } from "@microsoft/teams-js";
 
@@ -82,7 +82,7 @@ export function useSharedObjects() {
         // Join Teams container
         const client = new LiveShareClient(host);
         client
-            .joinContainer(schema, onFirstInitialize)
+            .join(schema, onFirstInitialize)
             .then((results) => setResults(results))
             .catch((err) => setError(err));
     }, []);

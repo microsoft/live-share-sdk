@@ -81,7 +81,7 @@ Here's an example of how you can implement this in your application:
 **JavaScript**
 
 ```javascript
-import { LiveShareClient, LiveState } from "@microsoft/live-share";
+import { LiveShareClient } from "@microsoft/live-share";
 import { ACSTeamsLiveShareHost } from "@microsoft/live-share-acs";
 import { app, LiveShareHost } from "@microsoft/teams-js";
 import { CallClient } from "@azure/communication-calling";
@@ -89,12 +89,7 @@ import { AzureCommunicationTokenCredential } from "@azure/communication-common";
 
 async function joinSession(host) {
     const client = new LiveShareClient(host);
-    const schema = {
-        initialObjects: {
-            liveState: LiveState,
-        },
-    };
-    const { container } = await client.joinContainer(schema);
+    const { container } = await client.join();
 
     // ... ready to start app sync logic
 }
@@ -156,7 +151,7 @@ if (IN_TEAMS) {
 **TypeScript**
 
 ```TypeScript
-import { LiveShareClient, LiveState, ILiveShareHost } from "@microsoft/live-share";
+import { LiveShareClient, ILiveShareHost } from "@microsoft/live-share";
 import { ACSTeamsLiveShareHost } from "@microsoft/live-share-acs";
 import { app, LiveShareHost } from "@microsoft/teams-js";
 import { CallClient } from "@azure/communication-calling";
@@ -164,12 +159,7 @@ import { AzureCommunicationTokenCredential } from '@azure/communication-common';
 
 async function joinSession(host: ILiveShareHost): Promise<void> {
     const client = new LiveShareClient(host);
-    const schema = {
-        initialObjects: {
-            liveState: LiveState,
-        },
-    };
-    const { container } = await client.joinContainer(schema);
+    const { container } = await client.join();
 
     // ... ready to start app sync logic
 }
@@ -277,6 +267,7 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 | @microsoft/live-share | @microsoft/teams-js | fluid-framework | @microsoft/live-share-\* | @fluidframework/azure-client | @microsoft/TeamsFx | @microsoft/TeamsFx-react |
 | --------------------- | ------------------- | --------------- | ------------------------ | ---------------------------- | ------------------ | ------------------------ |
+| ^2.0.0                | ^2.11.0             | ^2.0.0          | ^2.0.0                   | ^2.0.0                       | ^2.5.0             | ^2.5.0                   |
 | ^1.0.0                | ^2.11.0             | ^1.2.3          | ^1.0.0                   | ^1.0.0                       | ^2.5.0             | ^2.5.0                   |
 
 ## Contributing

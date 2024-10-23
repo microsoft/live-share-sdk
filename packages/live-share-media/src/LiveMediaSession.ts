@@ -3,35 +3,40 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct";
+import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
+import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import {
-    DynamicObjectRegistry,
-    LiveDataObject,
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectInitializeState,
     LiveTelemetryLogger,
     UserMeetingRole,
 } from "@microsoft/live-share";
-import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer";
-import { ITriggerActionEvent, TelemetryEvents } from "./internals";
+import {
+    DynamicObjectRegistry,
+    LiveDataObject,
+} from "@microsoft/live-share/internal";
+import { MediaPlayerSynchronizer } from "./MediaPlayerSynchronizer.js";
+import { ITriggerActionEvent } from "./internals/GroupCoordinatorState.js";
 import {
     MediaSessionCoordinatorEvents,
     ExtendedMediaSessionAction,
     ExtendedMediaSessionActionDetails,
     ExtendedMediaSessionActionHandler,
-} from "./MediaSessionExtensions";
+} from "./MediaSessionExtensions.js";
 import {
     LiveMediaSessionCoordinator,
     IMediaPlayerState,
-} from "./LiveMediaSessionCoordinator";
-import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler";
-import { RepeatedActionThrottler } from "./RepeatedActionThrottler";
-import { IMediaPlayer } from "./IMediaPlayer";
+} from "./LiveMediaSessionCoordinator.js";
+import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler.js";
+import { RepeatedActionThrottler } from "./RepeatedActionThrottler.js";
+import { IMediaPlayer } from "./IMediaPlayer.js";
+import { SharedObjectKind } from "fluid-framework";
+import { TelemetryEvents } from "./internals/consts.js";
 
 /**
  * Live fluid object that synchronizes media playback across multiple clients.
  */
-export class LiveMediaSession extends LiveDataObject {
+export class LiveMediaSessionClass extends LiveDataObject {
     private _actionThrottler: MediaSessionActionThrottler =
         new RepeatedActionThrottler();
     private _logger?: LiveTelemetryLogger;
@@ -56,8 +61,8 @@ export class LiveMediaSession extends LiveDataObject {
      * The objects fluid type factory.
      */
     public static readonly factory = new DataObjectFactory(
-        LiveMediaSession.TypeName,
-        LiveMediaSession,
+        LiveMediaSessionClass.TypeName,
+        LiveMediaSessionClass,
         [],
         {}
     );
@@ -341,7 +346,18 @@ export class LiveMediaSession extends LiveDataObject {
 }
 
 /**
- * Register `LiveMediaSession` as an available `LoadableObjectClass` for use in packages that support dynamic object loading, such as `@microsoft/live-share-turbo`.
+ * Live fluid object that synchronizes media playback across multiple clients.
+ */
+export type LiveMediaSession = LiveMediaSessionClass;
+
+// eslint-disable-next-line no-redeclare
+export const LiveMediaSession = (() => {
+    const kind = createDataObjectKind(LiveMediaSessionClass);
+    return kind as typeof kind & SharedObjectKind<LiveMediaSessionClass>;
+})();
+
+/**
+ * Register `LiveMediaSession` as an available `SharedObjectKind` for use in dynamic object loading.
  */
 DynamicObjectRegistry.registerObjectClass(
     LiveMediaSession,

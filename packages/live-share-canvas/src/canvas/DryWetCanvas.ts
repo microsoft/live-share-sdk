@@ -3,14 +3,14 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { InkingCanvas } from "./InkingCanvas";
+import { InkingCanvas } from "./InkingCanvas.js";
 import {
     IPointerPoint,
     DefaultPenBrush,
     IBrush,
     toCssRgbaColor,
-} from "../core";
-import { computeQuadPath, IQuadPathSegment } from "../core/internals";
+} from "../core/index.js";
+import { computeQuadPath, IQuadPathSegment } from "../core/internals/index.js";
 
 /**
  * Represents the base class from wet and dry canvases, implementing the common rendering logic.

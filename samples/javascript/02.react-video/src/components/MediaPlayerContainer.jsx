@@ -55,7 +55,7 @@ export const MediaPlayerContainer = ({
         setShowControls(false);
     }, [setShowControls]);
     // eslint-disable-next-line
-  const debouncedHideControls = useCallback(debounce(hideControls, 2500), [
+    const debouncedHideControls = useCallback(debounce(hideControls, 2500), [
         hideControls,
     ]);
 

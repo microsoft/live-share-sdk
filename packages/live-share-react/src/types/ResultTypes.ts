@@ -13,6 +13,7 @@ import {
     IFollowModeState,
     FollowModePresenceUser,
     LiveFollowMode,
+    LivePresenceData,
 } from "@microsoft/live-share";
 import { InkingManager, LiveCanvas } from "@microsoft/live-share-canvas";
 import {
@@ -20,15 +21,35 @@ import {
     ExtendedMediaMetadata,
     MediaPlayerSynchronizer,
 } from "@microsoft/live-share-media";
-import { IFluidContainer, SharedMap } from "fluid-framework";
-import { IReceiveLiveEvent } from "../interfaces";
+import {
+    IFluidContainer,
+    ITree,
+    ImplicitFieldSchema,
+    TreeFieldFromImplicitField,
+    TreeView,
+} from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
+import {
+    useSharedMap,
+    useTreeNode,
+    useSharedTree,
+} from "../shared-hooks/index.js";
+import {
+    useLiveEvent,
+    useLivePresence,
+    useMediaSynchronizer,
+    useLiveTimer,
+    useLiveCanvas,
+    useLiveFollowMode,
+} from "../live-hooks/index.js";
+import { IReceiveLiveEvent } from "../interfaces/index.js";
 import {
     OnPauseTimerAction,
     OnPlayTimerAction,
     OnStartTimerAction,
     OnUpdateLivePresenceAction,
     SendLiveEventAction,
-} from "./ActionTypes";
+} from "./ActionTypes.js";
 
 export interface IAzureContainerResults {
     /**
@@ -49,13 +70,19 @@ export interface ILiveShareContainerResults extends IAzureContainerResults {
 }
 
 /**
- * Return type of `useSharedMap` hook.
+ * @deprecated use {@link useSharedTree} instead.
+ *
+ * Return type of {@link useSharedMap} hook.
  */
 export interface IUseSharedMapResults<TData> {
     /**
-     * Stateful map of most recent values from `SharedMap`.
+     * The Fluid `SharedMap` object.
      */
-    map: ReadonlyMap<string, TData>;
+    sharedMap: (Map<string, TData> & SharedMap) | undefined;
+    /**
+     * Callback method to get entries in the `SharedMap`.
+     */
+    getEntry: (key: string) => TData | undefined;
     /**
      * Callback method to set/replace new entries in the `SharedMap`.
      */
@@ -64,14 +91,38 @@ export interface IUseSharedMapResults<TData> {
      * Callback method to delete an existing entry in the `SharedMap`.
      */
     deleteEntry: (key: string) => void;
-    /**
-     * The Fluid `SharedMap` object, should you want to use it directly.
-     */
-    sharedMap: SharedMap | undefined;
 }
 
 /**
- * Return type of `useLiveEvent` hook.
+ * Return type of {@link useSharedTree} hook.
+ */
+export interface IUseSharedTreeResults<TSchema extends ImplicitFieldSchema> {
+    /**
+     * The Fluid `TreeView`.
+     */
+    treeView: TreeView<TSchema> | undefined;
+    /**
+     * The Fluid `SharedTree` object, should you want to use it directly.
+     */
+    sharedTree: ITree | undefined;
+    /**
+     * Root node
+     */
+    root: TreeFieldFromImplicitField<TSchema> | undefined;
+}
+
+/**
+ * Return type of {@link useTreeNode} hook.
+ */
+export interface IUseTreeNodeResults<TNode = any> {
+    /**
+     * The Fluid `TreeNode`
+     */
+    node: TNode;
+}
+
+/**
+ * Return type of {@link useLiveEvent} hook.
  */
 export interface IUseLiveEventResults<TEvent = any> {
     /**
@@ -95,7 +146,7 @@ export interface IUseLiveEventResults<TEvent = any> {
 }
 
 /**
- * Return type of `useLiveTimer` hook.
+ * Return type of {@link useLiveTimer} hook.
  */
 export interface IUseLiveTimerResults {
     /**
@@ -129,9 +180,9 @@ export interface IUseLiveTimerResults {
 }
 
 /**
- * Return type of `useLivePresence` hook.
+ * Return type of {@link useLivePresence} hook.
  */
-export interface IUseLivePresenceResults<TData extends object = object> {
+export interface IUseLivePresenceResults<TData extends LivePresenceData = any> {
     /**
      * The local user's presence object.
      */
@@ -140,6 +191,10 @@ export interface IUseLivePresenceResults<TData extends object = object> {
      * List of non-local user's presence objects.
      */
     otherUsers: LivePresenceUser<TData>[];
+    /**
+     * List of all online users.
+     */
+    onlineUsers: LivePresenceUser<TData>[];
     /**
      * List of all user's presence objects.
      */
@@ -150,15 +205,14 @@ export interface IUseLivePresenceResults<TData extends object = object> {
     livePresence: LivePresence<TData> | undefined;
     /**
      * Callback method to update the local user's presence.
-     * @param data Optional. TData to set for user.
-     * @param state Optional. PresenceState to set for user.
+     * @param data TData to set for user.
      * @returns void promise that will throw when user does not have required roles
      */
     updatePresence: OnUpdateLivePresenceAction<TData>;
 }
 
 /**
- * Return type of `useMediaSynchronizer` hook.
+ * Return type of {@link useMediaSynchronizer} hook.
  */
 export interface IUseMediaSynchronizerResults {
     /**
@@ -208,7 +262,7 @@ export interface IUseMediaSynchronizerResults {
 }
 
 /**
- * Return type of `useLiveCanvas` hook.
+ * Return type of {@link useLiveCanvas} hook.
  */
 export interface IUseLiveCanvasResults {
     /**
@@ -222,7 +276,7 @@ export interface IUseLiveCanvasResults {
 }
 
 /**
- * Return type of `useLiveFollowMode` hook.
+ * Return type of {@link useLiveFollowMode} hook.
  */
 export interface IUseLiveFollowModeResults<TData = any> {
     /**

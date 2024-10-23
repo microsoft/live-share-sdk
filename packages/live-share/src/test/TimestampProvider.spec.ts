@@ -4,9 +4,9 @@
  */
 
 import { strict as assert } from "assert";
-import { INtpTimeInfo } from "../interfaces";
-import { TimestampProvider } from "../TimestampProvider";
-import { Deferred } from "../internals";
+import { INtpTimeInfo } from "../interfaces.js";
+import { TimestampProvider } from "../TimestampProvider.js";
+import { Deferred } from "../internals/Deferred.js";
 
 class TestTimestampProvider extends TimestampProvider {
     private _onGetNtpTime: () => Promise<void>;

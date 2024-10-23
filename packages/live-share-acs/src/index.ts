@@ -1,1 +1,1 @@
-export * from "./ACSTeamsLiveShareHost";
+export * from "./ACSTeamsLiveShareHost.js";

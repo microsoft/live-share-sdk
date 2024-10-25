@@ -26,7 +26,7 @@ import { TelemetryEvents } from "./internals/consts.js";
 import { cloneValue, isNewerEvent } from "./internals/utils.js";
 
 /**
- * Events supported by [LiveState` object.
+ * Events supported by {@link LiveState} object.
  */
 export enum LiveStateEvents {
     /**
@@ -36,12 +36,12 @@ export enum LiveStateEvents {
 }
 
 /**
- * Event typings for `LiveState` class.
+ * Event typings for {@link LiveState} class.
  * @template TState State object that's synchronized with the state.
  */
 export interface ILiveStateEvents<TState = any> extends IEvent {
     /**
-     * An `LiveState` objects state has changed.
+     * An {@link LiveState} objects state has changed.
      * @param event Name of event.
      * @param listener Function called when event is triggered.
      * @param listener.state The new state. Can be the same as the previous state.

@@ -1,7 +1,6 @@
 import { LiveDataObject } from "./internals/LiveDataObject.js";
 import { LiveState } from "./LiveState.js";
 import { ILivePresenceEvents, LivePresence } from "./LivePresence.js";
-import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import { assert } from "@fluidframework/core-utils/legacy";
@@ -1046,7 +1045,7 @@ export type LiveFollowMode<TData = any> = LiveFollowModeClass<TData>;
 
 // eslint-disable-next-line no-redeclare
 export const LiveFollowMode = (() => {
-    const kind = createDataObjectKind(LiveFollowModeClass);
+    const kind = LiveFollowModeClass;
     return kind as typeof kind & SharedObjectKind<LiveFollowModeClass>;
 })();
 

@@ -29,7 +29,6 @@ import {
     ITestObjectProviderOptions,
 } from "@live-share-private/test-utils";
 import { SharedObjectKind } from "fluid-framework";
-import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 
 class TestLivePresenceClass<
     TData extends object | undefined | null = object,
@@ -44,7 +43,7 @@ export type TestLivePresence<TData extends object | undefined | null = object> =
 
 // eslint-disable-next-line no-redeclare
 export const TestLivePresence = (() => {
-    const kind = createDataObjectKind(TestLivePresenceClass<any>);
+    const kind = TestLivePresenceClass<any>;
     return kind as typeof kind & SharedObjectKind<TestLivePresenceClass<any>>;
 })();
 

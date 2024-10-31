@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import { SharedMap } from "@fluidframework/map/legacy";
@@ -836,7 +835,7 @@ export type LiveCanvas = LiveCanvasClass;
 
 // eslint-disable-next-line no-redeclare
 export const LiveCanvas = (() => {
-    const kind = createDataObjectKind(LiveCanvasClass);
+    const kind = LiveCanvasClass;
     return kind as typeof kind & SharedObjectKind<LiveCanvasClass>;
 })();
 

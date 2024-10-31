@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import {
     LiveDataObjectInitializeNotNeededError,
@@ -352,7 +351,7 @@ export type LiveMediaSession = LiveMediaSessionClass;
 
 // eslint-disable-next-line no-redeclare
 export const LiveMediaSession = (() => {
-    const kind = createDataObjectKind(LiveMediaSessionClass);
+    const kind = LiveMediaSessionClass;
     return kind as typeof kind & SharedObjectKind<LiveMediaSessionClass>;
 })();
 

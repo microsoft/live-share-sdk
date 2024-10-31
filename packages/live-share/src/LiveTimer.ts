@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer.js";
 import {
@@ -645,7 +644,7 @@ export type LiveTimer = LiveTimerClass;
 
 // eslint-disable-next-line no-redeclare
 export const LiveTimer = (() => {
-    const kind = createDataObjectKind(LiveTimerClass);
+    const kind = LiveTimerClass;
     return kind as typeof kind & SharedObjectKind<LiveTimerClass>;
 })();
 

@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import { IEvent } from "@fluidframework/core-interfaces";
 import {
@@ -612,7 +611,7 @@ export type LivePresence<TData extends LivePresenceData = any> =
 
 // eslint-disable-next-line no-redeclare
 export const LivePresence = (() => {
-    const kind = createDataObjectKind(LivePresenceClass<any>);
+    const kind = LivePresenceClass<any>;
     return kind as typeof kind & SharedObjectKind<LivePresenceClass<any>>;
 })();
 

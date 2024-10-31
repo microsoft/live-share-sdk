@@ -3,7 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { createDataObjectKind } from "@fluidframework/aqueduct/internal";
 import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import {
     FluidObject,
@@ -208,7 +207,7 @@ export type DynamicObjectManager = DynamicObjectManagerClass;
 
 // eslint-disable-next-line no-redeclare
 export const DynamicObjectManager = (() => {
-    const kind = createDataObjectKind(DynamicObjectManagerClass);
+    const kind = DynamicObjectManagerClass;
     return kind as typeof kind & SharedObjectKind<DynamicObjectManagerClass>;
 })();
 

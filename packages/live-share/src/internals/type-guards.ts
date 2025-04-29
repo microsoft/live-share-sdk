@@ -1,5 +1,11 @@
+import { TestLiveShareHost } from "../TestLiveShareHost.js";
 import { TimestampProvider } from "../TimestampProvider.js";
-import { IClientInfo, ILiveEvent, UserMeetingRole } from "../interfaces.js";
+import {
+    IClientInfo,
+    ILiveEvent,
+    ILiveShareHost,
+    UserMeetingRole,
+} from "../interfaces.js";
 
 interface IMobileWorkaroundRolesResponse {
     userRoles: UserMeetingRole[];
@@ -60,4 +66,8 @@ export function isILiveEvent(value: any): value is ILiveEvent {
  */
 export function isTimestampProvider(value: any): value is TimestampProvider {
     return typeof value?.start === "function";
+}
+
+export function isTestHost(value: ILiveShareHost): value is TestLiveShareHost {
+    return value instanceof TestLiveShareHost;
 }

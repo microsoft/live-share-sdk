@@ -11,6 +11,7 @@ import { TestLiveShareHost } from "../TestLiveShareHost.js";
 import { LiveShareClient } from "../LiveShareClient.js";
 import { LiveEvent } from "../LiveEvent.js";
 import { LiveState } from "../LiveState.js";
+import { InsecureTokenProvider } from "@fluidframework/test-runtime-utils/internal";
 
 describe("LiveShareClient dynamic objects", () => {
     let containerId: string | undefined;
@@ -20,7 +21,14 @@ describe("LiveShareClient dynamic objects", () => {
     const setContainerId = (newContainerId: string) => {
         containerId = newContainerId;
     };
-    const host = TestLiveShareHost.create(getContainerId, setContainerId);
+    const host = TestLiveShareHost.create(
+        new InsecureTokenProvider("", {
+            id: "testId",
+            name: "Test User",
+        }),
+        getContainerId,
+        setContainerId
+    );
     let client1: LiveShareClient;
     let client2: LiveShareClient;
 

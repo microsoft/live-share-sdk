@@ -3,6 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
+import { ITokenProvider } from "@fluidframework/azure-client";
 import {
     ILiveShareHost,
     IFluidTenantInfo,
@@ -28,10 +29,12 @@ export class TestLiveShareHost implements ILiveShareHost {
      * @returns
      */
     public static create(
+        insecureTokenProvider?: ITokenProvider | undefined,
         getLocalTestContainerId?: () => string | undefined,
         setLocalTestContainerId?: (containerId: string) => void
     ): ILiveShareHost {
         return new TestLiveShareHost(
+            insecureTokenProvider,
             getLocalTestContainerId,
             setLocalTestContainerId
         );
@@ -41,6 +44,7 @@ export class TestLiveShareHost implements ILiveShareHost {
      * @hidden
      */
     private constructor(
+        public readonly insecureTokenProvider: ITokenProvider | undefined,
         private _getLocalTestContainerId?: () => string | undefined,
         private _setLocalTestContainerId?: (containerId: string) => void
     ) {}

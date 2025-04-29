@@ -9,6 +9,7 @@ import { LiveShareClient } from "../LiveShareClient.js";
 import { LivePresence } from "../LivePresence.js";
 import { PresenceStatus } from "../LivePresenceUser.js";
 import { waitForDelay } from "../internals/utils.js";
+import { InsecureTokenProvider } from "@fluidframework/test-runtime-utils/internal";
 
 describe("LivePresence Fluid Audience tests", () => {
     let containerId: string | undefined;
@@ -18,7 +19,14 @@ describe("LivePresence Fluid Audience tests", () => {
     const setContainerId = (newContainerId: string) => {
         containerId = newContainerId;
     };
-    const host = TestLiveShareHost.create(getContainerId, setContainerId);
+    const host = TestLiveShareHost.create(
+        new InsecureTokenProvider("", {
+            id: "testId",
+            name: "Test User",
+        }),
+        getContainerId,
+        setContainerId
+    );
     let client1: LiveShareClient;
     let client2: LiveShareClient;
 

@@ -3,8 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ITokenProvider } from "@fluidframework/azure-client";
-import { v4 as uuid } from "uuid";
 import { IRuntimeSignaler } from "./LiveEventScope.js";
 import { IClientTimestamp } from "../interfaces.js";
 
@@ -118,39 +116,6 @@ export function timeoutRequest<TResult>(
         }
         clearTimeout(hTimer);
     });
-}
-
-/**
- * Dynamically import InsecureTokenProvider class, in case developer does not yet have "@fluidframework/test-runtime-utils",
- * since don't want to require that they include it in package.json.
- * @hidden
- */
-export async function getInsecureTokenProvider(): Promise<ITokenProvider> {
-    const userId: () => string | undefined | null = () => {
-        try {
-            const userIdParam = new URL(
-                window.location.href
-            )?.searchParams?.get("userId");
-            return userIdParam;
-        } catch {
-            // window not available
-            return undefined;
-        }
-    };
-    try {
-        const { InsecureTokenProvider } = await import(
-            "@fluidframework/test-runtime-utils/internal"
-        );
-        const tokenProvider = new InsecureTokenProvider("", {
-            id: userId() ?? uuid(),
-            name: "Test User",
-        });
-        return tokenProvider as ITokenProvider;
-    } catch {
-        throw new Error(
-            "@microsoft/live-share: when using 'local' connection type, you must have @fluidframework/test-runtime-utils installed"
-        );
-    }
 }
 
 /**

@@ -1,3 +1,4 @@
+import { ITokenProvider } from "@fluidframework/azure-client";
 import { TestLiveShareHost } from "../TestLiveShareHost.js";
 import { TimestampProvider } from "../TimestampProvider.js";
 import {
@@ -68,6 +69,12 @@ export function isTimestampProvider(value: any): value is TimestampProvider {
     return typeof value?.start === "function";
 }
 
-export function isTestHost(value: ILiveShareHost): value is TestLiveShareHost {
-    return value instanceof TestLiveShareHost;
+type HasInsecureTokenProvider = {
+    insecureTokenProvider: ITokenProvider;
+};
+
+export function isTestHostWithInsecureTokenProvider(
+    value: ILiveShareHost
+): value is TestLiveShareHost & HasInsecureTokenProvider {
+    return (value as any)?.insecureTokenProvider !== undefined;
 }

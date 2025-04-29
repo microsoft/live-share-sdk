@@ -27,7 +27,7 @@ import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils.js";
 import { ExpectedError, UnexpectedError } from "./errors.js";
 import { FluidCompatibilityMode } from "./internals/consts.js";
-import { isTestHost } from "./internals/type-guards.js";
+import { isTestHostWithInsecureTokenProvider } from "./internals/type-guards.js";
 
 /**
  * @hidden
@@ -267,20 +267,18 @@ export class LiveShareClient extends BaseLiveShareClient {
                 }
 
                 // Is this a local config?
-                if (
-                    frsTenantInfo.tenantId == "local" &&
-                    isTestHost(this._host)
-                ) {
-                    if (this._host.insecureTokenProvider == undefined) {
+                if (frsTenantInfo.tenantId == "local") {
+                    if (isTestHostWithInsecureTokenProvider(this._host)) {
+                        config = {
+                            type: "local",
+                            endpoint: endpoint!,
+                            tokenProvider: this._host.insecureTokenProvider,
+                        };
+                    } else {
                         throw new Error(
-                            `LiveShareClient:join: unable to use local connection type without an insecure token provider`
+                            `LiveShareClient:join: unable to use local connection type with test host that that does not include an insecure token provider, please configure an insecure token provider.`
                         );
                     }
-                    config = {
-                        type: "local",
-                        endpoint: endpoint!,
-                        tokenProvider: this._host.insecureTokenProvider,
-                    };
                 } else {
                     config = {
                         type: "remote",

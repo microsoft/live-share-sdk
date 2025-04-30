@@ -22,7 +22,6 @@ export class MockTokenProvider implements ITokenProvider {
     ): Promise<ITokenResponse> {
         return Promise.reject();
     }
-
 }
 
 export class MockLiveShareRuntime extends LiveShareRuntime {

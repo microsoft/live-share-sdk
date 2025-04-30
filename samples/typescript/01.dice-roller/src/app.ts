@@ -10,6 +10,7 @@ import { renderMeetingSidePanel } from "./renderMeetingSidePanel";
 import { renderTabConfig } from "./renderTabConfig";
 import { renderError } from "./renderError";
 import { AppTheme } from "./types-interfaces";
+import { getInsecureTokenProvider } from "./insecureTokenProvider";
 
 const searchParams = new URL(window.location.href).searchParams;
 const IN_TEAMS = searchParams.get("inTeams") === "1";
@@ -55,7 +56,9 @@ async function start() {
 
 async function getClient() {
     // Are we running in teams?
-    const host = IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create();
+    const host = IN_TEAMS
+        ? LiveShareHost.create()
+        : TestLiveShareHost.create(getInsecureTokenProvider());
 
     // Create client
     const client = new LiveShareClient(host);

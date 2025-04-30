@@ -27,12 +27,15 @@ import {
     partitionAvatarGroupItems,
 } from "@fluentui/react-components";
 import { FlexColumn, FlexRow, MoreInformationText } from "../components";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 const IN_TEAMS = inTeams();
 
 export const TabContent: FC = () => {
     const [host] = useState(
-        IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
+        IN_TEAMS
+            ? LiveShareHost.create()
+            : TestLiveShareHost.create(getInsecureTokenProvider())
     );
     return (
         <LiveShareProvider joinOnLoad host={host}>

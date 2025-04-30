@@ -29,7 +29,7 @@ export class TestLiveShareHost implements ILiveShareHost {
      * @returns
      */
     public static create(
-        insecureTokenProvider?: ITokenProvider | undefined,
+        insecureTokenProvider: ITokenProvider,
         getLocalTestContainerId?: () => string | undefined,
         setLocalTestContainerId?: (containerId: string) => void
     ): ILiveShareHost {
@@ -44,7 +44,7 @@ export class TestLiveShareHost implements ILiveShareHost {
      * @hidden
      */
     private constructor(
-        public readonly insecureTokenProvider: ITokenProvider | undefined,
+        public readonly insecureTokenProvider: ITokenProvider,
         private _getLocalTestContainerId?: () => string | undefined,
         private _setLocalTestContainerId?: (containerId: string) => void
     ) {}

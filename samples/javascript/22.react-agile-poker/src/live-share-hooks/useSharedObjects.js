@@ -14,6 +14,7 @@ import { LiveTimer } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework/legacy";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 import { LiveShareHost } from "@microsoft/teams-js";
+import { getInsecureTokenProvider } from "../../../../typescript/01.dice-roller/src/insecureTokenProvider";
 
 /**
  * Hook that creates/loads the apps shared objects.
@@ -77,7 +78,7 @@ export function useSharedObjects() {
         // Create live share host
         const host = inTeams
             ? LiveShareHost.create()
-            : TestLiveShareHost.create();
+            : TestLiveShareHost.create(getInsecureTokenProvider());
 
         // Join Teams container
         const client = new LiveShareClient(host);

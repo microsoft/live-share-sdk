@@ -18,6 +18,7 @@ import { useEffect, useState, useRef } from "react";
 import { mediaList } from "../utils/media-list";
 import { LiveShareHost } from "@microsoft/teams-js";
 import { IUserData } from "./usePresence";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 interface IUseSharedObjectsResult extends Partial<ILiveShareJoinResults> {
     presence: LivePresence<IUserData> | undefined;
@@ -99,7 +100,7 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         // Create live share host
         const host = inTeams
             ? LiveShareHost.create()
-            : TestLiveShareHost.create();
+            : TestLiveShareHost.create(getInsecureTokenProvider());
 
         // Create the client, join container, and set results
         console.log("useSharedObjects: joining container");

@@ -14,12 +14,12 @@ import {
     ExampleMediaSynchronizer,
     ExampleSharedMap,
     ExampleSharedState,
-    TeamsClientLoader,
 } from "../components";
 import { inTeams } from "../utils/inTeams";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 const IN_TEAMS = inTeams();
-const testHost = TestLiveShareHost.create();
+const testHost = TestLiveShareHost.create(getInsecureTokenProvider());
 // If you want to test role validation locally, you can override the roles of remote/local users.
 // This will only work well with a max of two clients.
 const url = new URL(window.location.href);

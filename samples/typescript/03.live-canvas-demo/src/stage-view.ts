@@ -12,6 +12,7 @@ import {
 } from "@microsoft/live-share-canvas";
 import * as Utils from "./utils";
 import { View } from "./view";
+import { getInsecureTokenProvider } from "./insecureTokenProvider";
 
 /**
  * Other images
@@ -81,7 +82,7 @@ export class StageView extends View {
     private async internalStart() {
         const host = Utils.runningInTeams()
             ? Teams.LiveShareHost.create()
-            : TestLiveShareHost.create();
+            : TestLiveShareHost.create(getInsecureTokenProvider());
         const client = new LiveShareClient(host);
         await client.join();
         this._client = client;

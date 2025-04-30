@@ -16,12 +16,15 @@ import {
 } from "../components";
 import { inTeams } from "../utils/inTeams";
 import { useRef } from "react";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 const IN_TEAMS = inTeams();
 
 export const LiveShareAutoJoin = () => {
     const hostRef = useRef(
-        IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
+        IN_TEAMS
+            ? LiveShareHost.create()
+            : TestLiveShareHost.create(getInsecureTokenProvider())
     );
     return (
         <LiveShareProvider joinOnLoad host={hostRef.current}>

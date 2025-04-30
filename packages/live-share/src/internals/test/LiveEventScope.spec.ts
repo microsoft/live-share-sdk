@@ -12,6 +12,7 @@ import { MockTimestampProvider } from "../mock/MockTimestampProvider.js";
 import { LocalTimestampProvider } from "../../LocalTimestampProvider.js";
 import { TestLiveShareHost } from "../../TestLiveShareHost.js";
 import { LiveShareRuntime } from "../LiveShareRuntime.js";
+import { MockTokenProvider } from "../mock/MockLiveShareRuntime.js";
 
 function createConnectedSignalers() {
     const localRuntime = new MockRuntimeSignaler();
@@ -21,21 +22,33 @@ function createConnectedSignalers() {
 }
 
 describe("LiveEventScope", () => {
-    let localLiveRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
-        timestampProvider: new LocalTimestampProvider(),
-    });
-    let remoteLiveRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
-        timestampProvider: new LocalTimestampProvider(),
-    });
+    let localLiveRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(new MockTokenProvider()),
+        {
+            timestampProvider: new LocalTimestampProvider(),
+        }
+    );
+    let remoteLiveRuntime = new LiveShareRuntime(
+        TestLiveShareHost.create(new MockTokenProvider()),
+        {
+            timestampProvider: new LocalTimestampProvider(),
+        }
+    );
 
     afterEach(async () => {
         // restore defaults
-        localLiveRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
-            timestampProvider: new LocalTimestampProvider(),
-        });
-        remoteLiveRuntime = new LiveShareRuntime(TestLiveShareHost.create(), {
-            timestampProvider: new LocalTimestampProvider(),
-        });
+        localLiveRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(new MockTokenProvider()),
+            {
+                timestampProvider: new LocalTimestampProvider(),
+            }
+        );
+        remoteLiveRuntime = new LiveShareRuntime(
+            TestLiveShareHost.create(new MockTokenProvider()),
+            {
+                timestampProvider: new LocalTimestampProvider(),
+            }
+        );
     });
 
     it("Should raise local and remote events", async () => {

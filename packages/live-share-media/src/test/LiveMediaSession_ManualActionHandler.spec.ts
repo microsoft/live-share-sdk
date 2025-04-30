@@ -21,6 +21,7 @@ import {
     LiveEventScope,
     LiveEventTarget,
     MockLiveShareRuntime,
+    MockTokenProvider,
     waitForDelay,
     Deferred,
     LiveShareRuntime,
@@ -42,7 +43,7 @@ async function getObjects(
     updateInterval: number = 10000,
     timestampProvider: ITimestampProvider = new LocalTimestampProvider()
 ) {
-    const host = TestLiveShareHost.create();
+    const host = TestLiveShareHost.create(new MockTokenProvider());
     let liveRuntime1 = new MockLiveShareRuntime(
         false,
         updateInterval,

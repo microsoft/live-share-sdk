@@ -18,4 +18,7 @@ export {
     isNewerEvent as isEventNewer,
 } from "./internals/utils.js";
 export { isErrorLike } from "./internals/type-guards.js";
-export { MockLiveShareRuntime } from "./internals/mock/MockLiveShareRuntime.js";
+export {
+    MockLiveShareRuntime,
+    MockTokenProvider,
+} from "./internals/mock/MockLiveShareRuntime.js";

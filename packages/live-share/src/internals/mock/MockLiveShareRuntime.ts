@@ -7,7 +7,7 @@ import {
 import { MockContainerRuntimeSignaler } from "./MockContainerRuntimeSignaler.js";
 import { LocalTimestampProvider } from "../../LocalTimestampProvider.js";
 import { ITokenProvider, ITokenResponse } from "@fluidframework/azure-client";
-class MockTokenProvider implements ITokenProvider {
+export class MockTokenProvider implements ITokenProvider {
     public async fetchOrdererToken(
         _tenantId: string,
         _documentId?: string,

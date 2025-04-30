@@ -75,6 +75,6 @@ type HasInsecureTokenProvider = {
 
 export function isTestHostWithInsecureTokenProvider(
     value: ILiveShareHost
-): value is TestLiveShareHost & HasInsecureTokenProvider {
+): value is ILiveShareHost & HasInsecureTokenProvider {
     return (value as any)?.insecureTokenProvider !== undefined;
 }

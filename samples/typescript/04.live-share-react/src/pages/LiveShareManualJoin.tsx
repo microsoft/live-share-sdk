@@ -7,12 +7,15 @@ import { LiveShareHost } from "@microsoft/teams-js";
 import { FC, useState } from "react";
 import { ExampleLiveState } from "../components";
 import { inTeams } from "../utils/inTeams";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 const IN_TEAMS = inTeams();
 
 export const LiveShareManualJoin: FC = () => {
     const [host] = useState(
-        IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
+        IN_TEAMS
+            ? LiveShareHost.create()
+            : TestLiveShareHost.create(getInsecureTokenProvider())
     );
     return (
         <LiveShareProvider host={host}>

@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { LiveEvent, LivePresence } from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";
 import { LiveShareHost } from "@microsoft/teams-js";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 /**
  * Hook that creates/loads the apps shared objects.
@@ -76,7 +77,7 @@ export function useSharedObjects() {
         // Create live share host
         const host = inTeams
             ? LiveShareHost.create()
-            : TestLiveShareHost.create();
+            : TestLiveShareHost.create(getInsecureTokenProvider());
 
         // Create the client, join container, and set results
         console.log("useSharedObjects: joining container");

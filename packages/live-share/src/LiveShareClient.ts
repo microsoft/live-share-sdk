@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { getInsecureTokenProvider, waitForDelay } from "./internals/utils.js";
+import { waitForDelay } from "./internals/utils.js";
 import { LiveShareTokenProvider } from "./internals/LiveShareTokenProvider.js";
 import {
     AzureClient,
@@ -27,6 +27,7 @@ import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils.js";
 import { ExpectedError, UnexpectedError } from "./errors.js";
 import { FluidCompatibilityMode } from "./internals/consts.js";
+import { isTestHostWithInsecureTokenProvider } from "./internals/type-guards.js";
 
 /**
  * @hidden
@@ -91,10 +92,7 @@ export interface ILiveShareClientOptions {
  * Client used to connect to fluid containers within a Microsoft Teams context.
  */
 export class LiveShareClient extends BaseLiveShareClient {
-    private _host: ILiveShareHost = TestLiveShareHost.create(
-        undefined,
-        undefined
-    );
+    private _host: ILiveShareHost;
     private readonly _options: ILiveShareClientOptions;
     private _results: ILiveShareJoinResults | undefined;
 
@@ -270,11 +268,17 @@ export class LiveShareClient extends BaseLiveShareClient {
 
                 // Is this a local config?
                 if (frsTenantInfo.tenantId == "local") {
-                    config = {
-                        type: "local",
-                        endpoint: endpoint!,
-                        tokenProvider: await getInsecureTokenProvider(),
-                    };
+                    if (isTestHostWithInsecureTokenProvider(this._host)) {
+                        config = {
+                            type: "local",
+                            endpoint: endpoint!,
+                            tokenProvider: this._host.insecureTokenProvider,
+                        };
+                    } else {
+                        throw new Error(
+                            `LiveShareClient:join: unable to use local connection type with test host that that does not include an insecure token provider, please configure an insecure token provider.`
+                        );
+                    }
                 } else {
                     config = {
                         type: "remote",

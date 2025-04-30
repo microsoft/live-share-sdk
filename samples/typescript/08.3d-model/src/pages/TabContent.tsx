@@ -42,6 +42,7 @@ import { vectorsAreRoughlyEqual } from "../utils/vector-utils";
 import { LiveCanvasOverlay } from "../components/LiveCanvasOverlay";
 import { isLiveShareSupported } from "../utils/teams-utils";
 import { useSharingStatus } from "../hooks/useSharingStatus";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 const IN_TEAMS = inTeams();
 
@@ -56,7 +57,9 @@ export const TabContent: FC = () => {
 
 const LiveShareContentWrapper: FC = () => {
     const [host] = useState(
-        IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
+        IN_TEAMS
+            ? LiveShareHost.create()
+            : TestLiveShareHost.create(getInsecureTokenProvider())
     );
     return (
         <LiveShareProvider joinOnLoad host={host}>

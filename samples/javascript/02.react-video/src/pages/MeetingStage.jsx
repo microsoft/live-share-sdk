@@ -15,6 +15,7 @@ import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import { inTeams } from "../utils/inTeams";
 import { ConsoleLogger } from "./ConsoleLogger";
 import { LiveShareHost } from "@microsoft/teams-js";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 const MeetingStage = () => {
     // Started initializing flag
@@ -53,7 +54,7 @@ const MeetingStage = () => {
                 // Are we in teams?
                 const host = inTeams()
                     ? LiveShareHost.create()
-                    : TestLiveShareHost.create();
+                    : TestLiveShareHost.create(getInsecureTokenProvider());
 
                 // Define Fluid document schema and create container
                 const client = new LiveShareClient(host, {

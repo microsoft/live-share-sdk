@@ -6,12 +6,29 @@ import {
 } from "../../interfaces.js";
 import { MockContainerRuntimeSignaler } from "./MockContainerRuntimeSignaler.js";
 import { LocalTimestampProvider } from "../../LocalTimestampProvider.js";
+import { ITokenProvider, ITokenResponse } from "@fluidframework/azure-client";
+export class MockTokenProvider implements ITokenProvider {
+    public async fetchOrdererToken(
+        _tenantId: string,
+        _documentId?: string,
+        _refresh?: boolean
+    ): Promise<ITokenResponse> {
+        return Promise.reject();
+    }
+    public async fetchStorageToken(
+        _tenantId: string,
+        _documentId?: string,
+        _refresh?: boolean
+    ): Promise<ITokenResponse> {
+        return Promise.reject();
+    }
+}
 
 export class MockLiveShareRuntime extends LiveShareRuntime {
     constructor(
         shouldCreateMockContainer = false,
         private readonly updateInterval = 10000,
-        host = TestLiveShareHost.create(),
+        host = TestLiveShareHost.create(new MockTokenProvider()),
         timestampProvider: ITimestampProvider = new LocalTimestampProvider()
     ) {
         super(host, {

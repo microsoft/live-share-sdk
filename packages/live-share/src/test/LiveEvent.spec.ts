@@ -23,6 +23,7 @@ import {
 } from "@live-share-private/test-utils";
 import { Deferred } from "../internals/Deferred.js";
 import { isNewerEvent } from "../internals/utils.js";
+import { MockTokenProvider } from "../internals/mock/MockLiveShareRuntime.js";
 
 describeCompat(
     "LiveEvent",
@@ -36,7 +37,7 @@ describeCompat(
         let object2: LiveEvent;
         let object3: LiveEvent;
         let liveRuntime1: LiveShareRuntime = new LiveShareRuntime(
-            TestLiveShareHost.create(),
+            TestLiveShareHost.create(new MockTokenProvider()),
             {
                 timestampProvider: new LocalTimestampProvider(),
             }
@@ -46,7 +47,7 @@ describeCompat(
             liveRuntime1
         );
         let liveRuntime2: LiveShareRuntime = new LiveShareRuntime(
-            TestLiveShareHost.create(),
+            TestLiveShareHost.create(new MockTokenProvider()),
             {
                 timestampProvider: new LocalTimestampProvider(),
             }
@@ -56,7 +57,7 @@ describeCompat(
             liveRuntime2
         );
         let liveRuntime3: LiveShareRuntime = new LiveShareRuntime(
-            TestLiveShareHost.create(),
+            TestLiveShareHost.create(new MockTokenProvider()),
             {
                 timestampProvider: new LocalTimestampProvider(),
             }
@@ -182,7 +183,7 @@ describeCompat(
         it("Should getTimestamp() using custom timestamp providers", async () => {
             const mock = new MockTimestampProvider();
             const customRuntime = new LiveShareRuntime(
-                TestLiveShareHost.create(),
+                TestLiveShareHost.create(new MockTokenProvider()),
                 {
                     timestampProvider: mock,
                 }
@@ -204,7 +205,7 @@ describeCompat(
         it("Should verifyRolesAllowed() using custom role verifier", async () => {
             const mock = new MockRoleVerifier([UserMeetingRole.presenter]);
             const customRuntime = new LiveShareRuntime(
-                TestLiveShareHost.create(),
+                TestLiveShareHost.create(new MockTokenProvider()),
                 {
                     roleVerifier: mock,
                 }

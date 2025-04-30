@@ -9,6 +9,7 @@ import {
     LiveShareClient,
 } from "@microsoft/live-share";
 import { app, pages, meeting, LiveShareHost } from "@microsoft/teams-js";
+import { getInsecureTokenProvider } from "./insecureTokenProvider";
 
 const searchParams = new URL(window.location.href).searchParams;
 const root = document.getElementById("content")!;
@@ -58,7 +59,7 @@ async function join() {
     // Are we running in teams?
     const host = searchParams.get("inTeams")
         ? LiveShareHost.create()
-        : TestLiveShareHost.create();
+        : TestLiveShareHost.create(getInsecureTokenProvider());
 
     // Create client & join session
     const client = new LiveShareClient(host);

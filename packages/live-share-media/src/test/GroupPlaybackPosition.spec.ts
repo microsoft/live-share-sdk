@@ -24,6 +24,7 @@ import {
     IRuntimeSignaler,
     LiveShareRuntime,
     MockLiveShareRuntime,
+    MockTokenProvider,
 } from "@microsoft/live-share/internal";
 import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
 import { GroupPlaybackTrack } from "../internals/GroupPlaybackTrack";
@@ -82,7 +83,7 @@ class MockRuntimeSignaler {
 }
 
 async function getObjects(updateInterval: number = 10000) {
-    const host = TestLiveShareHost.create();
+    const host = TestLiveShareHost.create(new MockTokenProvider());
     let liveRuntime = new MockLiveShareRuntime(false, updateInterval, host);
 
     let runtime1 = new MockRuntimeSignaler("1") as IRuntimeSignaler;

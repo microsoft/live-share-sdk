@@ -1,5 +1,12 @@
+import { ITokenProvider } from "@fluidframework/azure-client";
+import { TestLiveShareHost } from "../TestLiveShareHost.js";
 import { TimestampProvider } from "../TimestampProvider.js";
-import { IClientInfo, ILiveEvent, UserMeetingRole } from "../interfaces.js";
+import {
+    IClientInfo,
+    ILiveEvent,
+    ILiveShareHost,
+    UserMeetingRole,
+} from "../interfaces.js";
 
 interface IMobileWorkaroundRolesResponse {
     userRoles: UserMeetingRole[];
@@ -60,4 +67,14 @@ export function isILiveEvent(value: any): value is ILiveEvent {
  */
 export function isTimestampProvider(value: any): value is TimestampProvider {
     return typeof value?.start === "function";
+}
+
+type HasInsecureTokenProvider = {
+    insecureTokenProvider: ITokenProvider;
+};
+
+export function isTestHostWithInsecureTokenProvider(
+    value: ILiveShareHost
+): value is ILiveShareHost & HasInsecureTokenProvider {
+    return (value as any)?.insecureTokenProvider !== undefined;
 }

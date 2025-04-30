@@ -23,7 +23,10 @@ import {
 } from "../interfaces.js";
 import { TestLiveShareHost } from "../TestLiveShareHost.js";
 import { getLiveDataObjectKind } from "../internals/schema-injection-utils.js";
-import { MockLiveShareRuntime } from "../internals/mock/MockLiveShareRuntime.js";
+import {
+    MockLiveShareRuntime,
+    MockTokenProvider,
+} from "../internals/mock/MockLiveShareRuntime.js";
 import {
     describeCompat,
     ITestObjectProviderOptions,
@@ -937,7 +940,7 @@ describeCompat(
 );
 
 class SameUserLiveShareTestHost implements ILiveShareHost {
-    private test = TestLiveShareHost.create();
+    private test = TestLiveShareHost.create(new MockTokenProvider());
     getFluidTenantInfo(): Promise<IFluidTenantInfo> {
         return this.test.getFluidTenantInfo();
     }

@@ -26,6 +26,7 @@ import {
 import videojs from "video.js";
 import { VideoJSDelegate } from "../utils/VideoJSDelegate";
 import "video.js/dist/video-js.css";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 const LIVE_SHARE_OPTIONS: ILiveShareClientOptions = {
     canSendBackgroundUpdates: false, // default to false so we can wait to see
@@ -36,7 +37,9 @@ const MeetingStage: FC = () => {
     const context = useTeamsContext();
 
     const hostRef = useRef(
-        IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
+        IN_TEAMS
+            ? LiveShareHost.create()
+            : TestLiveShareHost.create(getInsecureTokenProvider())
     );
     const shareStatus = useSharingStatus();
     if (!shareStatus) {

@@ -14,7 +14,7 @@ import { LiveTimer } from "@microsoft/live-share";
 import { SharedMap } from "fluid-framework/legacy";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 import { LiveShareHost } from "@microsoft/teams-js";
-import { getInsecureTokenProvider } from "../../../../typescript/01.dice-roller/src/insecureTokenProvider";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 /**
  * Hook that creates/loads the apps shared objects.

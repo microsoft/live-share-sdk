@@ -4,7 +4,6 @@
  */
 
 import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
-import { assert } from "@fluidframework/core-utils/legacy";
 import { IEvent } from "@fluidframework/core-interfaces";
 import {
     ILiveEvent,
@@ -256,7 +255,11 @@ export class LiveStateClass<TState = any> extends LiveDataObject<{
      * The current state.
      */
     private get latestEvent(): ILiveEvent<TState> {
-        assert(this._latestEvent !== undefined, "LiveState is not initialized");
+        UnexpectedError.assert(
+            this._latestEvent !== undefined,
+            "LiveState:latestEvent",
+            "LiveState is not initialized"
+        );
         return this._latestEvent;
     }
 

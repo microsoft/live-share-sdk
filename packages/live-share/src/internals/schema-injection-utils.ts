@@ -148,15 +148,14 @@ function getLiveDataObjectProxyClassInternal<
 
     const DynamicClass: LiveObjectClass<any> = class extends BaseClass {
         public static TypeName = (BaseClass as any).TypeName;
-        public static readonly factory = new Proxy((BaseClass as any).factory, {
-            get: function (target, prop, receiver) {
-                if (prop === "ctor") {
-                    return ProxiedBaseClass;
-                }
-                return Reflect.get(target, prop, receiver);
-            },
-        });
+        public static readonly factory = (BaseClass as any).factory;
     };
 
+    // Backwards compatibility for before ctor was moved to createProps
+    if ((DynamicClass.factory as any).createProps !== undefined) {
+        (DynamicClass.factory as any).createProps.ctor = ProxiedBaseClass;
+    } else {
+        (DynamicClass.factory as any).ctor = ProxiedBaseClass;
+    }
     return DynamicClass;
 }

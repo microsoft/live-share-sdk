@@ -140,9 +140,12 @@ export function useLiveState<TState = any>(
         if (
             liveState.initializeState === LiveDataObjectInitializeState.needed
         ) {
-            liveState.initialize(initialState, allowedRoles);
+            liveState
+                .initialize(initialState, allowedRoles)
+                .then(() => onStateChanged(liveState.state));
+        } else {
+            onStateChanged(liveState.state);
         }
-        onStateChanged(liveState.state);
 
         return () => {
             liveState?.off("stateChanged", onStateChanged);

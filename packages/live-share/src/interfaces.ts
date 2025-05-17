@@ -5,7 +5,7 @@
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client";
-import { IFluidContainer } from "fluid-framework";
+import type { IFluidContainer, ContainerSchema } from "fluid-framework";
 
 /**
  * Base interface for all event objects.
@@ -283,11 +283,13 @@ export interface ILiveShareHost {
 /**
  * Response object from `.join()` in `LiveShareClient`
  */
-export interface ILiveShareJoinResults {
+export interface ILiveShareJoinResults<
+    TContainerSchema extends ContainerSchema = ContainerSchema,
+> {
     /**
      * Fluid container
      */
-    container: IFluidContainer;
+    container: IFluidContainer<TContainerSchema>;
     /**
      * Azure Container Services, which includes things like Fluid Audience
      */

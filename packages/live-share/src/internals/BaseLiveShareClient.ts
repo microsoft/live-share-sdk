@@ -200,7 +200,9 @@ export abstract class BaseLiveShareClient {
      * @param initialObjects Optional. Initial objects to add to the schema
      * @returns a `ContainerSchema` record to use in a Fluid container
      */
-    protected getContainerSchema(schema?: ContainerSchema): ContainerSchema {
+    protected getContainerSchema<
+        const TContainerSchema extends ContainerSchema,
+    >(schema?: TContainerSchema): TContainerSchema {
         return {
             initialObjects: {
                 ...schema?.initialObjects,
@@ -209,8 +211,8 @@ export abstract class BaseLiveShareClient {
             dynamicObjectTypes: [
                 ...(schema?.dynamicObjectTypes ?? []),
                 ...DynamicObjectRegistry.dynamicLoadableObjects.values(),
-            ] as unknown as SharedObjectKind[],
-        };
+            ],
+        } as TContainerSchema /* and added the dynamic object types */;
     }
 
     /**

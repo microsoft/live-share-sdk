@@ -5,6 +5,7 @@
     "author": "Microsoft",
     "license": "MIT",
     "dependencies": {
+        "@fluidframework/azure-client": ">=2.40 <2.50",
         "@babylonjs/core": "6.43.0",
         "@babylonjs/loaders": "6.43.0",
         "@babylonjs/gui": "6.43.0",
@@ -16,7 +17,7 @@
         "@microsoft/live-share-media": "2.0.0-internal.9",
         "@microsoft/live-share-react": "2.0.0-internal.9",
         "@microsoft/teams-js": "^2.16.0",
-        "fluid-framework": "^2.0.0",
+        "fluid-framework": ">=2.40 <2.50",
         "lodash": "^4.17.21",
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
@@ -30,7 +31,7 @@
         "web-vitals": "^3.1.1"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": "^2.0.0",
+        "@fluidframework/test-runtime-utils": ">=2.40 <2.50",
         "@testing-library/jest-dom": "^5.16.5",
         "@testing-library/react": "^13.4.0",
         "@testing-library/user-event": "^14.4.3",

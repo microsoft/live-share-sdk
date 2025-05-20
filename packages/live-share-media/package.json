@@ -33,13 +33,13 @@
     "devDependencies": {
         "@microsoft/live-share": "2.0.0-internal.9",
         "@fluidframework/mocha-test-setup": "^2.0.0-rc.1.0.9",
-        "@fluidframework/test-runtime-utils": "^2.0.0",
-        "@fluidframework/test-utils": "^2.0.0",
+        "@fluidframework/test-runtime-utils": ">=2.40 <2.50",
+        "@fluidframework/test-utils": ">=2.40 <2.50",
         "@live-share-private/test-utils": "^1.0.0",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
-        "fluid-framework": "^2.0.0",
+        "fluid-framework": ">=2.40 <2.50",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
         "ts-mocha": "^10.0.0",
@@ -47,7 +47,7 @@
     },
     "peerDependencies": {
         "@microsoft/live-share": "2.0.0-internal.9",
-        "fluid-framework": "^2.0.0"
+        "fluid-framework": ">=2.40 <2.50"
     },
     "repository": {
         "directory": "packages/live-share-media",

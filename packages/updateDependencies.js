@@ -22,22 +22,23 @@ const { exit } = require("process");
 //=================================================================================================
 
 const localDependencies = {
-    "./packages/live-share": {},
-    "./packages/live-share-media": {
+    "./live-share": {},
+    "./live-share-media": {
         "@microsoft/live-share": "${version}:../live-share",
     },
 };
 
 const publishDependencies = {
-    "./packages/live-share": {},
-    "./packages/live-share-media": {
+    "./live-share": {},
+    "./live-share-media": {
         "@microsoft/live-share": "${version}",
     },
 };
 
 const npmrcContent =
-    `registry=https://registry.npmjs.org/` +
-    `\n`;
+    `registry=https://domoreexp.pkgs.visualstudio.com/_packaging/npm-mirror/npm/registry/` +
+    `\n\n` +
+    `always-auth=true`;
 
 // Grab command line args
 let args = process.argv.slice(2);
@@ -75,22 +76,7 @@ for (const package in dependencies) {
     // Update dependencies
     for (const entry in dependencies[package]) {
         let link = dependencies[package][entry].replace("${version}", version);
-        
-        // Check if dependencies field exists, if not create it
-        if (!pjson.dependencies) {
-            pjson.dependencies = {};
-        }
-        
         pjson.dependencies[entry] = link;
-        
-        // Also update devDependencies and peerDependencies if they exist and contain this entry
-        if (pjson.devDependencies && pjson.devDependencies[entry]) {
-            pjson.devDependencies[entry] = link;
-        }
-        
-        if (pjson.peerDependencies && pjson.peerDependencies[entry]) {
-            pjson.peerDependencies[entry] = link;
-        }
     }
 
     // Save out file

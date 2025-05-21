@@ -39,7 +39,7 @@ jobs:
               
             - name: Install all dependencies
               id: npm-install
-              run: npm ci
+              run: npm ci --no-package-lock --ignore-scripts
               timeout-minutes: 20
               env:
                 NODE_OPTIONS: "--max-old-space-size=4096"

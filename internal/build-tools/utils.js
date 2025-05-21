@@ -21,7 +21,7 @@ async function getGitHash() {
 async function getRootFolder() {
     const rootDir = childProcess.spawn(
         "git",
-        ["rev-parse", " --show-toplevel"],
+        ["rev-parse", "--show-toplevel"],
         {
             shell: true,
             cwd: process.cwd(),

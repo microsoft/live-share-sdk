@@ -21,7 +21,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install
+          cache: 'npm'
+      - name: Install dependencies using chunked install script
+        run: node .github/scripts/chunked-install.js
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
       - run: npm run build:packages
 
       - name: "test live-share"

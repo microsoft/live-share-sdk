@@ -21,8 +21,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install
-      - run: npm install jest
+          cache: 'npm'
+      - name: Install dependencies using chunked install script
+        run: node .github/scripts/chunked-install.js
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+      - name: Install jest for sample
+        run: npm install jest
         working-directory: samples/javascript/02.react-video
 
       - name: "build packages and samples"

@@ -1,41 +1,40 @@
 name: Build Live Share SDK samples
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    push:
+        branches: [main, mainv2]
+    pull_request:
+        branches: [main, mainv2]
+    workflow_dispatch:
 
 jobs:
-  build:
+    build:
+        runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node-version: [18.x]
 
-    strategy:
-      matrix:
-        node-version: [18.x]
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: 'npm'
+            - name: Install dependencies using chunked install script
+              run: node .github/scripts/chunked-install.js
+              env:
+                NODE_OPTIONS: "--max-old-space-size=4096"
+            - run: npm install jest
+              working-directory: samples/javascript/02.react-video
 
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - name: Install dependencies using chunked install script
-        run: node .github/scripts/chunked-install.js
-        env:
-          NODE_OPTIONS: "--max-old-space-size=4096"
-      - run: npm install jest
-        working-directory: samples/javascript/02.react-video
+            - name: "build packages and samples"
+              run: npm run build
 
-      - name: "build packages and samples"
-        run: npm run build
+            # TODO: get scenario_test.sh working
 
-      # TODO: get scenario_test.sh working
-      
-      # - name: "test 02.react-video sample"
-      #   shell: "bash"
-      #   run: sh ../../../.github/workflows/scenario_test.sh
-      #   working-directory: samples/javascript/02.react-video
+            # - name: "test 02.react-video sample"
+            #   shell: "bash"
+            #   run: sh ../../../.github/workflows/scenario_test.sh
+            #   working-directory: samples/javascript/02.react-video

@@ -36,9 +36,8 @@ const publishDependencies = {
 };
 
 const npmrcContent =
-    `registry=https://domoreexp.pkgs.visualstudio.com/_packaging/npm-mirror/npm/registry/` +
-    `\n\n` +
-    `always-auth=true`;
+    `registry=https://registry.npmjs.org/` +
+    `\n`;
 
 // Grab command line args
 let args = process.argv.slice(2);

@@ -98,10 +98,11 @@ if (rootPackageJson.scripts) {
 
 // Suggest optimizations
 console.log('\n=== OPTIMIZATION SUGGESTIONS ===');
-console.log('1. Consider using --no-audit and --no-fund flags with npm ci for faster installation');
+console.log('1. Consider using npm cache with GitHub Actions for faster installations');
 console.log('2. Ensure NODE_OPTIONS="--max-old-space-size=4096" is set for large projects');
-console.log('3. Use npm cache with GitHub Actions for faster installations');
+console.log('3. Check npm version compatibility (current version:', process.env.npm_config_node_version || execSync('npm --version').toString().trim(), ')');
 console.log('4. Consider breaking down large monorepos into smaller packages');
 console.log('5. Review and remove unnecessary dependencies');
+console.log('6. Use direct directory changes instead of workspace flags if issues persist');
 
 console.log('\nDiagnostic information collection complete.');

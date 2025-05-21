@@ -34,12 +34,12 @@ jobs:
             - name: Install critical dependencies only
               run: |
                 npm install --no-package-lock --no-save typescript eslint prettier
-                npm install --no-package-lock --no-save -w packages/live-share
+                cd packages/live-share && npm install --no-package-lock --no-save && cd ../..
               timeout-minutes: 5
               
             - name: Install all dependencies
               id: npm-install
-              run: npm ci --prefer-offline --no-audit --no-fund --no-optional
+              run: npm ci
               timeout-minutes: 20
               env:
                 NODE_OPTIONS: "--max-old-space-size=4096"

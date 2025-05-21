@@ -2,9 +2,9 @@ name: Test Live Share SDK packages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, mainv2 ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, mainv2 ]
 
 jobs:
   build:

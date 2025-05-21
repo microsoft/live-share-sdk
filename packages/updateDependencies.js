@@ -22,15 +22,15 @@ const { exit } = require("process");
 //=================================================================================================
 
 const localDependencies = {
-    "./live-share": {},
-    "./live-share-media": {
+    "./packages/live-share": {},
+    "./packages/live-share-media": {
         "@microsoft/live-share": "${version}:../live-share",
     },
 };
 
 const publishDependencies = {
-    "./live-share": {},
-    "./live-share-media": {
+    "./packages/live-share": {},
+    "./packages/live-share-media": {
         "@microsoft/live-share": "${version}",
     },
 };
@@ -75,7 +75,22 @@ for (const package in dependencies) {
     // Update dependencies
     for (const entry in dependencies[package]) {
         let link = dependencies[package][entry].replace("${version}", version);
+        
+        // Check if dependencies field exists, if not create it
+        if (!pjson.dependencies) {
+            pjson.dependencies = {};
+        }
+        
         pjson.dependencies[entry] = link;
+        
+        // Also update devDependencies and peerDependencies if they exist and contain this entry
+        if (pjson.devDependencies && pjson.devDependencies[entry]) {
+            pjson.devDependencies[entry] = link;
+        }
+        
+        if (pjson.peerDependencies && pjson.peerDependencies[entry]) {
+            pjson.peerDependencies[entry] = link;
+        }
     }
 
     // Save out file

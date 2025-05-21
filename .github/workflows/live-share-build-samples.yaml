@@ -2,9 +2,10 @@ name: Build Live Share SDK samples
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, mainv2 ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, mainv2 ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,14 +14,15 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [18.x, 20.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
       - run: npm install
       - run: npm install jest
         working-directory: samples/javascript/02.react-video

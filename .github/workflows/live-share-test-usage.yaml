@@ -1,0 +1,41 @@
+name: Test Usage of Live Share SDK packages in different JS environments
+
+on:
+    push:
+        branches: [main, mainv2]
+    pull_request:
+        branches: [main, mainv2]
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [18.x]
+
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - run: npm install # install will trigger a build of all packages
+
+            - name: "test live-share with cjs app"
+              run: npm run test
+              working-directory: internal/usage-test/cjs-test
+
+            - name: "test live-share with esm app"
+              run: npm run test
+              working-directory: internal/usage-test/esm-test
+
+            - uses: pnpm/action-setup@v4
+              name: Install pnpm for next step
+              with:
+                  version: 9
+                  run_install: false
+            - name: "test live-share with pnpm typescript esm app"
+              run: pnpm run test
+              working-directory: internal/usage-test/pnpm-test

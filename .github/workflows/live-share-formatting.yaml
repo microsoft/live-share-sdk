@@ -1,4 +1,4 @@
-name: Build Live Share SDK samples
+name: Check formatting
 
 on:
     push:
@@ -22,15 +22,7 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
             - run: npm install
-            - run: npm install jest
-              working-directory: samples/javascript/02.react-video
 
-            - name: "build packages and samples"
-              run: npm run build
-
-            # TODO: get scenario_test.sh working
-
-            # - name: "test 02.react-video sample"
-            #   shell: "bash"
-            #   run: sh ../../../.github/workflows/scenario_test.sh
-            #   working-directory: samples/javascript/02.react-video
+            - name: "check formatting"
+              run: "bash checkFormatting.sh"
+              working-directory: .github/workflows

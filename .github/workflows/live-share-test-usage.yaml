@@ -30,11 +30,6 @@ jobs:
                 npm config set fetch-retries 3
                 npm config set fetch-retry-factor 2
                 npm config set fetch-retry-mintimeout 20000
-                npm config set ignore-scripts false
-                npm config set fund false
-                npm config set audit false
-              env:
-                NPM_CONFIG_IGNORE_SCRIPTS: "true"
               
             - name: Install critical dependencies only
               run: |

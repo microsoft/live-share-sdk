@@ -24,9 +24,38 @@ jobs:
                   node-version: ${{ matrix.node-version }}
                   cache: 'npm'
                   
-            - name: Install dependencies
-              run: npm ci --verbose
-              timeout-minutes: 15
+            - name: Setup npm config
+              run: |
+                npm config set network-timeout 300000
+                npm config set fetch-retries 3
+                npm config set fetch-retry-factor 2
+                npm config set fetch-retry-mintimeout 20000
+                npm config set ignore-scripts false
+                npm config set fund false
+                npm config set audit false
+              env:
+                NPM_CONFIG_IGNORE_SCRIPTS: "true"
+              
+            - name: Install critical dependencies only
+              run: |
+                npm install --no-package-lock --no-save typescript eslint prettier
+                npm install --no-package-lock --no-save -w packages/live-share
+              timeout-minutes: 5
+              
+            - name: Install all dependencies
+              id: npm-install
+              run: npm ci --prefer-offline --no-audit --no-fund --no-optional
+              timeout-minutes: 20
+              env:
+                NODE_OPTIONS: "--max-old-space-size=4096"
+                
+            - name: Run npm diagnostic if install fails
+              run: node scripts/diagnose-npm-install.js
+              if: ${{ failure() && steps.npm-install.conclusion == 'failure' }}
+              
+            - name: Build packages manually
+              run: npm run build:packages
+              timeout-minutes: 10
 
             - name: "check formatting"
               run: "bash checkFormatting.sh"

@@ -1,8 +1,8 @@
 import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import { LiveCanvas, InkingTool } from "@microsoft/live-share-canvas";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useLiveCanvas } from "../utils/useLiveCanvas";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 const containerSchema = {
     initialObjects: {
@@ -64,8 +64,10 @@ export const LiveCanvasPage = () => {
     }, [inkingManager]);
 
     const initialize = async () => {
-        const client = new LiveShareClient(TestLiveShareHost.create());
-        const { container } = await client.joinContainer(containerSchema);
+        const client = new LiveShareClient(
+            TestLiveShareHost.create(getInsecureTokenProvider())
+        );
+        const { container } = await client.join(containerSchema);
         setliveCanvas(container.initialObjects.liveCanvas);
     };
 

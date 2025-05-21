@@ -2,8 +2,8 @@ import {
     GetLocalUserCanSend,
     ILiveEvent,
     UpdateSynchronizationState,
-} from "../interfaces";
-import { IEvent } from "@fluidframework/common-definitions";
+} from "../interfaces.js";
+import { IEvent } from "@fluidframework/core-interfaces";
 
 /**
  * @hidden

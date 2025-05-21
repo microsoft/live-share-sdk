@@ -3,12 +3,12 @@
  * Licensed under the MIT License.
  */
 
-// eslint-disable-next-line
-import { UserMeetingRole } from "@microsoft/live-share";
-// eslint-disable-next-line
+import {
+    LiveDataObjectInitializeState,
+    UserMeetingRole,
+} from "@microsoft/live-share";
 import { LiveMediaSession } from "@microsoft/live-share-media";
 import { useState, useEffect, useCallback, useRef } from "react";
-// eslint-disable-next-line
 import { AzureMediaPlayer } from "../utils/AzureMediaPlayer";
 import { inTeams } from "../utils/inTeams";
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -164,7 +164,8 @@ export const useMediaSession = (
     useEffect(() => {
         if (
             !mediaSession ||
-            mediaSession.isInitialized ||
+            mediaSession.initializeState ==
+                LiveDataObjectInitializeState.succeeded ||
             synchronizerRef.current ||
             !selectedMediaItem ||
             !player ||

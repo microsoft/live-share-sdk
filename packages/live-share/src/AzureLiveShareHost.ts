@@ -6,8 +6,8 @@ import {
     ILiveShareHost,
     INtpTimeInfo,
     UserMeetingRole,
-} from "./interfaces";
-import { Deferred } from "./internals";
+} from "./interfaces.js";
+import { Deferred } from "./internals/Deferred.js";
 
 /**
  * @alpha
@@ -73,9 +73,9 @@ export class AzureLiveShareHost implements ILiveShareHost {
             );
         }
         return {
-            userId: audienceInfo.userId,
+            userId: audienceInfo.id,
             roles: this.getRolesForAudienceMember(audienceInfo),
-            displayName: audienceInfo.userName,
+            displayName: audienceInfo.name,
         };
     }
 

@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TimestampProvider } from "./TimestampProvider";
-import { ILiveShareHost, INtpTimeInfo } from "./interfaces";
+import { TimestampProvider } from "./TimestampProvider.js";
+import { ILiveShareHost, INtpTimeInfo } from "./interfaces.js";
 
 /**
  * Timestamp Provider that calls the Live Share Host to lookup the current time.

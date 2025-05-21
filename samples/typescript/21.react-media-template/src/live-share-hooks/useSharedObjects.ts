@@ -12,11 +12,13 @@ import {
 } from "@microsoft/live-share";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
-import { IFluidContainer, SharedMap } from "fluid-framework";
+import { IFluidContainer } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { useEffect, useState, useRef } from "react";
 import { mediaList } from "../utils/media-list";
 import { LiveShareHost } from "@microsoft/teams-js";
 import { IUserData } from "./usePresence";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 interface IUseSharedObjectsResult extends Partial<ILiveShareJoinResults> {
     presence: LivePresence<IUserData> | undefined;
@@ -85,7 +87,7 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         // Define container schema
         const schema = {
             initialObjects: {
-                presence: LivePresence<IUserData>,
+                presence: LivePresence,
                 mediaSession: LiveMediaSession,
                 notificationEvent: LiveEvent,
                 liveCanvas: LiveCanvas,
@@ -98,13 +100,13 @@ export function useSharedObjects(): IUseSharedObjectsResult {
         // Create live share host
         const host = inTeams
             ? LiveShareHost.create()
-            : TestLiveShareHost.create();
+            : TestLiveShareHost.create(getInsecureTokenProvider());
 
         // Create the client, join container, and set results
         console.log("useSharedObjects: joining container");
         const client = new LiveShareClient(host);
         client
-            .joinContainer(schema, onFirstInitialize)
+            .join(schema, onFirstInitialize)
             .then((results) => {
                 console.log("useSharedObjects: joined container");
                 setResults(results);

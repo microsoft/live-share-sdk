@@ -9,15 +9,15 @@ import {
     UserMeetingRole,
 } from "@microsoft/live-share";
 import React from "react";
-import { SetLiveStateAction } from "../types";
-import { useDynamicDDS } from "../shared-hooks";
-import { useFluidObjectsContext } from "../providers";
+import { SetLiveStateAction } from "../types/index.js";
+import { useDynamicDDS } from "../shared-hooks/index.js";
+import { useFluidObjectsContext } from "../providers/index.js";
 import {
     ActionContainerNotJoinedError,
     ActionLiveDataObjectInitializedError,
     ActionLiveDataObjectUndefinedError,
     isPrevStateCallback,
-} from "../internal";
+} from "../internal/index.js";
 
 /**
  * React hook for using a Live Share `LiveState`.
@@ -31,6 +31,51 @@ import {
  * @param allowedRoles Optional. the user roles that are allowed to mutate the synchronized state
  * @returns ordered values: first value is the synchronized state value and the second is a setter to change the state value.
  * The setter returns a void promise, which will throw if the user does not have the required roles to set.
+ * 
+ * @example
+ ```jsx
+import { useLiveState } from "@microsoft/live-share-react";
+
+const planets = [
+  "Mercury",
+  "Venus",
+  "Earth",
+  "Mars",
+  "Jupiter",
+  "Saturn",
+  "Uranus",
+  "Neptune",
+];
+
+// Define a unique key that differentiates this usage of `useLiveState` from others in your app
+const MY_UNIQUE_KEY = "selected-planet-key";
+
+// Example component for using useLiveState
+export const MyCustomState = () => {
+  const [planet, setPlanet, liveState] = useLiveState(MY_UNIQUE_KEY, planets[0]);
+
+  // Render loading UI when creating LiveState instance for first time
+  if (!liveState) return <>Loading...</>;
+
+  // Render UI
+  return (
+    <div>
+      {`Current planet: ${planet}`}
+      {"Select a planet below:"}
+      {planets.map((planet) => (
+        <button
+          key={planet}
+          onClick={() => {
+            setPlanet(planet);
+          }}
+        >
+          {planet}
+        </button>
+      ))}
+    </div>
+  );
+};
+ ```
  */
 export function useLiveState<TState = any>(
     uniqueKey: string,

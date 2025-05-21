@@ -12,6 +12,7 @@ import {
 } from "@microsoft/live-share-canvas";
 import * as Utils from "./utils";
 import { View } from "./view";
+import { getInsecureTokenProvider } from "./insecureTokenProvider";
 
 /**
  * Other images
@@ -59,15 +60,9 @@ const appTemplate = `
         </div>
     </div>`;
 
-const containerSchema = {
-    initialObjects: {
-        liveCanvas: LiveCanvas,
-    },
-};
-
 export class StageView extends View {
     _inkingManager;
-    _container;
+    _client;
 
     offsetBy(x, y) {
         this._inkingManager.offset = {
@@ -78,8 +73,8 @@ export class StageView extends View {
         this.updateBackgroundImagePosition();
     }
 
-    getLiveCanvas() {
-        return this._container.initialObjects.liveCanvas;
+    async getLiveCanvas() {
+        return await this._client.getDDS("liveCanvas", LiveCanvas);
     }
 
     _hostResizeObserver;
@@ -87,17 +82,15 @@ export class StageView extends View {
     async internalStart() {
         const host = Utils.runningInTeams()
             ? Teams.LiveShareHost.create()
-            : TestLiveShareHost.create();
+            : TestLiveShareHost.create(getInsecureTokenProvider());
         const client = new LiveShareClient(host);
-
-        this._container = (
-            await client.joinContainer(containerSchema)
-        ).container;
+        await client.join();
+        this._client = client;
 
         const inkingHost = document.getElementById("inkingHost");
 
         if (inkingHost) {
-            const liveCanvas = this.getLiveCanvas();
+            const liveCanvas = await this.getLiveCanvas();
 
             this._inkingManager = new InkingManager(inkingHost);
 
@@ -262,8 +255,8 @@ export class StageView extends View {
             this.updateBackgroundImagePosition();
         });
 
-        setupButton("btnToggleCursorShare", () => {
-            const liveCanvas = this.getLiveCanvas();
+        setupButton("btnToggleCursorShare", async () => {
+            const liveCanvas = await this.getLiveCanvas();
             const isCursorShared = liveCanvas.isCursorShared;
 
             liveCanvas.isCursorShared = !isCursorShared;

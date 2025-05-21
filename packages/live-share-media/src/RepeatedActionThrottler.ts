@@ -4,11 +4,11 @@
  */
 
 import { TimeInterval } from "@microsoft/live-share";
-import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler";
+import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler.js";
 import {
     ExtendedMediaSessionActionDetails,
     ExtendedMediaSessionAction,
-} from "./MediaSessionExtensions";
+} from "./MediaSessionExtensions.js";
 
 /**
  *  A Throttler that passes through all actions but will only let an action be repeated once every 2 seconds.

@@ -7,7 +7,7 @@ import { meeting } from "@microsoft/teams-js";
 import { getRandomDiceValue, stylizeDiceElem } from "./utils";
 
 export async function renderMeetingSidePanel(container, elem, theme) {
-    const { storedDiceMap } = container.initialObjects;
+    const storedDiceMap = await client.getDDS("storedDice", SharedMap);
     const sideBarTemplate = document.createElement("template");
     sideBarTemplate["innerHTML"] = `
     <div class="wrapper ${theme}">

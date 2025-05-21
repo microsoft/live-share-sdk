@@ -5,15 +5,19 @@
 
 import { meeting } from "@microsoft/teams-js";
 import { getRandomDiceValue, stylizeDiceElem } from "./utils";
-import { IFluidContainer, SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { AppTheme } from "./types-interfaces";
+import { LiveShareClient } from "@microsoft/live-share";
 
 export async function renderMeetingSidePanel(
-    container: IFluidContainer,
+    client: LiveShareClient,
     elem: HTMLElement,
     theme: AppTheme
 ) {
-    const storedDiceMap = container.initialObjects.storedDiceMap as SharedMap;
+    const storedDiceMap = await client.getDDS<SharedMap>(
+        "storedDice",
+        SharedMap
+    );
     const sideBarTemplate = document.createElement("template");
     sideBarTemplate["innerHTML"] = `
     <div class="wrapper ${theme}">

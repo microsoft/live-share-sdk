@@ -9,8 +9,8 @@ import {
     viewportToScreen,
     IStroke,
     IBrush,
-} from "../core";
-import { IQuad, TWO_PI } from "../core/internals";
+} from "../core/index.js";
+import { IQuad, TWO_PI } from "../core/internals/index.js";
 
 /**
  * Defines the refernece point of a canvas. The reference point is the origin used for

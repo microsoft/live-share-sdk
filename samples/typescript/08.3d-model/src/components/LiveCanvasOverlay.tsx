@@ -10,6 +10,11 @@ interface ILiveCanvasOverlayProps {
     zPosition: number;
 }
 
+const liveCanvasProps = {
+    isCursorShared: true,
+    active: true,
+};
+
 export const LiveCanvasOverlay: FC<ILiveCanvasOverlayProps> = ({
     pointerElementRef,
     // followingUserId,
@@ -20,13 +25,7 @@ export const LiveCanvasOverlay: FC<ILiveCanvasOverlayProps> = ({
     const { inkingManager } = useLiveCanvas(
         `live-canvas`, // uniqueKey
         canvasRef, // pointer to div element that we want to host <canvas> element within
-        true, // we hardcode inking to always active so we can see cursors
-        undefined, // inkingTool. We ignore it in this sample because we set it directly through the inkingManager instead.
-        undefined, // lineBrush. We don't change this in this sample.
-        undefined, // offset. We don't change this in this sample.
-        undefined, // scale. We don't change this in this sample, though it would be a good idea since users can zoom in/out on browser.
-        undefined, // reference point, either center (default) or topLeft.
-        true // isCursorShared
+        liveCanvasProps
     );
 
     useEffect(() => {

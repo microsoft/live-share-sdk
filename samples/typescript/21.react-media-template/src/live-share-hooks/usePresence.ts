@@ -7,7 +7,7 @@ import {
     ITimestampProvider,
     LivePresence,
     LivePresenceUser,
-    PresenceState,
+    PresenceStatus,
     UserMeetingRole,
 } from "@microsoft/live-share";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -83,7 +83,7 @@ export const usePresence = (
                     setLocalUser(userPresence);
                 }
                 // Set users local state
-                const userArray = presence.getUsers(PresenceState.online);
+                const userArray = presence.getUsers(PresenceStatus.online);
                 // Need to create new array so that React knows the user list changed.
                 setUsers([...userArray]);
             }

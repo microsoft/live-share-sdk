@@ -11,9 +11,10 @@ import {
     TestLiveShareHost,
 } from "@microsoft/live-share";
 import { LiveTimer } from "@microsoft/live-share";
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 import { LiveShareHost } from "@microsoft/teams-js";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 /**
  * Hook that creates/loads the apps shared objects.
@@ -77,12 +78,12 @@ export function useSharedObjects() {
         // Create live share host
         const host = inTeams
             ? LiveShareHost.create()
-            : TestLiveShareHost.create();
+            : TestLiveShareHost.create(getInsecureTokenProvider());
 
         // Join Teams container
         const client = new LiveShareClient(host);
         client
-            .joinContainer(schema, onFirstInitialize)
+            .join(schema, onFirstInitialize)
             .then((results) => setResults(results))
             .catch((err) => setError(err));
     }, []);

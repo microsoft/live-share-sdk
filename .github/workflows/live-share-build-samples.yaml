@@ -10,6 +10,7 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        timeout-minutes: 30
 
         strategy:
             matrix:
@@ -21,8 +22,14 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-            - run: npm install
-            - run: npm install jest
+                  cache: 'npm'
+            
+            - name: Install dependencies
+              run: npm ci --verbose
+              timeout-minutes: 15
+              
+            - name: Install jest for samples
+              run: npm install jest
               working-directory: samples/javascript/02.react-video
 
             - name: "build packages and samples"

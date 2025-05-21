@@ -10,6 +10,7 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        timeout-minutes: 30
 
         strategy:
             matrix:
@@ -21,7 +22,11 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
-            - run: npm install
+                  cache: 'npm'
+                  
+            - name: Install dependencies
+              run: npm ci --verbose
+              timeout-minutes: 15
 
             - name: "check formatting"
               run: "bash checkFormatting.sh"

@@ -21,8 +21,8 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
-                  cache: 'npm'
-            - run: npm install # install will trigger a build of all packages
+                  cache: "npm"
+            - run: npm --loglevel verbose ci --ignore-scripts # install will trigger a build of all packages
               timeout-minutes: 20
 
             - name: "test live-share with cjs app"

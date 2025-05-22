@@ -25,6 +25,8 @@ jobs:
             - run: npm --loglevel verbose ci --ignore-scripts # install will trigger a build of all packages
               timeout-minutes: 20
 
+            - run: npm run prepare
+
             - name: "test live-share"
               run: npm run test
               working-directory: packages/live-share

@@ -22,7 +22,7 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: 'npm'
-            - run: npm --loglevel silly install
+            - run: npm --loglevel verbose ci
 
             - name: "check formatting"
               run: "bash checkFormatting.sh"

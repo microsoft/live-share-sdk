@@ -18,7 +18,7 @@ console.log("Disk space:", execSync("df -h").toString());
 
 // Log package.json information
 console.log("\n=== PACKAGE INFORMATION ===");
-const rootPackageJson = require("../package.json");
+const rootPackageJson = require("../../package.json");
 console.log("Root package name:", rootPackageJson.name);
 console.log("Workspaces:", rootPackageJson.workspaces);
 
@@ -82,7 +82,7 @@ console.log(`\nTotal dependencies across all packages: ${totalDeps}`);
 console.log("\n=== POTENTIAL ISSUES ===");
 
 // Check package-lock.json
-const lockfileSize = fs.statSync("../package-lock.json").size;
+const lockfileSize = fs.statSync("../../package-lock.json").size;
 console.log(
     `package-lock.json size: ${(lockfileSize / 1024 / 1024).toFixed(2)} MB`
 );

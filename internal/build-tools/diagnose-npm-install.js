@@ -81,17 +81,6 @@ console.log(`\nTotal dependencies across all packages: ${totalDeps}`);
 // Check for potential issues
 console.log("\n=== POTENTIAL ISSUES ===");
 
-// Check package-lock.json
-const lockfileSize = fs.statSync("../../package-lock.json").size;
-console.log(
-    `package-lock.json size: ${(lockfileSize / 1024 / 1024).toFixed(2)} MB`
-);
-if (lockfileSize > 1024 * 1024) {
-    console.log(
-        "Warning: Large package-lock.json may slow down npm operations"
-    );
-}
-
 // Check for custom npm hooks
 console.log(
     "\nChecking for lifecycle scripts that might slow down installation:"

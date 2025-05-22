@@ -54,7 +54,7 @@ rootPackageJson.workspaces.forEach((workspacePattern) => {
         const packageJsonPath = path.join(folder, "package.json");
         if (fs.existsSync(packageJsonPath)) {
             try {
-                const packageJson = require(`../${packageJsonPath}`);
+                const packageJson = require(`../../${packageJsonPath}`);
                 workspacePackages.push({
                     name: packageJson.name,
                     path: folder,

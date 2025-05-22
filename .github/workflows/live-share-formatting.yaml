@@ -23,9 +23,6 @@ jobs:
                   node-version: ${{ matrix.node-version }}
                   cache: "npm"
 
-            - name: Run npm diagnostic if install fails
-              run: node internal/build-tools/diagnose-npm-install.js
-
             - run: npm --loglevel verbose ci --ignore-scripts
               timeout-minutes: 20
 

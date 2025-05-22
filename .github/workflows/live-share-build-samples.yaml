@@ -23,6 +23,8 @@ jobs:
                   node-version: ${{ matrix.node-version }}
                   cache: 'npm'
             - run: npm install
+              timeout-minutes: 20
+              
             - run: npm install jest
               working-directory: samples/javascript/02.react-video
 

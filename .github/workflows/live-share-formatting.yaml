@@ -22,7 +22,12 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: 'npm'
-            - run: npm --loglevel verbose ci
+
+            - name: Run npm diagnostic if install fails
+              run: node internal/build-tools/diagnose-npm-install.js
+
+            - run: npm install
+              timeout-minutes: 20
 
             - name: "check formatting"
               run: "bash checkFormatting.sh"

@@ -219,9 +219,9 @@ export class LiveEventScope extends TypedEventEmitter<IErrorEvent> {
         const event = await this.createEvent(eventName, evt, targetClientId);
         // Send event
         this._runtime.submitSignal(eventName, event, targetClientId);
-        // Emit event to local client only when targetClientId is specified
-        // This is due to new versions of fluid not emitting the signal to the local client after sending it
-        if (targetClientId) {
+        // Emit event to local client only when targetClientId is specified and not the local client
+        // This is due to new versions of fluid not emitting the signal to the local client after sending it to other clients
+        if (targetClientId && targetClientId !== this._runtime.clientId) {
             this.emitToListeners(event.clientId, event, true);
         }
         return event;

@@ -118,10 +118,10 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 There are several ways you can [contribute](../../CONTRIBUTING.md) to this project:
 
--   [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
--   Review the source code changes.
--   Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
--   [Contribute bug fixes](../../CONTRIBUTING.md).
+- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+- Review the source code changes.
+- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+- [Contribute bug fixes](../../CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
 

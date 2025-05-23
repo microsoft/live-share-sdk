@@ -22,7 +22,7 @@ import {
     ITestObjectProviderOptions,
 } from "@live-share-private/test-utils";
 import { Deferred } from "../internals/Deferred.js";
-import { isNewerEvent } from "../internals/utils.js";
+import { isNewerEvent, waitForDelay } from "../internals/utils.js";
 import { MockTokenProvider } from "../internals/mock/MockLiveShareRuntime.js";
 
 describeCompat(
@@ -361,46 +361,25 @@ describeCompat(
             let object3ClientId: string;
 
             const object1done = new Deferred();
+            let object1Failed = false;
             object1.on("received", (evt, local, clientId, timestamp) => {
-                try {
-                    assert(local == true, `Not a local event`);
-                    assert(
-                        clientId === object1ClientId,
-                        `Unexpected clientId ${clientId}, should be local object1ClientId ${object1ClientId}`
-                    );
-                    object1done.resolve();
-                } catch (err) {
-                    object1done.reject(err);
-                }
+                object1Failed = true;
+                object1done.reject("Should not have received event");
             });
             await object1.initialize();
 
             const object2done = new Deferred();
-            let emitCount = 0;
             object2.on("received", (evt, local, clientId, timestamp) => {
-                if (emitCount === 0) {
-                    try {
-                        assert(local == false, `Unexpected local event`);
-                        assert(
-                            clientId === object1ClientId,
-                            `Unexpected clientId ${clientId}, should be remote object1ClientId ${object1ClientId}`
-                        );
-                    } catch (err) {
-                        object2done.reject(err);
-                    }
-                } else if (emitCount === 1) {
-                    try {
-                        assert(local == true, `Not a local event`);
-                        assert(
-                            clientId === object2ClientId,
-                            `Unexpected clientId ${clientId}, should be local object2ClientId ${object2ClientId}`
-                        );
-                        object2done.resolve();
-                    } catch (err) {
-                        object2done.reject(err);
-                    }
+                try {
+                    assert(local == false, `Unexpected local event`);
+                    assert(
+                        clientId === object1ClientId,
+                        `Unexpected clientId ${clientId}, should be remote object1ClientId ${object1ClientId}`
+                    );
+                    object2done.resolve();
+                } catch (err) {
+                    object2done.reject(err);
                 }
-                emitCount += 1;
             });
             await object2.initialize();
 
@@ -428,6 +407,11 @@ describeCompat(
 
             await object1.send({}, object2ClientId);
             await object2.send({}, object3ClientId);
+
+            waitForDelay(5).then(() => {
+                if (object1Failed) return;
+                object1done.resolve();
+            });
 
             // Wait for events to trigger
             await Promise.all([

@@ -985,6 +985,7 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
      * initialize the state of the DataObject.
      */
     protected async initializingFirstTime() {
+        this.debugInfo = `LiveFollowMode-${this.id}`;
         // We create the live state instance
         const presentingUserIdLiveStatePromise =
             LiveState.factory.createChildInstance(this.context);

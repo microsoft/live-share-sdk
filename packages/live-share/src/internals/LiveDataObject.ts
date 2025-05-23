@@ -38,6 +38,11 @@ export abstract class LiveDataObject<
     private _liveRuntime: LiveShareRuntime | null = null;
 
     /**
+     * @hidden
+     */
+    protected debugInfo = "";
+
+    /**
      * @internal
      * `LiveShareRuntime` instance
      * @remarks
@@ -46,7 +51,7 @@ export abstract class LiveDataObject<
     protected get liveRuntime(): LiveShareRuntime {
         UnexpectedError.assert(
             this._liveRuntime !== null,
-            "LiveDataObject:liveRuntime",
+            `LiveDataObject:liveRuntime:${this.debugInfo}`,
             `LiveShareRuntime not initialized. Ensure your Fluid \`ContainerSchema\` was first wrapped inside of \`getLiveContainerSchema()\` before calling \`client.getContainer()\` / \`client.createContainer()\` from your \`AzureClient\` (or equivalent) instance.\nAlternatively, you can use the \`.join()\` in \`LiveShareClient\`, which does this for you.\nIf you are using \`LiveShareClient\` and are still encountering this issue, please report this issue at ${LiveShareReportIssueLink}.`
         );
         return this._liveRuntime;

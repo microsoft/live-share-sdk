@@ -319,6 +319,14 @@ export class LiveStateClass<TState = any> extends LiveDataObject<{
             }
         );
     }
+
+    /**
+     * initializingFirstTime is run only once by the first client to create the DataObject. Here we use it to
+     * initialize the state of the DataObject.
+     */
+    protected async initializingFirstTime() {
+        this.debugInfo = `LivePresence-${this.id}`;
+    }
 }
 
 export type LiveState<TState = any> = LiveStateClass<TState>;

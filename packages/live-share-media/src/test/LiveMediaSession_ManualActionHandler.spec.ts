@@ -146,19 +146,17 @@ describeCompat(
             // wait for next event loop, simulate existing user waiting for other people to join.
             // otherwise joined event will fire for both users
             await waitForDelay(1);
-
-            // create a duplicate scope/target with same event name as one declared in coordinator
-            const scope2 = new LiveEventScope(
-                object2.runtimeForTesting(),
-                object2.liveRuntimeForTesting()
-            );
             let positionUpdateCount = 0;
-            new LiveEventTarget(scope2, "positionUpdate", (event, local) => {
-                // assert(!local, JSON.stringify(event));
-                positionUpdateCount += 1;
-            });
 
             await object2.initialize();
+            // @ts-ignore-next-line
+            object2.coordinator._positionUpdateEvent!._scope.onEvent(
+                "positionUpdate",
+                (event, local) => {
+                    // assert(!local, JSON.stringify(event));
+                    positionUpdateCount += 1;
+                }
+            );
             // wait for next event loop
             await waitForDelay(1);
 

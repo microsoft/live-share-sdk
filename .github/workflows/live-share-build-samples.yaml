@@ -25,8 +25,9 @@ jobs:
             - run: npm --loglevel verbose ci --ignore-scripts
               timeout-minutes: 20
 
-            - run: npm install jest
-              working-directory: samples/javascript/02.react-video
+            # fix for v1
+            #- run: npm install jest
+              #working-directory: samples/javascript/02.react-video
 
             - name: "build packages and samples"
               run: npm run build

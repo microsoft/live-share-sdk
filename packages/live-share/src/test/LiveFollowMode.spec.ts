@@ -177,7 +177,7 @@ describeCompat(
             }
             assertDefaultValues();
 
-            await waitForDelay(60);
+            await waitForDelay(2);
             // default values should remain unchanged once initial presence update is sent
             assertDefaultValues();
 

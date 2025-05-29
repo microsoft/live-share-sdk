@@ -7,7 +7,7 @@
 import { Loader } from "@fluidframework/container-loader/legacy";
 
 // ContainerRuntime API
-import { ContainerRuntime } from "@fluidframework/container-runtime/legacy";
+import { ContainerRuntime } from "@fluidframework/container-runtime/internal";
 
 // Data Runtime API
 import * as agentScheduler from "@fluidframework/agent-scheduler";

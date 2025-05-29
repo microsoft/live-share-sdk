@@ -150,13 +150,15 @@ function getLiveDataObjectProxyClassInternal<
         public static TypeName = (BaseClass as any).TypeName;
         public static readonly factory = new Proxy((BaseClass as any).factory, {
             get: function (target, prop, receiver) {
-                if (prop === "ctor") {
-                    return ProxiedBaseClass;
+                if (prop === "createProps") {
+                    return {
+                        ...Reflect.get(target, prop, receiver),
+                        ctor: ProxiedBaseClass,
+                    };
                 }
                 return Reflect.get(target, prop, receiver);
             },
         });
     };
-
     return DynamicClass;
 }

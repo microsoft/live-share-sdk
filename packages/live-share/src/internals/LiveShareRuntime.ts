@@ -1,4 +1,3 @@
-import { assert } from "@fluidframework/core-utils/legacy";
 import { HostTimestampProvider } from "../HostTimestampProvider.js";
 import {
     IClientInfo,
@@ -14,6 +13,7 @@ import { isTimestampProvider } from "./type-guards.js";
 import { LiveObjectManager } from "./LiveObjectManager.js";
 import { RoleVerifier } from "./RoleVerifier.js";
 import { LiveShareHostDecorator } from "./LiveShareHostDecorator.js";
+import { UnexpectedError } from "../errors.js";
 
 /**
  * Runtime for LiveDataObject, which is used to do things like validate roles, get a timestamp
@@ -54,8 +54,9 @@ export class LiveShareRuntime {
      * `LiveObjectSynchronizerManager` instance
      */
     public get objectManager(): LiveObjectManager {
-        assert(
+        UnexpectedError.assert(
             this._objectManager !== null,
+            "LiveShareRuntime:objectManager",
             "LiveObjectSynchronizerManager not initialized."
         );
         return this._objectManager;

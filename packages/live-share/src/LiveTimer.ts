@@ -638,6 +638,14 @@ export class LiveTimerClass extends LiveDataObject<{
     private endTimeFromConfig(config: ITimerConfigEvent): number {
         return config.timestamp - config.data.position + config.data.duration;
     }
+
+    /**
+     * initializingFirstTime is run only once by the first client to create the DataObject. Here we use it to
+     * initialize the state of the DataObject.
+     */
+    protected async initializingFirstTime() {
+        this.debugInfo = `LivePresence-${this.id}`;
+    }
 }
 
 export type LiveTimer = LiveTimerClass;

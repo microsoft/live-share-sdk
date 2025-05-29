@@ -68,11 +68,14 @@ const createFakeContext = () => {
         id: "foo",
     };
 
+    const fakeDialogParameters: Record<string, string> = {};
+
     const fakeContext: app.Context = {
         app: fakeAppInfo,
         page: fakePageInfo,
         user: fakeUserInfo,
         meeting: fakeMeetingInfo,
+        dialogParameters: fakeDialogParameters,
     };
 
     return fakeContext;

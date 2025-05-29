@@ -4,7 +4,7 @@
  */
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/legacy";
-import { MockLogger } from "@fluidframework/telemetry-utils/legacy";
+import { MockLogger } from "@fluidframework/telemetry-utils/internal";
 import { IRuntimeSignaler } from "../LiveEventScope.js";
 import { v4 } from "uuid";
 import { ITelemetryBaseLogger } from "@fluidframework/azure-client";

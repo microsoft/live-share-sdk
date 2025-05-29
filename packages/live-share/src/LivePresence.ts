@@ -604,6 +604,14 @@ export class LivePresenceClass<
         };
         await this.updateMembersList(localOnlyEvent, true);
     }
+
+    /**
+     * initializingFirstTime is run only once by the first client to create the DataObject. Here we use it to
+     * initialize the state of the DataObject.
+     */
+    protected async initializingFirstTime() {
+        this.debugInfo = `LivePresence-${this.id}`;
+    }
 }
 
 export type LivePresence<TData extends LivePresenceData = any> =

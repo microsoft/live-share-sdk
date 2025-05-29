@@ -14,30 +14,30 @@ You can find our detailed API reference documentation at [Live Share reference d
 
 [Live Share](/packages/live-share/README.md) has several features that make building collaborative apps easier than ever, including:
 
--   `LiveShareClient`: Connect to a Fluid container associated with a Microsoft Teams meeting.
--   `LivePresence`: Track who is using your app during a meeting and associate custom metadata for each user (e.g., camera position).
--   `LiveState`: Synchronize a JSON-serializable value for maintaining consistent application state across clients.
--   `LiveFollowMode` (beta): Easily integrate features to present to all, follow specific users, and suspend/resume following.
--   `LiveTimer`: Build a collaborative countdown timer.
--   `LiveEvent`: Send one-time, stateless JSON-serializable values to each user in the session.
+- `LiveShareClient`: Connect to a Fluid container associated with a Microsoft Teams meeting.
+- `LivePresence`: Track who is using your app during a meeting and associate custom metadata for each user (e.g., camera position).
+- `LiveState`: Synchronize a JSON-serializable value for maintaining consistent application state across clients.
+- `LiveFollowMode` (beta): Easily integrate features to present to all, follow specific users, and suspend/resume following.
+- `LiveTimer`: Build a collaborative countdown timer.
+- `LiveEvent`: Send one-time, stateless JSON-serializable values to each user in the session.
 
 [Live Share Canvas](/packages/live-share-canvas/README.md) is an optional extension that allows any app to add a collaborative whiteboard as an app overlay. Key classes include:
 
--   `InkingManager`: Utilizes the HTML `<canvas>` element for turn-key pen, highlighter, laser pointer, and eraser tools.
--   `LiveCanvas`: Synchronizes the `InkingManager` strokes and adds remote cursors for users in the session.
+- `InkingManager`: Utilizes the HTML `<canvas>` element for turn-key pen, highlighter, laser pointer, and eraser tools.
+- `LiveCanvas`: Synchronizes the `InkingManager` strokes and adds remote cursors for users in the session.
 
 [Live Share Media](/packages/live-share-media/README.md) is an optional extension that makes it easy to add co-watch support to any video or audio player. Key classes include:
 
--   `LiveMediaSession`: Synchronizes player state for everyone in the session.
--   `MediaPlayerSynchronizer`: Delegate interface used with `LiveMediaSession` to execute playback commands against a media player; matches the HTML5 `IMediaPlayer` interface for `<video>` or `<audio>` elements.
+- `LiveMediaSession`: Synchronizes player state for everyone in the session.
+- `MediaPlayerSynchronizer`: Delegate interface used with `LiveMediaSession` to execute playback commands against a media player; matches the HTML5 `IMediaPlayer` interface for `<video>` or `<audio>` elements.
 
 [Live Share React](/packages/live-share-react/README.md) (beta) is an optional integration for React, providing a `<LiveShareProvider>` context provider component and a series of custom React hooks that correspond with each Live Share and Fluid DDS.
 
 [Fluid Framework](https://fluidframework.com/) also offers some useful collaborative features, each of which is compatible with Live Share, including:
 
--   `SharedTree`: Synchronize any object simply by using objects like you normally would in JS/TS.
--   `SharedMap` (legacy): The DDS equivalent to a JavaScript `Map`, which is useful for synchronizing a collection of objects.
--   `SharedString` (legacy): Synchronize a string text value, useful for building real-time text editors.
+- `SharedTree`: Synchronize any object simply by using objects like you normally would in JS/TS.
+- `SharedMap` (legacy): The DDS equivalent to a JavaScript `Map`, which is useful for synchronizing a collection of objects.
+- `SharedString` (legacy): Synchronize a string text value, useful for building real-time text editors.
 
 ## Package Compatibility
 
@@ -112,11 +112,11 @@ yarn add @microsoft/live-share-react
 
 There are several ways you can [contribute](./CONTRIBUTING.md) to this project:
 
--   [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
-    -   (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
--   Review the source code changes.
--   Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
--   [Contribute bug fixes](./CONTRIBUTING.md).
+- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+    - (Please review [FAQ and Known issues](https://github.com/microsoft/live-share-sdk/issues/8) before filing a new item!)
+- Review the source code changes.
+- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+- [Contribute bug fixes](./CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact opencode@microsoft.com with any additional questions or comments.
 

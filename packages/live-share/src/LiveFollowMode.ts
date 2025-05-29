@@ -3,7 +3,6 @@ import { LiveState } from "./LiveState.js";
 import { ILivePresenceEvents, LivePresence } from "./LivePresence.js";
 import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
-import { assert } from "@fluidframework/core-utils/legacy";
 import {
     LiveDataObjectInitializeState,
     UserMeetingRole,
@@ -347,7 +346,11 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
      * never be undefined after `initializingFirstTime`.
      */
     private get presence() {
-        assert(this._presence !== undefined, "_presence not initialized");
+        UnexpectedError.assert(
+            this._presence !== undefined,
+            "LiveFollowMode:presence",
+            "presence is undefined"
+        );
         return this._presence;
     }
 
@@ -982,6 +985,7 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
      * initialize the state of the DataObject.
      */
     protected async initializingFirstTime() {
+        this.debugInfo = `LiveFollowMode-${this.id}`;
         // We create the live state instance
         const presentingUserIdLiveStatePromise =
             LiveState.factory.createChildInstance(this.context);

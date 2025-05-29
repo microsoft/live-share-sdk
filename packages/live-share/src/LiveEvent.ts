@@ -219,6 +219,14 @@ export class LiveEventClass<TEvent = any> extends LiveDataObject<{
 
         return await this._eventTarget.sendEvent(evt, targetClientId);
     }
+
+    /**
+     * initializingFirstTime is run only once by the first client to create the DataObject. Here we use it to
+     * initialize the state of the DataObject.
+     */
+    protected async initializingFirstTime() {
+        this.debugInfo = `LivePresence-${this.id}`;
+    }
 }
 
 export type LiveEvent<TEvent = any> = LiveEventClass<TEvent>;

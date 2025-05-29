@@ -64,11 +64,13 @@ const createFakeContext = () => {
         id: `user${Math.abs(Math.random() * 999999999)}`,
     };
 
+    const fakeDialogParameters: Record<string, string> = {};
+
     const fakeContext: app.Context = {
         app: fakeAppInfo,
         page: fakePageInfo,
         user: fakeUserInfo,
+        dialogParameters: fakeDialogParameters,
     };
-
     return fakeContext;
 };

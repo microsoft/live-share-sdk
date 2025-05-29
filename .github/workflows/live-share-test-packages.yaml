@@ -38,3 +38,7 @@ jobs:
             - name: "test live-share-media"
               run: npm run test
               working-directory: packages/live-share-media
+
+            - name: "test live-share-turbo"
+              run: npm run test
+              working-directory: packages/live-share-turbo

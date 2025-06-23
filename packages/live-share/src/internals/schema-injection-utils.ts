@@ -1,7 +1,4 @@
-import {
-    DataObjectTypes,
-    IDataObjectProps,
-} from "@fluidframework/aqueduct/legacy";
+import { DataObjectTypes } from "@fluidframework/aqueduct/legacy";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { LiveDataObject } from "./LiveDataObject.js";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";
@@ -11,6 +8,16 @@ import {
     DataObjectClass,
 } from "./fluid-duplicated.js";
 import { ContainerSchema, SharedObjectKind } from "fluid-framework";
+import {
+    IFluidDataStoreChannel,
+    IFluidDataStoreContext,
+} from "@fluidframework/runtime-definitions/legacy";
+// TODO: stabilize these APIs.
+import {
+    DataObjectKind,
+    createDataObjectKind,
+} from "@fluidframework/aqueduct/internal";
+import { UnexpectedError } from "../errors.js";
 
 /**
  * A LiveObjectClass is a class that has a factory that can create a DDS (SharedObject) and a
@@ -93,7 +100,7 @@ export function getLiveDataObjectKind<TClass extends IFluidLoadable>(
             return CheckExisting;
         }
         // Create a new proxy for this type and insert it into proxiedClasses
-        const NewProxy = getLiveDataObjectProxyClassInternal(
+        const NewProxy = getLiveDataObjectKindInternal(
             objectClass,
             liveRuntime
         ) as unknown as SharedObjectKind<TClass>;
@@ -112,53 +119,46 @@ function isLiveDataObject(value: any): value is typeof LiveDataObject {
 
 /**
  * @hidden
- * Create a new class extending LiveDataObject to inject in _liveRuntime
+ * Create a DataObjectKind for a LiveDataObject compatible with LiveShareRuntime.
  */
-function getLiveDataObjectProxyClassInternal<
-    I extends DataObjectTypes = DataObjectTypes,
->(
+function getLiveDataObjectKindInternal<I extends DataObjectTypes>(
     BaseClass: typeof LiveDataObject<I>,
     runtime: LiveShareRuntime
-): LiveObjectClass<any> {
-    class ProxiedBaseClass extends (BaseClass as unknown as new (
-        props: IDataObjectProps<I>
-    ) => LiveDataObject<I>) {
-        constructor(props: IDataObjectProps<I>) {
-            // eslint-disable-next-line constructor-super
-            super(props);
-            this.__dangerouslySetLiveRuntime(runtime);
-            // Pass reference to the container runtime
-            if (!this.context || !this.context.containerRuntime) {
-                throw Error(
-                    "getLiveDataObjectProxyClassInternal: required dependencies unknown"
-                );
-            }
+): DataObjectKind<LiveDataObject<I>> {
+    const base = BaseClass as unknown as DataObjectKind<LiveDataObject<I>>;
 
-            // when interactive is false, that means that this client is from the summarizer or some other system entity.
-            // we only want to set the container runtime for interactive clients, so we return.
-            if (this.context.clientDetails.capabilities.interactive === false) {
-                return;
-            }
-
-            runtime.__dangerouslySetContainerRuntime(
-                this.context.containerRuntime
-            );
-        }
-    }
-
-    const DynamicClass: LiveObjectClass<any> = class extends BaseClass {
-        public static TypeName = (BaseClass as any).TypeName;
-        public static readonly factory = new Proxy((BaseClass as any).factory, {
-            get: function (target, prop, receiver) {
-                if (prop === "createProps") {
-                    return {
-                        ...Reflect.get(target, prop, receiver),
-                        ctor: ProxiedBaseClass,
-                    };
-                }
-                return Reflect.get(target, prop, receiver);
+    return createDataObjectKind({
+        factory: {
+            type: base.factory.type,
+            get IFluidDataStoreFactory() {
+                return this;
             },
-        });
-    };
-    return DynamicClass;
+            async instantiateDataStore(
+                context: IFluidDataStoreContext,
+                existing: boolean
+            ): Promise<IFluidDataStoreChannel> {
+                const created = await base.factory.instantiateDataStore(
+                    context,
+                    existing
+                );
+                UnexpectedError.assert(
+                    created instanceof LiveDataObject,
+                    "getLiveDataObjectKindInternal",
+                    "unexpected channel type"
+                );
+                created.__dangerouslySetLiveRuntime(runtime);
+
+                // Pass reference to the container runtime
+                // When interactive is false, that means that this client is from the summarizer or some other system entity.
+                // We only want to set the container runtime for interactive clients.
+                if (context.clientDetails.capabilities.interactive === true) {
+                    runtime.__dangerouslySetContainerRuntime(
+                        context.containerRuntime
+                    );
+                }
+
+                return created;
+            },
+        },
+    });
 }

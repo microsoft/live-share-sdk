@@ -36,7 +36,7 @@ export abstract class LiveDataObject<
     /**
      * @hidden
      */
-    private _liveRuntime: LiveShareRuntime;
+    private _liveRuntime: LiveShareRuntime | undefined;
 
     /**
      * @hidden
@@ -50,6 +50,11 @@ export abstract class LiveDataObject<
      * You should usually not set this value to a DDS after calling `.initialize()`, but there is nothing preventing it.
      */
     protected get liveRuntime(): LiveShareRuntime {
+        UnexpectedError.assert(
+            this._liveRuntime !== undefined,
+            `LiveDataObject:liveRuntime:${this.debugInfo}`,
+            `LiveShareRuntime not initialized. Ensure your Fluid \`ContainerSchema\` was first wrapped inside of \`getLiveContainerSchema()\` before calling \`client.getContainer()\` / \`client.createContainer()\` from your \`AzureClient\` (or equivalent) instance.\nAlternatively, you can use the \`.join()\` in \`LiveShareClient\`, which does this for you.\nIf you are using \`LiveShareClient\` and are still encountering this issue, please report this issue at ${LiveShareReportIssueLink}.`
+        );
         return this._liveRuntime;
     }
 
@@ -82,15 +87,11 @@ export abstract class LiveDataObject<
         this.runtime.once("dispose", () => {
             this.dispose();
         });
-        const liveRuntime = LiveDataObject.__dangerousLiveRuntime.get(
+
+        // This should be provided unless using createChildInstance which will set it afterward.
+        this._liveRuntime = LiveDataObject.__dangerousLiveRuntime.get(
             this.context
         );
-        UnexpectedError.assert(
-            liveRuntime !== undefined,
-            `LiveDataObject:liveRuntime:${this.debugInfo}`,
-            `LiveShareRuntime not initialized. Ensure your Fluid \`ContainerSchema\` was first wrapped inside of \`getLiveContainerSchema()\` before calling \`client.getContainer()\` / \`client.createContainer()\` from your \`AzureClient\` (or equivalent) instance.\nAlternatively, you can use the \`.join()\` in \`LiveShareClient\`, which does this for you.\nIf you are using \`LiveShareClient\` and are still encountering this issue, please report this issue at ${LiveShareReportIssueLink}.`
-        );
-        this._liveRuntime = liveRuntime;
     }
 
     /**

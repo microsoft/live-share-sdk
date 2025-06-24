@@ -4,8 +4,11 @@
  */
 
 import { ContainerSchema, IFluidContainer } from "fluid-framework";
-import { AzureContainerServices } from "@fluidframework/azure-client/legacy";
-import { AzureClient, AzureClientProps } from "@fluidframework/azure-client";
+import {
+    AzureClient,
+    AzureClientProps,
+    AzureContainerServices,
+} from "@fluidframework/azure-client";
 import { BaseLiveShareClient } from "./internals/BaseLiveShareClient.js";
 import { ILiveShareHost } from "./interfaces.js";
 import { AzureLiveShareHost } from "./AzureLiveShareHost.js";

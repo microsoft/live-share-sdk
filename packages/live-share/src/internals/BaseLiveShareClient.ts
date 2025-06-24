@@ -10,7 +10,7 @@ import {
     SharedObjectKind,
 } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
-import { AzureContainerServices } from "@fluidframework/azure-client/legacy";
+import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry.js";
 import { DynamicObjectManager } from "./DynamicObjectManager.js";

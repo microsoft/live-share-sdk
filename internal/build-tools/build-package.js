@@ -1,6 +1,6 @@
 /**
  * Tool used to consolidate building package with different outputs of esm, cjs, or cjs with tests included.
- * Invokation with all arguments looks like `node <path>/build-package.js --cjs --esm --test`
+ * Invocation with all arguments looks like `node <path>/build-package.js --cjs --esm --test`
  */
 
 const childProcess = require("child_process");
@@ -8,11 +8,8 @@ const fs = require("fs");
 const { argv } = require("process");
 
 async function build(tsConfig) {
-    console.log(
-        "building",
-        process.env.PWD.substring(process.env.PWD.indexOf("packages")),
-        tsConfig
-    );
+    const cwd = process.cwd();
+    console.log("building", cwd.substring(cwd.indexOf("packages")), tsConfig);
     return new Promise((resolve, reject) => {
         const buildProcess = childProcess.spawn(
             "npx",

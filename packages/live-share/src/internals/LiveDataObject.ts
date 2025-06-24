@@ -4,7 +4,6 @@ import {
     IDataObjectProps,
 } from "@fluidframework/aqueduct/legacy";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";
-import { assert } from "@fluidframework/core-utils/legacy";
 import {
     IClientInfo,
     LiveDataObjectInitializeState,
@@ -12,6 +11,7 @@ import {
 } from "../interfaces.js";
 import { LiveShareReportIssueLink } from "./consts.js";
 import { waitUntilConnected } from "./utils.js";
+import { UnexpectedError } from "../errors.js";
 
 /**
  * Extends Fluid's DataObject class. Intended for use with Live Share custom DDS's that rely on a `ILiveShareHost`.
@@ -38,14 +38,20 @@ export abstract class LiveDataObject<
     private _liveRuntime: LiveShareRuntime | null = null;
 
     /**
+     * @hidden
+     */
+    protected debugInfo = "";
+
+    /**
      * @internal
      * `LiveShareRuntime` instance
      * @remarks
      * You should usually not set this value to a DDS after calling `.initialize()`, but there is nothing preventing it.
      */
     protected get liveRuntime(): LiveShareRuntime {
-        assert(
+        UnexpectedError.assert(
             this._liveRuntime !== null,
+            `LiveDataObject:liveRuntime:${this.debugInfo}`,
             `LiveShareRuntime not initialized. Ensure your Fluid \`ContainerSchema\` was first wrapped inside of \`getLiveContainerSchema()\` before calling \`client.getContainer()\` / \`client.createContainer()\` from your \`AzureClient\` (or equivalent) instance.\nAlternatively, you can use the \`.join()\` in \`LiveShareClient\`, which does this for you.\nIf you are using \`LiveShareClient\` and are still encountering this issue, please report this issue at ${LiveShareReportIssueLink}.`
         );
         return this._liveRuntime;

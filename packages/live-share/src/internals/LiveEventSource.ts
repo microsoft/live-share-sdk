@@ -15,7 +15,7 @@ import { LiveEventScope } from "./LiveEventScope.js";
  * @template TEvent Type of event to broadcast.
  */
 export class LiveEventSource<TEvent> {
-    private _scope: LiveEventScope;
+    protected _scope: LiveEventScope;
     private _eventName: string;
 
     /**

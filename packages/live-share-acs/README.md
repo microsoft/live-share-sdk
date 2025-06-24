@@ -246,10 +246,10 @@ const longJoinUrl = `https://teams.microsoft.com/l/meetup-join/${threadId}/0?con
 
 Integrating Live Share into your app can enhance collaboration between your agents and customers, particularly if your business provides customer services. Here are a few examples of how `ACSTeamsLiveShareHost` can be implemented in your application:
 
--   Facilitate co-browsing of your website between your support agents and customers.
--   Enable your retail agents and digital shoppers to co-shop on your e-commerce website.
--   Provide onboarding assistance through your sales representatives for new customers.
--   Allow co-watching of high-quality promotional videos during sales calls.
+- Facilitate co-browsing of your website between your support agents and customers.
+- Enable your retail agents and digital shoppers to co-shop on your e-commerce website.
+- Provide onboarding assistance through your sales representatives for new customers.
+- Allow co-watching of high-quality promotional videos during sales calls.
 
 ## Code samples
 
@@ -274,10 +274,10 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 There are several ways you can [contribute](../../CONTRIBUTING.md) to this project:
 
--   [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
--   Review the source code changes.
--   Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
--   [Contribute bug fixes](../../CONTRIBUTING.md).
+- [Submit bugs](https://github.com/microsoft/live-share-sdk/issues) and help us verify fixes as they are checked in.
+- Review the source code changes.
+- Engage with other Live Share developers on [StackOverflow](https://stackoverflow.com/questions/tagged/live-share).
+- [Contribute bug fixes](../../CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
 

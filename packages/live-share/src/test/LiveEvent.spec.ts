@@ -22,7 +22,7 @@ import {
     ITestObjectProviderOptions,
 } from "@live-share-private/test-utils";
 import { Deferred } from "../internals/Deferred.js";
-import { isNewerEvent } from "../internals/utils.js";
+import { isNewerEvent, waitForDelay } from "../internals/utils.js";
 import { MockTokenProvider } from "../internals/mock/MockLiveShareRuntime.js";
 
 describeCompat(

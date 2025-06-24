@@ -72,8 +72,11 @@ interface LiveObjectSynchronizerStartParams<TState> {
  */
 export class LiveObjectSynchronizer<TState> {
     private _isDisposed = false;
-    private _joinedListener: (clientId: string, timestamp: number) => void =
-        () => {};
+    private _joinedListener: (params: {
+        objectId: string;
+        clientId: string;
+        timestamp: number;
+    }) => void = () => {};
 
     /**
      * Creates a new `LiveObjectSynchronizer` instance.
@@ -222,15 +225,12 @@ export class LiveObjectSynchronizer<TState> {
         callback: (clientId: string, timestamp: number) => void
     ) {
         this.liveRuntime.objectManager.off("joined", this._joinedListener);
-        this._joinedListener = callback;
-
-        this.liveRuntime.objectManager.on(
-            "joined",
-            ({ objectId, clientId, timestamp }) => {
-                if (objectId === this.id) {
-                    this._joinedListener(clientId, timestamp);
-                }
+        this._joinedListener = ({ objectId, clientId, timestamp }) => {
+            if (objectId === this.id) {
+                callback(clientId, timestamp);
             }
-        );
+        };
+
+        this.liveRuntime.objectManager.on("joined", this._joinedListener);
     }
 }

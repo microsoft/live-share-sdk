@@ -10,10 +10,10 @@ import {
     SharedObjectKind,
 } from "fluid-framework";
 import { IFluidHandle, IFluidLoadable } from "@fluidframework/core-interfaces";
-import { assert } from "@fluidframework/core-utils/legacy";
 import { ConsensusRegisterCollection } from "@fluidframework/register-collection/legacy";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry.js";
 import { LiveDataObject } from "./LiveDataObject.js";
+import { UnexpectedError } from "../errors.js";
 
 // Register ConsensusRegisterCollection
 DynamicObjectRegistry.registerObjectClass(
@@ -90,8 +90,9 @@ export class DynamicObjectManagerClass extends LiveDataObject {
      * never be undefined after `initializingFirstTime`.
      */
     private get dynamicObjectsCollection() {
-        assert(
+        UnexpectedError.assert(
             this._dynamicObjectsCollection !== undefined,
+            "DynamicObjectManager:dynamicObjectsCollection",
             "_dynamicObjectsCollection not initialized"
         );
         return this._dynamicObjectsCollection;

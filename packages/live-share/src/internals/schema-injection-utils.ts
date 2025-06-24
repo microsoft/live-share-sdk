@@ -137,16 +137,17 @@ function getLiveDataObjectKindInternal<I extends DataObjectTypes>(
                 context: IFluidDataStoreContext,
                 existing: boolean
             ): Promise<IFluidDataStoreChannel> {
-                const created = await base.factory.instantiateDataStore(
+                const createdChannel = await base.factory.instantiateDataStore(
                     context,
                     existing
                 );
+                const createdObject = await createdChannel.entryPoint.get();
                 UnexpectedError.assert(
-                    created instanceof LiveDataObject,
+                    createdObject instanceof LiveDataObject,
                     "getLiveDataObjectKindInternal",
                     "unexpected channel type"
                 );
-                created.__dangerouslySetLiveRuntime(runtime);
+                createdObject.__dangerouslySetLiveRuntime(runtime);
 
                 // Pass reference to the container runtime
                 // When interactive is false, that means that this client is from the summarizer or some other system entity.
@@ -157,7 +158,7 @@ function getLiveDataObjectKindInternal<I extends DataObjectTypes>(
                     );
                 }
 
-                return created;
+                return createdChannel;
             },
         },
     });

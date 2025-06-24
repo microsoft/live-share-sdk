@@ -3,6 +3,7 @@ import {
     DataObjectTypes,
     IDataObjectProps,
 } from "@fluidframework/aqueduct/legacy";
+import { IFluidDataStoreContext } from "@fluidframework/runtime-definitions/legacy";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import {
     IClientInfo,
@@ -35,7 +36,7 @@ export abstract class LiveDataObject<
     /**
      * @hidden
      */
-    private _liveRuntime: LiveShareRuntime | null = null;
+    private _liveRuntime: LiveShareRuntime;
 
     /**
      * @hidden
@@ -49,11 +50,6 @@ export abstract class LiveDataObject<
      * You should usually not set this value to a DDS after calling `.initialize()`, but there is nothing preventing it.
      */
     protected get liveRuntime(): LiveShareRuntime {
-        UnexpectedError.assert(
-            this._liveRuntime !== null,
-            `LiveDataObject:liveRuntime:${this.debugInfo}`,
-            `LiveShareRuntime not initialized. Ensure your Fluid \`ContainerSchema\` was first wrapped inside of \`getLiveContainerSchema()\` before calling \`client.getContainer()\` / \`client.createContainer()\` from your \`AzureClient\` (or equivalent) instance.\nAlternatively, you can use the \`.join()\` in \`LiveShareClient\`, which does this for you.\nIf you are using \`LiveShareClient\` and are still encountering this issue, please report this issue at ${LiveShareReportIssueLink}.`
-        );
         return this._liveRuntime;
     }
 
@@ -86,6 +82,15 @@ export abstract class LiveDataObject<
         this.runtime.once("dispose", () => {
             this.dispose();
         });
+        const liveRuntime = LiveDataObject.__dangerousLiveRuntime.get(
+            this.context
+        );
+        UnexpectedError.assert(
+            liveRuntime !== undefined,
+            `LiveDataObject:liveRuntime:${this.debugInfo}`,
+            `LiveShareRuntime not initialized. Ensure your Fluid \`ContainerSchema\` was first wrapped inside of \`getLiveContainerSchema()\` before calling \`client.getContainer()\` / \`client.createContainer()\` from your \`AzureClient\` (or equivalent) instance.\nAlternatively, you can use the \`.join()\` in \`LiveShareClient\`, which does this for you.\nIf you are using \`LiveShareClient\` and are still encountering this issue, please report this issue at ${LiveShareReportIssueLink}.`
+        );
+        this._liveRuntime = liveRuntime;
     }
 
     /**
@@ -121,6 +126,15 @@ export abstract class LiveDataObject<
             this._allowedRoles ?? []
         );
     }
+
+    /**
+     * @hidden
+     * Dependency injection setter for `LiveShareRuntime`.
+     */
+    public static __dangerousLiveRuntime: WeakMap<
+        IFluidDataStoreContext,
+        LiveShareRuntime
+    > = new WeakMap();
 
     /**
      * @hidden

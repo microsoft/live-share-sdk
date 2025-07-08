@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-canvas",
-    "version": "2.0.0-internal.10",
+    "version": "2.0.0-internal.11",
     "description": "Live Share extension library for collaborative inking.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -30,19 +30,19 @@
         }
     },
     "devDependencies": {
-        "@microsoft/live-share": "2.0.0-internal.10",
+        "@microsoft/live-share": "2.0.0-internal.11",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
-        "fluid-framework": ">=2.40 <2.50",
+        "fluid-framework": ">=2.50 <2.60",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
         "ts-mocha": "^10.0.0",
         "typescript": "~5.5.3"
     },
     "peerDependencies": {
-        "@microsoft/live-share": "2.0.0-internal.10",
-        "fluid-framework": ">=2.40 <2.50"
+        "@microsoft/live-share": "2.0.0-internal.11",
+        "fluid-framework": ">=2.50 <2.60"
     },
     "repository": {
         "directory": "packages/live-share-canvas",

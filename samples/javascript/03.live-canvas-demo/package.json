@@ -16,14 +16,14 @@
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
-        "@fluidframework/azure-client": ">=2.40 <2.50",
-        "@microsoft/live-share": "2.0.0-internal.10",
-        "@microsoft/live-share-canvas": "2.0.0-internal.10",
+        "@fluidframework/azure-client": ">=2.50 <2.60",
+        "@microsoft/live-share": "2.0.0-internal.11",
+        "@microsoft/live-share-canvas": "2.0.0-internal.11",
         "@microsoft/teams-js": "^2.16.0",
-        "fluid-framework": ">=2.40 <2.50"
+        "fluid-framework": ">=2.50 <2.60"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": ">=2.40 <2.50",
+        "@fluidframework/test-runtime-utils": ">=2.50 <2.60",
         "@typescript-eslint/eslint-plugin": "^7.16.0",
         "@typescript-eslint/parser": "^7.16.0",
         "buffer": "^6.0.3",

@@ -82,17 +82,17 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
      * @param initialObjects Optional. Fluid ContainerSchema initialObjects.
      * @returns New detached container instance along with associated services.
      */
-    public async createContainer(
-        fluidContainerSchema?: ContainerSchema
+    public async createContainer<T extends ContainerSchema>(
+        fluidContainerSchema?: T
     ): Promise<{
-        container: IFluidContainer;
+        container: IFluidContainer<T>;
         services: AzureContainerServices;
     }> {
         const schema = this.getInjectedContainerSchema(fluidContainerSchema);
-        this._results = await this._client.createContainer(
+        const results = (this._results = await this._client.createContainer(
             schema,
             FluidCompatibilityMode
-        );
+        ));
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }
@@ -100,7 +100,7 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
         await this.addTurboFolder(this._results.container);
 
         await this._runtime.start();
-        return this._results;
+        return results;
     }
 
     /**
@@ -116,29 +116,31 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
      * @param host Optional. ILiveShareHost implementation to use when using Live Share DDS's.
      * @returns Existing container instance along with associated services.
      */
-    public async getContainer(
+    public async getContainer<
+        TContainerSchema extends ContainerSchema = ContainerSchema,
+    >(
         id: string,
-        fluidContainerSchema?: ContainerSchema
+        fluidContainerSchema?: TContainerSchema
     ): Promise<{
-        container: IFluidContainer;
+        container: IFluidContainer<TContainerSchema>;
         services: AzureContainerServices;
     }> {
         const schema = this.getInjectedContainerSchema(fluidContainerSchema);
-        this._results = await this._client.getContainer(
+        const results = (this._results = await this._client.getContainer(
             id,
             schema,
             FluidCompatibilityMode
-        );
+        ));
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
         }
         await this._runtime.start();
-        return this._results;
+        return results;
     }
 
-    private getInjectedContainerSchema(
-        fluidContainerSchema?: ContainerSchema
-    ): ContainerSchema {
+    private getInjectedContainerSchema<
+        TContainerSchema extends ContainerSchema,
+    >(fluidContainerSchema?: TContainerSchema): TContainerSchema {
         return getLiveContainerSchema(
             this.getContainerSchema(fluidContainerSchema),
             this._runtime

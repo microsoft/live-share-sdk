@@ -40,12 +40,17 @@ describe("AzureTurboClient", () => {
 
     const testMapKey = "TEST-MAP-KEY";
     const testLiveEventKey = "TEST-LIVE-EVENT-KEY";
+    const schema = {
+        initialObjects: {
+            [testLiveEventKey]: LiveEvent,
+        },
+    } as const satisfies ContainerSchema;
     let results1: {
-        container: IFluidContainer;
+        container: IFluidContainer<typeof schema>;
         services: AzureContainerServices;
     };
     let results2: {
-        container: IFluidContainer;
+        container: IFluidContainer<typeof schema>;
         services: AzureContainerServices;
     };
 
@@ -56,11 +61,6 @@ describe("AzureTurboClient", () => {
         client2 = new AzureLiveShareClient({
             connection: connectionProps,
         });
-        const schema: ContainerSchema = {
-            initialObjects: {
-                [testLiveEventKey]: LiveEvent,
-            },
-        };
         results1 = await client1.createContainer(schema);
         const containerId = await results1.container.attach();
         results2 = await client2.getContainer(containerId, schema);

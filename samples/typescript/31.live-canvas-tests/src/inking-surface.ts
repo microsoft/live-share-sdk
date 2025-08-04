@@ -20,7 +20,7 @@ const containerSchema = {
 export class InkingSurface {
     private _hostElement: HTMLElement;
     private _inkingManager!: InkingManager;
-    private _container!: IFluidContainer;
+    private _container!: IFluidContainer<typeof containerSchema>;
 
     private async internalStart() {
         const client = new LiveShareClient(TestLiveShareHost.create());
@@ -45,7 +45,7 @@ export class InkingSurface {
     }
 
     getLiveCanvas(): LiveCanvas {
-        return this._container.initialObjects.liveCanvas as LiveCanvas;
+        return this._container.initialObjects.liveCanvas;
     }
 
     async start() {

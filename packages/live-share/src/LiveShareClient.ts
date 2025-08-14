@@ -211,6 +211,7 @@ export class LiveShareClient extends BaseLiveShareClient {
      ```ts
         import { LiveShareClient, LivePresence, LiveState } from "@microsoft/live-share";
         import { LiveShareHost } from "@microsoft/teams-js";
+        import { ContainerSchema } from "fluid-framework";
 
         // Join the Fluid container
         const host = LiveShareHost.create();
@@ -219,20 +220,22 @@ export class LiveShareClient extends BaseLiveShareClient {
             initialObjects: {
                 presence: LivePresence
             }
-        };
+        } as const satisfies ContainerSchema;
         const { container } = await client.join(schema, (container) => {
             console.log("First created container", container);
         });
-        const presence = container.initialObjects.presence as unknown as LivePresence;
+        const presence = container.initialObjects.presence;
 
         // Can still dynamically get DDS's that were not in schema
         const counter = await client.getDDS("unique-id", LiveState<number>);
      ```
      */
-    public async join(
-        fluidContainerSchema?: ContainerSchema,
-        onContainerFirstCreated?: (container: IFluidContainer) => void
-    ): Promise<ILiveShareJoinResults> {
+    public async join<const TContainerSchema extends ContainerSchema>(
+        fluidContainerSchema?: TContainerSchema,
+        onContainerFirstCreated?: (
+            container: IFluidContainer<TContainerSchema>
+        ) => void
+    ): Promise<ILiveShareJoinResults<TContainerSchema>> {
         performance.mark(`TeamsSync: join container`);
         try {
             // Start runtime if needed
@@ -309,11 +312,12 @@ export class LiveShareClient extends BaseLiveShareClient {
 
             performance.mark(`TeamsSync: container connecting`);
 
-            this._results = {
+            const results = {
                 ...result[0],
                 timestampProvider: this._runtime.timestampProvider,
             };
-            return this._results;
+            this._results = results;
+            return results;
         } finally {
             performance.measure(
                 `TeamsSync: container joined`,
@@ -322,13 +326,17 @@ export class LiveShareClient extends BaseLiveShareClient {
         }
     }
 
-    private async getOrCreateContainer(
+    private async getOrCreateContainer<
+        const TContainerSchema extends ContainerSchema,
+    >(
         client: AzureClient,
-        fluidContainerSchema: ContainerSchema,
+        fluidContainerSchema: TContainerSchema,
         tries: number,
-        onInitializeContainer?: (container: IFluidContainer) => void
+        onInitializeContainer?: (
+            container: IFluidContainer<TContainerSchema>
+        ) => void
     ): Promise<{
-        container: IFluidContainer;
+        container: IFluidContainer<TContainerSchema>;
         services: AzureContainerServices;
         created: boolean;
     }> {
@@ -370,13 +378,17 @@ export class LiveShareClient extends BaseLiveShareClient {
         }
     }
 
-    private async createNewContainer(
+    private async createNewContainer<
+        const TContainerSchema extends ContainerSchema,
+    >(
         client: AzureClient,
-        fluidContainerSchema: ContainerSchema,
+        fluidContainerSchema: TContainerSchema,
         tries: number,
-        onInitializeContainer?: (container: IFluidContainer) => void
+        onInitializeContainer?: (
+            container: IFluidContainer<TContainerSchema>
+        ) => void
     ): Promise<{
-        container: IFluidContainer;
+        container: IFluidContainer<TContainerSchema>;
         services: AzureContainerServices;
         created: boolean;
     }> {

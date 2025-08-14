@@ -34,10 +34,9 @@ type LiveObjectClass<T extends IFluidLoadable> = {
  * @param liveRuntime LiveShareRuntime instance
  * @returns ContainerSchema with injected dependencies
  */
-export function getLiveContainerSchema(
-    schema: ContainerSchema,
-    liveRuntime: LiveShareRuntime
-): ContainerSchema {
+export function getLiveContainerSchema<
+    const TContainerSchema extends ContainerSchema,
+>(schema: TContainerSchema, liveRuntime: LiveShareRuntime): TContainerSchema {
     // Each container must proxy LiveDataObject classes separately.
     // This map is used to de-duplicate proxies for each class.
     const injectedClasses = new Map<string, SharedObjectKind<any>>();
@@ -62,7 +61,7 @@ export function getLiveContainerSchema(
         dynamicObjectTypes: schema.dynamicObjectTypes?.map((objectClass) =>
             getLiveDataObjectKind(objectClass, liveRuntime, injectedClasses)
         ),
-    };
+    } as TContainerSchema;
 }
 
 /**

@@ -3,9 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import EventEmitter from "events";
-import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions";
-import { IGroupStateEvent } from "./interfaces";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
+import { ExtendedMediaSessionActionSource } from "../MediaSessionExtensions.js";
+import { IGroupStateEvent, IGenericTypedEvents } from "./interfaces.js";
 
 /**
  * @hidden
@@ -33,7 +33,7 @@ export interface IPlaybackRateChangeEvent extends IGroupStateEvent {
 /**
  * @hidden
  */
-export class GroupPlaybackRate extends EventEmitter {
+export class GroupPlaybackRate extends TypedEventEmitter<IGenericTypedEvents> {
     private _current: IPlaybackRate;
 
     constructor() {

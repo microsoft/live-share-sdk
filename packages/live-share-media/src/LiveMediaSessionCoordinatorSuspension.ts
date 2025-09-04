@@ -6,7 +6,7 @@
 import {
     MediaSessionCoordinatorSuspension,
     CoordinationWaitPoint,
-} from "./MediaSessionExtensions";
+} from "./MediaSessionExtensions.js";
 
 export class LiveMediaSessionCoordinatorSuspension
     implements MediaSessionCoordinatorSuspension

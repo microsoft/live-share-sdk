@@ -1,6 +1,6 @@
 .App {
-  height: 100vh;
-  color: white;
-  display: flex;
-  flex-direction: column;
+    height: 100vh;
+    color: white;
+    display: flex;
+    flex-direction: column;
 }

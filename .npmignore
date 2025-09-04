@@ -3,3 +3,8 @@ node_modules
 package-lock.json
 tinylicious.log
 src/test/
+bin/test/
+nyc/
+.mocharc.cjs
+.nycrc.json
+tsconfig.test.json

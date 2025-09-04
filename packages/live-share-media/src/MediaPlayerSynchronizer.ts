@@ -2,12 +2,11 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the Microsoft Live Share SDK License.
  */
+import { LiveTelemetryLogger, ILiveEvent } from "@microsoft/live-share";
 import {
-    LiveTelemetryLogger,
-    ILiveEvent,
     IRuntimeSignaler,
-} from "@microsoft/live-share";
-import EventEmitter from "events";
+    waitUntilConnected,
+} from "@microsoft/live-share/internal";
 import {
     ExtendedMediaSessionAction,
     ExtendedMediaSessionPlaybackState,
@@ -16,12 +15,14 @@ import {
     ExtendedMediaSessionActionDetails,
     MediaSessionCoordinatorEvents,
     MediaSessionCoordinatorSuspension,
-} from "./MediaSessionExtensions";
-import { VolumeManager } from "./VolumeManager";
-import { LiveMediaSession } from "./LiveMediaSession";
-import { IMediaPlayer } from "./IMediaPlayer";
-import { ITriggerActionEvent, TelemetryEvents } from "./internals";
-import { waitUntilConnected } from "@microsoft/live-share/bin/internals";
+} from "./MediaSessionExtensions.js";
+import { VolumeManager } from "./VolumeManager.js";
+import { LiveMediaSession } from "./LiveMediaSession.js";
+import { IMediaPlayer } from "./IMediaPlayer.js";
+import { TelemetryEvents } from "./internals/consts.js";
+import { ITriggerActionEvent } from "./internals/GroupCoordinatorState.js";
+import { TypedEventEmitter } from "@fluid-internal/client-utils";
+import { IEvent } from "@fluidframework/core-interfaces";
 
 /**
  * Event data returned by `MediaPlayerSynchronizer` object.
@@ -50,6 +51,20 @@ export enum MediaPlayerSynchronizerEvents {
 }
 
 /**
+ * @hidden
+ * Emitted events from the `MediaPlayerSynchronizer` class.
+ */
+export interface IMediaPlayerSynchronizerEvents extends IEvent {
+    /**
+     * Event listener for events emitted
+     * @param event update
+     * @param listener listener function
+     * @param listener.event the event instance
+     */
+    (event: string, listener: (event: any) => void): void;
+}
+
+/**
  * Synchronizes a local HTML Media Element with a group of remote HTML Media Elements.
  *
  * @remarks
@@ -58,7 +73,7 @@ export enum MediaPlayerSynchronizerEvents {
  * to the local player. When the group session is joined the commands will be broadcast to the
  * group in addition to being applied to the local player.
  */
-export class MediaPlayerSynchronizer extends EventEmitter {
+export class MediaPlayerSynchronizer extends TypedEventEmitter<IMediaPlayerSynchronizerEvents> {
     private static SESSION_ACTIONS: ExtendedMediaSessionAction[] = [
         "play",
         "pause",

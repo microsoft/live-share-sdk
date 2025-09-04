@@ -3,21 +3,19 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IFluidContainer, LoadableObjectClassRecord } from "fluid-framework";
+import { ContainerSchema, IFluidContainer } from "fluid-framework";
 import React from "react";
 import {
     AzureClientProps,
     AzureContainerServices,
 } from "@fluidframework/azure-client";
-import { IAzureContainerResults } from "../types";
+import { IAzureContainerResults } from "../types/index.js";
 import {
     ISharedStateRegistryResponse,
     useSharedStateRegistry,
-} from "../shared-hooks";
-import {
-    AzureTurboClient,
-    IFluidTurboClient,
-} from "@microsoft/live-share-turbo";
+} from "../shared-hooks/index.js";
+import { AzureLiveShareClient } from "@microsoft/live-share";
+import { BaseLiveShareClient } from "@microsoft/live-share/internal";
 
 /**
  * React Context provider values for `<AzureProvider>` and `<LiveShareProvider>`.
@@ -29,7 +27,7 @@ export interface IFluidContext extends ISharedStateRegistryResponse {
     /**
      * The Fluid Turbo client used for connecting to the Fluid container.
      */
-    clientRef: React.MutableRefObject<IFluidTurboClient>;
+    clientRef: React.MutableRefObject<BaseLiveShareClient>;
     /**
      * Stateful Fluid container.
      */
@@ -54,7 +52,7 @@ export interface IFluidContext extends ISharedStateRegistryResponse {
      */
     getContainer: (
         containerId: string,
-        initialObjects?: LoadableObjectClassRecord
+        fluidContainerSchema?: ContainerSchema
     ) => Promise<IAzureContainerResults>;
     /**
      * React callback function to create and connect to a new Fluid container.
@@ -67,7 +65,7 @@ export interface IFluidContext extends ISharedStateRegistryResponse {
      * @returns promise that returns a results object once complete (e.g., container, services, etc.)
      */
     createContainer: (
-        initialObjects?: LoadableObjectClassRecord,
+        fluidContainerSchema?: ContainerSchema,
         onInitializeContainer?: (container: IFluidContainer) => void
     ) => Promise<IAzureContainerResults>;
 }
@@ -125,9 +123,9 @@ export interface IAzureProviderProps {
      */
     createOnLoad?: boolean;
     /**
-     * The initial object schema to use when {@link joinOnLoad} or {@link createOnLoad} is true.
+     * The initial schema to use when {@link joinOnLoad} or {@link createOnLoad} is true.
      */
-    initialObjects?: LoadableObjectClassRecord;
+    fluidContainerSchema?: ContainerSchema;
     /**
      * Flag to control whether or not to connect to an existing container on first mount.
      *
@@ -142,8 +140,8 @@ export interface IAzureProviderProps {
  */
 export const AzureProvider: React.FC<IAzureProviderProps> = (props) => {
     const startedRef = React.useRef<boolean>(false);
-    const clientRef = React.useRef<AzureTurboClient>(
-        new AzureTurboClient(props.clientOptions)
+    const clientRef = React.useRef<AzureLiveShareClient>(
+        new AzureLiveShareClient(props.clientOptions)
     );
     const [results, setResults] = React.useState<
         IAzureContainerResults | undefined
@@ -158,14 +156,14 @@ export const AzureProvider: React.FC<IAzureProviderProps> = (props) => {
     const getContainer = React.useCallback(
         async (
             containerId: string,
-            initialObjects?: LoadableObjectClassRecord
+            fluidContainerSchema?: ContainerSchema
         ): Promise<IAzureContainerResults> => {
             return new Promise(async (resolve, reject) => {
                 try {
                     const results: IAzureContainerResults =
                         await clientRef.current.getContainer(
                             containerId,
-                            initialObjects
+                            fluidContainerSchema
                         );
                     setResults(results);
                     resolve(results);
@@ -185,13 +183,15 @@ export const AzureProvider: React.FC<IAzureProviderProps> = (props) => {
      */
     const createContainer = React.useCallback(
         async (
-            initialObjects?: LoadableObjectClassRecord,
+            fluidContainerSchema?: ContainerSchema,
             onInitializeContainer?: (container: IFluidContainer) => void
         ): Promise<IAzureContainerResults> => {
             return new Promise(async (resolve, reject) => {
                 try {
                     const results: IAzureContainerResults =
-                        await clientRef.current.createContainer(initialObjects);
+                        await clientRef.current.createContainer(
+                            fluidContainerSchema
+                        );
                     if (onInitializeContainer) {
                         onInitializeContainer(results.container);
                     }
@@ -225,16 +225,16 @@ export const AzureProvider: React.FC<IAzureProviderProps> = (props) => {
             return;
         startedRef.current = true;
         if (props.containerId && props.joinOnLoad) {
-            getContainer(props.containerId, props.initialObjects);
+            getContainer(props.containerId, props.fluidContainerSchema);
         } else if (!props.containerId && props.createOnLoad) {
-            createContainer(props.initialObjects);
+            createContainer(props.fluidContainerSchema);
         }
     }, [
         results?.container?.connectionState,
         props.containerId,
         props.createOnLoad,
         props.joinOnLoad,
-        props.initialObjects,
+        props.fluidContainerSchema,
         getContainer,
         createContainer,
     ]);

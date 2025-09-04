@@ -21,7 +21,7 @@ export function millisecondsToTime(ms: number): [number, number, number] {
 export function timeToMilliseconds([hours, minutes, seconds]: [
     number,
     number,
-    number
+    number,
 ]): number {
     return (hours * 3600 + minutes * 60 + seconds) * 1000;
 }

@@ -2,9 +2,13 @@ const timeout = 4 * 60 * 1000; // adjust this time out as per number of windows 
 const chalk = require("chalk");
 
 // functions to test for a particular player event
-const isPlay = (log) => log && log.indexOf("MediaPlayerSynchronizer:SeekingPlayerToStartPosition") != -1;
-const isPause = (log) => log && log.indexOf("MediaPlayerSynchronizer:PauseAction") != -1;
-const isSeek = (log) => log && log.indexOf("MediaPlayerSynchronizer:SeekToAction") != -1;
+const isPlay = (log) =>
+    log &&
+    log.indexOf("MediaPlayerSynchronizer:SeekingPlayerToStartPosition") != -1;
+const isPause = (log) =>
+    log && log.indexOf("MediaPlayerSynchronizer:PauseAction") != -1;
+const isSeek = (log) =>
+    log && log.indexOf("MediaPlayerSynchronizer:SeekToAction") != -1;
 const isSeekTo = (log, position) => {
     const positionStr = `"position":${position}`;
 
@@ -245,7 +249,8 @@ const installMouseHelper = async (page) => {
                     true
                 );
                 function updateButtons(buttons) {
-                    for (let i = 0; i < 5; i++) box.classList.toggle("button-" + i, buttons & (1 << i));
+                    for (let i = 0; i < 5; i++)
+                        box.classList.toggle("button-" + i, buttons & (1 << i));
                 }
             },
             false

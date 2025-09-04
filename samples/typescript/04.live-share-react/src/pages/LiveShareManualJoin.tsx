@@ -5,23 +5,17 @@ import {
 } from "@microsoft/live-share-react";
 import { LiveShareHost } from "@microsoft/teams-js";
 import { FC, useState } from "react";
-import {
-    ExampleLiveCanvas,
-    ExampleLiveEvent,
-    ExampleLivePresence,
-    ExampleLiveState,
-    ExampleLiveTimer,
-    ExampleMediaSynchronizer,
-    ExampleSharedMap,
-    ExampleSharedState,
-} from "../components";
+import { ExampleLiveState } from "../components";
 import { inTeams } from "../utils/inTeams";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 const IN_TEAMS = inTeams();
 
 export const LiveShareManualJoin: FC = () => {
     const [host] = useState(
-        IN_TEAMS ? LiveShareHost.create() : TestLiveShareHost.create()
+        IN_TEAMS
+            ? LiveShareHost.create()
+            : TestLiveShareHost.create(getInsecureTokenProvider())
     );
     return (
         <LiveShareProvider host={host}>
@@ -68,25 +62,7 @@ const RequireJoinWrapper: FC = () => {
                     <h1>{joinState}</h1>
                 </div>
             )}
-            {joinState === JOIN_STATE_OPTIONS.done && (
-                <ExampleLiveState
-                    waitingContent={
-                        <>
-                            <ExampleMediaSynchronizer />
-                            <ExampleLiveEvent />
-                            <ExampleLiveCanvas />
-                        </>
-                    }
-                    startContent={
-                        <>
-                            <ExampleLiveTimer />
-                            <ExampleSharedState />
-                            <ExampleLivePresence />
-                            <ExampleSharedMap />
-                        </>
-                    }
-                />
-            )}
+            {joinState === JOIN_STATE_OPTIONS.done && <ExampleLiveState />}
             {joinState === JOIN_STATE_OPTIONS.error && (
                 <div>
                     <h1 style={{ color: "red" }}>{joinState}</h1>

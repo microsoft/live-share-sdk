@@ -6,7 +6,7 @@
 import {
     ExtendedMediaSessionActionDetails,
     ExtendedMediaSessionActionHandler,
-} from "./MediaSessionExtensions";
+} from "./MediaSessionExtensions.js";
 
 /**
  * Base class for action throttlers.

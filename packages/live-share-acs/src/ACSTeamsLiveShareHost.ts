@@ -26,7 +26,7 @@ import {
     isINtpTimeInfo,
     isIGetClientInfoResponse,
     isUserMeetingRoleResponse,
-} from "./internals";
+} from "./internals/index.js";
 
 const LiveShareRoutePrefix = "livesync/v1/acs";
 const LiveShareBaseUrl = "https://teams.microsoft.com/api/platform";

@@ -5,6 +5,7 @@
 import { v4 as uuid } from "uuid";
 import {
     BrushTipShape,
+    ClearEvent,
     IColor,
     IPoint,
     IPointerPoint,
@@ -12,7 +13,7 @@ import {
     ISegment,
     getPressureAdjustedSize,
     toCssRgbaColor,
-} from "..";
+} from "../index.js";
 
 /**
  * Pre-calculated Pi x 2.
@@ -295,7 +296,9 @@ export function renderFilledSVGCircle(
     color: IColor
 ): string {
     // eslint-disable-next-line prettier/prettier
-    return `<circle cx="${toFixed(center.x)}" cy="${toFixed(center.y)}" r="${toFixed(radius)}" fill="${toCssRgbaColor(color)}"/>`;
+    return `<circle cx="${toFixed(center.x)}" cy="${toFixed(
+        center.y
+    )}" r="${toFixed(radius)}" fill="${toCssRgbaColor(color)}"/>`;
 }
 
 /**
@@ -651,4 +654,16 @@ export function computeEndArrow(
             y: to.y - arrowSize * (unitDy - unitDx),
         },
     ];
+}
+
+/**
+ * Type guard that checks if a Fluid op is of type {@link ClearEvent}
+ */
+export function isClearEvent(value: any): boolean {
+    return (
+        typeof value === "object" &&
+        typeof value.type === "string" &&
+        // Fluid v2 emits "clear" instead of "Clear" on SharedMap.clear(), so we equalize it
+        value.type.toLowerCase() === ClearEvent.toLowerCase()
+    );
 }

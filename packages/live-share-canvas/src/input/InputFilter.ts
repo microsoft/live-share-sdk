@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IPointerPoint } from "../core";
+import { IPointerPoint } from "../core/index.js";
 
 /**
  * Defines an input filter. Input filters are used to transform

@@ -42,18 +42,10 @@ import { app, LiveShareHost } from "@microsoft/teams-js";
 // Initialize Teams Client SDK
 await app.initialize();
 
-// Define Fluid schema
-const schema = {
-    // Your initial SharedObject for your app
-    initialObjects: {
-        exampleMap: SharedMap,
-        ...,
-    },
-};
 // create space based on Teams context
 const host = LiveShareHost.create();
 const client = new LiveShareClient(host);
-const { container } = await client.joinContainer(schema);
+await client.join();
 
 ...
 // listen to and send events on container.initialObjects.<DDS>
@@ -84,9 +76,10 @@ The Live Share SDK contains dependencies for [@microsoft/teams-js](https://www.n
 
 **It is critical that your app use the package dependencies listed in the table below.** Lookup the version of the `@microsoft/live-share` you're using and set any other dependencies in your package.json file to match:
 
-| @microsoft/live-share | @microsoft/teams-js  | fluid-framework | @microsoft/live-share-\*   | @fluidframework/azure-client | @microsoft/TeamsFx              | @microsoft/TeamsFx-react        |
-| --------------------- | -------------------- | --------------- | -------------------------- | ---------------------------- | ------------------------------- | ------------------------------- |
-| ^1.0.0                  | ^2.11.0             | ^1.2.3          | ^1.0.0                      | ^1.0.0                       | ^2.5.0                        | ^2.5.0                          |
+| @microsoft/live-share | @microsoft/teams-js | fluid-framework | @microsoft/live-share-\* | @fluidframework/azure-client | @microsoft/TeamsFx | @microsoft/TeamsFx-react |
+| --------------------- | ------------------- | --------------- | ------------------------ | ---------------------------- | ------------------ | ------------------------ |
+| ^2.0.0                | ^2.11.0             | ^2.0.0          | ^2.0.0                   | ^2.0.0                       | ^2.5.0             | ^2.5.0                   |
+| ^1.0.0                | ^2.11.0             | ^1.2.3          | ^1.0.0                   | ^1.0.0                       | ^2.5.0             | ^2.5.0                   |
 
 ## Contributing
 

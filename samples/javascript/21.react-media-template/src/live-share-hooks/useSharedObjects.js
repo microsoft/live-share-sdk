@@ -4,14 +4,14 @@
  */
 
 import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
-import { SharedMap } from "fluid-framework";
+import { SharedMap } from "fluid-framework/legacy";
 import { useEffect, useRef, useState } from "react";
 import { LiveEvent, LivePresence } from "@microsoft/live-share";
 import { mediaList } from "../utils/media-list";
 import { LiveShareHost } from "@microsoft/teams-js";
+import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";
 
 /**
  * Hook that creates/loads the apps shared objects.
@@ -77,13 +77,13 @@ export function useSharedObjects() {
         // Create live share host
         const host = inTeams
             ? LiveShareHost.create()
-            : TestLiveShareHost.create();
+            : TestLiveShareHost.create(getInsecureTokenProvider());
 
         // Create the client, join container, and set results
         console.log("useSharedObjects: joining container");
         const client = new LiveShareClient(host);
         client
-            .joinContainer(schema, onFirstInitialize)
+            .join(schema, onFirstInitialize)
             .then((results) => {
                 console.log("useSharedObjects: joined container");
                 setResults(results);

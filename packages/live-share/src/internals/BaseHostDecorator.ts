@@ -5,7 +5,7 @@ import {
     INtpTimeInfo,
     UserMeetingRole,
     IClientInfo,
-} from "../interfaces";
+} from "../interfaces.js";
 
 export class BaseHostDecorator implements ILiveShareHost {
     /**

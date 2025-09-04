@@ -78,7 +78,7 @@ export class AzureMediaPlayer extends EventTarget {
     _options;
 
     // Position tracking
-    _positionTimer: NodeJS.Timeout | undefined;
+    _positionTimer?: any;
 
     // Track state
     _track = emptyTrackState("");

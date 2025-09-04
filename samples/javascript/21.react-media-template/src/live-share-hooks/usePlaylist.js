@@ -78,7 +78,9 @@ export const usePlaylist = (playlistMap, sendNotification) => {
     }, [playlistMap, setMediaItems, setSelectedId]);
 
     // eslint-disable-next-line
-  const debouncedRefresh = useCallback(debounce(refreshMediaItems, 100), [refreshMediaItems]);
+    const debouncedRefresh = useCallback(debounce(refreshMediaItems, 100), [
+        refreshMediaItems,
+    ]);
 
     useEffect(() => {
         if (playlistMap && !playlistStarted) {

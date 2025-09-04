@@ -3,17 +3,12 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    ILiveShareClientOptions,
-    LiveShareClient,
-    TestLiveShareHost,
-} from "@microsoft/live-share";
+import { LiveShareClient, TestLiveShareHost } from "@microsoft/live-share";
 import {
     InkingManager,
     InputFilter,
     LiveCanvas,
 } from "@microsoft/live-share-canvas";
-import { InsecureTokenProvider } from "@fluidframework/test-client-utils";
 import { IFluidContainer } from "fluid-framework";
 
 const containerSchema = {
@@ -25,14 +20,12 @@ const containerSchema = {
 export class InkingSurface {
     private _hostElement: HTMLElement;
     private _inkingManager!: InkingManager;
-    private _container!: IFluidContainer;
+    private _container!: IFluidContainer<typeof containerSchema>;
 
     private async internalStart() {
         const client = new LiveShareClient(TestLiveShareHost.create());
 
-        this._container = (
-            await client.joinContainer(containerSchema)
-        ).container;
+        this._container = (await client.join(containerSchema)).container;
 
         const liveCanvas = this.getLiveCanvas();
 
@@ -52,7 +45,7 @@ export class InkingSurface {
     }
 
     getLiveCanvas(): LiveCanvas {
-        return this._container.initialObjects.liveCanvas as LiveCanvas;
+        return this._container.initialObjects.liveCanvas;
     }
 
     async start() {

@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IPointerPoint } from "../core";
-import { WetCanvas } from "./DryWetCanvas";
+import { IPointerPoint } from "../core/index.js";
+import { WetCanvas } from "./DryWetCanvas.js";
 
 /**
  * Represents a canvas that implements the laser pointer behavior.

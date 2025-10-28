@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share",
-    "version": "2.0.0-internal.12",
+    "version": "2.0.0-internal.13",
     "description": "Building collaborative experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
@@ -47,23 +47,23 @@
         }
     },
     "dependencies": {
-        "@fluid-internal/client-utils": ">=2.40 <2.70",
-        "@fluidframework/aqueduct": ">=2.40 <2.70",
-        "@fluidframework/core-interfaces": ">=2.40 <2.70",
-        "@fluidframework/core-utils": ">=2.40 <2.70",
-        "@fluidframework/register-collection": ">=2.40 <2.70",
+        "@fluid-internal/client-utils": ">=2.40 <2.80",
+        "@fluidframework/aqueduct": ">=2.40 <2.80",
+        "@fluidframework/core-interfaces": ">=2.40 <2.80",
+        "@fluidframework/core-utils": ">=2.40 <2.80",
+        "@fluidframework/register-collection": ">=2.40 <2.80",
         "uuid": "^9.0.0"
     },
     "devDependencies": {
         "@fluidframework/mocha-test-setup": "^2.0.0-rc.1.0.9",
-        "@fluidframework/test-runtime-utils": ">=2.40 <2.70",
-        "@fluidframework/test-utils": ">=2.40 <2.70",
+        "@fluidframework/test-runtime-utils": ">=2.40 <2.80",
+        "@fluidframework/test-utils": ">=2.40 <2.80",
         "@live-share-private/test-utils": "^1.0.0",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
         "@types/uuid": "9.0.1",
-        "fluid-framework": ">=2.40 <2.70",
+        "fluid-framework": ">=2.40 <2.80",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
         "start-server-and-test": "^2.0.4",
@@ -71,8 +71,8 @@
         "typescript": "~5.5.3"
     },
     "peerDependencies": {
-        "@fluidframework/azure-client": ">=2.40 <2.70",
-        "fluid-framework": ">=2.40 <2.70"
+        "@fluidframework/azure-client": ">=2.40 <2.80",
+        "fluid-framework": ">=2.40 <2.80"
     },
     "repository": {
         "directory": "packages/live-share",

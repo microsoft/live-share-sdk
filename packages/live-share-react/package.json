@@ -39,14 +39,14 @@
         "@types/react-dom": "^18.0.0",
         "@types/uuid": "^9.0.1",
         "babel-loader": "^9.1.2",
-        "fluid-framework": ">=2.40 <2.80",
+        "fluid-framework": ">=2.40 <2.90",
         "typescript": "~5.5.3"
     },
     "peerDependencies": {
         "@microsoft/live-share": "2.0.0-internal.13",
         "@microsoft/live-share-canvas": "2.0.0-internal.13",
         "@microsoft/live-share-media": "2.0.0-internal.13",
-        "fluid-framework": ">=2.40 <2.80",
+        "fluid-framework": ">=2.40 <2.90",
         "react": "^16.8.0 || ^17 || ^18",
         "react-dom": "^16.8.0 || ^17 || ^18"
     },

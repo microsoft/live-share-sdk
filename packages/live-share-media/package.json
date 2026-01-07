@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-media",
-    "version": "2.0.0-internal.13",
+    "version": "2.0.0-internal.14",
     "description": "Live Share classes that synchronize media playback across clients.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",

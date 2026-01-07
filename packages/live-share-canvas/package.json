@@ -1,6 +1,6 @@
 {
     "name": "@microsoft/live-share-canvas",
-    "version": "2.0.0-internal.13",
+    "version": "2.0.0-internal.14",
     "description": "Live Share extension library for collaborative inking.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",

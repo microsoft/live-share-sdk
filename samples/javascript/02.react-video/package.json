@@ -36,9 +36,9 @@
         "eslint": "^8.56.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-react": "^7.34.4",
-        "jest-puppeteer": "^6.1.0",
+        "jest-puppeteer": "^11.0.0",
         "prettier": "^3.3.3",
-        "puppeteer": "^20.1.0",
+        "puppeteer": "^24.34.0",
         "rimraf": "^2.6.3",
         "start-server-and-test": "^2.0.0",
         "vite": "^4.0.4"

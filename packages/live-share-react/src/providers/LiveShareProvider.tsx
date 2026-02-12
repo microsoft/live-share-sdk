@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ContainerSchema, IFluidContainer } from "fluid-framework";
+import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
 import React from "react";
 import { useSharedStateRegistry } from "../shared-hooks/index.js";
 import {

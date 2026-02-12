@@ -1,4 +1,4 @@
-import { SchemaFactory, Tree, TreeViewConfiguration } from "fluid-framework";
+import { SchemaFactory, Tree, TreeViewConfiguration } from "@fluidframework/tree/internal";
 import { LiveCanvas } from "./LiveCanvas.js";
 import { IBrush } from "./Brush.js";
 import { IStroke, Stroke } from "./Stroke.js";

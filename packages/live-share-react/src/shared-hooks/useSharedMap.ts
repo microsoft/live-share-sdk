@@ -7,7 +7,7 @@ import React from "react";
 import { isEntries, isJSON, isMap } from "../utils/index.js";
 import { IUseSharedMapResults, SharedMapInitialData } from "../types/index.js";
 import { useDynamicDDS } from "./useDynamicDDS.js";
-import { SharedMap } from "fluid-framework/legacy";
+import { SharedMap } from "@fluidframework/map/internal";
 import {
     ActionContainerNotJoinedError,
     ActionLiveDataObjectUndefinedError,

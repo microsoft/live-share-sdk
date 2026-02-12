@@ -3,7 +3,7 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
+import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
 import {
     LiveDataObjectInitializeNotNeededError,
     LiveDataObjectInitializeState,

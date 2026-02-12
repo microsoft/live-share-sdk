@@ -6,7 +6,7 @@ import {
     ITree,
     InsertableTreeFieldFromImplicitField,
     TreeFieldFromImplicitField,
-} from "fluid-framework";
+} from "@fluidframework/tree/internal";
 import { IUseSharedTreeResults } from "../types/index.js";
 import { useDynamicDDS, useTreeNode } from "../shared-hooks/index.js";
 import React from "react";
@@ -25,7 +25,7 @@ import React from "react";
  *
  * @example
  * ```tsx
- * import { SchemaFactory, TreeViewConfiguration } from "fluid-framework";
+ * import { SchemaFactory, TreeViewConfiguration } from "@fluidframework/tree/internal";
  * import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
  * // Declare a schema factory with your unique uuid
  * const sf = new SchemaFactory("fc1db2e8-0000-11ee-be57-0242ac120002");

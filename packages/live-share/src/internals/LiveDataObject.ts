@@ -2,7 +2,7 @@ import {
     DataObject,
     DataObjectTypes,
     IDataObjectProps,
-} from "@fluidframework/aqueduct/legacy";
+} from "@fluidframework/aqueduct/internal";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import {
     IClientInfo,

@@ -21,14 +21,14 @@ import {
     ExtendedMediaMetadata,
     MediaPlayerSynchronizer,
 } from "@microsoft/live-share-media";
+import { IFluidContainer } from "@fluidframework/fluid-static";
 import {
-    IFluidContainer,
     ITree,
     ImplicitFieldSchema,
     TreeFieldFromImplicitField,
     TreeView,
-} from "fluid-framework";
-import { SharedMap } from "fluid-framework/legacy";
+} from "@fluidframework/tree/internal";
+import { SharedMap } from "@fluidframework/map/internal";
 import {
     useSharedMap,
     useTreeNode,

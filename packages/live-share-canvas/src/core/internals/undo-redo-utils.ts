@@ -5,7 +5,7 @@ import {
     Revertible,
     RevertibleFactory,
     TreeViewEvents,
-} from "fluid-framework";
+} from "@fluidframework/tree/internal";
 
 /**
  * Create undo and redo stacks for a tree view. The stacks are populated with revertible objects.

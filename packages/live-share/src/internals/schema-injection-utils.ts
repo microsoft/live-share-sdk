@@ -3,7 +3,7 @@ import type {
     IDataObjectProps,
 } from "@fluidframework/aqueduct/internal";
 import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
-import { IFluidLoadable } from "@fluidframework/core-interfaces";
+import type { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { LiveDataObject } from "./LiveDataObject.js";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import {
@@ -11,7 +11,7 @@ import {
     LoadableObjectClassRecord,
     DataObjectClass,
 } from "./fluid-duplicated.js";
-import type { ContainerSchema } from "fluid-framework";
+import type { ContainerSchema } from "@fluidframework/fluid-static";
 
 /**
  * A LiveObjectClass is a class that has a factory that can create a DDS (SharedObject) and a

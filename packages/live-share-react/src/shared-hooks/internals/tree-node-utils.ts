@@ -5,7 +5,7 @@ import {
     isTreeNode,
     isProxy,
 } from "./tree-node-types.js";
-import { TreeNode, Tree } from "fluid-framework";
+import { TreeNode, Tree } from "@fluidframework/tree/internal";
 import { Dispatch, SetStateAction } from "react";
 
 // Exported utils

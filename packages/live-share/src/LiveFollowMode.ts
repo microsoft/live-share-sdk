@@ -1,7 +1,7 @@
 import { LiveDataObject } from "./internals/LiveDataObject.js";
 import { LiveState } from "./LiveState.js";
 import { ILivePresenceEvents, LivePresence } from "./LivePresence.js";
-import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
+import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
 import {
     LiveDataObjectInitializeState,

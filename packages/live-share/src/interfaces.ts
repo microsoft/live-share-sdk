@@ -3,9 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/legacy";
+import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
 import { AzureContainerServices } from "@fluidframework/azure-client";
-import type { IFluidContainer, ContainerSchema } from "fluid-framework";
+import type { IFluidContainer, ContainerSchema } from "@fluidframework/fluid-static";
 
 /**
  * Base interface for all event objects.

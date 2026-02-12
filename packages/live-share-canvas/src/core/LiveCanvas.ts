@@ -3,9 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
+import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
 import { IFluidHandle } from "@fluidframework/core-interfaces";
-import { SharedMap } from "@fluidframework/map/legacy";
+import { SharedMap } from "@fluidframework/map/internal";
 import { InkingManager } from "./InkingManager.js";
 import { IPoint } from "./Geometry.js";
 import { IStroke, StrokeType } from "./Stroke.js";
@@ -39,7 +39,7 @@ import {
     createUndoRedoStacks,
     undoRedo,
 } from "./internals/index.js";
-import { ITree, SharedTree, TreeView } from "fluid-framework";
+import { ITree, SharedTree, TreeView } from "@fluidframework/tree/internal";
 import {
     IAddPointsEventArgs,
     IAddRemoveStrokeOptions,

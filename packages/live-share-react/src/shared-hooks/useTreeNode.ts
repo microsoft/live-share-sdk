@@ -1,4 +1,4 @@
-import { Tree, TreeChangeEvents, TreeNode } from "fluid-framework";
+import { Tree, TreeChangeEvents, TreeNode } from "@fluidframework/tree/internal";
 import { IUseTreeNodeResults } from "../types/index.js";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -19,7 +19,7 @@ import {
  * @example
  * Example using default `"nodeChanged"` `stateChangeType`
  * ```tsx
- * import { SchemaFactory, TreeViewConfiguration } from "fluid-framework";
+ * import { SchemaFactory, TreeViewConfiguration } from "@fluidframework/tree/internal";
  * import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
  * // Declare a schema factory with your unique uuid
  * const sf = new SchemaFactory("fc1db2e8-0000-11ee-be57-0242ac120002");
@@ -61,7 +61,7 @@ import {
  * @example
  * Example using `"treeChanged"` `stateChangeType`
  * ```tsx
- * import { SchemaFactory, TreeViewConfiguration } from "fluid-framework";
+ * import { SchemaFactory, TreeViewConfiguration } from "@fluidframework/tree/internal";
  * import { useSharedTree, useTreeNode } from "@microsoft/live-share-react";
  * // Declare a schema factory with your unique uuid
  * const sf = new SchemaFactory("fc1db2e8-0000-11ee-be57-0242ac120002");

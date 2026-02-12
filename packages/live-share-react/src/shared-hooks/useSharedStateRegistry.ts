@@ -3,11 +3,9 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    IFluidContainer,
-    IValueChanged,
-    SharedMap,
-} from "fluid-framework/legacy";
+import type { IFluidContainer } from "@fluidframework/fluid-static";
+import { SharedMap } from "@fluidframework/map/internal";
+import type { IValueChanged } from "@fluidframework/map/internal";
 import React from "react";
 import {
     DeleteSharedStateAction,

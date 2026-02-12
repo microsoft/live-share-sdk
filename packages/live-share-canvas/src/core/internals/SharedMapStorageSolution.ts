@@ -1,8 +1,6 @@
-import {
-    ISequencedDocumentMessage,
-    IValueChanged,
-    SharedMap,
-} from "fluid-framework/legacy";
+import type { ISequencedDocumentMessage } from "@fluidframework/driver-definitions/internal";
+import { SharedMap } from "@fluidframework/map/internal";
+import type { IValueChanged } from "@fluidframework/map/internal";
 import {
     LiveCanvasStorageSolution,
     StorageSolutionEvents,

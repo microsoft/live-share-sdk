@@ -24,7 +24,8 @@
         "doctor:json": "eslint **/*.json --fix",
         "doctor:prettier": "prettier . --write",
         "clean": "npm exec --workspaces -- npx rimraf node_modules && npx rimraf node_modules",
-        "prepare": "node internal/build-tools/ensure-packages-built.js"
+        "prepare": "node internal/build-tools/ensure-packages-built.js",
+        "compat:fluid": "node internal/build-tools/compat-fluid.js"
     },
     "author": "",
     "license": "Microsoft",
@@ -40,8 +41,8 @@
         "typescript": "~5.5.3"
     },
     "overrides": {
-        "@fluidframework/*": "2.80.0",
-        "@fluid-internal/*": "2.80.0",
-        "fluid-framework": "2.80.0"
+        "@fluidframework/*": "2.82.0",
+        "@fluid-internal/*": "2.82.0",
+        "fluid-framework": "2.82.0"
     }
 }

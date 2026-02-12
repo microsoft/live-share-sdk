@@ -6,7 +6,7 @@
 import React from "react";
 import { FluidObject, IFluidLoadable } from "@fluidframework/core-interfaces";
 import { useFluidObjectsContext } from "../providers/AzureProvider.js";
-import { SharedObjectKind } from "fluid-framework";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
 
 /**
  * Hook to gets or creates a DDS that corresponds to a given uniqueKey string.

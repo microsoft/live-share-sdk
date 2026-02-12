@@ -15,7 +15,7 @@ import {
     LiveDataObjectNotInitializedError,
     UnexpectedError,
 } from "./errors.js";
-import { SharedObjectKind } from "fluid-framework";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
 
 /**
  * Events supported by `LiveFollowMode` object.

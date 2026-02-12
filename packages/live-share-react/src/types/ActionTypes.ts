@@ -10,7 +10,7 @@ import {
     ILiveEvent,
     LivePresenceData,
 } from "@microsoft/live-share";
-import { SharedObjectKind } from "fluid-framework";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
 
 // React actions
 

@@ -3,11 +3,13 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { ITree, SharedObjectKind, SharedTree } from "fluid-framework";
-import { SharedMap } from "fluid-framework/legacy";
-import { SharedDirectory } from "@fluidframework/map/legacy";
-import { SharedString } from "@fluidframework/sequence/legacy";
-import type { ISharedObjectKind } from "@fluidframework/shared-object-base/legacy";
+import { SharedDirectory, SharedMap } from "@fluidframework/map/internal";
+import { SharedString } from "@fluidframework/sequence/internal";
+import { SharedTree, type ITree } from "@fluidframework/tree/internal";
+import type {
+    ISharedObjectKind,
+    SharedObjectKind,
+} from "@fluidframework/shared-object-base/internal";
 
 /**
  * Key for window global reference to loadable objects.

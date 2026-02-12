@@ -39,7 +39,7 @@ import {
     createUndoRedoStacks,
     undoRedo,
 } from "./internals/index.js";
-import { ITree, SharedObjectKind, SharedTree, TreeView } from "fluid-framework";
+import { ITree, SharedTree, TreeView } from "fluid-framework";
 import {
     IAddPointsEventArgs,
     IAddRemoveStrokeOptions,
@@ -58,7 +58,10 @@ import {
 } from "./InkingManager-constants.js";
 import { IEventUserInfo, IUserInfo } from "./LiveCanvas-interfaces.js";
 import { LiveCursor } from "./LiveCursor.js";
-import type { ISharedObjectKind } from "@fluidframework/shared-object-base/legacy";
+import type {
+    ISharedObjectKind,
+    SharedObjectKind,
+} from "@fluidframework/shared-object-base/internal";
 import {
     LiveCanvasStrokesMap,
     LiveCanvasTreeNode,

@@ -26,7 +26,7 @@ import {
     UserMeetingRole,
 } from "./interfaces.js";
 import { LiveDataObject } from "./internals/LiveDataObject.js";
-import { SharedObjectKind } from "fluid-framework";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
 import { cloneValue } from "./internals/utils.js";
 import { TelemetryEvents } from "./internals/consts.js";
 import { AzureMember } from "@fluidframework/azure-client";

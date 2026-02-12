@@ -19,7 +19,7 @@ import { LiveTelemetryLogger } from "./LiveTelemetryLogger.js";
 import { LiveObjectSynchronizer } from "./internals/LiveObjectSynchronizer.js";
 import { DynamicObjectRegistry } from "./internals/DynamicObjectRegistry.js";
 import { LiveDataObject } from "./internals/LiveDataObject.js";
-import { SharedObjectKind } from "fluid-framework";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
 import { TelemetryEvents } from "./internals/consts.js";
 import { cloneValue, isNewerEvent } from "./internals/utils.js";
 

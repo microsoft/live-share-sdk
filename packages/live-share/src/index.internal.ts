@@ -11,7 +11,6 @@ export * from "./internals/LiveObjectSynchronizer.js";
 export * from "./internals/LiveShareRuntime.js";
 export * from "./internals/schema-injection-utils.js";
 export * from "./internals/smuggle.js";
-
 export {
     waitForDelay,
     waitUntilConnected,

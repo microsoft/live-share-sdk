@@ -3,14 +3,11 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { DataObjectFactory } from "@fluidframework/aqueduct/legacy";
-import {
-    FluidObject,
-    IFluidContainer,
-    SharedObjectKind,
-} from "fluid-framework";
+import { DataObjectFactory } from "@fluidframework/aqueduct/internal";
+import { ConsensusRegisterCollection } from "@fluidframework/register-collection/internal";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
+import { FluidObject, IFluidContainer } from "fluid-framework";
 import { IFluidHandle, IFluidLoadable } from "@fluidframework/core-interfaces";
-import { ConsensusRegisterCollection } from "@fluidframework/register-collection/legacy";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry.js";
 import { LiveDataObject } from "./LiveDataObject.js";
 import { UnexpectedError } from "../errors.js";

@@ -3,18 +3,14 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import {
-    ContainerSchema,
-    FluidObject,
-    IFluidContainer,
-    SharedObjectKind,
-} from "fluid-framework";
+import { ContainerSchema, FluidObject, IFluidContainer } from "fluid-framework";
 import { SharedMap } from "fluid-framework/legacy";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry.js";
 import { DynamicObjectManager } from "./DynamicObjectManager.js";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
 import {
     getRootDataObject,
     getContainerRuntime,

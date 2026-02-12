@@ -19,7 +19,7 @@ import {
     LiveDataObjectNotInitializedError,
     UnexpectedError,
 } from "./errors.js";
-import { SharedObjectKind } from "fluid-framework";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
 import { isEventNewer } from "./index.internal.js";
 
 export interface ITimerConfigData {

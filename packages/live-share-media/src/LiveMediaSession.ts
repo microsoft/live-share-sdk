@@ -29,7 +29,7 @@ import {
 import { MediaSessionActionThrottler } from "./MediaSessionActionThrottler.js";
 import { RepeatedActionThrottler } from "./RepeatedActionThrottler.js";
 import { IMediaPlayer } from "./IMediaPlayer.js";
-import { SharedObjectKind } from "fluid-framework";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
 import { TelemetryEvents } from "./internals/consts.js";
 
 /**

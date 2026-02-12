@@ -41,8 +41,8 @@
         "typescript": "~5.5.3"
     },
     "overrides": {
-        "@fluidframework/*": "2.82.0",
-        "@fluid-internal/*": "2.82.0",
-        "fluid-framework": "2.82.0"
+        "@fluidframework/*": "2.80.0",
+        "@fluid-internal/*": "2.80.0",
+        "fluid-framework": "2.80.0"
     }
 }

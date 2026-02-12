@@ -7,12 +7,12 @@ import { IFluidLoadable } from "@fluidframework/core-interfaces";
 import {
     IFluidDataStoreContext,
     IFluidDataStoreFactory,
-} from "@fluidframework/runtime-definitions/legacy";
+} from "@fluidframework/runtime-definitions/internal";
 import {
     IFluidDataStoreRuntime,
     IChannelFactory,
-} from "@fluidframework/datastore-definitions/legacy";
-import { ISharedDirectory } from "@fluidframework/map/legacy";
+} from "@fluidframework/datastore-definitions/internal";
+import { ISharedDirectory } from "@fluidframework/map/internal";
 import { unreachableCase } from "@fluidframework/core-utils/internal";
 import {
     ITestContainerConfig,

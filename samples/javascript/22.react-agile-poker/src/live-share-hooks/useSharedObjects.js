@@ -11,7 +11,7 @@ import {
     TestLiveShareHost,
 } from "@microsoft/live-share";
 import { LiveTimer } from "@microsoft/live-share";
-import { SharedMap } from "fluid-framework/legacy";
+import { SharedMap } from "@fluidframework/map/internal";
 import { getDefaultUserStories } from "../constants/default-user-stories";
 import { LiveShareHost } from "@microsoft/teams-js";
 import { getInsecureTokenProvider } from "../utils/insecureTokenProvider";

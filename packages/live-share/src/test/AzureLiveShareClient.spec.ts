@@ -5,7 +5,7 @@
 
 import { strict as assert } from "assert";
 import { ContainerSchema, IFluidContainer } from "fluid-framework";
-import { SharedMap } from "fluid-framework/legacy";
+import { SharedMap } from "@fluidframework/map/internal";
 
 import {
     AzureContainerServices,

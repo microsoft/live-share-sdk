@@ -13,7 +13,7 @@ import {
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
 import { IFluidContainer } from "fluid-framework";
-import { SharedMap } from "fluid-framework/legacy";
+import { SharedMap } from "@fluidframework/map/internal";
 import { useEffect, useState, useRef } from "react";
 import { mediaList } from "../utils/media-list";
 import { LiveShareHost } from "@microsoft/teams-js";

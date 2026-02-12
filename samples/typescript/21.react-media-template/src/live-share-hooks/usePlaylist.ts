@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { MediaItem, searchList } from "../utils/media-list";
 import { debounce } from "lodash";
-import { SharedMap } from "fluid-framework/legacy";
+import { SharedMap } from "@fluidframework/map/internal";
 
 /**
  * Hook for tracking video playlist

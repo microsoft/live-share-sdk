@@ -5,7 +5,7 @@
 
 import { meeting } from "@microsoft/teams-js";
 import { getRandomDiceValue, stylizeDiceElem } from "./utils";
-import { SharedMap } from "fluid-framework/legacy";
+import { SharedMap } from "@fluidframework/map/internal";
 import { AppTheme } from "./types-interfaces";
 import { LiveShareClient } from "@microsoft/live-share";
 

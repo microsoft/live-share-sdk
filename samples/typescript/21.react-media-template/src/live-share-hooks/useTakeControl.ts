@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ITimestampProvider, LivePresenceUser } from "@microsoft/live-share";
-import { SharedMap } from "fluid-framework/legacy";
+import { SharedMap } from "@fluidframework/map/internal";
 import { IUserData } from "./usePresence";
 
 export const useTakeControl = (

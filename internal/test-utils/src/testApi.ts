@@ -4,7 +4,7 @@
  */
 
 // Loader API
-import { Loader } from "@fluidframework/container-loader/legacy";
+import { Loader } from "@fluidframework/container-loader/internal";
 
 // ContainerRuntime API
 import { ContainerRuntime } from "@fluidframework/container-runtime/internal";
@@ -14,17 +14,17 @@ import * as agentScheduler from "@fluidframework/agent-scheduler";
 import * as cell from "@fluidframework/cell";
 import { SharedCell } from "@fluidframework/cell/internal";
 import * as counter from "@fluidframework/counter";
-import { SharedCounter } from "@fluidframework/counter/legacy";
+import { SharedCounter } from "@fluidframework/counter/internal";
 import * as map from "@fluidframework/map";
-import { SharedDirectory, SharedMap } from "@fluidframework/map/legacy";
+import { SharedDirectory, SharedMap } from "@fluidframework/map/internal";
 import * as matrix from "@fluidframework/matrix";
-import { SharedMatrix } from "@fluidframework/matrix/legacy";
+import { SharedMatrix } from "@fluidframework/matrix/internal";
 import * as orderedCollection from "@fluidframework/ordered-collection";
-import { ConsensusQueue } from "@fluidframework/ordered-collection/legacy";
+import { ConsensusQueue } from "@fluidframework/ordered-collection/internal";
 import * as registerCollection from "@fluidframework/register-collection";
-import { ConsensusRegisterCollection } from "@fluidframework/register-collection/legacy";
+import { ConsensusRegisterCollection } from "@fluidframework/register-collection/internal";
 import * as sequence from "@fluidframework/sequence";
-import { SharedString } from "@fluidframework/sequence/legacy";
+import { SharedString } from "@fluidframework/sequence/internal";
 import { TestFluidObjectFactory } from "@fluidframework/test-utils/internal";
 
 // ContainerRuntime and Data Runtime API
@@ -32,7 +32,7 @@ import {
     ContainerRuntimeFactoryWithDefaultDataStore,
     DataObject,
     DataObjectFactory,
-} from "@fluidframework/aqueduct/legacy";
+} from "@fluidframework/aqueduct/internal";
 import * as sequenceDeprecated from "@fluid-experimental/sequence-deprecated";
 
 // #region Current versions of the APIs.

@@ -4,7 +4,10 @@
  */
 
 import { ContainerSchema, IFluidContainer } from "@fluidframework/fluid-static";
-import type { FluidObject, IFluidLoadable } from "@fluidframework/core-interfaces";
+import type {
+    FluidObject,
+    IFluidLoadable,
+} from "@fluidframework/core-interfaces";
 import { SharedMap } from "@fluidframework/map/internal";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { DynamicObjectRegistry } from "./DynamicObjectRegistry.js";

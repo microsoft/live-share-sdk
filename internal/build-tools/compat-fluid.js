@@ -29,11 +29,17 @@ const updateOverrides = (version) => {
     packageJson.overrides["@fluid-internal/*"] = version;
     packageJson.overrides["fluid-framework"] = version;
 
-    fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 4)}\n`);
+    fs.writeFileSync(
+        packageJsonPath,
+        `${JSON.stringify(packageJson, null, 4)}\n`
+    );
 };
 
 const removePath = (relativePath) => {
-    fs.rmSync(path.join(repoRoot, relativePath), { recursive: true, force: true });
+    fs.rmSync(path.join(repoRoot, relativePath), {
+        recursive: true,
+        force: true,
+    });
 };
 
 const testPackages = [
@@ -65,14 +71,23 @@ for (const version of targetVersions) {
     }
 
     for (const testPackage of testPackages) {
-        const testStatus = run("npm", ["run", "test"], path.join(repoRoot, testPackage));
+        const testStatus = run(
+            "npm",
+            ["run", "test"],
+            path.join(repoRoot, testPackage)
+        );
         if (testStatus !== 0) {
             console.log(`tests failed for ${version} in ${testPackage}`);
             hadFailures = true;
         }
     }
 
-    const lsStatus = run("npm", ["ls", "fluid-framework", "--workspaces", "--depth=0"]);
+    const lsStatus = run("npm", [
+        "ls",
+        "fluid-framework",
+        "--workspaces",
+        "--depth=0",
+    ]);
     if (lsStatus !== 0) {
         hadFailures = true;
     }

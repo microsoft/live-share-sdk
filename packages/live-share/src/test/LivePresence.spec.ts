@@ -31,7 +31,7 @@ import {
     describeCompat,
     ITestObjectProviderOptions,
 } from "@live-share-private/test-utils";
-import { SharedObjectKind } from "fluid-framework";
+import type { SharedObjectKind } from "@fluidframework/shared-object-base/internal";
 
 class TestLivePresenceClass<
     TData extends object | undefined | null = object,

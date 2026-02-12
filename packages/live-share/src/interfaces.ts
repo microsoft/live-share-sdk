@@ -5,7 +5,10 @@
 
 import { IInboundSignalMessage } from "@fluidframework/runtime-definitions/internal";
 import { AzureContainerServices } from "@fluidframework/azure-client";
-import type { IFluidContainer, ContainerSchema } from "@fluidframework/fluid-static";
+import type {
+    IFluidContainer,
+    ContainerSchema,
+} from "@fluidframework/fluid-static";
 
 /**
  * Base interface for all event objects.

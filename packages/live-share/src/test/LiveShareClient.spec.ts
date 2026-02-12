@@ -4,7 +4,10 @@
  */
 
 import { strict as assert } from "assert";
-import { ContainerSchema, IFluidContainer } from "fluid-framework";
+import type {
+    ContainerSchema,
+    IFluidContainer,
+} from "@fluidframework/fluid-static";
 import { SharedMap } from "@fluidframework/map/internal";
 import { AzureContainerServices } from "@fluidframework/azure-client";
 import { TestLiveShareHost } from "../TestLiveShareHost.js";

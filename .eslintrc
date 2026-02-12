@@ -41,6 +41,25 @@
     },
     "overrides": [
         {
+            "files": [
+                "packages/live-share/src/**/*.{ts,tsx,js,jsx}",
+                "packages/*/src/test/**/*.{ts,tsx,js,jsx}"
+            ],
+            "rules": {
+                "no-restricted-imports": [
+                    "error",
+                    {
+                        "paths": [
+                            {
+                                "name": "fluid-framework",
+                                "message": "Use @fluidframework/* imports to avoid duplicate type identities in compat builds."
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
             "files": ["bin/*.js", "lib/*.js"]
         }
     ],

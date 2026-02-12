@@ -18,6 +18,7 @@
         "@testing-library/react": "^13.4.0",
         "@testing-library/user-event": "^14.4.3",
         "fluid-framework": ">=2.40 <2.90",
+        "jest": "^30.2.0",
         "lodash": "^4.17.21",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

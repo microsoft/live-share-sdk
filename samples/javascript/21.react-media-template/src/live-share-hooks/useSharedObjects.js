@@ -39,11 +39,16 @@ export function useSharedObjects() {
         // Check if user is in Teams
         const url = window.location.href.includes("/#/")
             ? new URL(`${window.location.href.split("/#/").join("/")}`)
-            : new URL(window.location);
+            : new URL(window.location.href);
         const inTeams = !!url.searchParams.get("inTeams");
 
-        // Enable debugger
-        window.localStorage.debug = "fluid:*";
+        try {
+            // Enable debugger
+            window.localStorage.debug = "fluid:*";
+        } catch (error) {
+            // Some users or anonymous modes in browsers disable local storage
+            console.error(error);
+        }
 
         // Define container callback (optional).
         // * This is only called once when the container is first created.
@@ -71,6 +76,7 @@ export function useSharedObjects() {
                 liveCanvas: LiveCanvas,
                 takeControlMap: SharedMap,
                 playlistMap: SharedMap,
+                inkEvent: LiveEvent,
             },
         };
 
@@ -88,7 +94,10 @@ export function useSharedObjects() {
                 console.log("useSharedObjects: joined container");
                 setResults(results);
             })
-            .catch((err) => setError(err));
+            .catch((err) => {
+                console.error(err);
+                setError(err);
+            });
     }, []);
 
     const container = results?.container;

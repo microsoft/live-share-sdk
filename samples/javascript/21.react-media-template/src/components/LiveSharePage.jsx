@@ -2,6 +2,7 @@ import { Text } from "@fluentui/react-components";
 import { Spinner } from "@fluentui/react-components";
 import { FlexColumn } from "./flex";
 import { memo } from "react";
+import { inTeams } from "../utils/inTeams";
 
 export const LiveSharePage = memo(
     ({ children, context, container, started }) => {
@@ -29,6 +30,7 @@ export const LiveSharePage = memo(
                             top: "0px",
                             bottom: "0px",
                             zIndex: 9999,
+                            backgroundColor: inTeams() ? "transparent" : "#202020",
                         }}
                     >
                         <Spinner />

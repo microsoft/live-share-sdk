@@ -17,6 +17,7 @@
     },
     "devDependencies": {
         "@fluidframework/test-runtime-utils": ">=2.40 <2.90",
-        "@types/node": "^20.14.14"
+        "@types/node": "^20.14.14",
+        "typescript": "~5.5.3"
     }
 }

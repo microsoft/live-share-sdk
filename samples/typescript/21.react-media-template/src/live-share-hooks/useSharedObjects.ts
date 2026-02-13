@@ -12,7 +12,6 @@ import {
 } from "@microsoft/live-share";
 import { LiveCanvas } from "@microsoft/live-share-canvas";
 import { LiveMediaSession } from "@microsoft/live-share-media";
-import { IFluidContainer } from "fluid-framework";
 import { SharedMap } from "@fluidframework/map/internal";
 import { useEffect, useState, useRef } from "react";
 import { mediaList } from "../utils/media-list";
@@ -70,7 +69,9 @@ export function useSharedObjects(): IUseSharedObjectsResult {
 
         // Define container callback (optional).
         // * This is only called once when the container is first created.
-        const onFirstInitialize = (container: IFluidContainer) => {
+        const onFirstInitialize = (
+            container: ILiveShareJoinResults["container"]
+        ) => {
             console.log("useSharedObjects: onFirstInitialize called");
             // Setup any initial state here
             const playlistMap = container.initialObjects

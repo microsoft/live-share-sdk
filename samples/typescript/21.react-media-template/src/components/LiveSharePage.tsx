@@ -1,7 +1,7 @@
 import { Text } from "@fluentui/react-components";
 import { Spinner } from "@fluentui/react-components";
+import { ILiveShareJoinResults } from "@microsoft/live-share";
 import { app } from "@microsoft/teams-js";
-import { IFluidContainer } from "fluid-framework";
 import { FC, ReactNode, useMemo } from "react";
 import { FlexColumn } from "./flex";
 import { inTeams } from "../utils/inTeams";
@@ -10,7 +10,7 @@ export const LiveSharePage: FC<{
     children: ReactNode;
     started: boolean;
     context?: app.Context;
-    container?: IFluidContainer;
+    container?: ILiveShareJoinResults["container"];
 }> = ({ children, started, context, container }) => {
     const loadText = useMemo(() => {
         if (!context) {

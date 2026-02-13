@@ -43,7 +43,9 @@
     "overrides": {
         "@fluidframework/*": "2.80.0",
         "@fluid-internal/*": "2.80.0",
-        "fluid-framework": "2.80.0"
+        "fluid-framework": "2.80.0",
+        "@types/react": "18.3.28",
+        "@types/react-dom": "18.3.7"
     },
     "dependencies": {
         "jest": "^30.2.0"

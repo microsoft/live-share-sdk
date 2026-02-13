@@ -30,7 +30,9 @@ export const LiveSharePage = memo(
                             top: "0px",
                             bottom: "0px",
                             zIndex: 9999,
-                            backgroundColor: inTeams() ? "transparent" : "#202020",
+                            backgroundColor: inTeams()
+                                ? "transparent"
+                                : "#202020",
                         }}
                     >
                         <Spinner />

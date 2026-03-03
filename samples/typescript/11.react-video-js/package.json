@@ -5,15 +5,15 @@
     "author": "Microsoft",
     "license": "MIT",
     "dependencies": {
-        "@fluidframework/azure-client": ">=2.40 <2.90",
+        "@fluidframework/azure-client": ">=2.40 <2.100",
         "@fluentui/react-components": "^9.18.6",
         "@fluentui/react-icons": "^2.0.202",
         "@fluentui/react-theme": "^9.1.5",
-        "@microsoft/live-share": "2.0.0-internal.14",
-        "@microsoft/live-share-canvas": "2.0.0-internal.14",
-        "@microsoft/live-share-media": "2.0.0-internal.14",
+        "@microsoft/live-share": "2.0.0-internal.15",
+        "@microsoft/live-share-canvas": "2.0.0-internal.15",
+        "@microsoft/live-share-media": "2.0.0-internal.15",
         "@microsoft/teams-js": "^2.16.0",
-        "fluid-framework": ">=2.40 <2.90",
+        "fluid-framework": ">=2.40 <2.100",
         "lodash": "^4.17.21",
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
@@ -26,7 +26,7 @@
         "video.js": "^8.17.4"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": ">=2.40 <2.90",
+        "@fluidframework/test-runtime-utils": ">=2.40 <2.100",
         "@types/lodash": "^4.14.191",
         "@types/react": "^18.0.0",
         "@types/react-dom": "^18.0.0",
@@ -35,7 +35,7 @@
         "@testing-library/user-event": "^14.4.3",
         "@typescript-eslint/eslint-plugin": "^7.16.0",
         "@typescript-eslint/parser": "^7.16.0",
-        "@vitejs/plugin-react": "^3.0.1",
+        "@vitejs/plugin-react": "^5.1.4",
         "dotenv-cli": "^7.2.1",
         "esbuild": "^0.27.2",
         "eslint": "^8.56.0",
@@ -44,7 +44,7 @@
         "eslint-plugin-react": "^7.34.4",
         "eslint-plugin-react-hooks": "^4.6.2",
         "start-server-and-test": "^2.0.0",
-        "vite": "^4.0.4"
+        "vite": "^6.1.7"
     },
     "scripts": {
         "build": "tsc && vite build",

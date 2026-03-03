@@ -12,10 +12,10 @@ const fs = require("fs");
 const path = require("path");
 const { getRootFolder } = require("./utils");
 
-const DEFAULT_FROM_RANGE = ">=2.40 <2.80";
-const DEFAULT_TO_RANGE = ">=2.40 <2.90";
-const DEFAULT_VERSION_FROM = "2.0.0-internal.13";
-const DEFAULT_VERSION_TO = "2.0.0-internal.14";
+const DEFAULT_FROM_RANGE = ">=2.40 <2.90";
+const DEFAULT_TO_RANGE = ">=2.40 <2.100";
+const DEFAULT_VERSION_FROM = "2.0.0-internal.14";
+const DEFAULT_VERSION_TO = "2.0.0-internal.15";
 const INTERNAL_PKG_PREFIX = "@microsoft/live-share";
 const IGNORED_FOLDERS = new Set([
     "node_modules",

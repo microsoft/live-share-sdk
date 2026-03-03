@@ -35,8 +35,9 @@ export enum LiveFollowModeEvents {
  * Event typings for `LiveFollowMode` class.
  * @template TData Type of data object to share with clients.
  */
-export interface ILiveFollowModeEvents<TData = any>
-    extends ILivePresenceEvents<IFollowModePresenceUserData<TData>> {
+export interface ILiveFollowModeEvents<TData = any> extends ILivePresenceEvents<
+    IFollowModePresenceUserData<TData>
+> {
     /**
      * The presence information for the local or a remote user has changed.
      * @param event Name of event.

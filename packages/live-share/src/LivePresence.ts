@@ -56,8 +56,9 @@ export enum LivePresenceEvents {
  * Event typings for `LivePresence` class.
  * @template TData Type of data object to share with clients.
  */
-export interface ILivePresenceEvents<TData extends LivePresenceData = any>
-    extends IEvent {
+export interface ILivePresenceEvents<
+    TData extends LivePresenceData = any,
+> extends IEvent {
     /**
      * The presence information for the local or a remote user has changed.
      * @param event Name of event.

@@ -32,7 +32,7 @@ async function ensurePackagesBuilt() {
         return new Promise((resolve, reject) => {
             const installProcess = childProcess.spawn(
                 "npm",
-                ["install", " --ignore-scripts"],
+                ["install", "--ignore-scripts"],
                 {
                     shell: true,
                     cwd: directory,

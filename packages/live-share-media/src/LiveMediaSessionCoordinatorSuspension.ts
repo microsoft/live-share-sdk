@@ -8,9 +8,7 @@ import {
     CoordinationWaitPoint,
 } from "./MediaSessionExtensions.js";
 
-export class LiveMediaSessionCoordinatorSuspension
-    implements MediaSessionCoordinatorSuspension
-{
+export class LiveMediaSessionCoordinatorSuspension implements MediaSessionCoordinatorSuspension {
     private _waitPoint?: CoordinationWaitPoint;
     private _onEnd: (seekTo?: number) => void;
 

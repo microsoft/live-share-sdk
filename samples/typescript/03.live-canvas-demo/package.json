@@ -16,18 +16,18 @@
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern"
     },
     "dependencies": {
-        "@fluidframework/azure-client": ">=2.40 <2.90",
-        "@microsoft/live-share": "2.0.0-internal.14",
-        "@microsoft/live-share-canvas": "2.0.0-internal.14",
+        "@fluidframework/azure-client": ">=2.40 <2.100",
+        "@microsoft/live-share": "2.0.0-internal.15",
+        "@microsoft/live-share-canvas": "2.0.0-internal.15",
         "@microsoft/teams-js": "^2.16.0",
-        "fluid-framework": ">=2.40 <2.90"
+        "fluid-framework": ">=2.40 <2.100"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": ">=2.40 <2.90",
+        "@fluidframework/test-runtime-utils": ">=2.40 <2.100",
         "@typescript-eslint/eslint-plugin": "^7.16.0",
         "@typescript-eslint/parser": "^7.16.0",
         "buffer": "^6.0.3",
         "start-server-and-test": "^2.0.0",
-        "vite": "^4.0.4"
+        "vite": "^6.1.7"
     }
 }

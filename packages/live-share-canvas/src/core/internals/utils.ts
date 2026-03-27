@@ -90,17 +90,7 @@ export function sanitizeUserPictureUrl(
     try {
         parsedUrl = new URL(trimmedPictureUri);
     } catch {
-        const baseUrl = globalThis.location?.href;
-
-        if (!baseUrl) {
-            return undefined;
-        }
-
-        try {
-            parsedUrl = new URL(trimmedPictureUri, baseUrl);
-        } catch {
-            return undefined;
-        }
+        return undefined;
     }
 
     const protocol = parsedUrl.protocol.toLowerCase();

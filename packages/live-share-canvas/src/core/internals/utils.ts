@@ -22,7 +22,7 @@ export const TWO_PI: number = Math.PI * 2;
 
 const EPSILON = 0.000001;
 const UNSAFE_HTML_URI_CHARACTERS = /[<>"'`]/;
-const SAFE_IMAGE_URL_PROTOCOLS = new Set(["http:", "https:", "blob:"]);
+const SAFE_IMAGE_URL_PROTOCOLS = new Set(["http:", "https:"]);
 
 /**
  * Generates a unique Id.

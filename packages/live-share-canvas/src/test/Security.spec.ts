@@ -49,4 +49,18 @@ describe("Security", () => {
         assert.equal(sanitizeUserPictureUrl(""), undefined);
         assert.equal(sanitizeUserPictureUrl("   "), undefined);
     });
+
+    it("rejects URLs with embedded credentials", async () => {
+        assert.equal(
+            sanitizeUserPictureUrl("https://user:pass@contoso.com/avatar.png"),
+            undefined
+        );
+    });
+
+    it("rejects URLs with username only", async () => {
+        assert.equal(
+            sanitizeUserPictureUrl("https://user@contoso.com/avatar.png"),
+            undefined
+        );
+    });
 });

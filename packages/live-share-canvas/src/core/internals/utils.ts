@@ -21,7 +21,7 @@ export const TWO_PI: number = Math.PI * 2;
 
 const EPSILON = 0.000001;
 const UNSAFE_HTML_URI_CHARACTERS = /[<>"'`]/;
-const SAFE_IMAGE_URL_PROTOCOLS = new Set(["http:", "https:", "blob:"]);
+const SAFE_IMAGE_URL_PROTOCOLS = new Set(["http:", "https:"]);
 
 /**
  * Generates a unique Id.
@@ -95,6 +95,10 @@ export function sanitizeUserPictureUrl(
     const protocol = parsedUrl.protocol.toLowerCase();
 
     if (!SAFE_IMAGE_URL_PROTOCOLS.has(protocol)) {
+        return undefined;
+    }
+
+    if (parsedUrl.username || parsedUrl.password) {
         return undefined;
     }
 

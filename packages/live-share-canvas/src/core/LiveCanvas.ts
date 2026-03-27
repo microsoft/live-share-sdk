@@ -172,7 +172,10 @@ export abstract class LiveCursor {
      * Initializes a new instance of `LiveCursor`.
      * @param info The cursor info.
      */
-    constructor(public readonly clientId: string, _userInfo?: IUserInfo) {
+    constructor(
+        public readonly clientId: string,
+        _userInfo?: IUserInfo
+    ) {
         this._userInfo = _userInfo;
     }
 
@@ -432,7 +435,10 @@ class BuiltInLiveCursor extends LiveCursor {
         return element;
     }
 
-    constructor(public clientId: string, _userInfo?: IUserInfo) {
+    constructor(
+        public clientId: string,
+        _userInfo?: IUserInfo
+    ) {
         super(clientId, _userInfo);
 
         this._color =

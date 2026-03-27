@@ -42,7 +42,7 @@ export class BuiltInLiveCursor extends LiveCursor {
         );
         borderPath.setAttribute("d", this._arrowPathData ?? "");
         borderPath.setAttribute("stroke", arrowBorderColor);
-        borderPath.setAttribute("stroke-width", "10");
+        borderPath.setAttribute("stroke-width", String(arrowStrokeWidth));
         borderPath.setAttribute("stroke-linejoin", "round");
         borderPath.setAttribute("stroke-opacity", "0.90");
 
@@ -69,6 +69,8 @@ export class BuiltInLiveCursor extends LiveCursor {
         const image = document.createElement("img");
 
         image.setAttribute("src", this.userInfo?.pictureUri ?? "");
+        image.setAttribute("alt", "");
+        image.setAttribute("aria-hidden", "true");
         image.style.width = `${arrowHeight * 1.1}px`;
         image.style.height = `${arrowHeight * 1.1}px`;
         image.style.borderRadius = "50%";

@@ -49,6 +49,20 @@ function findElementsByTagName(
 }
 
 describe("Security", () => {
+    it("rejects URLs with embedded credentials", async () => {
+        assert.equal(
+            sanitizeUserPictureUrl("https://user:pass@contoso.com/avatar.png"),
+            undefined
+        );
+    });
+
+    it("rejects URLs with username only", async () => {
+        assert.equal(
+            sanitizeUserPictureUrl("https://user@contoso.com/avatar.png"),
+            undefined
+        );
+    });
+
     it("sanitizes picture URLs before they are rendered or transmitted", async () => {
         assert.equal(
             sanitizeUserPictureUrl("https://contoso.com/avatar.png"),
@@ -93,6 +107,11 @@ describe("Security", () => {
             assert.equal(
                 imageElements[0].attributes.get("src"),
                 "https://contoso.com/avatar.png"
+            );
+            assert.equal(imageElements[0].attributes.get("alt"), "");
+            assert.equal(
+                imageElements[0].attributes.get("aria-hidden"),
+                "true"
             );
             assert.equal(pathElements.length, 2);
             assert.ok(nameElement);

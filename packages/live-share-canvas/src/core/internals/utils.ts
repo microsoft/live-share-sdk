@@ -99,6 +99,10 @@ export function sanitizeUserPictureUrl(
         return undefined;
     }
 
+    if (parsedUrl.username || parsedUrl.password) {
+        return undefined;
+    }
+
     return parsedUrl.href;
 }
 

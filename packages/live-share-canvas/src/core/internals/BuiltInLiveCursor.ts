@@ -9,10 +9,75 @@ import { ICursorColor } from "./LiveCanvas-interfaces-internal.js";
  */
 export class BuiltInLiveCursor extends LiveCursor {
     private static currentColorIndex = 0;
+    private static readonly svgNamespace = "http://www.w3.org/2000/svg";
 
     private _color: ICursorColor;
     private _arrowPathData?: string;
     private _arrowBounds?: IRect;
+
+    private createArrowElement(
+        arrowStrokeWidth: number,
+        arrowWidth: number,
+        arrowHeight: number,
+        arrowBorderColor: string,
+        backgroundColor: string
+    ): SVGSVGElement {
+        const svg = document.createElementNS(
+            BuiltInLiveCursor.svgNamespace,
+            "svg"
+        );
+        svg.setAttribute(
+            "viewBox",
+            `-${arrowStrokeWidth} -${arrowStrokeWidth} ${
+                2 * arrowStrokeWidth + arrowWidth
+            } ${2 * arrowStrokeWidth + arrowHeight}`
+        );
+        svg.setAttribute("width", `${arrowWidth}`);
+        svg.setAttribute("height", `${arrowHeight}`);
+        svg.style.filter = "drop-shadow(0px 0px 1px rgba(0, 0, 0, .7))";
+
+        const borderPath = document.createElementNS(
+            BuiltInLiveCursor.svgNamespace,
+            "path"
+        );
+        borderPath.setAttribute("d", this._arrowPathData ?? "");
+        borderPath.setAttribute("stroke", arrowBorderColor);
+        borderPath.setAttribute("stroke-width", "10");
+        borderPath.setAttribute("stroke-linejoin", "round");
+        borderPath.setAttribute("stroke-opacity", "0.90");
+
+        const fillPath = document.createElementNS(
+            BuiltInLiveCursor.svgNamespace,
+            "path"
+        );
+        fillPath.setAttribute("d", this._arrowPathData ?? "");
+        fillPath.setAttribute("fill", backgroundColor);
+        fillPath.setAttribute("stroke", backgroundColor);
+        fillPath.setAttribute("stroke-width", "2");
+        fillPath.setAttribute("stroke-linejoin", "round");
+
+        svg.appendChild(borderPath);
+        svg.appendChild(fillPath);
+
+        return svg;
+    }
+
+    private createPictureElement(
+        arrowHeight: number,
+        arrowWidth: number
+    ): HTMLImageElement {
+        const image = document.createElement("img");
+
+        image.setAttribute("src", this.userInfo?.pictureUri ?? "");
+        image.style.width = `${arrowHeight * 1.1}px`;
+        image.style.height = `${arrowHeight * 1.1}px`;
+        image.style.borderRadius = "50%";
+        image.style.margin = `${arrowHeight * 0.75}px 0 0 -${
+            arrowWidth * 0.25
+        }px`;
+
+        return image;
+    }
 
     protected internalRender(): HTMLElement {
         const arrowPath: IPoint[] = [
@@ -53,67 +118,82 @@ export class BuiltInLiveCursor extends LiveCursor {
         );
         const backgroundColor = toCssRgbaColor(this._color.backgroundColor);
 
-        let visualTemplate = `
-            <svg viewbox="-${arrowStrokeWidth} -${arrowStrokeWidth} ${
-                2 * arrowStrokeWidth + arrowWidth
-            } ${2 * arrowStrokeWidth + arrowHeight}"
-                width="${arrowWidth}" height="${arrowHeight}" style="filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, .7)">
-                <path d="${
-                    this._arrowPathData
-                }" stroke="${arrowBorderColor}" stroke-width="10" stroke-linejoin="round" stroke-opacity="0.90"/>
-                <path d="${
-                    this._arrowPathData
-                }" fill="${backgroundColor}" stroke="${backgroundColor}" stroke-width="2" stroke-linejoin="round"/>
-            </svg>`;
-
-        if (this.userInfo) {
-            if (this.userInfo.displayName && !this.userInfo.pictureUri) {
-                visualTemplate += `
-                    <div style="display: flex; align-items: center; box-shadow: 0 0 2px black; background-color: ${backgroundColor};
-                        height: ${arrowHeight}px; color: ${textColor}; border-radius: ${
-                            arrowHeight / 2
-                        }px / 50%;
-                        border-top-left-radius: 4px; padding: 2px 8px; margin: ${
-                            arrowHeight * 0.75
-                        }px 0 0 -${arrowWidth * 0.25}px;
-                        white-space: nowrap; font-size: 12px; font-family: sans-serif">
-                        ${this.userInfo.displayName}
-                    </div>`;
-            } else if (this.userInfo.pictureUri && !this.userInfo.displayName) {
-                visualTemplate += `
-                    <img src="${this.userInfo.pictureUri}" style="width: ${
-                        arrowHeight * 1.1
-                    }px; height: ${arrowHeight * 1.1}px;
-                        border-radius: 50%; box-shadow: 0 0 2px black;
-                        margin: ${arrowHeight * 0.75}px 0 0 -${
-                            arrowWidth * 0.25
-                        }px;">`;
-            } else if (this.userInfo.pictureUri && this.userInfo.displayName) {
-                visualTemplate += `
-                    <div style="display: flex; flex-direction: row; align-items: center; background-color: ${backgroundColor}; color: ${textColor};
-                        border-radius: ${arrowHeight / 2}px / 50%; margin: ${
-                            arrowHeight * 0.75
-                        }px 0 0 -${arrowWidth * 0.25}px;
-                        padding: 2px; white-space: nowrap; font-size: 12px; font-family: sans-serif; box-shadow: 0 0 2px black">
-                        <img src="${this.userInfo.pictureUri}" style="width: ${
-                            arrowHeight * 1.1
-                        }px; height: ${arrowHeight * 1.1}px; border-radius: 50%;">
-                        <div style="padding: 0 8px">${
-                            this.userInfo.displayName
-                        }</div>
-                    </div>`;
-            }
-        }
-
-        const template = document.createElement("template");
-        template["innerHTML"] = visualTemplate;
-
         const element = document.createElement("div");
         element.style.position = "absolute";
         element.style.display = "flex";
         element.style.flexDirection = "row";
 
-        element.appendChild(template.content.cloneNode(true));
+        element.appendChild(
+            this.createArrowElement(
+                arrowStrokeWidth,
+                arrowWidth,
+                arrowHeight,
+                arrowBorderColor,
+                backgroundColor
+            )
+        );
+
+        if (this.userInfo) {
+            if (this.userInfo.displayName && !this.userInfo.pictureUri) {
+                const nameElement = document.createElement("div");
+                nameElement.style.display = "flex";
+                nameElement.style.alignItems = "center";
+                nameElement.style.boxShadow = "0 0 2px black";
+                nameElement.style.backgroundColor = backgroundColor;
+                nameElement.style.height = `${arrowHeight}px`;
+                nameElement.style.color = textColor;
+                nameElement.style.borderRadius = `${arrowHeight / 2}px / 50%`;
+                nameElement.style.borderTopLeftRadius = "4px";
+                nameElement.style.padding = "2px 8px";
+                nameElement.style.margin = `${arrowHeight * 0.75}px 0 0 -${
+                    arrowWidth * 0.25
+                }px`;
+                nameElement.style.whiteSpace = "nowrap";
+                nameElement.style.fontSize = "12px";
+                nameElement.style.fontFamily = "sans-serif";
+                nameElement.textContent = this.userInfo.displayName;
+
+                element.appendChild(nameElement);
+            } else if (this.userInfo.pictureUri && !this.userInfo.displayName) {
+                const imageElement = this.createPictureElement(
+                    arrowHeight,
+                    arrowWidth
+                );
+                imageElement.style.boxShadow = "0 0 2px black";
+
+                element.appendChild(imageElement);
+            } else if (this.userInfo.pictureUri && this.userInfo.displayName) {
+                const container = document.createElement("div");
+                container.style.display = "flex";
+                container.style.flexDirection = "row";
+                container.style.alignItems = "center";
+                container.style.backgroundColor = backgroundColor;
+                container.style.color = textColor;
+                container.style.borderRadius = `${arrowHeight / 2}px / 50%`;
+                container.style.margin = `${arrowHeight * 0.75}px 0 0 -${
+                    arrowWidth * 0.25
+                }px`;
+                container.style.padding = "2px";
+                container.style.whiteSpace = "nowrap";
+                container.style.fontSize = "12px";
+                container.style.fontFamily = "sans-serif";
+                container.style.boxShadow = "0 0 2px black";
+
+                const imageElement = this.createPictureElement(
+                    arrowHeight,
+                    arrowWidth
+                );
+                imageElement.style.margin = "0";
+
+                const nameElement = document.createElement("div");
+                nameElement.style.padding = "0 8px";
+                nameElement.textContent = this.userInfo.displayName;
+
+                container.appendChild(imageElement);
+                container.appendChild(nameElement);
+                element.appendChild(container);
+            }
+        }
 
         return element;
     }

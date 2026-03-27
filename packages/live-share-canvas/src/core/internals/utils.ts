@@ -21,6 +21,8 @@ import {
 export const TWO_PI: number = Math.PI * 2;
 
 const EPSILON = 0.000001;
+const UNSAFE_HTML_URI_CHARACTERS = /[<>"'`]/;
+const SAFE_IMAGE_URL_PROTOCOLS = new Set(["http:", "https:", "blob:"]);
 
 /**
  * Generates a unique Id.
@@ -61,6 +63,53 @@ export function forceIntoRange(n: number, min: number, max: number): number {
     }
 
     return n;
+}
+
+/**
+ * Validates a user profile image URL before it is transmitted or rendered.
+ * Returns `undefined` when the value is empty, malformed, or uses an unsafe scheme.
+ */
+export function sanitizeUserPictureUrl(
+    pictureUri?: string
+): string | undefined {
+    if (!pictureUri) {
+        return undefined;
+    }
+
+    const trimmedPictureUri = pictureUri.trim();
+
+    if (
+        trimmedPictureUri.length === 0 ||
+        UNSAFE_HTML_URI_CHARACTERS.test(trimmedPictureUri)
+    ) {
+        return undefined;
+    }
+
+    let parsedUrl: URL;
+
+    try {
+        parsedUrl = new URL(trimmedPictureUri);
+    } catch {
+        const baseUrl = globalThis.location?.href;
+
+        if (!baseUrl) {
+            return undefined;
+        }
+
+        try {
+            parsedUrl = new URL(trimmedPictureUri, baseUrl);
+        } catch {
+            return undefined;
+        }
+    }
+
+    const protocol = parsedUrl.protocol.toLowerCase();
+
+    if (!SAFE_IMAGE_URL_PROTOCOLS.has(protocol)) {
+        return undefined;
+    }
+
+    return parsedUrl.href;
 }
 
 /**

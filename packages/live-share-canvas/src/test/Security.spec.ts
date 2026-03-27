@@ -74,6 +74,7 @@ describe("Security", () => {
         );
         assert.equal(
             sanitizeUserPictureUrl(
+                // eslint-disable-next-line no-useless-escape
                 'https://contoso.com/avatar.png\" onerror=\"alert(1)'
             ),
             undefined
@@ -98,7 +99,10 @@ describe("Security", () => {
                 cursor.renderedElement as unknown as MockElement;
             const imageElements = findElementsByTagName(renderedElement, "img");
             const pathElements = findElementsByTagName(renderedElement, "path");
-            const nameElement = findElementsByTagName(renderedElement, "div").find(
+            const nameElement = findElementsByTagName(
+                renderedElement,
+                "div"
+            ).find(
                 (element) =>
                     element.textContent === '<img src=x onerror=alert("xss")>'
             );

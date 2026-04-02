@@ -9,7 +9,7 @@
         "@fluentui/react-icons": "^2.0.202",
         "@fluentui/react-theme": "^9.1.5",
         "@fluidframework/azure-client": "^1.1.1",
-        "@microsoft/live-share": "1.4.1",
+        "@microsoft/live-share": "1.4.2",
         "@microsoft/teams-js": "^2.16.0",
         "fluid-framework": "^1.3.6",
         "prop-types": "^15.8.1",
@@ -45,7 +45,7 @@
         "build": "vite build",
         "preview": "vite preview",
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern",
-        "postinstall":"node ../../../ensure-packages-built.js"
+        "postinstall": "node ../../../ensure-packages-built.js"
     },
     "browserslist": {
         "production": [

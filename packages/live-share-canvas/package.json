@@ -21,7 +21,7 @@
         "fluid-framework": "^1.3.6",
         "mocha": "^10.2.0",
         "nyc": "^15.1.0",
-        "ts-mocha": "^10.0.0",
+        "ts-mocha": "^11.1.0",
         "typescript": "^5.0.4"
     },
     "peerDependencies": {

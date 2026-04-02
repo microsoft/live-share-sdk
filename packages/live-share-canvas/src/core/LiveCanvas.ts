@@ -37,6 +37,7 @@ import {
     SharedMapStorageSolution,
     StorageSolutionEvents,
     createUndoRedoStacks,
+    sanitizeUserPictureUrl,
     undoRedo,
 } from "./internals/index.js";
 import { ITree, SharedObjectKind, SharedTree, TreeView } from "fluid-framework";
@@ -158,9 +159,11 @@ export class LiveCanvasClass extends LiveDataObject {
     };
 
     private getLocalUserPictureUrl(): string | undefined {
-        return this.onGetLocalUserPictureUrl
+        const pictureUri = this.onGetLocalUserPictureUrl
             ? this.onGetLocalUserPictureUrl()
             : undefined;
+
+        return sanitizeUserPictureUrl(pictureUri);
     }
 
     private setupWetInkProcessing(): void {
@@ -567,7 +570,9 @@ export class LiveCanvasClass extends LiveDataObject {
                 if (this._inkingManager) {
                     const userInfo: IUserInfo = {
                         displayName: clientInfo?.displayName,
-                        pictureUri: eventUserInfo?.pictureUri,
+                        pictureUri: sanitizeUserPictureUrl(
+                            eventUserInfo?.pictureUri
+                        ),
                     };
                     const liveCursor = this.getCursor(clientId, userInfo);
 

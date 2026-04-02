@@ -14,12 +14,12 @@
         "start:https": "vite --config vite.https-config.js",
         "start:server": "npx tinylicious@latest",
         "doctor": "eslint src/**/*.{j,t}s{,x} --fix --no-error-on-unmatched-pattern",
-        "postinstall":"node ../../../ensure-packages-built.js"
+        "postinstall": "node ../../../ensure-packages-built.js"
     },
     "dependencies": {
         "@fluidframework/azure-client": "^1.1.1",
-        "@microsoft/live-share": "1.4.1",
-        "@microsoft/live-share-canvas": "1.4.1",
+        "@microsoft/live-share": "1.4.2",
+        "@microsoft/live-share-canvas": "1.4.2",
         "@microsoft/teams-js": "^2.16.0",
         "fluid-framework": "^1.3.6"
     },

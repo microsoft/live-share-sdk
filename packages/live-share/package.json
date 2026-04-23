@@ -15,7 +15,7 @@
         "test:race": "node test-for-race-conditions.js"
     },
     "dependencies": {
-        "uuid": "^9.0.0"
+        "uuid": "^14.0.0"
     },
     "devDependencies": {
         "@fluidframework/azure-client": "^1.1.1",

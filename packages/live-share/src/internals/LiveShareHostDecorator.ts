@@ -13,7 +13,7 @@ import {
 } from "./type-guards.js";
 import { waitForResult } from "./utils.js";
 
-const EXPONENTIAL_BACKOFF_SCHEDULE = [100, 200, 200, 400, 600];
+const EXPONENTIAL_BACKOFF_SCHEDULE = [200, 200, 400, 800, 1000];
 const CACHE_LIFETIME = 4 * 1000;
 
 /**

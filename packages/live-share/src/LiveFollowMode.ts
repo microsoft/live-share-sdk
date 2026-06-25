@@ -1025,6 +1025,7 @@ export class LiveFollowModeClass<TData = any> extends LiveDataObject<{
             presentingUserIdLiveStateHandle?.get(),
             presenceHandle?.get(),
         ]);
+        // TODO: remove these?
         liveState?.__dangerouslySetLiveRuntime(this.liveRuntime);
         livePresence?.__dangerouslySetLiveRuntime(this.liveRuntime);
         this._presentingUserIdState = liveState;

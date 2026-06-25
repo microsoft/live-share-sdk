@@ -3,6 +3,7 @@ import {
     DataObjectTypes,
     IDataObjectProps,
 } from "@fluidframework/aqueduct/legacy";
+import { IFluidDataStoreContext } from "@fluidframework/runtime-definitions/legacy";
 import { LiveShareRuntime } from "./LiveShareRuntime.js";
 import {
     IClientInfo,
@@ -35,7 +36,7 @@ export abstract class LiveDataObject<
     /**
      * @hidden
      */
-    private _liveRuntime: LiveShareRuntime | null = null;
+    private _liveRuntime: LiveShareRuntime | undefined;
 
     /**
      * @hidden
@@ -50,7 +51,7 @@ export abstract class LiveDataObject<
      */
     protected get liveRuntime(): LiveShareRuntime {
         UnexpectedError.assert(
-            this._liveRuntime !== null,
+            this._liveRuntime !== undefined,
             `LiveDataObject:liveRuntime:${this.debugInfo}`,
             `LiveShareRuntime not initialized. Ensure your Fluid \`ContainerSchema\` was first wrapped inside of \`getLiveContainerSchema()\` before calling \`client.getContainer()\` / \`client.createContainer()\` from your \`AzureClient\` (or equivalent) instance.\nAlternatively, you can use the \`.join()\` in \`LiveShareClient\`, which does this for you.\nIf you are using \`LiveShareClient\` and are still encountering this issue, please report this issue at ${LiveShareReportIssueLink}.`
         );
@@ -86,6 +87,11 @@ export abstract class LiveDataObject<
         this.runtime.once("dispose", () => {
             this.dispose();
         });
+
+        // This should be provided unless using createChildInstance which will set it afterward.
+        this._liveRuntime = LiveDataObject.__dangerousLiveRuntime.get(
+            this.context
+        );
     }
 
     /**
@@ -121,6 +127,15 @@ export abstract class LiveDataObject<
             this._allowedRoles ?? []
         );
     }
+
+    /**
+     * @hidden
+     * Dependency injection setter for `LiveShareRuntime`.
+     */
+    public static __dangerousLiveRuntime: WeakMap<
+        IFluidDataStoreContext,
+        LiveShareRuntime
+    > = new WeakMap();
 
     /**
      * @hidden

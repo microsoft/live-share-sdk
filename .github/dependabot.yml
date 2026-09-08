@@ -19,3 +19,12 @@ updates:
       - "@microsoft/teams-js"
     # Updates both the package-lock and package.json, not just package-lock
     versioning-strategy: increase
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    groups:
+      github-actions:
+        patterns: ["*"]
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7

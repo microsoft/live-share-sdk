@@ -10,15 +10,15 @@ import {
     screenToViewport,
     viewportToScreen,
     ISegment,
-} from "../core";
-import { assertObjectsEqual } from "./Utils.spec";
+} from "../core/index.js";
+import { assertObjectsEqual } from "./Utils.spec.js";
 import {
     doRectanglesOverlap,
     getSegmentsIntersection,
     isPointInsideRectangle,
     isRectangleInsideRectangle,
     segmentsMayIntersect,
-} from "../core/internals";
+} from "../core/internals/index.js";
 
 const testColor: IColor = { r: 193, g: 221, b: 202 };
 const serializedTestColor = "#C1DDCA";

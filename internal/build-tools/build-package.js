@@ -1,10 +1,9 @@
 /**
- * Tool used to consolidate building package with different outputs of esm, cjs, or cjs with tests included.
- * Invocation with all arguments looks like `node <path>/build-package.js --cjs --esm --test`
+ * Tool used to consolidate building package with different outputs of esm, or esm with tests included.
+ * Invocation with all arguments looks like `node <path>/build-package.js --esm --test`
  */
 
 const childProcess = require("child_process");
-const fs = require("fs");
 const { argv } = require("process");
 
 async function build(tsConfig) {
@@ -30,23 +29,15 @@ async function build(tsConfig) {
     });
 }
 
-function addCJSPackageJsonOverride(type) {
-    fs.writeFileSync(
-        `./bin/${type}/package.json`,
-        JSON.stringify({ type: "commonjs" })
-    );
-}
-
 const esmBuildTask = argv.includes("--esm")
     ? build("tsconfig.json")
     : Promise.resolve();
 
-const cjsBuildTask = argv.includes("--cjs")
-    ? build("tsconfig.cjs.json").then(() => addCJSPackageJsonOverride("cjs"))
-    : Promise.resolve();
-
 const testBuildTask = argv.includes("--test")
-    ? build("tsconfig.test.json").then(() => addCJSPackageJsonOverride("test"))
+    ? build("tsconfig.test.json")
     : Promise.resolve();
 
-Promise.all([esmBuildTask, cjsBuildTask, testBuildTask]);
+Promise.all([esmBuildTask, testBuildTask]).catch((code) => {
+    console.error(`build failed in ${process.cwd()} (tsc exit ${code})`);
+    process.exit(typeof code === "number" && code !== 0 ? code : 1);
+});

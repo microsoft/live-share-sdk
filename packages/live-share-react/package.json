@@ -4,22 +4,17 @@
     "description": "Build collaborative React apps using Microsoft's Fluid & Live Share frameworks with ease.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "main": "./bin/cjs/index.js",
     "module": "./bin/esm/index.js",
     "types": "./bin/esm/index.d.ts",
     "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
-        "build": "node  ../../internal/build-tools/build-package.js --cjs --esm",
+        "build": "node  ../../internal/build-tools/build-package.js --esm",
         "typecheck": "tsc"
     },
     "exports": {
         "./package.json": "./package.json",
         ".": {
-            "require": {
-                "types": "./bin/cjs/index.d.ts",
-                "default": "./bin/cjs/index.js"
-            },
             "import": {
                 "types": "./bin/esm/index.d.ts",
                 "default": "./bin/esm/index.js"

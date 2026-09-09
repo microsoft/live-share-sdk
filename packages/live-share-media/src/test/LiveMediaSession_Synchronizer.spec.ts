@@ -7,7 +7,7 @@ import {
     TestLiveMediaSession,
     TestMediaPlayer,
     TestMediaTimeStampProvider,
-} from "./TestUtils";
+} from "./TestUtils.js";
 import { strict as assert } from "assert";
 import {
     getContainerEntryPointBackCompat,
@@ -35,12 +35,12 @@ import {
     ExtendedMediaSessionActionDetails,
     ExtendedMediaSessionActionIgnore,
     ExtendedMediaSessionActionSource,
-} from "../MediaSessionExtensions";
+} from "../MediaSessionExtensions.js";
 import {
     IMediaPlayerSynchronizerEvent,
     MediaPlayerSynchronizer,
     MediaPlayerSynchronizerEvents,
-} from "../MediaPlayerSynchronizer";
+} from "../MediaPlayerSynchronizer.js";
 import {
     ITestObjectProviderOptions,
     describeCompat,

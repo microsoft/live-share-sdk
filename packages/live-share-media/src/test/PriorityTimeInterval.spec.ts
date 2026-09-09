@@ -5,7 +5,7 @@
 
 import "mocha";
 import { strict as assert } from "assert";
-import { PriorityTimeInterval } from "../internals/PriorityTimeInterval";
+import { PriorityTimeInterval } from "../internals/PriorityTimeInterval.js";
 
 describe("PriorityTimeInterval", () => {
     it("Should scale properly with default values in constructor", () => {

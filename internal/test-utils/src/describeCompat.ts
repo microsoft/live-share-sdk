@@ -11,9 +11,9 @@ import {
 import {
     CompatApis,
     getVersionedTestObjectProviderFromApis,
-} from "./compatUtils";
-import { ContainerRuntimeApi, DataRuntimeApi, LoaderApi } from "./testApi";
-import { LocalDriverApi } from "./localDriverApi";
+} from "./compatUtils.js";
+import { ContainerRuntimeApi, DataRuntimeApi, LoaderApi } from "./testApi.js";
+import { LocalDriverApi } from "./localDriverApi.js";
 
 /*
  * Mocha Utils for test to generate the compat variants.

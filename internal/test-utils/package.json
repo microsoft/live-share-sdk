@@ -58,5 +58,15 @@
         "prettier": "^3.3.3",
         "rimraf": "^4.4.0",
         "typescript": "~5.5.3"
+    },
+    "type": "module",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "import": {
+                "types": "./bin/index.d.ts",
+                "default": "./bin/index.js"
+            }
+        }
     }
 }

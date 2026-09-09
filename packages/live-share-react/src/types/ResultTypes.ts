@@ -77,8 +77,15 @@ export interface ILiveShareContainerResults extends IAzureContainerResults {
 export interface IUseSharedMapResults<TData> {
     /**
      * The Fluid `SharedMap` object.
+     *
+     * @remarks
+     * Previously typed as `Map<string, TData> & SharedMap`. Fluid 3.0 changed `ISharedMap` to
+     * extend Fluid's own `FluidMap` rather than the built-in `Map`, so that intersection is no
+     * longer satisfiable — and `FluidMap` cannot be named here because it does not exist in
+     * Fluid 2.x, which we still support. Use the typed `getEntry` / `setEntry` callbacks below
+     * for value-typed access.
      */
-    sharedMap: (Map<string, TData> & SharedMap) | undefined;
+    sharedMap: SharedMap | undefined;
     /**
      * Callback method to get entries in the `SharedMap`.
      */

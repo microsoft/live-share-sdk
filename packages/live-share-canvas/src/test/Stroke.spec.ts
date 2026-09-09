@@ -1,12 +1,12 @@
 import "mocha";
 import { strict as assert } from "assert";
-import { Stroke } from "../core/Stroke";
+import { Stroke } from "../core/Stroke.js";
 import {
     assertPointArraysEqual,
     copyPointArrayAndDuplidateEachPoint,
     reducePointArrayPrecision,
-} from "./Utils.spec";
-import { IPointerPoint } from "../core";
+} from "./Utils.spec.js";
+import { IPointerPoint } from "../core/index.js";
 
 const testPoints: IPointerPoint[] = [
     {

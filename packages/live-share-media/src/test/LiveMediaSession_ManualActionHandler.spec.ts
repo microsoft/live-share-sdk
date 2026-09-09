@@ -3,7 +3,10 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { TestLiveMediaSession, TestMediaTimeStampProvider } from "./TestUtils";
+import {
+    TestLiveMediaSession,
+    TestMediaTimeStampProvider,
+} from "./TestUtils.js";
 import { strict as assert } from "assert";
 import {
     ITestObjectProvider,
@@ -29,8 +32,8 @@ import {
 import {
     ExtendedMediaMetadata,
     ExtendedMediaSessionActionDetails,
-} from "../MediaSessionExtensions";
-import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
+} from "../MediaSessionExtensions.js";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator.js";
 import {
     ITestObjectProviderOptions,
     describeCompat,

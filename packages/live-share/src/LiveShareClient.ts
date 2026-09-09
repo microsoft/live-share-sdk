@@ -26,7 +26,7 @@ import { TestLiveShareHost } from "./TestLiveShareHost.js";
 import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils.js";
 import { ExpectedError, UnexpectedError } from "./errors.js";
-import { FluidCompatibilityMode } from "./internals/consts.js";
+import { FluidOldestSupportedClient } from "./internals/consts.js";
 import { isTestHostWithInsecureTokenProvider } from "./internals/type-guards.js";
 
 /**
@@ -357,7 +357,7 @@ export class LiveShareClient extends BaseLiveShareClient {
                 ...(await client.getContainer(
                     containerInfo.containerId,
                     fluidContainerSchema,
-                    FluidCompatibilityMode
+                    FluidOldestSupportedClient
                 )),
             };
         } else if (
@@ -395,7 +395,7 @@ export class LiveShareClient extends BaseLiveShareClient {
         // Create and initialize container
         const { container, services } = await client.createContainer(
             fluidContainerSchema,
-            FluidCompatibilityMode
+            FluidOldestSupportedClient
         );
 
         await this.addTurboFolder(container);
@@ -420,7 +420,7 @@ export class LiveShareClient extends BaseLiveShareClient {
                 ...(await client.getContainer(
                     containerInfo.containerId!,
                     fluidContainerSchema,
-                    FluidCompatibilityMode
+                    FluidOldestSupportedClient
                 )),
             };
         } else {

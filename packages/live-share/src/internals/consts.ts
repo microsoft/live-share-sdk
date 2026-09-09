@@ -3,8 +3,6 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { CompatibilityMode } from "@fluidframework/azure-client";
-
 /**
  * List of telemetry events.
  * @hidden
@@ -45,6 +43,18 @@ export const ObjectSynchronizerEvents = {
 export const LiveShareReportIssueLink = "https://aka.ms/teamsliveshare/issue";
 
 /**
+ * The oldest Fluid client version that must be able to access documents we write.
+ *
+ * @remarks
+ * Fluid 3.0 removed the legacy `CompatibilityMode` values (`"1"` / `"2"`), so this must be a
+ * SemVer string. `"2.0.0"` preserves collaboration with Fluid 2.0.0-era clients and matches
+ * Fluid 3's own default.
+ *
+ * Deliberately left unannotated: the corresponding Fluid type is named
+ * `MinimumVersionForCollab` in 2.102-2.115 and `OldestSupportedClientVersion` from 2.116
+ * onward, so naming either one would break against part of our supported range. The inferred
+ * literal type `"2.0.0"` satisfies both.
+ *
  * @hidden
  */
-export const FluidCompatibilityMode: CompatibilityMode = "2";
+export const FluidOldestSupportedClient = "2.0.0";

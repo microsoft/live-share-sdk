@@ -13,10 +13,10 @@
     "license": "ISC",
     "dependencies": {
         "@microsoft/live-share": "file:/../../../packages/live-share",
-        "fluid-framework": ">=2.40 <2.120"
+        "fluid-framework": ">=2.102 <2.120 || >=3.0.0 <3.10.0"
     },
     "devDependencies": {
-        "@fluidframework/test-runtime-utils": ">=2.40 <2.120",
+        "@fluidframework/test-runtime-utils": ">=2.102 <2.120 || >=3.0.0 <3.10.0",
         "@types/node": "^20.14.14"
     }
 }

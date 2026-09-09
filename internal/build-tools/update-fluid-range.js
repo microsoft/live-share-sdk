@@ -6,16 +6,23 @@
  *   node internal/build-tools/update-fluid-range.js
  * The repo root is auto-detected via git; no CLI flags required.
  * This writes changes in place (no dry-run). Commit/revert as needed after inspection.
+ *
+ * DEFAULT_FROM_RANGE must be the exact range string currently present in package.json
+ * files (whitespace-trimmed, but otherwise character-for-character, including any `||`
+ * clauses). A near-miss silently matches nothing instead of failing.
+ *
+ * Always use `||` to separate range clauses, never a single `|` — a single pipe fails when
+ * consumers install with yarn.
  */
 
 const fs = require("fs");
 const path = require("path");
 const { getRootFolder } = require("./utils");
 
-const DEFAULT_FROM_RANGE = ">=2.40 <2.110";
-const DEFAULT_TO_RANGE = ">=2.40 <2.120";
-const DEFAULT_VERSION_FROM = "2.0.0-internal.17";
-const DEFAULT_VERSION_TO = "2.0.0-internal.18";
+const DEFAULT_FROM_RANGE = ">=2.40 <2.120";
+const DEFAULT_TO_RANGE = ">=2.102 <2.120 || >=3.0.0 <3.10.0";
+const DEFAULT_VERSION_FROM = "2.0.0-internal.18";
+const DEFAULT_VERSION_TO = "2.0.0-internal.19";
 const INTERNAL_PKG_PREFIX = "@microsoft/live-share";
 const IGNORED_FOLDERS = new Set([
     "node_modules",

@@ -4,8 +4,6 @@
     "description": "Live Share integration package for Azure Communication Services.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
-    "module": "./bin/esm/index.js",
-    "types": "./bin/esm/index.d.ts",
     "type": "module",
     "scripts": {
         "clean": "npx shx rm -rf bin",
@@ -17,10 +15,7 @@
     "exports": {
         "./package.json": "./package.json",
         ".": {
-            "import": {
-                "types": "./bin/esm/index.d.ts",
-                "default": "./bin/esm/index.js"
-            }
+            "import": "./bin/esm/index.js"
         }
     },
     "devDependencies": {

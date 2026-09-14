@@ -10,8 +10,6 @@
     "license": "MIT",
     "author": "Microsoft and contributors",
     "sideEffects": false,
-    "main": "./bin/index.js",
-    "types": "./bin/index.d.ts",
     "scripts": {
         "build": "tsc -p tsconfig.json",
         "eslint": "eslint --format stylish src",
@@ -63,10 +61,7 @@
     "exports": {
         "./package.json": "./package.json",
         ".": {
-            "import": {
-                "types": "./bin/index.d.ts",
-                "default": "./bin/index.js"
-            }
+            "import": "./bin/index.js"
         }
     }
 }

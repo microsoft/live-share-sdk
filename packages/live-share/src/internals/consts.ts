@@ -47,8 +47,8 @@ export const LiveShareReportIssueLink = "https://aka.ms/teamsliveshare/issue";
  *
  * @remarks
  * Fluid 3.0 removed the legacy `CompatibilityMode` values (`"1"` / `"2"`), so this must be a
- * SemVer string. `"2.0.0"` preserves collaboration with Fluid 2.0.0-era clients and matches
- * Fluid 3's own default.
+ * SemVer string. Fluid 3 has no default — a value must always be supplied — and `"2.0.0"` is
+ * the lowest version it supports, preserving collaboration with Fluid 2.0.0-era clients.
  *
  * Deliberately left unannotated: the corresponding Fluid type is named
  * `MinimumVersionForCollab` in 2.102-2.115 and `OldestSupportedClientVersion` from 2.116

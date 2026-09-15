@@ -10,9 +10,6 @@
  * DEFAULT_FROM_RANGE must be the exact range string currently present in package.json
  * files (whitespace-trimmed, but otherwise character-for-character, including any `||`
  * clauses). A near-miss silently matches nothing instead of failing.
- *
- * Always use `||` to separate range clauses, never a single `|` — a single pipe fails when
- * consumers install with yarn.
  */
 
 const fs = require("fs");

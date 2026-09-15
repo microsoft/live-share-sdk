@@ -257,13 +257,13 @@ Measured behaviour of a consumer against Fluid 3.0.0:
 | `moduleResolution: Bundler`             | works, even inside a `type: commonjs` package  | 7 TypeScript samples                 |
 | `moduleResolution: Node10`              | **TS2307** on every Fluid import               | our 5 `tsconfig.cjs.json`            |
 | `moduleResolution: Node16`, CJS context | **TS1479** "cannot be imported with `require`" | any CJS consumer of ours             |
-| `require("fluid-framework")` at runtime | works on Node >= 22.12 (tested v24.14.0)       | fails on Node 18 / 20                |
+| `require("fluid-framework")` at runtime | works on Node >= 20.19 (tested v24.14.0)       | fails below Node 20.19               |
 
 ---
 
 ## 5. The CJS build cannot support Fluid 3
 
-This is a hard constraint, not a matter of effort.
+This is a hard constraint on the build, not a matter of effort.
 
 - All five `packages/*/tsconfig.cjs.json` use `"module": "CommonJS"` + `"moduleResolution": "Node10"`.
   Fluid 3 removed its Node10 type-declaration entrypoints, so every Fluid import fails TS2307.
@@ -277,9 +277,12 @@ So `bin/cjs` cannot be produced against Fluid 3 with any tsc configuration. A CJ
 could in principle still be _emitted_ via a separate transpiler, but its `.d.ts` would still
 reference ESM-only Fluid types and would fail for the consumer — so this does not rescue it.
 
-**Conclusion: CJS consumers of Live Share cannot use Fluid 3.** This is imposed by Fluid, not
-by us. Note also that `exports` maps cannot express a per-format peer-dependency range, so a
-"CJS means Fluid 2" split is a documented support-matrix statement that npm cannot enforce.
+**Conclusion: we cannot ship a tsc-built CJS artifact against Fluid 3.** This is imposed by
+Fluid, not by us. CJS _consumers_ are not absolutely blocked — Node >= 20.19 and TypeScript
+5.9+ support `require(esm)`, which is enough to consume ESM-only packages — but that is a
+consumer-side capability, not something our CJS build can provide. Note also that `exports`
+maps cannot express a per-format peer-dependency range, so a "CJS means Fluid 2" split is a
+documented support-matrix statement that npm cannot enforce.
 
 ---
 
@@ -345,8 +348,10 @@ harness will never exercise 3.x even in a Fluid-3 lane.
 - **ESM consumers** — get v2 and v3 support, no action required beyond the floor raise.
 - **Bundler-based apps** (webpack, vite, Next.js) — unaffected; `moduleResolution: bundler`
   resolves Fluid 3 fine even from a `type: commonjs` package.
-- **CJS consumers** — cannot move to Fluid 3. They also need Node >= 22.12 for `require(ESM)`
-  to work at all at runtime. No `engines` field is declared in any of our packages today.
+- **CJS consumers** — cannot consume a CJS build of Live Share, because we no longer ship one.
+  They can still use the ESM packages via `require(esm)` on Node >= 20.19. Below that version
+  the import fails at runtime rather than at install time, because none of our packages declare
+  an `engines` field.
 - **Anyone on Fluid 2.40 – 2.115** — dropped by the floor raise.
 
 ---

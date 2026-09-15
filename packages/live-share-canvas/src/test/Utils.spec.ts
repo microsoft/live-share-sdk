@@ -1,6 +1,6 @@
 import "mocha";
 import { strict as assert } from "assert";
-import { Stroke, IPointerPoint, IColor, IRect } from "../core";
+import { Stroke, IPointerPoint, IColor, IRect } from "../core/index.js";
 
 export const coordinateSerializationPrecision = Stroke[
     "coordinateSerializationPrecision"

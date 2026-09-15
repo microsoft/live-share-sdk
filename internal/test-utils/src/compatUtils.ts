@@ -22,9 +22,9 @@ import {
     TestObjectProvider,
 } from "@fluidframework/test-utils/internal";
 import { mixinAttributor } from "@fluid-experimental/attributor";
-import { ContainerRuntimeApi, DataRuntimeApi, LoaderApi } from "./testApi";
-import { LocalServerTestDriver } from "./localServerTestDriver";
-import { LocalDriverApi } from "./localDriverApi";
+import { ContainerRuntimeApi, DataRuntimeApi, LoaderApi } from "./testApi.js";
+import { LocalServerTestDriver } from "./localServerTestDriver.js";
+import { LocalDriverApi } from "./localDriverApi.js";
 
 /**
  * @internal

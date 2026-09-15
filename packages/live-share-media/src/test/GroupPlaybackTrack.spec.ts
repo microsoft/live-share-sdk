@@ -9,8 +9,8 @@ import {
     GroupPlaybackTrack,
     GroupPlaybackTrackEvents,
     IPlaybackTrackChangeEvent,
-} from "../internals/GroupPlaybackTrack";
-import { ExtendedMediaMetadata } from "../MediaSessionExtensions";
+} from "../internals/GroupPlaybackTrack.js";
+import { ExtendedMediaMetadata } from "../MediaSessionExtensions.js";
 import { Deferred } from "@microsoft/live-share/internal";
 
 describe("GroupPlaybackTrack", () => {

@@ -3,8 +3,8 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 
-import { IMediaPlayer } from "../IMediaPlayer";
-import { LiveMediaSession } from "../LiveMediaSession";
+import { IMediaPlayer } from "../IMediaPlayer.js";
+import { LiveMediaSession } from "../LiveMediaSession.js";
 import { ITimestampProvider } from "@microsoft/live-share";
 import {
     Deferred,

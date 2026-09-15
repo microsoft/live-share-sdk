@@ -9,16 +9,16 @@ import {
     CoordinationWaitPoint,
     ExtendedMediaMetadata,
     ExtendedMediaSessionPlaybackState,
-} from "../MediaSessionExtensions";
+} from "../MediaSessionExtensions.js";
 import {
     GroupPlaybackPosition,
     ICurrentPlaybackPosition,
-} from "../internals/GroupPlaybackPosition";
-import { GroupPlaybackRate } from "../internals/GroupPlaybackRate";
+} from "../internals/GroupPlaybackPosition.js";
+import { GroupPlaybackRate } from "../internals/GroupPlaybackRate.js";
 import {
     GroupTransportState,
     ITransportState,
-} from "../internals/GroupTransportState";
+} from "../internals/GroupTransportState.js";
 import { TestLiveShareHost } from "@microsoft/live-share";
 import {
     IRuntimeSignaler,
@@ -26,9 +26,9 @@ import {
     MockLiveShareRuntime,
     MockTokenProvider,
 } from "@microsoft/live-share/internal";
-import { IMediaPlayerState } from "../LiveMediaSessionCoordinator";
-import { GroupPlaybackTrack } from "../internals/GroupPlaybackTrack";
-import { PriorityTimeInterval } from "../internals/PriorityTimeInterval";
+import { IMediaPlayerState } from "../LiveMediaSessionCoordinator.js";
+import { GroupPlaybackTrack } from "../internals/GroupPlaybackTrack.js";
+import { PriorityTimeInterval } from "../internals/PriorityTimeInterval.js";
 
 function createTransportUpdate(
     runtime: IRuntimeSignaler,

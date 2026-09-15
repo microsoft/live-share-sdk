@@ -27,10 +27,6 @@ jobs:
 
             - run: npm run prepare # will trigger a build of all packages
 
-            - name: "test live-share with cjs app"
-              run: npm run test
-              working-directory: internal/usage-test/cjs-test
-
             - name: "test live-share with esm app"
               run: npm run test
               working-directory: internal/usage-test/esm-test

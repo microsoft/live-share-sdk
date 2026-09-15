@@ -1,6 +1,9 @@
 import "mocha";
 import { strict as assert } from "assert";
-import { BuiltInLiveCursor, sanitizeUserPictureUrl } from "../core/internals";
+import {
+    BuiltInLiveCursor,
+    sanitizeUserPictureUrl,
+} from "../core/internals/index.js";
 
 class MockElement {
     public readonly children: MockElement[] = [];

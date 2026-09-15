@@ -81,7 +81,7 @@ export class LiveTelemetryLogger {
                 ),
                 error: this.parseErrorMessage(error),
             };
-            this._runtime.logger.send(evt, LogLevel.default);
+            this._runtime.logger.send(evt, LogLevel.info);
         }
     }
 
@@ -105,7 +105,7 @@ export class LiveTelemetryLogger {
                 ),
                 error: this.parseErrorMessage(error),
             };
-            this._runtime.logger.send(evt, LogLevel.error);
+            this._runtime.logger.send(evt, LogLevel.essential);
         }
     }
 
@@ -132,7 +132,7 @@ export class LiveTelemetryLogger {
                 ),
                 error: this.parseErrorMessage(error),
             };
-            this._runtime.logger.send(evt, LogLevel.error);
+            this._runtime.logger.send(evt, LogLevel.essential);
         }
     }
 

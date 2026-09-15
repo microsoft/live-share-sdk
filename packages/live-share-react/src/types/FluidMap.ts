@@ -61,7 +61,6 @@ export interface FluidIterableIterator<T> extends FluidIterable<T> {
      * When there are remaining elements, returns `\{ value: T; done?: false \}`.
      * When the iteration is complete, returns `\{ value: any; done: true \}`.
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     next(): { value: T; done?: false } | { value: any; done: true };
 }
 
@@ -100,7 +99,6 @@ export interface FluidReadonlyMap<K, V> {
     forEach(
         callbackfn: (value: V, key: K, map: FluidReadonlyMap<K, V>) => void,
         // Typing inherited from ReadonlyMap.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         thisArg?: any
     ): void;
 
@@ -160,7 +158,6 @@ export interface FluidMap<K, V> extends FluidReadonlyMap<K, V> {
     forEach(
         callbackfn: (value: V, key: K, map: FluidMap<K, V>) => void,
         // Typing inherited from Map.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         thisArg?: any
     ): void;
 

@@ -106,16 +106,32 @@ build.
 #### `useSharedMap` public type change
 
 `IUseSharedMapResults<TData>.sharedMap` changes from `(Map<string, TData> & SharedMap) | undefined`
-to `SharedMap | undefined`. `FluidMap` cannot be named in its place because it does not exist in
-Fluid 2.x, which we still support. Runtime behaviour is unchanged; consumers wanting value-typed
-access should use the `getEntry` / `setEntry` callbacks.
+to `TypedSharedMap<TData> | undefined`. Because Fluid 2.x does not export
+`FluidMap`, `packages/live-share-react/src/types/FluidMap.ts` contains a local copy of
+[Fluid's map and iterable interfaces](https://github.com/microsoft/FluidFramework/blob/main/packages/common/core-interfaces/src/fluidMap.ts).
+The copy retains its MIT license and is not re-exported from the package entry point, avoiding
+name collisions with Fluid 3.x exports.
 
-This needs to be called out in the release notes, because it **loosens types rather than
-breaking builds**: `ISharedMap.get` is declared `get<T = any>(key: string): T | undefined`, so
-existing consumer code like `sharedMap.get(key)` still compiles but now yields `any` instead of
-`TData`. Downstream type errors therefore disappear silently rather than surfacing at the call
-site. Consumers should either pass the type argument explicitly (`sharedMap.get<TData>(key)`) or
-switch to `getEntry`.
+Following the [review discussion](https://github.com/microsoft/live-share-sdk/pull/889#discussion_r3981502313),
+`TypedSharedMap` places `delete(key): boolean` and
+`set(key, value): TypedSharedMap<TData>` overrides before `FluidMap<string, TData> & SharedMap`.
+These preserve boolean deletion results and chaining, including DDS members after `set`.
+The local copy retains upstream's `void` mutator returns: changing those in the copy itself
+makes Fluid 3's `SharedMap` incompatible through the map argument of its `forEach` callback.
+That callback's third argument consequently retains Fluid's map interface and `void` mutator
+returns; use the outer `sharedMap` for boolean deletion results or chaining inside a callback.
+Keeping `FluidMap` before `SharedMap` preserves `TData` inference for `get`,
+`forEach`, `values`, and `entries`. Direct `for...of sharedMap` retains the original
+intersection's untyped value inference; iterate `sharedMap.entries()` for typed entries.
+Runtime behaviour is unchanged, as are the
+`getEntry` / `setEntry` callbacks. The underlying `SharedMap` generic `set` overload still
+accepts other value types, as it did before; use `setEntry` for a `TData`-constrained write.
+
+**Release-notes item:** the returned map is no longer assignable to the built-in
+`Map<string, TData>` type on Fluid 3.x. Consumers requiring a built-in `Map` should use
+`new Map(sharedMap)` after checking that `sharedMap` is defined. This creates a local snapshot,
+not a synchronized DDS. A Fluid 3.1 patch will not remove the need for this compatibility
+approach while Fluid 2.x remains supported.
 
 ### The one required source change
 
@@ -421,7 +437,9 @@ Done on this branch:
 6. [x] `.js` extensions added to 39 relative imports across test-utils, canvas and media.
 7. [x] `package-lock.json` regenerated; Fluid resolved to 3.0.1.
 8. [x] `LogLevel.default` / `LogLevel.error` replaced with `LogLevel.info` / `LogLevel.essential`.
-9. [x] `useSharedMap` result type narrowed to `SharedMap | undefined`.
+9. [x] `useSharedMap` value typing preserved with `TypedSharedMap`, using a local
+       `FluidMap & SharedMap` intersection with `delete` / `set` overrides for boolean
+       results and chaining.
 
 Not done — needs a decision or a follow-up:
 

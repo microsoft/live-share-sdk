@@ -72,12 +72,12 @@ export interface ILiveShareContainerResults extends IAzureContainerResults {
 
 /**
  * A value-typed SharedMap compatible with Fluid 2.x and 3.x.
+ * Uses SharedMap's mutators without changing FluidMap's forEach callback type.
  */
-export type TypedSharedMap<TData> = {
-    // These overloads precede FluidMap's void returns without changing its forEach callback type.
-    delete(key: string): boolean;
-    set(key: string, value: TData): TypedSharedMap<TData>;
-} & FluidMap<string, TData> &
+export type TypedSharedMap<TData> = Omit<
+    FluidMap<string, TData>,
+    "delete" | "set"
+> &
     SharedMap;
 
 /**

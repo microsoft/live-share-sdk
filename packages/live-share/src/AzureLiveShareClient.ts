@@ -16,7 +16,7 @@ import { LiveShareRuntime } from "./internals/LiveShareRuntime.js";
 import { getLiveContainerSchema } from "./internals/schema-injection-utils.js";
 import { LiveShareClient } from "./LiveShareClient.js";
 import { LiveDataObject } from "./internals/LiveDataObject.js";
-import { FluidCompatibilityMode } from "./internals/consts.js";
+import { FluidOldestSupportedClient } from "./internals/consts.js";
 
 /**
  * @alpha
@@ -91,7 +91,7 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
         const schema = this.getInjectedContainerSchema(fluidContainerSchema);
         const results = (this._results = await this._client.createContainer(
             schema,
-            FluidCompatibilityMode
+            FluidOldestSupportedClient
         ));
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);
@@ -129,7 +129,7 @@ export class AzureLiveShareClient extends BaseLiveShareClient {
         const results = (this._results = await this._client.getContainer(
             id,
             schema,
-            FluidCompatibilityMode
+            FluidOldestSupportedClient
         ));
         if (this._host instanceof AzureLiveShareHost) {
             this._host.setAudience(this._results.services.audience);

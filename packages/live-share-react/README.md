@@ -133,6 +133,12 @@ _NOTE:_ While this hook will get you pretty far on its own, carefully consider w
 
 This hook loads a Fluid `SharedMap` corresponding with the key you provide. Compared to `useSharedState`, this hook allows you to render a collection of items with less risk of conflict when multiple users may be writing to the same object simultaneously. For example, rather than storing an entire list of objects in a single key of `useSharedState`, the map allows each item in the list to have its own unique key.
 
+In TypeScript, `useSharedMap<TData>` preserves `TData` for `sharedMap.get`, `forEach`,
+`values`, and `entries` on both Fluid 2.x and 3.x. Its `delete` method returns a boolean and `set`
+remains chainable. With Fluid 3.x, `sharedMap` is not assignable to a built-in `Map`;
+use `new Map(sharedMap)` once it is defined if you need a local, unsynchronized snapshot.
+Use `setEntry` for writes constrained to `TData`.
+
 While you write to keys individually, the `map` object exposed through the hook uses React state itself. Lets see an example in action:
 
 ```javascript

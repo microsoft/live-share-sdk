@@ -50,6 +50,7 @@ import {
     OnUpdateLivePresenceAction,
     SendLiveEventAction,
 } from "./ActionTypes.js";
+import type { FluidMap } from "./FluidMap.js";
 
 export interface IAzureContainerResults {
     /**
@@ -70,6 +71,16 @@ export interface ILiveShareContainerResults extends IAzureContainerResults {
 }
 
 /**
+ * A value-typed SharedMap compatible with Fluid 2.x and 3.x.
+ * Uses SharedMap's mutators without changing FluidMap's forEach callback type.
+ */
+export type TypedSharedMap<TData> = Omit<
+    FluidMap<string, TData>,
+    "delete" | "set"
+> &
+    SharedMap;
+
+/**
  * @deprecated use {@link useSharedTree} instead.
  *
  * Return type of {@link useSharedMap} hook.
@@ -77,8 +88,14 @@ export interface ILiveShareContainerResults extends IAzureContainerResults {
 export interface IUseSharedMapResults<TData> {
     /**
      * The Fluid `SharedMap` object.
+     *
+     * @remarks
+     * Uses a local FluidMap type for value-typed get, forEach, values, and entries across Fluid 2.x and 3.x,
+     * while preserving ISharedMap's boolean delete result and chainable set method.
+     * Fluid 3.x maps are not assignable to the built-in Map type; use new Map(sharedMap)
+     * when a built-in Map is required.
      */
-    sharedMap: (Map<string, TData> & SharedMap) | undefined;
+    sharedMap: TypedSharedMap<TData> | undefined;
     /**
      * Callback method to get entries in the `SharedMap`.
      */

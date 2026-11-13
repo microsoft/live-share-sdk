@@ -1,20 +1,31 @@
 {
     "name": "@microsoft/live-share-canvas",
-    "version": "1.4.2",
+    "version": "1.4.3",
     "description": "Live Share extension library for collaborative inking.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
     "main": "./bin/index.js",
     "types": "./bin/index.d.ts",
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "files": [
+        "bin",
+        "src"
+    ],
     "scripts": {
-        "clean": "npx shx rm -rf bin",
-        "build": "tsc -p tsconfig.build.json",
-        "test": "ts-mocha src/**/*.spec.ts --timeout 10000",
-        "test:debug": "ts-mocha src/**/*.spec.ts --inspect-brk",
+        "clean": "node -e \"require('fs').rmSync('bin', { recursive: true, force: true })\"",
+        "build": "npm run clean && tsc -p tsconfig.build.json",
+        "prepack": "npm run build",
+        "test": "ts-mocha --no-experimental-strip-types src/**/*.spec.ts --timeout 10000",
+        "test:debug": "ts-mocha --no-experimental-strip-types src/**/*.spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test"
     },
+    "dependencies": {
+        "uuid": "^11.1.1"
+    },
     "devDependencies": {
-        "@microsoft/live-share": "1.4.2",
+        "@microsoft/live-share": "1.4.3",
         "@types/assert": "^1.5.6",
         "@types/mocha": "^10.0.1",
         "@types/node": "^20.2.3",
@@ -25,7 +36,7 @@
         "typescript": "^5.0.4"
     },
     "peerDependencies": {
-        "@microsoft/live-share": "1.4.2",
+        "@microsoft/live-share": "1.4.3",
         "fluid-framework": "^1.2.3"
     },
     "repository": {

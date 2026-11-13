@@ -13,7 +13,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [18.x]
+                node-version: [22.x, 24.x]
 
         steps:
             - uses: actions/checkout@v4
@@ -22,6 +22,7 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "npm"
+            - run: npm install --global npm@11.21.2
             - run: npm --loglevel verbose ci --ignore-scripts
               timeout-minutes: 20
 

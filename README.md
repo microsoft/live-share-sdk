@@ -117,7 +117,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Preparing the Repository
 
-To clone the repository to test samples and/or build the packages, ensure that you have the latest versions of [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/) installed.
+To clone the repository to test samples and/or build the packages, ensure that you have the latest version of [Git](https://git-scm.com/downloads), [Node.js](https://nodejs.org/) 22.12 or later, and npm 11.21.2 or later installed.
 
 Clone a copy of the repo:
 

@@ -3,16 +3,15 @@
  * Licensed under the Microsoft Live Share SDK License.
  */
 import { v4 as uuid } from "uuid";
+import { BrushTipShape } from "../Brush";
+import { IColor, toCssRgbaColor } from "../Colors";
 import {
-    BrushTipShape,
-    IColor,
     IPoint,
     IPointerPoint,
     IRect,
     ISegment,
     getPressureAdjustedSize,
-    toCssRgbaColor,
-} from "..";
+} from "../Geometry";
 
 /**
  * Pre-calculated Pi x 2.
@@ -338,7 +337,9 @@ export function renderFilledSVGCircle(
     color: IColor
 ): string {
     // eslint-disable-next-line prettier/prettier
-    return `<circle cx="${toFixed(center.x)}" cy="${toFixed(center.y)}" r="${toFixed(radius)}" fill="${toCssRgbaColor(color)}"/>`;
+    return `<circle cx="${toFixed(center.x)}" cy="${toFixed(
+        center.y
+    )}" r="${toFixed(radius)}" fill="${toCssRgbaColor(color)}"/>`;
 }
 
 /**

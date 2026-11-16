@@ -336,7 +336,6 @@ export function renderFilledSVGCircle(
     radius: number,
     color: IColor
 ): string {
-    // eslint-disable-next-line prettier/prettier
     return `<circle cx="${toFixed(center.x)}" cy="${toFixed(
         center.y
     )}" r="${toFixed(radius)}" fill="${toCssRgbaColor(color)}"/>`;

@@ -1,21 +1,29 @@
 {
     "name": "@microsoft/live-share",
-    "version": "1.4.2",
+    "version": "1.4.3",
     "description": "Building collaborative experiences for Microsoft Teams and M365 using Fluid.",
     "author": "Microsoft",
     "license": "SEE LICENSE IN LICENSE",
     "main": "./bin/index.js",
     "types": "./bin/index.d.ts",
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "files": [
+        "bin",
+        "src"
+    ],
     "scripts": {
-        "clean": "npx shx rm -rf bin",
-        "build": "tsc -p tsconfig.build.json",
-        "test": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --timeout 10000",
-        "test:debug": "ts-mocha --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --inspect-brk",
+        "clean": "node -e \"require('fs').rmSync('bin', { recursive: true, force: true })\"",
+        "build": "npm run clean && tsc -p tsconfig.build.json",
+        "prepack": "npm run build",
+        "test": "ts-mocha --no-experimental-strip-types --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --timeout 10000",
+        "test:debug": "ts-mocha --no-experimental-strip-types --config ./src/test/.mocharc.js src --recursive --extension .spec.ts --inspect-brk",
         "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
         "test:race": "node test-for-race-conditions.js"
     },
     "dependencies": {
-        "uuid": "^9.0.0"
+        "uuid": "^11.1.1"
     },
     "devDependencies": {
         "@fluidframework/azure-client": "^1.1.1",

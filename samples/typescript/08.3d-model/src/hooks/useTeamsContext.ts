@@ -68,6 +68,7 @@ const createFakeContext = () => {
         app: fakeAppInfo,
         page: fakePageInfo,
         user: fakeUserInfo,
+        dialogParameters: {},
     };
 
     return fakeContext;
